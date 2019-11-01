@@ -40,8 +40,9 @@ class TestDataServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        testDataService = new TestDataServiceImpl(companyProfileService, filingHistoryService, officerListService,
-                pscService, companyAuthCodeService, randomService);
+        //Inject Mocks does not function correctly with generic interfaces
+        this.testDataService = new TestDataServiceImpl(this.companyProfileService, this.filingHistoryService,
+                this.officerListService, this.pscService, this.companyAuthCodeService, this.randomService);
     }
 
     @Test

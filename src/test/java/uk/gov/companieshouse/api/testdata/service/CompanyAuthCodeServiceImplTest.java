@@ -34,7 +34,7 @@ class CompanyAuthCodeServiceImplTest {
     private CompanyAuthCodeServiceImpl companyAuthCodeServiceImpl;
 
     @Test
-    void testCreateNoException() throws DataException {
+    void createNoException() throws DataException {
         when(this.randomService.getRandomInteger(6)).thenReturn("123456");
         CompanyAuthCode createdAuthCode = this.companyAuthCodeServiceImpl.create("12345678");
 
