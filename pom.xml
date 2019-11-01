@@ -2,20 +2,46 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>uk.gov.companieshouse</groupId>
+	<artifactId>test-data-generator</artifactId>
+	<version>unversioned</version>
+	<packaging>jar</packaging>
+
+	<name>test-data-generator</name>
+	<description>Generate and manage test data</description>
+
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>2.1.6.RELEASE</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<relativePath/>
 	</parent>
-	<groupId>com.poc</groupId>
-	<artifactId>testdata</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>testdata</name>
-	<description>Generate and manage test data</description>
 
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		<junit-jupiter-engine.version>5.2.0</junit-jupiter-engine.version>
+		<mockito-junit-jupiter.version>2.18.0</mockito-junit-jupiter.version>
+		<jackson-xml.version>2.9.6</jackson-xml.version>
+
+		<!-- Sonar -->
+		<sonar-maven-plugin.version>3.5.0.1254</sonar-maven-plugin.version>
+		<sonar.host.url>${CODE_ANALYSIS_HOST_URL}</sonar.host.url>
+		<sonar.login>${CODE_ANALYSIS_LOGIN}</sonar.login>
+		<sonar.password>${CODE_ANALYSIS_PASSWORD}</sonar.password>
+
+		<!-- Maven and Surefire plugins -->
+		<maven-compiler-plugin.version>3.1</maven-compiler-plugin.version>
+		<maven-surefire-plugin.version>2.21.0</maven-surefire-plugin.version>
+		<maven-jar-plugin.version>2.4</maven-jar-plugin.version>
+		<junit-platform-surefire-provider.version>1.2.0</junit-platform-surefire-provider.version>
+
+		<!-- Repositories -->
+		<artifactoryResolveSnapshotRepo>libs-snapshot-local</artifactoryResolveSnapshotRepo>
+		<artifactoryResolveReleaseRepo>virtual-release</artifactoryResolveReleaseRepo>
+
 	</properties>
 
 	<dependencies>
@@ -45,15 +71,33 @@
 			<artifactId>spring-boot-starter-data-mongodb</artifactId>
 		</dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.9.6</version>
+            <version>${jackson-xml.version}</version>
         </dependency>
 
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit-jupiter-engine.version}</version>
+			<scope>test</scope>
+		</dependency>
 
-    </dependencies>
+		<dependency>
+			<groupId>org.sonarsource.scanner.maven</groupId>
+			<artifactId>sonar-maven-plugin</artifactId>
+			<version>${sonar-maven-plugin.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito-junit-jupiter.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+	</dependencies>
 
 	<build>
 		<plugins>
@@ -61,7 +105,43 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${maven-surefire-plugin.version}</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.junit.platform</groupId>
+						<artifactId>junit-platform-surefire-provider</artifactId>
+						<version>${junit-platform-surefire-provider.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+					<fork>true</fork>
+					<meminitial>128m</meminitial>
+					<encoding>${project.build.sourceEncoding}</encoding>
+					<maxmem>512m</maxmem>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
+
+	<repositories>
+		<repository>
+			<id>ch-artifactory-release</id>
+			<url>${MAVEN_REPOSITORY_URL}/${artifactoryResolveReleaseRepo}</url>
+		</repository>
+		<repository>
+			<id>ch-artifactory-snapshot</id>
+			<url>${MAVEN_REPOSITORY_URL}/${artifactoryResolveSnapshotRepo}</url>
+		</repository>
+	</repositories>
 
 </project>
