@@ -1,8 +1,5 @@
 artifact_name       := test-data-generator
-commit              := $(shell git rev-parse --short HEAD)
-tag                 := $(shell git tag -l 'v*-rc*' --points-at HEAD)
-version             := $(shell if [[ -n "$(tag)" ]]; then echo $(tag) | sed 's/^v//'; else echo $(commit); fi)
-artifactory_publish := $(shell if [[ -n "$(tag)" ]]; then echo release; else echo dev; fi)
+version             := "unversioned"
 
 .PHONY: all
 all: build
@@ -30,7 +27,12 @@ test-unit: clean
 
 .PHONY: package
 package:
-	@test -s ./$(artifact_name).jar || { echo "ERROR: Service JAR not found"; exit 1; }
+ifndef version
+	$(error No version given. Aborting)
+endif
+	$(info Packaging version: $(version))
+	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
+	mvn package -DskipTests=true
 	$(eval tmpdir:=$(shell mktemp -d build-XXXXXXXXXX))
 	cp ./start.sh $(tmpdir)
 	cp ./routes.yaml $(tmpdir)

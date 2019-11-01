@@ -5,7 +5,7 @@
 
 	<groupId>uk.gov.companieshouse</groupId>
 	<artifactId>test-data-generator</artifactId>
-	<version>72ad40e</version>
+	<version>unversioned</version>
 	<packaging>jar</packaging>
 
 	<name>test-data-generator</name>
