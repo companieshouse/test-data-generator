@@ -13,16 +13,12 @@ import uk.gov.companieshouse.api.testdata.model.companyprofile.RegisteredOfficeA
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 
-import java.util.Random;
-
 @Service
 public class CompanyProfileServiceImpl implements DataService<Company> {
 
     private static final String COMPANY_PROFILE_DATA_NOT_FOUND = "company profile data not found";
 
     private CompanyProfileRepository repository;
-
-    private Random rand = new Random();
 
     @Autowired
     public CompanyProfileServiceImpl(CompanyProfileRepository repository) {
@@ -97,11 +93,6 @@ public class CompanyProfileServiceImpl implements DataService<Company> {
         registeredOfficeAddress.setRegion("region");
 
         return registeredOfficeAddress;
-    }
-
-    private String getNewCompanyNumber() {
-        int num = rand.nextInt(90000000);
-        return String.format("%08d", num);
     }
 
 }
