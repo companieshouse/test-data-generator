@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.model.companyauthcode;
+package uk.gov.companieshouse.api.testdata.model.account;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

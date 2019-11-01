@@ -8,7 +8,7 @@ import uk.gov.companieshouse.api.testdata.model.Links;
 
 import java.util.List;
 
-@Document(collection = "officer_listing")
+@Document(collection = "officer_appointments")
 public class Officer {
 
     @Id

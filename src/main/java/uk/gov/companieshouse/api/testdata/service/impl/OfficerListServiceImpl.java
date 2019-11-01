@@ -1,9 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -12,13 +18,9 @@ import uk.gov.companieshouse.api.testdata.model.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.officer.Officer;
 import uk.gov.companieshouse.api.testdata.model.officer.OfficerItem;
-import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.repository.officer.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class OfficerListServiceImpl implements DataService<Officer> {

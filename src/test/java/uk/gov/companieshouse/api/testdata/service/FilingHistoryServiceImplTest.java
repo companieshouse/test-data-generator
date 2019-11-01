@@ -9,7 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;
-import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
+import uk.gov.companieshouse.api.testdata.repository.filinghistory.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.FilingHistoryServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

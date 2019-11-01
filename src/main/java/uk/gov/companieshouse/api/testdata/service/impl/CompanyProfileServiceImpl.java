@@ -1,17 +1,20 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.RegisteredOfficeAddress;
-import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.companyprofile.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+
 
 @Service
 public class CompanyProfileServiceImpl implements DataService<Company> {

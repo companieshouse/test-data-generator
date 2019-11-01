@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.repository;
+package uk.gov.companieshouse.api.testdata.repository.filinghistory;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;

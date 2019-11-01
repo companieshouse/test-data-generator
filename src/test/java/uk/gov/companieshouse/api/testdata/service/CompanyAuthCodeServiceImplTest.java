@@ -9,8 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.companyauthcode.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.model.account.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.repository.account.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyAuthCodeServiceImpl;
 
 import java.util.Optional;

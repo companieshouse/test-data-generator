@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.repository;
+package uk.gov.companieshouse.api.testdata.repository.companyprofile;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
