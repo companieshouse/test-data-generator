@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata;
+package uk.gov.companieshouse.api.testdata.config;
 
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
