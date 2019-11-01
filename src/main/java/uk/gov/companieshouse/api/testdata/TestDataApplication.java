@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude=MongoAutoConfiguration.class)
-public class TestdataApplication {
+public class TestDataApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(TestdataApplication.class, args);
+        SpringApplication.run(TestDataApplication.class, args);
     }
 
 }

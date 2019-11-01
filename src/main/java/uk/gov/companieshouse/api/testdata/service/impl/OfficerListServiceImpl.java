@@ -1,7 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -11,28 +19,21 @@ import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.officer.Officer;
 import uk.gov.companieshouse.api.testdata.model.officer.OfficerItem;
 import uk.gov.companieshouse.api.testdata.repository.officer.OfficerRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.service.IOfficerListService;
-import uk.gov.companieshouse.api.testdata.service.ITestDataHelperService;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
 
 @Service
-public class OfficerListServiceImpl implements IOfficerListService {
+public class OfficerListServiceImpl implements DataService<Officer> {
 
-    private ITestDataHelperService testDataHelperService;
+    private static final String OFFICER_DATA_NOT_FOUND = "officer data not found";
+
+    private TestDataHelperService testDataHelperService;
     private OfficerRepository officerRepository;
 
     private Officer officer;
 
-    private static final String OFFICER_DATA_NOT_FOUND = "officer data not found";
-
     @Autowired
-    public OfficerListServiceImpl(ITestDataHelperService testDataHelperService, OfficerRepository officerRepository) {
+    public OfficerListServiceImpl(TestDataHelperService testDataHelperService, OfficerRepository officerRepository) {
         this.testDataHelperService = testDataHelperService;
         this.officerRepository = officerRepository;
     }
@@ -49,7 +50,7 @@ public class OfficerListServiceImpl implements IOfficerListService {
         officer.setOfficerItems(createItems());
         officer.setResignedCount(1);
 
-        try{
+        try {
             officerRepository.save(officer);
         } catch (DuplicateKeyException e) {
 
@@ -68,7 +69,7 @@ public class OfficerListServiceImpl implements IOfficerListService {
 
         Officer officerToDelete = officerRepository.findByCompanyNumber(companyId);
 
-        if(officerToDelete == null) throw new NoDataFoundException(OFFICER_DATA_NOT_FOUND);
+        if (officerToDelete == null) throw new NoDataFoundException(OFFICER_DATA_NOT_FOUND);
 
         try {
             officerRepository.delete(officerToDelete);
@@ -77,7 +78,7 @@ public class OfficerListServiceImpl implements IOfficerListService {
         }
     }
 
-    private List<OfficerItem> createItems(){
+    private List<OfficerItem> createItems() {
         List<OfficerItem> officerItemList = new ArrayList<>();
 
         OfficerItem officerItem = createOfficerItem();
@@ -89,7 +90,7 @@ public class OfficerListServiceImpl implements IOfficerListService {
         return officerItemList;
     }
 
-    private OfficerItem createOfficerItem(){
+    private OfficerItem createOfficerItem() {
 
         OfficerItem officerItem = new OfficerItem();
         officerItem.setAddress(createAddress());
@@ -103,16 +104,16 @@ public class OfficerListServiceImpl implements IOfficerListService {
         return officerItem;
     }
 
-    private Links createLinks(){
+    private Links createLinks() {
 
         Links links = new Links();
-        links.setSelf("/officers/"+ officer.getCompanyNumber());
-        links.setOfficers("/company/"+ officer.getCompanyNumber() + "/officers");
+        links.setSelf("/officers/" + officer.getCompanyNumber());
+        links.setOfficers("/company/" + officer.getCompanyNumber() + "/officers");
 
         return links;
     }
 
-    private DateOfBirth createDateOfBirth(){
+    private DateOfBirth createDateOfBirth() {
 
         DateOfBirth dateOfBirth = new DateOfBirth();
 
@@ -124,7 +125,7 @@ public class OfficerListServiceImpl implements IOfficerListService {
     }
 
 
-    private Address createAddress(){
+    private Address createAddress() {
 
         Address address = new Address();
         address.setAddressLine1("10 Test Street");

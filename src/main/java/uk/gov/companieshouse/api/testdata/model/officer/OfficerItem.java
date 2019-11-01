@@ -1,12 +1,11 @@
 package uk.gov.companieshouse.api.testdata.model.officer;
 
+import org.springframework.data.mongodb.core.mapping.Field;
 import uk.gov.companieshouse.api.testdata.model.Address;
 import uk.gov.companieshouse.api.testdata.model.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.Links;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
-import java.util.List;
 
 public class OfficerItem {
 

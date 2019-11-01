@@ -1,10 +1,9 @@
 package uk.gov.companieshouse.api.testdata.model.filinghistory;
 
-import uk.gov.companieshouse.api.testdata.model.Links;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.gov.companieshouse.api.testdata.model.Links;
 
 import java.util.Date;
-import java.util.List;
 
 public class FilingHistoryItem {
 

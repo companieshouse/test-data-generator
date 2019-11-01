@@ -1,40 +1,39 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
-import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistoryItem;
-import uk.gov.companieshouse.api.testdata.repository.filinghistory.FilingHistoryRepository;
-import uk.gov.companieshouse.api.testdata.model.Links;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.service.IFilingHistoryService;
-import uk.gov.companieshouse.api.testdata.service.ITestDataHelperService;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoException;
+
+import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.Links;
+import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistoryItem;
+import uk.gov.companieshouse.api.testdata.repository.filinghistory.FilingHistoryRepository;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
+
 @Service
-public class FilingHistoryServiceImpl implements IFilingHistoryService {
+public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
-    @Autowired
-    private ITestDataHelperService testDataHelperService;
+    private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
 
-    @Autowired
+    private TestDataHelperService testDataHelperService;
     private FilingHistoryRepository filingHistoryRepository;
 
     private FilingHistory filingHistory;
     private Random rnd = new Random();
 
-    private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
-
-    public FilingHistoryServiceImpl(ITestDataHelperService testDataHelperService,
+    @Autowired
+    public FilingHistoryServiceImpl(TestDataHelperService testDataHelperService,
                                     FilingHistoryRepository filingHistoryRepository) {
         this.testDataHelperService = testDataHelperService;
         this.filingHistoryRepository = filingHistoryRepository;
@@ -51,7 +50,7 @@ public class FilingHistoryServiceImpl implements IFilingHistoryService {
         filingHistory.setTotalCount(1);
         filingHistory.setFilingHistoryItems(createItems());
 
-        try{
+        try {
             filingHistoryRepository.save(filingHistory);
         } catch (DuplicateKeyException e) {
 
@@ -69,7 +68,7 @@ public class FilingHistoryServiceImpl implements IFilingHistoryService {
 
         FilingHistory filingHistoryToDelete = filingHistoryRepository.findByCompanyNumber(companyId);
 
-        if(filingHistoryToDelete == null) throw new NoDataFoundException(FILING_HISTORY_DATA_NOT_FOUND);
+        if (filingHistoryToDelete == null) throw new NoDataFoundException(FILING_HISTORY_DATA_NOT_FOUND);
 
         try {
             filingHistoryRepository.delete(filingHistoryToDelete);
@@ -78,7 +77,7 @@ public class FilingHistoryServiceImpl implements IFilingHistoryService {
         }
     }
 
-    private List<FilingHistoryItem> createItems(){
+    private List<FilingHistoryItem> createItems() {
 
         List<FilingHistoryItem> filingHistoryItems = new ArrayList<>();
         FilingHistoryItem filingHistoryItem = new FilingHistoryItem();
@@ -94,21 +93,21 @@ public class FilingHistoryServiceImpl implements IFilingHistoryService {
         return filingHistoryItems;
     }
 
-    private Links createLinks(){
+    private Links createLinks() {
 
         Links links = new Links();
-        links.setSelf("/company/"+ filingHistory.getCompanyNumber() + "/filing-history/" + filingHistory.getId());
+        links.setSelf("/company/" + filingHistory.getCompanyNumber() + "/filing-history/" + filingHistory.getId());
 
         return links;
     }
 
-    private String getNewTransactionId(){
+    private String getNewTransactionId() {
 
         String saltChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
 
-        while (salt.length() < 18) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * saltChars.length());
+        while (salt.length() < 18) {
+            int index = rnd.nextInt(saltChars.length());
             salt.append(saltChars.charAt(index));
         }
         return salt.toString();

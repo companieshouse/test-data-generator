@@ -1,44 +1,47 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.account.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.repository.account.CompanyAuthCodeRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.service.ICompanyAuthCodeService;
-
-import java.util.Date;
-import java.util.Random;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyAuthCodeServiceImpl implements ICompanyAuthCodeService {
-
-    private CompanyAuthCodeRepository repository;
-
-    private Random rand = new Random();
+public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> {
 
     private static final String COMPANY_AUTH_DATA_NOT_FOUND = "company auth data not found";
+    private static final int AUTH_CODE_LENGTH = 6;
+
+    private RandomService randomService;
+    private CompanyAuthCodeRepository repository;
 
     @Autowired
-    public CompanyAuthCodeServiceImpl(CompanyAuthCodeRepository repository) {
+    public CompanyAuthCodeServiceImpl(RandomService randomService, CompanyAuthCodeRepository repository) {
+        this.randomService = randomService;
         this.repository = repository;
     }
 
-    public String create(String companyNumber) throws DataException {
+    @Override
+    public CompanyAuthCode create(String companyNumber) throws DataException {
 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
 
         companyAuthCode.setId(companyNumber);
         companyAuthCode.setValidFrom(new Date());
-        companyAuthCode.setAuthCode(getNewAuthCode());
+        companyAuthCode.setAuthCode(this.randomService.getRandomInteger(AUTH_CODE_LENGTH));
         companyAuthCode.setIsActive(true);
 
-        try{
+        try {
             repository.save(companyAuthCode);
         } catch (DuplicateKeyException e) {
 
@@ -48,9 +51,10 @@ public class CompanyAuthCodeServiceImpl implements ICompanyAuthCodeService {
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
 
-        return companyAuthCode.getAuthCode();
+        return companyAuthCode;
     }
 
+    @Override
     public void delete(String companyId) throws NoDataFoundException, DataException {
 
         CompanyAuthCode existingCompanyAuthCode = repository.findById(companyId).orElseThrow(
@@ -61,10 +65,5 @@ public class CompanyAuthCodeServiceImpl implements ICompanyAuthCodeService {
         } catch (MongoException e) {
             throw new DataException(ErrorMessageConstants.FAILED_TO_DELETE);
         }
-    }
-
-    private String getNewAuthCode(){
-        int num = rand.nextInt(900000);
-        return String.format("%06d", num);
     }
 }

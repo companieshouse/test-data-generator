@@ -1,41 +1,38 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.RegisteredOfficeAddress;
 import uk.gov.companieshouse.api.testdata.repository.companyprofile.CompanyProfileRepository;
-import uk.gov.companieshouse.api.testdata.model.Links;
+import uk.gov.companieshouse.api.testdata.service.DataService;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.service.ICompanyProfileService;
-
-import java.util.Random;
 
 @Service
-public class CompanyProfileServiceImpl implements ICompanyProfileService {
-
-    @Autowired
-    private CompanyProfileRepository repository;
-
-    private Random rand = new Random();
+public class CompanyProfileServiceImpl implements DataService<Company> {
 
     private static final String COMPANY_PROFILE_DATA_NOT_FOUND = "company profile data not found";
 
+    private CompanyProfileRepository repository;
+
+    @Autowired
     public CompanyProfileServiceImpl(CompanyProfileRepository repository) {
         this.repository = repository;
     }
 
     @Override
-    public Company create() throws DataException {
+    public Company create(String companyNumber) throws DataException {
 
         Company company = new Company();
 
-        String companyNumber = getNewCompanyNumber();
         company.setCompanyName("Company " + companyNumber);
         company.setId(companyNumber);
         company.setCompanyNumber(companyNumber);
@@ -45,7 +42,7 @@ public class CompanyProfileServiceImpl implements ICompanyProfileService {
         company.setType("ltd");
         company.setLinks(createLinks(company));
 
-        try{
+        try {
             repository.save(company);
         } catch (DuplicateKeyException e) {
 
@@ -63,7 +60,7 @@ public class CompanyProfileServiceImpl implements ICompanyProfileService {
 
         Company existingCompany = repository.findByCompanyNumber(companyId);
 
-        if(existingCompany == null) throw new NoDataFoundException(COMPANY_PROFILE_DATA_NOT_FOUND);
+        if (existingCompany == null) throw new NoDataFoundException(COMPANY_PROFILE_DATA_NOT_FOUND);
 
         try {
             repository.delete(existingCompany);
@@ -73,18 +70,18 @@ public class CompanyProfileServiceImpl implements ICompanyProfileService {
 
     }
 
-    private Links createLinks(Company company){
+    private Links createLinks(Company company) {
 
         Links links = new Links();
-        links.setSelf("/company/"+ company.getCompanyNumber());
-        links.setFilingHistory("/company/"+ company.getCompanyNumber() + "/filing-history");
-        links.setOfficers("/company/"+ company.getCompanyNumber() + "/officers");
-        links.setPersonsWithSignificantControl("/company/"+ company.getCompanyNumber() + "/persons-with-significant-control");
+        links.setSelf("/company/" + company.getCompanyNumber());
+        links.setFilingHistory("/company/" + company.getCompanyNumber() + "/filing-history");
+        links.setOfficers("/company/" + company.getCompanyNumber() + "/officers");
+        links.setPersonsWithSignificantControl("/company/" + company.getCompanyNumber() + "/persons-with-significant-control");
 
         return links;
     }
 
-    private RegisteredOfficeAddress createRoa(){
+    private RegisteredOfficeAddress createRoa() {
 
         RegisteredOfficeAddress registeredOfficeAddress = new RegisteredOfficeAddress();
 
@@ -99,11 +96,6 @@ public class CompanyProfileServiceImpl implements ICompanyProfileService {
         registeredOfficeAddress.setRegion("region");
 
         return registeredOfficeAddress;
-    }
-
-    private String getNewCompanyNumber(){
-        int num = rand.nextInt(90000000);
-        return String.format("%08d", num);
     }
 
 }

@@ -1,7 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -11,28 +19,21 @@ import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControlItem;
 import uk.gov.companieshouse.api.testdata.repository.psc.PersonsWithSignificantControlRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.service.IPSCService;
-import uk.gov.companieshouse.api.testdata.service.ITestDataHelperService;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
 
 @Service
-public class PSCServiceImpl implements IPSCService {
+public class PSCServiceImpl implements DataService<PersonsWithSignificantControl> {
 
-    private ITestDataHelperService testDataHelperService;
+    private static final String PSC_DATA_NOT_FOUND = "psc data not found";
+
+    private TestDataHelperService testDataHelperService;
     private PersonsWithSignificantControlRepository repository;
 
     private PersonsWithSignificantControl psc;
 
-    private static final String PSC_DATA_NOT_FOUND = "psc data not found";
-
     @Autowired
-    public PSCServiceImpl(ITestDataHelperService testDataHelperService,
+    public PSCServiceImpl(TestDataHelperService testDataHelperService,
                           PersonsWithSignificantControlRepository repository) {
         this.testDataHelperService = testDataHelperService;
         this.repository = repository;
@@ -49,7 +50,7 @@ public class PSCServiceImpl implements IPSCService {
         this.psc.setCeasedCount(0);
         this.psc.setItems(createItems());
 
-        try{
+        try {
             repository.save(this.psc);
         } catch (DuplicateKeyException e) {
 
@@ -66,7 +67,7 @@ public class PSCServiceImpl implements IPSCService {
     public void delete(String companyId) throws NoDataFoundException, DataException {
 
         PersonsWithSignificantControl pscToDelete = repository.findByCompanyNumber(companyId);
-        if(pscToDelete == null) throw new NoDataFoundException(PSC_DATA_NOT_FOUND);
+        if (pscToDelete == null) throw new NoDataFoundException(PSC_DATA_NOT_FOUND);
 
         try {
             repository.delete(pscToDelete);
@@ -75,7 +76,7 @@ public class PSCServiceImpl implements IPSCService {
         }
     }
 
-    private List<PersonsWithSignificantControlItem> createItems(){
+    private List<PersonsWithSignificantControlItem> createItems() {
 
         List<PersonsWithSignificantControlItem> pscItemList = new ArrayList<>();
         PersonsWithSignificantControlItem pscItem = new PersonsWithSignificantControlItem();
@@ -84,7 +85,7 @@ public class PSCServiceImpl implements IPSCService {
         pscItem.setDateOfBirth(createDOB());
         pscItem.setLinks(createLinks());
         pscItem.setName("full name");
-        String [] control = new String[1];
+        String[] control = new String[1];
         control[0] = "significant-influence-or-control";
         pscItem.setNaturesOfControl(control);
         pscItem.setNotifiedOn(new Date());
@@ -94,15 +95,15 @@ public class PSCServiceImpl implements IPSCService {
         return pscItemList;
     }
 
-    private Links createLinks(){
+    private Links createLinks() {
 
         Links links = new Links();
-        links.setSelf("/company/"+ psc.getCompanyNumber() + "/persons-with-significant-control/legal-person/" + psc.getId());
+        links.setSelf("/company/" + psc.getCompanyNumber() + "/persons-with-significant-control/legal-person/" + psc.getId());
 
         return links;
     }
 
-    private DateOfBirth createDOB(){
+    private DateOfBirth createDOB() {
 
         DateOfBirth dateOfBirth = new DateOfBirth();
         dateOfBirth.setMonth(1);
@@ -110,7 +111,7 @@ public class PSCServiceImpl implements IPSCService {
         return dateOfBirth;
     }
 
-    private Address createAddress(){
+    private Address createAddress() {
 
         Address address = new Address();
         address.setPremises("premises");

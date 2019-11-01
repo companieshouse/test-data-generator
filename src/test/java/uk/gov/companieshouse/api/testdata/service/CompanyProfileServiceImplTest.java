@@ -2,36 +2,34 @@ package uk.gov.companieshouse.api.testdata.service;
 
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
 import uk.gov.companieshouse.api.testdata.repository.companyprofile.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyProfileServiceImpl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CompanyProfileServiceImplTest {
 
     @Mock
     private CompanyProfileRepository companyProfileRepository;
 
-    private ICompanyProfileService ICompanyProfileService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-        this.ICompanyProfileService = new CompanyProfileServiceImpl(companyProfileRepository);
-    }
+    @InjectMocks
+    private CompanyProfileServiceImpl companyProfileService;
 
     @Test
-    void testCreateNoException() throws DataException {
-        Company createdCompany = this.ICompanyProfileService.create();
+    void createNoException() throws DataException {
+        Company createdCompany = this.companyProfileService.create("12345678");
 
         assertEquals("Active", createdCompany.getCompanyStatus());
         assertEquals("england-wales", createdCompany.getJurisdiction());
@@ -39,30 +37,30 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testCreateDuplicateKeyException() {
+    void createDuplicateKeyException() {
         when(companyProfileRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
         assertThrows(DataException.class, () -> {
-            this.ICompanyProfileService.create();
+            this.companyProfileService.create("12345678");
         });
     }
 
     @Test
-    void testCreateMongoExceptionException() {
+    void createMongoExceptionException() {
         when(companyProfileRepository.save(any())).thenThrow(MongoException.class);
 
         assertThrows(DataException.class, () -> {
-            this.ICompanyProfileService.create();
+            this.companyProfileService.create("12345678");
         });
     }
 
     @Test
-    void testDeleteMongoException() {
+    void deleteMongoException() {
         when(companyProfileRepository.findByCompanyNumber("12345678"))
                 .thenReturn(new Company());
         doThrow(MongoException.class).when(companyProfileRepository).delete(any());
         assertThrows(DataException.class, () -> {
-            this.ICompanyProfileService.delete("12345678");
+            this.companyProfileService.delete("12345678");
         });
     }
 

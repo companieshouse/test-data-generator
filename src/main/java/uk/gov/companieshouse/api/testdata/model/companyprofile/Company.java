@@ -1,10 +1,10 @@
 
 package uk.gov.companieshouse.api.testdata.model.companyprofile;
 
-import uk.gov.companieshouse.api.testdata.model.Links;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.gov.companieshouse.api.testdata.model.Links;
 
 @Document(collection = "company_profile")
 public class Company {

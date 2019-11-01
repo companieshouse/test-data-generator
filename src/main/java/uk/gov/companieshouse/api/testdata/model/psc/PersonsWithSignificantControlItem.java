@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.api.testdata.model.psc;
 
+import org.springframework.data.mongodb.core.mapping.Field;
 import uk.gov.companieshouse.api.testdata.model.Address;
 import uk.gov.companieshouse.api.testdata.model.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.Links;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
 
@@ -18,7 +18,7 @@ public class PersonsWithSignificantControlItem {
     @Field("name")
     private String name;
     @Field("natures_of_control")
-    private String [] naturesOfControl;
+    private String[] naturesOfControl;
     @Field("notified_on")
     private Date notifiedOn;
 
