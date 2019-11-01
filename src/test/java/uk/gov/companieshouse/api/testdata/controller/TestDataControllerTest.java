@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class TestDataControllerTest {
 
     @Mock
-    private TestDataService TestDataService;
+    private TestDataService testDataService;
 
     @InjectMocks
     private TestDataController testDataController;
@@ -30,7 +30,7 @@ class TestDataControllerTest {
     void createWorking() throws DataException {
         CreatedCompany mockCompany = new CreatedCompany("12345678", "123456");
 
-        when(this.TestDataService.createCompanyData()).thenReturn(mockCompany);
+        when(this.testDataService.createCompanyData()).thenReturn(mockCompany);
         ResponseEntity response = this.testDataController.create();
 
         assertEquals(mockCompany, response.getBody());
@@ -40,7 +40,7 @@ class TestDataControllerTest {
     @Test
     void createException() throws DataException {
         Throwable exception = new DataException("Error message");
-        when(this.TestDataService.createCompanyData()).thenThrow(exception);
+        when(this.testDataService.createCompanyData()).thenThrow(exception);
 
         ResponseEntity response = this.testDataController.create();
         assertEquals(exception.getMessage(), response.getBody());
@@ -58,7 +58,7 @@ class TestDataControllerTest {
     @Test
     void deleteNoData() throws Exception {
         Throwable throwable = new NoDataFoundException("Error message");
-        doThrow(throwable).when(this.TestDataService).deleteCompanyData("123456");
+        doThrow(throwable).when(this.testDataService).deleteCompanyData("123456");
         ResponseEntity response = this.testDataController.delete("123456");
 
         assertEquals(throwable.getMessage() + " for company: 123456", response.getBody());
@@ -68,7 +68,7 @@ class TestDataControllerTest {
     @Test
     void deleteDataException() throws Exception {
         Throwable throwable = new DataException("Error message");
-        doThrow(throwable).when(this.TestDataService).deleteCompanyData("123456");
+        doThrow(throwable).when(this.testDataService).deleteCompanyData("123456");
         ResponseEntity response = this.testDataController.delete("123456");
 
         assertEquals(throwable.getMessage(), response.getBody());
