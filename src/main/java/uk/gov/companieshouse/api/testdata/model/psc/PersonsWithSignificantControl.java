@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.api.testdata.model.psc;
 
-import uk.gov.companieshouse.api.testdata.model.Links;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+import uk.gov.companieshouse.api.testdata.model.Links;
 
 import java.util.List;
 

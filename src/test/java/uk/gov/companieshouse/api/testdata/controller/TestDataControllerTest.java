@@ -1,38 +1,36 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
-import uk.gov.companieshouse.api.testdata.service.ITestDataService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
 
+    @Mock
+    private TestDataService TestDataService;
+
+    @InjectMocks
     private TestDataController testDataController;
 
-    @Mock
-    private ITestDataService ITestDataService;
-
-    @BeforeEach
-    void setUp(){
-        MockitoAnnotations.initMocks(this);
-        testDataController = new TestDataController(ITestDataService);
-    }
-
     @Test
-    void testCreateWorking() throws DataException {
+    void createWorking() throws DataException {
         CreatedCompany mockCompany = new CreatedCompany("12345678", "123456");
 
-        when(this.ITestDataService.createCompanyData()).thenReturn(mockCompany);
+        when(this.TestDataService.createCompanyData()).thenReturn(mockCompany);
         ResponseEntity response = this.testDataController.create();
 
         assertEquals(mockCompany, response.getBody());
@@ -40,9 +38,9 @@ class TestDataControllerTest {
     }
 
     @Test
-    void testCreateException() throws DataException{
+    void createException() throws DataException {
         Throwable exception = new DataException("Error message");
-        when(this.ITestDataService.createCompanyData()).thenThrow(exception);
+        when(this.TestDataService.createCompanyData()).thenThrow(exception);
 
         ResponseEntity response = this.testDataController.create();
         assertEquals(exception.getMessage(), response.getBody());
@@ -50,7 +48,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void testDeleteWorking() {
+    void deleteWorking() {
         ResponseEntity response = this.testDataController.delete("123456");
 
         assertNull(response.getBody());
@@ -58,9 +56,9 @@ class TestDataControllerTest {
     }
 
     @Test
-    void testDeleteNoData() throws Exception{
+    void deleteNoData() throws Exception {
         Throwable throwable = new NoDataFoundException("Error message");
-        doThrow(throwable).when(this.ITestDataService).deleteCompanyData("123456");
+        doThrow(throwable).when(this.TestDataService).deleteCompanyData("123456");
         ResponseEntity response = this.testDataController.delete("123456");
 
         assertEquals(throwable.getMessage() + " for company: 123456", response.getBody());
@@ -68,9 +66,9 @@ class TestDataControllerTest {
     }
 
     @Test
-    void testDeleteDataException() throws Exception{
+    void deleteDataException() throws Exception {
         Throwable throwable = new DataException("Error message");
-        doThrow(throwable).when(this.ITestDataService).deleteCompanyData("123456");
+        doThrow(throwable).when(this.TestDataService).deleteCompanyData("123456");
         ResponseEntity response = this.testDataController.delete("123456");
 
         assertEquals(throwable.getMessage(), response.getBody());

@@ -1,9 +1,5 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
-import uk.gov.companieshouse.api.testdata.service.ITestDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -13,15 +9,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
+import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
 @RestController
 @RequestMapping(value = "/testdata", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TestDataController {
-    
-    private ITestDataService testDataService;
+
+    private TestDataService testDataService;
 
     @Autowired
-    public TestDataController(ITestDataService testDataService) {
+    public TestDataController(TestDataService testDataService) {
         this.testDataService = testDataService;
     }
 
@@ -32,7 +32,7 @@ public class TestDataController {
 
         try {
             createdCompany = testDataService.createCompanyData();
-        }catch(DataException e){
+        } catch (DataException e) {
             return new ResponseEntity<>(
                     e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR
@@ -46,16 +46,16 @@ public class TestDataController {
     }
 
     @DeleteMapping("/{companyId}")
-    public ResponseEntity delete(@PathVariable("companyId") String companyId){
+    public ResponseEntity delete(@PathVariable("companyId") String companyId) {
 
         try {
             testDataService.deleteCompanyData(companyId);
-        }catch (NoDataFoundException e){
+        } catch (NoDataFoundException e) {
             return new ResponseEntity<>(
                     e.getMessage() + " for company: " + companyId,
                     HttpStatus.NOT_FOUND
             );
-        }catch(DataException e) {
+        } catch (DataException e) {
             return new ResponseEntity<>(
                     e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR

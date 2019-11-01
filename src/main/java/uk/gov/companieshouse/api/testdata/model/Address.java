@@ -14,7 +14,7 @@ public class Address {
     private String locality;
     @Field("postal_code")
     private String postalCode;
-    @Field("premisies")
+    @Field("premises")
     private String premises;
 
     public String getAddressLine1() {

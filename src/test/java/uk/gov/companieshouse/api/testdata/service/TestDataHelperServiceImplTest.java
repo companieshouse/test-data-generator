@@ -1,22 +1,21 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.service.impl.TestDataHelperServiceImpl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@ExtendWith(MockitoExtension.class)
 class TestDataHelperServiceImplTest {
 
-    private ITestDataHelperService testDataHelperService;
-
-    @BeforeEach
-    void setUp() {
-        this.testDataHelperService = new TestDataHelperServiceImpl();
-    }
+    @InjectMocks
+    private TestDataHelperServiceImpl testDataHelperService;
 
     @Test
-    void testGetNewId() {
+    void getNewId() {
         String randomId = this.testDataHelperService.getNewId();
         assertEquals(28, randomId.length());
     }
