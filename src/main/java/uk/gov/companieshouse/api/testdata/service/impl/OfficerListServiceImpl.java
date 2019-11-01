@@ -10,7 +10,8 @@ import uk.gov.companieshouse.api.testdata.model.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.officer.Officer;
 import uk.gov.companieshouse.api.testdata.model.officer.OfficerItem;
-import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.repository.officer.OfficerRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.service.IOfficerListService;

@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
-import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
+import uk.gov.companieshouse.api.testdata.repository.psc.PersonsWithSignificantControlRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.PSCServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -5,8 +5,9 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.companyauthcode.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.model.account.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.repository.account.CompanyAuthCodeRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.service.ICompanyAuthCodeService;

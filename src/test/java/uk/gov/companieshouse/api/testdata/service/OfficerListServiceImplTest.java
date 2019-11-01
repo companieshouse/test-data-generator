@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.officer.Officer;
-import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.repository.officer.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.OfficerListServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;

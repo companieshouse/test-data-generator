@@ -7,8 +7,9 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistoryItem;
+import uk.gov.companieshouse.api.testdata.repository.filinghistory.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.model.Links;
-import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.service.IFilingHistoryService;

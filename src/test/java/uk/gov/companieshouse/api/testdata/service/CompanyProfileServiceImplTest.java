@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
-import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.companyprofile.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyProfileServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -10,7 +10,8 @@ import uk.gov.companieshouse.api.testdata.model.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.Links;
 import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControlItem;
-import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
+import uk.gov.companieshouse.api.testdata.repository.psc.PersonsWithSignificantControlRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.service.IPSCService;
