@@ -39,9 +39,9 @@ class OfficerListServiceImplTest {
 
         assertEquals("test_id", createdOfficer.getId());
         assertEquals("12345678", createdOfficer.getCompanyNumber());
-        assertEquals(new Integer(1), createdOfficer.getActiveCount());
-        assertEquals(new Integer(0), createdOfficer.getInactiveCount());
-        assertEquals(new Integer(1), createdOfficer.getResignedCount());
+        assertEquals(Integer.valueOf(1), createdOfficer.getActiveCount());
+        assertEquals(Integer.valueOf(0), createdOfficer.getInactiveCount());
+        assertEquals(Integer.valueOf(1), createdOfficer.getResignedCount());
         assertEquals(2, createdOfficer.getOfficerItems().size());
     }
 

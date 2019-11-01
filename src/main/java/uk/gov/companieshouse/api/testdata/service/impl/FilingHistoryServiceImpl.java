@@ -106,8 +106,8 @@ public class FilingHistoryServiceImpl implements IFilingHistoryService {
         String saltChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
         StringBuilder salt = new StringBuilder();
 
-        while (salt.length() < 18) { // length of the random string.
-            int index = (int) (rnd.nextFloat() * saltChars.length());
+        while (salt.length() < 18) {
+            int index = rnd.nextInt(saltChars.length());
             salt.append(saltChars.charAt(index));
         }
         return salt.toString();

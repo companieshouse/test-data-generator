@@ -39,7 +39,7 @@ class FilingHistoryServiceImplTest {
 
         assertEquals("test_id", createdHistory.getId());
         assertEquals("12345678", createdHistory.getCompanyNumber());
-        assertEquals(new Integer(1), createdHistory.getTotalCount());
+        assertEquals(Integer.valueOf(1), createdHistory.getTotalCount());
         assertEquals(1, createdHistory.getFilingHistoryItems().size());
     }
 

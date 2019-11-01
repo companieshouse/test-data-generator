@@ -39,8 +39,8 @@ class PSCServiceImplTest {
 
         assertEquals("test_id", returnedPsc.getId());
         assertEquals("12345678", returnedPsc.getCompanyNumber());
-        assertEquals(new Integer(1), returnedPsc.getActiveCount());
-        assertEquals(new Integer(0), returnedPsc.getCeasedCount());
+        assertEquals(Integer.valueOf(1), returnedPsc.getActiveCount());
+        assertEquals(Integer.valueOf(0), returnedPsc.getCeasedCount());
         assertEquals(1, returnedPsc.getItems().size());
     }
 
