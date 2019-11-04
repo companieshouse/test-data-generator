@@ -67,7 +67,9 @@ public class PSCServiceImpl implements DataService<PersonsWithSignificantControl
     public void delete(String companyId) throws NoDataFoundException, DataException {
 
         PersonsWithSignificantControl pscToDelete = repository.findByCompanyNumber(companyId);
-        if (pscToDelete == null) throw new NoDataFoundException(PSC_DATA_NOT_FOUND);
+        if (pscToDelete == null) {
+            throw new NoDataFoundException(PSC_DATA_NOT_FOUND);
+        }
 
         try {
             repository.delete(pscToDelete);

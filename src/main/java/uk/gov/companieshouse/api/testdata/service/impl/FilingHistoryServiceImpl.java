@@ -68,7 +68,9 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
         FilingHistory filingHistoryToDelete = filingHistoryRepository.findByCompanyNumber(companyId);
 
-        if (filingHistoryToDelete == null) throw new NoDataFoundException(FILING_HISTORY_DATA_NOT_FOUND);
+        if (filingHistoryToDelete == null) {
+            throw new NoDataFoundException(FILING_HISTORY_DATA_NOT_FOUND);
+        }
 
         try {
             filingHistoryRepository.delete(filingHistoryToDelete);
