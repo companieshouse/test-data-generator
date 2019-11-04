@@ -1,31 +1,18 @@
-HELP.md
+# Build artifacts
 target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**
-!**/src/test/**
+*.jar
+*.zip
 
-### STS ###
-.apt_generated
+# Eclipse files
 .classpath
-.factorypath
 .project
 .settings
-.springBeans
-.sts4-cache
+bin/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ files
+.idea/
 *.iml
-*.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-
-### VS Code ###
-.vscode/
+# Mac files
+.DS_Store
+._*
