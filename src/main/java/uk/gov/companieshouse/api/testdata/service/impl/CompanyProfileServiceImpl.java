@@ -60,7 +60,9 @@ public class CompanyProfileServiceImpl implements DataService<Company> {
 
         Company existingCompany = repository.findByCompanyNumber(companyId);
 
-        if (existingCompany == null) throw new NoDataFoundException(COMPANY_PROFILE_DATA_NOT_FOUND);
+        if (existingCompany == null) {
+            throw new NoDataFoundException(COMPANY_PROFILE_DATA_NOT_FOUND);
+        }
 
         try {
             repository.delete(existingCompany);

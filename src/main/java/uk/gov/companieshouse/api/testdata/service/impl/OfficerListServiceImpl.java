@@ -69,7 +69,9 @@ public class OfficerListServiceImpl implements DataService<Officer> {
 
         Officer officerToDelete = officerRepository.findByCompanyNumber(companyId);
 
-        if (officerToDelete == null) throw new NoDataFoundException(OFFICER_DATA_NOT_FOUND);
+        if (officerToDelete == null) {
+            throw new NoDataFoundException(OFFICER_DATA_NOT_FOUND);
+        }
 
         try {
             officerRepository.delete(officerToDelete);
