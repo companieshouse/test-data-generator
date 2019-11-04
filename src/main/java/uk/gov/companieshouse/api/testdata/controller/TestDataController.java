@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+
 import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
@@ -26,45 +25,20 @@ public class TestDataController {
     }
 
     @PostMapping
-    public ResponseEntity create() {
+    public ResponseEntity<CreatedCompany> create() throws Exception {
 
-        CreatedCompany createdCompany;
+        CreatedCompany createdCompany = testDataService.createCompanyData();
 
-        try {
-            createdCompany = testDataService.createCompanyData();
-        } catch (DataException e) {
-            return new ResponseEntity<>(
-                    e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-
-        return new ResponseEntity<>(
-                createdCompany,
-                HttpStatus.CREATED
-        );
+        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{companyId}")
-    public ResponseEntity delete(@PathVariable("companyId") String companyId) {
+    public ResponseEntity<Void> delete(@PathVariable("companyId") String companyId)
+            throws Exception {
 
-        try {
-            testDataService.deleteCompanyData(companyId);
-        } catch (NoDataFoundException e) {
-            return new ResponseEntity<>(
-                    e.getMessage() + " for company: " + companyId,
-                    HttpStatus.NOT_FOUND
-            );
-        } catch (DataException e) {
-            return new ResponseEntity<>(
-                    e.getMessage(),
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
-        return new ResponseEntity<>(
-                null,
-                HttpStatus.NO_CONTENT
-        );
+        testDataService.deleteCompanyData(companyId);
+
+        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
     }
 
 }
