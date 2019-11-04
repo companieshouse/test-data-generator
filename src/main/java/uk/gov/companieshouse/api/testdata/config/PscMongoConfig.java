@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata;
+package uk.gov.companieshouse.api.testdata.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
