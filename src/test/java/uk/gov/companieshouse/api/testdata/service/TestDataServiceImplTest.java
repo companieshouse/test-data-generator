@@ -24,6 +24,9 @@ import uk.gov.companieshouse.api.testdata.service.impl.TestDataServiceImpl;
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
 
+    private static final String COMPANY_NUMBER = "12345678";
+    private static final String AUTH_CODE = "123456";
+
     @Mock
     private DataService<Company> companyProfileService;
     @Mock
@@ -49,27 +52,27 @@ class TestDataServiceImplTest {
     @Test
     void createCompanyData() throws DataException {
         Company mockCompany = new Company();
-        mockCompany.setCompanyNumber("12345678");
+        mockCompany.setCompanyNumber(COMPANY_NUMBER);
 
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
-        mockAuthCode.setAuthCode("123456");
+        mockAuthCode.setAuthCode(AUTH_CODE);
 
-        when(this.randomService.getRandomInteger(8)).thenReturn("12345678");
-        when(this.companyAuthCodeService.create("12345678")).thenReturn(mockAuthCode);
+        when(this.randomService.getRandomInteger(8)).thenReturn(COMPANY_NUMBER);
+        when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
         CreatedCompany createdCompany = this.testDataService.createCompanyData();
 
-        assertEquals("12345678", createdCompany.getCompanyNumber());
-        assertEquals("123456", createdCompany.getAuthCode());
+        assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
     @Test
     void deleteCompanyData() throws NoDataFoundException, DataException {
-        this.testDataService.deleteCompanyData("123456");
+        this.testDataService.deleteCompanyData(COMPANY_NUMBER);
 
-        verify(companyProfileService, times(1)).delete("123456");
-        verify(filingHistoryService, times(1)).delete("123456");
-        verify(officerListService, times(1)).delete("123456");
-        verify(pscService, times(1)).delete("123456");
-        verify(companyAuthCodeService, times(1)).delete("123456");
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(officerListService, times(1)).delete(COMPANY_NUMBER);
+        verify(pscService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
     }
 }

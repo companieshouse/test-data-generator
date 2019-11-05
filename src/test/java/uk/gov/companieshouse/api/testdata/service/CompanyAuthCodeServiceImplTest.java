@@ -18,12 +18,16 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyAuthCodeServiceImplTest {
+
+    private static final String COMPANY_NUMBER = "12345678";
+    private static final String COMPANY_AUTH_CODE = "123456";
 
     @Mock
     private CompanyAuthCodeRepository companyAuthCodeRepository;
@@ -35,49 +39,51 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
-        when(this.randomService.getRandomInteger(6)).thenReturn("123456");
-        CompanyAuthCode createdAuthCode = this.companyAuthCodeServiceImpl.create("12345678");
+        when(this.randomService.getRandomInteger(6)).thenReturn(COMPANY_AUTH_CODE);
+        CompanyAuthCode createdAuthCode = this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER);
 
         assertNotNull(createdAuthCode);
-        assertEquals(6, createdAuthCode.getAuthCode().length());
+        assertEquals(COMPANY_AUTH_CODE, createdAuthCode.getAuthCode());
+        assertTrue(createdAuthCode.getIsActive());
+        assertEquals(COMPANY_NUMBER, createdAuthCode.getId());
     }
 
     @Test
     void createDuplicateKeyException() {
-        when(this.randomService.getRandomInteger(6)).thenReturn("123456");
+        when(this.randomService.getRandomInteger(6)).thenReturn(COMPANY_AUTH_CODE);
         when(companyAuthCodeRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.companyAuthCodeServiceImpl.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void createMongoExceptionException() {
-        when(this.randomService.getRandomInteger(6)).thenReturn("123456");
+        when(this.randomService.getRandomInteger(6)).thenReturn(COMPANY_AUTH_CODE);
         when(companyAuthCodeRepository.save(any())).thenThrow(MongoException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.companyAuthCodeServiceImpl.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void deleteNoDataException() {
-        when(companyAuthCodeRepository.findById("12345678")).thenReturn(Optional.empty());
-        assertThrows(NoDataFoundException.class, () -> {
-            this.companyAuthCodeServiceImpl.delete("12345678");
-        });
+        when(companyAuthCodeRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertThrows(NoDataFoundException.class, () ->
+            this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void deleteMongoException() {
-        when(companyAuthCodeRepository.findById("12345678"))
+        when(companyAuthCodeRepository.findById(COMPANY_NUMBER))
                 .thenReturn(Optional.of(new CompanyAuthCode()));
         doThrow(MongoException.class).when(companyAuthCodeRepository).delete(any());
-        assertThrows(DataException.class, () -> {
-            this.companyAuthCodeServiceImpl.delete("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
+        );
     }
 
 }

@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.officer.Officer;
 import uk.gov.companieshouse.api.testdata.repository.officer.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.OfficerListServiceImpl;
@@ -21,6 +22,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class OfficerListServiceImplTest {
 
+    private static final String TEST_ID = "test_id";
+    private static final String COMPANY_NUMBER = "12345678";
+
     @Mock
     private TestDataHelperService testDataHelperService;
 
@@ -32,11 +36,11 @@ class OfficerListServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
-        when(testDataHelperService.getNewId()).thenReturn("test_id");
-        Officer createdOfficer = this.officerListService.create("12345678");
+        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        Officer createdOfficer = this.officerListService.create(COMPANY_NUMBER);
 
-        assertEquals("test_id", createdOfficer.getId());
-        assertEquals("12345678", createdOfficer.getCompanyNumber());
+        assertEquals(TEST_ID, createdOfficer.getId());
+        assertEquals(COMPANY_NUMBER, createdOfficer.getCompanyNumber());
         assertEquals(Integer.valueOf(1), createdOfficer.getActiveCount());
         assertEquals(Integer.valueOf(0), createdOfficer.getInactiveCount());
         assertEquals(Integer.valueOf(1), createdOfficer.getResignedCount());
@@ -45,31 +49,40 @@ class OfficerListServiceImplTest {
 
     @Test
     void createDuplicateKeyException() {
-        when(testDataHelperService.getNewId()).thenReturn("test_id");
+        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
         when(officerRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.officerListService.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.officerListService.create(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void createMongoExceptionException() {
-        when(testDataHelperService.getNewId()).thenReturn("test_id");
+        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
         when(officerRepository.save(any())).thenThrow(MongoException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.officerListService.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.officerListService.create(COMPANY_NUMBER)
+        );
+    }
+
+    @Test
+    void deleteNoCompany() {
+        when(officerRepository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(null);
+        assertThrows(NoDataFoundException.class, () ->
+            this.officerListService.delete(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void deleteMongoException() {
-        when(officerRepository.findByCompanyNumber("12345678"))
+        when(officerRepository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(new Officer());
         doThrow(MongoException.class).when(officerRepository).delete(any());
-        assertThrows(DataException.class, () -> {
-            this.officerListService.delete("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.officerListService.delete(COMPANY_NUMBER)
+        );
     }
 }
