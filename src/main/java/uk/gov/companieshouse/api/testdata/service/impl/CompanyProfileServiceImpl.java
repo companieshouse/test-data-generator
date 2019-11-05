@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 public class CompanyProfileServiceImpl implements DataService<Company> {
 
     private static final String COMPANY_PROFILE_DATA_NOT_FOUND = "company profile data not found";
+    private static final String LINK_STEM = "/company/";
 
     private CompanyProfileRepository repository;
 
@@ -75,10 +76,10 @@ public class CompanyProfileServiceImpl implements DataService<Company> {
     private Links createLinks(Company company) {
 
         Links links = new Links();
-        links.setSelf("/company/" + company.getCompanyNumber());
-        links.setFilingHistory("/company/" + company.getCompanyNumber() + "/filing-history");
-        links.setOfficers("/company/" + company.getCompanyNumber() + "/officers");
-        links.setPersonsWithSignificantControl("/company/" + company.getCompanyNumber() + "/persons-with-significant-control");
+        links.setSelf(LINK_STEM + company.getCompanyNumber());
+        links.setFilingHistory(LINK_STEM + company.getCompanyNumber() + "/filing-history");
+        links.setOfficers(LINK_STEM + company.getCompanyNumber() + "/officers");
+        links.setPersonsWithSignificantControl(LINK_STEM + company.getCompanyNumber() + "/persons-with-significant-control");
 
         return links;
     }

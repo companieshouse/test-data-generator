@@ -27,9 +27,6 @@ public class Officer {
     @Field("company_number")
     private String companyNumber;
 
-    public Officer() {
-    }
-
     public String getId() {
         return id;
     }

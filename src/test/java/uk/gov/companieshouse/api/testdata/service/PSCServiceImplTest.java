@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.repository.psc.PersonsWithSignificantControlRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.PSCServiceImpl;
@@ -21,6 +22,9 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PSCServiceImplTest {
 
+    private static final String TEST_ID = "test_id";
+    private static final String COMPANY_NUMBER = "12345678";
+
     @Mock
     private TestDataHelperService testDataHelperService;
 
@@ -31,12 +35,12 @@ class PSCServiceImplTest {
     private PSCServiceImpl pscService;
 
     @Test
-    void createSuccess() throws Exception {
-        when(testDataHelperService.getNewId()).thenReturn("test_id");
-        PersonsWithSignificantControl returnedPsc = this.pscService.create("12345678");
+    void createSuccess() throws DataException {
+        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        PersonsWithSignificantControl returnedPsc = this.pscService.create(COMPANY_NUMBER);
 
-        assertEquals("test_id", returnedPsc.getId());
-        assertEquals("12345678", returnedPsc.getCompanyNumber());
+        assertEquals(TEST_ID, returnedPsc.getId());
+        assertEquals(COMPANY_NUMBER, returnedPsc.getCompanyNumber());
         assertEquals(Integer.valueOf(1), returnedPsc.getActiveCount());
         assertEquals(Integer.valueOf(0), returnedPsc.getCeasedCount());
         assertEquals(1, returnedPsc.getItems().size());
@@ -44,31 +48,40 @@ class PSCServiceImplTest {
 
     @Test
     void createDuplicateKeyException() {
-        when(testDataHelperService.getNewId()).thenReturn("test_id");
+        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
         when(personsWithSignificantControlRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.pscService.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.pscService.create(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void createMongoExceptionException() {
-        when(testDataHelperService.getNewId()).thenReturn("test_id");
+        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
         when(personsWithSignificantControlRepository.save(any())).thenThrow(MongoException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.pscService.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.pscService.create(COMPANY_NUMBER)
+        );
+    }
+
+    @Test
+    void deleteNoCompany() {
+        when(personsWithSignificantControlRepository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(null);
+        assertThrows(NoDataFoundException.class, () ->
+            this.pscService.delete(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void deleteMongoException() {
-        when(personsWithSignificantControlRepository.findByCompanyNumber("12345678"))
+        when(personsWithSignificantControlRepository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(new PersonsWithSignificantControl());
         doThrow(MongoException.class).when(personsWithSignificantControlRepository).delete(any());
-        assertThrows(DataException.class, () -> {
-            this.pscService.delete("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.pscService.delete(COMPANY_NUMBER)
+        );
     }
 }

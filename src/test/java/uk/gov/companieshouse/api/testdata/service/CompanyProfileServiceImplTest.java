@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
 import uk.gov.companieshouse.api.testdata.repository.companyprofile.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyProfileServiceImpl;
@@ -21,6 +22,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CompanyProfileServiceImplTest {
 
+    private static final String COMPANY_NUMBER = "12345678";
+
     @Mock
     private CompanyProfileRepository companyProfileRepository;
 
@@ -29,7 +32,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
-        Company createdCompany = this.companyProfileService.create("12345678");
+        Company createdCompany = this.companyProfileService.create(COMPANY_NUMBER);
 
         assertEquals("Active", createdCompany.getCompanyStatus());
         assertEquals("england-wales", createdCompany.getJurisdiction());
@@ -40,28 +43,37 @@ class CompanyProfileServiceImplTest {
     void createDuplicateKeyException() {
         when(companyProfileRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.companyProfileService.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.companyProfileService.create(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void createMongoExceptionException() {
         when(companyProfileRepository.save(any())).thenThrow(MongoException.class);
 
-        assertThrows(DataException.class, () -> {
-            this.companyProfileService.create("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.companyProfileService.create(COMPANY_NUMBER)
+        );
+    }
+
+    @Test
+    void deleteNoCompany() {
+        when(companyProfileRepository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(null);
+        assertThrows(NoDataFoundException.class, () ->
+            this.companyProfileService.delete(COMPANY_NUMBER)
+        );
     }
 
     @Test
     void deleteMongoException() {
-        when(companyProfileRepository.findByCompanyNumber("12345678"))
+        when(companyProfileRepository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(new Company());
         doThrow(MongoException.class).when(companyProfileRepository).delete(any());
-        assertThrows(DataException.class, () -> {
-            this.companyProfileService.delete("12345678");
-        });
+        assertThrows(DataException.class, () ->
+            this.companyProfileService.delete(COMPANY_NUMBER)
+        );
     }
 
 }
