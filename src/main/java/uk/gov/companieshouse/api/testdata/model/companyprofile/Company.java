@@ -27,10 +27,6 @@ public class Company {
     @Field("type")
     private String type;
 
-    public Company() {
-        //No args constructor for use in serialization
-    }
-
     public String getId() {
         return id;
     }

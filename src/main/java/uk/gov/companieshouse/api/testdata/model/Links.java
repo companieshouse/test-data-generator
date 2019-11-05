@@ -14,10 +14,6 @@ public class Links {
     @Field("self")
     private String self;
 
-    public Links() {
-        //No args constructor for use in serialization
-    }
-
     public String getFilingHistory() {
         return filingHistory;
     }

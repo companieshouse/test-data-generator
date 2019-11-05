@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
@@ -25,7 +27,7 @@ public class TestDataController {
     }
 
     @PostMapping
-    public ResponseEntity<CreatedCompany> create() throws Exception {
+    public ResponseEntity<CreatedCompany> create() throws DataException {
 
         CreatedCompany createdCompany = testDataService.createCompanyData();
 
@@ -34,11 +36,11 @@ public class TestDataController {
 
     @DeleteMapping("/{companyId}")
     public ResponseEntity<Void> delete(@PathVariable("companyId") String companyId)
-            throws Exception {
+            throws NoDataFoundException, DataException {
 
         testDataService.deleteCompanyData(companyId);
 
-        return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
 }

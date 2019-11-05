@@ -24,10 +24,6 @@ public class RegisteredOfficeAddress {
     @Field("region")
     private String region;
 
-    public RegisteredOfficeAddress() {
-        //No args constructor for use in serialization
-    }
-
     public String getAddressLine1() {
         return addressLine1;
     }
