@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
 @RestController
-@RequestMapping(value = "/testdata", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/test-data-generator", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TestDataController {
 
     private TestDataService testDataService;
@@ -26,7 +26,7 @@ public class TestDataController {
         this.testDataService = testDataService;
     }
 
-    @PostMapping
+    @PostMapping("/testdata")
     public ResponseEntity<CreatedCompany> create() throws DataException {
 
         CreatedCompany createdCompany = testDataService.createCompanyData();

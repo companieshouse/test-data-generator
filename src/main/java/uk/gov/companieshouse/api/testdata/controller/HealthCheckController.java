@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,10 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * HealthCheck returns a 200 response if the service is running.
  */
 @Controller
-@RequestMapping("/healthcheck")
+@RequestMapping(value = "/test-data-generator")
 public class HealthCheckController {
 
-    @GetMapping
+    @GetMapping("/healthcheck")
     public ResponseEntity<Void> isHealthy() {
         return new ResponseEntity<>(HttpStatus.OK);
     }
