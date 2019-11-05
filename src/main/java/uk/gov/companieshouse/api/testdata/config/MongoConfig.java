@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -22,33 +23,31 @@ public class MongoConfig {
 
     @Bean(name = "companyProfileMongoTemplate")
     public MongoTemplate companyProfileMongoTemplate() {
-        return createMongoTemplate(this.mongoProperties.getHost(), this.mongoProperties.getPort(), "company_profile");
+        return createMongoTemplate(this.mongoProperties.getUri(), "company_profile");
     }
 
     @Bean(name = "accountMongoTemplate")
     public MongoTemplate accountMongoTemplate() {
-        return createMongoTemplate(this.mongoProperties.getHost(), this.mongoProperties.getPort(), "account");
+        return createMongoTemplate(this.mongoProperties.getUri(), "account");
     }
 
     @Bean(name = "filingHistoryMongoTemplate")
     public MongoTemplate filingHistoryMongoTemplate() {
-        return createMongoTemplate(this.mongoProperties.getHost(), this.mongoProperties.getPort(),
-                "company_filing_history");
+        return createMongoTemplate(this.mongoProperties.getUri(), "company_filing_history");
     }
 
     @Bean(name = "officerMongoTemplate")
     public MongoTemplate officerMongoTemplate() {
-        return createMongoTemplate(this.mongoProperties.getHost(), this.mongoProperties.getPort(),
-                "officer_appointments");
+        return createMongoTemplate(this.mongoProperties.getUri(), "officer_appointments");
     }
 
     @Bean(name = "pscMongoTemplate")
     public MongoTemplate pscMongoTemplate() {
-        return createMongoTemplate(this.mongoProperties.getHost(), this.mongoProperties.getPort(), "company_pscs");
+        return createMongoTemplate(this.mongoProperties.getUri(), "company_pscs");
     }
 
-    private MongoTemplate createMongoTemplate(final String host, final Integer port, final String database) {
-        return new MongoTemplate(new SimpleMongoDbFactory(new MongoClient(host, port), database));
+    private MongoTemplate createMongoTemplate(final String uri, final String database) {
+        return new MongoTemplate(new SimpleMongoDbFactory(new MongoClient(new MongoClientURI(uri)), database));
     }
 
 }
