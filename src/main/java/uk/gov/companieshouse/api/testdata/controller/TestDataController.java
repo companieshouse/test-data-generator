@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
 @RestController
-@RequestMapping(value = "/test-data-generator", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TestDataController {
 
     private TestDataService testDataService;

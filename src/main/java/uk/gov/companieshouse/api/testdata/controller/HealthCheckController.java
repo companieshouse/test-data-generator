@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
  * HealthCheck returns a 200 response if the service is running.
  */
 @Controller
-@RequestMapping(value = "/test-data-generator")
+@RequestMapping(value = "${api.endpoint}")
 public class HealthCheckController {
 
     @GetMapping("/healthcheck")
