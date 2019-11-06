@@ -18,7 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControlItem;
-import uk.gov.companieshouse.api.testdata.repository.psc.PersonsWithSignificantControlRepository;
+import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
 

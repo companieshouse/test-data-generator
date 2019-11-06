@@ -1,10 +1,10 @@
-package uk.gov.companieshouse.api.testdata.repository.account;
+package uk.gov.companieshouse.api.testdata.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.NoRepositoryBean;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 
-@Repository
+@NoRepositoryBean
 public interface CompanyAuthCodeRepository extends MongoRepository<CompanyAuthCode, String> {
 }
