@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
-import uk.gov.companieshouse.api.testdata.repository.psc.PersonsWithSignificantControlRepository;
+import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.PSCServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

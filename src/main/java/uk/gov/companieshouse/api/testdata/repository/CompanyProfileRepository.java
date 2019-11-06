@@ -1,11 +1,11 @@
-package uk.gov.companieshouse.api.testdata.repository.companyprofile;
+package uk.gov.companieshouse.api.testdata.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.NoRepositoryBean;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 
-@Repository
+@NoRepositoryBean
 public interface CompanyProfileRepository extends MongoRepository<CompanyProfile, String> {
 
     CompanyProfile findByCompanyNumber(String companyNumber);
