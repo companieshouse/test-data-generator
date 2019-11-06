@@ -13,12 +13,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
-import uk.gov.companieshouse.api.testdata.model.account.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
-import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.officer.Officer;
-import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Officer;
+import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.impl.TestDataServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +28,7 @@ class TestDataServiceImplTest {
     private static final String AUTH_CODE = "123456";
 
     @Mock
-    private DataService<Company> companyProfileService;
+    private DataService<CompanyProfile> companyProfileService;
     @Mock
     private DataService<FilingHistory> filingHistoryService;
     @Mock
@@ -51,7 +51,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyData() throws DataException {
-        Company mockCompany = new Company();
+        CompanyProfile mockCompany = new CompanyProfile();
         mockCompany.setCompanyNumber(COMPANY_NUMBER);
 
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -59,7 +59,7 @@ class TestDataServiceImplTest {
 
         when(this.randomService.getRandomInteger(8)).thenReturn(COMPANY_NUMBER);
         when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
-        CreatedCompany createdCompany = this.testDataService.createCompanyData();
+        CompanyData createdCompany = this.testDataService.createCompanyData();
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());

@@ -1,9 +1,6 @@
-package uk.gov.companieshouse.api.testdata.model.psc;
+package uk.gov.companieshouse.api.testdata.model.entity;
 
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.gov.companieshouse.api.testdata.model.Address;
-import uk.gov.companieshouse.api.testdata.model.DateOfBirth;
-import uk.gov.companieshouse.api.testdata.model.Links;
 
 import java.util.Date;
 

@@ -1,7 +1,6 @@
-package uk.gov.companieshouse.api.testdata.model.filinghistory;
+package uk.gov.companieshouse.api.testdata.model.entity;
 
 import org.springframework.data.mongodb.core.mapping.Field;
-import uk.gov.companieshouse.api.testdata.model.Links;
 
 import java.util.Date;
 

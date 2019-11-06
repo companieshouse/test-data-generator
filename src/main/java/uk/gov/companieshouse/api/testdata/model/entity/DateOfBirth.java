@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.model;
+package uk.gov.companieshouse.api.testdata.model.entity;
 
 import org.springframework.data.mongodb.core.mapping.Field;
 

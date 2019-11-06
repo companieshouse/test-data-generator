@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
-import uk.gov.companieshouse.api.testdata.model.account.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
-import uk.gov.companieshouse.api.testdata.model.filinghistory.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.officer.Officer;
-import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Officer;
+import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -20,7 +20,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
-    private DataService<Company> companyProfileService;
+    private DataService<CompanyProfile> companyProfileService;
     private DataService<FilingHistory> filingHistoryService;
     private DataService<Officer> officerListService;
     private DataService<PersonsWithSignificantControl> pscService;
@@ -28,7 +28,7 @@ public class TestDataServiceImpl implements TestDataService {
     private RandomService randomService;
 
     @Autowired
-    public TestDataServiceImpl(DataService<Company> companyProfileService, DataService<FilingHistory> filingHistoryService,
+    public TestDataServiceImpl(DataService<CompanyProfile> companyProfileService, DataService<FilingHistory> filingHistoryService,
                                DataService<Officer> officerListService, DataService<PersonsWithSignificantControl> pscService,
                                DataService<CompanyAuthCode> companyAuthCodeService, RandomService randomService) {
         this.companyProfileService = companyProfileService;
@@ -40,7 +40,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CreatedCompany createCompanyData() throws DataException {
+    public CompanyData createCompanyData() throws DataException {
         String companyNumber = randomService.getRandomInteger(COMPANY_NUMBER_LENGTH);
 
         this.companyProfileService.create(companyNumber);
@@ -49,7 +49,7 @@ public class TestDataServiceImpl implements TestDataService {
         this.pscService.create(companyNumber);
         CompanyAuthCode authCode = this.companyAuthCodeService.create(companyNumber);
 
-        return new CreatedCompany(companyNumber, authCode.getAuthCode());
+        return new CompanyData(companyNumber, authCode.getAuthCode());
     }
 
     @Override

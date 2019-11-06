@@ -9,15 +9,15 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.Links;
-import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
-import uk.gov.companieshouse.api.testdata.model.companyprofile.RegisteredOfficeAddress;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddress;
 import uk.gov.companieshouse.api.testdata.repository.companyprofile.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 
 
 @Service
-public class CompanyProfileServiceImpl implements DataService<Company> {
+public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
     private static final String COMPANY_PROFILE_DATA_NOT_FOUND = "company profile data not found";
     private static final String LINK_STEM = "/company/";
@@ -30,9 +30,9 @@ public class CompanyProfileServiceImpl implements DataService<Company> {
     }
 
     @Override
-    public Company create(String companyNumber) throws DataException {
+    public CompanyProfile create(String companyNumber) throws DataException {
 
-        Company company = new Company();
+        CompanyProfile company = new CompanyProfile();
 
         company.setCompanyName("Company " + companyNumber);
         company.setId(companyNumber);
@@ -59,7 +59,7 @@ public class CompanyProfileServiceImpl implements DataService<Company> {
     @Override
     public void delete(String companyId) throws NoDataFoundException, DataException {
 
-        Company existingCompany = repository.findByCompanyNumber(companyId);
+        CompanyProfile existingCompany = repository.findByCompanyNumber(companyId);
 
         if (existingCompany == null) {
             throw new NoDataFoundException(COMPANY_PROFILE_DATA_NOT_FOUND);
@@ -73,7 +73,7 @@ public class CompanyProfileServiceImpl implements DataService<Company> {
 
     }
 
-    private Links createLinks(Company company) {
+    private Links createLinks(CompanyProfile company) {
 
         Links links = new Links();
         links.setSelf(LINK_STEM + company.getCompanyNumber());
