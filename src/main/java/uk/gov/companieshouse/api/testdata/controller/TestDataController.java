@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
 @RestController
@@ -27,9 +27,9 @@ public class TestDataController {
     }
 
     @PostMapping("/testdata")
-    public ResponseEntity<CreatedCompany> create() throws DataException {
+    public ResponseEntity<CompanyData> create() throws DataException {
 
-        CreatedCompany createdCompany = testDataService.createCompanyData();
+        CompanyData createdCompany = testDataService.createCompanyData();
 
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }

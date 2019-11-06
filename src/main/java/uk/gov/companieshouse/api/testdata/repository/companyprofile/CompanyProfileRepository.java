@@ -2,10 +2,11 @@ package uk.gov.companieshouse.api.testdata.repository.companyprofile;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
-import uk.gov.companieshouse.api.testdata.model.companyprofile.Company;
+
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 
 @Repository
-public interface CompanyProfileRepository extends MongoRepository<Company, String> {
+public interface CompanyProfileRepository extends MongoRepository<CompanyProfile, String> {
 
-    Company findByCompanyNumber(String companyNumber);
+    CompanyProfile findByCompanyNumber(String companyNumber);
 }

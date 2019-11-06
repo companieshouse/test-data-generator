@@ -1,7 +1,8 @@
 package uk.gov.companieshouse.api.testdata.repository.psc;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import uk.gov.companieshouse.api.testdata.model.psc.PersonsWithSignificantControl;
+
+import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
 
 public interface PersonsWithSignificantControlRepository extends MongoRepository<PersonsWithSignificantControl, String> {
 

@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.CreatedCompany;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,10 +31,10 @@ class TestDataControllerTest {
 
     @Test
     void create() throws Exception {
-        CreatedCompany company = new CreatedCompany("12345678", "123456");
+        CompanyData company = new CompanyData("12345678", "123456");
 
         when(this.testDataService.createCompanyData()).thenReturn(company);
-        ResponseEntity<CreatedCompany> response = this.testDataController.create();
+        ResponseEntity<CompanyData> response = this.testDataController.create();
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
