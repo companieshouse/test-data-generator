@@ -14,6 +14,7 @@ import org.springframework.data.repository.Repository;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
@@ -54,6 +55,11 @@ public class MongoConfig {
     @Bean
     public PersonsWithSignificantControlRepository pscRepository() {
         return getMongoRepositoryBean(PersonsWithSignificantControlRepository.class, "company_pscs");
+    }
+
+    @Bean
+    public AppointmentsRepository appointmentsRepository() {
+        return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
