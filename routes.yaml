@@ -3,4 +3,4 @@ group: api
 
 weight: 900
 routes:
-   1: ^/test-data-generator/*
+   1: ^/test-data/*

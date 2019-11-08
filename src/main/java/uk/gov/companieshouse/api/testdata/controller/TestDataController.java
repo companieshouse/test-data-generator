@@ -26,7 +26,7 @@ public class TestDataController {
         this.testDataService = testDataService;
     }
 
-    @PostMapping("/testdata")
+    @PostMapping("/company")
     public ResponseEntity<CompanyData> create() throws DataException {
 
         CompanyData createdCompany = testDataService.createCompanyData();
