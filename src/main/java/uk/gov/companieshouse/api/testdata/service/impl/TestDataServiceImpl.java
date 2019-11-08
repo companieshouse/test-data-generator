@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
@@ -25,17 +26,21 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<Officer> officerListService;
     private DataService<PersonsWithSignificantControl> pscService;
     private DataService<CompanyAuthCode> companyAuthCodeService;
+    private DataService<Appointment> appointmentService;
     private RandomService randomService;
 
     @Autowired
-    public TestDataServiceImpl(DataService<CompanyProfile> companyProfileService, DataService<FilingHistory> filingHistoryService,
-                               DataService<Officer> officerListService, DataService<PersonsWithSignificantControl> pscService,
-                               DataService<CompanyAuthCode> companyAuthCodeService, RandomService randomService) {
+    public TestDataServiceImpl(DataService<CompanyProfile> companyProfileService,
+                               DataService<FilingHistory> filingHistoryService, DataService<Officer> officerListService,
+                               DataService<PersonsWithSignificantControl> pscService,
+                               DataService<CompanyAuthCode> companyAuthCodeService,
+                               DataService<Appointment> appointmentService, RandomService randomService) {
         this.companyProfileService = companyProfileService;
         this.filingHistoryService = filingHistoryService;
         this.officerListService = officerListService;
         this.pscService = pscService;
         this.companyAuthCodeService = companyAuthCodeService;
+        this.appointmentService = appointmentService;
         this.randomService = randomService;
     }
 
@@ -47,6 +52,7 @@ public class TestDataServiceImpl implements TestDataService {
         this.filingHistoryService.create(companyNumber);
         this.officerListService.create(companyNumber);
         this.pscService.create(companyNumber);
+        this.appointmentService.create(companyNumber);
         CompanyAuthCode authCode = this.companyAuthCodeService.create(companyNumber);
 
         return new CompanyData(companyNumber, authCode.getAuthCode());
@@ -60,5 +66,6 @@ public class TestDataServiceImpl implements TestDataService {
         this.officerListService.delete(companyId);
         this.pscService.delete(companyId);
         this.companyAuthCodeService.delete(companyId);
+        this.appointmentService.delete(companyId);
     }
 }
