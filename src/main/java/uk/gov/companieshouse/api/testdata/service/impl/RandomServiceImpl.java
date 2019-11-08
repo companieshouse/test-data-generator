@@ -3,8 +3,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
