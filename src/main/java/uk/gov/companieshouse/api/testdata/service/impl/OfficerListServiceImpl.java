@@ -27,16 +27,12 @@ public class OfficerListServiceImpl implements DataService<Officer> {
 
     private static final String OFFICER_DATA_NOT_FOUND = "officer data not found";
 
+    @Autowired
     private TestDataHelperService testDataHelperService;
+    @Autowired
     private OfficerRepository officerRepository;
 
     private Officer officer;
-
-    @Autowired
-    public OfficerListServiceImpl(TestDataHelperService testDataHelperService, OfficerRepository officerRepository) {
-        this.testDataHelperService = testDataHelperService;
-        this.officerRepository = officerRepository;
-    }
 
     @Override
     public Officer create(String companyNumber) throws DataException {

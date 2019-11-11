@@ -27,7 +27,7 @@ import static org.mockito.Mockito.when;
 class CompanyAuthCodeServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String COMPANY_AUTH_CODE = "123456";
+    private static final Long COMPANY_AUTH_CODE = 123456L;
 
     @Mock
     private CompanyAuthCodeRepository companyAuthCodeRepository;
@@ -39,18 +39,18 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
-        when(this.randomService.getRandomInteger(6)).thenReturn(COMPANY_AUTH_CODE);
+        when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         CompanyAuthCode createdAuthCode = this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER);
 
         assertNotNull(createdAuthCode);
-        assertEquals(COMPANY_AUTH_CODE, createdAuthCode.getAuthCode());
+        assertEquals(String.valueOf(COMPANY_AUTH_CODE), createdAuthCode.getAuthCode());
         assertTrue(createdAuthCode.getIsActive());
         assertEquals(COMPANY_NUMBER, createdAuthCode.getId());
     }
 
     @Test
     void createDuplicateKeyException() {
-        when(this.randomService.getRandomInteger(6)).thenReturn(COMPANY_AUTH_CODE);
+        when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         when(companyAuthCodeRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
         assertThrows(DataException.class, () ->
@@ -60,7 +60,7 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createMongoExceptionException() {
-        when(this.randomService.getRandomInteger(6)).thenReturn(COMPANY_AUTH_CODE);
+        when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         when(companyAuthCodeRepository.save(any())).thenThrow(MongoException.class);
 
         assertThrows(DataException.class, () ->

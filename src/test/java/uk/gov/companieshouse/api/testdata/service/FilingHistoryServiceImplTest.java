@@ -30,6 +30,9 @@ class FilingHistoryServiceImplTest {
 
     @Mock
     private FilingHistoryRepository filingHistoryRepository;
+    
+    @Mock
+    private RandomService randomService;
 
     @InjectMocks
     private FilingHistoryServiceImpl filingHistoryService;

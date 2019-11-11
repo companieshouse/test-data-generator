@@ -11,7 +11,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.PSCServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.PscServiceImpl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class PSCServiceImplTest {
+class PscServiceImplTest {
 
     private static final String TEST_ID = "test_id";
     private static final String COMPANY_NUMBER = "12345678";
@@ -32,7 +32,7 @@ class PSCServiceImplTest {
     private PersonsWithSignificantControlRepository personsWithSignificantControlRepository;
 
     @InjectMocks
-    private PSCServiceImpl pscService;
+    private PscServiceImpl pscService;
 
     @Test
     void createSuccess() throws DataException {

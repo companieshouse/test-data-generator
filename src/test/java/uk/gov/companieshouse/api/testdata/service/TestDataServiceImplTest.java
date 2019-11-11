@@ -5,17 +5,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
@@ -42,16 +42,8 @@ class TestDataServiceImplTest {
     private DataService<Appointment> appointmentService;
     @Mock
     private RandomService randomService;
-
+    @InjectMocks
     private TestDataServiceImpl testDataService;
-
-    @BeforeEach
-    void setUp() {
-        //Inject Mocks does not function correctly with generic interfaces
-        this.testDataService = new TestDataServiceImpl(this.companyProfileService, this.filingHistoryService,
-                this.officerListService, this.pscService, this.companyAuthCodeService, this.appointmentService,
-                this.randomService);
-    }
 
     @Test
     void createCompanyData() throws DataException {
@@ -61,7 +53,7 @@ class TestDataServiceImplTest {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
 
-        when(this.randomService.getRandomInteger(8)).thenReturn(COMPANY_NUMBER);
+        when(this.randomService.getRandomNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
         CompanyData createdCompany = this.testDataService.createCompanyData();
 

@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryItem;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
 
 @Service
@@ -26,18 +26,14 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
     private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
 
+    @Autowired
     private TestDataHelperService testDataHelperService;
+    @Autowired
     private FilingHistoryRepository filingHistoryRepository;
+    @Autowired
+    private RandomService randomService;
 
     private FilingHistory filingHistory;
-    private Random rnd = new Random();
-
-    @Autowired
-    public FilingHistoryServiceImpl(TestDataHelperService testDataHelperService,
-                                    FilingHistoryRepository filingHistoryRepository) {
-        this.testDataHelperService = testDataHelperService;
-        this.filingHistoryRepository = filingHistoryRepository;
-    }
 
     @Override
     public FilingHistory create(String companyNumber) throws DataException {
@@ -104,15 +100,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
     }
 
     private String getNewTransactionId() {
-
-        String saltChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        StringBuilder salt = new StringBuilder();
-
-        while (salt.length() < 18) {
-            int index = rnd.nextInt(saltChars.length());
-            salt.append(saltChars.charAt(index));
-        }
-        return salt.toString();
+        return randomService.getRandomString(18);
     }
 
 }
