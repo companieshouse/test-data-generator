@@ -26,7 +26,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private void logException(Exception ex) {
         // TODO Log exception
-        ex.printStackTrace();
     }
 
 }

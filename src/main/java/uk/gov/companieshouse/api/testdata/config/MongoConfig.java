@@ -67,9 +67,9 @@ public class MongoConfig {
                 new SimpleMongoDbFactory(new MongoClient(new MongoClientURI(this.mongoProperties.getUri())), database));
     }
 
-    private <T extends Repository<S, ID>, S, ID extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
+    private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
             String database) {
-        MongoRepositoryFactoryBean<T, S, ID> mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(repositoryClass);
+        MongoRepositoryFactoryBean<T, S, I> mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(repositoryClass);
         mongoDbFactoryBean.setMongoOperations(createMongoTemplate(database));
         mongoDbFactoryBean.afterPropertiesSet();
         return mongoDbFactoryBean.getObject();
