@@ -34,7 +34,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setId(encodedId);
 
         try {
-            repository.save(appointment);
+            return repository.save(appointment);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -42,8 +42,6 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
-
-        return appointment;
     }
 
     @Override

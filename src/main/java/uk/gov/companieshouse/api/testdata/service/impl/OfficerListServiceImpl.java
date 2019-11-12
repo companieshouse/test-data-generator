@@ -33,22 +33,20 @@ public class OfficerListServiceImpl implements DataService<Officer> {
     @Autowired
     private OfficerRepository officerRepository;
 
-    private Officer officer;
-
     @Override
     public Officer create(String companyNumber) throws DataException {
 
-        officer = new Officer();
+        Officer officer = new Officer();
 
         officer.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         officer.setCompanyNumber(companyNumber);
         officer.setActiveCount(1);
         officer.setInactiveCount(0);
-        officer.setOfficerItems(createItems());
+        officer.setOfficerItems(createItems(officer));
         officer.setResignedCount(1);
 
         try {
-            officerRepository.save(officer);
+            return officerRepository.save(officer);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -56,8 +54,6 @@ public class OfficerListServiceImpl implements DataService<Officer> {
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
-
-        return officer;
 
     }
 
@@ -77,25 +73,25 @@ public class OfficerListServiceImpl implements DataService<Officer> {
         }
     }
 
-    private List<OfficerItem> createItems() {
+    private List<OfficerItem> createItems(Officer officer) {
         List<OfficerItem> officerItemList = new ArrayList<>();
 
-        OfficerItem officerItem = createOfficerItem();
+        OfficerItem officerItem = createOfficerItem(officer);
         officerItemList.add(officerItem);
-        OfficerItem resignedOfficer = createOfficerItem();
+        OfficerItem resignedOfficer = createOfficerItem(officer);
         resignedOfficer.setResignedOn(new Date());
         officerItemList.add(resignedOfficer);
 
         return officerItemList;
     }
 
-    private OfficerItem createOfficerItem() {
+    private OfficerItem createOfficerItem(Officer officer) {
 
         OfficerItem officerItem = new OfficerItem();
         officerItem.setAddress(createAddress());
         officerItem.setAppointedOn(new Date());
         officerItem.setDateOfBirth(createDateOfBirth());
-        officerItem.setLinks(createLinks());
+        officerItem.setLinks(createLinks(officer));
         officerItem.setName("full name");
         officerItem.setAppointedOn(new Date());
         officerItem.setOfficerRole("director");
@@ -103,7 +99,7 @@ public class OfficerListServiceImpl implements DataService<Officer> {
         return officerItem;
     }
 
-    private Links createLinks() {
+    private Links createLinks(Officer officer) {
 
         Links links = new Links();
         links.setSelf("/officers/" + officer.getCompanyNumber());
