@@ -20,15 +20,16 @@ import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerItem;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class OfficerListServiceImpl implements DataService<Officer> {
-
+    private static final int SALT_LENGTH = 8;
+    private static final int ID_LENGTH = 10;
     private static final String OFFICER_DATA_NOT_FOUND = "officer data not found";
 
     @Autowired
-    private TestDataHelperService testDataHelperService;
+    private RandomService randomService;
     @Autowired
     private OfficerRepository officerRepository;
 
@@ -39,7 +40,7 @@ public class OfficerListServiceImpl implements DataService<Officer> {
 
         officer = new Officer();
 
-        officer.setId(testDataHelperService.getNewId());
+        officer.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         officer.setCompanyNumber(companyNumber);
         officer.setActiveCount(1);
         officer.setInactiveCount(0);

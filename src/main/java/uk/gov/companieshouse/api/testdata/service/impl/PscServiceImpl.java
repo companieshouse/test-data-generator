@@ -20,15 +20,16 @@ import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantCon
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControlItem;
 import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class PscServiceImpl implements DataService<PersonsWithSignificantControl> {
-
+    private static final int SALT_LENGTH = 8;
+    private static final int ID_LENGTH = 10;
     private static final String PSC_DATA_NOT_FOUND = "psc data not found";
 
     @Autowired
-    private TestDataHelperService testDataHelperService;
+    private RandomService randomService;
     @Autowired
     private PersonsWithSignificantControlRepository repository;
 
@@ -39,7 +40,7 @@ public class PscServiceImpl implements DataService<PersonsWithSignificantControl
 
         this.psc = new PersonsWithSignificantControl();
 
-        this.psc.setId(testDataHelperService.getNewId());
+        this.psc.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         this.psc.setCompanyNumber(companyNumber);
         this.psc.setActiveCount(1);
         this.psc.setCeasedCount(0);

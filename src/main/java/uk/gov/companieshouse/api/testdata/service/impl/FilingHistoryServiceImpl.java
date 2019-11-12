@@ -19,15 +19,14 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
+    private static final int SALT_LENGTH = 8;
+    private static final int ID_LENGTH = 10;
     private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
 
-    @Autowired
-    private TestDataHelperService testDataHelperService;
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
     @Autowired
@@ -40,7 +39,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
         filingHistory = new FilingHistory();
 
-        filingHistory.setId(testDataHelperService.getNewId());
+        filingHistory.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
 
         filingHistory.setCompanyNumber(companyNumber);
         filingHistory.setTotalCount(1);

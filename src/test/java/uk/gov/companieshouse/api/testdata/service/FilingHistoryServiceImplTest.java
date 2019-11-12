@@ -26,9 +26,6 @@ class FilingHistoryServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
 
     @Mock
-    private TestDataHelperService testDataHelperService;
-
-    @Mock
     private FilingHistoryRepository filingHistoryRepository;
     
     @Mock
@@ -39,7 +36,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
-        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
         FilingHistory createdHistory = this.filingHistoryService.create(COMPANY_NUMBER);
 
         assertEquals(TEST_ID, createdHistory.getId());
@@ -50,7 +47,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createDuplicateKeyException() {
-        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
         when(filingHistoryRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
         assertThrows(DataException.class, () ->
@@ -60,7 +57,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createMongoExceptionException() {
-        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
         when(filingHistoryRepository.save(any())).thenThrow(MongoException.class);
 
         assertThrows(DataException.class, () ->
