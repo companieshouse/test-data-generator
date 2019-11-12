@@ -26,7 +26,7 @@ class OfficerListServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
 
     @Mock
-    private TestDataHelperService testDataHelperService;
+    private RandomService randomService;
 
     @Mock
     private OfficerRepository officerRepository;
@@ -36,7 +36,7 @@ class OfficerListServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
-        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
         Officer createdOfficer = this.officerListService.create(COMPANY_NUMBER);
 
         assertEquals(TEST_ID, createdOfficer.getId());
@@ -49,7 +49,7 @@ class OfficerListServiceImplTest {
 
     @Test
     void createDuplicateKeyException() {
-        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
         when(officerRepository.save(any())).thenThrow(DuplicateKeyException.class);
 
         assertThrows(DataException.class, () ->
@@ -59,7 +59,7 @@ class OfficerListServiceImplTest {
 
     @Test
     void createMongoExceptionException() {
-        when(testDataHelperService.getNewId()).thenReturn(TEST_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
         when(officerRepository.save(any())).thenThrow(MongoException.class);
 
         assertThrows(DataException.class, () ->

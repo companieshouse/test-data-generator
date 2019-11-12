@@ -1,19 +1,20 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.security.SecureRandom;
 import java.util.Base64;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import org.springframework.stereotype.Service;
+
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class RandomServiceImpl implements RandomService {
 
     private static final String SALT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    private static final Random rnd = new Random();
+    private static final SecureRandom rnd = new SecureRandom();
 
     @Override
     public Long getRandomNumber(int digits) {
