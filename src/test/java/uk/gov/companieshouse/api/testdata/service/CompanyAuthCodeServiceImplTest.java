@@ -42,7 +42,7 @@ class CompanyAuthCodeServiceImplTest {
     private CompanyAuthCodeServiceImpl companyAuthCodeServiceImpl;
 
     @Test
-    void createn() throws DataException {
+    void create() throws DataException {
         when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         CompanyAuthCode savedAuthCode = new CompanyAuthCode();
         when(repository.save(any())).thenReturn(savedAuthCode);
