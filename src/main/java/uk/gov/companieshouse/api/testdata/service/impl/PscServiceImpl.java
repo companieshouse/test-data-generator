@@ -33,21 +33,19 @@ public class PscServiceImpl implements DataService<PersonsWithSignificantControl
     @Autowired
     private PersonsWithSignificantControlRepository repository;
 
-    private PersonsWithSignificantControl psc;
-
     @Override
     public PersonsWithSignificantControl create(String companyNumber) throws DataException {
 
-        this.psc = new PersonsWithSignificantControl();
+        PersonsWithSignificantControl psc = new PersonsWithSignificantControl();
 
-        this.psc.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
-        this.psc.setCompanyNumber(companyNumber);
-        this.psc.setActiveCount(1);
-        this.psc.setCeasedCount(0);
-        this.psc.setItems(createItems());
+        psc.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+        psc.setCompanyNumber(companyNumber);
+        psc.setActiveCount(1);
+        psc.setCeasedCount(0);
+        psc.setItems(createItems(psc));
 
         try {
-            repository.save(this.psc);
+            return repository.save(psc);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -55,8 +53,6 @@ public class PscServiceImpl implements DataService<PersonsWithSignificantControl
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
-
-        return this.psc;
     }
 
     @Override
@@ -74,14 +70,14 @@ public class PscServiceImpl implements DataService<PersonsWithSignificantControl
         }
     }
 
-    private List<PersonsWithSignificantControlItem> createItems() {
+    private List<PersonsWithSignificantControlItem> createItems(PersonsWithSignificantControl psc) {
 
         List<PersonsWithSignificantControlItem> pscItemList = new ArrayList<>();
         PersonsWithSignificantControlItem pscItem = new PersonsWithSignificantControlItem();
 
         pscItem.setAddress(createAddress());
         pscItem.setDateOfBirth(createDOB());
-        pscItem.setLinks(createLinks());
+        pscItem.setLinks(createLinks(psc));
         pscItem.setName("full name");
         String[] control = new String[1];
         control[0] = "significant-influence-or-control";
@@ -93,7 +89,7 @@ public class PscServiceImpl implements DataService<PersonsWithSignificantControl
         return pscItemList;
     }
 
-    private Links createLinks() {
+    private Links createLinks(PersonsWithSignificantControl psc) {
 
         Links links = new Links();
         links.setSelf("/company/" + psc.getCompanyNumber() + "/persons-with-significant-control/legal-person/" + psc.getId());

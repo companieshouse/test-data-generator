@@ -38,7 +38,7 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
         companyAuthCode.setIsActive(true);
 
         try {
-            repository.save(companyAuthCode);
+            return repository.save(companyAuthCode);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -46,8 +46,6 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
-
-        return companyAuthCode;
     }
 
     @Override

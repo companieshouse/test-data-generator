@@ -1,27 +1,31 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.CompanyAuthCodeServiceImpl;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoException;
+
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanyAuthCodeServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyAuthCodeServiceImplTest {
@@ -30,60 +34,87 @@ class CompanyAuthCodeServiceImplTest {
     private static final Long COMPANY_AUTH_CODE = 123456L;
 
     @Mock
-    private CompanyAuthCodeRepository companyAuthCodeRepository;
+    private CompanyAuthCodeRepository repository;
     @Mock
-    RandomService randomService;
+    private RandomService randomService;
 
     @InjectMocks
     private CompanyAuthCodeServiceImpl companyAuthCodeServiceImpl;
 
     @Test
-    void createNoException() throws DataException {
+    void create() throws DataException {
         when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
-        CompanyAuthCode createdAuthCode = this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER);
+        CompanyAuthCode savedAuthCode = new CompanyAuthCode();
+        when(repository.save(any())).thenReturn(savedAuthCode);
+        
+        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER);
 
-        assertNotNull(createdAuthCode);
-        assertEquals(String.valueOf(COMPANY_AUTH_CODE), createdAuthCode.getAuthCode());
-        assertTrue(createdAuthCode.getIsActive());
-        assertEquals(COMPANY_NUMBER, createdAuthCode.getId());
+        assertEquals(savedAuthCode, returnedAuthCode);
+        
+        ArgumentCaptor<CompanyAuthCode> authCodeCaptor = ArgumentCaptor.forClass(CompanyAuthCode.class);
+        verify(repository).save(authCodeCaptor.capture());
+        CompanyAuthCode authCode = authCodeCaptor.getValue();
+
+        assertNotNull(authCode);
+        assertEquals(String.valueOf(COMPANY_AUTH_CODE), authCode.getAuthCode());
+        assertTrue(authCode.getIsActive());
+        assertEquals(COMPANY_NUMBER, authCode.getId());
+        assertNotNull(authCode.getValidFrom());
     }
 
     @Test
     void createDuplicateKeyException() {
         when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
-        when(companyAuthCodeRepository.save(any())).thenThrow(DuplicateKeyException.class);
+        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
 
-        assertThrows(DataException.class, () ->
+        DataException exception = assertThrows(DataException.class, () ->
             this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
         );
+        assertEquals("duplicate key", exception.getMessage());
     }
 
     @Test
     void createMongoExceptionException() {
         when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
-        when(companyAuthCodeRepository.save(any())).thenThrow(MongoException.class);
+        when(repository.save(any())).thenThrow(MongoException.class);
 
-        assertThrows(DataException.class, () ->
+        DataException exception = assertThrows(DataException.class, () ->
             this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
         );
+        assertEquals("failed to insert", exception.getMessage());
+    }
+    
+    @Test
+    void delete() throws Exception {
+        CompanyAuthCode authCode = new CompanyAuthCode();
+        when(repository.findById(COMPANY_NUMBER))
+                .thenReturn(Optional.of(authCode));
+        
+        this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER);
+
+        verify(repository).delete(authCode);
     }
 
     @Test
     void deleteNoDataException() {
-        when(companyAuthCodeRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
-        assertThrows(NoDataFoundException.class, () ->
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
             this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
         );
+        assertEquals("company auth data not found", exception.getMessage());
     }
 
     @Test
     void deleteMongoException() {
-        when(companyAuthCodeRepository.findById(COMPANY_NUMBER))
-                .thenReturn(Optional.of(new CompanyAuthCode()));
-        doThrow(MongoException.class).when(companyAuthCodeRepository).delete(any());
-        assertThrows(DataException.class, () ->
+        CompanyAuthCode authCode = new CompanyAuthCode();
+        when(repository.findById(COMPANY_NUMBER))
+                .thenReturn(Optional.of(authCode));
+        doThrow(MongoException.class).when(repository).delete(authCode);
+        
+        DataException exception = assertThrows(DataException.class, () ->
             this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
         );
+        assertEquals("failed to delete", exception.getMessage());
     }
 
 }

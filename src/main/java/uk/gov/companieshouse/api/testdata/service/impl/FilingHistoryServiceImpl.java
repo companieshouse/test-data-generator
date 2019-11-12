@@ -32,21 +32,19 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
     @Autowired
     private RandomService randomService;
 
-    private FilingHistory filingHistory;
-
     @Override
     public FilingHistory create(String companyNumber) throws DataException {
 
-        filingHistory = new FilingHistory();
+        FilingHistory filingHistory = new FilingHistory();
 
         filingHistory.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
 
         filingHistory.setCompanyNumber(companyNumber);
         filingHistory.setTotalCount(1);
-        filingHistory.setFilingHistoryItems(createItems());
+        filingHistory.setFilingHistoryItems(createItems(filingHistory));
 
         try {
-            filingHistoryRepository.save(filingHistory);
+            return filingHistoryRepository.save(filingHistory);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -54,8 +52,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
-
-        return filingHistory;
     }
 
     @Override
@@ -74,7 +70,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         }
     }
 
-    private List<FilingHistoryItem> createItems() {
+    private List<FilingHistoryItem> createItems(FilingHistory filingHistory) {
 
         List<FilingHistoryItem> filingHistoryItems = new ArrayList<>();
         FilingHistoryItem filingHistoryItem = new FilingHistoryItem();
@@ -83,14 +79,14 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         filingHistoryItem.setDate(new Date());
         filingHistoryItem.setDescription("incorporation-company");
         filingHistoryItem.setTransactionId(getNewTransactionId());
-        filingHistoryItem.setLinks(createLinks());
+        filingHistoryItem.setLinks(createLinks(filingHistory));
 
         filingHistoryItems.add(filingHistoryItem);
 
         return filingHistoryItems;
     }
 
-    private Links createLinks() {
+    private Links createLinks(FilingHistory filingHistory) {
 
         Links links = new Links();
         links.setSelf("/company/" + filingHistory.getCompanyNumber() + "/filing-history/" + filingHistory.getId());

@@ -40,7 +40,7 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         company.setLinks(createLinks(company));
 
         try {
-            repository.save(company);
+            return repository.save(company);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -48,8 +48,6 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
-
-        return company;
     }
 
     @Override
