@@ -21,32 +21,24 @@ public class TestDataServiceImpl implements TestDataService {
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
-    private DataService<CompanyProfile> companyProfileService;
-    private DataService<FilingHistory> filingHistoryService;
-    private DataService<Officer> officerListService;
-    private DataService<PersonsWithSignificantControl> pscService;
-    private DataService<CompanyAuthCode> companyAuthCodeService;
-    private DataService<Appointment> appointmentService;
-    private RandomService randomService;
-
     @Autowired
-    public TestDataServiceImpl(DataService<CompanyProfile> companyProfileService,
-                               DataService<FilingHistory> filingHistoryService, DataService<Officer> officerListService,
-                               DataService<PersonsWithSignificantControl> pscService,
-                               DataService<CompanyAuthCode> companyAuthCodeService,
-                               DataService<Appointment> appointmentService, RandomService randomService) {
-        this.companyProfileService = companyProfileService;
-        this.filingHistoryService = filingHistoryService;
-        this.officerListService = officerListService;
-        this.pscService = pscService;
-        this.companyAuthCodeService = companyAuthCodeService;
-        this.appointmentService = appointmentService;
-        this.randomService = randomService;
-    }
+    private DataService<CompanyProfile> companyProfileService;
+    @Autowired
+    private DataService<FilingHistory> filingHistoryService;
+    @Autowired
+    private DataService<Officer> officerListService;
+    @Autowired
+    private DataService<PersonsWithSignificantControl> pscService;
+    @Autowired
+    private DataService<CompanyAuthCode> companyAuthCodeService;
+    @Autowired
+    private DataService<Appointment> appointmentService;
+    @Autowired
+    private RandomService randomService;
 
     @Override
     public CompanyData createCompanyData() throws DataException {
-        String companyNumber = randomService.getRandomInteger(COMPANY_NUMBER_LENGTH);
+        String companyNumber = String.valueOf(randomService.getRandomNumber(COMPANY_NUMBER_LENGTH));
 
         this.companyProfileService.create(companyNumber);
         this.filingHistoryService.create(companyNumber);

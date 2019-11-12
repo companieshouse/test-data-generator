@@ -23,21 +23,16 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.TestDataHelperService;
 
 @Service
-public class PSCServiceImpl implements DataService<PersonsWithSignificantControl> {
+public class PscServiceImpl implements DataService<PersonsWithSignificantControl> {
 
     private static final String PSC_DATA_NOT_FOUND = "psc data not found";
 
+    @Autowired
     private TestDataHelperService testDataHelperService;
+    @Autowired
     private PersonsWithSignificantControlRepository repository;
 
     private PersonsWithSignificantControl psc;
-
-    @Autowired
-    public PSCServiceImpl(TestDataHelperService testDataHelperService,
-                          PersonsWithSignificantControlRepository repository) {
-        this.testDataHelperService = testDataHelperService;
-        this.repository = repository;
-    }
 
     @Override
     public PersonsWithSignificantControl create(String companyNumber) throws DataException {

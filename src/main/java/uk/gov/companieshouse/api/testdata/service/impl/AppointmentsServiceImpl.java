@@ -19,14 +19,10 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private static final int ID_LENGTH = 10;
     private static final String APPOINTMENT_DATA_NOT_FOUND = "appointment data not found";
 
-    private RandomService randomService;
-    private AppointmentsRepository repository;
-
     @Autowired
-    public AppointmentsServiceImpl(RandomService randomService, AppointmentsRepository repository) {
-        this.randomService = randomService;
-        this.repository = repository;
-    }
+    private RandomService randomService;
+    @Autowired
+    private AppointmentsRepository repository;
 
     @Override
     public Appointment create(String companyNumber) throws DataException {

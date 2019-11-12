@@ -22,14 +22,10 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
     private static final String COMPANY_AUTH_DATA_NOT_FOUND = "company auth data not found";
     private static final int AUTH_CODE_LENGTH = 6;
 
-    private RandomService randomService;
-    private CompanyAuthCodeRepository repository;
-
     @Autowired
-    public CompanyAuthCodeServiceImpl(RandomService randomService, CompanyAuthCodeRepository repository) {
-        this.randomService = randomService;
-        this.repository = repository;
-    }
+    private RandomService randomService;
+    @Autowired
+    private CompanyAuthCodeRepository repository;
 
     @Override
     public CompanyAuthCode create(String companyNumber) throws DataException {
@@ -38,7 +34,7 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
 
         companyAuthCode.setId(companyNumber);
         companyAuthCode.setValidFrom(new Date());
-        companyAuthCode.setAuthCode(this.randomService.getRandomInteger(AUTH_CODE_LENGTH));
+        companyAuthCode.setAuthCode(String.valueOf(randomService.getRandomNumber(AUTH_CODE_LENGTH)));
         companyAuthCode.setIsActive(true);
 
         try {

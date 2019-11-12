@@ -14,8 +14,20 @@ class RandomServiceImplTest {
 
     @Test
     void getRandomInteger() {
-        String randomInt = this.randomService.getRandomInteger(6);
-        assertEquals(6, randomInt.length());
+        final int digits = 6;
+        
+        Long random = randomService.getRandomNumber(digits);
+        assertNotNull(random);
+        assertEquals(digits, String.valueOf(random).length());
+    }
+    
+    @Test
+    void getRandomString() {
+        final int digits = 6;
+        
+        String random = randomService.getRandomString(digits);
+        assertNotNull(random);
+        assertEquals(digits, random.length());
     }
 
     @Test

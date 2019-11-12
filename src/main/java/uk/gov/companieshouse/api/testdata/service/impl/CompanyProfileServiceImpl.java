@@ -22,12 +22,8 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     private static final String COMPANY_PROFILE_DATA_NOT_FOUND = "company profile data not found";
     private static final String LINK_STEM = "/company/";
 
-    private CompanyProfileRepository repository;
-
     @Autowired
-    public CompanyProfileServiceImpl(CompanyProfileRepository repository) {
-        this.repository = repository;
-    }
+    private CompanyProfileRepository repository;
 
     @Override
     public CompanyProfile create(String companyNumber) throws DataException {

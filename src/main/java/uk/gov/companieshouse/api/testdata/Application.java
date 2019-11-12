@@ -8,9 +8,13 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 @SpringBootApplication
 @EnableAutoConfiguration(exclude=MongoAutoConfiguration.class)
 public class Application {
+    
+    private Application() {
+        // private empty constructor
+    }
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(Application.class, (String[]) null);
     }
 
 }
