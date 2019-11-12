@@ -14,8 +14,7 @@ public class Application {
     }
 
     public static void main(String[] args) {
-        String[] emptyArgs = new String[0];
-        SpringApplication.run(Application.class, emptyArgs);
+        SpringApplication.run(Application.class);
     }
 
 }
