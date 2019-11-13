@@ -59,7 +59,6 @@ class CompanyAuthCodeServiceImplTest {
         assertEquals(String.valueOf(COMPANY_AUTH_CODE), authCode.getAuthCode());
         assertTrue(authCode.getIsActive());
         assertEquals(COMPANY_NUMBER, authCode.getId());
-        assertNotNull(authCode.getValidFrom());
     }
 
     @Test
