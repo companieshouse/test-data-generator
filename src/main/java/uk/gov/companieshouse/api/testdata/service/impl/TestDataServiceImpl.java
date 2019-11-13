@@ -38,7 +38,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public CompanyData createCompanyData() throws DataException {
-        String companyNumber = String.valueOf(randomService.getRandomNumber(COMPANY_NUMBER_LENGTH));
+        String companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
 
         this.companyProfileService.create(companyNumber);
         this.filingHistoryService.create(companyNumber);

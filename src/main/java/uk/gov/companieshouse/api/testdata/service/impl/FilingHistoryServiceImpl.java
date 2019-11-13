@@ -95,7 +95,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
     }
 
     private String getNewTransactionId() {
-        return randomService.getRandomString(18);
+        return randomService.getString(18);
     }
 
 }

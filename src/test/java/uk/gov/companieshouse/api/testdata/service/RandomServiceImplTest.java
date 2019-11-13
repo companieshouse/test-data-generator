@@ -16,7 +16,7 @@ class RandomServiceImplTest {
     void getRandomInteger() {
         final int digits = 6;
         
-        Long random = randomService.getRandomNumber(digits);
+        Long random = randomService.getNumber(digits);
         assertNotNull(random);
         assertEquals(digits, String.valueOf(random).length());
     }
@@ -25,7 +25,7 @@ class RandomServiceImplTest {
     void getRandomString() {
         final int digits = 6;
         
-        String random = randomService.getRandomString(digits);
+        String random = randomService.getString(digits);
         assertNotNull(random);
         assertEquals(digits, random.length());
     }
@@ -37,5 +37,11 @@ class RandomServiceImplTest {
 
         String randomDecodedWithSalt = new String(Base64.getUrlDecoder().decode(randomEncodedWithSalt));
         assertEquals(10, randomDecodedWithSalt.length());
+    }
+    
+    @Test
+    void getEtag() {
+        String etag = this.randomService.getEtag();
+        assertNotNull(etag);
     }
 }

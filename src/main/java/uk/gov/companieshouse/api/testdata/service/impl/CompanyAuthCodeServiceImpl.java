@@ -31,7 +31,7 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
 
         companyAuthCode.setId(companyNumber);
-        companyAuthCode.setAuthCode(String.valueOf(randomService.getRandomNumber(AUTH_CODE_LENGTH)));
+        companyAuthCode.setAuthCode(String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH)));
         companyAuthCode.setIsActive(true);
 
         try {

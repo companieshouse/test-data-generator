@@ -43,7 +43,7 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void create() throws DataException {
-        when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+        when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         CompanyAuthCode savedAuthCode = new CompanyAuthCode();
         when(repository.save(any())).thenReturn(savedAuthCode);
         
@@ -63,7 +63,7 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createDuplicateKeyException() {
-        when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+        when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         when(repository.save(any())).thenThrow(DuplicateKeyException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
@@ -74,7 +74,7 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createMongoExceptionException() {
-        when(this.randomService.getRandomNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+        when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
