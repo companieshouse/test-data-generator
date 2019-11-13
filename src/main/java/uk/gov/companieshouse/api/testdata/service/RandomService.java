@@ -33,4 +33,13 @@ public interface RandomService {
      * @return A random etag
      */
     String getEtag();
+
+    /**
+     * Appends a random salt of {@code saltLength} to {@code baseString}
+     * and base-64 encodes the result
+     * @param baseString The String to be salted and encoded
+     * @param saltLength The length of the salt String
+     * @return A base-64-encoded string
+     */
+    String addSaltAndEncode(String baseString, int saltLength);
 }
