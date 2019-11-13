@@ -38,4 +38,10 @@ class RandomServiceImplTest {
         String randomDecodedWithSalt = new String(Base64.getUrlDecoder().decode(randomEncodedWithSalt));
         assertEquals(10, randomDecodedWithSalt.length());
     }
+    
+    @Test
+    void getEtag() {
+        String etag = this.randomService.getEtag();
+        assertNotNull(etag);
+    }
 }

@@ -6,4 +6,10 @@ public interface RandomService {
     String getRandomString(int digits);
 
     String getEncodedIdWithSalt(int idLength, int saltLength);
+    
+    /**
+     * Generate a random etag
+     * @return A random etag
+     */
+    String getEtag();
 }

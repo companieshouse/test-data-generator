@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.GenerateEtagUtil;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
@@ -39,5 +40,10 @@ public class RandomServiceImpl implements RandomService {
         String salt = getRandomString(saltLength);
         String idSalt = id + salt;
         return Base64.getUrlEncoder().encodeToString(idSalt.getBytes(UTF_8));
+    }
+    
+    @Override
+    public String getEtag() {
+        return GenerateEtagUtil.generateEtag();
     }
 }
