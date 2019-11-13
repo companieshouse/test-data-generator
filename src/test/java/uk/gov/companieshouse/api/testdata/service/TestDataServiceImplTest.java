@@ -65,6 +65,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(COMPANY_NUMBER);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals("/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 

@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +31,6 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
 
         companyAuthCode.setId(companyNumber);
-        companyAuthCode.setValidFrom(new Date());
         companyAuthCode.setAuthCode(String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH)));
         companyAuthCode.setIsActive(true);
 
