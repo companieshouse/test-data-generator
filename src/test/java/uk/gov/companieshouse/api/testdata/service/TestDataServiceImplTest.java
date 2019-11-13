@@ -53,7 +53,7 @@ class TestDataServiceImplTest {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
 
-        when(this.randomService.getRandomNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
         CompanyData createdCompany = this.testDataService.createCompanyData();
 

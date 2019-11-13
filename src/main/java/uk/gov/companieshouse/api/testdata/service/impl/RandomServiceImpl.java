@@ -18,14 +18,14 @@ public class RandomServiceImpl implements RandomService {
     private static final SecureRandom rnd = new SecureRandom();
 
     @Override
-    public Long getRandomNumber(int digits) {
+    public Long getNumber(int digits) {
         long min = (long) Math.pow(10, digits - (double) 1);
 
         return ThreadLocalRandom.current().nextLong(min, min * 10);
     }
     
     @Override
-    public String getRandomString(int digits) {
+    public String getString(int digits) {
         StringBuilder salt = new StringBuilder();
         while (salt.length() < digits) {
             int index = rnd.nextInt(SALT_CHARS.length());
@@ -36,8 +36,8 @@ public class RandomServiceImpl implements RandomService {
 
     @Override
     public String getEncodedIdWithSalt(int idLength, int saltLength) {
-        String id = String.valueOf(getRandomNumber(idLength));
-        String salt = getRandomString(saltLength);
+        String id = String.valueOf(getNumber(idLength));
+        String salt = getString(saltLength);
         String idSalt = id + salt;
         return Base64.getUrlEncoder().encodeToString(idSalt.getBytes(UTF_8));
     }

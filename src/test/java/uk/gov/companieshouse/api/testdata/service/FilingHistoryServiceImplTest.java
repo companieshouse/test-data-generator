@@ -45,7 +45,7 @@ class FilingHistoryServiceImplTest {
     void create() throws DataException {
         final String transactionId = "TRANSACTION_ID";
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
-        when(randomService.getRandomString(18)).thenReturn(transactionId);
+        when(randomService.getString(18)).thenReturn(transactionId);
         
         FilingHistory savedHistory = new FilingHistory();
         when(repository.save(Mockito.any())).thenReturn(savedHistory);
