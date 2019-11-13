@@ -44,4 +44,15 @@ class RandomServiceImplTest {
         String etag = this.randomService.getEtag();
         assertNotNull(etag);
     }
+
+    @Test
+    void addSaltAndEncode() {
+        final String baseString = "abcde";
+
+        String salted = this.randomService.addSaltAndEncode(baseString, 5);
+        assertNotNull(salted);
+
+        String saltedDecodedWithSalt = new String(Base64.getUrlDecoder().decode(salted));
+        assertEquals(10, saltedDecodedWithSalt.length());
+    }
 }

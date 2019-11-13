@@ -46,4 +46,11 @@ public class RandomServiceImpl implements RandomService {
     public String getEtag() {
         return GenerateEtagUtil.generateEtag();
     }
+
+    @Override
+    public String addSaltAndEncode(String baseString, int saltLength) {
+        String salt = getString(saltLength);
+        String baseSalt = baseString + salt;
+        return Base64.getUrlEncoder().encodeToString(baseSalt.getBytes(UTF_8));
+    }
 }
