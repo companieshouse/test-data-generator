@@ -9,8 +9,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentData;
-import uk.gov.companieshouse.api.testdata.model.entity.DateObject;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -42,24 +40,22 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         LocalDate dateNow = LocalDate.now();
 
         appointment.setId(appointmentId);
-        appointment.setCreated(new DateObject(dateTimeNow));
+        appointment.setCreated(dateTimeNow);
 
         String internalId = this.generateInternalId();
         String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
         appointment.setInternalId(internalId);
         appointment.setAppointmentId(appointmentId);
 
-        AppointmentData appointmentData = new AppointmentData();
-
-        appointmentData.setNationality("British");
-        appointmentData.setOccupation("Director");
-        appointmentData.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-        appointmentData.setCountryOfResidence("Wales");
-        appointmentData.setUpdatedAt(dateTimeNow);
-        appointmentData.setForename("Test");
-        appointmentData.setAppointedOn(dateNow);
-        appointmentData.setOfficerRole("director");
-        appointmentData.setEtag(randomService.getEtag());
+        appointment.setNationality("British");
+        appointment.setOccupation("Director");
+        appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
+        appointment.setCountryOfResidence("Wales");
+        appointment.setUpdatedAt(dateTimeNow);
+        appointment.setForename("Test");
+        appointment.setAppointedOn(dateNow);
+        appointment.setOfficerRole("director");
+        appointment.setEtag(randomService.getEtag());
 
         Address serviceAddress = new Address();
         serviceAddress.setCountry("United Kingdom");
@@ -68,8 +64,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         serviceAddress.setAddressLine2("Crownway");
         serviceAddress.setLocality("Cardiff");
 
-        appointmentData.setServiceAddress(serviceAddress);
-        appointmentData.setCompanyNumber(companyNumber);
+        appointment.setServiceAddress(serviceAddress);
+        appointment.setDataCompanyNumber(companyNumber);
 
         Links links = new Links();
         links.setSelf("/company/" + companyNumber + "/appointments/" + officerId);
@@ -77,18 +73,16 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         officer.setSelf("/officers/" + officerId);
         officer.setAppointments("/officers/" + officerId + "/appointments");
         links.setOfficer(officer);
-        appointmentData.setLinks(links);
+        appointment.setLinks(links);
 
-        appointmentData.setSurname("DIRECTOR");
-        appointmentData.setDateOfBirth(dateNow);
-
-        appointment.setData(appointmentData);
+        appointment.setSurname("DIRECTOR");
+        appointment.setDateOfBirth(dateNow);
 
         appointment.setCompanyName("Company " + companyNumber);
         appointment.setCompanyStatus("active");
         appointment.setOfficerId(officerId);
         appointment.setCompanyNumber(companyNumber);
-        appointment.setUpdated(new DateObject(dateTimeNow));
+        appointment.setUpdated(dateTimeNow);
 
         try {
             return repository.save(appointment);

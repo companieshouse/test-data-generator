@@ -23,7 +23,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.service.impl.AppointmentsServiceImpl;
@@ -66,44 +65,42 @@ public class AppointmentsServiceImplTest {
         Appointment appointment = aptCaptor.getValue();
         assertNotNull(appointment);
         assertEquals(ENCODED_VALUE, appointment.getId());
-        assertEquals(LocalDate.now(), appointment.getCreated().getAt().toLocalDate());
+        assertEquals(LocalDate.now(), appointment.getCreated().toLocalDate());
         assertEquals("8" + GENERATED_INTERNAL_ID, appointment.getInternalId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());
         assertEquals(ENCODED_INTERNAL_ID, appointment.getOfficerId());
         assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
-        assertEquals(LocalDate.now(), appointment.getUpdated().getAt().toLocalDate());
+        assertEquals(LocalDate.now(), appointment.getUpdated().toLocalDate());
 
-        AppointmentData data = appointment.getData();
+        assertEquals("British", appointment.getNationality());
+        assertEquals("Director", appointment.getOccupation());
+        assertTrue(appointment.isServiceAddressIsSameAsRegisteredOfficeAddress());
+        assertEquals("Wales", appointment.getCountryOfResidence());
+        assertEquals(LocalDate.now(), appointment.getUpdatedAt().toLocalDate());
+        assertEquals("Test", appointment.getForename());
+        assertEquals(LocalDate.now(), appointment.getAppointedOn());
+        assertEquals("director", appointment.getOfficerRole());
+        assertEquals(ETAG, appointment.getEtag());
 
-        assertEquals("British", data.getNationality());
-        assertEquals("Director", data.getOccupation());
-        assertTrue(data.isServiceAddressIsSameAsRegisteredOfficeAddress());
-        assertEquals("Wales", data.getCountryOfResidence());
-        assertEquals(LocalDate.now(), data.getUpdatedAt().toLocalDate());
-        assertEquals("Test", data.getForename());
-        assertEquals(LocalDate.now(), data.getAppointedOn());
-        assertEquals("director", data.getOfficerRole());
-        assertEquals(ETAG, data.getEtag());
-
-        Address serviceAddress = data.getServiceAddress();
+        Address serviceAddress = appointment.getServiceAddress();
         assertEquals("United Kingdom", serviceAddress.getCountry());
         assertEquals("CF14 3UZ", serviceAddress.getPostalCode());
         assertEquals("Companies House", serviceAddress.getAddressLine1());
         assertEquals("Crownway", serviceAddress.getAddressLine2());
         assertEquals("Cardiff", serviceAddress.getLocality());
 
-        assertEquals(COMPANY_NUMBER, data.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
 
-        Links links = data.getLinks();
+        Links links = appointment.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_INTERNAL_ID, links.getSelf());
         Links officerLink = links.getOfficer();
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, officerLink.getSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", officerLink.getAppointments());
 
-        assertEquals("DIRECTOR", data.getSurname());
-        assertEquals(LocalDate.now(), data.getDateOfBirth());
+        assertEquals("DIRECTOR", appointment.getSurname());
+        assertEquals(LocalDate.now(), appointment.getDateOfBirth());
     }
 
     @Test
