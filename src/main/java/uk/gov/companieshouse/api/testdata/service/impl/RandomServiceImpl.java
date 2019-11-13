@@ -37,9 +37,7 @@ public class RandomServiceImpl implements RandomService {
     @Override
     public String getEncodedIdWithSalt(int idLength, int saltLength) {
         String id = String.valueOf(getNumber(idLength));
-        String salt = getString(saltLength);
-        String idSalt = id + salt;
-        return Base64.getUrlEncoder().encodeToString(idSalt.getBytes(UTF_8));
+        return addSaltAndEncode(id, saltLength);
     }
     
     @Override
