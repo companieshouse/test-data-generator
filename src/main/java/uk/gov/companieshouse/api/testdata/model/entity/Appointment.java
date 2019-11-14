@@ -4,8 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Document(collection = "appointments")
 public class Appointment {
@@ -14,7 +13,7 @@ public class Appointment {
     private String id;
 
     @Field("created.at")
-    private LocalDateTime created;
+    private Instant created;
 
     @Field("internal_id")
     private String internalId;
@@ -35,13 +34,13 @@ public class Appointment {
     private String countryOfResidence;
 
     @Field("data.updated_at")
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @Field("data.forename")
     private String forename;
 
     @Field("data.appointed_on")
-    private LocalDate appointedOn;
+    private Instant appointedOn;
 
     @Field("data.officer_role")
     private String officerRole;
@@ -62,7 +61,7 @@ public class Appointment {
     private String surname;
 
     @Field("data.date_of_birth")
-    private LocalDate dateOfBirth;
+    private Instant dateOfBirth;
 
     @Field("company_name")
     private String companyName;
@@ -77,7 +76,7 @@ public class Appointment {
     private String companyNumber;
 
     @Field("updated.at")
-    private LocalDateTime updated;
+    private Instant updated;
 
     public String getId() {
         return id;
@@ -87,11 +86,11 @@ public class Appointment {
         this.id = id;
     }
 
-    public LocalDateTime getCreated() {
+    public Instant getCreated() {
         return created;
     }
 
-    public void setCreated(LocalDateTime created) {
+    public void setCreated(Instant created) {
         this.created = created;
     }
 
@@ -143,11 +142,11 @@ public class Appointment {
         this.countryOfResidence = countryOfResidence;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public Instant getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
     }
 
@@ -159,11 +158,11 @@ public class Appointment {
         this.forename = forename;
     }
 
-    public LocalDate getAppointedOn() {
+    public Instant getAppointedOn() {
         return appointedOn;
     }
 
-    public void setAppointedOn(LocalDate appointedOn) {
+    public void setAppointedOn(Instant appointedOn) {
         this.appointedOn = appointedOn;
     }
 
@@ -215,11 +214,11 @@ public class Appointment {
         this.surname = surname;
     }
 
-    public LocalDate getDateOfBirth() {
+    public Instant getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(LocalDate dateOfBirth) {
+    public void setDateOfBirth(Instant dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
@@ -255,11 +254,11 @@ public class Appointment {
         this.companyNumber = companyNumber;
     }
 
-    public LocalDateTime getUpdated() {
+    public Instant getUpdated() {
         return updated;
     }
 
-    public void setUpdated(LocalDateTime updated) {
+    public void setUpdated(Instant updated) {
         this.updated = updated;
     }
 }

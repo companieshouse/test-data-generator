@@ -14,8 +14,9 @@ import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Service
 public class AppointmentsServiceImpl implements DataService<Appointment> {
@@ -36,8 +37,12 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         Appointment appointment = new Appointment();
 
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
-        LocalDateTime dateTimeNow = LocalDateTime.now();
-        LocalDate dateNow = LocalDate.now();
+
+        LocalDate officerDob = LocalDate.of(1990, 3, 6);
+
+        Instant dateTimeNow = Instant.now();
+        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dob = officerDob.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
         appointment.setId(appointmentId);
         appointment.setCreated(dateTimeNow);
@@ -76,7 +81,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setLinks(links);
 
         appointment.setSurname("DIRECTOR");
-        appointment.setDateOfBirth(dateNow);
+        appointment.setDateOfBirth(dob);
 
         appointment.setCompanyName("Company " + companyNumber);
         appointment.setCompanyStatus("active");
