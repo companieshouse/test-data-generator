@@ -22,6 +22,7 @@ import com.mongodb.MongoClientURI;
 
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
@@ -66,6 +67,11 @@ public class MongoConfig {
     @Bean
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
+    }
+    
+    @Bean
+    public CompanyMetricsRepository companyMetricsRepository() {
+        return getMongoRepositoryBean(CompanyMetricsRepository.class, "company_metrics");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
