@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
@@ -41,6 +42,8 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<Appointment> appointmentService;
     @Mock
+    private DataService<CompanyMetrics> metricsService;
+    @Mock
     private RandomService randomService;
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -63,6 +66,7 @@ class TestDataServiceImplTest {
         verify(pscService, times(1)).create(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).create(COMPANY_NUMBER);
         verify(appointmentService, times(1)).create(COMPANY_NUMBER);
+        verify(metricsService, times(1)).create(COMPANY_NUMBER);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
         assertEquals("/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());

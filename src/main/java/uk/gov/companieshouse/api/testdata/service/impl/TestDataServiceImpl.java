@@ -8,6 +8,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
@@ -34,6 +35,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<Appointment> appointmentService;
     @Autowired
+    private DataService<CompanyMetrics> companyMetricsService;
+    @Autowired
     private RandomService randomService;
 
     @Override
@@ -46,6 +49,7 @@ public class TestDataServiceImpl implements TestDataService {
         this.pscService.create(companyNumber);
         this.appointmentService.create(companyNumber);
         CompanyAuthCode authCode = this.companyAuthCodeService.create(companyNumber);
+        this.companyMetricsService.create(companyNumber);
 
         return new CompanyData(companyNumber, authCode.getAuthCode());
     }
