@@ -75,7 +75,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         Links links = new Links();
         links.setSelf("/company/" + companyNumber + "/appointments/" + officerId);
         links.setOfficerSelf("/officers/" + officerId);
-        links.setAppointments("/officers/" + officerId + "/appointments");
+        links.setOfficerAppointments("/officers/" + officerId + "/appointments");
         appointment.setLinks(links);
 
         appointment.setSurname("DIRECTOR");

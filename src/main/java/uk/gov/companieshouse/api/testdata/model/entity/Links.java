@@ -15,8 +15,8 @@ public class Links {
     private String self;
     @Field("officer.self")
     private String officerSelf;
-    @Field("officer.appointments")
-    private String appointments;
+    @Field("officer.officerAppointments")
+    private String officerAppointments;
 
     public String getFilingHistory() {
         return filingHistory;
@@ -58,11 +58,11 @@ public class Links {
         this.officerSelf = officerSelf;
     }
 
-    public String getAppointments() {
-        return appointments;
+    public String getOfficerAppointments() {
+        return officerAppointments;
     }
 
-    public void setAppointments(String appointments) {
-        this.appointments = appointments;
+    public void setOfficerAppointments(String officerAppointments) {
+        this.officerAppointments = officerAppointments;
     }
 }
