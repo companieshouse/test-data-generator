@@ -6,8 +6,14 @@ import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.core.convert.DbRefResolver;
+import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
+import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
+import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
+import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 
@@ -63,8 +69,20 @@ public class MongoConfig {
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
+        SimpleMongoDbFactory simpleMongoDbFactory = new SimpleMongoDbFactory(new MongoClient(new MongoClientURI(this.mongoProperties.getUri())), database);
+        MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(simpleMongoDbFactory);
         return new MongoTemplate(
-                new SimpleMongoDbFactory(new MongoClient(new MongoClientURI(this.mongoProperties.getUri())), database));
+                simpleMongoDbFactory, mappingMongoConverter);
+    }
+
+    private MappingMongoConverter getMappingMongoConverter(MongoDbFactory factory) {
+        DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
+        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, new MongoMappingContext());
+
+        // Don't save _class to mongo
+        mappingConverter.setTypeMapper(new DefaultMongoTypeMapper(null));
+
+        return mappingConverter;
     }
 
     private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
