@@ -13,9 +13,9 @@ public class Links {
     private String personsWithSignificantControl;
     @Field("self")
     private String self;
-    @Field("officer")
-    private Links officer;
-    @Field("appointments")
+    @Field("officer.self")
+    private String officerSelf;
+    @Field("officer.appointments")
     private String appointments;
 
     public String getFilingHistory() {
@@ -50,12 +50,12 @@ public class Links {
         this.self = self;
     }
 
-    public Links getOfficer() {
-        return officer;
+    public String getOfficerSelf() {
+        return officerSelf;
     }
 
-    public void setOfficer(Links officer) {
-        this.officer = officer;
+    public void setOfficerSelf(String officerSelf) {
+        this.officerSelf = officerSelf;
     }
 
     public String getAppointments() {

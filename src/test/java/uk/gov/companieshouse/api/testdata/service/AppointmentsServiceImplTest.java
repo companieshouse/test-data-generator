@@ -93,9 +93,8 @@ public class AppointmentsServiceImplTest {
 
         Links links = appointment.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_INTERNAL_ID, links.getSelf());
-        Links officerLink = links.getOfficer();
-        assertEquals("/officers/" + ENCODED_INTERNAL_ID, officerLink.getSelf());
-        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", officerLink.getAppointments());
+        assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
+        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getAppointments());
 
         assertEquals("DIRECTOR", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
