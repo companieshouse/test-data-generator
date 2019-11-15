@@ -32,7 +32,7 @@ public class AppointmentsServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";
-    private static final Long GENERATED_INTERNAL_ID = 123456789L;
+    private static final String GENERATED_INTERNAL_ID = "8123456789";
     private static final String ENCODED_INTERNAL_ID = "ENCODED 2";
     private static final String ETAG = "ETAG";
 
@@ -46,9 +46,9 @@ public class AppointmentsServiceImplTest {
 
     @Test
     void create() throws DataException {
+        when(this.randomService.generateEntityId()).thenReturn(GENERATED_INTERNAL_ID);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(this.randomService.getNumber(9)).thenReturn(GENERATED_INTERNAL_ID);
-        when(this.randomService.addSaltAndEncode("8" + GENERATED_INTERNAL_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
+        when(this.randomService.addSaltAndEncode(GENERATED_INTERNAL_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
@@ -64,7 +64,7 @@ public class AppointmentsServiceImplTest {
         assertNotNull(appointment);
         assertEquals(ENCODED_VALUE, appointment.getId());
         assertNotNull(appointment.getCreated());
-        assertEquals("8" + GENERATED_INTERNAL_ID, appointment.getInternalId());
+        assertEquals(GENERATED_INTERNAL_ID, appointment.getInternalId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());

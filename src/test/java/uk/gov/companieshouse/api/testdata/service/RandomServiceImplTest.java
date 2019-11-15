@@ -55,4 +55,13 @@ class RandomServiceImplTest {
         String saltedDecodedWithSalt = new String(Base64.getUrlDecoder().decode(salted));
         assertEquals(10, saltedDecodedWithSalt.length());
     }
+
+    @Test
+    void generateEntityId() {
+        String entityId = this.randomService.generateEntityId();
+        assertNotNull(entityId);
+
+        assertEquals("8", entityId.substring(0, 1));
+        assertEquals(10, entityId.length());
+    }
 }

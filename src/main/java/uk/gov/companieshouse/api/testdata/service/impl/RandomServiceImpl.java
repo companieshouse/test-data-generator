@@ -15,7 +15,9 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class RandomServiceImpl implements RandomService {
 
     private static final String SALT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    private static final SecureRandom rnd = new SecureRandom();
+    private static final SecureRandom RND = new SecureRandom();
+    private static final String ENTITY_ID_PREFIX = "8";
+    private static final int ENTITY_ID_LENGTH = 9;
 
     @Override
     public Long getNumber(int digits) {
@@ -28,7 +30,7 @@ public class RandomServiceImpl implements RandomService {
     public String getString(int digits) {
         StringBuilder salt = new StringBuilder();
         while (salt.length() < digits) {
-            int index = rnd.nextInt(SALT_CHARS.length());
+            int index = RND.nextInt(SALT_CHARS.length());
             salt.append(SALT_CHARS.charAt(index));
         }
         return salt.toString();
@@ -50,5 +52,10 @@ public class RandomServiceImpl implements RandomService {
         String salt = getString(saltLength);
         String baseSalt = baseString + salt;
         return Base64.getUrlEncoder().encodeToString(baseSalt.getBytes(UTF_8));
+    }
+
+    @Override
+    public String generateEntityId() {
+        return ENTITY_ID_PREFIX + this.getNumber(ENTITY_ID_LENGTH);
     }
 }

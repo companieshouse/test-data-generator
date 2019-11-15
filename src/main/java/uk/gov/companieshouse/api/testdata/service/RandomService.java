@@ -42,4 +42,6 @@ public interface RandomService {
      * @return A base-64-encoded string
      */
     String addSaltAndEncode(String baseString, int saltLength);
+
+    String generateEntityId();
 }
