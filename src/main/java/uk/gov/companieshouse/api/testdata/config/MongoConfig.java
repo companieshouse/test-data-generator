@@ -27,7 +27,6 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -58,11 +57,6 @@ public class MongoConfig {
     @Bean
     public OfficerRepository officerRepository() {
         return getMongoRepositoryBean(OfficerRepository.class, "officer_appointments");
-    }
-
-    @Bean
-    public PersonsWithSignificantControlRepository pscRepository() {
-        return getMongoRepositoryBean(PersonsWithSignificantControlRepository.class, "company_pscs");
     }
 
     @Bean

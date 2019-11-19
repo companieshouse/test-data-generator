@@ -20,7 +20,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
-import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -37,8 +36,6 @@ class TestDataServiceImplTest {
     private DataService<FilingHistory> filingHistoryService;
     @Mock
     private DataService<Officer> officerListService;
-    @Mock
-    private DataService<PersonsWithSignificantControl> pscService;
     @Mock
     private DataService<CompanyAuthCode> companyAuthCodeService;
     @Mock
@@ -67,7 +64,6 @@ class TestDataServiceImplTest {
         verify(companyProfileService, times(1)).create(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).create(COMPANY_NUMBER);
         verify(officerListService, times(1)).create(COMPANY_NUMBER);
-        verify(pscService, times(1)).create(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).create(COMPANY_NUMBER);
         verify(appointmentService, times(1)).create(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).create(COMPANY_NUMBER);
@@ -85,7 +81,6 @@ class TestDataServiceImplTest {
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
         verify(officerListService, times(1)).delete(COMPANY_NUMBER);
-        verify(pscService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
