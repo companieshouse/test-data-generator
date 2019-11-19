@@ -63,12 +63,13 @@ class CompanyAuthCodeServiceImplTest {
         CompanyAuthCode authCode = authCodeCaptor.getValue();
 
         assertNotNull(authCode);
+        assertEquals(String.valueOf(COMPANY_AUTH_CODE), authCode.getAuthCode());
         assertTrue(authCode.getIsActive());
         assertEquals(COMPANY_NUMBER, authCode.getId());
 
         // Ideally we would use the following line to verify the encryption:
         //
-        // assertTrue(BCrypt.checkpw(password, authCode.getAuthCode()));
+        // assertTrue(BCrypt.checkpw(password, authCode.getEncryptedAuthCode()));
         //
         // However, the latest version of Spring Security at the time of developing this
         // (5.2.1.RELEASE) does not provide a checkpw method accepting a byte[] as a
@@ -76,7 +77,7 @@ class CompanyAuthCodeServiceImplTest {
         // That is why we need to verify it ourselves by just hashing the authcode using
         // the same salt (present in the auth code) and then comparing the hashed
         // values.
-        assertEquals(authCode.getAuthCode(), BCrypt.hashpw(password, authCode.getAuthCode()));
+        assertEquals(authCode.getEncryptedAuthCode(), BCrypt.hashpw(password, authCode.getEncryptedAuthCode()));
     }
 
     @Test

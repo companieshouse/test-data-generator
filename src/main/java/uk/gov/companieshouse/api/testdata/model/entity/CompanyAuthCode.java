@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
@@ -10,8 +11,10 @@ public class CompanyAuthCode {
     @Id
     @Field("id")
     private String id;
-    @Field("auth_code")
+    @Transient
     private String authCode;
+    @Field("auth_code")
+    private String encryptedAuthCode;
     @Field("is_active")
     private Boolean isActive;
 
@@ -29,6 +32,14 @@ public class CompanyAuthCode {
 
     public void setAuthCode(String authCode) {
         this.authCode = authCode;
+    }
+
+    public String getEncryptedAuthCode() {
+        return encryptedAuthCode;
+    }
+
+    public void setEncryptedAuthCode(String encryptedAuthCode) {
+        this.encryptedAuthCode = encryptedAuthCode;
     }
 
     public Boolean getIsActive() {

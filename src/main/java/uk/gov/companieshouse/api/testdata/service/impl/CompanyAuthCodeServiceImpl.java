@@ -44,7 +44,8 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
 
         companyAuthCode.setId(companyNumber);
-        companyAuthCode.setAuthCode(encrypt(authCode));
+        companyAuthCode.setAuthCode(authCode);
+        companyAuthCode.setEncryptedAuthCode(encrypt(authCode));
         companyAuthCode.setIsActive(true);
 
         try {
