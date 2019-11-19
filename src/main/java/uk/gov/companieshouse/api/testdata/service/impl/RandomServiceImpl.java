@@ -15,7 +15,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class RandomServiceImpl implements RandomService {
 
     private static final String SALT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-    private static final SecureRandom rnd = new SecureRandom();
+    private static final SecureRandom RND = new SecureRandom();
 
     @Override
     public Long getNumber(int digits) {
@@ -28,7 +28,7 @@ public class RandomServiceImpl implements RandomService {
     public String getString(int digits) {
         StringBuilder salt = new StringBuilder();
         while (salt.length() < digits) {
-            int index = rnd.nextInt(SALT_CHARS.length());
+            int index = RND.nextInt(SALT_CHARS.length());
             salt.append(SALT_CHARS.charAt(index));
         }
         return salt.toString();
