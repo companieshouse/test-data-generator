@@ -1,7 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -27,7 +29,10 @@ import uk.gov.companieshouse.api.testdata.service.impl.CompanyProfileServiceImpl
 class CompanyProfileServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String ETAG = "ETAG";
 
+    @Mock
+    private RandomService randomService;
     @Mock
     private CompanyProfileRepository repository;
 
@@ -37,37 +42,52 @@ class CompanyProfileServiceImplTest {
     @Test
     void createNoException() throws DataException {
         CompanyProfile savedProfile = new CompanyProfile();
+        when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
-
         CompanyProfile returnedProfile = this.companyProfileService.create(COMPANY_NUMBER);
 
         assertEquals(savedProfile, returnedProfile);
         
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
-        
+
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("Company "+ COMPANY_NUMBER, profile.getCompanyName());
-        assertEquals("Active", profile.getCompanyStatus());
+        assertEquals("Company " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        assertEquals("active", profile.getCompanyStatus());
         assertEquals("england-wales", profile.getJurisdiction());
         assertEquals("ltd", profile.getType());
 
-        assertEquals("10 Test Street", profile.getRegisteredOfficeAddress().getAddressLine1());
-        assertEquals("test 2", profile.getRegisteredOfficeAddress().getAddressLine2());
-        assertEquals("care of", profile.getRegisteredOfficeAddress().getCareOf());
-        assertEquals("England", profile.getRegisteredOfficeAddress().getCountry());
-        assertEquals("Locality", profile.getRegisteredOfficeAddress().getLocality());
-        assertEquals("POBox", profile.getRegisteredOfficeAddress().getPoBox());
-        assertEquals("POSTCODE", profile.getRegisteredOfficeAddress().getPostalCode());
-        assertEquals("premises", profile.getRegisteredOfficeAddress().getPremises());
-        assertEquals("region", profile.getRegisteredOfficeAddress().getRegion());
+        assertEquals("Crown Way", profile.getRegisteredOfficeAddress().getAddressLine1());
+        assertEquals("United Kingdom", profile.getRegisteredOfficeAddress().getCountry());
+        assertEquals("Cardiff", profile.getRegisteredOfficeAddress().getLocality());
+        assertEquals("CF14 3UZ", profile.getRegisteredOfficeAddress().getPostalCode());
 
         assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
         assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
         assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control", profile.getLinks().getPersonsWithSignificantControl());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement", profile.getLinks().getPersonsWithSignificantControlStatement());
+
+        assertNotNull(profile.getAccountsNextDue());
+        assertNotNull(profile.getAccountsNextAccountsPeriodStart());
+        assertNotNull(profile.getAccountsNextAccountsPeriodEnd());
+        assertNotNull(profile.getAccountsNextAccountsDueOn());
+        assertEquals(false, profile.getAccountsNextAccountsOverdue());
+        assertNotNull(profile.getAccountsNextMadeUpTo());
+        assertNotNull(profile.getAccountsReferenceDateDay());
+        assertNotNull(profile.getAccountsReferenceDateMonth());
+        assertNotNull(profile.getDateOfCreation());
+        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
+        assertNotNull(profile.getSicCodes());
+        assertNotNull(profile.getConfirmationStatementNextMadeUpTo());
+        assertEquals(false, profile.getConfirmationStatementOverdue());
+        assertNotNull(profile.getConfirmationStatementNextDue());
+        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
+        assertEquals(false, profile.getHasInsolvencyHistory());
+        assertEquals(false, profile.getHasCharges());
+        assertTrue(profile.getCanFile());
+        assertEquals(ETAG, profile.getEtag());
     }
 
     @Test
