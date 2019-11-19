@@ -16,8 +16,6 @@ public class RandomServiceImpl implements RandomService {
 
     private static final String SALT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
     private static final SecureRandom RND = new SecureRandom();
-    private static final String ENTITY_ID_PREFIX = "8";
-    private static final int ENTITY_ID_LENGTH = 9;
 
     @Override
     public Long getNumber(int digits) {
@@ -52,10 +50,5 @@ public class RandomServiceImpl implements RandomService {
         String salt = getString(saltLength);
         String baseSalt = baseString + salt;
         return Base64.getUrlEncoder().encodeToString(baseSalt.getBytes(UTF_8));
-    }
-
-    @Override
-    public String generateEntityId() {
-        return ENTITY_ID_PREFIX + this.getNumber(ENTITY_ID_LENGTH);
     }
 }

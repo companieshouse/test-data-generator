@@ -47,7 +47,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setId(appointmentId);
         appointment.setCreated(dateTimeNow);
 
-        String internalId = this.randomService.generateEntityId();
+        String internalId = INTERNAL_ID_PREFIX + this.randomService.getNumber(INTERNAL_ID_LENGTH);
         String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
         appointment.setInternalId(internalId);
         appointment.setAppointmentId(appointmentId);

@@ -31,6 +31,8 @@ import static uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants
 public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
     private static final int SALT_LENGTH = 8;
+    private static final int ENTITY_ID_LENGTH = 9;
+    private static final String ENTITY_ID_PREFIX = "8";
     private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
 
     @Autowired
@@ -55,17 +57,17 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-        String entityId = randomService.generateEntityId();
+        String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(companyNumber);
-        filingHistory.setDataLinks(createLinks(filingHistory));
-        filingHistory.setDataAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
-        filingHistory.setDataCategory("incorporation");
-        filingHistory.setDataDescription("incorporation-company");
-        filingHistory.setDataDate(dayTimeNow);
-        filingHistory.setDataType("NEWINC");
-        filingHistory.setDataPages(10);
+        filingHistory.setLinks(createLinks(filingHistory));
+        filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
+        filingHistory.setCategory("incorporation");
+        filingHistory.setDescription("incorporation-company");
+        filingHistory.setDate(dayTimeNow);
+        filingHistory.setType("NEWINC");
+        filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
         filingHistory.setOriginalDescription("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
 

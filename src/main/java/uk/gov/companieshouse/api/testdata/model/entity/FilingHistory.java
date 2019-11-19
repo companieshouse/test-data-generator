@@ -16,19 +16,19 @@ public class FilingHistory {
     @Field("company_number")
     private String companyNumber;
     @Field("data.links")
-    private Links dataLinks;
+    private Links links;
     @Field("data.associated_filings")
-    private List<AssociatedFiling> dataAssociatedFilings;
+    private List<AssociatedFiling> associatedFilings;
     @Field("data.category")
-    private String dataCategory;
+    private String category;
     @Field("data.description")
-    private String dataDescription;
+    private String description;
     @Field("data.date")
-    private Instant dataDate;
+    private Instant date;
     @Field("data.type")
-    private String dataType;
+    private String type;
     @Field("data.pages")
-    private Integer dataPages;
+    private Integer pages;
     @Field("_entity_id")
     private String entityId;
     @Field("original_description")
@@ -52,60 +52,60 @@ public class FilingHistory {
         this.companyNumber = companyNumber;
     }
 
-    public Links getDataLinks() {
-        return dataLinks;
+    public Links getLinks() {
+        return links;
     }
 
-    public void setDataLinks(Links dataLinks) {
-        this.dataLinks = dataLinks;
+    public void setLinks(Links links) {
+        this.links = links;
     }
 
-    public List<AssociatedFiling> getDataAssociatedFilings() {
-        return dataAssociatedFilings;
+    public List<AssociatedFiling> getAssociatedFilings() {
+        return associatedFilings;
     }
 
-    public void setDataAssociatedFilings(List<AssociatedFiling> dataAssociatedFilings) {
-        this.dataAssociatedFilings = dataAssociatedFilings;
+    public void setAssociatedFilings(List<AssociatedFiling> associatedFilings) {
+        this.associatedFilings = associatedFilings;
     }
 
-    public String getDataCategory() {
-        return dataCategory;
+    public String getCategory() {
+        return category;
     }
 
-    public void setDataCategory(String dataCategory) {
-        this.dataCategory = dataCategory;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public String getDataDescription() {
-        return dataDescription;
+    public String getDescription() {
+        return description;
     }
 
-    public void setDataDescription(String dataDescription) {
-        this.dataDescription = dataDescription;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Instant getDataDate() {
-        return dataDate;
+    public Instant getDate() {
+        return date;
     }
 
-    public void setDataDate(Instant dataDate) {
-        this.dataDate = dataDate;
+    public void setDate(Instant date) {
+        this.date = date;
     }
 
-    public String getDataType() {
-        return dataType;
+    public String getType() {
+        return type;
     }
 
-    public void setDataType(String dataType) {
-        this.dataType = dataType;
+    public void setType(String type) {
+        this.type = type;
     }
 
-    public Integer getDataPages() {
-        return dataPages;
+    public Integer getPages() {
+        return pages;
     }
 
-    public void setDataPages(Integer dataPages) {
-        this.dataPages = dataPages;
+    public void setPages(Integer pages) {
+        this.pages = pages;
     }
 
     public String getEntityId() {

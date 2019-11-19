@@ -31,11 +31,12 @@ import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryServiceImplTest {
-    private static final String UNENCODED_ID = "unencoded";
+    private static final Long UNENCODED_ID = 2345678L;
     private static final String TEST_ID = "test_id";
     private static final String COMPANY_NUMBER = "12345678";
-    private static final int ID_LENGTH = 10;
     private static final String BARCODE = "BARCODE";
+    private static final int ENTITY_ID_LENGTH = 9;
+    private static final String ENTITY_ID_PREFIX = "8";
 
     @Mock
     private FilingHistoryRepository repository;
@@ -51,8 +52,8 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void create() throws DataException, BarcodeServiceException {
-        when(randomService.generateEntityId()).thenReturn(UNENCODED_ID);
-        when(randomService.addSaltAndEncode(UNENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
         
         FilingHistory savedHistory = new FilingHistory();
@@ -67,18 +68,18 @@ class FilingHistoryServiceImplTest {
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
-        assertNotNull(filingHistory.getDataLinks());
-        assertEquals("incorporation", filingHistory.getDataCategory());
-        assertEquals("incorporation-company", filingHistory.getDataDescription());
-        assertNotNull(filingHistory.getDataDate());
-        assertEquals("NEWINC", filingHistory.getDataType());
-        assertEquals(Integer.valueOf(10), filingHistory.getDataPages());
-        assertEquals(UNENCODED_ID, filingHistory.getEntityId());
+        assertNotNull(filingHistory.getLinks());
+        assertEquals("incorporation", filingHistory.getCategory());
+        assertEquals("incorporation-company", filingHistory.getDescription());
+        assertNotNull(filingHistory.getDate());
+        assertEquals("NEWINC", filingHistory.getType());
+        assertEquals(Integer.valueOf(10), filingHistory.getPages());
+        assertEquals(ENTITY_ID_PREFIX + UNENCODED_ID, filingHistory.getEntityId());
         assertEquals("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association",
                 filingHistory.getOriginalDescription());
         assertEquals(BARCODE, filingHistory.getBarcode());
 
-        List<AssociatedFiling> associatedFilings = filingHistory.getDataAssociatedFilings();
+        List<AssociatedFiling> associatedFilings = filingHistory.getAssociatedFilings();
         assertEquals(2, associatedFilings.size());
         AssociatedFiling incorporation = associatedFilings.get(0);
         assertEquals("incorporation", incorporation.getCategory());
@@ -108,8 +109,8 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createDuplicateKeyException() throws BarcodeServiceException{
-        when(randomService.generateEntityId()).thenReturn(UNENCODED_ID);
-        when(randomService.addSaltAndEncode(UNENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
         when(repository.save(any())).thenThrow(DuplicateKeyException.class);
 
@@ -121,8 +122,8 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createMongoExceptionException() throws BarcodeServiceException{
-        when(randomService.generateEntityId()).thenReturn(UNENCODED_ID);
-        when(randomService.addSaltAndEncode(UNENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
         when(repository.save(any())).thenThrow(MongoException.class);
 

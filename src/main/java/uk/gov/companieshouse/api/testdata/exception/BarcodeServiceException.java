@@ -4,7 +4,7 @@ public class BarcodeServiceException extends Exception {
 
     private static final long serialVersionUID = -7421602790483260597L;
 
-    public BarcodeServiceException(String message) {
-        super(message);
+    public BarcodeServiceException(String message, Throwable cause) {
+        super(message, cause);
     }
 }

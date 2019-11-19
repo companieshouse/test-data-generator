@@ -61,7 +61,7 @@ public class BarcodeServiceImpl implements BarcodeService {
             JsonNode rootNode = objectMapper.readTree(response.getBody());
             generatedBarcode = rootNode.path("barcode").asText();
         } catch(Exception ex) {
-            throw new BarcodeServiceException(BARCODE_ERROR);
+            throw new BarcodeServiceException(BARCODE_ERROR, ex);
         }
 
         return generatedBarcode;
