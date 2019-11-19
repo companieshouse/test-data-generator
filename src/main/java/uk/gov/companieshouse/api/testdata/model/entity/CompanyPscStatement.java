@@ -19,15 +19,15 @@ public class CompanyPscStatement {
     @Field("psc_statement_id")
     private String pscStatementId;
     @Field("data.links")
-    private Links dataLinks;
+    private Links links;
     @Field("data.notified_on")
-    private Instant dataNotifiedOn;
+    private Instant notifiedOn;
     @Field("data.etag")
-    private String dataEtag;
-    @Field("data.dataKind")
-    private String dataKind;
+    private String etag;
+    @Field("data.kind")
+    private String kind;
     @Field("data.statement")
-    private String dataStatement;
+    private String statement;
     @Field("created.at")
     private Instant createdAt;
 
@@ -63,44 +63,44 @@ public class CompanyPscStatement {
         this.pscStatementId = pscStatementId;
     }
 
-    public Links getDataLinks() {
-        return dataLinks;
+    public Links getLinks() {
+        return links;
     }
 
-    public void setDataLinks(Links dataLinks) {
-        this.dataLinks = dataLinks;
+    public void setLinks(Links links) {
+        this.links = links;
     }
 
-    public Instant getDataNotifiedOn() {
-        return dataNotifiedOn;
+    public Instant getNotifiedOn() {
+        return notifiedOn;
     }
 
-    public void setDataNotifiedOn(Instant dataNotifiedOn) {
-        this.dataNotifiedOn = dataNotifiedOn;
+    public void setNotifiedOn(Instant notifiedOn) {
+        this.notifiedOn = notifiedOn;
     }
 
-    public String getDataEtag() {
-        return dataEtag;
+    public String getEtag() {
+        return etag;
     }
 
-    public void setDataEtag(String dataEtag) {
-        this.dataEtag = dataEtag;
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
-    public String getDataKind() {
-        return dataKind;
+    public String getKind() {
+        return kind;
     }
 
-    public void setDataKind(String dataKind) {
-        this.dataKind = dataKind;
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 
-    public String getDataStatement() {
-        return dataStatement;
+    public String getStatement() {
+        return statement;
     }
 
-    public void setDataStatement(String dataStatement) {
-        this.dataStatement = dataStatement;
+    public void setStatement(String statement) {
+        this.statement = statement;
     }
 
     public Instant getCreatedAt() {

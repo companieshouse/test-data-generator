@@ -59,14 +59,14 @@ class CompanyPscStatementServiceTest {
         assertEquals(COMPANY_NUMBER, statement.getCompanyNumber());
         assertEquals(ENCODED_VALUE, statement.getPscStatementId());
 
-        Links links = statement.getDataLinks();
+        Links links = statement.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/" + ENCODED_VALUE,
                 links.getSelf());
 
-        assertNotNull(statement.getDataNotifiedOn());
-        assertEquals(ETAG, statement.getDataEtag());
-        assertEquals("persons-with-significant-control-statement", statement.getDataKind());
-        assertEquals("no-individual-or-entity-with-significant-control", statement.getDataStatement());
+        assertNotNull(statement.getNotifiedOn());
+        assertEquals(ETAG, statement.getEtag());
+        assertEquals("persons-with-significant-control-statement", statement.getKind());
+        assertEquals("no-individual-or-entity-with-significant-control", statement.getStatement());
 
         assertNotNull(statement.getCreatedAt());
 

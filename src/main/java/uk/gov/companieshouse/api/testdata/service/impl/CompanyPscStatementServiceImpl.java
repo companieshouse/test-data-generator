@@ -46,14 +46,14 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         Links links = new Links();
         links.setSelf("/company/" + companyNumber + "/persons-with-significant-control-statements/" + id);
 
-        companyPscStatement.setDataLinks(links);
-        companyPscStatement.setDataNotifiedOn(dateNow);
+        companyPscStatement.setLinks(links);
+        companyPscStatement.setNotifiedOn(dateNow);
 
         String etag = this.randomService.getEtag();
-        companyPscStatement.setDataEtag(etag);
+        companyPscStatement.setEtag(etag);
 
-        companyPscStatement.setDataKind("persons-with-significant-control-statement");
-        companyPscStatement.setDataStatement("no-individual-or-entity-with-significant-control");
+        companyPscStatement.setKind("persons-with-significant-control-statement");
+        companyPscStatement.setStatement("no-individual-or-entity-with-significant-control");
 
         companyPscStatement.setCreatedAt(dateTimeNow);
 
