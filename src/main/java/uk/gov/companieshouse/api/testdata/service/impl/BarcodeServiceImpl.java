@@ -28,11 +28,11 @@ public class BarcodeServiceImpl implements BarcodeService {
     @Value("${barcode.url}")
     private String barcodeUrl;
 
-    public void setTemplate(RestTemplate template) {
+    void setTemplate(RestTemplate template) {
         this.template = template;
     }
 
-    public void setBarcodeUrl(String barcodeUrl) {
+    void setBarcodeUrl(String barcodeUrl) {
         this.barcodeUrl = barcodeUrl;
     }
 
@@ -42,9 +42,6 @@ public class BarcodeServiceImpl implements BarcodeService {
         if(this.template == null){
             this.template = new RestTemplate();
         }
-
-        ResponseEntity<String> response;
-        String generatedBarcode;
 
         try {
             HttpHeaders headers = new HttpHeaders();
@@ -56,14 +53,14 @@ public class BarcodeServiceImpl implements BarcodeService {
 
             String jsonRequestString = "{\"datereceived\":" + barcodeServiceDate + "}";
             HttpEntity<String> requestEntity = new HttpEntity<>(jsonRequestString, headers);
-            response = template.exchange(barcodeUrl, HttpMethod.POST, requestEntity, String.class);
+            ResponseEntity<String> response = template.exchange(barcodeUrl, HttpMethod.POST, requestEntity, String.class);
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode rootNode = objectMapper.readTree(response.getBody());
-            generatedBarcode = rootNode.path("barcode").asText();
+            return rootNode.path("barcode").asText();
         } catch(Exception ex) {
             throw new BarcodeServiceException(BARCODE_ERROR, ex);
         }
 
-        return generatedBarcode;
+
     }
 }

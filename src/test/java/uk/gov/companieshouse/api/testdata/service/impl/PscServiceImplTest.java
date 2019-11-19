@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,7 +24,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControlItem;
 import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.PscServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class PscServiceImplTest {

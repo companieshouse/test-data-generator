@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,10 +25,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.AppointmentsServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
-public class AppointmentsServiceImplTest {
+class AppointmentsServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";

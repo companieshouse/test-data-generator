@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +25,8 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.FilingHistoryServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.BarcodeService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import java.util.List;
 
