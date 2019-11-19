@@ -9,14 +9,18 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Optional;
 
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
@@ -42,11 +46,14 @@ class CompanyAuthCodeServiceImplTest {
     private CompanyAuthCodeServiceImpl companyAuthCodeServiceImpl;
 
     @Test
-    void create() throws DataException {
+    void create() throws Exception {
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+
         CompanyAuthCode savedAuthCode = new CompanyAuthCode();
         when(repository.save(any())).thenReturn(savedAuthCode);
         
+        final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+                .digest(String.valueOf(COMPANY_AUTH_CODE).getBytes(StandardCharsets.UTF_8));
         CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER);
 
         assertEquals(savedAuthCode, returnedAuthCode);
@@ -56,9 +63,20 @@ class CompanyAuthCodeServiceImplTest {
         CompanyAuthCode authCode = authCodeCaptor.getValue();
 
         assertNotNull(authCode);
-        assertEquals(String.valueOf(COMPANY_AUTH_CODE), authCode.getAuthCode());
         assertTrue(authCode.getIsActive());
         assertEquals(COMPANY_NUMBER, authCode.getId());
+
+        // Ideally we would use the following line to verify the encryption:
+        //
+        // assertTrue(BCrypt.checkpw(password, authCode.getAuthCode()));
+        //
+        // However, the latest version of Spring Security at the time of developing this
+        // (5.2.1.RELEASE) does not provide a checkpw method accepting a byte[] as a
+        // password. It only expects a UTF-8 String but our password isn't UTF-8.
+        // That is why we need to verify it ourselves by just hashing the authcode using
+        // the same salt (present in the auth code) and then comparing the hashed
+        // values.
+        assertEquals(authCode.getAuthCode(), BCrypt.hashpw(password, authCode.getAuthCode()));
     }
 
     @Test
