@@ -70,13 +70,13 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement", profile.getLinks().getPersonsWithSignificantControlStatement());
 
         assertNotNull(profile.getAccountsNextDue());
-        assertNotNull(profile.getAccountsNextAccountsPeriodStart());
-        assertNotNull(profile.getAccountsNextAccountsPeriodEnd());
-        assertNotNull(profile.getAccountsNextAccountsDueOn());
-        assertEquals(false, profile.getAccountsNextAccountsOverdue());
+        assertNotNull(profile.getPeriodStart());
+        assertNotNull(profile.getPeriodEnd());
+        assertNotNull(profile.getNextAccountsDueOn());
+        assertEquals(false, profile.getNextAccountsOverdue());
         assertNotNull(profile.getAccountsNextMadeUpTo());
-        assertNotNull(profile.getAccountsReferenceDateDay());
-        assertNotNull(profile.getAccountsReferenceDateMonth());
+        assertNotNull(profile.getAccountingReferenceDateDay());
+        assertNotNull(profile.getAccountingReferenceDateMonth());
         assertNotNull(profile.getDateOfCreation());
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());

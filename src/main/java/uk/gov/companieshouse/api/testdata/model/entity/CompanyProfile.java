@@ -19,19 +19,19 @@ public class CompanyProfile {
     @Field("accounts.next_due")
     private Instant accountsNextDue;
     @Field("accounts.next_accounts.period_start_on")
-    private Instant accountsNextAccountsPeriodStart;
+    private Instant periodStart;
     @Field("accounts.next_accounts.period_end_on")
-    private Instant accountsNextAccountsPeriodEnd;
+    private Instant periodEnd;
     @Field("accounts.next_accounts.due_on")
-    private Instant accountsNextAccountsDueOn;
+    private Instant nextAccountsDueOn;
     @Field("accounts.next_accounts.overdue")
-    private Boolean accountsNextAccountsOverdue;
+    private Boolean nextAccountsOverdue;
     @Field("accounts.next_made_up_to")
     private Instant accountsNextMadeUpTo;
     @Field("accounts.accounting_reference_date.day")
-    private String accountsReferenceDateDay;
+    private String accountingReferenceDateDay;
     @Field("accounts.accounting_reference_date.month")
-    private String accountsReferenceDateMonth;
+    private String accountingReferenceDateMonth;
     @Field("company_number")
     private String companyNumber;
     @Field("date_of_creation")
@@ -91,36 +91,36 @@ public class CompanyProfile {
         this.accountsNextDue = accountsNextDue;
     }
 
-    public Instant getAccountsNextAccountsPeriodStart() {
-        return accountsNextAccountsPeriodStart;
+    public Instant getPeriodStart() {
+        return periodStart;
     }
 
-    public void setAccountsNextAccountsPeriodStart(Instant accountsNextAccountsPeriodStart) {
-        this.accountsNextAccountsPeriodStart = accountsNextAccountsPeriodStart;
+    public void setPeriodStart(Instant periodStart) {
+        this.periodStart = periodStart;
     }
 
-    public Instant getAccountsNextAccountsPeriodEnd() {
-        return accountsNextAccountsPeriodEnd;
+    public Instant getPeriodEnd() {
+        return periodEnd;
     }
 
-    public void setAccountsNextAccountsPeriodEnd(Instant accountsNextAccountsPeriodEnd) {
-        this.accountsNextAccountsPeriodEnd = accountsNextAccountsPeriodEnd;
+    public void setPeriodEnd(Instant periodEnd) {
+        this.periodEnd = periodEnd;
     }
 
-    public Instant getAccountsNextAccountsDueOn() {
-        return accountsNextAccountsDueOn;
+    public Instant getNextAccountsDueOn() {
+        return nextAccountsDueOn;
     }
 
-    public void setAccountsNextAccountsDueOn(Instant accountsNextAccountsDueOn) {
-        this.accountsNextAccountsDueOn = accountsNextAccountsDueOn;
+    public void setNextAccountsDueOn(Instant nextAccountsDueOn) {
+        this.nextAccountsDueOn = nextAccountsDueOn;
     }
 
-    public Boolean getAccountsNextAccountsOverdue() {
-        return accountsNextAccountsOverdue;
+    public Boolean getNextAccountsOverdue() {
+        return nextAccountsOverdue;
     }
 
-    public void setAccountsNextAccountsOverdue(Boolean accountsNextAccountsOverdue) {
-        this.accountsNextAccountsOverdue = accountsNextAccountsOverdue;
+    public void setNextAccountsOverdue(Boolean nextAccountsOverdue) {
+        this.nextAccountsOverdue = nextAccountsOverdue;
     }
 
     public Instant getAccountsNextMadeUpTo() {
@@ -131,20 +131,20 @@ public class CompanyProfile {
         this.accountsNextMadeUpTo = accountsNextMadeUpTo;
     }
 
-    public String getAccountsReferenceDateDay() {
-        return accountsReferenceDateDay;
+    public String getAccountingReferenceDateDay() {
+        return accountingReferenceDateDay;
     }
 
-    public void setAccountsReferenceDateDay(String accountsReferenceDateDay) {
-        this.accountsReferenceDateDay = accountsReferenceDateDay;
+    public void setAccountingReferenceDateDay(String accountingReferenceDateDay) {
+        this.accountingReferenceDateDay = accountingReferenceDateDay;
     }
 
-    public String getAccountsReferenceDateMonth() {
-        return accountsReferenceDateMonth;
+    public String getAccountingReferenceDateMonth() {
+        return accountingReferenceDateMonth;
     }
 
-    public void setAccountsReferenceDateMonth(String accountsReferenceDateMonth) {
-        this.accountsReferenceDateMonth = accountsReferenceDateMonth;
+    public void setAccountingReferenceDateMonth(String accountingReferenceDateMonth) {
+        this.accountingReferenceDateMonth = accountingReferenceDateMonth;
     }
 
     public String getCompanyNumber() {
