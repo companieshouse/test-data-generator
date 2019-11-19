@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
@@ -37,6 +38,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyMetrics> companyMetricsService;
     @Autowired
+    private DataService<CompanyPscStatement> companyPscStatementService;
+    @Autowired
     private RandomService randomService;
 
     @Override
@@ -50,6 +53,7 @@ public class TestDataServiceImpl implements TestDataService {
         this.appointmentService.create(companyNumber);
         CompanyAuthCode authCode = this.companyAuthCodeService.create(companyNumber);
         this.companyMetricsService.create(companyNumber);
+        this.companyPscStatementService.create(companyNumber);
 
         return new CompanyData(companyNumber, authCode.getAuthCode());
     }
@@ -63,5 +67,6 @@ public class TestDataServiceImpl implements TestDataService {
         this.pscService.delete(companyId);
         this.companyAuthCodeService.delete(companyId);
         this.appointmentService.delete(companyId);
+        this.companyPscStatementService.delete(companyId);
     }
 }

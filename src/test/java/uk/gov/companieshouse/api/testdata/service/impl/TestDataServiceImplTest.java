@@ -17,6 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
@@ -45,6 +46,8 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<CompanyMetrics> metricsService;
     @Mock
+    private DataService<CompanyPscStatement> companyPscStatementService;
+    @Mock
     private RandomService randomService;
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -67,6 +70,7 @@ class TestDataServiceImplTest {
         verify(pscService, times(1)).create(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).create(COMPANY_NUMBER);
         verify(appointmentService, times(1)).create(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).create(COMPANY_NUMBER);
         verify(metricsService, times(1)).create(COMPANY_NUMBER);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
@@ -84,5 +88,6 @@ class TestDataServiceImplTest {
         verify(pscService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
     }
 }
