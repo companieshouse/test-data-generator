@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,16 +25,18 @@ import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.AppointmentsServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
-public class AppointmentsServiceImplTest {
+class AppointmentsServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";
-    private static final Long GENERATED_INTERNAL_ID = 123456789L;
+    private static final Long GENERATED_ID = 123456789L;
     private static final String ENCODED_INTERNAL_ID = "ENCODED 2";
     private static final String ETAG = "ETAG";
+    private static final int INTERNAL_ID_LENGTH = 9;
+    private static final String INTERNAL_ID_PREFIX = "8";
 
     @Mock
     private AppointmentsRepository repository;
@@ -46,9 +48,9 @@ public class AppointmentsServiceImplTest {
 
     @Test
     void create() throws DataException {
+        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(this.randomService.getNumber(9)).thenReturn(GENERATED_INTERNAL_ID);
-        when(this.randomService.addSaltAndEncode("8" + GENERATED_INTERNAL_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
+        when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
@@ -64,7 +66,7 @@ public class AppointmentsServiceImplTest {
         assertNotNull(appointment);
         assertEquals(ENCODED_VALUE, appointment.getId());
         assertNotNull(appointment.getCreated());
-        assertEquals("8" + GENERATED_INTERNAL_ID, appointment.getInternalId());
+        assertEquals(INTERNAL_ID_PREFIX + GENERATED_ID, appointment.getInternalId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());
