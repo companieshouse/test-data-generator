@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
@@ -17,11 +17,12 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
-import uk.gov.companieshouse.api.testdata.model.entity.PersonsWithSignificantControl;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.service.impl.TestDataServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
@@ -36,13 +37,13 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<Officer> officerListService;
     @Mock
-    private DataService<PersonsWithSignificantControl> pscService;
-    @Mock
     private DataService<CompanyAuthCode> companyAuthCodeService;
     @Mock
     private DataService<Appointment> appointmentService;
     @Mock
     private DataService<CompanyMetrics> metricsService;
+    @Mock
+    private DataService<CompanyPscStatement> companyPscStatementService;
     @Mock
     private RandomService randomService;
     @InjectMocks
@@ -63,9 +64,9 @@ class TestDataServiceImplTest {
         verify(companyProfileService, times(1)).create(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).create(COMPANY_NUMBER);
         verify(officerListService, times(1)).create(COMPANY_NUMBER);
-        verify(pscService, times(1)).create(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).create(COMPANY_NUMBER);
         verify(appointmentService, times(1)).create(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).create(COMPANY_NUMBER);
         verify(metricsService, times(1)).create(COMPANY_NUMBER);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
@@ -80,8 +81,8 @@ class TestDataServiceImplTest {
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
         verify(officerListService, times(1)).delete(COMPANY_NUMBER);
-        verify(pscService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
     }
 }

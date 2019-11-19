@@ -24,9 +24,9 @@ import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.repository.PersonsWithSignificantControlRepository;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -60,11 +60,6 @@ public class MongoConfig {
     }
 
     @Bean
-    public PersonsWithSignificantControlRepository pscRepository() {
-        return getMongoRepositoryBean(PersonsWithSignificantControlRepository.class, "company_pscs");
-    }
-
-    @Bean
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
     }
@@ -72,6 +67,11 @@ public class MongoConfig {
     @Bean
     public CompanyMetricsRepository companyMetricsRepository() {
         return getMongoRepositoryBean(CompanyMetricsRepository.class, "company_metrics");
+    }
+
+    @Bean
+    public CompanyPscStatementRepository companyPscStatement() {
+        return getMongoRepositoryBean(CompanyPscStatementRepository.class, "company_psc_statements");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
