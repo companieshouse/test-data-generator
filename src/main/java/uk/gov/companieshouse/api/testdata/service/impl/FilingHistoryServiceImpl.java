@@ -1,7 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,37 +14,65 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
+import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryItem;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
+import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import static uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants.BARCODE_ERROR;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
     private static final int SALT_LENGTH = 8;
-    private static final int ID_LENGTH = 10;
+    private static final int ENTITY_ID_LENGTH = 9;
+    private static final String ENTITY_ID_PREFIX = "8";
     private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
 
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
     @Autowired
     private RandomService randomService;
+    @Autowired
+    private BarcodeService barcodeService;
 
     @Override
     public FilingHistory create(String companyNumber) throws DataException {
+        String barcode;
+
+        try {
+            barcode = barcodeService.getBarcode();
+        } catch (BarcodeServiceException ex) {
+            throw new DataException(BARCODE_ERROR);
+        }
+
 
         FilingHistory filingHistory = new FilingHistory();
+        Instant dayTimeNow = Instant.now();
+        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-        filingHistory.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+        String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 
+        filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(companyNumber);
-        filingHistory.setTotalCount(1);
-        filingHistory.setFilingHistoryItems(createItems(filingHistory));
+        filingHistory.setLinks(createLinks(filingHistory));
+        filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
+        filingHistory.setCategory("incorporation");
+        filingHistory.setDescription("incorporation-company");
+        filingHistory.setDate(dayTimeNow);
+        filingHistory.setType("NEWINC");
+        filingHistory.setPages(10);
+        filingHistory.setEntityId(entityId);
+        filingHistory.setOriginalDescription("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
+
+
+        filingHistory.setBarcode(barcode);
 
         try {
             return filingHistoryRepository.save(filingHistory);
@@ -70,20 +101,42 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         }
     }
 
-    private List<FilingHistoryItem> createItems(FilingHistory filingHistory) {
+    private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow){
 
-        List<FilingHistoryItem> filingHistoryItems = new ArrayList<>();
-        FilingHistoryItem filingHistoryItem = new FilingHistoryItem();
-        filingHistoryItem.setType("NEWINC");
-        filingHistoryItem.setCategory("incorporation");
-        filingHistoryItem.setDate(new Date());
-        filingHistoryItem.setDescription("incorporation-company");
-        filingHistoryItem.setTransactionId(getNewTransactionId());
-        filingHistoryItem.setLinks(createLinks(filingHistory));
+        ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 
-        filingHistoryItems.add(filingHistoryItem);
+        AssociatedFiling incorporation = new AssociatedFiling();
+        incorporation.setCategory("incorporation");
+        incorporation.setDate(dayTimeNow);
+        incorporation.setDescription("model-articles-adopted");
+        incorporation.setType("MODEL ARTICLES");
+        associatedFilings.add(incorporation);
 
-        return filingHistoryItems;
+        AssociatedFiling capital = new AssociatedFiling();
+        capital.setActionDate(dayNow);
+        capital.setCategory("capital");
+        capital.setDate(dayTimeNow);
+        capital.setDescription("statement-of-capital");
+
+        HashMap<String, Object> descriptionValues = new HashMap<>();
+
+        ArrayList<HashMap<String, String>> descriptionValueCapital = new ArrayList<>();
+        HashMap<String, String> descriptionValueCapitalHashMap = new HashMap<>();
+        descriptionValueCapitalHashMap.put("currency", "GBP");
+        descriptionValueCapitalHashMap.put("figure", "1");
+        descriptionValueCapital.add(descriptionValueCapitalHashMap);
+
+        descriptionValues.put("capital", descriptionValueCapital);
+        descriptionValues.put("date", dayNow);
+
+        capital.setDescriptionValues(descriptionValues);
+        capital.setOriginalDescription("11/09/19 Statement of Capital;GBP 1");
+        capital.setType("SH01");
+
+        associatedFilings.add(capital);
+
+        return associatedFilings;
+
     }
 
     private Links createLinks(FilingHistory filingHistory) {
@@ -93,9 +146,4 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
         return links;
     }
-
-    private String getNewTransactionId() {
-        return randomService.getString(18);
-    }
-
 }

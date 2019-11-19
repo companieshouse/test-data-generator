@@ -1,7 +1,6 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.companieshouse.api.testdata.service.impl.RandomServiceImpl;
 
 import java.util.Base64;
 

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +25,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerItem;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.service.impl.OfficerListServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class OfficerListServiceImplTest {
