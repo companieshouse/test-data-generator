@@ -1,6 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.DuplicateKeyException;
@@ -24,14 +30,22 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
     private RandomService randomService;
     @Autowired
     private CompanyAuthCodeRepository repository;
+    
+    private final MessageDigest sha256Digest;
+    
+    public CompanyAuthCodeServiceImpl() throws NoSuchAlgorithmException {
+        sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
+    }
 
     @Override
     public CompanyAuthCode create(String companyNumber) throws DataException {
+        final String authCode = String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH));
 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
 
         companyAuthCode.setId(companyNumber);
-        companyAuthCode.setAuthCode(String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH)));
+        companyAuthCode.setAuthCode(authCode);
+        companyAuthCode.setEncryptedAuthCode(encrypt(authCode));
         companyAuthCode.setIsActive(true);
 
         try {
@@ -43,6 +57,11 @@ public class CompanyAuthCodeServiceImpl implements DataService<CompanyAuthCode> 
 
             throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
         }
+    }
+
+    private String encrypt(final String authCode) {
+        byte[] password = sha256Digest.digest(authCode.getBytes(StandardCharsets.UTF_8));
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     @Override
