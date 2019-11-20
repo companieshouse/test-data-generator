@@ -8,5 +8,5 @@ import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 @NoRepositoryBean
 public interface OfficerRepository extends MongoRepository<OfficerAppointment, String> {
 
-    OfficerAppointment findByCompanyNumber(String companyId);
+    //OfficerAppointment findByCompanyNumber(String companyId);
 }
