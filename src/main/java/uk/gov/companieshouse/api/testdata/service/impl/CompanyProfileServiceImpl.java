@@ -39,29 +39,35 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
         LocalDate now = LocalDate.now();
         Instant dateNow = now.atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Instant dateInOneYear = now.plusDays(365L).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZoneId.systemDefault()).toInstant();
 
         CompanyProfile profile = new CompanyProfile();
 
         profile.setId(companyNumber);
         profile.setLinks(createLinks(companyNumber));
-        profile.setAccountsNextDue(dateInOneYear);
-        profile.setPeriodStart(dateNow);
-        profile.setPeriodEnd(dateInOneYear);
-        profile.setNextAccountsDueOn(dateInOneYear);
-        profile.setNextAccountsOverdue(false);
-        profile.setAccountsNextMadeUpTo(dateInOneYear);
-        profile.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
-        profile.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
+
+        CompanyProfile.Accounts accounts = profile.getAccounts();
+        accounts.setAccountsNextDue(dateInOneYear);
+        accounts.setPeriodStart(dateNow);
+        accounts.setPeriodEnd(dateInOneYear);
+        accounts.setNextAccountsDueOn(dateInOneYear);
+        accounts.setNextAccountsOverdue(false);
+        accounts.setAccountsNextMadeUpTo(dateInOneYear);
+        accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
+        accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
+
         profile.setCompanyNumber(companyNumber);
         profile.setDateOfCreation(dateNow);
         profile.setType("ltd");
         profile.setUndeliverableRegisteredOfficeAddress(false);
         profile.setCompanyName("Company " + companyNumber + " LIMITED");
         profile.setSicCodes(Collections.singletonList("71200"));
-        profile.setConfirmationStatementNextMadeUpTo(dateInOneYear);
-        profile.setConfirmationStatementOverdue(false);
-        profile.setConfirmationStatementNextDue(dateInOneYear);
+
+        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
+        confirmationStatement.setConfirmationStatementNextMadeUpTo(dateInOneYear);
+        confirmationStatement.setConfirmationStatementOverdue(false);
+        confirmationStatement.setConfirmationStatementNextDue(dateInOneYear);
+
         profile.setRegisteredOfficeIsInDispute(false);
         profile.setCompanyStatus("active");
         profile.setEtag(this.randomService.getEtag());

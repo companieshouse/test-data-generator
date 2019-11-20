@@ -70,20 +70,26 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
 
-        assertNotNull(profile.getAccountsNextDue());
-        assertNotNull(profile.getPeriodStart());
-        assertNotNull(profile.getPeriodEnd());
-        assertNotNull(profile.getNextAccountsDueOn());
-        assertEquals(false, profile.getNextAccountsOverdue());
-        assertNotNull(profile.getAccountsNextMadeUpTo());
-        assertNotNull(profile.getAccountingReferenceDateDay());
-        assertNotNull(profile.getAccountingReferenceDateMonth());
+        CompanyProfile.Accounts accounts = profile.getAccounts();
+        assertNotNull(accounts);
+        assertNotNull(accounts.getAccountsNextDue());
+        assertNotNull(accounts.getPeriodStart());
+        assertNotNull(accounts.getPeriodEnd());
+        assertNotNull(accounts.getNextAccountsDueOn());
+        assertEquals(false, accounts.getNextAccountsOverdue());
+        assertNotNull(accounts.getAccountsNextMadeUpTo());
+        assertNotNull(accounts.getAccountingReferenceDateDay());
+        assertNotNull(accounts.getAccountingReferenceDateMonth());
+
         assertNotNull(profile.getDateOfCreation());
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
-        assertNotNull(profile.getConfirmationStatementNextMadeUpTo());
-        assertEquals(false, profile.getConfirmationStatementOverdue());
-        assertNotNull(profile.getConfirmationStatementNextDue());
+
+        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
+        assertNotNull(confirmationStatement.getConfirmationStatementNextMadeUpTo());
+        assertEquals(false, confirmationStatement.getConfirmationStatementOverdue());
+        assertNotNull(confirmationStatement.getConfirmationStatementNextDue());
+
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
         assertEquals(false, profile.getHasCharges());

@@ -11,27 +11,129 @@ import java.util.List;
 @Document(collection = "company_profile")
 public class CompanyProfile {
 
+    public class Accounts {
+        @Field("next_due")
+        private Instant accountsNextDue;
+        @Field("next_accounts.period_start_on")
+        private Instant periodStart;
+        @Field("next_accounts.period_end_on")
+        private Instant periodEnd;
+        @Field("next_accounts.due_on")
+        private Instant nextAccountsDueOn;
+        @Field("next_accounts.overdue")
+        private Boolean nextAccountsOverdue;
+        @Field("next_made_up_to")
+        private Instant accountsNextMadeUpTo;
+        @Field("accounting_reference_date.day")
+        private String accountingReferenceDateDay;
+        @Field("accounting_reference_date.month")
+        private String accountingReferenceDateMonth;
+
+        public Instant getAccountsNextDue() {
+            return accountsNextDue;
+        }
+
+        public void setAccountsNextDue(Instant accountsNextDue) {
+            this.accountsNextDue = accountsNextDue;
+        }
+
+        public Instant getPeriodStart() {
+            return periodStart;
+        }
+
+        public void setPeriodStart(Instant periodStart) {
+            this.periodStart = periodStart;
+        }
+
+        public Instant getPeriodEnd() {
+            return periodEnd;
+        }
+
+        public void setPeriodEnd(Instant periodEnd) {
+            this.periodEnd = periodEnd;
+        }
+
+        public Instant getNextAccountsDueOn() {
+            return nextAccountsDueOn;
+        }
+
+        public void setNextAccountsDueOn(Instant nextAccountsDueOn) {
+            this.nextAccountsDueOn = nextAccountsDueOn;
+        }
+
+        public Boolean getNextAccountsOverdue() {
+            return nextAccountsOverdue;
+        }
+
+        public void setNextAccountsOverdue(Boolean nextAccountsOverdue) {
+            this.nextAccountsOverdue = nextAccountsOverdue;
+        }
+
+        public Instant getAccountsNextMadeUpTo() {
+            return accountsNextMadeUpTo;
+        }
+
+        public void setAccountsNextMadeUpTo(Instant accountsNextMadeUpTo) {
+            this.accountsNextMadeUpTo = accountsNextMadeUpTo;
+        }
+
+        public String getAccountingReferenceDateDay() {
+            return accountingReferenceDateDay;
+        }
+
+        public void setAccountingReferenceDateDay(String accountingReferenceDateDay) {
+            this.accountingReferenceDateDay = accountingReferenceDateDay;
+        }
+
+        public String getAccountingReferenceDateMonth() {
+            return accountingReferenceDateMonth;
+        }
+
+        public void setAccountingReferenceDateMonth(String accountingReferenceDateMonth) {
+            this.accountingReferenceDateMonth = accountingReferenceDateMonth;
+        }
+    }
+
+    public class ConfirmationStatement {
+        @Field("next_made_up_to")
+        private Instant confirmationStatementNextMadeUpTo;
+        @Field("overdue")
+        private Boolean confirmationStatementOverdue;
+        @Field("next_due")
+        private Instant confirmationStatementNextDue;
+
+        public Instant getConfirmationStatementNextMadeUpTo() {
+            return confirmationStatementNextMadeUpTo;
+        }
+
+        public void setConfirmationStatementNextMadeUpTo(Instant confirmationStatementNextMadeUpTo) {
+            this.confirmationStatementNextMadeUpTo = confirmationStatementNextMadeUpTo;
+        }
+
+        public Boolean getConfirmationStatementOverdue() {
+            return confirmationStatementOverdue;
+        }
+
+        public void setConfirmationStatementOverdue(Boolean confirmationStatementOverdue) {
+            this.confirmationStatementOverdue = confirmationStatementOverdue;
+        }
+
+        public Instant getConfirmationStatementNextDue() {
+            return confirmationStatementNextDue;
+        }
+
+        public void setConfirmationStatementNextDue(Instant confirmationStatementNextDue) {
+            this.confirmationStatementNextDue = confirmationStatementNextDue;
+        }
+    }
+
     @Id
     @Field("id")
     private String id;
     @Field("links")
     private Links links;
-    @Field("accounts.next_due")
-    private Instant accountsNextDue;
-    @Field("accounts.next_accounts.period_start_on")
-    private Instant periodStart;
-    @Field("accounts.next_accounts.period_end_on")
-    private Instant periodEnd;
-    @Field("accounts.next_accounts.due_on")
-    private Instant nextAccountsDueOn;
-    @Field("accounts.next_accounts.overdue")
-    private Boolean nextAccountsOverdue;
-    @Field("accounts.next_made_up_to")
-    private Instant accountsNextMadeUpTo;
-    @Field("accounts.accounting_reference_date.day")
-    private String accountingReferenceDateDay;
-    @Field("accounts.accounting_reference_date.month")
-    private String accountingReferenceDateMonth;
+    @Field("accounts")
+    private Accounts accounts = new Accounts();
     @Field("company_number")
     private String companyNumber;
     @Field("date_of_creation")
@@ -44,12 +146,8 @@ public class CompanyProfile {
     private String companyName;
     @Field("sic_codes")
     private List<String> sicCodes;
-    @Field("confirmation_statement.next_made_up_to")
-    private Instant confirmationStatementNextMadeUpTo;
-    @Field("confirmation_statement.overdue")
-    private Boolean confirmationStatementOverdue;
-    @Field("confirmation_statement.next_due")
-    private Instant confirmationStatementNextDue;
+    @Field("confirmation_statement")
+    private ConfirmationStatement confirmationStatement = new ConfirmationStatement();
     @Field("registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
     @Field("company_status")
@@ -83,68 +181,12 @@ public class CompanyProfile {
         this.links = links;
     }
 
-    public Instant getAccountsNextDue() {
-        return accountsNextDue;
+    public Accounts getAccounts() {
+        return accounts;
     }
 
-    public void setAccountsNextDue(Instant accountsNextDue) {
-        this.accountsNextDue = accountsNextDue;
-    }
-
-    public Instant getPeriodStart() {
-        return periodStart;
-    }
-
-    public void setPeriodStart(Instant periodStart) {
-        this.periodStart = periodStart;
-    }
-
-    public Instant getPeriodEnd() {
-        return periodEnd;
-    }
-
-    public void setPeriodEnd(Instant periodEnd) {
-        this.periodEnd = periodEnd;
-    }
-
-    public Instant getNextAccountsDueOn() {
-        return nextAccountsDueOn;
-    }
-
-    public void setNextAccountsDueOn(Instant nextAccountsDueOn) {
-        this.nextAccountsDueOn = nextAccountsDueOn;
-    }
-
-    public Boolean getNextAccountsOverdue() {
-        return nextAccountsOverdue;
-    }
-
-    public void setNextAccountsOverdue(Boolean nextAccountsOverdue) {
-        this.nextAccountsOverdue = nextAccountsOverdue;
-    }
-
-    public Instant getAccountsNextMadeUpTo() {
-        return accountsNextMadeUpTo;
-    }
-
-    public void setAccountsNextMadeUpTo(Instant accountsNextMadeUpTo) {
-        this.accountsNextMadeUpTo = accountsNextMadeUpTo;
-    }
-
-    public String getAccountingReferenceDateDay() {
-        return accountingReferenceDateDay;
-    }
-
-    public void setAccountingReferenceDateDay(String accountingReferenceDateDay) {
-        this.accountingReferenceDateDay = accountingReferenceDateDay;
-    }
-
-    public String getAccountingReferenceDateMonth() {
-        return accountingReferenceDateMonth;
-    }
-
-    public void setAccountingReferenceDateMonth(String accountingReferenceDateMonth) {
-        this.accountingReferenceDateMonth = accountingReferenceDateMonth;
+    public void setAccounts(Accounts accounts) {
+        this.accounts = accounts;
     }
 
     public String getCompanyNumber() {
@@ -195,28 +237,12 @@ public class CompanyProfile {
         this.sicCodes = sicCodes;
     }
 
-    public Instant getConfirmationStatementNextMadeUpTo() {
-        return confirmationStatementNextMadeUpTo;
+    public ConfirmationStatement getConfirmationStatement() {
+        return confirmationStatement;
     }
 
-    public void setConfirmationStatementNextMadeUpTo(Instant confirmationStatementNextMadeUpTo) {
-        this.confirmationStatementNextMadeUpTo = confirmationStatementNextMadeUpTo;
-    }
-
-    public Boolean getConfirmationStatementOverdue() {
-        return confirmationStatementOverdue;
-    }
-
-    public void setConfirmationStatementOverdue(Boolean confirmationStatementOverdue) {
-        this.confirmationStatementOverdue = confirmationStatementOverdue;
-    }
-
-    public Instant getConfirmationStatementNextDue() {
-        return confirmationStatementNextDue;
-    }
-
-    public void setConfirmationStatementNextDue(Instant confirmationStatementNextDue) {
-        this.confirmationStatementNextDue = confirmationStatementNextDue;
+    public void setConfirmationStatement(ConfirmationStatement confirmationStatement) {
+        this.confirmationStatement = confirmationStatement;
     }
 
     public Boolean getRegisteredOfficeIsInDispute() {
