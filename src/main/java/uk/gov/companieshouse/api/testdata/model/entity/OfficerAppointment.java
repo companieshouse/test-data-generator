@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.List;
 
 @Document(collection = "officer_appointments")
-public class Officer {
+public class OfficerAppointment {
 
     @Id
     @Field("id")
@@ -18,7 +18,7 @@ public class Officer {
     @Field("inactive_count")
     private Integer inactiveCount;
     @Field("items")
-    private List<OfficerItem> officerItems = null;
+    private List<OfficerAppointmentItem> officerAppointmentItems = null;
     @Field("links")
     private Links links;
     @Field("resigned_count")
@@ -50,12 +50,12 @@ public class Officer {
         this.inactiveCount = inactiveCount;
     }
 
-    public List<OfficerItem> getOfficerItems() {
-        return officerItems;
+    public List<OfficerAppointmentItem> getOfficerAppointmentItems() {
+        return officerAppointmentItems;
     }
 
-    public void setOfficerItems(List<OfficerItem> officerItems) {
-        this.officerItems = officerItems;
+    public void setOfficerAppointmentItems(List<OfficerAppointmentItem> officerAppointmentItems) {
+        this.officerAppointmentItems = officerAppointmentItems;
     }
 
     public Links getLinks() {

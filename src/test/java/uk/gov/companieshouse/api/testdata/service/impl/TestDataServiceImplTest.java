@@ -19,7 +19,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.Officer;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -35,7 +35,7 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<FilingHistory> filingHistoryService;
     @Mock
-    private DataService<Officer> officerListService;
+    private DataService<OfficerAppointment> officerListService;
     @Mock
     private DataService<CompanyAuthCode> companyAuthCodeService;
     @Mock

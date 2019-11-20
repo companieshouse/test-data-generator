@@ -22,13 +22,13 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Officer;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerItem;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
-class OfficerListServiceImplTest {
+class OfficerAppointmentListServiceImplTest {
 
     private static final String TEST_ID = "test_id";
     private static final String COMPANY_NUMBER = "12345678";
@@ -45,28 +45,28 @@ class OfficerListServiceImplTest {
     @Test
     void create() throws DataException {
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(TEST_ID);
-        Officer savedOfficer = new Officer();
-        when(repository.save(Mockito.any())).thenReturn(savedOfficer);
+        OfficerAppointment savedOfficerAppointment = new OfficerAppointment();
+        when(repository.save(Mockito.any())).thenReturn(savedOfficerAppointment);
         
-        Officer returnedOfficer = this.officerListService.create(COMPANY_NUMBER);
+        OfficerAppointment returnedOfficerAppointment = this.officerListService.create(COMPANY_NUMBER);
         
-        assertEquals(savedOfficer, returnedOfficer);
+        assertEquals(savedOfficerAppointment, returnedOfficerAppointment);
         
-        ArgumentCaptor<Officer> officerCaptor = ArgumentCaptor.forClass(Officer.class);
+        ArgumentCaptor<OfficerAppointment> officerCaptor = ArgumentCaptor.forClass(OfficerAppointment.class);
         verify(repository).save(officerCaptor.capture());
-        Officer officer = officerCaptor.getValue();
-        assertEquals(TEST_ID, officer.getId());
-        assertEquals(COMPANY_NUMBER, officer.getCompanyNumber());
-        assertEquals(1, officer.getActiveCount().intValue());
-        assertEquals(0, officer.getInactiveCount().intValue());
-        assertEquals(1, officer.getResignedCount().intValue());
-        assertEquals(2, officer.getOfficerItems().size());
+        OfficerAppointment officerAppointment = officerCaptor.getValue();
+        assertEquals(TEST_ID, officerAppointment.getId());
+        assertEquals(COMPANY_NUMBER, officerAppointment.getCompanyNumber());
+        assertEquals(1, officerAppointment.getActiveCount().intValue());
+        assertEquals(0, officerAppointment.getInactiveCount().intValue());
+        assertEquals(1, officerAppointment.getResignedCount().intValue());
+        assertEquals(2, officerAppointment.getOfficerAppointmentItems().size());
         
-        assertOfficerItem(officer.getOfficerItems().get(0), false);
-        assertOfficerItem(officer.getOfficerItems().get(1), true);
+        assertOfficerItem(officerAppointment.getOfficerAppointmentItems().get(0), false);
+        assertOfficerItem(officerAppointment.getOfficerAppointmentItems().get(1), true);
     }
 
-    private void assertOfficerItem(OfficerItem item, boolean resignedOfficer) {
+    private void assertOfficerItem(OfficerAppointmentItem item, boolean resignedOfficer) {
         assertEquals("full name", item.getName());
         assertEquals("director", item.getOfficerRole());
         assertEquals("10 Test Street", item.getAddress().getAddressLine1());
@@ -111,29 +111,29 @@ class OfficerListServiceImplTest {
 
     @Test
     void delete() throws Exception {
-        Officer officer = new Officer();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(officer);
+        OfficerAppointment officerAppointment = new OfficerAppointment();
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(officerAppointment);
 
         officerListService.delete(COMPANY_NUMBER);
 
-        verify(repository).delete(officer);
+        verify(repository).delete(officerAppointment);
     };
 
     @Test
     void deleteNoOfficer() {
-        Officer officer = null;
+        OfficerAppointment officerAppointment = null;
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(officer);
+                .thenReturn(officerAppointment);
         NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
             this.officerListService.delete(COMPANY_NUMBER)
         );
-        assertEquals("officer data not found", exception.getMessage());
+        assertEquals("officerAppointment data not found", exception.getMessage());
     }
 
     @Test
     void deleteMongoException() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(new Officer());
+                .thenReturn(new OfficerAppointment());
         doThrow(MongoException.class).when(repository).delete(any());
         DataException exception = assertThrows(DataException.class, () ->
             this.officerListService.delete(COMPANY_NUMBER)

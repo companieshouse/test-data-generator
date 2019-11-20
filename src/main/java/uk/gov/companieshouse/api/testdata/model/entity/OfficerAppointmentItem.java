@@ -4,7 +4,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.util.Date;
 
-public class OfficerItem {
+public class OfficerAppointmentItem {
 
 
     @Field("address")

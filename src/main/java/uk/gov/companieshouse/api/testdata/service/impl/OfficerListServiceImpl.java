@@ -16,14 +16,14 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.Officer;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerItem;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class OfficerListServiceImpl implements DataService<Officer> {
+public class OfficerListServiceImpl implements DataService<OfficerAppointment> {
     private static final int SALT_LENGTH = 8;
     private static final int ID_LENGTH = 10;
     private static final String OFFICER_DATA_NOT_FOUND = "officer data not found";
@@ -34,19 +34,19 @@ public class OfficerListServiceImpl implements DataService<Officer> {
     private OfficerRepository officerRepository;
 
     @Override
-    public Officer create(String companyNumber) throws DataException {
+    public OfficerAppointment create(String companyNumber) throws DataException {
 
-        Officer officer = new Officer();
+        OfficerAppointment officerAppointment = new OfficerAppointment();
 
-        officer.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
-        officer.setCompanyNumber(companyNumber);
-        officer.setActiveCount(1);
-        officer.setInactiveCount(0);
-        officer.setOfficerItems(createItems(officer));
-        officer.setResignedCount(1);
+        officerAppointment.setId(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+        officerAppointment.setCompanyNumber(companyNumber);
+        officerAppointment.setActiveCount(1);
+        officerAppointment.setInactiveCount(0);
+        officerAppointment.setOfficerAppointmentItems(createItems(officerAppointment));
+        officerAppointment.setResignedCount(1);
 
         try {
-            return officerRepository.save(officer);
+            return officerRepository.save(officerAppointment);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -60,50 +60,50 @@ public class OfficerListServiceImpl implements DataService<Officer> {
     @Override
     public void delete(String companyId) throws NoDataFoundException, DataException {
 
-        Officer officerToDelete = officerRepository.findByCompanyNumber(companyId);
+        OfficerAppointment officerAppointmentToDelete = officerRepository.findByCompanyNumber(companyId);
 
-        if (officerToDelete == null) {
+        if (officerAppointmentToDelete == null) {
             throw new NoDataFoundException(OFFICER_DATA_NOT_FOUND);
         }
 
         try {
-            officerRepository.delete(officerToDelete);
+            officerRepository.delete(officerAppointmentToDelete);
         } catch (MongoException e) {
             throw new DataException(ErrorMessageConstants.FAILED_TO_DELETE);
         }
     }
 
-    private List<OfficerItem> createItems(Officer officer) {
-        List<OfficerItem> officerItemList = new ArrayList<>();
+    private List<OfficerAppointmentItem> createItems(OfficerAppointment officerAppointment) {
+        List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
 
-        OfficerItem officerItem = createOfficerItem(officer);
-        officerItemList.add(officerItem);
-        OfficerItem resignedOfficer = createOfficerItem(officer);
+        OfficerAppointmentItem officerAppointmentItem = createOfficerItem(officerAppointment);
+        officerAppointmentItemList.add(officerAppointmentItem);
+        OfficerAppointmentItem resignedOfficer = createOfficerItem(officerAppointment);
         resignedOfficer.setResignedOn(new Date());
-        officerItemList.add(resignedOfficer);
+        officerAppointmentItemList.add(resignedOfficer);
 
-        return officerItemList;
+        return officerAppointmentItemList;
     }
 
-    private OfficerItem createOfficerItem(Officer officer) {
+    private OfficerAppointmentItem createOfficerItem(OfficerAppointment officerAppointment) {
 
-        OfficerItem officerItem = new OfficerItem();
-        officerItem.setAddress(createAddress());
-        officerItem.setAppointedOn(new Date());
-        officerItem.setDateOfBirth(createDateOfBirth());
-        officerItem.setLinks(createLinks(officer));
-        officerItem.setName("full name");
-        officerItem.setAppointedOn(new Date());
-        officerItem.setOfficerRole("director");
+        OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
+        officerAppointmentItem.setAddress(createAddress());
+        officerAppointmentItem.setAppointedOn(new Date());
+        officerAppointmentItem.setDateOfBirth(createDateOfBirth());
+        officerAppointmentItem.setLinks(createLinks(officerAppointment));
+        officerAppointmentItem.setName("full name");
+        officerAppointmentItem.setAppointedOn(new Date());
+        officerAppointmentItem.setOfficerRole("director");
 
-        return officerItem;
+        return officerAppointmentItem;
     }
 
-    private Links createLinks(Officer officer) {
+    private Links createLinks(OfficerAppointment officerAppointment) {
 
         Links links = new Links();
-        links.setSelf("/officers/" + officer.getCompanyNumber());
-        links.setOfficers("/company/" + officer.getCompanyNumber() + "/officers");
+        links.setSelf("/officers/" + officerAppointment.getCompanyNumber());
+        links.setOfficers("/company/" + officerAppointment.getCompanyNumber() + "/officers");
 
         return links;
     }
