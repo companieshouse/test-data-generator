@@ -23,6 +23,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyProfileServiceImplTest {
@@ -66,7 +67,8 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
         assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
         assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement", profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+                profile.getLinks().getPersonsWithSignificantControlStatement());
 
         assertNotNull(profile.getAccountsNextDue());
         assertNotNull(profile.getPeriodStart());
