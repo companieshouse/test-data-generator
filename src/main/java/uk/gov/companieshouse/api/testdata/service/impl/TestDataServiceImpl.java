@@ -11,9 +11,9 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.Officer;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
@@ -27,7 +27,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<FilingHistory> filingHistoryService;
     @Autowired
-    private DataService<Officer> officerListService;
+    private OfficerAppointmentService officerAppointmentService;
     @Autowired
     private DataService<CompanyAuthCode> companyAuthCodeService;
     @Autowired
@@ -45,8 +45,8 @@ public class TestDataServiceImpl implements TestDataService {
 
         this.companyProfileService.create(companyNumber);
         this.filingHistoryService.create(companyNumber);
-        this.officerListService.create(companyNumber);
-        this.appointmentService.create(companyNumber);
+        Appointment appointment = this.appointmentService.create(companyNumber);
+        this.officerAppointmentService.create(companyNumber, appointment.getOfficerId(), appointment.getAppointmentId());
         CompanyAuthCode authCode = this.companyAuthCodeService.create(companyNumber);
         this.companyMetricsService.create(companyNumber);
         this.companyPscStatementService.create(companyNumber);
@@ -59,7 +59,7 @@ public class TestDataServiceImpl implements TestDataService {
 
         this.companyProfileService.delete(companyId);
         this.filingHistoryService.delete(companyId);
-        this.officerListService.delete(companyId);
+        this.officerAppointmentService.delete(companyId);
         this.companyAuthCodeService.delete(companyId);
         this.appointmentService.delete(companyId);
         this.companyPscStatementService.delete(companyId);

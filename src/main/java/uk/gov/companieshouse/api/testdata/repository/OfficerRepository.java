@@ -3,10 +3,8 @@ package uk.gov.companieshouse.api.testdata.repository;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Officer;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 
 @NoRepositoryBean
-public interface OfficerRepository extends MongoRepository<Officer, String> {
-
-    Officer findByCompanyNumber(String companyId);
+public interface OfficerRepository extends MongoRepository<OfficerAppointment, String> {
 }

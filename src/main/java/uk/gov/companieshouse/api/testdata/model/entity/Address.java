@@ -14,8 +14,6 @@ public class Address {
     private String locality;
     @Field("postal_code")
     private String postalCode;
-    @Field("premises")
-    private String premises;
 
     public String getAddressLine1() {
         return addressLine1;
@@ -55,13 +53,5 @@ public class Address {
 
     public void setPostalCode(String postalCode) {
         this.postalCode = postalCode;
-    }
-
-    public String getPremises() {
-        return premises;
-    }
-
-    public void setPremises(String premises) {
-        this.premises = premises;
     }
 }

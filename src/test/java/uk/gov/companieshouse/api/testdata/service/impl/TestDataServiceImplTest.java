@@ -19,9 +19,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.Officer;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,13 +30,15 @@ class TestDataServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String AUTH_CODE = "123456";
+    private static final String OFFICER_ID = "OFFICER_ID";
+    private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
 
     @Mock
     private DataService<CompanyProfile> companyProfileService;
     @Mock
     private DataService<FilingHistory> filingHistoryService;
     @Mock
-    private DataService<Officer> officerListService;
+    private OfficerAppointmentService officerListService;
     @Mock
     private DataService<CompanyAuthCode> companyAuthCodeService;
     @Mock
@@ -57,13 +60,18 @@ class TestDataServiceImplTest {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
 
+        Appointment mockAppointment = new Appointment();
+        mockAppointment.setOfficerId(OFFICER_ID);
+        mockAppointment.setAppointmentId(APPOINTMENT_ID);
+
         when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(COMPANY_NUMBER)).thenReturn(mockAppointment);
         CompanyData createdCompany = this.testDataService.createCompanyData();
 
         verify(companyProfileService, times(1)).create(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).create(COMPANY_NUMBER);
-        verify(officerListService, times(1)).create(COMPANY_NUMBER);
+        verify(officerListService, times(1)).create(COMPANY_NUMBER, OFFICER_ID, APPOINTMENT_ID);
         verify(companyAuthCodeService, times(1)).create(COMPANY_NUMBER);
         verify(appointmentService, times(1)).create(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).create(COMPANY_NUMBER);
