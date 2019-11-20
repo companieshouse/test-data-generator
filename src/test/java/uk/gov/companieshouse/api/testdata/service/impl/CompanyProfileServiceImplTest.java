@@ -72,12 +72,12 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile.Accounts accounts = profile.getAccounts();
         assertNotNull(accounts);
-        assertNotNull(accounts.getAccountsNextDue());
+        assertNotNull(accounts.getNextDue());
         assertNotNull(accounts.getPeriodStart());
         assertNotNull(accounts.getPeriodEnd());
         assertNotNull(accounts.getNextAccountsDueOn());
         assertEquals(false, accounts.getNextAccountsOverdue());
-        assertNotNull(accounts.getAccountsNextMadeUpTo());
+        assertNotNull(accounts.getNextMadeUpTo());
         assertNotNull(accounts.getAccountingReferenceDateDay());
         assertNotNull(accounts.getAccountingReferenceDateMonth());
 
@@ -86,9 +86,9 @@ class CompanyProfileServiceImplTest {
         assertNotNull(profile.getSicCodes());
 
         CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        assertNotNull(confirmationStatement.getConfirmationStatementNextMadeUpTo());
-        assertEquals(false, confirmationStatement.getConfirmationStatementOverdue());
-        assertNotNull(confirmationStatement.getConfirmationStatementNextDue());
+        assertNotNull(confirmationStatement.getNextMadeUpTo());
+        assertEquals(false, confirmationStatement.getOverdue());
+        assertNotNull(confirmationStatement.getNextDue());
 
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());

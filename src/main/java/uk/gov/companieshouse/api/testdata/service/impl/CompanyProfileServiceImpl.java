@@ -47,12 +47,12 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         profile.setLinks(createLinks(companyNumber));
 
         CompanyProfile.Accounts accounts = profile.getAccounts();
-        accounts.setAccountsNextDue(dateInOneYear);
+        accounts.setNextDue(dateInOneYear);
         accounts.setPeriodStart(dateNow);
         accounts.setPeriodEnd(dateInOneYear);
         accounts.setNextAccountsDueOn(dateInOneYear);
         accounts.setNextAccountsOverdue(false);
-        accounts.setAccountsNextMadeUpTo(dateInOneYear);
+        accounts.setNextMadeUpTo(dateInOneYear);
         accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
         accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
 
@@ -64,9 +64,9 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         profile.setSicCodes(Collections.singletonList("71200"));
 
         CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        confirmationStatement.setConfirmationStatementNextMadeUpTo(dateInOneYear);
-        confirmationStatement.setConfirmationStatementOverdue(false);
-        confirmationStatement.setConfirmationStatementNextDue(dateInOneYear);
+        confirmationStatement.setNextMadeUpTo(dateInOneYear);
+        confirmationStatement.setOverdue(false);
+        confirmationStatement.setNextDue(dateInOneYear);
 
         profile.setRegisteredOfficeIsInDispute(false);
         profile.setCompanyStatus("active");

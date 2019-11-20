@@ -13,7 +13,7 @@ public class CompanyProfile {
 
     public class Accounts {
         @Field("next_due")
-        private Instant accountsNextDue;
+        private Instant nextDue;
         @Field("next_accounts.period_start_on")
         private Instant periodStart;
         @Field("next_accounts.period_end_on")
@@ -23,18 +23,18 @@ public class CompanyProfile {
         @Field("next_accounts.overdue")
         private Boolean nextAccountsOverdue;
         @Field("next_made_up_to")
-        private Instant accountsNextMadeUpTo;
+        private Instant nextMadeUpTo;
         @Field("accounting_reference_date.day")
         private String accountingReferenceDateDay;
         @Field("accounting_reference_date.month")
         private String accountingReferenceDateMonth;
 
-        public Instant getAccountsNextDue() {
-            return accountsNextDue;
+        public Instant getNextDue() {
+            return nextDue;
         }
 
-        public void setAccountsNextDue(Instant accountsNextDue) {
-            this.accountsNextDue = accountsNextDue;
+        public void setNextDue(Instant nextDue) {
+            this.nextDue = nextDue;
         }
 
         public Instant getPeriodStart() {
@@ -69,12 +69,12 @@ public class CompanyProfile {
             this.nextAccountsOverdue = nextAccountsOverdue;
         }
 
-        public Instant getAccountsNextMadeUpTo() {
-            return accountsNextMadeUpTo;
+        public Instant getNextMadeUpTo() {
+            return nextMadeUpTo;
         }
 
-        public void setAccountsNextMadeUpTo(Instant accountsNextMadeUpTo) {
-            this.accountsNextMadeUpTo = accountsNextMadeUpTo;
+        public void setNextMadeUpTo(Instant nextMadeUpTo) {
+            this.nextMadeUpTo = nextMadeUpTo;
         }
 
         public String getAccountingReferenceDateDay() {
@@ -96,34 +96,34 @@ public class CompanyProfile {
 
     public class ConfirmationStatement {
         @Field("next_made_up_to")
-        private Instant confirmationStatementNextMadeUpTo;
+        private Instant nextMadeUpTo;
         @Field("overdue")
-        private Boolean confirmationStatementOverdue;
+        private Boolean overdue;
         @Field("next_due")
-        private Instant confirmationStatementNextDue;
+        private Instant nextDue;
 
-        public Instant getConfirmationStatementNextMadeUpTo() {
-            return confirmationStatementNextMadeUpTo;
+        public Instant getNextMadeUpTo() {
+            return nextMadeUpTo;
         }
 
-        public void setConfirmationStatementNextMadeUpTo(Instant confirmationStatementNextMadeUpTo) {
-            this.confirmationStatementNextMadeUpTo = confirmationStatementNextMadeUpTo;
+        public void setNextMadeUpTo(Instant nextMadeUpTo) {
+            this.nextMadeUpTo = nextMadeUpTo;
         }
 
-        public Boolean getConfirmationStatementOverdue() {
-            return confirmationStatementOverdue;
+        public Boolean getOverdue() {
+            return overdue;
         }
 
-        public void setConfirmationStatementOverdue(Boolean confirmationStatementOverdue) {
-            this.confirmationStatementOverdue = confirmationStatementOverdue;
+        public void setOverdue(Boolean overdue) {
+            this.overdue = overdue;
         }
 
-        public Instant getConfirmationStatementNextDue() {
-            return confirmationStatementNextDue;
+        public Instant getNextDue() {
+            return nextDue;
         }
 
-        public void setConfirmationStatementNextDue(Instant confirmationStatementNextDue) {
-            this.confirmationStatementNextDue = confirmationStatementNextDue;
+        public void setNextDue(Instant nextDue) {
+            this.nextDue = nextDue;
         }
     }
 
@@ -185,10 +185,6 @@ public class CompanyProfile {
         return accounts;
     }
 
-    public void setAccounts(Accounts accounts) {
-        this.accounts = accounts;
-    }
-
     public String getCompanyNumber() {
         return companyNumber;
     }
@@ -239,10 +235,6 @@ public class CompanyProfile {
 
     public ConfirmationStatement getConfirmationStatement() {
         return confirmationStatement;
-    }
-
-    public void setConfirmationStatement(ConfirmationStatement confirmationStatement) {
-        this.confirmationStatement = confirmationStatement;
     }
 
     public Boolean getRegisteredOfficeIsInDispute() {
