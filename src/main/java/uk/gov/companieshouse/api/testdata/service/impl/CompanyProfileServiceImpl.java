@@ -9,11 +9,17 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddress;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collections;
 
 
 @Service
@@ -23,24 +29,56 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     private static final String LINK_STEM = "/company/";
 
     @Autowired
+    private RandomService randomService;
+
+    @Autowired
     private CompanyProfileRepository repository;
 
     @Override
     public CompanyProfile create(String companyNumber) throws DataException {
 
-        CompanyProfile company = new CompanyProfile();
+        LocalDate now = LocalDate.now();
+        Instant dateNow = now.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-        company.setCompanyName("Company " + companyNumber);
-        company.setId(companyNumber);
-        company.setCompanyNumber(companyNumber);
-        company.setCompanyStatus("Active");
-        company.setJurisdiction("england-wales");
-        company.setRegisteredOfficeAddress(createRoa());
-        company.setType("ltd");
-        company.setLinks(createLinks(company));
+        CompanyProfile profile = new CompanyProfile();
+
+        profile.setId(companyNumber);
+        profile.setLinks(createLinks(companyNumber));
+
+        CompanyProfile.Accounts accounts = profile.getAccounts();
+        accounts.setNextDue(dateInOneYear);
+        accounts.setPeriodStart(dateNow);
+        accounts.setPeriodEnd(dateInOneYear);
+        accounts.setNextAccountsDueOn(dateInOneYear);
+        accounts.setNextAccountsOverdue(false);
+        accounts.setNextMadeUpTo(dateInOneYear);
+        accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
+        accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
+
+        profile.setCompanyNumber(companyNumber);
+        profile.setDateOfCreation(dateNow);
+        profile.setType("ltd");
+        profile.setUndeliverableRegisteredOfficeAddress(false);
+        profile.setCompanyName("Company " + companyNumber + " LIMITED");
+        profile.setSicCodes(Collections.singletonList("71200"));
+
+        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
+        confirmationStatement.setNextMadeUpTo(dateInOneYear);
+        confirmationStatement.setOverdue(false);
+        confirmationStatement.setNextDue(dateInOneYear);
+
+        profile.setRegisteredOfficeIsInDispute(false);
+        profile.setCompanyStatus("active");
+        profile.setEtag(this.randomService.getEtag());
+        profile.setHasInsolvencyHistory(false);
+        profile.setRegisteredOfficeAddress(createRoa());
+        profile.setJurisdiction("england-wales");
+        profile.setHasCharges(false);
+        profile.setCanFile(true);
 
         try {
-            return repository.save(company);
+            return repository.save(profile);
         } catch (DuplicateKeyException e) {
 
             throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
@@ -67,30 +105,26 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
     }
 
-    private Links createLinks(CompanyProfile company) {
+    private Links createLinks(String companyNumber) {
 
         Links links = new Links();
-        links.setSelf(LINK_STEM + company.getCompanyNumber());
-        links.setFilingHistory(LINK_STEM + company.getCompanyNumber() + "/filing-history");
-        links.setOfficers(LINK_STEM + company.getCompanyNumber() + "/officers");
-        links.setPersonsWithSignificantControl(LINK_STEM + company.getCompanyNumber() + "/persons-with-significant-control");
+        links.setSelf(LINK_STEM + companyNumber);
+        links.setFilingHistory(LINK_STEM + companyNumber + "/filing-history");
+        links.setOfficers(LINK_STEM + companyNumber + "/officers");
+        links.setPersonsWithSignificantControlStatement(LINK_STEM + companyNumber +
+                "/persons-with-significant-control-statement");
 
         return links;
     }
 
-    private RegisteredOfficeAddress createRoa() {
+    private Address createRoa() {
 
-        RegisteredOfficeAddress registeredOfficeAddress = new RegisteredOfficeAddress();
+        Address registeredOfficeAddress = new Address();
 
-        registeredOfficeAddress.setAddressLine1("10 Test Street");
-        registeredOfficeAddress.setAddressLine2("test 2");
-        registeredOfficeAddress.setCareOf("care of");
-        registeredOfficeAddress.setCountry("England");
-        registeredOfficeAddress.setLocality("Locality");
-        registeredOfficeAddress.setPoBox("POBox");
-        registeredOfficeAddress.setPostalCode("POSTCODE");
-        registeredOfficeAddress.setPremises("premises");
-        registeredOfficeAddress.setRegion("region");
+        registeredOfficeAddress.setAddressLine1("Crown Way");
+        registeredOfficeAddress.setCountry("United Kingdom");
+        registeredOfficeAddress.setLocality("Cardiff");
+        registeredOfficeAddress.setPostalCode("CF14 3UZ");
 
         return registeredOfficeAddress;
     }
