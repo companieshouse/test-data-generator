@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDbFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoClientDbFactory;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
@@ -17,8 +17,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 
-import com.mongodb.MongoClient;
-import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoClients;
 
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
@@ -75,10 +74,10 @@ public class MongoConfig {
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
-        SimpleMongoDbFactory simpleMongoDbFactory = new SimpleMongoDbFactory(new MongoClient(new MongoClientURI(this.mongoProperties.getUri())), database);
+        SimpleMongoClientDbFactory simpleMongoDbFactory = new SimpleMongoClientDbFactory(
+                MongoClients.create(this.mongoProperties.getUri()), database);
         MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(simpleMongoDbFactory);
-        return new MongoTemplate(
-                simpleMongoDbFactory, mappingMongoConverter);
+        return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
     }
 
     private MappingMongoConverter getMappingMongoConverter(MongoDbFactory factory) {
