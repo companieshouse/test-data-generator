@@ -3,10 +3,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +20,6 @@ import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;

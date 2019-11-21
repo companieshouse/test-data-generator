@@ -19,7 +19,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
