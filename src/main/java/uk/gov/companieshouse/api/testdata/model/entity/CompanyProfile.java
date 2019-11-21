@@ -130,39 +130,39 @@ public class CompanyProfile {
     @Id
     @Field("id")
     private String id;
-    @Field("links")
+    @Field("data.links")
     private Links links;
-    @Field("accounts")
+    @Field("data.accounts")
     private Accounts accounts = new Accounts();
-    @Field("company_number")
+    @Field("data.company_number")
     private String companyNumber;
-    @Field("date_of_creation")
+    @Field("data.date_of_creation")
     private Instant dateOfCreation;
-    @Field("type")
+    @Field("data.type")
     private String type;
-    @Field("undeliverable_registered_office_address")
+    @Field("data.undeliverable_registered_office_address")
     private Boolean undeliverableRegisteredOfficeAddress;
-    @Field("company_name")
+    @Field("data.company_name")
     private String companyName;
-    @Field("sic_codes")
+    @Field("data.sic_codes")
     private List<String> sicCodes;
-    @Field("confirmation_statement")
+    @Field("data.confirmation_statement")
     private ConfirmationStatement confirmationStatement = new ConfirmationStatement();
-    @Field("registered_office_is_in_dispute")
+    @Field("data.registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
-    @Field("company_status")
+    @Field("data.company_status")
     private String companyStatus;
-    @Field("etag")
+    @Field("data.etag")
     private String etag;
-    @Field("has_insolvency_history")
+    @Field("data.has_insolvency_history")
     private Boolean hasInsolvencyHistory;
-    @Field("registered_office_address")
+    @Field("data.registered_office_address")
     private Address registeredOfficeAddress;
-    @Field("jurisdiction")
+    @Field("data.jurisdiction")
     private String jurisdiction;
-    @Field("has_charges")
+    @Field("data.has_charges")
     private Boolean hasCharges;
-    @Field("can_file")
+    @Field("data.can_file")
     private Boolean canFile;
 
     public String getId() {
