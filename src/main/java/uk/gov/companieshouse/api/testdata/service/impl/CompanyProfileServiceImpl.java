@@ -38,8 +38,10 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     public CompanyProfile create(String companyNumber) throws DataException {
 
         LocalDate now = LocalDate.now();
-        Instant dateNow = now.atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dateInOneYearTwoWeeks = now.plusYears(1L).plusDays(14L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dateInOneYearNineMonths = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         CompanyProfile profile = new CompanyProfile();
 
@@ -47,10 +49,10 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         profile.setLinks(createLinks(companyNumber));
 
         CompanyProfile.Accounts accounts = profile.getAccounts();
-        accounts.setNextDue(dateInOneYear);
+        accounts.setNextDue(dateInOneYearNineMonths);
         accounts.setPeriodStart(dateNow);
         accounts.setPeriodEnd(dateInOneYear);
-        accounts.setNextAccountsDueOn(dateInOneYear);
+        accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
         accounts.setNextAccountsOverdue(false);
         accounts.setNextMadeUpTo(dateInOneYear);
         accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
@@ -66,7 +68,7 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
         confirmationStatement.setNextMadeUpTo(dateInOneYear);
         confirmationStatement.setOverdue(false);
-        confirmationStatement.setNextDue(dateInOneYear);
+        confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
 
         profile.setRegisteredOfficeIsInDispute(false);
         profile.setCompanyStatus("active");

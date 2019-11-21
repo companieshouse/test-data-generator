@@ -38,7 +38,7 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
-        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         officerAppointment.setId(officerId);
         officerAppointment.setCreatedAt(dayTimeNow);
