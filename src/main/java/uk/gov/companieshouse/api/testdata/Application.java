@@ -8,7 +8,9 @@ import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 @SpringBootApplication
 @EnableAutoConfiguration(exclude=MongoAutoConfiguration.class)
 public class Application {
-    
+
+    public static final String APPLICATION_NAME = "test-data-generator";
+
     Application() {
         // default empty constructor
     }

@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -10,27 +13,32 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @RestController
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TestDataController {
 
-    private TestDataService testDataService;
+    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
-    public TestDataController(TestDataService testDataService) {
-        this.testDataService = testDataService;
-    }
+    private TestDataService testDataService;
+
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> create() throws DataException {
 
         CompanyData createdCompany = testDataService.createCompanyData();
-
+        
+        Map<String, Object> data = new HashMap<>();
+        data.put("company number", createdCompany.getCompanyNumber());
+        LOG.info("New company created", data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
@@ -40,6 +48,9 @@ public class TestDataController {
 
         testDataService.deleteCompanyData(companyId);
 
+        Map<String, Object> data = new HashMap<>();
+        data.put("company number", companyId);
+        LOG.info("Company deleted", data);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

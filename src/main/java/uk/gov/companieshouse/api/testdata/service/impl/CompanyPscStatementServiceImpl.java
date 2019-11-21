@@ -1,10 +1,14 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
+
+import com.mongodb.MongoException;
+
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
@@ -12,10 +16,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 @Service
 public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement> {
@@ -59,12 +59,8 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
 
         try {
             return repository.save(companyPscStatement);
-        } catch (DuplicateKeyException e) {
-
-            throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
         } catch (MongoException e) {
-
-            throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
+            throw new DataException("Failed to save PSC statement", e);
         }
     }
 
@@ -79,7 +75,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         try {
             repository.delete(existingStatement);
         } catch (MongoException e) {
-            throw new DataException(ErrorMessageConstants.FAILED_TO_DELETE);
+            throw new DataException("Failed to delete PSC statement", e);
         }
     }
 }

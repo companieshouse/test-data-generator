@@ -9,10 +9,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
-import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
@@ -62,12 +60,8 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
 
         try {
             return officerRepository.save(officerAppointment);
-        } catch (DuplicateKeyException e) {
-
-            throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
         } catch (MongoException e) {
-
-            throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
+            throw new DataException("Failed to save officer appointment", e);
         }
 
     }

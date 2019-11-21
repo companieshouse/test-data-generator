@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -103,25 +102,14 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void createDuplicateKeyException() {
-        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                this.appointmentsService.create(COMPANY_NUMBER)
-        );
-        assertEquals("duplicate key", exception.getMessage());
-    }
-
-    @Test
-    void createMongoExceptionException() {
+    void createMongoException() {
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
                 this.appointmentsService.create(COMPANY_NUMBER)
         );
-        assertEquals("failed to insert", exception.getMessage());
+        assertEquals("Failed to save appointment", exception.getMessage());
     }
     
     @Test
@@ -153,7 +141,7 @@ class AppointmentsServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
                 this.appointmentsService.delete(COMPANY_NUMBER)
         );
-        assertEquals("failed to delete", exception.getMessage());
+        assertEquals("Failed to delete appointment", exception.getMessage());
     }
 
 }

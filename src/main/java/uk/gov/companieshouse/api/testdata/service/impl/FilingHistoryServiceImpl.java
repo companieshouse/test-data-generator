@@ -10,10 +10,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
-import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -24,8 +22,6 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import static uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants.BARCODE_ERROR;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
@@ -49,7 +45,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         try {
             barcode = barcodeService.getBarcode();
         } catch (BarcodeServiceException ex) {
-            throw new DataException(BARCODE_ERROR);
+            throw new DataException(ex.getMessage(), ex);
         }
 
 
@@ -76,12 +72,8 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
         try {
             return filingHistoryRepository.save(filingHistory);
-        } catch (DuplicateKeyException e) {
-
-            throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
         } catch (MongoException e) {
-
-            throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
+            throw new DataException("Failed to save filing history", e);
         }
     }
 
@@ -97,7 +89,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         try {
             filingHistoryRepository.delete(filingHistoryToDelete);
         } catch (MongoException e) {
-            throw new DataException(ErrorMessageConstants.FAILED_TO_DELETE);
+            throw new DataException("Failed to delete filing history", e);
         }
     }
 

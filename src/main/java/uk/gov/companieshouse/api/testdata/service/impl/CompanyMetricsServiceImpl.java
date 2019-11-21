@@ -3,10 +3,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
-import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
@@ -32,12 +30,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
 
         try {
             return repository.save(metrics);
-        } catch (DuplicateKeyException e) {
-
-            throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
         } catch (MongoException e) {
-
-            throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
+            throw new DataException("Failed to save company metrics", e);
         }
     }
 

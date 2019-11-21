@@ -6,11 +6,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @ExceptionHandler(value = { DataException.class })
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -25,7 +29,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private void logException(Exception ex) {
-        // TODO Log exception
+        LOG.error(ex);
     }
 
 }

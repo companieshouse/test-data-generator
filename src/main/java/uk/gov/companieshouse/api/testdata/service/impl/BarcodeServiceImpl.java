@@ -1,7 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -10,15 +13,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-
-import static uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants.BARCODE_ERROR;
 
 @Service
 public class BarcodeServiceImpl implements BarcodeService {
@@ -58,7 +58,7 @@ public class BarcodeServiceImpl implements BarcodeService {
             JsonNode rootNode = objectMapper.readTree(response.getBody());
             return rootNode.path("barcode").asText();
         } catch(Exception ex) {
-            throw new BarcodeServiceException(BARCODE_ERROR, ex);
+            throw new BarcodeServiceException("Error creating barcode", ex);
         }
 
 

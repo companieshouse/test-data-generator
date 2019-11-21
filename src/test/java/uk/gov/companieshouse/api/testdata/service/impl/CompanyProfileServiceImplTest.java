@@ -16,7 +16,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -98,23 +97,13 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createDuplicateKeyException() {
-        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.companyProfileService.create(COMPANY_NUMBER)
-        );
-        assertEquals("duplicate key", exception.getMessage());
-    }
-
-    @Test
-    void createMongoExceptionException() {
+    void createMongoException() {
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
             this.companyProfileService.create(COMPANY_NUMBER)
         );
-        assertEquals("failed to insert", exception.getMessage());
+        assertEquals("Failed to save company profile", exception.getMessage());
     }
 
     @Test
@@ -149,7 +138,7 @@ class CompanyProfileServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
             this.companyProfileService.delete(COMPANY_NUMBER)
         );
-        assertEquals("failed to delete", exception.getMessage());
+        assertEquals("Failed to delete company profile", exception.getMessage());
     }
 
 }

@@ -22,7 +22,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -81,25 +80,14 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void createDuplicateKeyException() {
-        when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
-        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
-        );
-        assertEquals("duplicate key", exception.getMessage());
-    }
-
-    @Test
-    void createMongoExceptionException() {
+    void createMongoException() {
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
             this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
         );
-        assertEquals("failed to insert", exception.getMessage());
+        assertEquals("Failed to save company auth code", exception.getMessage());
     }
     
     @Test
@@ -132,7 +120,7 @@ class CompanyAuthCodeServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
             this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
         );
-        assertEquals("failed to delete", exception.getMessage());
+        assertEquals("Failed to delete company auth code", exception.getMessage());
     }
 
 }
