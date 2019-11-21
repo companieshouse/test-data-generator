@@ -63,6 +63,6 @@ class BarcodeServiceImplTest {
         BarcodeServiceException exception = assertThrows(BarcodeServiceException.class, () ->
                 this.barcodeService.getBarcode()
         );
-        Assertions.assertEquals("error creating barcode", exception.getMessage());
+        Assertions.assertEquals("Error creating barcode", exception.getMessage());
     }
 }

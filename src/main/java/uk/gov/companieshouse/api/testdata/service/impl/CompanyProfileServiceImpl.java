@@ -1,12 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Collections;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
-import uk.gov.companieshouse.api.testdata.constants.ErrorMessageConstants;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
@@ -15,11 +18,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Collections;
 
 
 @Service
@@ -81,12 +79,8 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
         try {
             return repository.save(profile);
-        } catch (DuplicateKeyException e) {
-
-            throw new DataException(ErrorMessageConstants.DUPLICATE_KEY);
         } catch (MongoException e) {
-
-            throw new DataException(ErrorMessageConstants.FAILED_TO_INSERT);
+            throw new DataException("Failed to save company profile", e);
         }
     }
 
@@ -102,7 +96,7 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         try {
             repository.delete(existingCompany);
         } catch (MongoException e) {
-            throw new DataException(ErrorMessageConstants.FAILED_TO_DELETE);
+            throw new DataException("Failed to delete company profile", e);
         }
 
     }

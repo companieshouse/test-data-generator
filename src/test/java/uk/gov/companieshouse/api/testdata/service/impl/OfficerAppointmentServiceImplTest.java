@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -95,22 +94,12 @@ class OfficerAppointmentServiceImplTest {
     }
 
     @Test
-    void createDuplicateKeyException() {
-        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.officerListService.create(COMPANY_NUMBER, OFFICER_ID, APPOINTMENT_ID)
-        );
-        assertEquals("duplicate key", exception.getMessage());
-    }
-
-    @Test
     void createMongoException() {
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
             this.officerListService.create(COMPANY_NUMBER, OFFICER_ID, APPOINTMENT_ID)
         );
-        assertEquals("failed to insert", exception.getMessage());
+        assertEquals("Failed to save officer appointment", exception.getMessage());
     }
 }

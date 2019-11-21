@@ -1,20 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.mongodb.DuplicateKeyException;
-import com.mongodb.MongoException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -22,6 +7,22 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.mongodb.MongoException;
+
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyPscStatementServiceImplTest {
@@ -73,25 +74,14 @@ class CompanyPscStatementServiceImplTest {
     }
 
     @Test
-    void createDuplicateKeyException() {
-        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                this.companyPscStatementService.create(COMPANY_NUMBER)
-        );
-        assertEquals("duplicate key", exception.getMessage());
-    }
-
-    @Test
-    void createMongoExceptionException() {
+    void createMongoException() {
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
                 this.companyPscStatementService.create(COMPANY_NUMBER)
         );
-        assertEquals("failed to insert", exception.getMessage());
+        assertEquals("Failed to save PSC statement", exception.getMessage());
     }
     
     @Test
@@ -123,7 +113,7 @@ class CompanyPscStatementServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
                 this.companyPscStatementService.delete(COMPANY_NUMBER)
         );
-        assertEquals("failed to delete", exception.getMessage());
+        assertEquals("Failed to delete PSC statement", exception.getMessage());
     }
 
 }

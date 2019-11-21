@@ -8,6 +8,8 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -16,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.DuplicateKeyException;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
@@ -27,8 +28,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class FilingHistoryServiceImplTest {
@@ -100,29 +99,17 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createBarcodeServiceException() throws BarcodeServiceException{
-        when(barcodeService.getBarcode()).thenThrow(BarcodeServiceException.class);
+        final String exceptionMessage = "Barcode error";
+        when(barcodeService.getBarcode()).thenThrow(new BarcodeServiceException(exceptionMessage));
 
         DataException exception = assertThrows(DataException.class, () ->
                 this.filingHistoryService.create(COMPANY_NUMBER)
         );
-        assertEquals("error creating barcode", exception.getMessage());
+        assertEquals(exceptionMessage, exception.getMessage());
     }
 
     @Test
-    void createDuplicateKeyException() throws BarcodeServiceException{
-        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
-        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
-        when(barcodeService.getBarcode()).thenReturn(BARCODE);
-        when(repository.save(any())).thenThrow(DuplicateKeyException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.filingHistoryService.create(COMPANY_NUMBER)
-        );
-        assertEquals("duplicate key", exception.getMessage());
-    }
-
-    @Test
-    void createMongoExceptionException() throws BarcodeServiceException{
+    void createMongoException() throws BarcodeServiceException{
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
@@ -131,7 +118,7 @@ class FilingHistoryServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
             this.filingHistoryService.create(COMPANY_NUMBER)
         );
-        assertEquals("failed to insert", exception.getMessage());
+        assertEquals("Failed to save filing history", exception.getMessage());
     }
 
     @Test
@@ -165,6 +152,6 @@ class FilingHistoryServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
             this.filingHistoryService.delete(COMPANY_NUMBER)
         );
-        assertEquals("failed to delete", exception.getMessage());
+        assertEquals("Failed to delete filing history", exception.getMessage());
     }
 }
