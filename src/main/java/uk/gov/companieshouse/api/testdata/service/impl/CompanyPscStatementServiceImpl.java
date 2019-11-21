@@ -35,7 +35,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
 
         Instant dateTimeNow = Instant.now();
-        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         companyPscStatement.setId(id);

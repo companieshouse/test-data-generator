@@ -41,8 +41,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         LocalDate officerDob = LocalDate.of(1990, 3, 6);
 
         Instant dateTimeNow = Instant.now();
-        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
-        Instant dob = officerDob.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dob = officerDob.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         appointment.setId(appointmentId);
         appointment.setCreated(dateTimeNow);

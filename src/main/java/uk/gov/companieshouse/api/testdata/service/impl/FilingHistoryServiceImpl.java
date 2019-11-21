@@ -55,7 +55,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
         FilingHistory filingHistory = new FilingHistory();
         Instant dayTimeNow = Instant.now();
-        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 
