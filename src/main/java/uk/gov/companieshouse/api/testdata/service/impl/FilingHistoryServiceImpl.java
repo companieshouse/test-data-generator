@@ -18,6 +18,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -39,7 +40,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
     private BarcodeService barcodeService;
 
     @Override
-    public FilingHistory create(String companyNumber) throws DataException {
+    public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
 
         try {
@@ -56,7 +57,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
-        filingHistory.setCompanyNumber(companyNumber);
+        filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(filingHistory));
         filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
         filingHistory.setCategory("incorporation");

@@ -21,6 +21,7 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -40,10 +41,13 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createNoException() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         CompanyProfile savedProfile = new CompanyProfile();
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
-        CompanyProfile returnedProfile = this.companyProfileService.create(COMPANY_NUMBER);
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
 
         assertEquals(savedProfile, returnedProfile);
         
@@ -98,10 +102,13 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createMongoException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-            this.companyProfileService.create(COMPANY_NUMBER)
+            this.companyProfileService.create(spec)
         );
         assertEquals("Failed to save company profile", exception.getMessage());
     }

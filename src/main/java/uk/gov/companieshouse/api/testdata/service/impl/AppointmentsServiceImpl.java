@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -33,7 +34,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private AppointmentsRepository repository;
 
     @Override
-    public Appointment create(String companyNumber) throws DataException {
+    public Appointment create(CompanySpec spec) throws DataException {
+        final String companyNumber = spec.getCompanyNumber();
         Appointment appointment = new Appointment();
 
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);

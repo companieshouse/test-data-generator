@@ -23,6 +23,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -47,6 +48,9 @@ class AppointmentsServiceImplTest {
 
     @Test
     void create() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
@@ -54,7 +58,7 @@ class AppointmentsServiceImplTest {
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
         
-        Appointment returnedApt = this.appointmentsService.create(COMPANY_NUMBER);
+        Appointment returnedApt = this.appointmentsService.create(spec);
         
         assertEquals(savedApt, returnedApt);
         
@@ -103,11 +107,14 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createMongoException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-                this.appointmentsService.create(COMPANY_NUMBER)
+                this.appointmentsService.create(spec)
         );
         assertEquals("Failed to save appointment", exception.getMessage());
     }

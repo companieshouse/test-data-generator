@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -52,6 +53,9 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void create() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
@@ -59,7 +63,7 @@ class FilingHistoryServiceImplTest {
         FilingHistory savedHistory = new FilingHistory();
         when(repository.save(Mockito.any())).thenReturn(savedHistory);
         
-        FilingHistory returnedHistory = this.filingHistoryService.create(COMPANY_NUMBER);
+        FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(returnedHistory, savedHistory);
         
@@ -99,24 +103,30 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createBarcodeServiceException() throws BarcodeServiceException{
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         final String exceptionMessage = "Barcode error";
         when(barcodeService.getBarcode()).thenThrow(new BarcodeServiceException(exceptionMessage));
 
         DataException exception = assertThrows(DataException.class, () ->
-                this.filingHistoryService.create(COMPANY_NUMBER)
+                this.filingHistoryService.create(spec)
         );
         assertEquals(exceptionMessage, exception.getMessage());
     }
 
     @Test
     void createMongoException() throws BarcodeServiceException{
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-            this.filingHistoryService.create(COMPANY_NUMBER)
+            this.filingHistoryService.create(spec)
         );
         assertEquals("Failed to save filing history", exception.getMessage());
     }
