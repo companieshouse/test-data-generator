@@ -11,7 +11,6 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -57,21 +56,14 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setNationality("British");
         appointment.setOccupation("Director");
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-        appointment.setCountryOfResidence("Wales");
+        appointment.setCountryOfResidence(spec.getJurisdiction().getCountryOfResidence());
         appointment.setUpdatedAt(dateTimeNow);
         appointment.setForename("Test");
         appointment.setAppointedOn(dateNow);
         appointment.setOfficerRole("director");
         appointment.setEtag(randomService.getEtag());
 
-        Address serviceAddress = new Address();
-        serviceAddress.setCountry("United Kingdom");
-        serviceAddress.setPostalCode("CF14 3UZ");
-        serviceAddress.setAddressLine1("Companies House");
-        serviceAddress.setAddressLine2("Crownway");
-        serviceAddress.setLocality("Cardiff");
-
-        appointment.setServiceAddress(serviceAddress);
+        appointment.setServiceAddress(spec.getJurisdiction().getAddress());
         appointment.setDataCompanyNumber(companyNumber);
 
         Links links = new Links();
