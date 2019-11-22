@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.service.TestDataService;
 public class TestDataServiceImpl implements TestDataService {
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
+    private static final String SCOTTISH_COMPANY_PREFIX = "SC";
 
     @Autowired
     private DataService<CompanyProfile> companyProfileService;
@@ -43,9 +44,18 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
         if (spec == null) {
-            new IllegalArgumentException("CompanySpec can not be null");
+            throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        String companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
+        String companyNumber;
+
+        switch (spec.getJurisdiction()){
+            case SCOTLAND: companyNumber = SCOTTISH_COMPANY_PREFIX +
+                    randomService.getNumber(COMPANY_NUMBER_LENGTH - SCOTTISH_COMPANY_PREFIX.length());
+            break;
+            case ENGLAND_WALES:
+            default: companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
+        }
+
         spec.setCompanyNumber(companyNumber);
         
         this.companyProfileService.create(spec);

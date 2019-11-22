@@ -11,11 +11,12 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -29,6 +30,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private static final String APPOINTMENT_DATA_NOT_FOUND = "appointment data not found";
 
     @Autowired
+    private AddressService addressService;
+    @Autowired
     private RandomService randomService;
     @Autowired
     private AppointmentsRepository repository;
@@ -36,6 +39,9 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     @Override
     public Appointment create(CompanySpec spec) throws DataException {
         final String companyNumber = spec.getCompanyNumber();
+
+        final String countryOfResidence = getCountryOfResidence(spec.getJurisdiction());
+
         Appointment appointment = new Appointment();
 
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
@@ -57,21 +63,14 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setNationality("British");
         appointment.setOccupation("Director");
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-        appointment.setCountryOfResidence("Wales");
+        appointment.setCountryOfResidence(countryOfResidence);
         appointment.setUpdatedAt(dateTimeNow);
         appointment.setForename("Test");
         appointment.setAppointedOn(dateNow);
         appointment.setOfficerRole("director");
         appointment.setEtag(randomService.getEtag());
 
-        Address serviceAddress = new Address();
-        serviceAddress.setCountry("United Kingdom");
-        serviceAddress.setPostalCode("CF14 3UZ");
-        serviceAddress.setAddressLine1("Companies House");
-        serviceAddress.setAddressLine2("Crownway");
-        serviceAddress.setLocality("Cardiff");
-
-        appointment.setServiceAddress(serviceAddress);
+        appointment.setServiceAddress(addressService.getAddress(spec.getJurisdiction()));
         appointment.setDataCompanyNumber(companyNumber);
 
         Links links = new Links();
@@ -108,6 +107,17 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
             repository.delete(existingAppointment);
         } catch (MongoException e) {
             throw new DataException("Failed to delete appointment", e);
+        }
+    }
+
+    private String getCountryOfResidence(Jurisdiction jurisdiction) {
+        switch(jurisdiction) {
+            case ENGLAND_WALES:
+                return "Wales";
+            case SCOTLAND:
+                return "Scotland";
+            default:
+                throw new IllegalArgumentException("No valid jurisdiction provided");
         }
     }
 }

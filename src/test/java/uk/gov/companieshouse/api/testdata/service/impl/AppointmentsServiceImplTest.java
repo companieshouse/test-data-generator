@@ -24,7 +24,9 @@ import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +41,8 @@ class AppointmentsServiceImplTest {
     private static final String INTERNAL_ID_PREFIX = "8";
 
     @Mock
+    private AddressService addressService;
+    @Mock
     private AppointmentsRepository repository;
     @Mock
     private RandomService randomService;
@@ -48,6 +52,8 @@ class AppointmentsServiceImplTest {
 
     @Test
     void create() throws DataException {
+        final Address mockServiceAddress = new Address();
+
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         
@@ -55,6 +61,7 @@ class AppointmentsServiceImplTest {
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
+        when(this.addressService.getAddress(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
         
@@ -86,14 +93,64 @@ class AppointmentsServiceImplTest {
         assertNotNull(appointment.getAppointedOn());
         assertEquals("director", appointment.getOfficerRole());
         assertEquals(ETAG, appointment.getEtag());
+        assertEquals(mockServiceAddress, appointment.getServiceAddress());
 
-        Address serviceAddress = appointment.getServiceAddress();
-        assertEquals("United Kingdom", serviceAddress.getCountry());
-        assertEquals("CF14 3UZ", serviceAddress.getPostalCode());
-        assertEquals("Companies House", serviceAddress.getAddressLine1());
-        assertEquals("Crownway", serviceAddress.getAddressLine2());
-        assertEquals("Cardiff", serviceAddress.getLocality());
+        assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
 
+        Links links = appointment.getLinks();
+        assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_INTERNAL_ID, links.getSelf());
+        assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
+        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
+
+        assertEquals("DIRECTOR", appointment.getSurname());
+        assertNotNull(appointment.getDateOfBirth());
+    }
+
+    @Test
+    void createScottish() throws DataException {
+        final Address mockServiceAddress = new Address();
+
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+
+        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        when(this.addressService.getAddress(Jurisdiction.SCOTLAND)).thenReturn(mockServiceAddress);
+        Appointment savedApt = new Appointment();
+        when(this.repository.save(any())).thenReturn(savedApt);
+
+        Appointment returnedApt = this.appointmentsService.create(spec);
+
+        assertEquals(savedApt, returnedApt);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(repository).save(aptCaptor.capture());
+
+        Appointment appointment = aptCaptor.getValue();
+        assertNotNull(appointment);
+        assertEquals(ENCODED_VALUE, appointment.getId());
+        assertNotNull(appointment.getCreated());
+        assertEquals(INTERNAL_ID_PREFIX + GENERATED_ID, appointment.getInternalId());
+        assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
+        assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
+        assertEquals("active", appointment.getCompanyStatus());
+        assertEquals(ENCODED_INTERNAL_ID, appointment.getOfficerId());
+        assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
+        assertNotNull(appointment.getUpdated());
+
+        assertEquals("British", appointment.getNationality());
+        assertEquals("Director", appointment.getOccupation());
+        assertTrue(appointment.isServiceAddressIsSameAsRegisteredOfficeAddress());
+        assertEquals("Scotland", appointment.getCountryOfResidence());
+        assertNotNull(appointment.getUpdatedAt());
+        assertEquals("Test", appointment.getForename());
+        assertNotNull(appointment.getAppointedOn());
+        assertEquals("director", appointment.getOfficerRole());
+        assertEquals(ETAG, appointment.getEtag());
+        assertEquals(mockServiceAddress, appointment.getServiceAddress());
         assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
 
         Links links = appointment.getLinks();
