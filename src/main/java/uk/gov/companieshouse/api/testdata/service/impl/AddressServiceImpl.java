@@ -23,11 +23,14 @@ public class AddressServiceImpl implements AddressService {
             "EH3 9FF"
     );
 
-    public Address getAddressForJurisdiction(Jurisdiction jurisdiction) {
+    public Address getAddress(Jurisdiction jurisdiction) {
         switch (jurisdiction) {
-            case ENGLAND_WALES: return ENGLAND_WALES_ADDRESS;
-            case SCOTLAND: return SCOTLAND_ADDRESS;
-            default: throw new IllegalArgumentException("No address for jurisdiction");
+            case ENGLAND_WALES:
+                return ENGLAND_WALES_ADDRESS;
+            case SCOTLAND:
+                return SCOTLAND_ADDRESS;
+            default:
+                throw new IllegalArgumentException("No address for jurisdiction");
         }
     }
 }

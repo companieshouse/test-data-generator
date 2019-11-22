@@ -9,5 +9,5 @@ public interface AddressService {
      * @param jurisdiction jurisdiction of the address to return
      * @return the companies house office address in given {@code jurisdiction}
      */
-    Address getAddressForJurisdiction(Jurisdiction jurisdiction);
+    Address getAddress(Jurisdiction jurisdiction);
 }

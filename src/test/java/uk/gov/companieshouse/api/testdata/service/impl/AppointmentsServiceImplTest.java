@@ -52,13 +52,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void create() throws DataException {
-        final Address mockServiceAddress = new Address(
-                "Companies House",
-                "Crownway",
-                "United Kingdom",
-                "Cardiff",
-                "CF14 3UZ"
-        );
+        final Address mockServiceAddress = new Address();
 
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -67,7 +61,7 @@ class AppointmentsServiceImplTest {
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
-        when(this.addressService.getAddressForJurisdiction(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
+        when(this.addressService.getAddress(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
         
@@ -114,13 +108,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createScottish() throws DataException {
-        final Address mockServiceAddress = new Address(
-                "4th Floor Edinburgh Quay 2",
-                "139 Fountain Bridge",
-                "United Kingdom",
-                "Edinburgh",
-                "EH3 9FF"
-        );
+        final Address mockServiceAddress = new Address();
 
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -130,7 +118,7 @@ class AppointmentsServiceImplTest {
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
-        when(this.addressService.getAddressForJurisdiction(Jurisdiction.SCOTLAND)).thenReturn(mockServiceAddress);
+        when(this.addressService.getAddress(Jurisdiction.SCOTLAND)).thenReturn(mockServiceAddress);
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
 
