@@ -1,12 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +23,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
@@ -51,10 +55,13 @@ class TestDataServiceImplTest {
     private RandomService randomService;
     @InjectMocks
     private TestDataServiceImpl testDataService;
+    
+    @Captor
+    private ArgumentCaptor<CompanySpec> specCaptor;
 
     @Test
-    void createCompanyData() throws DataException {
-        Jurisdiction jurisdiction = Jurisdiction.ENGLAND_WALES;
+    void createCompanyDataDefaultSpec() throws DataException {
+        CompanySpec spec = new CompanySpec();
         CompanyProfile mockCompany = new CompanyProfile();
         mockCompany.setCompanyNumber(COMPANY_NUMBER);
 
@@ -66,17 +73,21 @@ class TestDataServiceImplTest {
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
         when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
-        when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(COMPANY_NUMBER)).thenReturn(mockAppointment);
-        CompanyData createdCompany = this.testDataService.createCompanyData(jurisdiction);
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
-        verify(companyProfileService, times(1)).create(COMPANY_NUMBER);
-        verify(filingHistoryService, times(1)).create(COMPANY_NUMBER);
-        verify(officerListService, times(1)).create(COMPANY_NUMBER, OFFICER_ID, APPOINTMENT_ID);
-        verify(companyAuthCodeService, times(1)).create(COMPANY_NUMBER);
-        verify(appointmentService, times(1)).create(COMPANY_NUMBER);
-        verify(companyPscStatementService, times(1)).create(COMPANY_NUMBER);
-        verify(metricsService, times(1)).create(COMPANY_NUMBER);
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, spec.getCompanyNumber());
+        assertEquals(Jurisdiction.ENGLAND_WALES, spec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(officerListService, times(1)).create(expectedSpec, OFFICER_ID, APPOINTMENT_ID);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
         assertEquals("/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());

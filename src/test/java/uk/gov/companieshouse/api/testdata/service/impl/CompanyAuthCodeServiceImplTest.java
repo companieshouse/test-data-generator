@@ -27,6 +27,7 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -46,6 +47,9 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void create() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
         CompanyAuthCode savedAuthCode = new CompanyAuthCode();
@@ -53,7 +57,7 @@ class CompanyAuthCodeServiceImplTest {
         
         final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
                 .digest(String.valueOf(COMPANY_AUTH_CODE).getBytes(StandardCharsets.UTF_8));
-        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER);
+        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(spec);
 
         assertEquals(savedAuthCode, returnedAuthCode);
         
@@ -81,11 +85,14 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createMongoException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-            this.companyAuthCodeServiceImpl.create(COMPANY_NUMBER)
+            this.companyAuthCodeServiceImpl.create(spec)
         );
         assertEquals("Failed to save company auth code", exception.getMessage());
     }

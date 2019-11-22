@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -31,7 +32,8 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     private CompanyPscStatementRepository repository;
 
     @Override
-    public CompanyPscStatement create(String companyNumber) throws DataException {
+    public CompanyPscStatement create(CompanySpec spec) throws DataException {
+        final String companyNumber = spec.getCompanyNumber();
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
 
         Instant dateTimeNow = Instant.now();

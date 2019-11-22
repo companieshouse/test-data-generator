@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -33,7 +34,8 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     private CompanyProfileRepository repository;
 
     @Override
-    public CompanyProfile create(String companyNumber) throws DataException {
+    public CompanyProfile create(CompanySpec spec) throws DataException {
+        final String companyNumber = spec.getCompanyNumber();
 
         LocalDate now = LocalDate.now();
         Instant dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();

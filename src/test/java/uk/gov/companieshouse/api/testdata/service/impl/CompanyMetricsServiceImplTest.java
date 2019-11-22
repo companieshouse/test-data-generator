@@ -18,6 +18,7 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -37,13 +38,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         final String etag = "ETAG";
         when(randomService.getEtag()).thenReturn(etag);
         
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
         
-        CompanyMetrics returnedMetrics = this.metricsService.create(COMPANY_NUMBER);
+        CompanyMetrics returnedMetrics = this.metricsService.create(spec);
 
         assertEquals(savedMetrics, returnedMetrics);
         
@@ -76,10 +80,13 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createMongoException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-            this.metricsService.create(COMPANY_NUMBER)
+            this.metricsService.create(spec)
         );
         assertEquals("Failed to save company metrics", exception.getMessage());
     }

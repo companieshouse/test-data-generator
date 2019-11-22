@@ -21,6 +21,7 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -43,11 +44,14 @@ class OfficerAppointmentServiceImplTest {
 
     @Test
     void create() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(randomService.getEtag()).thenReturn(ETAG);
         OfficerAppointment savedOfficerAppointment = new OfficerAppointment();
         when(repository.save(Mockito.any())).thenReturn(savedOfficerAppointment);
         
-        OfficerAppointment returnedOfficerAppointment = this.officerListService.create(COMPANY_NUMBER, OFFICER_ID, APPOINTMENT_ID);
+        OfficerAppointment returnedOfficerAppointment = this.officerListService.create(spec, OFFICER_ID, APPOINTMENT_ID);
         
         assertEquals(savedOfficerAppointment, returnedOfficerAppointment);
         
@@ -95,10 +99,13 @@ class OfficerAppointmentServiceImplTest {
 
     @Test
     void createMongoException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-            this.officerListService.create(COMPANY_NUMBER, OFFICER_ID, APPOINTMENT_ID)
+            this.officerListService.create(spec, OFFICER_ID, APPOINTMENT_ID)
         );
         assertEquals("Failed to save officer appointment", exception.getMessage());
     }

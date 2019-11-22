@@ -11,8 +11,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -41,16 +41,20 @@ public class TestDataServiceImpl implements TestDataService {
     private RandomService randomService;
 
     @Override
-    public CompanyData createCompanyData(Jurisdiction jurisdiction) throws DataException {
+    public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
+        if (spec == null) {
+            new IllegalArgumentException("CompanySpec can not be null");
+        }
         String companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
-
-        this.companyProfileService.create(companyNumber);
-        this.filingHistoryService.create(companyNumber);
-        Appointment appointment = this.appointmentService.create(companyNumber);
-        this.officerAppointmentService.create(companyNumber, appointment.getOfficerId(), appointment.getAppointmentId());
-        CompanyAuthCode authCode = this.companyAuthCodeService.create(companyNumber);
-        this.companyMetricsService.create(companyNumber);
-        this.companyPscStatementService.create(companyNumber);
+        spec.setCompanyNumber(companyNumber);
+        
+        this.companyProfileService.create(spec);
+        this.filingHistoryService.create(spec);
+        Appointment appointment = this.appointmentService.create(spec);
+        this.officerAppointmentService.create(spec, appointment.getOfficerId(), appointment.getAppointmentId());
+        CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
+        this.companyMetricsService.create(spec);
+        this.companyPscStatementService.create(spec);
 
         return new CompanyData(companyNumber, authCode.getAuthCode());
     }

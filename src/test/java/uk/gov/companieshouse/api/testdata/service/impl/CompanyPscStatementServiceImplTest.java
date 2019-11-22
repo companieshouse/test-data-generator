@@ -21,6 +21,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -41,12 +42,15 @@ class CompanyPscStatementServiceImplTest {
 
     @Test
     void create() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscStatement savedStatement = new CompanyPscStatement();
         when(this.repository.save(any())).thenReturn(savedStatement);
         
-        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(COMPANY_NUMBER);
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
         
         assertEquals(savedStatement, returnedStatement);
         
@@ -75,11 +79,14 @@ class CompanyPscStatementServiceImplTest {
 
     @Test
     void createMongoException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(repository.save(any())).thenThrow(MongoException.class);
 
         DataException exception = assertThrows(DataException.class, () ->
-                this.companyPscStatementService.create(COMPANY_NUMBER)
+                this.companyPscStatementService.create(spec)
         );
         assertEquals("Failed to save PSC statement", exception.getMessage());
     }

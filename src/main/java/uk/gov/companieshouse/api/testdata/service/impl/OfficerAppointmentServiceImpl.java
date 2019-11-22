@@ -17,6 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -30,7 +31,7 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
     private OfficerRepository officerRepository;
 
     @Override
-    public OfficerAppointment create(String companyNumber, String officerId, String appointmentId)
+    public OfficerAppointment create(CompanySpec spec, String officerId, String appointmentId)
             throws DataException {
 
         OfficerAppointment officerAppointment = new OfficerAppointment();
@@ -56,7 +57,7 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
         officerAppointment.setEtag(this.randomService.getEtag());
         officerAppointment.setDateOfBirthYear(1990);
         officerAppointment.setDateOfBirthMonth(3);
-        officerAppointment.setOfficerAppointmentItems(createItems(companyNumber, appointmentId, dayNow, dayTimeNow));
+        officerAppointment.setOfficerAppointmentItems(createItems(spec.getCompanyNumber(), appointmentId, dayNow, dayTimeNow));
 
         try {
             return officerRepository.save(officerAppointment);

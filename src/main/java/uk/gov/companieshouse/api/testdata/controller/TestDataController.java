@@ -19,9 +19,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.NewCompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -36,19 +35,19 @@ public class TestDataController {
     private TestDataService testDataService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody(required = false) NewCompanyRequest request)
+    public ResponseEntity<CompanyData> create(@Valid @RequestBody(required = false) CompanySpec request)
             throws DataException {
 
-        Jurisdiction jurisdiction = Jurisdiction.ENGLAND_WALES;
-        if (request != null && request.getJurisdiction() != null) {
-            jurisdiction = request.getJurisdiction();
+        CompanySpec spec = request;
+        if (spec == null) {
+            spec = new CompanySpec();
         }
         
-        CompanyData createdCompany = testDataService.createCompanyData(jurisdiction);
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
         
         Map<String, Object> data = new HashMap<>();
         data.put("company number", createdCompany.getCompanyNumber());
-        data.put("jurisdiction", jurisdiction);
+        data.put("jurisdiction", spec.getJurisdiction());
         LOG.info("New company created", data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }

@@ -8,6 +8,7 @@ import com.mongodb.MongoException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -21,9 +22,9 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
     private RandomService randomService;
     
     @Override
-    public CompanyMetrics create(String companyNumber) throws DataException {
+    public CompanyMetrics create(CompanySpec spec) throws DataException {
         CompanyMetrics metrics = new CompanyMetrics();
-        metrics.setId(companyNumber);
+        metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
         metrics.setActivePscStatementsCount(1);
         metrics.setActiveDirectorsCount(1);
