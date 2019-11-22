@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -53,6 +54,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyData() throws DataException {
+        Jurisdiction jurisdiction = Jurisdiction.ENGLAND_WALES;
         CompanyProfile mockCompany = new CompanyProfile();
         mockCompany.setCompanyNumber(COMPANY_NUMBER);
 
@@ -66,7 +68,7 @@ class TestDataServiceImplTest {
         when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(this.companyAuthCodeService.create(COMPANY_NUMBER)).thenReturn(mockAuthCode);
         when(this.appointmentService.create(COMPANY_NUMBER)).thenReturn(mockAppointment);
-        CompanyData createdCompany = this.testDataService.createCompanyData();
+        CompanyData createdCompany = this.testDataService.createCompanyData(jurisdiction);
 
         verify(companyProfileService, times(1)).create(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).create(COMPANY_NUMBER);

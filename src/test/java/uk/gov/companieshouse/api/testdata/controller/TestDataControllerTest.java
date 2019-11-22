@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.NewCompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,10 +33,38 @@ class TestDataControllerTest {
 
     @Test
     void create() throws Exception {
+        NewCompanyRequest request = new NewCompanyRequest();
+        request.setJurisdiction(Jurisdiction.SCOTLAND);
         CompanyData company = new CompanyData("12345678", "123456");
 
-        when(this.testDataService.createCompanyData()).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.create();
+        when(this.testDataService.createCompanyData(request.getJurisdiction())).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.create(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+    
+    @Test
+    void createNoRequest() throws Exception {
+        NewCompanyRequest request = null;
+        CompanyData company = new CompanyData("12345678", "123456");
+
+        // ENGLAND/WALES is the default jurisdiction
+        when(this.testDataService.createCompanyData(Jurisdiction.ENGLAND_WALES)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.create(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+    
+    @Test
+    void createNoJurisdiction() throws Exception {
+        NewCompanyRequest request = new NewCompanyRequest();
+        CompanyData company = new CompanyData("12345678", "123456");
+
+        // ENGLAND/WALES is the default jurisdiction
+        when(this.testDataService.createCompanyData(Jurisdiction.ENGLAND_WALES)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.create(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -42,11 +72,13 @@ class TestDataControllerTest {
 
     @Test
     void createException() throws Exception {
+        NewCompanyRequest request = new NewCompanyRequest();
+        request.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         Throwable exception = new DataException("Error message");
-        when(this.testDataService.createCompanyData()).thenThrow(exception);
+        when(this.testDataService.createCompanyData(request.getJurisdiction())).thenThrow(exception);
 
         assertThrows(DataException.class, () -> {
-            this.testDataController.create();
+            this.testDataController.create(request);
         }, exception.getMessage());
     }
 
