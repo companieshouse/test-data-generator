@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -28,6 +29,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private static final String APPOINTMENT_DATA_NOT_FOUND = "appointment data not found";
 
     @Autowired
+    private AddressService addressService;
+    @Autowired
     private RandomService randomService;
     @Autowired
     private AppointmentsRepository repository;
@@ -35,6 +38,16 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     @Override
     public Appointment create(CompanySpec spec) throws DataException {
         final String companyNumber = spec.getCompanyNumber();
+
+        final String countryOfResidence;
+        switch(spec.getJurisdiction()) {
+            case ENGLAND_WALES: countryOfResidence = "Wales";
+            break;
+            case SCOTLAND: countryOfResidence = "Scotland";
+            break;
+            default: throw new IllegalArgumentException("No valid jurisdiction provided");
+        }
+
         Appointment appointment = new Appointment();
 
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
@@ -56,14 +69,14 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setNationality("British");
         appointment.setOccupation("Director");
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-        appointment.setCountryOfResidence(spec.getJurisdiction().getCountryOfResidence());
+        appointment.setCountryOfResidence(countryOfResidence);
         appointment.setUpdatedAt(dateTimeNow);
         appointment.setForename("Test");
         appointment.setAppointedOn(dateNow);
         appointment.setOfficerRole("director");
         appointment.setEtag(randomService.getEtag());
 
-        appointment.setServiceAddress(spec.getJurisdiction().getAddress());
+        appointment.setServiceAddress(addressService.getAddressForJurisdiction(spec.getJurisdiction()));
         appointment.setDataCompanyNumber(companyNumber);
 
         Links links = new Links();

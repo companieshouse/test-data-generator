@@ -49,11 +49,10 @@ public class TestDataServiceImpl implements TestDataService {
         String companyNumber;
 
         switch (spec.getJurisdiction()){
-            case ENGLAND_WALES: companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
-            break;
             case SCOTLAND: companyNumber = SCOTTISH_COMPANY_PREFIX +
                     randomService.getNumber(COMPANY_NUMBER_LENGTH - SCOTTISH_COMPANY_PREFIX.length());
             break;
+            case ENGLAND_WALES:
             default: companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
         }
 

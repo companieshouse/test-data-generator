@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -110,7 +109,7 @@ class TestDataServiceImplTest {
         mockAppointment.setOfficerId(OFFICER_ID);
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
-        when(this.randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
