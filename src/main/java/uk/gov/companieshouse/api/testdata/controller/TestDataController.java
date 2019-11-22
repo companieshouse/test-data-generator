@@ -48,6 +48,7 @@ public class TestDataController {
         
         Map<String, Object> data = new HashMap<>();
         data.put("company number", createdCompany.getCompanyNumber());
+        data.put("jurisdiction", jurisdiction);
         LOG.info("New company created", data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
