@@ -127,7 +127,7 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
             case SCOTLAND:
                 return "scotland";
             default:
-                throw new IllegalArgumentException("No valid jurisdiction provided");
+                throw new IllegalArgumentException("No valid jurisdiction string for provided jurisdiction");
         }
     }
 
