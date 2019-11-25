@@ -12,11 +12,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class CompanySpec {
 
     @JsonProperty
-    @NotNull
-    private Jurisdiction jurisdiction = Jurisdiction.ENGLAND_WALES;
+    @NotNull(message="invalid jurisdiction")
+    private Jurisdiction jurisdiction;
 
     @JsonIgnore
     private String companyNumber;
+    
+    public CompanySpec() {
+        jurisdiction = Jurisdiction.ENGLAND_WALES;
+    }
 
     public Jurisdiction getJurisdiction() {
         return jurisdiction;
