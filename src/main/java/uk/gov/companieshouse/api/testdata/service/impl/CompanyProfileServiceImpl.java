@@ -80,7 +80,7 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         profile.setEtag(this.randomService.getEtag());
         profile.setHasInsolvencyHistory(false);
         profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
-        profile.setJurisdiction(getJurisdictionString(jurisdiction));
+        profile.setJurisdiction(jurisdiction.toString());
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
@@ -118,17 +118,6 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
                 "/persons-with-significant-control-statement");
 
         return links;
-    }
-
-    private String getJurisdictionString(Jurisdiction jurisdiction) {
-        switch(jurisdiction) {
-            case ENGLAND_WALES:
-                return "england-wales";
-            case SCOTLAND:
-                return "scotland";
-            default:
-                throw new IllegalArgumentException("No valid jurisdiction string for provided jurisdiction");
-        }
     }
 
 }
