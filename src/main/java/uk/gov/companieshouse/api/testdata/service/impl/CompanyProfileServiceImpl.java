@@ -12,11 +12,12 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -31,11 +32,15 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     private RandomService randomService;
 
     @Autowired
+    private AddressService addressService;
+
+    @Autowired
     private CompanyProfileRepository repository;
 
     @Override
     public CompanyProfile create(CompanySpec spec) throws DataException {
         final String companyNumber = spec.getCompanyNumber();
+        final Jurisdiction jurisdiction = spec.getJurisdiction();
 
         LocalDate now = LocalDate.now();
         Instant dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
@@ -74,8 +79,8 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         profile.setCompanyStatus("active");
         profile.setEtag(this.randomService.getEtag());
         profile.setHasInsolvencyHistory(false);
-        profile.setRegisteredOfficeAddress(createRoa());
-        profile.setJurisdiction("england-wales");
+        profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+        profile.setJurisdiction(getJurisdictionString(jurisdiction));
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
@@ -115,16 +120,15 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         return links;
     }
 
-    private Address createRoa() {
-
-        Address registeredOfficeAddress = new Address();
-
-        registeredOfficeAddress.setAddressLine1("Crown Way");
-        registeredOfficeAddress.setCountry("United Kingdom");
-        registeredOfficeAddress.setLocality("Cardiff");
-        registeredOfficeAddress.setPostalCode("CF14 3UZ");
-
-        return registeredOfficeAddress;
+    private String getJurisdictionString(Jurisdiction jurisdiction) {
+        switch(jurisdiction) {
+            case ENGLAND_WALES:
+                return "england-wales";
+            case SCOTLAND:
+                return "scotland";
+            default:
+                throw new IllegalArgumentException("No valid jurisdiction provided");
+        }
     }
 
 }

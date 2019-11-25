@@ -20,9 +20,12 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,19 +37,24 @@ class CompanyProfileServiceImplTest {
     @Mock
     private RandomService randomService;
     @Mock
+    private AddressService addressService;
+    @Mock
     private CompanyProfileRepository repository;
 
     @InjectMocks
     private CompanyProfileServiceImpl companyProfileService;
 
     @Test
-    void createNoException() throws DataException {
+    void createEnglandWales() throws DataException {
+        final Address mockServiceAddress = new Address();
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
 
         CompanyProfile savedProfile = new CompanyProfile();
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
 
         assertEquals(savedProfile, returnedProfile);
@@ -62,10 +70,68 @@ class CompanyProfileServiceImplTest {
         assertEquals("england-wales", profile.getJurisdiction());
         assertEquals("ltd", profile.getType());
 
-        assertEquals("Crown Way", profile.getRegisteredOfficeAddress().getAddressLine1());
-        assertEquals("United Kingdom", profile.getRegisteredOfficeAddress().getCountry());
-        assertEquals("Cardiff", profile.getRegisteredOfficeAddress().getLocality());
-        assertEquals("CF14 3UZ", profile.getRegisteredOfficeAddress().getPostalCode());
+        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
+
+        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+                profile.getLinks().getPersonsWithSignificantControlStatement());
+
+        CompanyProfile.Accounts accounts = profile.getAccounts();
+        assertNotNull(accounts);
+        assertNotNull(accounts.getNextDue());
+        assertNotNull(accounts.getPeriodStart());
+        assertNotNull(accounts.getPeriodEnd());
+        assertNotNull(accounts.getNextAccountsDueOn());
+        assertEquals(false, accounts.getNextAccountsOverdue());
+        assertNotNull(accounts.getNextMadeUpTo());
+        assertNotNull(accounts.getAccountingReferenceDateDay());
+        assertNotNull(accounts.getAccountingReferenceDateMonth());
+
+        assertNotNull(profile.getDateOfCreation());
+        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
+        assertNotNull(profile.getSicCodes());
+
+        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
+        assertNotNull(confirmationStatement.getNextMadeUpTo());
+        assertEquals(false, confirmationStatement.getOverdue());
+        assertNotNull(confirmationStatement.getNextDue());
+
+        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
+        assertEquals(false, profile.getHasInsolvencyHistory());
+        assertEquals(false, profile.getHasCharges());
+        assertTrue(profile.getCanFile());
+        assertEquals(ETAG, profile.getEtag());
+    }
+
+    @Test
+    void createScotland() throws DataException {
+        final Address mockServiceAddress = new Address();
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+
+        CompanyProfile savedProfile = new CompanyProfile();
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+
+        assertEquals(savedProfile, returnedProfile);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, profile.getId());
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertEquals("Company " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        assertEquals("active", profile.getCompanyStatus());
+        assertEquals("scotland", profile.getJurisdiction());
+        assertEquals("ltd", profile.getType());
+
+        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
         assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
         assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
