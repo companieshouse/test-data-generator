@@ -13,12 +13,13 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -27,6 +28,8 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
 
     @Autowired
     private RandomService randomService;
+    @Autowired
+    private AddressService addressService;
     @Autowired
     private OfficerRepository officerRepository;
 
@@ -57,7 +60,7 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
         officerAppointment.setEtag(this.randomService.getEtag());
         officerAppointment.setDateOfBirthYear(1990);
         officerAppointment.setDateOfBirthMonth(3);
-        officerAppointment.setOfficerAppointmentItems(createItems(spec.getCompanyNumber(), appointmentId, dayNow, dayTimeNow));
+        officerAppointment.setOfficerAppointmentItems(createItems(spec, appointmentId, dayNow, dayTimeNow));
 
         try {
             return officerRepository.save(officerAppointment);
@@ -72,18 +75,21 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
         //TODO delete Officer Appointment data
     }
 
-    private List<OfficerAppointmentItem> createItems(String companyNumber, String appointmentId,
+    private List<OfficerAppointmentItem> createItems(CompanySpec companySpec, String appointmentId,
                                                      Instant dayNow, Instant dayTimeNow) {
         List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
 
+        String companyNumber = companySpec.getCompanyNumber();
+        Jurisdiction jurisdiction = companySpec.getJurisdiction();
+
         OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
         officerAppointmentItem.setOccupation("Director");
-        officerAppointmentItem.setAddress(createAddress());
+        officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
         officerAppointmentItem.setForename("Test");
         officerAppointmentItem.setSurname("Director");
         officerAppointmentItem.setOfficerRole("director");
         officerAppointmentItem.setLinks(createItemLinks(companyNumber, appointmentId));
-        officerAppointmentItem.setCountryOfResidence("Wales");
+        officerAppointmentItem.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
         officerAppointmentItem.setAppointedOn(dayNow);
         officerAppointmentItem.setNationality("British");
         officerAppointmentItem.setUpdatedAt(dayTimeNow);
@@ -104,18 +110,6 @@ public class OfficerAppointmentServiceImpl implements OfficerAppointmentService 
         links.setCompany("/company/" + companyNumber);
 
         return links;
-    }
-
-    private Address createAddress() {
-
-        Address address = new Address();
-        address.setAddressLine1("Companies House");
-        address.setAddressLine2("Crown Way");
-        address.setLocality("Cardiff");
-        address.setCountry("United Kingdom");
-        address.setPostalCode("CF14 3UZ");
-
-        return address;
     }
 
 }

@@ -19,10 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,6 +40,9 @@ class OfficerAppointmentServiceImplTest {
     private RandomService randomService;
 
     @Mock
+    private AddressService addressService;
+
+    @Mock
     private OfficerRepository repository;
 
     @InjectMocks
@@ -44,11 +50,16 @@ class OfficerAppointmentServiceImplTest {
 
     @Test
     void create() throws DataException {
+        final String countryOfResidence = "COUNTRY";
+        Address mockAddress = new Address();
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         OfficerAppointment savedOfficerAppointment = new OfficerAppointment();
+        when(addressService.getCountryOfResidence(spec.getJurisdiction())).thenReturn(countryOfResidence);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
         when(repository.save(Mockito.any())).thenReturn(savedOfficerAppointment);
         
         OfficerAppointment returnedOfficerAppointment = this.officerListService.create(spec, OFFICER_ID, APPOINTMENT_ID);
@@ -73,11 +84,11 @@ class OfficerAppointmentServiceImplTest {
         assertEquals(3, officerAppointment.getDateOfBirthMonth().intValue());
         assertEquals("Test DIRECTOR", officerAppointment.getName());
 
-        assertOfficerItem(officerAppointment.getOfficerAppointmentItems().get(0));
+        assertOfficerItem(officerAppointment.getOfficerAppointmentItems().get(0), countryOfResidence);
 
     }
 
-    private void assertOfficerItem(OfficerAppointmentItem item) {
+    private void assertOfficerItem(OfficerAppointmentItem item, String countryOfResidence) {
 
         assertEquals("Director", item.getOccupation());
         assertNotNull(item.getAddress());
@@ -87,7 +98,7 @@ class OfficerAppointmentServiceImplTest {
         assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + APPOINTMENT_ID,
                 item.getLinks().getSelf());
         assertEquals("/company/" + COMPANY_NUMBER, item.getLinks().getCompany());
-        assertEquals("Wales", item.getCountryOfResidence());
+        assertEquals(countryOfResidence, item.getCountryOfResidence());
         assertNotNull(item.getAppointedOn());
         assertEquals("British", item.getNationality());
         assertNotNull(item.getUpdatedAt());

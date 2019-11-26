@@ -62,6 +62,7 @@ class AppointmentsServiceImplTest {
         when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         when(this.addressService.getAddress(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
+        when(this.addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES)).thenReturn("Wales");
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
         
@@ -119,6 +120,7 @@ class AppointmentsServiceImplTest {
         when(this.randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8)).thenReturn(ENCODED_INTERNAL_ID);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         when(this.addressService.getAddress(Jurisdiction.SCOTLAND)).thenReturn(mockServiceAddress);
+        when(this.addressService.getCountryOfResidence(Jurisdiction.SCOTLAND)).thenReturn("Scotland");
         Appointment savedApt = new Appointment();
         when(this.repository.save(any())).thenReturn(savedApt);
 
