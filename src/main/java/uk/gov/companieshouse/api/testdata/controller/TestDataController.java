@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -19,8 +20,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -35,16 +36,12 @@ public class TestDataController {
     private TestDataService testDataService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody(required = false) CompanySpec request)
-            throws DataException {
+    public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws DataException {
 
-        CompanySpec spec = request;
-        if (spec == null) {
-            spec = new CompanySpec();
-        }
-        
+        CompanySpec spec = request.orElse(new CompanySpec());
+
         CompanyData createdCompany = testDataService.createCompanyData(spec);
-        
+
         Map<String, Object> data = new HashMap<>();
         data.put("company number", createdCompany.getCompanyNumber());
         data.put("jurisdiction", spec.getJurisdiction());
