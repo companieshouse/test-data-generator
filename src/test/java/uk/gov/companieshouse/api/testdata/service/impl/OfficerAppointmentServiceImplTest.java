@@ -50,6 +50,7 @@ class OfficerAppointmentServiceImplTest {
 
     @Test
     void create() throws DataException {
+        final String countryOfResidence = "COUNTRY";
         Address mockAddress = new Address();
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -57,7 +58,7 @@ class OfficerAppointmentServiceImplTest {
 
         when(randomService.getEtag()).thenReturn(ETAG);
         OfficerAppointment savedOfficerAppointment = new OfficerAppointment();
-        when(addressService.getCountryOfResidence(spec.getJurisdiction())).thenReturn("Wales");
+        when(addressService.getCountryOfResidence(spec.getJurisdiction())).thenReturn(countryOfResidence);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
         when(repository.save(Mockito.any())).thenReturn(savedOfficerAppointment);
         
@@ -83,11 +84,11 @@ class OfficerAppointmentServiceImplTest {
         assertEquals(3, officerAppointment.getDateOfBirthMonth().intValue());
         assertEquals("Test DIRECTOR", officerAppointment.getName());
 
-        assertOfficerItem(officerAppointment.getOfficerAppointmentItems().get(0));
+        assertOfficerItem(officerAppointment.getOfficerAppointmentItems().get(0), countryOfResidence);
 
     }
 
-    private void assertOfficerItem(OfficerAppointmentItem item) {
+    private void assertOfficerItem(OfficerAppointmentItem item, String countryOfResidence) {
 
         assertEquals("Director", item.getOccupation());
         assertNotNull(item.getAddress());
@@ -97,7 +98,7 @@ class OfficerAppointmentServiceImplTest {
         assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + APPOINTMENT_ID,
                 item.getLinks().getSelf());
         assertEquals("/company/" + COMPANY_NUMBER, item.getLinks().getCompany());
-        assertEquals("Wales", item.getCountryOfResidence());
+        assertEquals(countryOfResidence, item.getCountryOfResidence());
         assertNotNull(item.getAppointedOn());
         assertEquals("British", item.getNationality());
         assertNotNull(item.getUpdatedAt());
