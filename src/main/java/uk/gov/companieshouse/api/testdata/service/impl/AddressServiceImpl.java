@@ -23,6 +23,7 @@ public class AddressServiceImpl implements AddressService {
             "EH3 9FF"
     );
 
+    @Override
     public Address getAddress(Jurisdiction jurisdiction) {
         switch (jurisdiction) {
             case ENGLAND_WALES:
@@ -31,6 +32,18 @@ public class AddressServiceImpl implements AddressService {
                 return SCOTLAND_ADDRESS;
             default:
                 throw new IllegalArgumentException("No address for jurisdiction");
+        }
+    }
+
+    @Override
+    public String getCountryOfResidence(Jurisdiction jurisdiction) {
+        switch(jurisdiction) {
+            case ENGLAND_WALES:
+                return "Wales";
+            case SCOTLAND:
+                return "Scotland";
+            default:
+                throw new IllegalArgumentException("No valid jurisdiction provided");
         }
     }
 }

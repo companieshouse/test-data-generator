@@ -10,4 +10,11 @@ public interface AddressService {
      * @return the companies house office address in given {@code jurisdiction}
      */
     Address getAddress(Jurisdiction jurisdiction);
+
+    /**
+     * Returns the country of residence string for the given {@code jurisdiction}
+     * @param jurisdiction jurisdiction of the country of residence to return
+     * @return the country of residence for the given {@code jurisdiction}
+     */
+    String getCountryOfResidence(Jurisdiction jurisdiction);
 }

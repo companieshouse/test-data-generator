@@ -17,7 +17,7 @@ class AddressServiceImplTest {
     }
 
     @Test
-    void getAddressForJurisdictionEngland() {
+    void getAddressForJurisdictionEnglandWales() {
         Address address = addressService.getAddress(Jurisdiction.ENGLAND_WALES);
         assertEquals("Companies House", address.getAddressLine1());
         assertEquals("Crownway", address.getAddressLine2());
@@ -34,5 +34,17 @@ class AddressServiceImplTest {
         assertEquals("United Kingdom", address.getCountry());
         assertEquals("Edinburgh", address.getLocality());
         assertEquals("EH3 9FF", address.getPostalCode());
+    }
+
+    @Test
+    void getCountryOfResidenceEnglandWales() {
+        String s = addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES);
+        assertEquals("Wales", s);
+    }
+
+    @Test
+    void getCountryOfResidenceScotland() {
+        String s = addressService.getCountryOfResidence(Jurisdiction.SCOTLAND);
+        assertEquals("Scotland", s);
     }
 }

@@ -14,7 +14,6 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -40,7 +39,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     public Appointment create(CompanySpec spec) throws DataException {
         final String companyNumber = spec.getCompanyNumber();
 
-        final String countryOfResidence = getCountryOfResidence(spec.getJurisdiction());
+        final String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
 
         Appointment appointment = new Appointment();
 
@@ -110,14 +109,4 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         }
     }
 
-    private String getCountryOfResidence(Jurisdiction jurisdiction) {
-        switch(jurisdiction) {
-            case ENGLAND_WALES:
-                return "Wales";
-            case SCOTLAND:
-                return "Scotland";
-            default:
-                throw new IllegalArgumentException("No valid jurisdiction provided");
-        }
-    }
 }
