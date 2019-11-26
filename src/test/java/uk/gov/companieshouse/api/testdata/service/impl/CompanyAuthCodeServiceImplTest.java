@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
@@ -95,6 +97,48 @@ class CompanyAuthCodeServiceImplTest {
             this.companyAuthCodeServiceImpl.create(spec)
         );
         assertEquals("Failed to save company auth code", exception.getMessage());
+    }
+    
+    @Test
+    void verifyAuthCodeCorrect() throws NoSuchAlgorithmException, NoDataFoundException {
+        final String plainCode = "222";
+        
+        // Create a valid encrypted auth code
+        final String encryptedAuthCode = BCrypt.hashpw(MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+                .digest(plainCode.getBytes(StandardCharsets.UTF_8)), BCrypt.gensalt());
+
+        CompanyAuthCode authCode = new CompanyAuthCode();
+        authCode.setAuthCode(plainCode);
+        authCode.setEncryptedAuthCode(encryptedAuthCode);
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(authCode));
+
+        assertTrue(companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
+    }
+    
+    @Test
+    void verifyAuthCodeIncorrect() throws NoDataFoundException {
+        final String plainCode = "222";
+        
+        final String encryptedAuthCode = "$2a$10$randomrandomrandomrandomrandomrandomrandomrandom12345";
+
+        CompanyAuthCode authCode = new CompanyAuthCode();
+        authCode.setAuthCode(plainCode);
+        authCode.setEncryptedAuthCode(encryptedAuthCode);
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(authCode));
+
+        assertFalse(companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
+
+    }
+
+    @Test
+    void verifyAuthCodeNotFound() {
+        final String plainCode = "222";
+
+        CompanyAuthCode authCode = null;
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(authCode));
+
+        assertThrows(NoDataFoundException.class,
+                () -> companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
     }
     
     @Test
