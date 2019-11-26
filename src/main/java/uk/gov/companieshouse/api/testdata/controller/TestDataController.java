@@ -36,7 +36,7 @@ public class TestDataController {
     private TestDataService testDataService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws Exception {
+    public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws DataException {
 
         CompanySpec spec = request.orElse(new CompanySpec());
 
