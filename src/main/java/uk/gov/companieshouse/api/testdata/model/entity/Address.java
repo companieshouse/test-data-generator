@@ -7,18 +7,15 @@ import java.util.Objects;
 public class Address {
 
     @Field("address_line_1")
-    private String addressLine1;
+    private final String addressLine1;
     @Field("address_line_2")
-    private String addressLine2;
+    private final String addressLine2;
     @Field("country")
-    private String country;
+    private final String country;
     @Field("locality")
-    private String locality;
+    private final String locality;
     @Field("postal_code")
-    private String postalCode;
-
-    public Address() {
-    }
+    private final String postalCode;
 
     public Address(String addressLine1, String addressLine2, String country, String locality, String postalCode) {
         this.addressLine1 = addressLine1;
@@ -32,40 +29,20 @@ public class Address {
         return addressLine1;
     }
 
-    public void setAddressLine1(String addressLine1) {
-        this.addressLine1 = addressLine1;
-    }
-
     public String getAddressLine2() {
         return addressLine2;
-    }
-
-    public void setAddressLine2(String addressLine2) {
-        this.addressLine2 = addressLine2;
     }
 
     public String getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getLocality() {
         return locality;
     }
 
-    public void setLocality(String locality) {
-        this.locality = locality;
-    }
-
     public String getPostalCode() {
         return postalCode;
-    }
-
-    public void setPostalCode(String postalCode) {
-        this.postalCode = postalCode;
     }
 
     @Override

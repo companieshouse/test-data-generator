@@ -46,7 +46,9 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createEnglandWales() throws DataException {
-        final Address mockServiceAddress = new Address();
+        final Address mockServiceAddress = new Address(
+                "","","","",""
+        );
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
@@ -107,7 +109,9 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createScotland() throws DataException {
-        final Address mockServiceAddress = new Address();
+        final Address mockServiceAddress = new Address(
+                "","","","",""
+        );
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.SCOTLAND);

@@ -51,7 +51,9 @@ class OfficerAppointmentServiceImplTest {
     @Test
     void create() throws DataException {
         final String countryOfResidence = "COUNTRY";
-        Address mockAddress = new Address();
+        Address mockAddress = new Address(
+                "","","","",""
+        );
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
