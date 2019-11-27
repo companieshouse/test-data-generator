@@ -4,15 +4,21 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum Jurisdiction {
 
-    ENGLAND_WALES("england-wales"),
-    SCOTLAND("scotland"),
-    NI("northern-ireland");
+    ENGLAND_WALES("england-wales", ""),
+    SCOTLAND("scotland", "SC"),
+    NI("northern-ireland", "NI");
 
     @JsonValue
     private final String jurisdictionString;
+    private final String companyNumberPrefix;
 
-    Jurisdiction(String jurisdictionString) {
+    Jurisdiction(String jurisdictionString, String companyNumberPrefix) {
         this.jurisdictionString = jurisdictionString;
+        this.companyNumberPrefix = companyNumberPrefix;
+    }
+
+    public String getCompanyNumberPrefix() {
+        return companyNumberPrefix;
     }
 
     @Override
