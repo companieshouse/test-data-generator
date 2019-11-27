@@ -23,8 +23,6 @@ import uk.gov.companieshouse.api.testdata.service.TestDataService;
 public class TestDataServiceImpl implements TestDataService {
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
-    private static final String SCOTTISH_COMPANY_PREFIX = "SC";
-    private static final String NI_COMPANY_PREFIX = "NI";
 
     @Autowired
     private DataService<CompanyProfile> companyProfileService;
@@ -48,23 +46,9 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        String companyNumber;
-
-        switch (spec.getJurisdiction()){
-            case ENGLAND_WALES:
-                companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
-            break;
-            case NI:
-                companyNumber =NI_COMPANY_PREFIX +
-                    randomService.getNumber(COMPANY_NUMBER_LENGTH - NI_COMPANY_PREFIX.length());
-            break;
-            case SCOTLAND:
-                companyNumber = SCOTTISH_COMPANY_PREFIX +
-                    randomService.getNumber(COMPANY_NUMBER_LENGTH - SCOTTISH_COMPANY_PREFIX.length());
-            break;
-
-            default: throw new IllegalArgumentException("Invalid jurisdiction for company number");
-        }
+        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
+        String companyNumber = companyNumberPrefix +
+                randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length());
 
         spec.setCompanyNumber(companyNumber);
         
