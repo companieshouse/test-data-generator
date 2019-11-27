@@ -22,6 +22,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
+import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 
@@ -34,11 +35,10 @@ public class GlobalExceptionHandlerTest {
     void handleHttpMessageNotReadableNullCause() throws Exception {
         Throwable cause = null;
         HttpInputMessage httpInputMessage = null;
-        String exceptionMessage = "message not readable";
-        Exception ex = new HttpMessageNotReadableException(exceptionMessage, cause, httpInputMessage);
+        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
-        final ValidationError expectedError = new ValidationError(exceptionMessage, null, null, "ch:validation");
+        final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
@@ -53,11 +53,10 @@ public class GlobalExceptionHandlerTest {
     void handleHttpMessageNotReadableUnhandledCause() throws Exception {
         Throwable cause = new Throwable("throwable message");
         HttpInputMessage httpInputMessage = null;
-        String exceptionMessage = "message not readable";
-        Exception ex = new HttpMessageNotReadableException(exceptionMessage, cause, httpInputMessage);
+        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
-        final ValidationError expectedError = new ValidationError(cause.getMessage(), null, null, "ch:validation");
+        final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
@@ -67,17 +66,17 @@ public class GlobalExceptionHandlerTest {
         assertEquals(1, errors.getErrorCount());
         assertTrue(errors.containsError(expectedError));
     }
-    
+
     @Test
     void handleHttpMessageNotReadableCompanySpecInvalidFormatException() throws Exception {
         InvalidFormatException cause = Mockito.mock(InvalidFormatException.class);
         HttpInputMessage httpInputMessage = null;
-        String exceptionMessage = "message not readable";
-        Exception ex = new HttpMessageNotReadableException(exceptionMessage, cause, httpInputMessage);
+        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
-        when(cause.getPathReference()).thenReturn("uk.gov.companieshouse.api.testdata.model.rest.CompanySpec[\"jurisdiction\"]");
-        
+        when(cause.getPathReference())
+                .thenReturn("uk.gov.companieshouse.api.testdata.model.rest.CompanySpec[\"jurisdiction\"]");
+
         final ValidationError expectedError = new ValidationError("invalid jurisdiction", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
@@ -88,20 +87,17 @@ public class GlobalExceptionHandlerTest {
         assertEquals(1, errors.getErrorCount());
         assertTrue(errors.containsError(expectedError));
     }
-    
+
     @Test
     void handleHttpMessageNotReadableOtherInvalidFormatException() throws Exception {
         InvalidFormatException cause = Mockito.mock(InvalidFormatException.class);
         HttpInputMessage httpInputMessage = null;
-        String exceptionMessage = "message not readable";
-        Exception ex = new HttpMessageNotReadableException(exceptionMessage, cause, httpInputMessage);
+        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
         when(cause.getPathReference()).thenReturn("unrecognised path reference");
-        String ifeMessage = "ife message";
-        when(cause.getMessage()).thenReturn(ifeMessage);
-        
-        final ValidationError expectedError = new ValidationError(ifeMessage, null, null, "ch:validation");
+
+        final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
@@ -111,17 +107,17 @@ public class GlobalExceptionHandlerTest {
         assertEquals(1, errors.getErrorCount());
         assertTrue(errors.containsError(expectedError));
     }
-    
+
     @Test
     void handleMethodArgumentNotValid() throws Exception {
         List<FieldError> fieldErrors = new ArrayList<>();
         for (int i = 1; i <= 3; i++) {
             fieldErrors.add(new FieldError("name " + i, "field" + i, "field error message" + i));
         }
-        
+
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
-        
+
         MethodArgumentNotValidException ex = Mockito.mock(MethodArgumentNotValidException.class);
         when(ex.getBindingResult()).thenReturn(bindingResult);
         WebRequest request = Mockito.mock(WebRequest.class);
@@ -136,5 +132,18 @@ public class GlobalExceptionHandlerTest {
             final ValidationError expectedError = new ValidationError(e.getDefaultMessage(), null, null, "ch:validation");
             assertTrue(errors.containsError(expectedError));
         }
+    }
+
+    @Test
+    void handleNoDataFoundException() {
+        final InvalidAuthCodeException ex = new InvalidAuthCodeException("1234");
+
+        ResponseEntity<ValidationErrors> response = handler.handleInvalidAuthCode(ex);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+        assertEquals(1, response.getBody().getErrorCount());
+
+        final ValidationError expectedError = new ValidationError("incorrect company auth_code", null, null, "ch:validation");
+        assertTrue(response.getBody().containsError(expectedError));
     }
 }
