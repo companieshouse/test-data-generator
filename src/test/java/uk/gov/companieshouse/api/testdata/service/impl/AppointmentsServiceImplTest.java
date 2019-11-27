@@ -52,7 +52,9 @@ class AppointmentsServiceImplTest {
 
     @Test
     void create() throws DataException {
-        final Address mockServiceAddress = new Address();
+        final Address mockServiceAddress = new Address(
+                "","","","",""
+        );
 
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -109,7 +111,9 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createScottish() throws DataException {
-        final Address mockServiceAddress = new Address();
+        final Address mockServiceAddress = new Address(
+                "","","","",""
+        );
 
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);

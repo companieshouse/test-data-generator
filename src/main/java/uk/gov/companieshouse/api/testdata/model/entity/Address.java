@@ -17,14 +17,6 @@ public class Address {
     @Field("postal_code")
     private final String postalCode;
 
-    public Address() {
-        this.addressLine1 = "";
-        this.addressLine2 = "";
-        this.country = "";
-        this.locality = "";
-        this.postalCode = "";
-    }
-
     public Address(String addressLine1, String addressLine2, String country, String locality, String postalCode) {
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
