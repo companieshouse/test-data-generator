@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -32,7 +33,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private OfficerAppointmentService officerAppointmentService;
     @Autowired
-    private DataService<CompanyAuthCode> companyAuthCodeService;
+    private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
     private DataService<Appointment> appointmentService;
     @Autowired

@@ -15,5 +15,12 @@ public interface TestDataService {
      */
     CompanyData createCompanyData(CompanySpec companySpec) throws DataException;
 
-    void deleteCompanyData(String companyId) throws NoDataFoundException, DataException;
+    /**
+     * Delete all data for company {@code companyNumber}
+     * 
+     * @param companyNumber The company number to be deleted
+     * @throws NoDataFoundException
+     * @throws DataException
+     */
+    void deleteCompanyData(String companyNumber) throws NoDataFoundException, DataException;
 }

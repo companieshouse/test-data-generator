@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
@@ -39,25 +40,32 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         logException(ex);
     }
     
+    @ExceptionHandler(value = { InvalidAuthCodeException.class })
+    @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
+    protected ResponseEntity<ValidationErrors> handleInvalidAuthCode(InvalidAuthCodeException ex) {
+        LOG.error("Incorrect company auth_code provided for company " + ex.getCompanyNumber());
+
+        ValidationErrors errors = new ValidationErrors();
+        errors.addError(createValidationError("incorrect company auth_code"));
+        return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
+    }
+    
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
         HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status,
         WebRequest request) {
         logException(ex);
         
-        String message = ex.getMessage();
+        String message = "invalid request";
         Throwable cause = ex.getCause();
-        if (cause != null) {
-            message = cause.getMessage();
-            if (cause instanceof InvalidFormatException) {
-                InvalidFormatException ife = (InvalidFormatException) cause;
-                String pathReference = ife.getPathReference();
-                if (pathReference != null && pathReference.startsWith(CompanySpec.class.getName())) {
-                    // Handle invalid format in CompanySpec (failed to parse jurisdiction)
-                    String invalidField = pathReference.substring(pathReference.indexOf("[\"") + 2,
-                            pathReference.indexOf("\"]"));
-                    message = "invalid " + invalidField;
-                }
+        if (cause != null && cause instanceof InvalidFormatException) {
+            InvalidFormatException ife = (InvalidFormatException) cause;
+            String pathReference = ife.getPathReference();
+            if (pathReference != null && pathReference.startsWith(CompanySpec.class.getName())) {
+                // Handle invalid format in CompanySpec (failed to deserialize enum)
+                String invalidField = pathReference.substring(pathReference.indexOf("[\"") + 2,
+                        pathReference.indexOf("\"]"));
+                message = "invalid " + invalidField;
             }
         }
 

@@ -19,9 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -34,6 +36,9 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
+    
+    @Autowired
+    private CompanyAuthCodeService companyAuthCodeService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws DataException {
@@ -49,14 +54,18 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/{companyId}")
-    public ResponseEntity<Void> delete(@PathVariable("companyId") String companyId)
-            throws NoDataFoundException, DataException {
+    @DeleteMapping("/company/{companyNumber}")
+    public ResponseEntity<Void> delete(@PathVariable("companyNumber") String companyNumber,
+            @Valid @RequestBody DeleteCompanyRequest request) throws Exception {
+        
+        if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
+            throw new InvalidAuthCodeException(companyNumber);
+        }
 
-        testDataService.deleteCompanyData(companyId);
+        testDataService.deleteCompanyData(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("company number", companyId);
+        data.put("company number", companyNumber);
         LOG.info("Company deleted", data);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
