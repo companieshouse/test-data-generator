@@ -37,6 +37,7 @@ class TestDataServiceImplTest {
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
+    private static final String NI_COMPANY_PREFIX = "NI";
 
     @Mock
     private DataService<CompanyProfile> companyProfileService;
@@ -128,6 +129,42 @@ class TestDataServiceImplTest {
 
         assertEquals(SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyNumber());
         assertEquals("/company/" + SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
+    }
+
+    @Test
+    void createCompanyDataNISpec() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.NI);
+        CompanyProfile mockCompany = new CompanyProfile();
+        mockCompany.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+
+        Appointment mockAppointment = new Appointment();
+        mockAppointment.setOfficerId(OFFICER_ID);
+        mockAppointment.setAppointmentId(APPOINTMENT_ID);
+
+        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(NI_COMPANY_PREFIX + COMPANY_NUMBER, spec.getCompanyNumber());
+        assertEquals(Jurisdiction.NI, spec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(officerListService, times(1)).create(expectedSpec, OFFICER_ID, APPOINTMENT_ID);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
+
+        assertEquals(NI_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals("/company/" + NI_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 

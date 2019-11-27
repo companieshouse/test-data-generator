@@ -23,6 +23,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
+    private static final String NI_COMPANY_PREFIX = "NI";
 
     @Autowired
     private DataService<CompanyProfile> companyProfileService;
@@ -49,11 +50,19 @@ public class TestDataServiceImpl implements TestDataService {
         String companyNumber;
 
         switch (spec.getJurisdiction()){
-            case SCOTLAND: companyNumber = SCOTTISH_COMPANY_PREFIX +
+            case ENGLAND_WALES:
+                companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
+            break;
+            case NI:
+                companyNumber =NI_COMPANY_PREFIX +
+                    randomService.getNumber(COMPANY_NUMBER_LENGTH - NI_COMPANY_PREFIX.length());
+            break;
+            case SCOTLAND:
+                companyNumber = SCOTTISH_COMPANY_PREFIX +
                     randomService.getNumber(COMPANY_NUMBER_LENGTH - SCOTTISH_COMPANY_PREFIX.length());
             break;
-            case ENGLAND_WALES:
-            default: companyNumber = String.valueOf(randomService.getNumber(COMPANY_NUMBER_LENGTH));
+
+            default: throw new IllegalArgumentException("Invalid jurisdiction for company number");
         }
 
         spec.setCompanyNumber(companyNumber);

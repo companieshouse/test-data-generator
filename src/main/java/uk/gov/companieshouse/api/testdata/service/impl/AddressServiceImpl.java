@@ -8,19 +8,27 @@ import uk.gov.companieshouse.api.testdata.service.AddressService;
 @Service
 public class AddressServiceImpl implements AddressService {
 
+    private static final String UNITED_KINGDOM = "United Kingdom";
     private static final Address ENGLAND_WALES_ADDRESS = new Address(
             "Companies House",
             "Crownway",
-            "United Kingdom",
+            UNITED_KINGDOM,
             "Cardiff",
             "CF14 3UZ"
     );
     private static final Address SCOTLAND_ADDRESS = new Address(
             "4th Floor Edinburgh Quay 2",
             "139 Fountain Bridge",
-            "United Kingdom",
+            UNITED_KINGDOM,
             "Edinburgh",
             "EH3 9FF"
+    );
+    private static final Address NI_ADDRESS = new Address(
+            "Second Floor The Linenhall",
+            "32 - 38 Linenhall Street",
+            UNITED_KINGDOM,
+            "Belfast",
+            "BT2 8BG"
     );
 
     @Override
@@ -30,6 +38,8 @@ public class AddressServiceImpl implements AddressService {
                 return ENGLAND_WALES_ADDRESS;
             case SCOTLAND:
                 return SCOTLAND_ADDRESS;
+            case NI:
+                return NI_ADDRESS;
             default:
                 throw new IllegalArgumentException("No address for jurisdiction");
         }
@@ -42,6 +52,8 @@ public class AddressServiceImpl implements AddressService {
                 return "Wales";
             case SCOTLAND:
                 return "Scotland";
+            case NI:
+                return "Northern Ireland";
             default:
                 throw new IllegalArgumentException("No valid jurisdiction provided");
         }
