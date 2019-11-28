@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
 
-    private static final String METRIC_DATA_NOT_FOUND = "metric data not found";
+    private static final String METRIC_DATA_NOT_FOUND = "company metrics data not found";
 
     @Autowired
     private CompanyMetricsRepository repository;

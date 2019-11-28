@@ -106,6 +106,16 @@ class CompanyMetricsServiceImplTest {
     }
 
     @Test
+    void deleteNoDataException() {
+        Optional<CompanyMetrics> optionalMetric = Optional.empty();
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(optionalMetric);
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
+                this.metricsService.delete(COMPANY_NUMBER)
+        );
+        assertEquals("company metrics data not found", exception.getMessage());
+    }
+
+    @Test
     void deleteMongoException() {
         CompanyMetrics metrics = new CompanyMetrics();
         Optional<CompanyMetrics> optionalMetric = Optional.of(metrics);
