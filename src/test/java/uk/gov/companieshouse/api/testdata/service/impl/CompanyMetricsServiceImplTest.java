@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,10 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyMetricsServiceImplTest {
@@ -89,6 +93,39 @@ class CompanyMetricsServiceImplTest {
             this.metricsService.create(spec)
         );
         assertEquals("Failed to save company metrics", exception.getMessage());
+    }
+
+    @Test
+    void delete() throws NoDataFoundException, DataException {
+        CompanyMetrics metrics = new CompanyMetrics();
+        Optional<CompanyMetrics> optionalMetric = Optional.of(metrics);
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(optionalMetric);
+
+        this.metricsService.delete(COMPANY_NUMBER);
+        verify(repository).delete(metrics);
+    }
+
+    @Test
+    void deleteNoDataException() {
+        Optional<CompanyMetrics> optionalMetric = Optional.empty();
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(optionalMetric);
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
+                this.metricsService.delete(COMPANY_NUMBER)
+        );
+        assertEquals("company metrics data not found", exception.getMessage());
+    }
+
+    @Test
+    void deleteMongoException() {
+        CompanyMetrics metrics = new CompanyMetrics();
+        Optional<CompanyMetrics> optionalMetric = Optional.of(metrics);
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(optionalMetric);
+        doThrow(MongoException.class).when(repository).delete(metrics);
+
+        DataException exception = assertThrows(DataException.class, () ->
+                this.metricsService.delete(COMPANY_NUMBER)
+        );
+        assertEquals("Failed to delete company metrics", exception.getMessage());
     }
 
 }

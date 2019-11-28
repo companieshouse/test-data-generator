@@ -16,6 +16,8 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
 
+    private static final String METRIC_DATA_NOT_FOUND = "company metrics data not found";
+
     @Autowired
     private CompanyMetricsRepository repository;
     @Autowired
@@ -38,7 +40,14 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
 
     @Override
     public void delete(String companyNumber) throws NoDataFoundException, DataException {
-        // TODO Auto-generated method stub
+        CompanyMetrics existingMetric = repository.findById(companyNumber)
+                .orElseThrow(() -> new NoDataFoundException(METRIC_DATA_NOT_FOUND));
+
+        try {
+            repository.delete(existingMetric);
+        } catch (MongoException e) {
+            throw new DataException("Failed to delete company metrics", e);
+        }
     }
 
 }

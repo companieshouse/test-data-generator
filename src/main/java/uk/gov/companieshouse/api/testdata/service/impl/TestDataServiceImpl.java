@@ -72,5 +72,6 @@ public class TestDataServiceImpl implements TestDataService {
         this.companyAuthCodeService.delete(companyId);
         this.appointmentService.delete(companyId);
         this.companyPscStatementService.delete(companyId);
+        this.companyMetricsService.delete(companyId);
     }
 }
