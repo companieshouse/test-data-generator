@@ -261,5 +261,4 @@ public class Appointment {
     public void setUpdated(Instant updated) {
         this.updated = updated;
     }
-
 }
