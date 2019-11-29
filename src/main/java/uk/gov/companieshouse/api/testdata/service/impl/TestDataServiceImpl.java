@@ -15,7 +15,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
@@ -28,8 +27,6 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<CompanyProfile> companyProfileService;
     @Autowired
     private DataService<FilingHistory> filingHistoryService;
-    @Autowired
-    private OfficerAppointmentService officerAppointmentService;
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
@@ -54,8 +51,7 @@ public class TestDataServiceImpl implements TestDataService {
         
         this.companyProfileService.create(spec);
         this.filingHistoryService.create(spec);
-        Appointment appointment = this.appointmentService.create(spec);
-        this.officerAppointmentService.create(spec, appointment.getOfficerId(), appointment.getAppointmentId());
+        this.appointmentService.create(spec);
         CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
         this.companyMetricsService.create(spec);
         this.companyPscStatementService.create(spec);
@@ -68,7 +64,6 @@ public class TestDataServiceImpl implements TestDataService {
 
         this.companyProfileService.delete(companyId);
         this.filingHistoryService.delete(companyId);
-        this.officerAppointmentService.delete(companyId);
         this.companyAuthCodeService.delete(companyId);
         this.appointmentService.delete(companyId);
         this.companyPscStatementService.delete(companyId);

@@ -27,7 +27,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.OfficerAppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -44,8 +43,6 @@ class TestDataServiceImplTest {
     private DataService<CompanyProfile> companyProfileService;
     @Mock
     private DataService<FilingHistory> filingHistoryService;
-    @Mock
-    private OfficerAppointmentService officerListService;
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
     @Mock
@@ -86,7 +83,6 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.ENGLAND_WALES, spec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
-        verify(officerListService, times(1)).create(expectedSpec, OFFICER_ID, APPOINTMENT_ID);
         verify(companyAuthCodeService, times(1)).create(expectedSpec);
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
@@ -122,7 +118,6 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.SCOTLAND, spec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
-        verify(officerListService, times(1)).create(expectedSpec, OFFICER_ID, APPOINTMENT_ID);
         verify(companyAuthCodeService, times(1)).create(expectedSpec);
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
@@ -158,7 +153,6 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.NI, spec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
-        verify(officerListService, times(1)).create(expectedSpec, OFFICER_ID, APPOINTMENT_ID);
         verify(companyAuthCodeService, times(1)).create(expectedSpec);
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
@@ -175,7 +169,6 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
-        verify(officerListService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
