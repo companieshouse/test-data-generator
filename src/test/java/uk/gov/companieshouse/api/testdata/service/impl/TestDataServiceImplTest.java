@@ -169,7 +169,6 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
-        //verify(officerListService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
