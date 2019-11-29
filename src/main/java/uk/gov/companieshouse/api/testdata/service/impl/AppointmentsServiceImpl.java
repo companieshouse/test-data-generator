@@ -36,6 +36,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private static final String OFFICER_APPOINTMENT_DATA_NOT_FOUND = "officer appointment data not found";
     private static final String COMPANY_LINK = "/company/";
     private static final String OFFICERS_LINK = "/officers/";
+    private static final String OCCUPATION = "Director";
 
     @Autowired
     private AddressService addressService;
@@ -71,7 +72,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setAppointmentId(appointmentId);
 
         appointment.setNationality("British");
-        appointment.setOccupation("Director");
+        appointment.setOccupation(OCCUPATION);
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
         appointment.setCountryOfResidence(countryOfResidence);
         appointment.setUpdatedAt(dateTimeNow);
@@ -183,10 +184,10 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         Jurisdiction jurisdiction = companySpec.getJurisdiction();
 
         OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
-        officerAppointmentItem.setOccupation("Director");
+        officerAppointmentItem.setOccupation(OCCUPATION);
         officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
         officerAppointmentItem.setForename("Test");
-        officerAppointmentItem.setSurname("Director");
+        officerAppointmentItem.setSurname(OCCUPATION);
         officerAppointmentItem.setOfficerRole("director");
         officerAppointmentItem.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
         officerAppointmentItem.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
