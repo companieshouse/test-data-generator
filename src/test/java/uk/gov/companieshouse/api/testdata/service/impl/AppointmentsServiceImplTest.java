@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -199,6 +200,7 @@ class AppointmentsServiceImplTest {
         DataException exception = assertThrows(DataException.class, () ->
                 this.appointmentsService.create(spec)
         );
+        verify(appointmentsRepository, times(0)).save(any());
         assertEquals("Failed to save officer appointment", exception.getMessage());
     }
     
