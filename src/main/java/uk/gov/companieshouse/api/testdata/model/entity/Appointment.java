@@ -261,4 +261,33 @@ public class Appointment {
     public void setUpdated(Instant updated) {
         this.updated = updated;
     }
+
+    @Override
+    public String toString() {
+        return "Appointment{" +
+                "id='" + id + '\'' +
+                ", created=" + created +
+                ", internalId='" + internalId + '\'' +
+                ", appointmentId='" + appointmentId + '\'' +
+                ", nationality='" + nationality + '\'' +
+                ", occupation='" + occupation + '\'' +
+                ", serviceAddressIsSameAsRegisteredOfficeAddress=" + serviceAddressIsSameAsRegisteredOfficeAddress +
+                ", countryOfResidence='" + countryOfResidence + '\'' +
+                ", updatedAt=" + updatedAt +
+                ", forename='" + forename + '\'' +
+                ", appointedOn=" + appointedOn +
+                ", officerRole='" + officerRole + '\'' +
+                ", etag='" + etag + '\'' +
+                ", serviceAddress=" + serviceAddress +
+                ", dataCompanyNumber='" + dataCompanyNumber + '\'' +
+                ", links=" + links +
+                ", surname='" + surname + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", companyName='" + companyName + '\'' +
+                ", companyStatus='" + companyStatus + '\'' +
+                ", officerId='" + officerId + '\'' +
+                ", companyNumber='" + companyNumber + '\'' +
+                ", updated=" + updated +
+                '}';
+    }
 }

@@ -3,6 +3,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +15,12 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -27,13 +33,18 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private static final int INTERNAL_ID_LENGTH = 9;
     private static final String INTERNAL_ID_PREFIX = "8";
     private static final String APPOINTMENT_DATA_NOT_FOUND = "appointment data not found";
+    private static final String OFFICER_APPOINTMENT_DATA_NOT_FOUND = "officer appointment data not found";
+    private static final String COMPANY_LINK = "/company/";
+    private static final String OFFICERS_LINK = "/officers/";
 
     @Autowired
     private AddressService addressService;
     @Autowired
     private RandomService randomService;
     @Autowired
-    private AppointmentsRepository repository;
+    private AppointmentsRepository appointmentsRepository;
+    @Autowired
+    private OfficerRepository officerRepository;
 
     @Override
     public Appointment create(CompanySpec spec) throws DataException {
@@ -73,9 +84,9 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setDataCompanyNumber(companyNumber);
 
         Links links = new Links();
-        links.setSelf("/company/" + companyNumber + "/appointments/" + officerId);
-        links.setOfficerSelf("/officers/" + officerId);
-        links.setOfficerAppointments("/officers/" + officerId + "/appointments");
+        links.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + officerId);
+        links.setOfficerSelf(OFFICERS_LINK + officerId);
+        links.setOfficerAppointments(OFFICERS_LINK + officerId + "/appointments");
         appointment.setLinks(links);
 
         appointment.setSurname("DIRECTOR");
@@ -87,8 +98,10 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setCompanyNumber(companyNumber);
         appointment.setUpdated(dateTimeNow);
 
+        this.createOfficerAppointment(spec, officerId, appointmentId);
+
         try {
-            return repository.save(appointment);
+            return appointmentsRepository.save(appointment);
         } catch (MongoException e) {
             throw new DataException("Failed to save appointment", e);
         }
@@ -96,17 +109,107 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
     @Override
     public void delete(String companyNumber) throws NoDataFoundException, DataException {
-        Appointment existingAppointment = repository.findByCompanyNumber(companyNumber);
+        Appointment existingAppointment = appointmentsRepository.findByCompanyNumber(companyNumber);
 
         if (existingAppointment == null) {
             throw new NoDataFoundException(APPOINTMENT_DATA_NOT_FOUND);
         }
+        String officerId = existingAppointment.getOfficerId();
+
+        this.deleteOfficerAppointment(officerId);
 
         try {
-            repository.delete(existingAppointment);
+            appointmentsRepository.delete(existingAppointment);
         } catch (MongoException e) {
             throw new DataException("Failed to delete appointment", e);
         }
+    }
+
+
+
+    private void createOfficerAppointment(CompanySpec spec, String officerId, String appointmentId)
+            throws DataException {
+
+        OfficerAppointment officerAppointment = new OfficerAppointment();
+
+        Instant dayTimeNow = Instant.now();
+        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        officerAppointment.setId(officerId);
+        officerAppointment.setCreatedAt(dayTimeNow);
+        officerAppointment.setUpdatedAt(dayTimeNow);
+
+        officerAppointment.setTotalResults(1);
+        officerAppointment.setActiveCount(1);
+        officerAppointment.setInactiveCount(0);
+        officerAppointment.setResignedCount(1);
+        officerAppointment.setCorporateOfficer(false);
+        officerAppointment.setName("Test DIRECTOR");
+
+        Links links = new Links();
+        links.setSelf(OFFICERS_LINK + officerId + "/appointments");
+        officerAppointment.setLinks(links);
+
+        officerAppointment.setEtag(this.randomService.getEtag());
+        officerAppointment.setDateOfBirthYear(1990);
+        officerAppointment.setDateOfBirthMonth(3);
+        officerAppointment.setOfficerAppointmentItems(
+                createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow));
+
+        try {
+            officerRepository.save(officerAppointment);
+        } catch (MongoException e) {
+            throw new DataException("Failed to save officer appointment", e);
+        }
+
+    }
+
+    private void deleteOfficerAppointment(String officerId) throws NoDataFoundException, DataException {
+        OfficerAppointment existingAppointment = officerRepository.findById(officerId)
+                .orElseThrow(() -> new NoDataFoundException(OFFICER_APPOINTMENT_DATA_NOT_FOUND));
+
+        try {
+            officerRepository.delete(existingAppointment);
+        } catch (MongoException e) {
+            throw new DataException("Failed to delete officer appointment", e);
+        }
+    }
+
+    private List<OfficerAppointmentItem> createOfficerAppointmentItems(CompanySpec companySpec, String appointmentId,
+                                                                       Instant dayNow, Instant dayTimeNow) {
+        List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
+
+        String companyNumber = companySpec.getCompanyNumber();
+        Jurisdiction jurisdiction = companySpec.getJurisdiction();
+
+        OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
+        officerAppointmentItem.setOccupation("Director");
+        officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
+        officerAppointmentItem.setForename("Test");
+        officerAppointmentItem.setSurname("Director");
+        officerAppointmentItem.setOfficerRole("director");
+        officerAppointmentItem.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
+        officerAppointmentItem.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
+        officerAppointmentItem.setAppointedOn(dayNow);
+        officerAppointmentItem.setNationality("British");
+        officerAppointmentItem.setUpdatedAt(dayTimeNow);
+        officerAppointmentItem.setName("Test DIRECTOR");
+        officerAppointmentItem.setCompanyName("Company " + companyNumber);
+        officerAppointmentItem.setCompanyNumber(companyNumber);
+        officerAppointmentItem.setCompanyStatus("active");
+
+        officerAppointmentItemList.add(officerAppointmentItem);
+
+        return officerAppointmentItemList;
+    }
+
+    private Links createOfficerAppointmentItemLinks(String companyNumber, String appointmentId) {
+
+        Links links = new Links();
+        links.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + appointmentId);
+        links.setCompany(COMPANY_LINK + companyNumber);
+
+        return links;
     }
 
 }
