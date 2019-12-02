@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -92,23 +94,21 @@ class CompanyPscStatementServiceImplTest {
     }
     
     @Test
-    void delete() throws Exception {
+    void delete() throws DataException {
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(companyPscStatement);
 
-        this.companyPscStatementService.delete(COMPANY_NUMBER);
+        assertTrue(this.companyPscStatementService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyPscStatement);
     }
 
     @Test
-    void deleteNoDataException() {
+    void deleteNoDataException() throws DataException {
         CompanyPscStatement companyPscStatement = null;
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(companyPscStatement);
-        
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-                this.companyPscStatementService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("statement data not found", exception.getMessage());
+
+        assertFalse(this.companyPscStatementService.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(companyPscStatement);
     }
 
     @Test

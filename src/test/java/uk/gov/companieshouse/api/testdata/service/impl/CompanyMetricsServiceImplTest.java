@@ -1,12 +1,17 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,13 +23,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyMetricsServiceImplTest {
@@ -96,23 +98,22 @@ class CompanyMetricsServiceImplTest {
     }
 
     @Test
-    void delete() throws NoDataFoundException, DataException {
+    void delete() throws DataException {
         CompanyMetrics metrics = new CompanyMetrics();
         Optional<CompanyMetrics> optionalMetric = Optional.of(metrics);
         when(repository.findById(COMPANY_NUMBER)).thenReturn(optionalMetric);
 
-        this.metricsService.delete(COMPANY_NUMBER);
+        assertTrue(this.metricsService.delete(COMPANY_NUMBER));
         verify(repository).delete(metrics);
     }
 
     @Test
-    void deleteNoDataException() {
+    void deleteNoDataException() throws DataException {
         Optional<CompanyMetrics> optionalMetric = Optional.empty();
         when(repository.findById(COMPANY_NUMBER)).thenReturn(optionalMetric);
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-                this.metricsService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("company metrics data not found", exception.getMessage());
+        
+        assertFalse(this.metricsService.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(any());
     }
 
     @Test

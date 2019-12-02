@@ -1,7 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,10 +14,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
@@ -79,8 +81,8 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(COMPANY_NUMBER, spec.getCompanyNumber());
-        assertEquals(Jurisdiction.ENGLAND_WALES, spec.getJurisdiction());
+        assertEquals(COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
         verify(companyAuthCodeService, times(1)).create(expectedSpec);
@@ -114,8 +116,8 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, spec.getCompanyNumber());
-        assertEquals(Jurisdiction.SCOTLAND, spec.getJurisdiction());
+        assertEquals(SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.SCOTLAND, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
         verify(companyAuthCodeService, times(1)).create(expectedSpec);
@@ -149,8 +151,8 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(NI_COMPANY_PREFIX + COMPANY_NUMBER, spec.getCompanyNumber());
-        assertEquals(Jurisdiction.NI, spec.getJurisdiction());
+        assertEquals(NI_COMPANY_PREFIX + COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.NI, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
         verify(companyAuthCodeService, times(1)).create(expectedSpec);
@@ -162,10 +164,199 @@ class TestDataServiceImplTest {
         assertEquals("/company/" + NI_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
+    
 
     @Test
-    void deleteCompanyData() throws NoDataFoundException, DataException {
+    void createCompanyDataRollBack() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.NI);
+        
+        final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix() + COMPANY_NUMBER;
+        when(this.randomService.getNumber(Mockito.anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        
+        DataException pscStatementException = new DataException("error");
+        when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
+
+        DataException thrown = assertThrows(DataException.class, () -> this.testDataService.createCompanyData(spec));
+
+        assertEquals(pscStatementException, thrown);
+        
+        verify(companyProfileService).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(fullCompanyNumber, expectedSpec.getCompanyNumber());
+        assertEquals(spec.getJurisdiction(), expectedSpec.getJurisdiction());
+
+        verify(filingHistoryService).create(expectedSpec);
+        verify(companyAuthCodeService).create(expectedSpec);
+        verify(appointmentService).create(expectedSpec);
+        verify(metricsService).create(expectedSpec);
+        
+        // Verify we roll back data
+        verify(companyProfileService).delete(fullCompanyNumber);
+        verify(filingHistoryService).delete(fullCompanyNumber);
+        verify(companyAuthCodeService).delete(fullCompanyNumber);
+        verify(appointmentService).delete(fullCompanyNumber);
+        verify(companyPscStatementService).delete(fullCompanyNumber);
+        verify(metricsService).delete(fullCompanyNumber);
+    }
+
+    @Test
+    void deleteCompanyData() throws DataException {
         this.testDataService.deleteCompanyData(COMPANY_NUMBER);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void createCompanyDataNullSpec() throws DataException {
+        CompanySpec spec = null;
+        assertThrows(IllegalArgumentException.class, () -> this.testDataService.createCompanyData(spec));
+        
+        verify(companyProfileService, never()).delete(any());
+        verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
+        verify(appointmentService, never()).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
+        verify(metricsService, never()).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataProfileException() throws DataException {
+        DataException ex = new DataException("exception");
+        when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(ex, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataFilingHistoryException() throws DataException {
+        DataException ex = new DataException("exception");
+        when(filingHistoryService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(ex, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataAuthCodeException() throws DataException {
+        DataException ex = new DataException("exception");
+        when(companyAuthCodeService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(ex, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataAppointmentException() throws DataException {
+        DataException ex = new DataException("exception");
+        when(appointmentService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(ex, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataPscStatementException() throws DataException {
+        DataException ex = new DataException("exception");
+        when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(ex, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataMetricsException() throws DataException {
+        DataException ex = new DataException("exception");
+        when(metricsService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(ex, thrown);
+        assertEquals(0, thrown.getSuppressed().length);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataMultipleExceptions() throws DataException {
+        DataException profileException = new DataException("exception");
+        when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(profileException);
+
+        DataException authCodeException = new DataException("exception");
+        when(companyAuthCodeService.delete(COMPANY_NUMBER)).thenThrow(authCodeException);
+
+        DataException pscStatementException = new DataException("exception");
+        when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(pscStatementException);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(profileException, thrown);
+        assertEquals(2, thrown.getSuppressed().length);
+        assertEquals(authCodeException, thrown.getSuppressed()[0]);
+        assertEquals(pscStatementException, thrown.getSuppressed()[1]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);

@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 
@@ -19,8 +18,7 @@ public interface TestDataService {
      * Delete all data for company {@code companyNumber}
      * 
      * @param companyNumber The company number to be deleted
-     * @throws NoDataFoundException
      * @throws DataException
      */
-    void deleteCompanyData(String companyNumber) throws NoDataFoundException, DataException;
+    void deleteCompanyData(String companyNumber) throws DataException;
 }

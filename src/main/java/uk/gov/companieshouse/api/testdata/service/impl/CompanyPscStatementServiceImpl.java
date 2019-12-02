@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -21,7 +20,6 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement> {
 
-    private static final String STATEMENT_DATA_NOT_FOUND = "statement data not found";
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
 
@@ -67,15 +65,16 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     }
 
     @Override
-    public void delete(String companyNumber) throws NoDataFoundException, DataException {
+    public boolean delete(String companyNumber) throws DataException {
         CompanyPscStatement existingStatement = repository.findByCompanyNumber(companyNumber);
 
         if (existingStatement == null) {
-            throw new NoDataFoundException(STATEMENT_DATA_NOT_FOUND);
+            return false;
         }
 
         try {
             repository.delete(existingStatement);
+            return true;
         } catch (MongoException e) {
             throw new DataException("Failed to delete PSC statement", e);
         }
