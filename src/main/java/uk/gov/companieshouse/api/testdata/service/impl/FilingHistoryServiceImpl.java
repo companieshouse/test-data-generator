@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
@@ -30,8 +30,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
-    private static final String FILING_HISTORY_DATA_NOT_FOUND = "filing history data not found";
-
+ 
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
     @Autowired
@@ -79,16 +78,12 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
     }
 
     @Override
-    public void delete(String companyId) throws NoDataFoundException, DataException {
-
-        FilingHistory filingHistoryToDelete = filingHistoryRepository.findByCompanyNumber(companyId);
-
-        if (filingHistoryToDelete == null) {
-            throw new NoDataFoundException(FILING_HISTORY_DATA_NOT_FOUND);
-        }
-
+    public boolean delete(String companyId) throws DataException {
         try {
-            filingHistoryRepository.delete(filingHistoryToDelete);
+            Optional<FilingHistory> filingHistory = filingHistoryRepository.findByCompanyNumber(companyId);
+
+            filingHistory.ifPresent(filingHistoryRepository::delete);
+            return filingHistory.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete filing history", e);
         }

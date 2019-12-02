@@ -1,14 +1,18 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +24,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
@@ -31,8 +34,6 @@ import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class AppointmentsServiceImplTest {
@@ -205,41 +206,39 @@ class AppointmentsServiceImplTest {
     }
     
     @Test
-    void delete() throws Exception {
+    void delete() throws DataException {
         Appointment apt = new Appointment();
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
 
-        this.appointmentsService.delete(COMPANY_NUMBER);
+        assertTrue(this.appointmentsService.delete(COMPANY_NUMBER));
+        verify(officerRepository).delete(officerAppointment);
         verify(appointmentsRepository).delete(apt);
     }
 
     @Test
-    void deleteNoAppointmentDataException() {
-        Appointment apt = null;
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+    void deleteNoAppointmentDataException() throws DataException {
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
         
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-                this.appointmentsService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("appointment data not found", exception.getMessage());
+        assertFalse(this.appointmentsService.delete(COMPANY_NUMBER));
+        verify(officerRepository, never()).delete(any());
+        verify(appointmentsRepository, never()).delete(any());
     }
 
     @Test
-    void deleteNoOfficerDataException() {
+    void deleteNoOfficerDataException() throws DataException {
         Appointment apt = new Appointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.empty());
 
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-                this.appointmentsService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("officer appointment data not found", exception.getMessage());
+        assertTrue(this.appointmentsService.delete(COMPANY_NUMBER));
+        verify(officerRepository, never()).delete(any());
+        verify(appointmentsRepository).delete(apt);
     }
 
     @Test
@@ -248,7 +247,7 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
         doThrow(MongoException.class).when(appointmentsRepository).delete(apt);
         
@@ -264,14 +263,14 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
         doThrow(MongoException.class).when(officerRepository).delete(officerAppointment);
 
         DataException exception = assertThrows(DataException.class, () ->
                 this.appointmentsService.delete(COMPANY_NUMBER)
         );
-        assertEquals("Failed to delete officer appointment", exception.getMessage());
+        assertEquals("Failed to delete appointment", exception.getMessage());
     }
 
 }

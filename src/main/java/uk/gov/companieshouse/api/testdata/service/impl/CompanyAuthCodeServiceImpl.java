@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,13 +64,13 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     }
 
     @Override
-    public void delete(String companyId) throws NoDataFoundException, DataException {
+    public boolean delete(String companyId) throws DataException {
 
-        CompanyAuthCode existingCompanyAuthCode = repository.findById(companyId)
-                .orElseThrow(() -> new NoDataFoundException(COMPANY_AUTH_DATA_NOT_FOUND));
+        Optional<CompanyAuthCode> existingCompanyAuthCode = repository.findById(companyId);
 
         try {
-            repository.delete(existingCompanyAuthCode);
+            existingCompanyAuthCode.ifPresent(repository::delete);
+            return existingCompanyAuthCode.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete company auth code", e);
         }

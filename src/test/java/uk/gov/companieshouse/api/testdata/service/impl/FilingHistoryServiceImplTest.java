@@ -1,14 +1,18 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +26,6 @@ import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -132,32 +135,29 @@ class FilingHistoryServiceImplTest {
     }
 
     @Test
-    void delete() throws Exception {
+    void delete() throws DataException {
         FilingHistory filingHistory = new FilingHistory();
 
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(filingHistory);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistory));
 
-        filingHistoryService.delete(COMPANY_NUMBER);
+        assertTrue(filingHistoryService.delete(COMPANY_NUMBER));
 
         verify(repository).delete(filingHistory);
     }
 
     @Test
-    void deleteNoCompany() {
-        FilingHistory filingHistory = null;
-        when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(filingHistory);
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-            this.filingHistoryService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("filing history data not found", exception.getMessage());
+    void deleteNoCompany() throws DataException {
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        assertFalse(this.filingHistoryService.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(any());
     }
 
     @Test
     void deleteMongoException() {
         FilingHistory filingHistory = new FilingHistory();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(filingHistory);
+                .thenReturn(Optional.of(filingHistory));
         doThrow(MongoException.class).when(repository).delete(filingHistory);
         DataException exception = assertThrows(DataException.class, () ->
             this.filingHistoryService.delete(COMPANY_NUMBER)

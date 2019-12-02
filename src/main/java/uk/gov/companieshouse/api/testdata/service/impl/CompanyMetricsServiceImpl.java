@@ -1,12 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
@@ -15,8 +16,6 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
-
-    private static final String METRIC_DATA_NOT_FOUND = "company metrics data not found";
 
     @Autowired
     private CompanyMetricsRepository repository;
@@ -39,12 +38,12 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
     }
 
     @Override
-    public void delete(String companyNumber) throws NoDataFoundException, DataException {
-        CompanyMetrics existingMetric = repository.findById(companyNumber)
-                .orElseThrow(() -> new NoDataFoundException(METRIC_DATA_NOT_FOUND));
+    public boolean delete(String companyNumber) throws DataException {
+        Optional<CompanyMetrics> existingMetric = repository.findById(companyNumber);
 
         try {
-            repository.delete(existingMetric);
+            existingMetric.ifPresent(repository::delete);
+            return existingMetric.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete company metrics", e);
         }

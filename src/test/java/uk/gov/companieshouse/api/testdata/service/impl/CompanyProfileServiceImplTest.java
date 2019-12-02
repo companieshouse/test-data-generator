@@ -1,13 +1,17 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -184,33 +187,29 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void delete() throws Exception {
+    void delete() throws DataException {
         CompanyProfile companyProfile = new CompanyProfile();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(companyProfile);
+                .thenReturn(Optional.of(companyProfile));
 
-        this.companyProfileService.delete(COMPANY_NUMBER);
-
+        assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyProfile);
     }
     
     @Test
-    void deleteNoCompanyProfile() {
-        CompanyProfile companyProfile = null;
+    void deleteNoCompanyProfile() throws DataException {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(companyProfile);
+                .thenReturn(Optional.empty());
         
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-            this.companyProfileService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("company profile data not found", exception.getMessage());
+        assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(any());
     }
 
     @Test
     void deleteMongoException() {
         CompanyProfile companyProfile = new CompanyProfile();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(companyProfile);
+                .thenReturn(Optional.of(companyProfile));
         doThrow(MongoException.class).when(repository).delete(companyProfile);
         DataException exception = assertThrows(DataException.class, () ->
             this.companyProfileService.delete(COMPANY_NUMBER)

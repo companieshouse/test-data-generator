@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -21,11 +21,9 @@ import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-
 @Service
 public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
-    private static final String COMPANY_PROFILE_DATA_NOT_FOUND = "company profile data not found";
     private static final String LINK_STEM = "/company/";
 
     @Autowired
@@ -92,20 +90,14 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     }
 
     @Override
-    public void delete(String companyId) throws NoDataFoundException, DataException {
-
-        CompanyProfile existingCompany = repository.findByCompanyNumber(companyId);
-
-        if (existingCompany == null) {
-            throw new NoDataFoundException(COMPANY_PROFILE_DATA_NOT_FOUND);
-        }
-
+    public boolean delete(String companyId) throws DataException {
         try {
-            repository.delete(existingCompany);
+            Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
+            profile.ifPresent(repository::delete);
+            return profile.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete company profile", e);
         }
-
     }
 
     private Links createLinks(String companyNumber) {

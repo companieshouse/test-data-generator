@@ -121,7 +121,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void deleteNoDataFound() throws Exception {
+    void deleteDataException() throws Exception {
         final String companyNumber = "123456";
         final DeleteCompanyRequest request = new DeleteCompanyRequest();
         request.setAuthCode("222222");
@@ -129,10 +129,10 @@ class TestDataControllerTest {
 
         when(companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())).thenReturn(validAuthCode);
 
-        NoDataFoundException ex = new NoDataFoundException("Error message");
+        DataException ex = new DataException("Error message");
         doThrow(ex).when(this.testDataService).deleteCompanyData(companyNumber);
 
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () -> {
+        DataException thrown = assertThrows(DataException.class, () -> {
             this.testDataController.delete(companyNumber, request);
         });
         assertEquals(ex, thrown);

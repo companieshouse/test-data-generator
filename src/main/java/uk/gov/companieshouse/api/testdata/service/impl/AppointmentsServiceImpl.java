@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
@@ -32,8 +32,6 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private static final int ID_LENGTH = 10;
     private static final int INTERNAL_ID_LENGTH = 9;
     private static final String INTERNAL_ID_PREFIX = "8";
-    private static final String APPOINTMENT_DATA_NOT_FOUND = "appointment data not found";
-    private static final String OFFICER_APPOINTMENT_DATA_NOT_FOUND = "officer appointment data not found";
     private static final String COMPANY_LINK = "/company/";
     private static final String OFFICERS_LINK = "/officers/";
     private static final String OCCUPATION = "Director";
@@ -109,24 +107,21 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     }
 
     @Override
-    public void delete(String companyNumber) throws NoDataFoundException, DataException {
-        Appointment existingAppointment = appointmentsRepository.findByCompanyNumber(companyNumber);
-
-        if (existingAppointment == null) {
-            throw new NoDataFoundException(APPOINTMENT_DATA_NOT_FOUND);
-        }
-        String officerId = existingAppointment.getOfficerId();
-
-        this.deleteOfficerAppointment(officerId);
-
+    public boolean delete(String companyNumber) throws DataException {
         try {
-            appointmentsRepository.delete(existingAppointment);
+            Optional<Appointment> existingAppointment = appointmentsRepository.findByCompanyNumber(companyNumber);
+
+            if (existingAppointment.isPresent()) {
+                String officerId = existingAppointment.get().getOfficerId();
+                officerRepository.findById(officerId).ifPresent(officerRepository::delete);
+                appointmentsRepository.delete(existingAppointment.get());
+                return true;
+            }
+            return false;
         } catch (MongoException e) {
             throw new DataException("Failed to delete appointment", e);
         }
     }
-
-
 
     private void createOfficerAppointment(CompanySpec spec, String officerId, String appointmentId)
             throws DataException {
@@ -163,17 +158,6 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
             throw new DataException("Failed to save officer appointment", e);
         }
 
-    }
-
-    private void deleteOfficerAppointment(String officerId) throws NoDataFoundException, DataException {
-        OfficerAppointment existingAppointment = officerRepository.findById(officerId)
-                .orElseThrow(() -> new NoDataFoundException(OFFICER_APPOINTMENT_DATA_NOT_FOUND));
-
-        try {
-            officerRepository.delete(existingAppointment);
-        } catch (MongoException e) {
-            throw new DataException("Failed to delete officer appointment", e);
-        }
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(CompanySpec companySpec, String appointmentId,

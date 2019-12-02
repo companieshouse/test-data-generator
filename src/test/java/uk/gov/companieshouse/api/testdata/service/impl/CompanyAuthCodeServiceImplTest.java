@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -142,23 +143,20 @@ class CompanyAuthCodeServiceImplTest {
     }
     
     @Test
-    void delete() throws Exception {
+    void delete() throws DataException {
         CompanyAuthCode authCode = new CompanyAuthCode();
         when(repository.findById(COMPANY_NUMBER))
                 .thenReturn(Optional.of(authCode));
         
-        this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER);
-
+        assertTrue(this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER));
         verify(repository).delete(authCode);
     }
 
     @Test
-    void deleteNoDataException() {
+    void deleteNoDataException() throws DataException {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
-        NoDataFoundException exception = assertThrows(NoDataFoundException.class, () ->
-            this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
-        );
-        assertEquals("company auth data not found", exception.getMessage());
+        assertFalse(this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(any());
     }
 
     @Test
