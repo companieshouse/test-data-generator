@@ -11,6 +11,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -96,7 +98,7 @@ class CompanyPscStatementServiceImplTest {
     @Test
     void delete() throws DataException {
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(companyPscStatement);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscStatement));
 
         assertTrue(this.companyPscStatementService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyPscStatement);
@@ -105,7 +107,7 @@ class CompanyPscStatementServiceImplTest {
     @Test
     void deleteNoDataException() throws DataException {
         CompanyPscStatement companyPscStatement = null;
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(companyPscStatement);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(companyPscStatement));
 
         assertFalse(this.companyPscStatementService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(companyPscStatement);
@@ -114,7 +116,7 @@ class CompanyPscStatementServiceImplTest {
     @Test
     void deleteMongoException() {
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(companyPscStatement);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscStatement));
         doThrow(MongoException.class).when(repository).delete(companyPscStatement);
         
         DataException exception = assertThrows(DataException.class, () ->

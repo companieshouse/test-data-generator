@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -137,7 +138,7 @@ class FilingHistoryServiceImplTest {
     void delete() throws DataException {
         FilingHistory filingHistory = new FilingHistory();
 
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(filingHistory);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistory));
 
         assertTrue(filingHistoryService.delete(COMPANY_NUMBER));
 
@@ -146,8 +147,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void deleteNoCompany() throws DataException {
-        FilingHistory filingHistory = null;
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(filingHistory);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
         assertFalse(this.filingHistoryService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
@@ -157,7 +157,7 @@ class FilingHistoryServiceImplTest {
     void deleteMongoException() {
         FilingHistory filingHistory = new FilingHistory();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(filingHistory);
+                .thenReturn(Optional.of(filingHistory));
         doThrow(MongoException.class).when(repository).delete(filingHistory);
         DataException exception = assertThrows(DataException.class, () ->
             this.filingHistoryService.delete(COMPANY_NUMBER)

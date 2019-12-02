@@ -11,6 +11,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -188,7 +190,7 @@ class CompanyProfileServiceImplTest {
     void delete() throws DataException {
         CompanyProfile companyProfile = new CompanyProfile();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(companyProfile);
+                .thenReturn(Optional.of(companyProfile));
 
         assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyProfile);
@@ -196,9 +198,8 @@ class CompanyProfileServiceImplTest {
     
     @Test
     void deleteNoCompanyProfile() throws DataException {
-        CompanyProfile companyProfile = null;
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(companyProfile);
+                .thenReturn(Optional.empty());
         
         assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
@@ -208,7 +209,7 @@ class CompanyProfileServiceImplTest {
     void deleteMongoException() {
         CompanyProfile companyProfile = new CompanyProfile();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(companyProfile);
+                .thenReturn(Optional.of(companyProfile));
         doThrow(MongoException.class).when(repository).delete(companyProfile);
         DataException exception = assertThrows(DataException.class, () ->
             this.companyProfileService.delete(COMPANY_NUMBER)

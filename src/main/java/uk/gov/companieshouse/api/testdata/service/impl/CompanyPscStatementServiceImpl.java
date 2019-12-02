@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,15 +67,10 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
 
     @Override
     public boolean delete(String companyNumber) throws DataException {
-        CompanyPscStatement existingStatement = repository.findByCompanyNumber(companyNumber);
-
-        if (existingStatement == null) {
-            return false;
-        }
-
         try {
-            repository.delete(existingStatement);
-            return true;
+            Optional<CompanyPscStatement> existingStatement = repository.findByCompanyNumber(companyNumber);
+            existingStatement.ifPresent(repository::delete);
+            return existingStatement.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete PSC statement", e);
         }

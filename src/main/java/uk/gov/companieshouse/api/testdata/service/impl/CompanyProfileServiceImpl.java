@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -90,20 +91,13 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
 
     @Override
     public boolean delete(String companyId) throws DataException {
-
-        CompanyProfile existingCompany = repository.findByCompanyNumber(companyId);
-
-        if (existingCompany == null) {
-            return false;
-        }
-
         try {
-            repository.delete(existingCompany);
-            return true;
+            Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
+            profile.ifPresent(repository::delete);
+            return profile.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete company profile", e);
         }
-
     }
 
     private Links createLinks(String companyNumber) {

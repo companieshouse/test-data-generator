@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -78,16 +79,11 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
     @Override
     public boolean delete(String companyId) throws DataException {
-
-        FilingHistory filingHistoryToDelete = filingHistoryRepository.findByCompanyNumber(companyId);
-
-        if (filingHistoryToDelete == null) {
-            return false;
-        }
-
         try {
-            filingHistoryRepository.delete(filingHistoryToDelete);
-            return true;
+            Optional<FilingHistory> filingHistory = filingHistoryRepository.findByCompanyNumber(companyId);
+
+            filingHistory.ifPresent(filingHistoryRepository::delete);
+            return filingHistory.isPresent();
         } catch (MongoException e) {
             throw new DataException("Failed to delete filing history", e);
         }

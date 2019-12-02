@@ -108,19 +108,16 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
     @Override
     public boolean delete(String companyNumber) throws DataException {
-        Appointment existingAppointment = appointmentsRepository.findByCompanyNumber(companyNumber);
-
-        if (existingAppointment == null) {
-            return false;
-        }
-        String officerId = existingAppointment.getOfficerId();
-
-        Optional<OfficerAppointment> officerApt = officerRepository.findById(officerId);
-
         try {
-            officerApt.ifPresent(officerRepository::delete);
-            appointmentsRepository.delete(existingAppointment);
-            return true;
+            Optional<Appointment> existingAppointment = appointmentsRepository.findByCompanyNumber(companyNumber);
+
+            if (existingAppointment.isPresent()) {
+                String officerId = existingAppointment.get().getOfficerId();
+                officerRepository.findById(officerId).ifPresent(officerRepository::delete);
+                appointmentsRepository.delete(existingAppointment.get());
+                return true;
+            }
+            return false;
         } catch (MongoException e) {
             throw new DataException("Failed to delete appointment", e);
         }

@@ -211,7 +211,7 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
 
         assertTrue(this.appointmentsService.delete(COMPANY_NUMBER));
@@ -221,8 +221,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void deleteNoAppointmentDataException() throws DataException {
-        Appointment apt = null;
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
         
         assertFalse(this.appointmentsService.delete(COMPANY_NUMBER));
         verify(officerRepository, never()).delete(any());
@@ -234,7 +233,7 @@ class AppointmentsServiceImplTest {
         Appointment apt = new Appointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.empty());
 
         assertTrue(this.appointmentsService.delete(COMPANY_NUMBER));
@@ -248,7 +247,7 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
         doThrow(MongoException.class).when(appointmentsRepository).delete(apt);
         
@@ -264,7 +263,7 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(apt);
+        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
         when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
         doThrow(MongoException.class).when(officerRepository).delete(officerAppointment);
 
