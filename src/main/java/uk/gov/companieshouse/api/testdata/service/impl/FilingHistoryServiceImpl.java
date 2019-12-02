@@ -11,8 +11,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.MongoException;
-
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
@@ -70,23 +68,15 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
 
         filingHistory.setBarcode(barcode);
 
-        try {
-            return filingHistoryRepository.save(filingHistory);
-        } catch (MongoException e) {
-            throw new DataException("Failed to save filing history", e);
-        }
+        return filingHistoryRepository.save(filingHistory);
     }
 
     @Override
-    public boolean delete(String companyId) throws DataException {
-        try {
-            Optional<FilingHistory> filingHistory = filingHistoryRepository.findByCompanyNumber(companyId);
+    public boolean delete(String companyId) {
+        Optional<FilingHistory> filingHistory = filingHistoryRepository.findByCompanyNumber(companyId);
 
-            filingHistory.ifPresent(filingHistoryRepository::delete);
-            return filingHistory.isPresent();
-        } catch (MongoException e) {
-            throw new DataException("Failed to delete filing history", e);
-        }
+        filingHistory.ifPresent(filingHistoryRepository::delete);
+        return filingHistory.isPresent();
     }
 
     private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow){

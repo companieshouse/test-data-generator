@@ -10,7 +10,7 @@ public interface TestDataService {
      * 
      * @param companySpec The specification the new company must adhere to
      * @return A {@link CompanyData}
-     * @throws DataException If any exception occurs
+     * @throws DataException If any error occurs
      */
     CompanyData createCompanyData(CompanySpec companySpec) throws DataException;
 
@@ -18,7 +18,7 @@ public interface TestDataService {
      * Delete all data for company {@code companyNumber}
      * 
      * @param companyNumber The company number to be deleted
-     * @throws DataException
+     * @throws DataException If any error occurs
      */
     void deleteCompanyData(String companyNumber) throws DataException;
 }

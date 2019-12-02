@@ -8,9 +8,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -31,7 +28,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     private CompanyPscStatementRepository repository;
 
     @Override
-    public CompanyPscStatement create(CompanySpec spec) throws DataException {
+    public CompanyPscStatement create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
 
@@ -58,21 +55,13 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
 
         companyPscStatement.setCreatedAt(dateTimeNow);
 
-        try {
-            return repository.save(companyPscStatement);
-        } catch (MongoException e) {
-            throw new DataException("Failed to save PSC statement", e);
-        }
+        return repository.save(companyPscStatement);
     }
 
     @Override
-    public boolean delete(String companyNumber) throws DataException {
-        try {
-            Optional<CompanyPscStatement> existingStatement = repository.findByCompanyNumber(companyNumber);
-            existingStatement.ifPresent(repository::delete);
-            return existingStatement.isPresent();
-        } catch (MongoException e) {
-            throw new DataException("Failed to delete PSC statement", e);
-        }
+    public boolean delete(String companyNumber) {
+        Optional<CompanyPscStatement> existingStatement = repository.findByCompanyNumber(companyNumber);
+        existingStatement.ifPresent(repository::delete);
+        return existingStatement.isPresent();
     }
 }

@@ -62,7 +62,7 @@ class TestDataServiceImplTest {
     private ArgumentCaptor<CompanySpec> specCaptor;
 
     @Test
-    void createCompanyDataDefaultSpec() throws DataException {
+    void createCompanyDataDefaultSpec() throws Exception {
         CompanySpec spec = new CompanySpec();
         CompanyProfile mockCompany = new CompanyProfile();
         mockCompany.setCompanyNumber(COMPANY_NUMBER);
@@ -96,7 +96,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createCompanyDataScottishSpec() throws DataException {
+    void createCompanyDataScottishSpec() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         CompanyProfile mockCompany = new CompanyProfile();
@@ -131,7 +131,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createCompanyDataNISpec() throws DataException {
+    void createCompanyDataNISpec() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
         CompanyProfile mockCompany = new CompanyProfile();
@@ -179,7 +179,7 @@ class TestDataServiceImplTest {
 
         DataException thrown = assertThrows(DataException.class, () -> this.testDataService.createCompanyData(spec));
 
-        assertEquals(pscStatementException, thrown);
+        assertEquals(pscStatementException, thrown.getCause());
         
         verify(companyProfileService).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -201,7 +201,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyData() throws DataException {
+    void deleteCompanyData() throws Exception {
         this.testDataService.deleteCompanyData(COMPANY_NUMBER);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
@@ -226,15 +226,15 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataProfileException() throws DataException {
-        DataException ex = new DataException("exception");
+    void deleteCompanyDataProfileException() {
+        RuntimeException ex = new RuntimeException("exception");
         when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(ex, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -245,15 +245,15 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataFilingHistoryException() throws DataException {
-        DataException ex = new DataException("exception");
+    void deleteCompanyDataFilingHistoryException() {
+        RuntimeException ex = new RuntimeException("exception");
         when(filingHistoryService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(ex, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -264,15 +264,15 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataAuthCodeException() throws DataException {
-        DataException ex = new DataException("exception");
+    void deleteCompanyDataAuthCodeException() {
+        RuntimeException ex = new RuntimeException("exception");
         when(companyAuthCodeService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(ex, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -283,15 +283,15 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataAppointmentException() throws DataException {
-        DataException ex = new DataException("exception");
+    void deleteCompanyDataAppointmentException() {
+        RuntimeException ex = new RuntimeException("exception");
         when(appointmentService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(ex, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -302,15 +302,15 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataPscStatementException() throws DataException {
-        DataException ex = new DataException("exception");
+    void deleteCompanyDataPscStatementException() {
+        RuntimeException ex = new RuntimeException("exception");
         when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(ex, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -321,15 +321,15 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataMetricsException() throws DataException {
-        DataException ex = new DataException("exception");
+    void deleteCompanyDataMetricsException() {
+        RuntimeException ex = new RuntimeException("exception");
         when(metricsService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(ex, thrown);
-        assertEquals(0, thrown.getSuppressed().length);
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -340,23 +340,23 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataMultipleExceptions() throws DataException {
-        DataException profileException = new DataException("exception");
+    void deleteCompanyDataMultipleExceptions() {
+        RuntimeException profileException = new RuntimeException("exception");
         when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(profileException);
 
-        DataException authCodeException = new DataException("exception");
+        RuntimeException authCodeException = new RuntimeException("exception");
         when(companyAuthCodeService.delete(COMPANY_NUMBER)).thenThrow(authCodeException);
 
-        DataException pscStatementException = new DataException("exception");
+        RuntimeException pscStatementException = new RuntimeException("exception");
         when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(pscStatementException);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(profileException, thrown);
-        assertEquals(2, thrown.getSuppressed().length);
-        assertEquals(authCodeException, thrown.getSuppressed()[0]);
-        assertEquals(pscStatementException, thrown.getSuppressed()[1]);
+        assertEquals(3, thrown.getSuppressed().length);
+        assertEquals(profileException, thrown.getSuppressed()[0]);
+        assertEquals(authCodeException, thrown.getSuppressed()[1]);
+        assertEquals(pscStatementException, thrown.getSuppressed()[2]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);

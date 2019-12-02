@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,8 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.mongodb.MongoException;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -119,23 +116,7 @@ class FilingHistoryServiceImplTest {
     }
 
     @Test
-    void createMongoException() throws BarcodeServiceException{
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
-        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
-        when(barcodeService.getBarcode()).thenReturn(BARCODE);
-        when(repository.save(any())).thenThrow(MongoException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.filingHistoryService.create(spec)
-        );
-        assertEquals("Failed to save filing history", exception.getMessage());
-    }
-
-    @Test
-    void delete() throws DataException {
+    void delete() {
         FilingHistory filingHistory = new FilingHistory();
 
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistory));
@@ -146,22 +127,11 @@ class FilingHistoryServiceImplTest {
     }
 
     @Test
-    void deleteNoCompany() throws DataException {
+    void deleteNoCompany() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
         assertFalse(this.filingHistoryService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
     }
 
-    @Test
-    void deleteMongoException() {
-        FilingHistory filingHistory = new FilingHistory();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.of(filingHistory));
-        doThrow(MongoException.class).when(repository).delete(filingHistory);
-        DataException exception = assertThrows(DataException.class, () ->
-            this.filingHistoryService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("Failed to delete filing history", exception.getMessage());
-    }
 }

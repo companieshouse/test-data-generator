@@ -3,10 +3,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,9 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -48,7 +43,7 @@ class CompanyProfileServiceImplTest {
     private CompanyProfileServiceImpl companyProfileService;
 
     @Test
-    void createEnglandWales() throws DataException {
+    void createEnglandWales() {
         final Address mockServiceAddress = new Address(
                 "","","","",""
         );
@@ -111,7 +106,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createScotland() throws DataException {
+    void createScotland() {
         final Address mockServiceAddress = new Address(
                 "","","","",""
         );
@@ -173,21 +168,9 @@ class CompanyProfileServiceImplTest {
         assertEquals(ETAG, profile.getEtag());
     }
 
-    @Test
-    void createMongoException() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(repository.save(any())).thenThrow(MongoException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.companyProfileService.create(spec)
-        );
-        assertEquals("Failed to save company profile", exception.getMessage());
-    }
 
     @Test
-    void delete() throws DataException {
+    void delete() {
         CompanyProfile companyProfile = new CompanyProfile();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.of(companyProfile));
@@ -197,24 +180,12 @@ class CompanyProfileServiceImplTest {
     }
     
     @Test
-    void deleteNoCompanyProfile() throws DataException {
+    void deleteNoCompanyProfile() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
         
         assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
-    }
-
-    @Test
-    void deleteMongoException() {
-        CompanyProfile companyProfile = new CompanyProfile();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.of(companyProfile));
-        doThrow(MongoException.class).when(repository).delete(companyProfile);
-        DataException exception = assertThrows(DataException.class, () ->
-            this.companyProfileService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("Failed to delete company profile", exception.getMessage());
     }
 
 }

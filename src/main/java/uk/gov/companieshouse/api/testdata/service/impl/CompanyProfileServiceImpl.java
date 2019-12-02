@@ -9,9 +9,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -36,7 +33,7 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
     private CompanyProfileRepository repository;
 
     @Override
-    public CompanyProfile create(CompanySpec spec) throws DataException {
+    public CompanyProfile create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
         final Jurisdiction jurisdiction = spec.getJurisdiction();
 
@@ -82,22 +79,14 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
-        try {
-            return repository.save(profile);
-        } catch (MongoException e) {
-            throw new DataException("Failed to save company profile", e);
-        }
+        return repository.save(profile);
     }
 
     @Override
-    public boolean delete(String companyId) throws DataException {
-        try {
-            Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
-            profile.ifPresent(repository::delete);
-            return profile.isPresent();
-        } catch (MongoException e) {
-            throw new DataException("Failed to delete company profile", e);
-        }
+    public boolean delete(String companyId) {
+        Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
+        profile.ifPresent(repository::delete);
+        return profile.isPresent();
     }
 
     private Links createLinks(String companyNumber) {

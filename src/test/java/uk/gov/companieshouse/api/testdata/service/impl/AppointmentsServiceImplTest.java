@@ -3,12 +3,9 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,9 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
@@ -59,7 +53,7 @@ class AppointmentsServiceImplTest {
     private AppointmentsServiceImpl appointmentsService;
 
     @Test
-    void create() throws DataException {
+    void create() {
         final Address mockServiceAddress = new Address(
                 "","","","",""
         );
@@ -118,7 +112,7 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void createScottish() throws DataException {
+    void createScottish() {
         final Address mockServiceAddress = new Address(
                 "","","","",""
         );
@@ -177,36 +171,7 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void createAppointmentMongoException() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(appointmentsRepository.save(any())).thenThrow(MongoException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                this.appointmentsService.create(spec)
-        );
-        assertEquals("Failed to save appointment", exception.getMessage());
-    }
-
-    @Test
-    void createOfficerMongoException() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(officerRepository.save(any())).thenThrow(MongoException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                this.appointmentsService.create(spec)
-        );
-        verify(appointmentsRepository, times(0)).save(any());
-        assertEquals("Failed to save officer appointment", exception.getMessage());
-    }
-    
-    @Test
-    void delete() throws DataException {
+    void delete() {
         Appointment apt = new Appointment();
         OfficerAppointment officerAppointment = new OfficerAppointment();
         final String officerId = "TEST";
@@ -220,7 +185,7 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void deleteNoAppointmentDataException() throws DataException {
+    void deleteNoAppointmentDataException() {
         when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
         
         assertFalse(this.appointmentsService.delete(COMPANY_NUMBER));
@@ -229,7 +194,7 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void deleteNoOfficerDataException() throws DataException {
+    void deleteNoOfficerDataException() {
         Appointment apt = new Appointment();
         final String officerId = "TEST";
         apt.setOfficerId(officerId);
@@ -239,38 +204,6 @@ class AppointmentsServiceImplTest {
         assertTrue(this.appointmentsService.delete(COMPANY_NUMBER));
         verify(officerRepository, never()).delete(any());
         verify(appointmentsRepository).delete(apt);
-    }
-
-    @Test
-    void deleteAppointmentMongoException() {
-        Appointment apt = new Appointment();
-        OfficerAppointment officerAppointment = new OfficerAppointment();
-        final String officerId = "TEST";
-        apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
-        when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
-        doThrow(MongoException.class).when(appointmentsRepository).delete(apt);
-        
-        DataException exception = assertThrows(DataException.class, () ->
-                this.appointmentsService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("Failed to delete appointment", exception.getMessage());
-    }
-
-    @Test
-    void deleteOfficerMongoException() {
-        Appointment apt = new Appointment();
-        OfficerAppointment officerAppointment = new OfficerAppointment();
-        final String officerId = "TEST";
-        apt.setOfficerId(officerId);
-        when(appointmentsRepository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(apt));
-        when(officerRepository.findById(officerId)).thenReturn(Optional.of(officerAppointment));
-        doThrow(MongoException.class).when(officerRepository).delete(officerAppointment);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                this.appointmentsService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("Failed to delete appointment", exception.getMessage());
     }
 
 }

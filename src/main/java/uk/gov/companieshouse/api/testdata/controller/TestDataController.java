@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.companieshouse.api.testdata.Application;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -41,7 +40,7 @@ public class TestDataController {
     private CompanyAuthCodeService companyAuthCodeService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws DataException {
+    public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws Exception {
 
         CompanySpec spec = request.orElse(new CompanySpec());
 
