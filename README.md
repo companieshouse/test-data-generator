@@ -28,7 +28,8 @@ CODE_ANALYSIS_LOGIN    | The analysis server account to use when analysing or pu
 CODE_ANALYSIS_PASSWORD | The analysis server account password. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters)                            | ✓         |         | password
 
 ### Deployment Variables
-Name                                   | Description                                                                                                                                                               | Mandatory | Default | Example
--------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- | ----------------------------------------                                                                                                      
-TEST_DATA_GENERATOR_PORT               | Configured port application runs on.                                                                                                                                      | ✓         |         | 4022             
-MONGODB_URL                            | Mongo database URL.                                                                                                                                                       | ✓         |         | mongodb://localhost:27017
+Name                                   | Description                               | Mandatory | Default | Example
+-------------------------------------- | ----------------------------------------  | --------- | ------- | -----------------
+TEST_DATA_GENERATOR_PORT               | Configured port application runs on.      | ✓         |         | 4022             
+MONGODB_URL                            | Mongo database URL.                       | ✓         |         | mongodb://localhost:27017
+BARCODE_SERVICE_URL                    | URL of barcode service                    | ✓         |         | http://localhost:9000
