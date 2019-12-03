@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -42,7 +43,7 @@ class TestDataServiceImplTest {
     private static final String NI_COMPANY_PREFIX = "NI";
 
     @Mock
-    private DataService<CompanyProfile> companyProfileService;
+    private CompanyProfileService companyProfileService;
     @Mock
     private DataService<FilingHistory> filingHistoryService;
     @Mock
@@ -75,13 +76,16 @@ class TestDataServiceImplTest {
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
         when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        final String fullCompanyNumber = COMPANY_NUMBER;
+        when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(fullCompanyNumber, expectedSpec.getCompanyNumber());
         assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
@@ -110,13 +114,15 @@ class TestDataServiceImplTest {
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
         when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        final String fullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
+        when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(fullCompanyNumber, expectedSpec.getCompanyNumber());
         assertEquals(Jurisdiction.SCOTLAND, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
@@ -125,8 +131,8 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).create(expectedSpec);
         verify(metricsService, times(1)).create(expectedSpec);
 
-        assertEquals(SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyNumber());
-        assertEquals("/company/" + SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
+        assertEquals("/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
@@ -145,13 +151,15 @@ class TestDataServiceImplTest {
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
         when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        final String fullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
+        when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(NI_COMPANY_PREFIX + COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(fullCompanyNumber, expectedSpec.getCompanyNumber());
         assertEquals(Jurisdiction.NI, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
@@ -160,12 +168,51 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).create(expectedSpec);
         verify(metricsService, times(1)).create(expectedSpec);
 
-        assertEquals(NI_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyNumber());
-        assertEquals("/company/" + NI_COMPANY_PREFIX + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
+        assertEquals("/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
-    
 
+    @Test
+    void createCompanyDataExistingNumber() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        CompanyProfile mockCompany = new CompanyProfile();
+        mockCompany.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+
+        Appointment mockAppointment = new Appointment();
+        mockAppointment.setOfficerId(OFFICER_ID);
+        mockAppointment.setAppointmentId(APPOINTMENT_ID);
+        
+        final String existingCompanyNumber = "555555";
+        final String fullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
+        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(existingCompanyNumber)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(companyProfileService.companyExists(SCOTTISH_COMPANY_PREFIX + existingCompanyNumber)).thenReturn(true);
+        when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
+        
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(fullCompanyNumber, expectedSpec.getCompanyNumber());
+        assertEquals(spec.getJurisdiction(), expectedSpec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
+
+        assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
+        assertEquals("/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
+    }
     @Test
     void createCompanyDataRollBack() throws DataException {
         CompanySpec spec = new CompanySpec();
