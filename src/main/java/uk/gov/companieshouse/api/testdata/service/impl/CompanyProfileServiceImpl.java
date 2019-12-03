@@ -15,11 +15,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
+public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private static final String LINK_STEM = "/company/";
 
@@ -87,6 +87,11 @@ public class CompanyProfileServiceImpl implements DataService<CompanyProfile> {
         Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
         profile.ifPresent(repository::delete);
         return profile.isPresent();
+    }
+
+    @Override
+    public boolean companyExists(String companyNumber) {
+        return repository.findById(companyNumber).isPresent();
     }
 
     private Links createLinks(String companyNumber) {

@@ -13,12 +13,12 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -32,7 +32,7 @@ public class TestDataServiceImpl implements TestDataService {
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
     @Autowired
-    private DataService<CompanyProfile> companyProfileService;
+    private CompanyProfileService companyProfileService;
     @Autowired
     private DataService<FilingHistory> filingHistoryService;
     @Autowired
@@ -51,11 +51,12 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
-        String companyNumber = companyNumberPrefix +
-                randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length());
+        final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
 
-        spec.setCompanyNumber(companyNumber);
+        do {
+            spec.setCompanyNumber(companyNumberPrefix
+                    + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
             this.companyProfileService.create(spec);
@@ -65,10 +66,10 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyMetricsService.create(spec);
             this.companyPscStatementService.create(spec);
 
-            return new CompanyData(companyNumber, authCode.getAuthCode());
+            return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode());
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
-            data.put("company number", companyNumber);
+            data.put("company number", spec.getCompanyNumber());
             LOG.error("Rolling back creation of company", data);
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
