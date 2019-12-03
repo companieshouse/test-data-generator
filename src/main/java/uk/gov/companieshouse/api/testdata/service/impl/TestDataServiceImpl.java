@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -65,60 +66,55 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyPscStatementService.create(spec);
 
             return new CompanyData(companyNumber, authCode.getAuthCode());
-        } catch (DataException ex) {
+        } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", companyNumber);
             LOG.error("Rolling back creation of company", data);
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
-            throw ex;
+            throw new DataException(ex);
         }
     }
 
     @Override
     public void deleteCompanyData(String companyId) throws DataException {
-        Optional<DataException> throwEx = Optional.empty();
+        List<Exception> suppressedExceptions = new ArrayList<>();
         try {
             this.companyProfileService.delete(companyId);
-        } catch (DataException de) {
-            throwEx = addOrSuppressException(throwEx, de);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
         }
         try {
             this.filingHistoryService.delete(companyId);
-        } catch (DataException de) {
-            throwEx = addOrSuppressException(throwEx, de);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
         }
         try {
             this.companyAuthCodeService.delete(companyId);
-        } catch (DataException de) {
-            throwEx = addOrSuppressException(throwEx, de);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
         }
         try {
             this.appointmentService.delete(companyId);
-        } catch (DataException de) {
-            throwEx = addOrSuppressException(throwEx, de);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
         }
         try {
             this.companyPscStatementService.delete(companyId);
-        } catch (DataException de) {
-            throwEx = addOrSuppressException(throwEx, de);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
         }
         try {
             this.companyMetricsService.delete(companyId);
-        } catch (DataException de) {
-            throwEx = addOrSuppressException(throwEx, de);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
         }
 
-        if (throwEx.isPresent()) {
-            throw throwEx.get();
+        if (!suppressedExceptions.isEmpty()) {
+            DataException ex = new DataException("Error deleting company data");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
         }
-
     }
     
-    private Optional<DataException> addOrSuppressException(Optional<DataException> throwEx, DataException suppressed) {
-        if (throwEx.isPresent()) {
-            throwEx.get().addSuppressed(suppressed);
-        }
-        return Optional.of(throwEx.orElse(suppressed));
-    }
 }

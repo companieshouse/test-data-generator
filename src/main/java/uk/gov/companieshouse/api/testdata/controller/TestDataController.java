@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -56,8 +57,9 @@ public class TestDataController {
 
     @DeleteMapping("/company/{companyNumber}")
     public ResponseEntity<Void> delete(@PathVariable("companyNumber") String companyNumber,
-            @Valid @RequestBody DeleteCompanyRequest request) throws Exception {
-        
+            @Valid @RequestBody DeleteCompanyRequest request)
+            throws DataException, InvalidAuthCodeException, NoDataFoundException {
+
         if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
             throw new InvalidAuthCodeException(companyNumber);
         }

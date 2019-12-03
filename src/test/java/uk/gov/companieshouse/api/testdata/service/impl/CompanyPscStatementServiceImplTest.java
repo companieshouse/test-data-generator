@@ -3,10 +3,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,9 +18,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -45,7 +40,7 @@ class CompanyPscStatementServiceImplTest {
     private CompanyPscStatementServiceImpl companyPscStatementService;
 
     @Test
-    void create() throws DataException {
+    void create() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -82,21 +77,7 @@ class CompanyPscStatementServiceImplTest {
     }
 
     @Test
-    void createMongoException() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(repository.save(any())).thenThrow(MongoException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                this.companyPscStatementService.create(spec)
-        );
-        assertEquals("Failed to save PSC statement", exception.getMessage());
-    }
-    
-    @Test
-    void delete() throws DataException {
+    void delete() {
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscStatement));
 
@@ -105,24 +86,11 @@ class CompanyPscStatementServiceImplTest {
     }
 
     @Test
-    void deleteNoDataException() throws DataException {
+    void deleteNoDataException() {
         CompanyPscStatement companyPscStatement = null;
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(companyPscStatement));
 
         assertFalse(this.companyPscStatementService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(companyPscStatement);
     }
-
-    @Test
-    void deleteMongoException() {
-        CompanyPscStatement companyPscStatement = new CompanyPscStatement();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscStatement));
-        doThrow(MongoException.class).when(repository).delete(companyPscStatement);
-        
-        DataException exception = assertThrows(DataException.class, () ->
-                this.companyPscStatementService.delete(COMPANY_NUMBER)
-        );
-        assertEquals("Failed to delete PSC statement", exception.getMessage());
-    }
-
 }

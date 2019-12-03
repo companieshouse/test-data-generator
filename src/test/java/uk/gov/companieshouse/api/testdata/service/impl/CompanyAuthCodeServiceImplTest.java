@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,9 +24,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -87,20 +83,6 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void createMongoException() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
-        when(repository.save(any())).thenThrow(MongoException.class);
-
-        DataException exception = assertThrows(DataException.class, () ->
-            this.companyAuthCodeServiceImpl.create(spec)
-        );
-        assertEquals("Failed to save company auth code", exception.getMessage());
-    }
-    
-    @Test
     void verifyAuthCodeCorrect() throws NoSuchAlgorithmException, NoDataFoundException {
         final String plainCode = "222";
         
@@ -143,7 +125,7 @@ class CompanyAuthCodeServiceImplTest {
     }
     
     @Test
-    void delete() throws DataException {
+    void delete() {
         CompanyAuthCode authCode = new CompanyAuthCode();
         when(repository.findById(COMPANY_NUMBER))
                 .thenReturn(Optional.of(authCode));
@@ -153,23 +135,10 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void deleteNoDataException() throws DataException {
+    void deleteNoDataException() {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         assertFalse(this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
-    }
-
-    @Test
-    void deleteMongoException() {
-        CompanyAuthCode authCode = new CompanyAuthCode();
-        when(repository.findById(COMPANY_NUMBER))
-                .thenReturn(Optional.of(authCode));
-        doThrow(MongoException.class).when(repository).delete(authCode);
-        
-        DataException exception = assertThrows(DataException.class, () ->
-            this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER)
-        );
-        assertEquals("Failed to delete company auth code", exception.getMessage());
     }
 
 }

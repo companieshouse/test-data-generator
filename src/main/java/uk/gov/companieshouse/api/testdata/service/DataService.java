@@ -11,7 +11,6 @@ public interface DataService<T> {
      * 
      * @param companyNumber
      * @return True if the data could be found and deleted. False if no data found
-     * @throws DataException When any error occurs
      */
-    boolean delete(String companyNumber) throws DataException;
+    boolean delete(String companyNumber);
 }

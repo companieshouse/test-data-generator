@@ -10,9 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
-import com.mongodb.MongoException;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -38,7 +35,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     }
 
     @Override
-    public CompanyAuthCode create(CompanySpec spec) throws DataException {
+    public CompanyAuthCode create(CompanySpec spec) {
         final String authCode = String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH));
 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
@@ -48,11 +45,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         companyAuthCode.setEncryptedAuthCode(encrypt(authCode));
         companyAuthCode.setIsActive(true);
 
-        try {
-            return repository.save(companyAuthCode);
-        } catch (MongoException e) {
-            throw new DataException("Failed to save company auth code", e);
-        }
+        return repository.save(companyAuthCode);
     }
 
     private String encrypt(final String authCode) {
@@ -64,16 +57,12 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     }
 
     @Override
-    public boolean delete(String companyId) throws DataException {
+    public boolean delete(String companyId) {
 
         Optional<CompanyAuthCode> existingCompanyAuthCode = repository.findById(companyId);
 
-        try {
-            existingCompanyAuthCode.ifPresent(repository::delete);
-            return existingCompanyAuthCode.isPresent();
-        } catch (MongoException e) {
-            throw new DataException("Failed to delete company auth code", e);
-        }
+        existingCompanyAuthCode.ifPresent(repository::delete);
+        return existingCompanyAuthCode.isPresent();
     }
 
     @Override
