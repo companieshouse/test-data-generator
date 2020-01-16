@@ -1,5 +1,8 @@
 artifact_name       := test-data-generator
 version             := "unversioned"
+docker_registry     := 169942020521.dkr.ecr.eu-west-2.amazonaws.com
+docker_image        := test-data-generator-temp
+docker_tag          := test01
 
 .PHONY: all
 all: build
@@ -50,3 +53,17 @@ sonar:
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
 	mvn sonar:sonar -P sonar-pr-analysis
+
+# Docker
+
+.PHONY: docker-build
+docker-build: build # ADD THIS FOR BUILD DEPENDENCY LATER ######################################
+	docker build -t $(docker_image):$(docker_tag) .
+
+.PHONY: docker-tag
+docker-tag:
+	docker tag $(docker_image):$(docker_tag) $(docker_registry)/$(docker_image):$(docker_tag)
+
+.PHONY: docker-push
+docker-push:
+	docker push $(docker_registry)/$(docker_image):$(docker_tag)
