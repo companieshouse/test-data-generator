@@ -2,7 +2,7 @@ UNVERSIONED = unversioned
 
 artifact_name       := test-data-generator
 version             := ${UNVERSIONED}
-docker_registry     := 169942020521.dkr.ecr.eu-west-2.amazonaws.com
+docker_registry     := ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
 docker_repository   := ${artifact_name}
 exposed_port        := 10000
 
