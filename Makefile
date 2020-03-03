@@ -61,20 +61,6 @@ sonar-pr-analysis:
 docker-build:
 	docker build -t $(docker_repository):$(version) .
 
-.PHONY: docker-tag
-docker-tag:
-ifeq ($(version), ${UNVERSIONED})
-	$(error Cannot tag as unversioned image in docker repository. Aborting)
-endif
-	docker tag $(docker_repository):$(version) $(docker_registry)/$(docker_repository):$(version)
-
-.PHONY: docker-push
-docker-push:
-ifeq ($(version), ${UNVERSIONED})
-	$(error Cannot push unversioned image. Aborting)
-endif
-	docker push $(docker_registry)/$(docker_repository):$(version)
-
 .PHONY: docker-run
 docker-run:
 	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(docker_registry)/$(docker_repository):$(version)
