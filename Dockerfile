@@ -3,11 +3,11 @@ FROM centos:7
 RUN yum update -y && \
     yum install -y \
     epel-release-7 \
-    zip-3.0 \
-    unzip-6.0 \
+    zip \
+    unzip \
     java-1.8.0-openjdk \
-    maven-3.0.5 \
-    make-3.82 && \
+    maven \
+    make && \
     yum clean all
 
 COPY test-data-generator.jar /root/test-data-generator.jar
