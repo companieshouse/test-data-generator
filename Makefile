@@ -1,5 +1,8 @@
 artifact_name       := test-data-generator
-version             := "unversioned"
+version             := unversioned
+docker_registry     := ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
+docker_repository   := ${artifact_name}
+exposed_port        := 10000
 
 .PHONY: all
 all: build
@@ -25,7 +28,7 @@ test: test-unit
 test-unit: clean
 	mvn test
 
-.PHONY: package
+.PHONY: package # TODO: remove zip based packaging when fully replaced by docker build/tag/push below
 package:
 ifndef version
 	$(error No version given. Aborting)
@@ -50,3 +53,11 @@ sonar:
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
 	mvn sonar:sonar -P sonar-pr-analysis
+
+.PHONY: docker-build
+docker-build:
+	docker build -t $(docker_repository):$(version) .
+
+.PHONY: docker-run
+docker-run:
+	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(docker_registry)/$(docker_repository):$(version)
