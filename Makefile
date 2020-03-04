@@ -54,7 +54,6 @@ sonar:
 sonar-pr-analysis:
 	mvn sonar:sonar -P sonar-pr-analysis
 
-# Docker build, tag, push and run targets replacing zip based packaging
 .PHONY: docker-build
 docker-build:
 	docker build -t $(docker_repository):$(version) .
