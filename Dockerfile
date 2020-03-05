@@ -10,8 +10,9 @@ RUN yum update -y && \
     make && \
     yum clean all
 
-COPY test-data-generator.jar /root/test-data-generator.jar
-COPY start-ecs /root/start-ecs
+COPY test-data-generator.jar /opt/test-data-generator/
+COPY start-ecs /usr/local/bin/
 
-WORKDIR /root
-CMD ["./start-ecs"]
+RUN chmod 555 /usr/local/bin/start-ecs
+
+CMD ["start-ecs"]

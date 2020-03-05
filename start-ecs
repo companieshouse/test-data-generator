@@ -1,5 +1,4 @@
 #!/bin/bash
 
-APP_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PORT=${PORT:=10000}
-exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "${APP_DIR}/test-data-generator.jar"
+exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "/opt/test-data-generator/test-data-generator.jar"
