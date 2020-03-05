@@ -13,4 +13,6 @@ RUN yum update -y && \
 COPY test-data-generator.jar /opt/test-data-generator/
 COPY start-ecs /usr/local/bin/
 
+RUN chmod 555 /usr/local/bin/start-ecs
+
 CMD ["start-ecs"]
