@@ -2,7 +2,7 @@ artifact_name       := test-data-generator
 version             := unversioned
 docker_registry     := ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
 docker_repository   := ${artifact_name}
-exposed_port        := 10000
+exposed_port        := ${TEST_DATA_GENERATOR_PORT}
 
 .PHONY: all
 all: build
