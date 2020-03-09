@@ -1,6 +1,5 @@
 artifact_name       := test-data-generator
 version             := unversioned
-docker_registry     := ${AWS_ACCOUNT}.dkr.ecr.${AWS_REGION}.amazonaws.com
 docker_repository   := ${artifact_name}
 exposed_port        := ${TEST_DATA_GENERATOR_PORT}
 
@@ -60,4 +59,4 @@ docker-build:
 
 .PHONY: docker-run
 docker-run:
-	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(docker_registry)/$(docker_repository):$(version)
+	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(docker_repository):$(version)
