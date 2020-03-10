@@ -1,6 +1,5 @@
 artifact_name       := test-data-generator
 version             := unversioned
-docker_repository   := ${artifact_name}
 exposed_port        := ${TEST_DATA_GENERATOR_PORT}
 
 .PHONY: all
@@ -55,8 +54,8 @@ sonar-pr-analysis:
 
 .PHONY: docker-build
 docker-build:
-	docker build -t $(docker_repository):$(version) .
+	docker build -t $(artifact_name):$(version) .
 
 .PHONY: docker-run
 docker-run:
-	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(docker_repository):$(version)
+	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(artifact_name):$(version)
