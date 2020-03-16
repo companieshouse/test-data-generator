@@ -1,5 +1,6 @@
 artifact_name       := test-data-generator
-version             := "unversioned"
+version             := unversioned
+exposed_port        := ${TEST_DATA_GENERATOR_PORT}
 
 .PHONY: all
 all: build
@@ -25,7 +26,7 @@ test: test-unit
 test-unit: clean
 	mvn test
 
-.PHONY: package
+.PHONY: package # TODO: remove zip based packaging when fully replaced by docker build/tag/push below
 package:
 ifndef version
 	$(error No version given. Aborting)
@@ -50,3 +51,11 @@ sonar:
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
 	mvn sonar:sonar -P sonar-pr-analysis
+
+.PHONY: docker-build
+docker-build:
+	docker build -t $(artifact_name):$(version) .
+
+.PHONY: docker-run
+docker-run:
+	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(artifact_name):$(version)

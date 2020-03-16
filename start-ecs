@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec java ${JAVA_MEM_ARGS} -jar -Dserver.port="${PORT}" "/opt/test-data-generator/test-data-generator.jar"
