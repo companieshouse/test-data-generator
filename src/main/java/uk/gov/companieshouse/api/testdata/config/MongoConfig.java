@@ -6,9 +6,9 @@ import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.MongoDbFactory;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.SimpleMongoClientDbFactory;
+import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
@@ -74,13 +74,13 @@ public class MongoConfig {
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
-        SimpleMongoClientDbFactory simpleMongoDbFactory = new SimpleMongoClientDbFactory(
+        SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
         MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(simpleMongoDbFactory);
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
     }
 
-    private MappingMongoConverter getMappingMongoConverter(MongoDbFactory factory) {
+    private MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory factory) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
         MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, new MongoMappingContext());
 

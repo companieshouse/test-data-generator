@@ -70,18 +70,6 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         String encryptedAuthCode = repository.findById(companyNumber)
                 .orElseThrow(() -> new NoDataFoundException(COMPANY_AUTH_DATA_NOT_FOUND)).getEncryptedAuthCode();
 
-        // Ideally we would use the following line to verify the encryption:
-        //
-        // return BCrypt.checkpw(sha256(plainAuthCode), encryptedAuthCode);
-        //
-        // However, the latest version of Spring Security at the time of developing this
-        // (5.2.1.RELEASE) does not provide a checkpw method accepting a byte[] as a
-        // password. It only expects a UTF-8 String but our password isn't UTF-8.
-        // That is why we need to verify it ourselves by just hashing the authcode using
-        // the same salt (present in the encrypted auth code) and then compare the
-        // hashed values.
-        String encrypted = BCrypt.hashpw(sha256(plainAuthCode), encryptedAuthCode);
-        return MessageDigest.isEqual(encryptedAuthCode.getBytes(StandardCharsets.UTF_8),
-                encrypted.getBytes(StandardCharsets.UTF_8));
+        return BCrypt.checkpw(sha256(plainAuthCode), encryptedAuthCode);
     }
 }
