@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
 import org.springframework.data.mongodb.core.convert.DbRefResolver;
@@ -79,8 +80,8 @@ public class MongoConfig {
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
     }
 
-    private MappingMongoConverter getMappingMongoConverter(SimpleMongoClientDatabaseFactory simpleMongoDbFactory) {
-        DbRefResolver dbRefResolver = new DefaultDbRefResolver(simpleMongoDbFactory);
+    private MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory factory) {
+        DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
         MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, new MongoMappingContext());
 
         // Don't save _class to mongo
