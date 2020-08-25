@@ -49,7 +49,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     }
 
     private String encrypt(final String authCode) {
-        return BCrypt.hashpw(sha256(authCode), BCrypt.gensalt());
+        return BCrypt.hashpw(authCode, BCrypt.gensalt());
     }
 
     private byte[] sha256(final String authCode) {
@@ -70,6 +70,6 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         String encryptedAuthCode = repository.findById(companyNumber)
                 .orElseThrow(() -> new NoDataFoundException(COMPANY_AUTH_DATA_NOT_FOUND)).getEncryptedAuthCode();
 
-        return BCrypt.checkpw(sha256(plainAuthCode), encryptedAuthCode);
+        return BCrypt.checkpw(plainAuthCode, encryptedAuthCode);
     }
 }
