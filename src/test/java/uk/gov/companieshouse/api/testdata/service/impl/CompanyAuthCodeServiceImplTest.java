@@ -53,9 +53,8 @@ class CompanyAuthCodeServiceImplTest {
 
         CompanyAuthCode savedAuthCode = new CompanyAuthCode();
         when(repository.save(any())).thenReturn(savedAuthCode);
-        
-        final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
-                .digest(String.valueOf(COMPANY_AUTH_CODE).getBytes(StandardCharsets.UTF_8));
+        final String password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256).
+                .digest(String.valueOf(COMPANY_AUTH_CODE));
         CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(spec);
 
         assertEquals(savedAuthCode, returnedAuthCode);
