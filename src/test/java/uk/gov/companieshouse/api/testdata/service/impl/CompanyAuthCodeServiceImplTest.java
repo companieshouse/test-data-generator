@@ -53,7 +53,9 @@ class CompanyAuthCodeServiceImplTest {
 
         CompanyAuthCode savedAuthCode = new CompanyAuthCode();
         when(repository.save(any())).thenReturn(savedAuthCode);
-        final String password = String.valueOf(COMPANY_AUTH_CODE);
+        
+        final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+                .digest(String.valueOf(COMPANY_AUTH_CODE).getBytes(StandardCharsets.UTF_8));
         CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(spec);
 
         assertEquals(savedAuthCode, returnedAuthCode);
@@ -75,7 +77,8 @@ class CompanyAuthCodeServiceImplTest {
         final String plainCode = "222";
         
         // Create a valid encrypted auth code
-        final String encryptedAuthCode = BCrypt.hashpw(plainCode, BCrypt.gensalt());
+        final String encryptedAuthCode = BCrypt.hashpw(MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+                .digest(plainCode.getBytes(StandardCharsets.UTF_8)), BCrypt.gensalt());
 
         CompanyAuthCode authCode = new CompanyAuthCode();
         authCode.setAuthCode(plainCode);
