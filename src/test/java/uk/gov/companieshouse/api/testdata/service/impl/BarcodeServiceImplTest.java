@@ -14,8 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
