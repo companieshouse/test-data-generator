@@ -2,6 +2,8 @@ Test data generator
 ==========
 Service for generating and storing random test company data. This includes company profile, authentication code, filing history, officers and people of significant control.
 
+As new filings are exposed to external software vendors more test data options should be added to this service and the relevant public specs/docs updated.
+
 Requirements
 ------------
 In order to run the API locally you'll need the following installed on your machine:
