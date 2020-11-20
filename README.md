@@ -25,7 +25,7 @@ POST: Sending a POST request on the following endpoint (Base URL + test-data/com
 - Optional request body CompanySpec when added will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales.
 	Usage example: {"jurisdiction":"scotland"}
 
-Delete: Sending a DELETE request on the endpoint (Base URL + test-data/company/{companyNumber} will delete the test company
+Delete: Sending a DELETE request on the endpoint (Base URL + test-data/company/{companyNumber}) will delete the test company
 - Required: Authcode needs to be included in the request body to be allowed to delete the test company.
 	Usage example: {"auth_code":"222222"} 
 
