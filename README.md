@@ -19,6 +19,10 @@ Getting started
 1. Run `make`
 2. Run `./start.sh`
 
+Once started, send a POST request on the base URL + /testdata to generate a test company and accompanying authcode
+
+You can also send a DELETE request on the base URL + /testdata/{companyNumber} to delete all data for that test company
+
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
