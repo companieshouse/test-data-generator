@@ -19,9 +19,15 @@ Getting started
 1. Run `make`
 2. Run `./start.sh`
 
-Once started, send a POST request on the base URL + /testdata to generate a test company and accompanying authcode
+In order to use the generator, there are 2 possible endpoints that can be used. 
 
-You can also send a DELETE request on the base URL + /testdata/{companyNumber} to delete all data for that test company
+POST: Sending a POST request on the following endpoint (Base URL + test-data/company) will generate a new test company and accompanying Authcode.
+- Optional request body CompanySpec when added will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales.
+	Usage example: {"jurisdiction":"scotland"}
+
+Delete: Sending a DELETE request on the endpoint (Base URL + test-data/company/{companyNumber} will delete the test company
+- Required: Authcode needs to be included in the request body to be allowed to delete the test company.
+	Usage example: {"auth_code":"222222"} 
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
