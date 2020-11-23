@@ -19,15 +19,19 @@ Getting started
 1. Run `make`
 2. Run `./start.sh`
 
+### Usage
 In order to use the generator, there are 2 possible endpoints that can be used. 
 
-POST: Sending a POST request on the following endpoint (Base URL + test-data/company) will generate a new test company and accompanying Authcode.
-- Optional request body CompanySpec when added will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales.
-	Usage example: {"jurisdiction":"scotland"}
+POST: Sending a POST request on the following endpoint ({Base URL}:4022/test-data/company) will generate a new test company and accompanying Authcode.
+- Optional: CompanySpec when added to the request body will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales.
+	- Usage example: {"jurisdiction":"scotland"}
 
-Delete: Sending a DELETE request on the endpoint (Base URL + test-data/company/{companyNumber}) will delete the test company
+DELETE: Sending a DELETE request on the endpoint ({Base URL}:4022/test-data/company/{companyNumber}) will delete the test company
 - Required: Authcode needs to be included in the request body to be allowed to delete the test company.
-	Usage example: {"auth_code":"222222"} 
+	- Usage example: {"auth_code":"222222"} 
+
+Health Check: Sending a GET request on the endpoint ({Base URL}:4022/test-data/healthcheck) will return a status code and an empty request body.
+- Expected: 200 OK 
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
