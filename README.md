@@ -24,7 +24,7 @@ In order to use the generator, there are 2 possible endpoints that can be used.
 
 - POST: Sending a POST request on the following endpoint `{Base URL}/test-data/company)` will generate a new test company and accompanying Authcode. There is an optional parameter which is CompanySpec. When added to the request body will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales. An usage example looks like this: `{"jurisdiction":"scotland"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{auth_code":"222222"}` 
-- Health Check: Sending a GET request on the endpoint `{Base URL}:/test-data/healthcheck` will return a status code and an empty request body.
+- Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
