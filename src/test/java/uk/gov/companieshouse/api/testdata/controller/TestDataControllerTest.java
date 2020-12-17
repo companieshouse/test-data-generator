@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -49,7 +48,7 @@ class TestDataControllerTest {
     void create() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
-        CompanyData company = new CompanyData("12345678", "123456");
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));
@@ -61,7 +60,7 @@ class TestDataControllerTest {
     @Test
     void createNoRequest() throws Exception {
         CompanySpec request = null;
-        CompanyData company = new CompanyData("12345678", "123456");
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(any())).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));
@@ -78,7 +77,7 @@ class TestDataControllerTest {
     @Test
     void createDefaultJurisdiction() throws Exception {
         CompanySpec request = new CompanySpec();
-        CompanyData company = new CompanyData("12345678", "123456");
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));

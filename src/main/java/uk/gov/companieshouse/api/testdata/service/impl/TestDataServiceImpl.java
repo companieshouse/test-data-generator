@@ -4,10 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
@@ -46,6 +45,13 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private RandomService randomService;
 
+    @Value("${api.url}")
+    private String apiUrl;
+
+    void setAPIUrl(String apiUrl) {
+        this.apiUrl = apiUrl;
+    }
+
     @Override
     public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
         if (spec == null) {
@@ -66,7 +72,8 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyMetricsService.create(spec);
             this.companyPscStatementService.create(spec);
 
-            return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode());
+            String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
+            return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());

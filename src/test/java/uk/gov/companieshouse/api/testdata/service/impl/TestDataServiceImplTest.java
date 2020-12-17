@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +42,7 @@ class TestDataServiceImplTest {
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
     private static final String NI_COMPANY_PREFIX = "NI";
+    private static final String API_URL = "http://localhost:4001";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -61,6 +63,11 @@ class TestDataServiceImplTest {
     
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
+
+    @BeforeEach
+    void setUp() {
+        this.testDataService.setAPIUrl(API_URL);
+    }
 
     @Test
     void createCompanyDataDefaultSpec() throws Exception {
@@ -95,7 +102,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).create(expectedSpec);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
-        assertEquals("/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(API_URL + "/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
@@ -132,7 +139,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).create(expectedSpec);
 
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
-        assertEquals("/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
+        assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
@@ -169,7 +176,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).create(expectedSpec);
 
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
-        assertEquals("/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
+        assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
@@ -210,7 +217,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).create(expectedSpec);
 
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
-        assertEquals("/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
+        assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
     @Test

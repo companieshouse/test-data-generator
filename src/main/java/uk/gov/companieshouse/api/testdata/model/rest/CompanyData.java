@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class CompanyData {
@@ -11,9 +10,13 @@ public class CompanyData {
     @JsonProperty("auth_code")
     private final String authCode;
 
-    public CompanyData(String companyNumber, String authCode) {
+    @JsonProperty("company_uri")
+    private final String companyUri;
+
+    public CompanyData(String companyNumber, String authCode, String companyUri) {
         this.companyNumber = companyNumber;
         this.authCode = authCode;
+        this.companyUri = companyUri;
     }
 
     public String getCompanyNumber() {
@@ -23,9 +26,8 @@ public class CompanyData {
     public String getAuthCode() {
         return authCode;
     }
-    
-    @JsonGetter("company_uri")
+
     public String getCompanyUri() {
-        return "/company/"+getCompanyNumber();
+        return companyUri;
     }
 }
