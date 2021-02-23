@@ -55,7 +55,7 @@ class AppointmentsServiceImplTest {
     @Test
     void create() {
         final Address mockServiceAddress = new Address(
-                "","","","",""
+                "","","","","",""
         );
 
         CompanySpec spec = new CompanySpec();
@@ -114,7 +114,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createScottish() {
         final Address mockServiceAddress = new Address(
-                "","","","",""
+                "","","","","",""
         );
 
         CompanySpec spec = new CompanySpec();
