@@ -60,7 +60,8 @@ public class Address {
             return false;
         }
         Address address = (Address) o;
-        return Objects.equals(getAddressLine1(), address.getAddressLine1()) &&
+        return Objects.equals(getPremise(), address.getPremise()) &&
+                Objects.equals(getAddressLine1(), address.getAddressLine1()) &&
                 Objects.equals(getAddressLine2(), address.getAddressLine2()) &&
                 Objects.equals(getCountry(), address.getCountry()) &&
                 Objects.equals(getLocality(), address.getLocality()) &&
@@ -69,6 +70,6 @@ public class Address {
 
     @Override
     public int hashCode() {
-        return Objects.hash(getAddressLine1(), getAddressLine2(), getCountry(), getLocality(), getPostalCode());
+        return Objects.hash(getPremise(), getAddressLine1(), getAddressLine2(), getCountry(), getLocality(), getPostalCode());
     }
 }
