@@ -10,6 +10,7 @@ public class AddressServiceImpl implements AddressService {
 
     private static final String UNITED_KINGDOM = "United Kingdom";
     private static final Address ENGLAND_WALES_ADDRESS = new Address(
+            "1",
             "Companies House",
             "Crownway",
             UNITED_KINGDOM,
@@ -17,6 +18,7 @@ public class AddressServiceImpl implements AddressService {
             "CF14 3UZ"
     );
     private static final Address SCOTLAND_ADDRESS = new Address(
+            "1",
             "4th Floor Edinburgh Quay 2",
             "139 Fountain Bridge",
             UNITED_KINGDOM,
@@ -24,6 +26,7 @@ public class AddressServiceImpl implements AddressService {
             "EH3 9FF"
     );
     private static final Address NI_ADDRESS = new Address(
+            "1",
             "Second Floor The Linenhall",
             "32 - 38 Linenhall Street",
             UNITED_KINGDOM,

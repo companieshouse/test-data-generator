@@ -5,7 +5,8 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.Objects;
 
 public class Address {
-
+    @Field("premise")
+    private final String premise;
     @Field("address_line_1")
     private final String addressLine1;
     @Field("address_line_2")
@@ -17,12 +18,17 @@ public class Address {
     @Field("postal_code")
     private final String postalCode;
 
-    public Address(String addressLine1, String addressLine2, String country, String locality, String postalCode) {
+    public Address(String premise, String addressLine1, String addressLine2, String country, String locality, String postalCode) {
+        this.premise = premise;
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
         this.country = country;
         this.locality = locality;
         this.postalCode = postalCode;
+    }
+
+    public String getPremise() {
+        return premise;
     }
 
     public String getAddressLine1() {

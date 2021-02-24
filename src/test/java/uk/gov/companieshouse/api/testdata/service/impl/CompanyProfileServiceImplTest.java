@@ -45,7 +45,7 @@ class CompanyProfileServiceImplTest {
     @Test
     void createEnglandWales() {
         final Address mockServiceAddress = new Address(
-                "","","","",""
+                "","","","","",""
         );
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -108,7 +108,7 @@ class CompanyProfileServiceImplTest {
     @Test
     void createScotland() {
         final Address mockServiceAddress = new Address(
-                "","","","",""
+                "","","","","",""
         );
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
