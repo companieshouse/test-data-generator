@@ -86,6 +86,70 @@ class CompanyPscsServiceImplTest {
     }
 
     @Test
+    void createWhenThereIsAlreadyASinglePsc() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(this.randomService.getString(30)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
+
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscs savedPsc = new CompanyPscs();
+        when(this.repository.save(any())).thenReturn(savedPsc);
+
+        when(repository.count()).thenReturn(1L);
+        CompanyPscs returnedPsc = this.companyPscsService.create(spec);
+
+        assertEquals(savedPsc, returnedPsc);
+
+        ArgumentCaptor<CompanyPscs> pscCaptor = ArgumentCaptor.forClass(CompanyPscs.class);
+        verify(repository).save(pscCaptor.capture());
+
+        CompanyPscs companyPsc = pscCaptor.getValue();
+        assertNotNull(companyPsc);
+
+
+        assertEquals("Mrs forename middle legal-person-person-with-significant-control", companyPsc.getName());
+        assertEquals("legal-person-person-with-significant-control", companyPsc.getKind());
+
+        Links links = companyPsc.getSelf();
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control/legal-person/" + ENCODED_VALUE,
+                links.getSelf());
+    }
+
+    @Test
+    void createWhenThereAreAlreadyTwoPscs() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(this.randomService.getString(30)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
+
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscs savedPsc = new CompanyPscs();
+        when(this.repository.save(any())).thenReturn(savedPsc);
+
+        when(repository.count()).thenReturn(2L);
+        CompanyPscs returnedPsc = this.companyPscsService.create(spec);
+
+        assertEquals(savedPsc, returnedPsc);
+
+        ArgumentCaptor<CompanyPscs> pscCaptor = ArgumentCaptor.forClass(CompanyPscs.class);
+        verify(repository).save(pscCaptor.capture());
+
+        CompanyPscs companyPsc = pscCaptor.getValue();
+        assertNotNull(companyPsc);
+
+
+        assertEquals("Mrs forename middle corporate-entity-person-with-significant-control", companyPsc.getName());
+        assertEquals("corporate-entity-person-with-significant-control", companyPsc.getKind());
+
+        Links links = companyPsc.getSelf();
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control/corporate-entity/" + ENCODED_VALUE,
+                links.getSelf());
+    }
+
+    @Test
     void delete() {
         CompanyPscs companyPscs = new CompanyPscs();
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscs));

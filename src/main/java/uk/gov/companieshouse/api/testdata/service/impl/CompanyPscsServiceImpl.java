@@ -62,9 +62,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         companyPsc.setPscId(randomService.getString(30));
         companyPsc.setNotificationId(randomService.getString(30));
 
-        companyPsc = differentiatePsc(companyPsc);
-
-        return repository.save(companyPsc);
+        return repository.save(differentiatePsc(companyPsc));
     }
 
     @Override
