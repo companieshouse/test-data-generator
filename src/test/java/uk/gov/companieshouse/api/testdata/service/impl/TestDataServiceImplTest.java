@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
@@ -56,6 +57,9 @@ class TestDataServiceImplTest {
     private DataService<CompanyMetrics> metricsService;
     @Mock
     private DataService<CompanyPscStatement> companyPscStatementService;
+    @Mock
+    private DataService<CompanyPscs> companyPscsService;
+
     @Mock
     private RandomService randomService;
     @InjectMocks
@@ -100,6 +104,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
         verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
 
         assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
@@ -137,6 +142,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
         verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
 
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
@@ -174,6 +180,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
         verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
 
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
@@ -215,6 +222,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(expectedSpec);
         verify(companyPscStatementService, times(1)).create(expectedSpec);
         verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
 
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
@@ -244,7 +252,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService).create(expectedSpec);
         verify(appointmentService).create(expectedSpec);
         verify(metricsService).create(expectedSpec);
-        
+
         // Verify we roll back data
         verify(companyProfileService).delete(fullCompanyNumber);
         verify(filingHistoryService).delete(fullCompanyNumber);
@@ -252,6 +260,7 @@ class TestDataServiceImplTest {
         verify(appointmentService).delete(fullCompanyNumber);
         verify(companyPscStatementService).delete(fullCompanyNumber);
         verify(metricsService).delete(fullCompanyNumber);
+        verify(companyPscsService,times(1)).delete(fullCompanyNumber);
     }
 
     @Test
@@ -263,6 +272,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
     }
 
@@ -276,6 +286,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
         verify(appointmentService, never()).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
+        verify(companyPscsService, never()).delete(COMPANY_NUMBER);
         verify(metricsService, never()).delete(COMPANY_NUMBER);
     }
 
@@ -296,6 +307,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -315,6 +327,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -334,6 +347,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -353,6 +367,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -372,6 +387,28 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataPscsException() {
+        RuntimeException ex = new RuntimeException("exception");
+        when(companyPscsService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> this.testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
+
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+
     }
 
     @Test
@@ -391,6 +428,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -417,6 +455,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
     }
 }

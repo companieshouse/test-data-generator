@@ -9,11 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -43,6 +39,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyPscStatement> companyPscStatementService;
     @Autowired
+    private DataService<CompanyPscs> companyPscsService;
+    @Autowired
     private RandomService randomService;
 
     @Value("${api.url}")
@@ -71,6 +69,9 @@ public class TestDataServiceImpl implements TestDataService {
             CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
             this.companyMetricsService.create(spec);
             this.companyPscStatementService.create(spec);
+            this.companyPscsService.create(spec);
+            this.companyPscsService.create(spec);
+            this.companyPscsService.create(spec);
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
@@ -109,6 +110,11 @@ public class TestDataServiceImpl implements TestDataService {
         }
         try {
             this.companyPscStatementService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+        try {
+            this.companyPscsService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
