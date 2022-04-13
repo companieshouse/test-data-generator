@@ -19,13 +19,7 @@ import org.springframework.data.repository.Repository;
 
 import com.mongodb.client.MongoClients;
 
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
-import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
-import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.repository.*;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -71,6 +65,11 @@ public class MongoConfig {
     @Bean
     public CompanyPscStatementRepository companyPscStatement() {
         return getMongoRepositoryBean(CompanyPscStatementRepository.class, "company_psc_statements");
+    }
+
+    @Bean
+    public CompanyPscsRepository companyPscs() {
+        return getMongoRepositoryBean(CompanyPscsRepository.class, "company_pscs");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
