@@ -10,7 +10,6 @@ import java.util.List;
 @Document(collection = "company_pscs")
 public class CompanyPscs{
 
-
     @Id
     @Field("_id")
     private String id;
