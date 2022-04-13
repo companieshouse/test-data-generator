@@ -68,7 +68,7 @@ public class MongoConfig {
     }
 
     @Bean
-    public CompanyPscsRepository companyPscs() {
+    public CompanyPscsRepository companyPscsRepository() {
         return getMongoRepositoryBean(CompanyPscsRepository.class, "company_pscs");
     }
 
