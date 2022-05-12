@@ -90,6 +90,11 @@ public class TestDataServiceImpl implements TestDataService {
         List<Exception> suppressedExceptions = new ArrayList<>();
 
         try {
+            this.companyProfileService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+        try {
             this.filingHistoryService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
@@ -119,11 +124,7 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
-        try {
-            this.companyProfileService.delete(companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
+
 
         if (!suppressedExceptions.isEmpty()) {
             DataException ex = new DataException("Error deleting company data");
