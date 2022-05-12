@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -69,8 +70,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
     @Override
     public boolean delete(String companyNumber) {
-        Optional<CompanyPscs> existingPscs = repository.findByCompanyNumber(companyNumber);
-        existingPscs.ifPresent(repository::delete);
+        Optional<List<CompanyPscs>> existingPscs = repository.findByCompanyNumber(companyNumber);
+        existingPscs.ifPresent(repository::deleteAll);
         return existingPscs.isPresent();
     }
 
