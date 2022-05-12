@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -151,20 +153,20 @@ class CompanyPscsServiceImplTest {
 
     @Test
     void delete() {
-        CompanyPscs companyPscs = new CompanyPscs();
+        List<CompanyPscs> companyPscs = new ArrayList<>();
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscs));
 
         assertTrue(this.companyPscsService.delete(COMPANY_NUMBER));
-        verify(repository).delete(companyPscs);
+        verify(repository).deleteAll(companyPscs);
     }
 
     @Test
     void deleteNoDataException() {
-        CompanyPscs companyPscs = null;
+        List<CompanyPscs> companyPscs = null;
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(companyPscs));
 
         assertFalse(this.companyPscsService.delete(COMPANY_NUMBER));
-        verify(repository, never()).delete(companyPscs);
+        verify(repository, never()).deleteAll(companyPscs);
     }
 
 }

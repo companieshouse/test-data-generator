@@ -88,11 +88,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public void deleteCompanyData(String companyId) throws DataException {
         List<Exception> suppressedExceptions = new ArrayList<>();
-        try {
-            this.companyProfileService.delete(companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
+
         try {
             this.filingHistoryService.delete(companyId);
         } catch (Exception de) {
@@ -120,6 +116,11 @@ public class TestDataServiceImpl implements TestDataService {
         }
         try {
             this.companyMetricsService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+        try {
+            this.companyProfileService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
