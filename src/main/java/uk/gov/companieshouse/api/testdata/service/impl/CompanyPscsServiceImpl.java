@@ -23,8 +23,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
-    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
-
 
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
