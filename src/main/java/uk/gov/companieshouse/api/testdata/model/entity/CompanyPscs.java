@@ -47,8 +47,8 @@ public class CompanyPscs{
     private String countryOfResidence;
     @Field("data.date_of_birth")
     private Instant dateOfBirth;
-    @Field("data.links.self")
-    private Links self;
+    @Field("data.links")
+    private Links links;
     @Field("data.etag")
     private String etag;
     @Field("company_number")
@@ -136,9 +136,9 @@ public class CompanyPscs{
 
     public void setDateOfBirth(Instant dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
-    public Links getSelf() { return self; }
+    public Links getLinks() { return links; }
 
-    public void setSelf(Links self) { this.self = self; }
+    public void setLinks(Links links) { this.links = links; }
 
     public String getEtag() { return etag; }
 

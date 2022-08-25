@@ -77,7 +77,7 @@ class CompanyPscsServiceImplTest {
         assertEquals("34 Silver Street", companyPsc.getAddressLine1());
         assertEquals("Wales", companyPsc.getCountryOfResidence());
 
-        Links links = companyPsc.getSelf();
+        Links links = companyPsc.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control/individual/" + ENCODED_VALUE,
                 links.getSelf());
 
@@ -98,8 +98,9 @@ class CompanyPscsServiceImplTest {
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscs savedPsc = new CompanyPscs();
         when(this.repository.save(any())).thenReturn(savedPsc);
+        
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(buildListOfCompanyPscs(1)));
 
-        when(repository.count()).thenReturn(1L);
         CompanyPscs returnedPsc = this.companyPscsService.create(spec);
 
         assertEquals(savedPsc, returnedPsc);
@@ -114,7 +115,7 @@ class CompanyPscsServiceImplTest {
         assertEquals("Mrs forename middle legal-person-person-with-significant-control", companyPsc.getName());
         assertEquals("legal-person-person-with-significant-control", companyPsc.getKind());
 
-        Links links = companyPsc.getSelf();
+        Links links = companyPsc.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control/legal-person/" + ENCODED_VALUE,
                 links.getSelf());
     }
@@ -131,7 +132,8 @@ class CompanyPscsServiceImplTest {
         CompanyPscs savedPsc = new CompanyPscs();
         when(this.repository.save(any())).thenReturn(savedPsc);
 
-        when(repository.count()).thenReturn(2L);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(buildListOfCompanyPscs(2)));
+
         CompanyPscs returnedPsc = this.companyPscsService.create(spec);
 
         assertEquals(savedPsc, returnedPsc);
@@ -146,7 +148,7 @@ class CompanyPscsServiceImplTest {
         assertEquals("Mrs forename middle corporate-entity-person-with-significant-control", companyPsc.getName());
         assertEquals("corporate-entity-person-with-significant-control", companyPsc.getKind());
 
-        Links links = companyPsc.getSelf();
+        Links links = companyPsc.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control/corporate-entity/" + ENCODED_VALUE,
                 links.getSelf());
     }
@@ -169,4 +171,15 @@ class CompanyPscsServiceImplTest {
         verify(repository, never()).deleteAll(companyPscs);
     }
 
+    private List<CompanyPscs> buildListOfCompanyPscs(int howManyPscs) {
+
+        List<CompanyPscs> listOfCompanyPscs = new ArrayList<>();
+        CompanyPscs aCompanyPsc = new CompanyPscs();
+
+        for(int i = 0; i < howManyPscs; i++) {
+        	listOfCompanyPscs.add(aCompanyPsc);
+        }
+        
+        return listOfCompanyPscs;
+    }
 }

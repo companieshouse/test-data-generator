@@ -15,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -79,8 +80,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
         String pscType;
         String linkType;
+        Optional<List<CompanyPscs>> existingPscs = repository.findByCompanyNumber(companyPsc.getCompanyNumber());
 
-        switch ((int) repository.count()){
+        switch (existingPscs.orElse(new ArrayList<>()).size()){
             case 0:
                 pscType = "individual-person-with-significant-control";
                 linkType = "individual";
@@ -101,7 +103,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
         Links links = new Links();
         links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType +"/" + companyPsc.getId());
-        companyPsc.setSelf(links);
+        companyPsc.setLinks(links);
         return companyPsc;
     }
 }
