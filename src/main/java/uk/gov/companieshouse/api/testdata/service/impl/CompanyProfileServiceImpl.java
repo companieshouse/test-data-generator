@@ -62,7 +62,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setDateOfCreation(dateNow);
         profile.setType("ltd");
         profile.setUndeliverableRegisteredOfficeAddress(false);
-        profile.setCompanyName("Company " + companyNumber + " LIMITED");
+        profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
         profile.setSicCodes(Collections.singletonList("71200"));
 
         CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
