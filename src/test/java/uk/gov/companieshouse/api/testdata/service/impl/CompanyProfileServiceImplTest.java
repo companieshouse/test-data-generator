@@ -65,7 +65,7 @@ class CompanyProfileServiceImplTest {
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("Company " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
         assertEquals("active", profile.getCompanyStatus());
         assertEquals("england-wales", profile.getJurisdiction());
         assertEquals("ltd", profile.getType());
@@ -128,7 +128,7 @@ class CompanyProfileServiceImplTest {
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("Company " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
         assertEquals("active", profile.getCompanyStatus());
         assertEquals("scotland", profile.getJurisdiction());
         assertEquals("ltd", profile.getType());
