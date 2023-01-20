@@ -42,3 +42,13 @@ Name                                   | Description                            
 TEST_DATA_GENERATOR_PORT               | Configured port application runs on.      | ✓         |         | 4022             
 MONGODB_URL                            | Mongo database URL.                       | ✓         |         | mongodb://localhost:27017
 BARCODE_SERVICE_URL                    | URL of barcode service                    | ✓         |         | http://localhost:9000
+
+
+## Docker
+If you wish to use this application using Docker in the CHS Development Environment you must add the following to the Docker-Compose.json
+docker-chs-development/services/modules/test-utils/test-data-generator.docker-compose.yaml
+
+### Debug Variable
+Name                                   | Description                               | Mandatory | Default | Example
+-------------------------------------- | ----------------------------------------  | --------- | ------- | -----------------
+API_URL                                | URL to run the test generator             | ✓         |         | http://api.chs.local:4000             
