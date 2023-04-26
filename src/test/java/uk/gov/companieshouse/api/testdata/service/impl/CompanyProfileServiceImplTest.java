@@ -9,6 +9,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -29,6 +33,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @ExtendWith(MockitoExtension.class)
 class CompanyProfileServiceImplTest {
 
+    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ETAG = "ETAG";
 
@@ -58,7 +63,7 @@ class CompanyProfileServiceImplTest {
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
 
         assertEquals(savedProfile, returnedProfile);
-        
+
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
@@ -89,7 +94,18 @@ class CompanyProfileServiceImplTest {
         assertNotNull(accounts.getAccountingReferenceDateDay());
         assertNotNull(accounts.getAccountingReferenceDateMonth());
 
-        assertNotNull(profile.getDateOfCreation());
+        Instant dateOfCreation = profile.getDateOfCreation();
+        assertNotNull(dateOfCreation);
+
+        Instant now = Instant.now();
+        assertTrue(now.isAfter(dateOfCreation));
+
+        LocalDateTime t1 = LocalDateTime.ofInstant(dateOfCreation, ZONE_ID_UTC);
+        LocalDateTime t2 = LocalDateTime.ofInstant(now, ZONE_ID_UTC);
+
+        long days = Duration.between(t1, t2).toDays();
+        assertTrue(days == 365 || days == 366); // cater for leap years
+
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
 
@@ -152,7 +168,18 @@ class CompanyProfileServiceImplTest {
         assertNotNull(accounts.getAccountingReferenceDateDay());
         assertNotNull(accounts.getAccountingReferenceDateMonth());
 
-        assertNotNull(profile.getDateOfCreation());
+        Instant dateOfCreation = profile.getDateOfCreation();
+        assertNotNull(dateOfCreation);
+
+        Instant now = Instant.now();
+        assertTrue(now.isAfter(dateOfCreation));
+
+        LocalDateTime t1 = LocalDateTime.ofInstant(dateOfCreation, ZONE_ID_UTC);
+        LocalDateTime t2 = LocalDateTime.ofInstant(now, ZONE_ID_UTC);
+
+        long days = Duration.between(t1, t2).toDays();
+        assertTrue(days == 365 || days == 366); // cater for leap years
+
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
 
@@ -178,12 +205,12 @@ class CompanyProfileServiceImplTest {
         assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyProfile);
     }
-    
+
     @Test
     void deleteNoCompanyProfile() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
-        
+
         assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
     }
