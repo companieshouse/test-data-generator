@@ -83,7 +83,29 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
 
-        CompanyProfile.Accounts accounts = profile.getAccounts();
+        assertOnAccounts(profile.getAccounts());
+
+        assertOnDateofCreation(profile.getDateOfCreation());
+
+        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
+        assertNotNull(profile.getSicCodes());
+
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
+
+        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
+        assertEquals(false, profile.getHasInsolvencyHistory());
+        assertEquals(false, profile.getHasCharges());
+        assertTrue(profile.getCanFile());
+        assertEquals(ETAG, profile.getEtag());
+    }
+
+    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement confirmationStatement) {
+        assertNotNull(confirmationStatement.getNextMadeUpTo());
+        assertEquals(false, confirmationStatement.getOverdue());
+        assertNotNull(confirmationStatement.getNextDue());
+    }
+
+    private void assertOnAccounts(CompanyProfile.Accounts accounts) {
         assertNotNull(accounts);
         assertNotNull(accounts.getNextDue());
         assertNotNull(accounts.getPeriodStart());
@@ -93,8 +115,9 @@ class CompanyProfileServiceImplTest {
         assertNotNull(accounts.getNextMadeUpTo());
         assertNotNull(accounts.getAccountingReferenceDateDay());
         assertNotNull(accounts.getAccountingReferenceDateMonth());
+    }
 
-        Instant dateOfCreation = profile.getDateOfCreation();
+    private void assertOnDateofCreation(Instant dateOfCreation) {
         assertNotNull(dateOfCreation);
 
         Instant now = Instant.now();
@@ -105,20 +128,6 @@ class CompanyProfileServiceImplTest {
 
         long days = Duration.between(t1, t2).toDays();
         assertTrue(days == 365 || days == 366); // cater for leap years
-
-        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
-        assertNotNull(profile.getSicCodes());
-
-        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        assertNotNull(confirmationStatement.getNextMadeUpTo());
-        assertEquals(false, confirmationStatement.getOverdue());
-        assertNotNull(confirmationStatement.getNextDue());
-
-        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
-        assertEquals(false, profile.getHasInsolvencyHistory());
-        assertEquals(false, profile.getHasCharges());
-        assertTrue(profile.getCanFile());
-        assertEquals(ETAG, profile.getEtag());
     }
 
     @Test
@@ -157,36 +166,14 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
 
-        CompanyProfile.Accounts accounts = profile.getAccounts();
-        assertNotNull(accounts);
-        assertNotNull(accounts.getNextDue());
-        assertNotNull(accounts.getPeriodStart());
-        assertNotNull(accounts.getPeriodEnd());
-        assertNotNull(accounts.getNextAccountsDueOn());
-        assertEquals(false, accounts.getNextAccountsOverdue());
-        assertNotNull(accounts.getNextMadeUpTo());
-        assertNotNull(accounts.getAccountingReferenceDateDay());
-        assertNotNull(accounts.getAccountingReferenceDateMonth());
+        assertOnAccounts(profile.getAccounts());
 
-        Instant dateOfCreation = profile.getDateOfCreation();
-        assertNotNull(dateOfCreation);
-
-        Instant now = Instant.now();
-        assertTrue(now.isAfter(dateOfCreation));
-
-        LocalDateTime t1 = LocalDateTime.ofInstant(dateOfCreation, ZONE_ID_UTC);
-        LocalDateTime t2 = LocalDateTime.ofInstant(now, ZONE_ID_UTC);
-
-        long days = Duration.between(t1, t2).toDays();
-        assertTrue(days == 365 || days == 366); // cater for leap years
+        assertOnDateofCreation(profile.getDateOfCreation());
 
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
 
-        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        assertNotNull(confirmationStatement.getNextMadeUpTo());
-        assertEquals(false, confirmationStatement.getOverdue());
-        assertNotNull(confirmationStatement.getNextDue());
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
 
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
