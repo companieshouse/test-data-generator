@@ -9,6 +9,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -29,6 +33,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @ExtendWith(MockitoExtension.class)
 class CompanyProfileServiceImplTest {
 
+    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ETAG = "ETAG";
 
@@ -58,7 +63,7 @@ class CompanyProfileServiceImplTest {
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
 
         assertEquals(savedProfile, returnedProfile);
-        
+
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
@@ -78,7 +83,29 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
 
-        CompanyProfile.Accounts accounts = profile.getAccounts();
+        assertOnAccounts(profile.getAccounts());
+
+        assertOnDateofCreation(profile.getDateOfCreation());
+
+        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
+        assertNotNull(profile.getSicCodes());
+
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
+
+        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
+        assertEquals(false, profile.getHasInsolvencyHistory());
+        assertEquals(false, profile.getHasCharges());
+        assertTrue(profile.getCanFile());
+        assertEquals(ETAG, profile.getEtag());
+    }
+
+    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement confirmationStatement) {
+        assertNotNull(confirmationStatement.getNextMadeUpTo());
+        assertEquals(false, confirmationStatement.getOverdue());
+        assertNotNull(confirmationStatement.getNextDue());
+    }
+
+    private void assertOnAccounts(CompanyProfile.Accounts accounts) {
         assertNotNull(accounts);
         assertNotNull(accounts.getNextDue());
         assertNotNull(accounts.getPeriodStart());
@@ -88,21 +115,19 @@ class CompanyProfileServiceImplTest {
         assertNotNull(accounts.getNextMadeUpTo());
         assertNotNull(accounts.getAccountingReferenceDateDay());
         assertNotNull(accounts.getAccountingReferenceDateMonth());
+    }
 
-        assertNotNull(profile.getDateOfCreation());
-        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
-        assertNotNull(profile.getSicCodes());
+    private void assertOnDateofCreation(Instant dateOfCreation) {
+        assertNotNull(dateOfCreation);
 
-        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        assertNotNull(confirmationStatement.getNextMadeUpTo());
-        assertEquals(false, confirmationStatement.getOverdue());
-        assertNotNull(confirmationStatement.getNextDue());
+        Instant now = Instant.now();
+        assertTrue(now.isAfter(dateOfCreation));
 
-        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
-        assertEquals(false, profile.getHasInsolvencyHistory());
-        assertEquals(false, profile.getHasCharges());
-        assertTrue(profile.getCanFile());
-        assertEquals(ETAG, profile.getEtag());
+        LocalDateTime t1 = LocalDateTime.ofInstant(dateOfCreation, ZONE_ID_UTC);
+        LocalDateTime t2 = LocalDateTime.ofInstant(now, ZONE_ID_UTC);
+
+        long days = Duration.between(t1, t2).toDays();
+        assertTrue(days == 365 || days == 366); // cater for leap years
     }
 
     @Test
@@ -141,25 +166,14 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
 
-        CompanyProfile.Accounts accounts = profile.getAccounts();
-        assertNotNull(accounts);
-        assertNotNull(accounts.getNextDue());
-        assertNotNull(accounts.getPeriodStart());
-        assertNotNull(accounts.getPeriodEnd());
-        assertNotNull(accounts.getNextAccountsDueOn());
-        assertEquals(false, accounts.getNextAccountsOverdue());
-        assertNotNull(accounts.getNextMadeUpTo());
-        assertNotNull(accounts.getAccountingReferenceDateDay());
-        assertNotNull(accounts.getAccountingReferenceDateMonth());
+        assertOnAccounts(profile.getAccounts());
 
-        assertNotNull(profile.getDateOfCreation());
+        assertOnDateofCreation(profile.getDateOfCreation());
+
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
 
-        CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        assertNotNull(confirmationStatement.getNextMadeUpTo());
-        assertEquals(false, confirmationStatement.getOverdue());
-        assertNotNull(confirmationStatement.getNextDue());
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
 
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
@@ -178,12 +192,12 @@ class CompanyProfileServiceImplTest {
         assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyProfile);
     }
-    
+
     @Test
     void deleteNoCompanyProfile() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
-        
+
         assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
     }

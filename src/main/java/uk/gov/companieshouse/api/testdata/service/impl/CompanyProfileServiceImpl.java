@@ -21,6 +21,8 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyProfileServiceImpl implements CompanyProfileService {
 
+    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
+
     private static final String LINK_STEM = "/company/";
 
     @Autowired
@@ -38,10 +40,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final Jurisdiction jurisdiction = spec.getJurisdiction();
 
         LocalDate now = LocalDate.now();
-        Instant dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
-        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        Instant dateInOneYearTwoWeeks = now.plusYears(1L).plusDays(14L).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        Instant dateInOneYearNineMonths = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYearTwoWeeks = now.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYearNineMonths = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
 
         CompanyProfile profile = new CompanyProfile();
 
@@ -59,7 +62,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
 
         profile.setCompanyNumber(companyNumber);
-        profile.setDateOfCreation(dateNow);
+        profile.setDateOfCreation(dateOneYearAgo);
         profile.setType("ltd");
         profile.setUndeliverableRegisteredOfficeAddress(false);
         profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
