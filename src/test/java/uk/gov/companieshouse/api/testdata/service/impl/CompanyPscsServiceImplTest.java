@@ -1,6 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
@@ -20,6 +24,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static uk.gov.companieshouse.api.testdata.service.impl.CompanyPscsServiceImpl.NATURES_OF_CONTROL;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyPscsServiceImplTest {
@@ -29,76 +34,115 @@ class CompanyPscsServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";
     private static final String ETAG = "ETAG";
+    private static final String INDIVIDUAL = "individual-person-with-significant-control";
+    private static final Instant dateNowInstant = Instant.parse("2023-06-01T00:00:00Z");
 
     @Mock
     private CompanyPscsRepository repository;
     @Mock
     private RandomService randomService;
+    @Mock
+    private Clock clock;
 
     @InjectMocks
     private CompanyPscsServiceImpl companyPscsService;
 
     @Test
     void create() throws DataException {
+
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
-        when(this.randomService.getString(30)).thenReturn(ENCODED_VALUE);
-        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
-
-        when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscs savedPsc = new CompanyPscs();
         when(this.repository.save(any())).thenReturn(savedPsc);
+
+        when(this.clock.instant()).thenReturn(dateNowInstant);
+        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(1, 5)).thenReturn(3L);
+        when(randomService.getNumberInRange(0, NATURES_OF_CONTROL.length)).thenReturn(2L, 1L, 4L);
 
         CompanyPscs returnedPsc = this.companyPscsService.create(spec);
 
         assertEquals(savedPsc, returnedPsc);
 
-        ArgumentCaptor<CompanyPscs> pscCaptor = ArgumentCaptor.forClass(CompanyPscs.class);
-        verify(repository).save(pscCaptor.capture());
+        verify(repository).save(argThat(psc -> hasExpectedValues(psc)));
+    }
 
-        CompanyPscs companyPsc = pscCaptor.getValue();
+    private boolean hasExpectedValues(CompanyPscs companyPsc) {
+
         assertNotNull(companyPsc);
+
         assertEquals(ENCODED_VALUE, companyPsc.getId());
-        assertNotNull(companyPsc.getCreatedAt());
-        assertNotNull(companyPsc.getUpdatedAt());
+
         assertEquals(COMPANY_NUMBER, companyPsc.getCompanyNumber());
 
-        assertEquals("voting-rights-75-to-100-percent-as-trust", companyPsc.getNaturesOfControl().get(0));
-        assertEquals("Mrs forename middle individual-person-with-significant-control", companyPsc.getName());
-        assertEquals("British", companyPsc.getNationality());
-        assertNotNull(companyPsc.getDateOfBirth());
-        assertEquals("individual-person-with-significant-control", companyPsc.getKind());
-
+        assertEquals("34 Silver Street", companyPsc.getAddressLine1());
+        assertEquals("Silverstone", companyPsc.getAddressLine2());
+        assertEquals("Care of", companyPsc.getCareOf());
+        assertEquals("Wales",companyPsc.getCountry());
+        assertEquals("Cardiff",companyPsc.getLocality());
+        assertEquals("Po Box",companyPsc.getPoBox());
         assertEquals("CF14 3UZ", companyPsc.getPostalCode());
         assertEquals("1", companyPsc.getPremises());
-        assertEquals("Cardiff",companyPsc.getLocality());
-        assertEquals("Wales",companyPsc.getCountry());
-        assertEquals("34 Silver Street", companyPsc.getAddressLine1());
-        assertEquals("Wales", companyPsc.getCountryOfResidence());
+        assertEquals("UK", companyPsc.getRegion());
+        assertEquals(true, companyPsc.getAddressSameAsRegisteredOfficeAddress());
+
+        assertNotNull(companyPsc.getCeasedOn());
+        assertEquals(dateNowInstant, companyPsc.getCeasedOn());
+        assertNotNull(companyPsc.getCreatedAt());
+        assertEquals(dateNowInstant, companyPsc.getCreatedAt());
+
+        assertEquals(Arrays.asList(NATURES_OF_CONTROL[2], NATURES_OF_CONTROL[1], NATURES_OF_CONTROL[4]), companyPsc.getNaturesOfControl());
+
+        assertEquals(dateNowInstant, companyPsc.getNotifiedOn());
+        assertEquals("reference etag", companyPsc.getReferenceEtag());
+        assertEquals("reference psc id", companyPsc.getReferencePscId());
+        assertEquals(dateNowInstant, companyPsc.getRegisterEntryDate());
+        assertNotNull(companyPsc.getUpdatedAt());
+        assertEquals(dateNowInstant, companyPsc.getUpdatedAt());
+
+        assertNotNull(companyPsc.getStatementActionDate());
+        assertEquals(dateNowInstant, companyPsc.getStatementActionDate());
+        assertEquals("statement type", companyPsc.getStatementType());
+
+        if (companyPsc.getKind().equals(INDIVIDUAL)) {
+
+            assertEquals("Mr Test Tester Testington", companyPsc.getNameElements().toString());
+            assertEquals("British", companyPsc.getNationality());
+            assertNotNull(companyPsc.getDateOfBirth());
+            assertEquals("Wales", companyPsc.getCountryOfResidence());
+
+        } else {
+            Identification identification = companyPsc.getIdentification();
+            assertEquals("UK", identification.getCountryRegistered());
+            assertEquals("Legal Authority", identification.getLegalAuthority());
+            assertEquals("Legal Form", identification.getLegalForm());
+            assertEquals("Wales", identification.getPlaceRegistered());
+            assertEquals("123456", identification.getRegistrationNumber());
+        }
+
+        assertEquals("individual-person-with-significant-control", companyPsc.getKind());
 
         Links links = companyPsc.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control/individual/" + ENCODED_VALUE,
                 links.getSelf());
 
-        assertNotNull(companyPsc.getNotifiedOn());
-        assertEquals(ETAG, companyPsc.getEtag());
-        assertEquals(ENCODED_VALUE, companyPsc.getPscId());
-        assertEquals(ENCODED_VALUE, companyPsc.getNotificationId());
+        return true;
     }
 
     @Test
     void createWhenThereIsAlreadyASinglePsc() throws DataException {
+
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
-        when(this.randomService.getString(30)).thenReturn(ENCODED_VALUE);
-        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
-
-        when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscs savedPsc = new CompanyPscs();
         when(this.repository.save(any())).thenReturn(savedPsc);
-        
+
+        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(buildListOfCompanyPscs(1)));
 
         CompanyPscs returnedPsc = this.companyPscsService.create(spec);
@@ -111,8 +155,7 @@ class CompanyPscsServiceImplTest {
         CompanyPscs companyPsc = pscCaptor.getValue();
         assertNotNull(companyPsc);
 
-
-        assertEquals("Mrs forename middle legal-person-person-with-significant-control", companyPsc.getName());
+        assertEquals("Mr A Jones", companyPsc.getName());
         assertEquals("legal-person-person-with-significant-control", companyPsc.getKind());
 
         Links links = companyPsc.getLinks();
@@ -122,15 +165,15 @@ class CompanyPscsServiceImplTest {
 
     @Test
     void createWhenThereAreAlreadyTwoPscs() throws DataException {
+
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
-        when(this.randomService.getString(30)).thenReturn(ENCODED_VALUE);
-        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
-
-        when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscs savedPsc = new CompanyPscs();
         when(this.repository.save(any())).thenReturn(savedPsc);
+
+        when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
 
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(buildListOfCompanyPscs(2)));
 
@@ -145,7 +188,7 @@ class CompanyPscsServiceImplTest {
         assertNotNull(companyPsc);
 
 
-        assertEquals("Mrs forename middle corporate-entity-person-with-significant-control", companyPsc.getName());
+        assertEquals("Mr A Jones", companyPsc.getName());
         assertEquals("corporate-entity-person-with-significant-control", companyPsc.getKind());
 
         Links links = companyPsc.getLinks();

@@ -23,7 +23,18 @@ public class RandomServiceImpl implements RandomService {
 
         return ThreadLocalRandom.current().nextLong(min, min * 10);
     }
-    
+
+    @Override
+    public Long getNumberInRange(int startInclusive, int endExclusive) {
+
+        if (endExclusive <= startInclusive) {
+            int temp = startInclusive;
+            startInclusive = endExclusive;
+            endExclusive = temp;
+        }
+        return ThreadLocalRandom.current().nextLong(startInclusive, endExclusive);
+    }
+
     @Override
     public String getString(int digits) {
         StringBuilder salt = new StringBuilder();
