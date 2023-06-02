@@ -71,8 +71,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         companyPsc.setEtag(etag);
 
         List<String> naturesOfControl = new ArrayList<>();
-        for (long i = randomService.getNumberInRange(1,5); i > 0; i--) {
-            naturesOfControl.add(NATURES_OF_CONTROL[randomService.getNumberInRange(0,NATURES_OF_CONTROL.length).intValue()]);
+        for (long i = randomService.getNumberInRange(1,5).orElse(0); i > 0; i--) {
+            naturesOfControl.add(
+                    NATURES_OF_CONTROL[Math.toIntExact(randomService.getNumberInRange(0,NATURES_OF_CONTROL.length).orElse(0))]);
         }
         companyPsc.setNaturesOfControl(naturesOfControl);
 

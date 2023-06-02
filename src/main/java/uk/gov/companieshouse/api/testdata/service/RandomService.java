@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import java.util.OptionalLong;
+
 public interface RandomService {
 
     /**
@@ -14,10 +16,10 @@ public interface RandomService {
      * Generate a random number between a set range
      *
      * @param startInclusive The starting range including the given value.
-     * @param endExclusive The closing range excluding the given value.
+     * @param endExclusive   The closing range excluding the given value.
      * @return A random long
      */
-    Long getNumberInRange(int startInclusive, int endExclusive);
+    OptionalLong getNumberInRange(int startInclusive, int endExclusive);
 
     /**
      * Generate a random string with of size {@code length}

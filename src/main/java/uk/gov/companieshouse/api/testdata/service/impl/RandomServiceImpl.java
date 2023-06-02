@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
@@ -25,14 +26,16 @@ public class RandomServiceImpl implements RandomService {
     }
 
     @Override
-    public Long getNumberInRange(int startInclusive, int endExclusive) {
+    public OptionalLong getNumberInRange(int startInclusive, int endExclusive) {
 
         if (endExclusive <= startInclusive) {
             int temp = startInclusive;
             startInclusive = endExclusive;
             endExclusive = temp;
         }
-        return ThreadLocalRandom.current().nextLong(startInclusive, endExclusive);
+
+        return RND.longs(startInclusive, endExclusive + 1)
+                        .findFirst();
     }
 
     @Override

@@ -2,9 +2,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -18,8 +17,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -59,8 +56,9 @@ class CompanyPscsServiceImplTest {
         when(this.clock.instant()).thenReturn(dateNowInstant);
         when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
-        when(randomService.getNumberInRange(1, 5)).thenReturn(3L);
-        when(randomService.getNumberInRange(0, NATURES_OF_CONTROL.length)).thenReturn(2L, 1L, 4L);
+        when(randomService.getNumberInRange(1, 5)).thenReturn(OptionalLong.of(3L));
+        when(randomService.getNumberInRange(0, NATURES_OF_CONTROL.length))
+                .thenReturn(OptionalLong.of(2L), OptionalLong.of(1L), OptionalLong.of(4L));
 
         CompanyPscs returnedPsc = this.companyPscsService.create(spec);
 
