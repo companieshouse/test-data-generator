@@ -23,10 +23,11 @@ import java.util.Optional;
 @Service
 public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
-    public static String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
+    protected static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
         "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
+    public static final String WALES = "Wales";
 
     private RandomService randomService;
 
@@ -56,7 +57,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         companyPsc.setAddressLine1("34 Silver Street");
         companyPsc.setAddressLine2("Silverstone");
         companyPsc.setCareOf("Care of");
-        companyPsc.setCountry("Wales");
+        companyPsc.setCountry(WALES);
         companyPsc.setLocality("Cardiff");
         companyPsc.setPoBox("Po Box");
         companyPsc.setPostalCode("CF14 3UZ");
@@ -126,7 +127,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
         companyPsc.setKind(pscType);
 
-        companyPsc.setCountryOfResidence("Wales");
+        companyPsc.setCountryOfResidence(WALES);
         companyPsc.setNationality("British");
         companyPsc.setDateOfBirth(Instant.now().minus( 69, ChronoUnit.DAYS));
 
@@ -158,7 +159,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         identification.setCountryRegistered("UK");
         identification.setLegalAuthority("Legal Authority");
         identification.setLegalForm("Legal Form");
-        identification.setPlaceRegistered("Wales");
+        identification.setPlaceRegistered(WALES);
         identification.setRegistrationNumber("123456");
         companyPsc.setIdentification(identification);
 
