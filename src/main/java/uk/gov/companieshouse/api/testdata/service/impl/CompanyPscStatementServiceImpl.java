@@ -27,6 +27,13 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     @Autowired
     private CompanyPscStatementRepository repository;
 
+    /**
+     * creates PSC statement deliberately misspelt as 'signficant' to match api-enumeration and live data
+     * can be corrected when api-enumeration is fixed.
+     * psc-statement-data-api java services utilises the enum values and correct spelling will cause failures in environments that run the java service
+     * @param spec
+     * @return
+     */
     @Override
     public CompanyPscStatement create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
@@ -51,7 +58,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         companyPscStatement.setEtag(etag);
 
         companyPscStatement.setKind("persons-with-significant-control-statement");
-        companyPscStatement.setStatement("no-individual-or-entity-with-significant-control");
+        companyPscStatement.setStatement("no-individual-or-entity-with-signficant-control");
 
         companyPscStatement.setCreatedAt(dateTimeNow);
 
