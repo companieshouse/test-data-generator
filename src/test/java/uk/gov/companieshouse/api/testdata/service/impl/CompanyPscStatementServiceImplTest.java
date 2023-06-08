@@ -70,7 +70,7 @@ class CompanyPscStatementServiceImplTest {
         assertNotNull(statement.getNotifiedOn());
         assertEquals(ETAG, statement.getEtag());
         assertEquals("persons-with-significant-control-statement", statement.getKind());
-        assertEquals("no-individual-or-entity-with-significant-control", statement.getStatement());
+        assertEquals("no-individual-or-entity-with-signficant-control", statement.getStatement());
 
         assertNotNull(statement.getCreatedAt());
 
