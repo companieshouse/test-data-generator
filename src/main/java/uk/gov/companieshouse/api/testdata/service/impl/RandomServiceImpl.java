@@ -34,7 +34,7 @@ public class RandomServiceImpl implements RandomService {
             endExclusive = temp;
         }
 
-        return RND.longs(startInclusive, endExclusive + 1L)
+        return RND.longs(startInclusive, endExclusive)
                         .findFirst();
     }
 
