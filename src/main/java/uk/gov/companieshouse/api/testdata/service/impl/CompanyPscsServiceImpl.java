@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Clock;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -15,10 +12,10 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
@@ -71,11 +68,14 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         String etag = this.randomService.getEtag();
         companyPsc.setEtag(etag);
 
-        List<String> naturesOfControl = new ArrayList<>();
-        for (long i = randomService.getNumberInRange(1,5).orElse(0); i > 0; i--) {
-            naturesOfControl.add(
-                    NATURES_OF_CONTROL[Math.toIntExact(randomService.getNumberInRange(0,NATURES_OF_CONTROL.length).orElse(0))]);
-        }
+        final List<String> nocList = Arrays.asList(NATURES_OF_CONTROL);
+
+        Collections.shuffle(nocList);
+
+        final long num = randomService.getNumberInRange(0, NATURES_OF_CONTROL.length).orElse(0);
+
+        final List<String> naturesOfControl = new ArrayList<>(nocList.subList(0, ((int) num + 1)));
+
         companyPsc.setNaturesOfControl(naturesOfControl);
 
         companyPsc.setNotifiedOn(dateNow);

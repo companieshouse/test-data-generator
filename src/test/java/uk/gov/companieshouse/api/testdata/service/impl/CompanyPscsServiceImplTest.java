@@ -1,15 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Clock;
-import java.time.Instant;
-import java.util.*;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
@@ -18,9 +15,23 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.time.Clock;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.OptionalLong;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.companieshouse.api.testdata.service.impl.CompanyPscsServiceImpl.NATURES_OF_CONTROL;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +67,6 @@ class CompanyPscsServiceImplTest {
         when(this.clock.instant()).thenReturn(dateNowInstant);
         when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
-        when(randomService.getNumberInRange(1, 5)).thenReturn(OptionalLong.of(3L));
         when(randomService.getNumberInRange(0, NATURES_OF_CONTROL.length))
                 .thenReturn(OptionalLong.of(2L), OptionalLong.of(1L), OptionalLong.of(4L));
 
@@ -64,7 +74,7 @@ class CompanyPscsServiceImplTest {
 
         assertEquals(savedPsc, returnedPsc);
 
-        verify(repository).save(argThat(psc -> hasExpectedValues(psc)));
+        verify(repository).save(argThat(this::hasExpectedValues));
     }
 
     private boolean hasExpectedValues(CompanyPscs companyPsc) {
@@ -91,7 +101,8 @@ class CompanyPscsServiceImplTest {
         assertNotNull(companyPsc.getCreatedAt());
         assertEquals(dateNowInstant, companyPsc.getCreatedAt());
 
-        assertEquals(Arrays.asList(NATURES_OF_CONTROL[2], NATURES_OF_CONTROL[1], NATURES_OF_CONTROL[4]), companyPsc.getNaturesOfControl());
+        List<String> nocList = Arrays.asList(NATURES_OF_CONTROL);
+        assertTrue(nocList.containsAll(companyPsc.getNaturesOfControl()));
 
         assertEquals(dateNowInstant, companyPsc.getNotifiedOn());
         assertEquals("reference etag", companyPsc.getReferenceEtag());
