@@ -19,14 +19,8 @@ public class CompanyPscs{
     private List<String> naturesOfControl;
     @Field("data.kind")
     private String kind;
-    @Field("data.name_elements.middle_name")
-    private String middleName;
-    @Field("data.name_elements.forename")
-    private String forename;
-    @Field("data.name_elements.title")
-    private String title;
-    @Field("data.name_elements.surname")
-    private String surname;
+    @Field("data.name_elements")
+    private NameElements nameElements;
     @Field("data.name")
     private String name;
     @Field("data.notified_on")
@@ -43,8 +37,30 @@ public class CompanyPscs{
     private String country;
     @Field("data.address.address_line_1")
     private String addressLine1;
+    @Field("data.address.address_line_2")
+    private String addressLine2;
+    @Field("data.address.care_of")
+    private String careOf;
+    @Field("data.address.poBox")
+    private String poBox;
+    @Field("data.address.region")
+    private String region;
     @Field("data.country_of_residence")
     private String countryOfResidence;
+    @Field("data.address_same_as_registered_office_address")
+    private Boolean addressSameAsRegisteredOfficeAddress;
+    @Field("data.ceased_on")
+    private Instant ceasedOn;
+    @Field("data.reference_etag")
+    private String referenceEtag;
+    @Field("data.reference_psc_id")
+    private String referencePscId;
+    @Field("data.register_entry_date")
+    private Instant registerEntryDate;
+    @Field("data.statement_action_date")
+    private Instant statementActionDate;
+    @Field("data.statement_type")
+    private String statementType;
     @Field("data.date_of_birth")
     private Instant dateOfBirth;
     @Field("data.links")
@@ -54,13 +70,15 @@ public class CompanyPscs{
     @Field("company_number")
     private String companyNumber;
     @Field("psc_id")
-    private  String pscId;
+    private String pscId;
     @Field("updated.at")
     private Instant updatedAt;
     @Field("notification_id")
     private String notificationId;
     @Field("created.at")
     private Instant createdAt;
+    @Field("data.identification")
+    private Identification identification;
 
     public String getId() {
         return id;
@@ -80,21 +98,13 @@ public class CompanyPscs{
 
     public void setKind(String kind) { this.kind = kind; }
 
-    public String getMiddleName() { return middleName; }
+    public NameElements getNameElements() {
+        return nameElements;
+    }
 
-    public void setMiddleName(String middleName) { this.middleName = middleName; }
-
-    public String getForename() { return forename; }
-
-    public void setForename(String forename) { this.forename = forename; }
-
-    public String getTitle() { return title; }
-
-    public void setTitle(String title) { this.title = title; }
-
-    public String getSurname() { return surname; }
-
-    public void setSurname(String surname) { this.surname = surname; }
+    public void setNameElements(NameElements nameElements) {
+        this.nameElements = nameElements;
+    }
 
     public String getName() { return name; }
 
@@ -127,6 +137,94 @@ public class CompanyPscs{
     public String getAddressLine1() { return addressLine1; }
 
     public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }
+
+    public String getAddressLine2() {
+        return addressLine2;
+    }
+
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
+
+    public String getCareOf() {
+        return careOf;
+    }
+
+    public void setCareOf(String careOf) {
+        this.careOf = careOf;
+    }
+
+    public String getPoBox() {
+        return poBox;
+    }
+
+    public void setPoBox(String poBox) {
+        this.poBox = poBox;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
+    }
+
+    public Boolean getAddressSameAsRegisteredOfficeAddress() {
+        return addressSameAsRegisteredOfficeAddress;
+    }
+
+    public void setAddressSameAsRegisteredOfficeAddress(Boolean addressSameAsRegisteredOfficeAddress) {
+        this.addressSameAsRegisteredOfficeAddress = addressSameAsRegisteredOfficeAddress;
+    }
+
+    public Instant getCeasedOn() {
+        return ceasedOn;
+    }
+
+    public void setCeasedOn(Instant ceasedOn) {
+        this.ceasedOn = ceasedOn;
+    }
+
+    public String getReferenceEtag() {
+        return referenceEtag;
+    }
+
+    public void setReferenceEtag(String referenceEtag) {
+        this.referenceEtag = referenceEtag;
+    }
+
+    public String getReferencePscId() {
+        return referencePscId;
+    }
+
+    public void setReferencePscId(String referencePscId) {
+        this.referencePscId = referencePscId;
+    }
+
+    public Instant getRegisterEntryDate() {
+        return registerEntryDate;
+    }
+
+    public void setRegisterEntryDate(Instant registerEntryDate) {
+        this.registerEntryDate = registerEntryDate;
+    }
+
+    public Instant getStatementActionDate() {
+        return statementActionDate;
+    }
+
+    public void setStatementActionDate(Instant statementActionDate) {
+        this.statementActionDate = statementActionDate;
+    }
+
+    public String getStatementType() {
+        return statementType;
+    }
+
+    public void setStatementType(String statementType) {
+        this.statementType = statementType;
+    }
 
     public String getCountryOfResidence() { return countryOfResidence; }
 
@@ -163,4 +261,12 @@ public class CompanyPscs{
     public Instant getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public Identification getIdentification() {
+        return identification;
+    }
+
+    public void setIdentification(Identification identification) {
+        this.identification = identification;
+    }
 }

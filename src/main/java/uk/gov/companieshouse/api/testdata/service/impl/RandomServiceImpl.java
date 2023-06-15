@@ -4,6 +4,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.SecureRandom;
 import java.util.Base64;
+import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
@@ -23,7 +24,20 @@ public class RandomServiceImpl implements RandomService {
 
         return ThreadLocalRandom.current().nextLong(min, min * 10);
     }
-    
+
+    @Override
+    public OptionalLong getNumberInRange(int startInclusive, int endExclusive) {
+
+        if (endExclusive <= startInclusive) {
+            int temp = startInclusive;
+            startInclusive = endExclusive;
+            endExclusive = temp;
+        }
+
+        return RND.longs(startInclusive, endExclusive)
+                        .findFirst();
+    }
+
     @Override
     public String getString(int digits) {
         StringBuilder salt = new StringBuilder();
