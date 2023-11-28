@@ -48,6 +48,7 @@ class TestDataControllerTest {
     void create() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
+        request.setRegisteredEmailAddressChange(true);
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);

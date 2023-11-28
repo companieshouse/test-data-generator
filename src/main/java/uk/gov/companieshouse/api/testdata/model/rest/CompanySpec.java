@@ -25,8 +25,8 @@ public class CompanySpec {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
 
-    public Boolean registeredEmailAddressChange() {
-        return null;
+    public Boolean isRegisteredEmailAddressChange() {
+        return getRegisteredEmailAddressChange();
     }
 
     public Jurisdiction getJurisdiction() {
