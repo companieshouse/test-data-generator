@@ -91,6 +91,26 @@ class TestDataControllerTest {
     }
 
     @Test
+    void createRegisteredEmailAddressChange() throws Exception {
+        // Given
+        CompanySpec request = new CompanySpec();
+        request.setCompanyNumber("123456ERR");
+        request.setRegisteredEmailAddressChange(true);
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+
+        // When
+        when(this.testDataService.createCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));
+
+        assertEquals(company, response.getBody());
+        assertEquals(company.getCompanyNumber(), "123456ERR");
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        // Then
+        //assertEquals(company.getCompanyNumber(), request.getCompanyNumber());
+    }
+
+    @Test
     void createException() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.NI);
