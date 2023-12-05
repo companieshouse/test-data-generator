@@ -19,13 +19,13 @@ public class CompanySpec {
     private String companyNumber;
 
     @JsonProperty
-    private Boolean registeredEmailAddressChange;
+    private boolean registeredEmailAddressChange;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
 
-    public Boolean isRegisteredEmailAddressChange() {
+    public boolean isRegisteredEmailAddressChange() {
         return getRegisteredEmailAddressChange();
     }
 
@@ -45,11 +45,11 @@ public class CompanySpec {
         this.companyNumber = companyNumber;
     }
 
-    public Boolean getRegisteredEmailAddressChange() {
+    public boolean getRegisteredEmailAddressChange() {
         return registeredEmailAddressChange;
     }
 
-    public void setRegisteredEmailAddressChange(Boolean registeredEmailAddressChange) {
+    public void setRegisteredEmailAddressChange(boolean registeredEmailAddressChange) {
         this.registeredEmailAddressChange = registeredEmailAddressChange;
     }
 }

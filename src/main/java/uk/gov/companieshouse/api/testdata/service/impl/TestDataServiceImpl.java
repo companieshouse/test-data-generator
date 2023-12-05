@@ -61,11 +61,10 @@ public class TestDataServiceImpl implements TestDataService {
         do {
             String companyNumber = (companyNumberPrefix
                     + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
-            if (spec.getRegisteredEmailAddressChange() == true) {
+            if (spec.getRegisteredEmailAddressChange()) {
                 StringBuilder builder = new StringBuilder(COMPANY_NUMBER_LENGTH);
                 builder.append(companyNumber).replace((COMPANY_NUMBER_LENGTH - 3), COMPANY_NUMBER_LENGTH, "ERR");
-                String companyNumberRea = builder.toString();
-                spec.setCompanyNumber(companyNumberRea);
+                spec.setCompanyNumber(builder.toString());
             } else {
                 spec.setCompanyNumber(companyNumber);
             }
