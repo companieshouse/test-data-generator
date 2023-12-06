@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.StringBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -59,14 +58,14 @@ public class TestDataServiceImpl implements TestDataService {
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
 
         do {
-            String companyNumber = (companyNumberPrefix
-                    + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
-            if (spec.getRegisteredEmailAddressChange()) {
-                StringBuilder builder = new StringBuilder(COMPANY_NUMBER_LENGTH);
-                builder.append(companyNumber).replace((COMPANY_NUMBER_LENGTH - 3), COMPANY_NUMBER_LENGTH, "ERR");
-                spec.setCompanyNumber(builder.toString());
+            if (!spec.isRegisteredEmailAddressChange()) {
+                // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
+                String companyNumber = (companyNumberPrefix
+                        + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
             } else {
-                spec.setCompanyNumber(companyNumber);
+                // company number format: PP+12345+ERR (Prefix either 0 or 2 chars, example uses 2 chars)
+                String companyNumber = (companyNumberPrefix
+                        + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length() - 3) + "ERR");
             }
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
