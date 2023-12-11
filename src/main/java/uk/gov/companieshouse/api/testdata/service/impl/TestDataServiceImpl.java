@@ -58,8 +58,15 @@ public class TestDataServiceImpl implements TestDataService {
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
 
         do {
-            spec.setCompanyNumber(companyNumberPrefix
-                    + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+            if (!spec.isRegisteredEmailAddressChange()) {
+                // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
+                spec.setCompanyNumber(companyNumberPrefix
+                        + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+            } else {
+                // company number format: PP+12345+ERR (Prefix either 0 or 2 chars, example uses 2 chars)
+                spec.setCompanyNumber(companyNumberPrefix
+                        + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length() - 3) + "ERR");
+            }
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
