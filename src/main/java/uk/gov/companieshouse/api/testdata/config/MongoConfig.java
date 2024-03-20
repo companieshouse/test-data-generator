@@ -56,6 +56,11 @@ public class MongoConfig {
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
     }
+
+    @Bean
+    public DeltaAppointmentsRepository deltaAppointmentsRepository() {
+        return getMongoRepositoryBean(DeltaAppointmentsRepository.class, "appointments");
+    }
     
     @Bean
     public CompanyMetricsRepository companyMetricsRepository() {

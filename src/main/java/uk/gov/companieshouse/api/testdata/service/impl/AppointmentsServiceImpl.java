@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.DeltaAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.DeltaAppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -39,6 +41,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
     private RandomService randomService;
     @Autowired
     private AppointmentsRepository appointmentsRepository;
+    @Autowired
+    private DeltaAppointmentsRepository deltaAppointmentsRepository;
     @Autowired
     private OfficerRepository officerRepository;
 
@@ -94,6 +98,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setCompanyNumber(companyNumber);
         appointment.setUpdated(dateTimeNow);
 
+        this.createDeltaAppointment(companyNumber, appointment, dateTimeNow, officerId);
         this.createOfficerAppointment(spec, officerId, appointmentId);
 
         return appointmentsRepository.save(appointment);
@@ -106,10 +111,31 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         if (existingAppointment.isPresent()) {
             String officerId = existingAppointment.get().getOfficerId();
             officerRepository.findById(officerId).ifPresent(officerRepository::delete);
+            deltaAppointmentsRepository.findById(existingAppointment.get().getId()).ifPresent(deltaAppointmentsRepository::delete);
             appointmentsRepository.delete(existingAppointment.get());
             return true;
         }
         return false;
+    }
+
+    private DeltaAppointment createDeltaAppointment(String companyNumber, Appointment appointment, Instant dateTimeNow, String officerId) {
+        DeltaAppointment deltaAppointment = DeltaAppointment.Builder.builder()
+                .fromAppointment(appointment)
+                .addressLine1(appointment.getServiceAddress().getAddressLine1())
+                .addressLine2(appointment.getServiceAddress().getAddressLine2())
+                .country(appointment.getServiceAddress().getCountry())
+                .locality(appointment.getServiceAddress().getLocality())
+                .postalCode(appointment.getServiceAddress().getPostalCode())
+                .premises(appointment.getServiceAddress().getPremise())
+                .created(dateTimeNow)
+                .updated(dateTimeNow)
+                .deltaAt(dateTimeNow)
+                .officerRoleSortOrder(20)
+                .self("/company/" + companyNumber + "/appointments/" + appointment.getId())
+                .officerSelf("/officers/" + officerId)
+                .officerAppointments("/officers/" + officerId + "/appointments")
+                .build();
+        return deltaAppointmentsRepository.save(deltaAppointment);
     }
 
     private void createOfficerAppointment(CompanySpec spec, String officerId, String appointmentId) {
