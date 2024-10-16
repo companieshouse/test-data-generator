@@ -189,8 +189,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataRegisteredEmailAddressChangeSpec() throws Exception {
-        String baseCompanyNumber = "123456";
-        final String companyNumber = "RE" + baseCompanyNumber;
+        String baseCompanyNumber = "12345678";
 
         CompanySpec spec = new CompanySpec();
         spec.setRegisteredEmailAddressChange(true);
@@ -204,8 +203,8 @@ class TestDataServiceImplTest {
         mockAppointment.setOfficerId(OFFICER_ID);
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
-        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(baseCompanyNumber));
-        when(companyProfileService.companyExists(companyNumber)).thenReturn(false);
+        when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(baseCompanyNumber));
+        when(companyProfileService.companyExists(baseCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
@@ -213,7 +212,7 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(companyNumber, expectedSpec.getCompanyNumber());
+        assertEquals(baseCompanyNumber, expectedSpec.getCompanyNumber());
         assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
 
         verify(filingHistoryService, times(1)).create(expectedSpec);
@@ -223,8 +222,8 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).create(expectedSpec);
         verify(companyPscsService, times(3)).create(expectedSpec);
 
-        assertEquals(companyNumber, createdCompany.getCompanyNumber());
-        assertEquals(API_URL + "/company/" + companyNumber, createdCompany.getCompanyUri());
+        assertEquals(baseCompanyNumber, createdCompany.getCompanyNumber());
+        assertEquals(API_URL + "/company/" + baseCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 

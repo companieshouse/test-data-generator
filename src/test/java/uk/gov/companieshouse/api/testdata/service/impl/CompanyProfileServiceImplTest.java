@@ -55,6 +55,7 @@ class CompanyProfileServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setRegisteredEmailAddressChange(true);
 
         CompanyProfile savedProfile = new CompanyProfile();
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -95,6 +96,7 @@ class CompanyProfileServiceImplTest {
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
         assertEquals(false, profile.getHasCharges());
+        assertEquals("true", profile.getRegisteredOfficeAddress().getTestData());
         assertTrue(profile.getCanFile());
         assertEquals(ETAG, profile.getEtag());
     }
@@ -178,6 +180,7 @@ class CompanyProfileServiceImplTest {
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
         assertEquals(false, profile.getHasCharges());
+        assertEquals(null, profile.getRegisteredOfficeAddress().getTestData());
         assertTrue(profile.getCanFile());
         assertEquals(ETAG, profile.getEtag());
     }

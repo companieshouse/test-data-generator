@@ -17,6 +17,8 @@ public class Address {
     private final String locality;
     @Field("postal_code")
     private final String postalCode;
+    @Field("test_data")
+    private String testData;
 
     public Address(String premise, String addressLine1, String addressLine2, String country, String locality, String postalCode) {
         this.premise = premise;
@@ -51,6 +53,14 @@ public class Address {
         return postalCode;
     }
 
+    public String getTestData() {
+        return testData;
+    }
+
+    public void setTestData(String testData) {
+        this.testData = testData;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -65,11 +75,12 @@ public class Address {
                 Objects.equals(getAddressLine2(), address.getAddressLine2()) &&
                 Objects.equals(getCountry(), address.getCountry()) &&
                 Objects.equals(getLocality(), address.getLocality()) &&
-                Objects.equals(getPostalCode(), address.getPostalCode());
+                Objects.equals(getPostalCode(), address.getPostalCode()) &&
+                Objects.equals(getTestData(), address.getTestData());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPremise(), getAddressLine1(), getAddressLine2(), getCountry(), getLocality(), getPostalCode());
+        return Objects.hash(getPremise(), getAddressLine1(), getAddressLine2(), getCountry(), getLocality(), getPostalCode(), getTestData());
     }
 }
