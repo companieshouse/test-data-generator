@@ -35,7 +35,6 @@ class CompanyProfileServiceImplTest {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String COMPANY_NUMBER_RE = "RE";
     private static final String ETAG = "ETAG";
 
     @Mock

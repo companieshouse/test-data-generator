@@ -188,52 +188,10 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createCompanyDataRegisteredEmailAddressChangeSpec() throws Exception {
-        String baseCompanyNumber = "123456";
-        final String companyNumber = "RE" + baseCompanyNumber;
-
-        CompanySpec spec = new CompanySpec();
-        spec.setRegisteredEmailAddressChange(true);
-        CompanyProfile mockCompany = new CompanyProfile();
-        mockCompany.setCompanyNumber(COMPANY_NUMBER);
-
-        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
-        mockAuthCode.setAuthCode(AUTH_CODE);
-
-        Appointment mockAppointment = new Appointment();
-        mockAppointment.setOfficerId(OFFICER_ID);
-        mockAppointment.setAppointmentId(APPOINTMENT_ID);
-
-        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(baseCompanyNumber));
-        when(companyProfileService.companyExists(companyNumber)).thenReturn(false);
-        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
-
-        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
-
-        verify(companyProfileService, times(1)).create(specCaptor.capture());
-        CompanySpec expectedSpec = specCaptor.getValue();
-        assertEquals(companyNumber, expectedSpec.getCompanyNumber());
-        assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
-
-        verify(filingHistoryService, times(1)).create(expectedSpec);
-        verify(companyAuthCodeService, times(1)).create(expectedSpec);
-        verify(appointmentService, times(1)).create(expectedSpec);
-        verify(companyPscStatementService, times(1)).create(expectedSpec);
-        verify(metricsService, times(1)).create(expectedSpec);
-        verify(companyPscsService, times(3)).create(expectedSpec);
-
-        assertEquals(companyNumber, createdCompany.getCompanyNumber());
-        assertEquals(API_URL + "/company/" + companyNumber, createdCompany.getCompanyUri());
-        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
-    }
-
-    @Test
-    void createCompanyDataNoRegisteredEmailAddressChangeSpec() throws Exception {
+    void createCompanyDataSpec() throws Exception {
         final String companyNumber = "12345678";
 
         CompanySpec spec = new CompanySpec();
-        spec.setRegisteredEmailAddressChange(false);
         CompanyProfile mockCompany = new CompanyProfile();
         mockCompany.setCompanyNumber(COMPANY_NUMBER);
 
