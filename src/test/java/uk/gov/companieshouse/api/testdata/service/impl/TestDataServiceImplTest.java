@@ -189,8 +189,8 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataRegisteredEmailAddressChangeSpec() throws Exception {
-        String baseCompanyNumber = "12345";
-        final String companyNumber = baseCompanyNumber + "ERR";
+        String baseCompanyNumber = "123456";
+        final String companyNumber = "RE" + baseCompanyNumber;
 
         CompanySpec spec = new CompanySpec();
         spec.setRegisteredEmailAddressChange(true);
@@ -204,7 +204,7 @@ class TestDataServiceImplTest {
         mockAppointment.setOfficerId(OFFICER_ID);
         mockAppointment.setAppointmentId(APPOINTMENT_ID);
 
-        when(this.randomService.getNumber(5)).thenReturn(Long.valueOf(baseCompanyNumber));
+        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(baseCompanyNumber));
         when(companyProfileService.companyExists(companyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);

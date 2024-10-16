@@ -63,9 +63,10 @@ public class TestDataServiceImpl implements TestDataService {
                 spec.setCompanyNumber(companyNumberPrefix
                         + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
             } else {
-                // company number format: PP+12345+ERR (Prefix either 0 or 2 chars, example uses 2 chars)
-                spec.setCompanyNumber(companyNumberPrefix
-                        + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length() - 3) + "ERR");
+                // company number format: RE+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
+                String reaPrefix = "RE";
+                spec.setCompanyNumber(reaPrefix
+                        + randomService.getNumber(COMPANY_NUMBER_LENGTH - reaPrefix.length()));
             }
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
