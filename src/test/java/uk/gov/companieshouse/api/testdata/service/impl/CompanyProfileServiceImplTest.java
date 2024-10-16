@@ -96,7 +96,6 @@ class CompanyProfileServiceImplTest {
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
         assertEquals(false, profile.getHasCharges());
-        assertEquals("true", profile.getRegisteredOfficeAddress().getTestData());
         assertTrue(profile.getCanFile());
         assertEquals(ETAG, profile.getEtag());
     }
@@ -180,7 +179,6 @@ class CompanyProfileServiceImplTest {
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
         assertEquals(false, profile.getHasInsolvencyHistory());
         assertEquals(false, profile.getHasCharges());
-        assertEquals(null, profile.getRegisteredOfficeAddress().getTestData());
         assertTrue(profile.getCanFile());
         assertEquals(ETAG, profile.getEtag());
     }

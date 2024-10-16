@@ -78,9 +78,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setEtag(this.randomService.getEtag());
         profile.setHasInsolvencyHistory(false);
         profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
-        if (spec.isRegisteredEmailAddressChange()) {
-            profile.getRegisteredOfficeAddress().setTestData("true");
-        }
         profile.setJurisdiction(jurisdiction.toString());
         profile.setHasCharges(false);
         profile.setCanFile(true);
