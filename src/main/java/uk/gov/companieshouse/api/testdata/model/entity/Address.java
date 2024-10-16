@@ -1,9 +1,12 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import org.springframework.data.mongodb.core.mapping.Field;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import java.util.Objects;
 
+@JsonInclude(Include.NON_NULL)
 public class Address {
     @Field("premise")
     private final String premise;
