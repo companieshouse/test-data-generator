@@ -35,6 +35,7 @@ class CompanyProfileServiceImplTest {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String COMPANY_NUMBER_RE = "RE";
     private static final String ETAG = "ETAG";
 
     @Mock
@@ -55,7 +56,6 @@ class CompanyProfileServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setRegisteredEmailAddressChange(true);
 
         CompanyProfile savedProfile = new CompanyProfile();
         when(randomService.getEtag()).thenReturn(ETAG);
