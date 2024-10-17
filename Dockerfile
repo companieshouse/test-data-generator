@@ -1,5 +1,10 @@
 FROM centos:7
 
+# Could not resolve host: mirrorlist.centos.org - Centos 7 has reached EOL 1 July 2024, repoint to archive vault
+# Temporary fix while generator is on java 8
+RUN sed -i 's/^mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-*
+RUN sed -i 's|^#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-*
+
 RUN yum update -y && \
     yum install -y \
     epel-release-7 \
