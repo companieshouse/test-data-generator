@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.Instant;
 import java.util.List;
 
-@Document(collection = "company_pscs")
+@Document(collection = "delta_company_pscs")
 public class CompanyPscs{
 
     @Id
@@ -61,7 +61,7 @@ public class CompanyPscs{
     private Instant statementActionDate;
     @Field("data.statement_type")
     private String statementType;
-    @Field("data.date_of_birth")
+    @Field("sensitive_data.date_of_birth")
     private Instant dateOfBirth;
     @Field("data.links")
     private Links links;

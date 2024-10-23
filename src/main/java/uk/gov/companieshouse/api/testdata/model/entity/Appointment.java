@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.time.Instant;
 
-@Document(collection = "appointments")
+@Document(collection = "delta_appointments")
 public class Appointment {
     @Id
     @Field("id")
@@ -60,7 +60,7 @@ public class Appointment {
     @Field("data.surname")
     private String surname;
 
-    @Field("data.date_of_birth")
+    @Field("sensitive_data.date_of_birth")
     private Instant dateOfBirth;
 
     @Field("company_name")
