@@ -46,7 +46,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         final String companyNumber = spec.getCompanyNumber();
         companyPsc.setCompanyNumber(companyNumber);
 
-        Instant dateNow = clock.instant();
+        Instant dateNow = clock.instant().truncatedTo(ChronoUnit.SECONDS);
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         companyPsc.setId(id);
