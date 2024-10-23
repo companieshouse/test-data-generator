@@ -6,7 +6,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
@@ -17,6 +16,8 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.argThat;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -43,7 +44,7 @@ class CompanyPscsServiceImplTest {
     private static final String ENCODED_VALUE = "ENCODED";
     private static final String ETAG = "ETAG";
     private static final String INDIVIDUAL = "individual-person-with-significant-control";
-    private static final Instant dateNowInstant = Instant.parse("2023-06-01T00:00:00Z");
+    private static final Instant dateNowInstant = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
     @Mock
     private CompanyPscsRepository repository;
@@ -64,7 +65,6 @@ class CompanyPscsServiceImplTest {
         CompanyPscs savedPsc = new CompanyPscs();
         when(this.repository.save(any())).thenReturn(savedPsc);
 
-        when(this.clock.instant()).thenReturn(dateNowInstant);
         when(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         when(randomService.getNumberInRange(0, NATURES_OF_CONTROL.length))

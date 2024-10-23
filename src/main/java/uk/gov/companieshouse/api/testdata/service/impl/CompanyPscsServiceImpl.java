@@ -12,8 +12,9 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
@@ -30,13 +31,10 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
     private CompanyPscsRepository repository;
 
-    private Clock clock;
-
     @Autowired
-    public CompanyPscsServiceImpl(RandomService randomService, CompanyPscsRepository repository, Clock clock) {
+    public CompanyPscsServiceImpl(RandomService randomService, CompanyPscsRepository repository) {
         this.randomService = randomService;
         this.repository = repository;
-        this.clock = clock;
     }
 
     @Override
@@ -46,7 +44,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
         final String companyNumber = spec.getCompanyNumber();
         companyPsc.setCompanyNumber(companyNumber);
 
-        Instant dateNow = clock.instant().truncatedTo(ChronoUnit.SECONDS);
+        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         companyPsc.setId(id);
