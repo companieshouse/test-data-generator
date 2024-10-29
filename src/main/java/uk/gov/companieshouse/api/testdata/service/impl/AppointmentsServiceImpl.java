@@ -49,8 +49,11 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
 
+        LocalDate officerDob = LocalDate.of(1990, 3, 6);
+
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dob = officerDob.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         appointment.setId(appointmentId);
         appointment.setCreated(dateTimeNow);
@@ -80,8 +83,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setLinks(links);
 
         appointment.setSurname("DIRECTOR");
-        DateOfBirth dateOfBirth = new DateOfBirth(14, 6, 1987);
-        appointment.setDateOfBirth(dateOfBirth);
+        appointment.setDateOfBirth(dob);
         appointment.setCompanyName("Company " + companyNumber);
         appointment.setCompanyStatus("active");
         appointment.setOfficerId(officerId);

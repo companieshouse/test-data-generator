@@ -106,9 +106,6 @@ class AppointmentsServiceImplTest {
 
         assertEquals("DIRECTOR", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
-        assertNotNull(appointment.getDateOfBirth().getDay());
-        assertNotNull(appointment.getDateOfBirth().getMonth());
-        assertNotNull(appointment.getDateOfBirth().getYear());
     }
 
     @Test
@@ -168,9 +165,6 @@ class AppointmentsServiceImplTest {
 
         assertEquals("DIRECTOR", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
-        assertNotNull(appointment.getDateOfBirth().getDay());
-        assertNotNull(appointment.getDateOfBirth().getMonth());
-        assertNotNull(appointment.getDateOfBirth().getYear());
     }
 
     @Test

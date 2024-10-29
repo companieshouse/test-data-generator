@@ -63,12 +63,6 @@ public class CompanyPscs{
     private String statementType;
     @Field("sensitive_data.date_of_birth")
     private DateOfBirth dateOfBirth;
-    @Field("data.date_of_birth.day")
-    private Integer day;
-    @Field("data.date_of_birth.month")
-    private Integer month;
-    @Field("data.date_of_birth.year")
-    private Integer year;
     @Field("data.links")
     private Links links;
     @Field("data.etag")
@@ -239,24 +233,6 @@ public class CompanyPscs{
     public DateOfBirth getDateOfBirth() { return dateOfBirth; }
 
     public void setDateOfBirth(DateOfBirth dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-
-    public Integer getDay() { return day; }
-
-    public void setDay(Integer day) {
-        this.day = day;
-    }
-
-    public Integer getMonth() { return month; }
-
-    public void setMonth(Integer month) {
-        this.month = month;
-    }
-
-    public Integer getYear() { return year; }
-
-    public void setYear(Integer year) {
-        this.year = year;
-    }
 
     public Links getLinks() { return links; }
 
