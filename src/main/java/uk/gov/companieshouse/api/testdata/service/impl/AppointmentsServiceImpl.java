@@ -49,8 +49,6 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
 
-        LocalDate officerDob = LocalDate.of(1990, 3, 6);
-
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
