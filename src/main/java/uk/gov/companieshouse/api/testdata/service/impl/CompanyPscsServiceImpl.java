@@ -3,10 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.entity.Identification;
-import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.NameElements;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -127,7 +124,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
 
         companyPsc.setCountryOfResidence(WALES);
         companyPsc.setNationality("British");
-        companyPsc.setDateOfBirth(Instant.now().minus( 69, ChronoUnit.DAYS));
+        DateOfBirth dateOfBirth = new DateOfBirth(20, 9, 1975);
+        companyPsc.setDateOfBirth(dateOfBirth);
 
         NameElements nameElements = new NameElements();
 

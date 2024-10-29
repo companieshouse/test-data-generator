@@ -62,7 +62,7 @@ public class CompanyPscs{
     @Field("data.statement_type")
     private String statementType;
     @Field("sensitive_data.date_of_birth")
-    private Instant dateOfBirth;
+    private DateOfBirth dateOfBirth;
     @Field("data.links")
     private Links links;
     @Field("data.etag")
@@ -230,9 +230,9 @@ public class CompanyPscs{
 
     public void setCountryOfResidence(String countryOfResidence) { this.countryOfResidence = countryOfResidence; }
 
-    public Instant getDateOfBirth() { return dateOfBirth; }
+    public DateOfBirth getDateOfBirth() { return dateOfBirth; }
 
-    public void setDateOfBirth(Instant dateOfBirth) { this.dateOfBirth = dateOfBirth; }
+    public void setDateOfBirth(DateOfBirth dateOfBirth) { this.dateOfBirth = dateOfBirth; }
 
     public Links getLinks() { return links; }
 
