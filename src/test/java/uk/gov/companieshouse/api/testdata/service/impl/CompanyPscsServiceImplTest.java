@@ -120,6 +120,9 @@ class CompanyPscsServiceImplTest {
             assertEquals("Mr Test Tester Testington", companyPsc.getNameElements().toString());
             assertEquals("British", companyPsc.getNationality());
             assertNotNull(companyPsc.getDateOfBirth());
+            assertNotNull(companyPsc.getDateOfBirth().getDay());
+            assertNotNull(companyPsc.getDateOfBirth().getMonth());
+            assertNotNull(companyPsc.getDateOfBirth().getYear());
             assertEquals("Wales", companyPsc.getCountryOfResidence());
 
         } else {

@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -109,6 +106,9 @@ class AppointmentsServiceImplTest {
 
         assertEquals("DIRECTOR", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
+        assertNotNull(appointment.getDateOfBirth().getDay());
+        assertNotNull(appointment.getDateOfBirth().getMonth());
+        assertNotNull(appointment.getDateOfBirth().getYear());
     }
 
     @Test
@@ -168,6 +168,9 @@ class AppointmentsServiceImplTest {
 
         assertEquals("DIRECTOR", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
+        assertNotNull(appointment.getDateOfBirth().getDay());
+        assertNotNull(appointment.getDateOfBirth().getMonth());
+        assertNotNull(appointment.getDateOfBirth().getYear());
     }
 
     @Test

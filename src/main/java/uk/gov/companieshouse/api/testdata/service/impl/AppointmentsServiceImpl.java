@@ -10,10 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
@@ -56,7 +53,6 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-        Instant dob = officerDob.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         appointment.setId(appointmentId);
         appointment.setCreated(dateTimeNow);
@@ -86,8 +82,8 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
         appointment.setLinks(links);
 
         appointment.setSurname("DIRECTOR");
-        appointment.setDateOfBirth(dob);
-
+        DateOfBirth dateOfBirth = new DateOfBirth(14, 6, 1987);
+        appointment.setDateOfBirth(dateOfBirth);
         appointment.setCompanyName("Company " + companyNumber);
         appointment.setCompanyStatus("active");
         appointment.setOfficerId(officerId);

@@ -61,7 +61,16 @@ public class Appointment {
     private String surname;
 
     @Field("sensitive_data.date_of_birth")
-    private Instant dateOfBirth;
+    private DateOfBirth dateOfBirth;
+
+    @Field("data.date_of_birth.day")
+    private Integer day;
+
+    @Field("data.date_of_birth.month")
+    private Integer month;
+
+    @Field("data.date_of_birth.year")
+    private Integer year;
 
     @Field("company_name")
     private String companyName;
@@ -214,12 +223,30 @@ public class Appointment {
         this.surname = surname;
     }
 
-    public Instant getDateOfBirth() {
+    public DateOfBirth getDateOfBirth() {
         return dateOfBirth;
     }
 
-    public void setDateOfBirth(Instant dateOfBirth) {
+    public void setDateOfBirth(DateOfBirth dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public Integer getDay() { return day; }
+
+    public void setDay(Integer day) {
+        this.day = day;
+    }
+
+    public Integer getMonth() { return month; }
+
+    public void setMonth(Integer month) {
+        this.month = month;
+    }
+
+    public Integer getYear() { return year; }
+
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
     public String getCompanyName() {
