@@ -84,6 +84,7 @@ public class AppointmentsServiceImpl implements DataService<Appointment> {
 
         appointment.setSurname("DIRECTOR");
         appointment.setDateOfBirth(dob);
+
         appointment.setCompanyName("Company " + companyNumber);
         appointment.setCompanyStatus("active");
         appointment.setOfficerId(officerId);
