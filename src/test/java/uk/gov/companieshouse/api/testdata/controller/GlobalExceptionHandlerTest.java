@@ -77,6 +77,11 @@ public class GlobalExceptionHandlerTest {
         when(cause.getPathReference())
                 .thenReturn("uk.gov.companieshouse.api.testdata.model.rest.CompanySpec[\"jurisdiction\"]");
 
+        StackTraceElement[] stackTrace = new StackTraceElement[] {
+            new StackTraceElement("CompanySpec", "getJurisdiction", "CompanySpec.java", 123)
+        };
+        when(cause.getStackTrace()).thenReturn(stackTrace);
+
         final ValidationError expectedError = new ValidationError("invalid jurisdiction", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
@@ -96,6 +101,11 @@ public class GlobalExceptionHandlerTest {
         WebRequest request = Mockito.mock(WebRequest.class);
 
         when(cause.getPathReference()).thenReturn("unrecognised path reference");
+
+        StackTraceElement[] stackTrace = new StackTraceElement[] {
+            new StackTraceElement("CompanySpec", "getJurisdiction", "CompanySpec.java", 123)
+        };
+        when(cause.getStackTrace()).thenReturn(stackTrace);
 
         final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
 
