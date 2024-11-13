@@ -48,6 +48,10 @@ dist: clean build package
 sonar:
 	mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar
 
+.PHONY: security-check
+security-check:
+	mvn org.owasp:dependency-check-maven:check -DassemblyAnalyzerEnabled=false
+
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
 	mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.4.0.905:sonar -P sonar-pr-analysis

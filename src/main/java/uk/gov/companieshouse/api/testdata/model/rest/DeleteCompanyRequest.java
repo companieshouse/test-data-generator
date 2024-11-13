@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

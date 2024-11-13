@@ -81,7 +81,11 @@ public class MongoConfig {
 
     private MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory factory) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, new MongoMappingContext());
+        MongoMappingContext mappingContext = new MongoMappingContext();
+        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, mappingContext);
+        mappingContext.setSimpleTypeHolder(mappingConverter.getCustomConversions().getSimpleTypeHolder());
+        mappingContext.afterPropertiesSet();
+        mappingConverter.afterPropertiesSet();
 
         // Don't save _class to mongo
         mappingConverter.setTypeMapper(new DefaultMongoTypeMapper(null));

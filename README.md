@@ -8,7 +8,7 @@ Requirements
 ------------
 In order to run the API locally you'll need the following installed on your machine:
 
-- [Java](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
+- [Java 21](https://www.oracle.com/java/technologies/downloads/#java21)
 - [Maven](https://maven.apache.org/download.cgi)
 - [Git](https://git-scm.com/downloads)
 - [MongoDB](https://www.mongodb.com)
@@ -36,8 +36,6 @@ The docker compose file for this service is `docker-chs-development/services/tes
       - 4022
     ports:
       - "4022:4022"
-
-A `Tiltfile.dev` is included in this project to allow development mode to be enabled.
 
 ### Usage
 In order to use the generator, there are 2 possible endpoints that can be used.
