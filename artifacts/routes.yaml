@@ -1,0 +1,6 @@
+app_name: test-data-generator
+group: api
+
+weight: 900
+routes:
+   1: ^/test-data/*
