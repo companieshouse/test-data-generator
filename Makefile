@@ -15,7 +15,7 @@ clean:
 
 .PHONY: build
 build:
-	mvn versions-maven-plugin:set -DnewVersion=$(version) -DgenerateBackupPoms=false
+	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
 	mvn package -DskipTests=true
 	cp ./target/$(artifact_name)-$(version).jar ./$(artifact_name).jar
 
@@ -32,7 +32,7 @@ ifndef version
 	$(error No version given. Aborting)
 endif
 	$(info Packaging version: $(version))
-	mvn versions-maven-plugin:set -DnewVersion=$(version) -DgenerateBackupPoms=false
+	mvn versions:set -DnewVersion=$(version) -DgenerateBackupPoms=false
 	mvn package -DskipTests=true
 	$(eval tmpdir:=$(shell mktemp -d build-XXXXXXXXXX))
 	cp ./start.sh $(tmpdir)
@@ -46,7 +46,7 @@ dist: clean build package
 
 .PHONY: sonar
 sonar:
-	mvn sonar-maven-plugin:sonar
+	mvn sonar:sonar
 
 .PHONY: security-check
 security-check:
@@ -54,7 +54,7 @@ security-check:
 
 .PHONY: sonar-pr-analysis
 sonar-pr-analysis:
-	mvn sonar-maven-plugin:sonar -P sonar-pr-analysis
+	mvn sonar:sonar -P sonar-pr-analysis
 
 .PHONY: docker-build
 docker-build:
