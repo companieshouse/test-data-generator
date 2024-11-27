@@ -42,9 +42,10 @@ public class TestDataController {
     private CompanyAuthCodeService companyAuthCodeService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody Optional<CompanySpec> request) throws DataException {
+    public ResponseEntity<CompanyData> create(@Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
-        CompanySpec spec = request.orElse(new CompanySpec());
+        Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
+        CompanySpec spec = optionalRequest.orElse(new CompanySpec());
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
 
