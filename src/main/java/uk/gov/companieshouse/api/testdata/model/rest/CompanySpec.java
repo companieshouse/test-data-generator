@@ -18,6 +18,12 @@ public class CompanySpec {
     @JsonIgnore
     private String companyNumber;
 
+    @JsonProperty("company_status")
+    private String companyStatus;
+
+    @JsonProperty("type")
+    private String companyType;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -36,5 +42,17 @@ public class CompanySpec {
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCompanyStatus(){return companyStatus;}
+
+    public String getCompanyType(){return companyType;}
+
+    public void setCompanyStatus(String companyStatus) {
+        this.companyStatus = companyStatus;
+    }
+
+    public void setCompanyType(String companyType) {
+        this.companyType = companyType;
     }
 }

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     public CompanyProfile create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
         final Jurisdiction jurisdiction = spec.getJurisdiction();
+        final String companyStatus = spec.getCompanyStatus();
+        final String companyType = spec.getCompanyType();
 
         LocalDate now = LocalDate.now();
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
@@ -63,7 +66,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         profile.setCompanyNumber(companyNumber);
         profile.setDateOfCreation(dateOneYearAgo);
-        profile.setType("ltd");
+        profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
         profile.setUndeliverableRegisteredOfficeAddress(false);
         profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
         profile.setSicCodes(Collections.singletonList("71200"));
@@ -74,9 +77,15 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
 
         profile.setRegisteredOfficeIsInDispute(false);
-        profile.setCompanyStatus("active");
+        if(companyStatus!=null){
+            profile.setCompanyStatus(companyStatus);
+            profile.setHasInsolvencyHistory(companyStatus.equals("dissolved"));
+        }
+        else {
+            profile.setCompanyStatus("active");
+            profile.setHasInsolvencyHistory(false);
+        }
         profile.setEtag(this.randomService.getEtag());
-        profile.setHasInsolvencyHistory(false);
         profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
         profile.setJurisdiction(jurisdiction.toString());
         profile.setHasCharges(false);

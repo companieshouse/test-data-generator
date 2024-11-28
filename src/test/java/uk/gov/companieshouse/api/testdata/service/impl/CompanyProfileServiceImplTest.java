@@ -36,6 +36,8 @@ class CompanyProfileServiceImplTest {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ETAG = "ETAG";
+    private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
+    private static final String COMPANY_TYPE = "plc";
 
     @Mock
     private RandomService randomService;
@@ -200,6 +202,112 @@ class CompanyProfileServiceImplTest {
 
         assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void createDissolvedCompany() {
+        final Address mockServiceAddress = new Address(
+                "","","","","",""
+        );
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
+
+        CompanyProfile savedProfile = new CompanyProfile();
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+
+        assertEquals(savedProfile, returnedProfile);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, profile.getId());
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        assertEquals(COMPANY_STATUS_DISSOLVED, profile.getCompanyStatus());
+        assertEquals("england-wales", profile.getJurisdiction());
+        assertEquals("ltd", profile.getType());
+
+        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
+
+        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+                profile.getLinks().getPersonsWithSignificantControlStatement());
+
+        assertOnAccounts(profile.getAccounts());
+
+        assertOnDateofCreation(profile.getDateOfCreation());
+
+        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
+        assertNotNull(profile.getSicCodes());
+
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
+
+        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
+        assertEquals(true, profile.getHasInsolvencyHistory());
+        assertEquals(false, profile.getHasCharges());
+        assertTrue(profile.getCanFile());
+        assertEquals(ETAG, profile.getEtag());
+    }
+
+    @Test
+    void createCompanyWithType() {
+        final Address mockServiceAddress = new Address(
+                "","","","","",""
+        );
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE);
+
+        CompanyProfile savedProfile = new CompanyProfile();
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+
+        assertEquals(savedProfile, returnedProfile);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, profile.getId());
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        assertEquals("active", profile.getCompanyStatus());
+        assertEquals("england-wales", profile.getJurisdiction());
+        assertEquals(COMPANY_TYPE, profile.getType());
+
+        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
+
+        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+                profile.getLinks().getPersonsWithSignificantControlStatement());
+
+        assertOnAccounts(profile.getAccounts());
+
+        assertOnDateofCreation(profile.getDateOfCreation());
+
+        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
+        assertNotNull(profile.getSicCodes());
+
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
+
+        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
+        assertEquals(false, profile.getHasInsolvencyHistory());
+        assertEquals(false, profile.getHasCharges());
+        assertTrue(profile.getCanFile());
+        assertEquals(ETAG, profile.getEtag());
     }
 
 }
