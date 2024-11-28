@@ -258,7 +258,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithType() {
+    void createPlcCompany() {
         final Address mockServiceAddress = new Address(
                 "","","","","",""
         );

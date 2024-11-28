@@ -77,14 +77,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
 
         profile.setRegisteredOfficeIsInDispute(false);
-        if(companyStatus!=null){
-            profile.setCompanyStatus(companyStatus);
-            profile.setHasInsolvencyHistory(companyStatus.equals("dissolved"));
-        }
-        else {
-            profile.setCompanyStatus("active");
-            profile.setHasInsolvencyHistory(false);
-        }
+
+        profile.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
+        profile.setHasInsolvencyHistory("dissolved".equals(Objects.requireNonNullElse(companyStatus, "")));
+
         profile.setEtag(this.randomService.getEtag());
         profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
         profile.setJurisdiction(jurisdiction.toString());
