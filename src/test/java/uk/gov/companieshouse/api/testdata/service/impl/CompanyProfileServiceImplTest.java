@@ -69,7 +69,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ACTIVE);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, "england-wales", COMPANY_TYPE_LTD, false);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
@@ -77,7 +77,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, "scotland", COMPANY_TYPE_LTD, false);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.SCOTLAND.toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is deleted
@@ -105,7 +105,7 @@ class CompanyProfileServiceImplTest {
     void createDissolvedCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        assertCompanyProfile( COMPANY_STATUS_DISSOLVED, "england-wales", COMPANY_TYPE_LTD, true);
+        assertCompanyProfile( COMPANY_STATUS_DISSOLVED, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_LTD, true);
     }
 
     // Test that a company profile is created with plc company type
@@ -113,7 +113,7 @@ class CompanyProfileServiceImplTest {
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, "england-wales", COMPANY_TYPE_PLC, false);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_PLC, false);
     }
 
     private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
