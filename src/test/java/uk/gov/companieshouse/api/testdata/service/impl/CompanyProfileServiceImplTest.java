@@ -125,7 +125,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    public void testInvalidCompanyStatus() {
+    void testInvalidCompanyStatus() {
         validator = factory.getValidator();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("invalid-company-status");
@@ -134,7 +134,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    public void testInvalidCompanyType() {
+    void testInvalidCompanyType() {
         validator = factory.getValidator();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType("invalid-company-type");
