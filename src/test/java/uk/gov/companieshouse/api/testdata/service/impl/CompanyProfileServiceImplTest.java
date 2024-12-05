@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,13 +10,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -131,6 +132,9 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyStatus("invalid-company-status");
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
         assertFalse(violations.isEmpty(), "Expected violations for invalid company status");
+        for (ConstraintViolation<CompanySpec> violation : violations) {
+            assertEquals("Invalid company status", violation.getMessage());
+        }
     }
 
     @Test
@@ -140,6 +144,29 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType("invalid-company-type");
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
         assertFalse(violations.isEmpty(), "Expected violations for invalid company type");
+        for (ConstraintViolation<CompanySpec> violation : violations) {
+            assertEquals("Invalid company type", violation.getMessage());
+        }
+    }
+
+    // Test that a spec is not accepting field attributes that are not defined in the CompanySpec class
+    @Test
+    void testDeserializationFailsOnUnknownProperties() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String invalidJson = "{ \"jurisdiction\": \"england-wales\", \"companystatus\": \"active\" }";
+        assertThrows(UnrecognizedPropertyException.class, () -> {
+            objectMapper.readValue(invalidJson, CompanySpec.class);
+        });
+    }
+
+    // Test that a spec is accepting field attributes that are defined in the CompanySpec class
+    @Test
+    void testDeserializationSucceedsWithValidProperties() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+        String validJson = "{ \"jurisdiction\": \"england-wales\", \"company_status\": \"dissolved\" }";
+        assertDoesNotThrow(() -> {
+            objectMapper.readValue(validJson, CompanySpec.class);
+        });
     }
 
     private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
