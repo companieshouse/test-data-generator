@@ -14,7 +14,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
+import java.util.Set;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,6 +61,8 @@ class CompanyProfileServiceImplTest {
     private Address mockServiceAddress;
     private CompanySpec spec;
     private CompanyProfile savedProfile;
+    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+    private  Validator validator;
 
     @BeforeEach
     void setUp() {
@@ -115,6 +122,24 @@ class CompanyProfileServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
         assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_PLC, false);
+    }
+
+    @Test
+    public void testInvalidCompanyStatus() {
+        validator = factory.getValidator();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("invalid-company-status");
+        Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
+        assertFalse(violations.isEmpty(), "Expected violations for invalid company status");
+    }
+
+    @Test
+    public void testInvalidCompanyType() {
+        validator = factory.getValidator();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType("invalid-company-type");
+        Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
+        assertFalse(violations.isEmpty(), "Expected violations for invalid company type");
     }
 
     private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
