@@ -38,7 +38,9 @@ class CompanyProfileServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ETAG = "ETAG";
     private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
-    private static final String COMPANY_TYPE = "plc";
+    private static final String COMPANY_TYPE_PLC = "plc";
+    private static final String COMPANY_STATUS_ACTIVE = "active";
+    private static final String COMPANY_TYPE_LTD = "ltd";
 
     @Mock
     private RandomService randomService;
@@ -62,10 +64,11 @@ class CompanyProfileServiceImplTest {
         savedProfile = new CompanyProfile();
     }
 
-    // Test that a company profile is created with default company type and status with England and Wales jurisdiction
+    // Test that a company profile is created with default company type with England and Wales jurisdiction
     @Test
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus(COMPANY_STATUS_ACTIVE);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
@@ -80,9 +83,9 @@ class CompanyProfileServiceImplTest {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals("active", profile.getCompanyStatus());
+        assertEquals(COMPANY_STATUS_ACTIVE, profile.getCompanyStatus());
         assertEquals("england-wales", profile.getJurisdiction());
-        assertEquals("ltd", profile.getType());
+        assertEquals(COMPANY_TYPE_LTD, profile.getType());
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
@@ -143,10 +146,11 @@ class CompanyProfileServiceImplTest {
                 profile.getLinks().getPersonsWithSignificantControlStatement());
     }
 
-    // Test that a company profile is created with default company type and status with SCOTLAND jurisdiction
+    // Test that a company profile is created with default company type with SCOTLAND jurisdiction
     @Test
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
@@ -161,9 +165,9 @@ class CompanyProfileServiceImplTest {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals("active", profile.getCompanyStatus());
+        assertEquals(COMPANY_STATUS_ACTIVE, profile.getCompanyStatus());
         assertEquals("scotland", profile.getJurisdiction());
-        assertEquals("ltd", profile.getType());
+        assertEquals(COMPANY_TYPE_LTD, profile.getType());
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
@@ -226,7 +230,7 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
         assertEquals(COMPANY_STATUS_DISSOLVED, profile.getCompanyStatus());
         assertEquals("england-wales", profile.getJurisdiction());
-        assertEquals("ltd", profile.getType());
+        assertEquals(COMPANY_TYPE_LTD, profile.getType());
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
@@ -252,7 +256,7 @@ class CompanyProfileServiceImplTest {
     @Test
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE);
+        spec.setCompanyType(COMPANY_TYPE_PLC);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -268,9 +272,9 @@ class CompanyProfileServiceImplTest {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals("active", profile.getCompanyStatus());
+        assertEquals(COMPANY_STATUS_ACTIVE, profile.getCompanyStatus());
         assertEquals("england-wales", profile.getJurisdiction());
-        assertEquals(COMPANY_TYPE, profile.getType());
+        assertEquals(COMPANY_TYPE_PLC, profile.getType());
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
