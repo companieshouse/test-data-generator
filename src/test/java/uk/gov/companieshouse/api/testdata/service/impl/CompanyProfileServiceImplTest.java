@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -49,16 +50,22 @@ class CompanyProfileServiceImplTest {
     @InjectMocks
     private CompanyProfileServiceImpl companyProfileService;
 
-    @Test
-    void createEnglandWales() {
-        final Address mockServiceAddress = new Address(
-                "","","","","",""
-        );
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+    private Address mockServiceAddress;
+    private CompanySpec spec;
+    private CompanyProfile savedProfile;
 
-        CompanyProfile savedProfile = new CompanyProfile();
+    @BeforeEach
+    void setUp() {
+        mockServiceAddress = new Address("", "", "", "", "", "");
+        spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        savedProfile = new CompanyProfile();
+    }
+
+    // Test that a company profile is created with default company type and status with England and Wales jurisdiction
+    @Test
+    void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
@@ -79,15 +86,11 @@ class CompanyProfileServiceImplTest {
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
-        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
-                profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertLinks(profile);
 
         assertOnAccounts(profile.getAccounts());
 
-        assertOnDateofCreation(profile.getDateOfCreation());
+        assertOnDateOfCreation(profile.getDateOfCreation());
 
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
@@ -119,7 +122,7 @@ class CompanyProfileServiceImplTest {
         assertNotNull(accounts.getAccountingReferenceDateMonth());
     }
 
-    private void assertOnDateofCreation(Instant dateOfCreation) {
+    private void assertOnDateOfCreation(Instant dateOfCreation) {
         assertNotNull(dateOfCreation);
 
         Instant now = Instant.now();
@@ -132,16 +135,18 @@ class CompanyProfileServiceImplTest {
         assertTrue(days == 365 || days == 366); // cater for leap years
     }
 
-    @Test
-    void createScotland() {
-        final Address mockServiceAddress = new Address(
-                "","","","","",""
-        );
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+    private void assertLinks(CompanyProfile profile) {
+        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+                profile.getLinks().getPersonsWithSignificantControlStatement());
+    }
 
-        CompanyProfile savedProfile = new CompanyProfile();
+    // Test that a company profile is created with default company type and status with SCOTLAND jurisdiction
+    @Test
+    void createCompanyWithoutCompanyStatusAndWithScotland() {
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
@@ -162,15 +167,11 @@ class CompanyProfileServiceImplTest {
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
-        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
-                profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertLinks(profile);
 
         assertOnAccounts(profile.getAccounts());
 
-        assertOnDateofCreation(profile.getDateOfCreation());
+        assertOnDateOfCreation(profile.getDateOfCreation());
 
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
@@ -184,17 +185,17 @@ class CompanyProfileServiceImplTest {
         assertEquals(ETAG, profile.getEtag());
     }
 
-
+    // Test that a company profile is deleted
     @Test
     void delete() {
-        CompanyProfile companyProfile = new CompanyProfile();
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.of(companyProfile));
+                .thenReturn(Optional.of(savedProfile));
 
         assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
-        verify(repository).delete(companyProfile);
+        verify(repository).delete(savedProfile);
     }
 
+    // Test that a company profile is not deleted when it does not exist
     @Test
     void deleteNoCompanyProfile() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
@@ -204,17 +205,11 @@ class CompanyProfileServiceImplTest {
         verify(repository, never()).delete(any());
     }
 
+    // Test that a company profile is created with dissolved company status
     @Test
     void createDissolvedCompany() {
-        final Address mockServiceAddress = new Address(
-                "","","","","",""
-        );
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-
-        CompanyProfile savedProfile = new CompanyProfile();
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
@@ -235,15 +230,11 @@ class CompanyProfileServiceImplTest {
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
-        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
-                profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertLinks(profile);
 
         assertOnAccounts(profile.getAccounts());
 
-        assertOnDateofCreation(profile.getDateOfCreation());
+        assertOnDateOfCreation(profile.getDateOfCreation());
 
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
@@ -257,17 +248,12 @@ class CompanyProfileServiceImplTest {
         assertEquals(ETAG, profile.getEtag());
     }
 
+    // Test that a company profile is created with plc company type
     @Test
     void createPlcCompany() {
-        final Address mockServiceAddress = new Address(
-                "","","","","",""
-        );
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE);
 
-        CompanyProfile savedProfile = new CompanyProfile();
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
@@ -288,15 +274,11 @@ class CompanyProfileServiceImplTest {
 
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
 
-        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
-                profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertLinks(profile);
 
         assertOnAccounts(profile.getAccounts());
 
-        assertOnDateofCreation(profile.getDateOfCreation());
+        assertOnDateOfCreation(profile.getDateOfCreation());
 
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
