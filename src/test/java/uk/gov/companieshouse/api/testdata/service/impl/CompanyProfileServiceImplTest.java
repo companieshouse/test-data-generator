@@ -41,6 +41,7 @@ class CompanyProfileServiceImplTest {
     private static final String COMPANY_TYPE_PLC = "plc";
     private static final String COMPANY_STATUS_ACTIVE = "active";
     private static final String COMPANY_TYPE_LTD = "ltd";
+    private static final String COMPANY_STATUS_ADMINISTRATION = "administration";
 
     @Mock
     private RandomService randomService;
@@ -68,8 +69,8 @@ class CompanyProfileServiceImplTest {
     @Test
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyStatus(COMPANY_STATUS_ACTIVE);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_LTD, false);
+        spec.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
+        assertCompanyProfile( COMPANY_STATUS_ADMINISTRATION, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
