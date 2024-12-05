@@ -69,13 +69,60 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ACTIVE);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, "england-wales", COMPANY_TYPE_LTD, false);
+    }
+
+    // Test that a company profile is created with default company status with SCOTLAND jurisdiction
+    @Test
+    void createCompanyWithoutCompanyStatusAndWithScotland() {
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, "scotland", COMPANY_TYPE_LTD, false);
+    }
+
+    // Test that a company profile is deleted
+    @Test
+    void delete() {
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(savedProfile));
+
+        assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
+        verify(repository).delete(savedProfile);
+    }
+
+    // Test that a company profile is not deleted when it does not exist
+    @Test
+    void deleteNoCompanyProfile() {
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.empty());
+
+        assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(any());
+    }
+
+    // Test that a company profile is created with dissolved company status
+    @Test
+    void createDissolvedCompany() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
+        assertCompanyProfile( COMPANY_STATUS_DISSOLVED, "england-wales", COMPANY_TYPE_LTD, true);
+    }
+
+    // Test that a company profile is created with plc company type
+    @Test
+    void createPlcCompany() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_PLC);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, "england-wales", COMPANY_TYPE_PLC, false);
+    }
+
+    private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
+
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
-
         assertEquals(savedProfile, returnedProfile);
-
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
@@ -83,28 +130,25 @@ class CompanyProfileServiceImplTest {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals(COMPANY_STATUS_ACTIVE, profile.getCompanyStatus());
-        assertEquals("england-wales", profile.getJurisdiction());
-        assertEquals(COMPANY_TYPE_LTD, profile.getType());
-
+        assertEquals(companyStatus, profile.getCompanyStatus());
+        assertEquals(jurisdiction, profile.getJurisdiction());
+        assertEquals(companyType, profile.getType());
         assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
-
-        assertLinks(profile);
-
-        assertOnAccounts(profile.getAccounts());
-
-        assertOnDateOfCreation(profile.getDateOfCreation());
-
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
-
         assertOnConfirmationStatement(profile.getConfirmationStatement());
-
         assertEquals(false, profile.getRegisteredOfficeIsInDispute());
-        assertEquals(false, profile.getHasInsolvencyHistory());
+        assertEquals(hasInsolvencyHistory, profile.getHasInsolvencyHistory());
         assertEquals(false, profile.getHasCharges());
         assertTrue(profile.getCanFile());
         assertEquals(ETAG, profile.getEtag());
+        assertOnAccounts(profile.getAccounts());
+        assertOnDateOfCreation(profile.getDateOfCreation());
+        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
+        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+                profile.getLinks().getPersonsWithSignificantControlStatement());
     }
 
     private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement confirmationStatement) {
@@ -137,163 +181,4 @@ class CompanyProfileServiceImplTest {
         long days = Duration.between(t1, t2).toDays();
         assertTrue(days == 365 || days == 366); // cater for leap years
     }
-
-    private void assertLinks(CompanyProfile profile) {
-        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
-                profile.getLinks().getPersonsWithSignificantControlStatement());
-    }
-
-    // Test that a company profile is created with default company type with SCOTLAND jurisdiction
-    @Test
-    void createCompanyWithoutCompanyStatusAndWithScotland() {
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
-        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
-
-        assertEquals(savedProfile, returnedProfile);
-
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
-        assertEquals(COMPANY_NUMBER, profile.getId());
-        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals(COMPANY_STATUS_ACTIVE, profile.getCompanyStatus());
-        assertEquals("scotland", profile.getJurisdiction());
-        assertEquals(COMPANY_TYPE_LTD, profile.getType());
-
-        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
-
-        assertLinks(profile);
-
-        assertOnAccounts(profile.getAccounts());
-
-        assertOnDateOfCreation(profile.getDateOfCreation());
-
-        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
-        assertNotNull(profile.getSicCodes());
-
-        assertOnConfirmationStatement(profile.getConfirmationStatement());
-
-        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
-        assertEquals(false, profile.getHasInsolvencyHistory());
-        assertEquals(false, profile.getHasCharges());
-        assertTrue(profile.getCanFile());
-        assertEquals(ETAG, profile.getEtag());
-    }
-
-    // Test that a company profile is deleted
-    @Test
-    void delete() {
-        when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.of(savedProfile));
-
-        assertTrue(this.companyProfileService.delete(COMPANY_NUMBER));
-        verify(repository).delete(savedProfile);
-    }
-
-    // Test that a company profile is not deleted when it does not exist
-    @Test
-    void deleteNoCompanyProfile() {
-        when(repository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.empty());
-
-        assertFalse(this.companyProfileService.delete(COMPANY_NUMBER));
-        verify(repository, never()).delete(any());
-    }
-
-    // Test that a company profile is created with dissolved company status
-    @Test
-    void createDissolvedCompany() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
-        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
-
-        assertEquals(savedProfile, returnedProfile);
-
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
-        assertEquals(COMPANY_NUMBER, profile.getId());
-        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals(COMPANY_STATUS_DISSOLVED, profile.getCompanyStatus());
-        assertEquals("england-wales", profile.getJurisdiction());
-        assertEquals(COMPANY_TYPE_LTD, profile.getType());
-
-        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
-
-        assertLinks(profile);
-
-        assertOnAccounts(profile.getAccounts());
-
-        assertOnDateOfCreation(profile.getDateOfCreation());
-
-        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
-        assertNotNull(profile.getSicCodes());
-
-        assertOnConfirmationStatement(profile.getConfirmationStatement());
-
-        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
-        assertEquals(true, profile.getHasInsolvencyHistory());
-        assertEquals(false, profile.getHasCharges());
-        assertTrue(profile.getCanFile());
-        assertEquals(ETAG, profile.getEtag());
-    }
-
-    // Test that a company profile is created with plc company type
-    @Test
-    void createPlcCompany() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_PLC);
-
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
-        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
-
-        assertEquals(savedProfile, returnedProfile);
-
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
-        assertEquals(COMPANY_NUMBER, profile.getId());
-        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
-        assertEquals(COMPANY_STATUS_ACTIVE, profile.getCompanyStatus());
-        assertEquals("england-wales", profile.getJurisdiction());
-        assertEquals(COMPANY_TYPE_PLC, profile.getType());
-
-        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
-
-        assertLinks(profile);
-
-        assertOnAccounts(profile.getAccounts());
-
-        assertOnDateOfCreation(profile.getDateOfCreation());
-
-        assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
-        assertNotNull(profile.getSicCodes());
-
-        assertOnConfirmationStatement(profile.getConfirmationStatement());
-
-        assertEquals(false, profile.getRegisteredOfficeIsInDispute());
-        assertEquals(false, profile.getHasInsolvencyHistory());
-        assertEquals(false, profile.getHasCharges());
-        assertTrue(profile.getCanFile());
-        assertEquals(ETAG, profile.getEtag());
-    }
-
 }
