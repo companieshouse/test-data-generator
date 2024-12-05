@@ -8,8 +8,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -51,7 +49,7 @@ class TestDataControllerTest {
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));
+        ResponseEntity<CompanyData> response = this.testDataController.create(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -63,7 +61,7 @@ class TestDataControllerTest {
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(any())).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));
+        ResponseEntity<CompanyData> response = this.testDataController.create(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -80,7 +78,7 @@ class TestDataControllerTest {
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.create(Optional.ofNullable(request));
+        ResponseEntity<CompanyData> response = this.testDataController.create(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -97,7 +95,7 @@ class TestDataControllerTest {
         when(this.testDataService.createCompanyData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () -> {
-            this.testDataController.create(Optional.ofNullable(request));
+            this.testDataController.create(request);
         });
         assertEquals(exception, thrown);
     }
