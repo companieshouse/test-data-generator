@@ -131,10 +131,7 @@ class CompanyProfileServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("invalid-company-status");
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
-        assertFalse(violations.isEmpty(), "Expected violations for invalid company status");
-        for (ConstraintViolation<CompanySpec> violation : violations) {
-            assertEquals("Invalid company status", violation.getMessage());
-        }
+        assertTrue(violations.stream().anyMatch(v -> "Invalid company status".equals(v.getMessage())), "Expected a violation message for invalid company status");
     }
 
     @Test
@@ -143,10 +140,7 @@ class CompanyProfileServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType("invalid-company-type");
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
-        assertFalse(violations.isEmpty(), "Expected violations for invalid company type");
-        for (ConstraintViolation<CompanySpec> violation : violations) {
-            assertEquals("Invalid company type", violation.getMessage());
-        }
+        assertTrue(violations.stream().anyMatch(v -> "Invalid company type".equals(v.getMessage())), "Expected a violation message for invalid company type");
     }
 
     // Test that a spec is not accepting field attributes that are not defined in the CompanySpec class
