@@ -68,7 +68,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
-        assertCompanyProfile( COMPANY_STATUS_ADMINISTRATION, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_LTD, false);
+        assertCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
@@ -76,7 +76,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.SCOTLAND.toString(), COMPANY_TYPE_LTD, false);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
     // Test that a company profile is deleted
@@ -104,7 +104,7 @@ class CompanyProfileServiceImplTest {
     void createDissolvedCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        assertCompanyProfile( COMPANY_STATUS_DISSOLVED, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_LTD, true);
+        assertCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
     }
 
     // Test that a company profile is created with plc company type
@@ -112,7 +112,7 @@ class CompanyProfileServiceImplTest {
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_PLC, false);
+        assertCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
 
