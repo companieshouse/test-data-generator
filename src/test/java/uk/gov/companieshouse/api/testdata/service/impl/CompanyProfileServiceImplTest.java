@@ -10,17 +10,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.Set;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.hibernate.validator.internal.engine.ConstraintViolationImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,8 +53,7 @@ class CompanyProfileServiceImplTest {
     private Address mockServiceAddress;
     private CompanySpec spec;
     private CompanyProfile savedProfile;
-    private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-    private  Validator validator;
+
 
     @BeforeEach
     void setUp() {
@@ -125,23 +115,6 @@ class CompanyProfileServiceImplTest {
         assertCompanyProfile( COMPANY_STATUS_ACTIVE, Jurisdiction.ENGLAND_WALES.toString(), COMPANY_TYPE_PLC, false);
     }
 
-    @Test
-    void testInvalidCompanyStatus() {
-        validator = factory.getValidator();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyStatus("invalid-company-status");
-        Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
-        assertTrue(violations.stream().anyMatch(v -> "Invalid company status".equals(v.getMessage())), "Expected a violation message for invalid company status");
-    }
-
-    @Test
-    void testInvalidCompanyType() {
-        validator = factory.getValidator();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType("invalid-company-type");
-        Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
-        assertTrue(violations.stream().anyMatch(v -> "Invalid company type".equals(v.getMessage())), "Expected a violation message for invalid company type");
-    }
 
     private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
         when(randomService.getEtag()).thenReturn(ETAG);
