@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import java.util.List;
 
 @Document(collection = "account/roles")
-public class Roles {
+public class Role {
 
     @Id
     @Field("id")
