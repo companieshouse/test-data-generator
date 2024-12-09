@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class CompanySpecTest {
+class CompanySpecTest {
 
     private final ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
     private Validator validator;
