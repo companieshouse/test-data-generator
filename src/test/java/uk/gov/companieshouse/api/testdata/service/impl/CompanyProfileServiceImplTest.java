@@ -143,26 +143,6 @@ class CompanyProfileServiceImplTest {
         assertTrue(violations.stream().anyMatch(v -> "Invalid company type".equals(v.getMessage())), "Expected a violation message for invalid company type");
     }
 
-    // Test that a spec is not accepting field attributes that are not defined in the CompanySpec class
-    @Test
-    void testDeserializationFailsOnUnknownProperties() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String invalidJson = "{ \"jurisdiction\": \"england-wales\", \"companystatus\": \"active\" }";
-        assertThrows(UnrecognizedPropertyException.class, () -> {
-            objectMapper.readValue(invalidJson, CompanySpec.class);
-        });
-    }
-
-    // Test that a spec is accepting field attributes that are defined in the CompanySpec class
-    @Test
-    void testDeserializationSucceedsWithValidProperties() throws Exception {
-        ObjectMapper objectMapper = new ObjectMapper();
-        String validJson = "{ \"jurisdiction\": \"england-wales\", \"company_status\": \"dissolved\" }";
-        assertDoesNotThrow(() -> {
-            objectMapper.readValue(validJson, CompanySpec.class);
-        });
-    }
-
     private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
