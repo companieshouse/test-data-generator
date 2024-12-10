@@ -42,12 +42,12 @@ In order to use the generator, there are 2 possible endpoints that can be used.
 
 - POST: Sending a POST request to `{Base URL}/test-data/company` will generate a new test company and accompanying Authcode. The request body can include an optional `CompanySpec` parameter to customize the generated company.
 
-  - **CompanySpec Parameters**:
+  - CompanySpec Parameters:
     - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`). Defaults to `england_wales`.
     - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
     - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
 
-  - **Usage Examples**:
+  - Usage Examples:
     - With all parameters: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc"}`
     - With company status: `{"company_status":"dissolved"}`
   
