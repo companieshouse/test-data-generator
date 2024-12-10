@@ -1,6 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -50,14 +53,12 @@ class CompanyProfileServiceImplTest {
     @InjectMocks
     private CompanyProfileServiceImpl companyProfileService;
 
-    private Address mockServiceAddress;
     private CompanySpec spec;
     private CompanyProfile savedProfile;
 
 
     @BeforeEach
     void setUp() {
-        mockServiceAddress = new Address("", "", "", "", "", "");
         spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         savedProfile = new CompanyProfile();
@@ -68,7 +69,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
-        assertCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
+        createCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
@@ -76,7 +77,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        createCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
     // Test that a company profile is deleted
@@ -104,7 +105,7 @@ class CompanyProfileServiceImplTest {
     void createDissolvedCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        assertCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
+        createCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
     }
 
     // Test that a company profile is created with plc company type
@@ -112,14 +113,15 @@ class CompanyProfileServiceImplTest {
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
-        assertCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        createCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
 
-    private void assertCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
+    private void createCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
+        Address mockRegiseteredAddress = new Address("", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockServiceAddress);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegiseteredAddress);
 
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
         assertEquals(savedProfile, returnedProfile);
@@ -133,7 +135,7 @@ class CompanyProfileServiceImplTest {
         assertEquals(companyStatus, profile.getCompanyStatus());
         assertEquals(jurisdiction, profile.getJurisdiction());
         assertEquals(companyType, profile.getType());
-        assertEquals(mockServiceAddress, profile.getRegisteredOfficeAddress());
+        assertEquals(mockRegiseteredAddress, profile.getRegisteredOfficeAddress());
         assertEquals(false, profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
         assertOnConfirmationStatement(profile.getConfirmationStatement());
