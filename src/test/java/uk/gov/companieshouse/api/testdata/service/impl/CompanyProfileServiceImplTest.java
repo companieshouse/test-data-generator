@@ -69,7 +69,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
-        createCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
+        assertCreateCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
@@ -77,7 +77,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
-        createCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        assertCreateCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
     // Test that a company profile is deleted
@@ -105,7 +105,7 @@ class CompanyProfileServiceImplTest {
     void createDissolvedCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        createCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
+        assertCreateCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
     }
 
     // Test that a company profile is created with plc company type
@@ -113,11 +113,11 @@ class CompanyProfileServiceImplTest {
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
-        createCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        assertCreateCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
 
-    private void createCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
+    private void assertCreateCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
         Address mockRegiseteredAddress = new Address("", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
