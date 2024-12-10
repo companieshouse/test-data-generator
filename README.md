@@ -40,7 +40,12 @@ The docker compose file for this service is `docker-chs-development/services/tes
 ### Usage
 In order to use the generator, there are 2 possible endpoints that can be used.
 
-- POST: Sending a POST request on the following endpoint `{Base URL}/test-data/company)` will generate a new test company and accompanying Authcode. There is an optional parameter which is CompanySpec. When added to the request body will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales. An usage example looks like this: `{"jurisdiction":"scotland"}`
+- POST: Sending a POST request on the following endpoint `{Base URL}/test-data/company)` will generate a new test company and accompanying Authcode. There is an optional parameter which is CompanySpec. When added to the request body will alter generated company to be based in jurisdiction, company_status and type. The CompanySpec parameters are:
+  - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`).
+  - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`, etc.,).
+  - `type`: The type of the company (e.g., `ltd`, `plc`, etc.,).
+  An usage example looks like this: `{"jurisdiction":"scotland", "companyStatus":"active", "companyType":"ltd"}`
+  
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
