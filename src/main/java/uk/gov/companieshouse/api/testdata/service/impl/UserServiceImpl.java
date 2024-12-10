@@ -2,8 +2,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.authentication.Permissions;
-import uk.gov.companieshouse.api.testdata.model.authentication.RoleTypes;
 import uk.gov.companieshouse.api.testdata.model.entity.Role;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
 import uk.gov.companieshouse.api.testdata.model.rest.RolesSpec;
@@ -17,7 +15,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
-import static uk.gov.companieshouse.api.testdata.model.authentication.Permissions.permissions;
 
 public class UserServiceImpl implements UserService, RolesService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
@@ -37,13 +34,15 @@ public class UserServiceImpl implements UserService, RolesService {
 
 
     @Override
-    public void creteUser(RolesSpec roles) throws DataException {
+    public void creteUser(RolesSpec rolesSpec) throws DataException {
         LocalDate now = LocalDate.now();
-        final List<String> roleList = roles.getRoles();
+        final List<String> roleList = rolesSpec.getRoles();
         final Users user = new Users();
+
         if (user.getRoles() == null) {
             user.setRoles(new ArrayList<>());
         }
+
         if (roleList != null && !roleList.isEmpty()) {
             for (final String role : roleList) {
                 if (!roleExists(role)) {
@@ -51,14 +50,15 @@ public class UserServiceImpl implements UserService, RolesService {
                 }
                 // Initialise the Role structure
                 Role newRole = new Role();
-                List<String> permissionList = Permissions.getPermissions(RoleTypes.valueOf(role));
-                newRole.setPermissions(permissionList);
+                newRole.setPermissions(roleList);
                 newRole.setId(role);
+                roleRepository.save(newRole);
             }
         }
         else{
             throw new DataException("Role does not exist");
         }
+        user.setRoles(roleList);
     }
 
     @Override
