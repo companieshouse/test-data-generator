@@ -40,7 +40,12 @@ The docker compose file for this service is `docker-chs-development/services/tes
 ### Usage
 In order to use the generator, there are 2 possible endpoints that can be used.
 
-- POST: Sending a POST request on the following endpoint `{Base URL}/test-data/company)` will generate a new test company and accompanying Authcode. There is an optional parameter which is CompanySpec. When added to the request body will alter generated company to be based in Scotland or Northern Ireland but will default to England/Wales. An usage example looks like this: `{"jurisdiction":"scotland"}`
+- POST: Sending a POST request to `{Base URL}/test-data/company` will generate a new test company and accompanying Authcode. The request body can include an optional `CompanySpec` parameter to customise the generated company.
+  - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`). Defaults to `england_wales`.
+  - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
+  - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
+
+  An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
@@ -48,16 +53,16 @@ In order to use the generator, there are 2 possible endpoints that can be used.
 The supported environmental variables have been categorised by use case and are as follows.
 
 ### Code Analysis Variables
-Name                   | Description                                                                                                                               | Mandatory | Default | Example
----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- | ------------------
-CODE_ANALYSIS_HOST_URL | The host URL of the code analysis server. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters)                        | ✓         |         | http://HOST:PORT
-CODE_ANALYSIS_LOGIN    | The analysis server account to use when analysing or publishing. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters) | ✓         |         | login
-CODE_ANALYSIS_PASSWORD | The analysis server account password. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters)                            | ✓         |         | password
+| Name                   | Description                                                                                                                               | Mandatory | Default | Example          |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------|---------|------------------|
+| CODE_ANALYSIS_HOST_URL | The host URL of the code analysis server. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters)                        | ✓         |         | http://HOST:PORT |
+| CODE_ANALYSIS_LOGIN    | The analysis server account to use when analysing or publishing. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters) | ✓         |         | login            |
+| CODE_ANALYSIS_PASSWORD | The analysis server account password. See [here](https://docs.sonarqube.org/display/SONAR/Analysis+Parameters)                            | ✓         |         | password         |
 
 ### Deployment Variables
-Name                                   | Description                               | Mandatory | Default | Example
--------------------------------------- | ----------------------------------------  | --------- | ------- | -----------------
-TEST_DATA_GENERATOR_PORT               | Configured port application runs on.      | ✓         |         | 4022
-MONGODB_URL                            | Mongo database URL.                       | ✓         |         | mongodb://localhost:27017
-BARCODE_SERVICE_URL                    | URL of barcode service                    | ✓         |         | http://localhost:9000
-API_URL                                | URL of (company) API service              | ✓         |         |
+| Name                     | Description                          | Mandatory | Default | Example                   |
+|--------------------------|--------------------------------------|-----------|---------|---------------------------|
+| TEST_DATA_GENERATOR_PORT | Configured port application runs on. | ✓         |         | 4022                      |
+| MONGODB_URL              | Mongo database URL.                  | ✓         |         | mongodb://localhost:27017 |
+| BARCODE_SERVICE_URL      | URL of barcode service               | ✓         |         | http://localhost:9000     |
+| API_URL                  | URL of (company) API service         | ✓         |         |                           |
