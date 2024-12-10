@@ -40,7 +40,11 @@ The docker compose file for this service is `docker-chs-development/services/tes
 ### Usage
 In order to use the generator, there are 2 possible endpoints that can be used.
 
-- POST: Sending a POST request on the following endpoint `{Base URL}/test-data/company)` will generate a new test company and accompanying Authcode. There is an optional parameter which is CompanySpec. When added to the request body will alter generated company to be based in `jurisdiction` as Scotland or Northern Ireland but will default to England/Wales. An usage example looks like this: `{"jurisdiction":"scotland"}`. When added to the request body will alter generated company to be of `type` as Ltd or Plc but will default to Ltd. An usage example looks like this: `{"companyType":"plc"}`. When added to the request body will alter generated company to be of `company_status` as Active or Dissolved but will default to Active. An usage example looks like this: `{"companyStatus":"dissolved"}`. The CompanySpec parameters are:
+- POST: Sending a POST request on the following endpoint `{Base URL}/test-data/company)` will generate a new test company and accompanying Authcode. There is an optional parameter which is CompanySpec. 
+- When added to the request body will alter generated company to be based in `jurisdiction` as Scotland or Northern Ireland but will default to England/Wales. An usage example looks like this: `{"jurisdiction":"scotland"}`. 
+- When added to the request body will alter generated company to be of `type` as Ltd or Plc but will default to Ltd. An usage example looks like this: `{"companyType":"plc"}`. 
+- When added to the request body will alter generated company to be of `company_status` as Active or Dissolved but will default to Active. An usage example looks like this: `{"companyStatus":"dissolved"}`. 
+- The CompanySpec parameters are:
   - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`).
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`, etc.,).
   - `type`: The type of the company (e.g., `ltd`, `plc`, etc.,).
