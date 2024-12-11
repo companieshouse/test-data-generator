@@ -72,6 +72,11 @@ public class MongoConfig {
         return getMongoRepositoryBean(CompanyPscsRepository.class, "company_pscs");
     }
 
+    @Bean
+    public AcspProfileRepository acspProfileRepository() {
+        return getMongoRepositoryBean(AcspProfileRepository.class, "acsp_profile");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
