@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 public class UserServiceImpl implements UserService, RolesService {
@@ -44,16 +45,7 @@ public class UserServiceImpl implements UserService, RolesService {
         }
 
         if (roleList != null && !roleList.isEmpty()) {
-            for (final String role : roleList) {
-                if (!roleExists(role)) {
-                    throw new DataException("Role does not exist");
-                }
-                // Initialise the Role structure
-                Role newRole = new Role();
-                newRole.setPermissions(roleList);
-                newRole.setId(role);
-                roleRepository.save(newRole);
-            }
+            createRole(roleList);
         }
         else{
             throw new DataException("Role does not exist");
@@ -72,8 +64,27 @@ public class UserServiceImpl implements UserService, RolesService {
     }
 
     @Override
-    public void createRole(List<String> roles) {
+    public void createRole(List<String> roleList) throws DataException {
+        for (final String role : roleList) {
+            if (!roleExists(role)) {
+                throw new DataException("Role does not exist");
+            }
+            // Initialise the Role structure
+            Role newRole = new Role();
+            newRole.setPermissions(roleList);
+            String randomRoleId = generateRandomString(8, "numeric");
+            newRole.setId(roleList.get(i) + "-playwright-role" + randomRoleId);
+            roleRepository.save(newRole);
+        }
+    }
 
+    private String generateRandomString(int length, String charset) {
+        StringBuilder randomString = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            randomString.append(charset.charAt(random.nextInt(charset.length())));
+        }
+        return randomString.toString();
     }
 
     @Override
