@@ -1,22 +1,23 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Role;
+import uk.gov.companieshouse.api.testdata.model.entity.Roles;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
-import uk.gov.companieshouse.api.testdata.model.rest.RolesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RolesService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
-
+@Service
 public class UserServiceImpl implements UserService, RolesService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
@@ -30,27 +31,43 @@ public class UserServiceImpl implements UserService, RolesService {
 
     @Override
     public boolean userExits(String userId) {
-        return repository.findByUserId(userId).isPresent();
+        Optional<Users> existingUser = repository.findById(userId);
+        return existingUser.isPresent();
     }
 
 
     @Override
-    public void creteUser(RolesSpec rolesSpec) throws DataException {
+    public UserTestData creteUser(UsersSpec usersSpec) throws DataException {
         LocalDate now = LocalDate.now();
-        final List<String> roleList = rolesSpec.getRoles();
+        Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
+        final String password = usersSpec.getPassword();
+
+        final List<String> roleList = usersSpec.getRoles();
         final Users user = new Users();
 
         if (user.getRoles() == null) {
             user.setRoles(new ArrayList<>());
         }
-
-        if (roleList != null && !roleList.isEmpty()) {
-            createRole(roleList);
-        }
-        else{
-            throw new DataException("Role does not exist");
-        }
-        user.setRoles(roleList);
+//
+//        if (roleList != null && !roleList.isEmpty()) {
+//            createRole(roleList);
+//        }
+//        else{
+//            throw new DataException("Role does not exist");
+//        }
+//        user.setRoles(roleList);
+        long timestamp = System.currentTimeMillis();
+        String randomUser = "playwright-user" + timestamp + "@test.companieshouse.gov.uk";
+        user.setId(generateRandomString(24));
+        user.setEmail(randomUser);
+        user.setForename("Forename-"+timestamp);
+        user.setSurname("Surname-"+timestamp);
+        user.setLocale("GB_en");
+        user.setPassword(password);
+        user.setDirectLoginPrivilege(true);
+        user.setCreated(dateNow);
+        repository.save(user);
+        return new UserTestData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
     }
 
     @Override
@@ -60,7 +77,8 @@ public class UserServiceImpl implements UserService, RolesService {
 
     @Override
     public boolean roleExists(String role) {
-        return roleRepository.findByRoleId(role).isPresent();
+        Optional<Roles> existingRole = roleRepository.findById(role);
+        return existingRole.isPresent();
     }
 
     @Override
@@ -70,21 +88,17 @@ public class UserServiceImpl implements UserService, RolesService {
                 throw new DataException("Role does not exist");
             }
             // Initialise the Role structure
-            Role newRole = new Role();
+            Roles newRole = new Roles();
             newRole.setPermissions(roleList);
-            String randomRoleId = generateRandomString(8, "numeric");
-            newRole.setId(roleList.get(i) + "-playwright-role" + randomRoleId);
+            String randomRoleId = generateRandomString(8);
+            newRole.setId(role + "-playwright-role" + randomRoleId);
             roleRepository.save(newRole);
         }
     }
 
-    private String generateRandomString(int length, String charset) {
-        StringBuilder randomString = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < length; i++) {
-            randomString.append(charset.charAt(random.nextInt(charset.length())));
-        }
-        return randomString.toString();
+    private String generateRandomString(int length) {
+        String uuid = UUID.randomUUID().toString().replace("-", "");
+        return uuid.substring(0, length);
     }
 
     @Override

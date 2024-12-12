@@ -74,12 +74,12 @@ public class MongoConfig {
 
     @Bean
     public UserRepository userRepository() {
-        return getMongoRepositoryBean(UserRepository.class, "users");
+        return getMongoRepositoryBean(UserRepository.class, "account");
     }
 
     @Bean
     public RoleRepository roleRepository() {
-        return getMongoRepositoryBean(RoleRepository.class, "roles");
+        return getMongoRepositoryBean(RoleRepository.class, "account");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
