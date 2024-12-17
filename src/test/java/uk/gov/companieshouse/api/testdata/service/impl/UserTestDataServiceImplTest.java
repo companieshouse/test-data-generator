@@ -16,7 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserTestDataServiceImplTest {
+class UserTestDataServiceImplTest {
     @Mock
     private UserService userService;
 
@@ -24,7 +24,7 @@ public class UserTestDataServiceImplTest {
     private UserTestDataServiceImpl userTestDataServiceImpl;
 
     @Test
-    public void testCreateUserTestData() throws DataException {
+    void testCreateUserTestData() throws DataException {
         UsersSpec usersSpec = new UsersSpec();
         usersSpec.setPassword("password");
 
@@ -42,13 +42,13 @@ public class UserTestDataServiceImplTest {
     }
 
     @Test
-    public void testCreateUserTestDataWithOutPassword() {
+    void testCreateUserTestDataWithOutPassword() {
         UsersSpec usersSpec = new UsersSpec();
         assertThrows(IllegalArgumentException.class, () -> userTestDataServiceImpl.createUserTestData(usersSpec));
     }
 
     @Test
-    public void testDeleteUserTestData() throws DataException {
+    void testDeleteUserTestData() throws DataException {
         doNothing().when(userService).deleteUser("userId");
 
         userTestDataServiceImpl.deleteUserTestData("userId");
@@ -57,13 +57,13 @@ public class UserTestDataServiceImplTest {
     }
 
     @Test
-    public void testDeleteUserTestDataThrowsException() throws DataException {
+    void testDeleteUserTestDataThrowsException() throws DataException {
         doThrow(new DataException("User not found")).when(userService).deleteUser("userId");
         assertThrows(DataException.class, () -> userTestDataServiceImpl.deleteUserTestData("userId"));
     }
 
     @Test
-    public void testUserExists() throws NoDataFoundException {
+    void testUserExists() throws NoDataFoundException {
         when(userService.userExits("userId")).thenReturn(true);
 
         boolean userExists = userTestDataServiceImpl.userExists("userId");
@@ -73,7 +73,7 @@ public class UserTestDataServiceImplTest {
     }
 
     @Test
-    public void testUserDoesNotExist() throws NoDataFoundException {
+    void testUserDoesNotExist() throws NoDataFoundException {
         when(userService.userExits("userId")).thenReturn(false);
 
         boolean userExists = userTestDataServiceImpl.userExists("userId");

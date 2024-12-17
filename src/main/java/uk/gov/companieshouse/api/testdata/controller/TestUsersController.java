@@ -30,7 +30,7 @@ public class TestUsersController {
     @PostMapping("/users")
     public ResponseEntity<UserTestData> createUser(@Valid @RequestBody(required = false) UsersSpec request) throws DataException {
         Optional<UsersSpec> optionalRequest = Optional.ofNullable(request);
-        UsersSpec spec = optionalRequest.orElse(new UsersSpec());
+        var spec = optionalRequest.orElse(new UsersSpec());
 
         UserTestData createdUser = userTestDataService.createUserTestData(spec);
 

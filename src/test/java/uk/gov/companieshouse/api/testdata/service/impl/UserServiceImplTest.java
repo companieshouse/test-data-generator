@@ -23,7 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
@@ -35,7 +35,7 @@ public class UserServiceImplTest {
     private UserServiceImpl userServiceImpl;
 
     @Test
-    public void testCreateUserWithoutRoles() throws DataException {
+    void testCreateUserWithoutRoles() throws DataException {
         UsersSpec usersSpec = new UsersSpec();
         usersSpec.setPassword("password");
 
@@ -53,7 +53,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testCreateUserWithRoles() throws DataException {
+    void testCreateUserWithRoles() throws DataException {
         UsersSpec usersSpec = new UsersSpec();
         usersSpec.setPassword("password");
 
@@ -84,7 +84,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testUserExists() {
+    void testUserExists() {
         when(userRepository.findById(any(String.class))).thenReturn(Optional.of(new Users()));
 
         boolean userExists = userServiceImpl.userExits("userId");
@@ -94,7 +94,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testUserDoesNotExist() {
+    void testUserDoesNotExist() {
         when(userRepository.findById(any(String.class))).thenReturn(Optional.empty());
 
         boolean userExists = userServiceImpl.userExits("userId");
@@ -104,7 +104,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testDeleteUser() throws DataException {
+    void testDeleteUser() throws DataException {
         Users mockUser = new Users();
         mockUser.setId("userId");
 
@@ -119,7 +119,7 @@ public class UserServiceImplTest {
     }
 
     @Test
-    public void testDeleteUserNotFound() {
+    void testDeleteUserNotFound() {
         when(userRepository.findById("userId")).thenReturn(Optional.empty());
 
         assertFalse(userServiceImpl.userExits("userId"), "User should not exist before deletion");

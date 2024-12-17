@@ -21,7 +21,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class TestUsersControllerTest {
+class TestUsersControllerTest {
     @Mock
     private UsersTestDataService usersTestDataService;
 
@@ -29,7 +29,7 @@ public class TestUsersControllerTest {
     private TestUsersController testUsersController;
 
     @Test
-    public void createUser() throws Exception {
+    void createUser() throws Exception {
         UsersSpec usersSpec = new UsersSpec();
         UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForeName", "TestSurName");
 
@@ -42,7 +42,7 @@ public class TestUsersControllerTest {
     }
 
     @Test
-    public void createUserWithNullRequest() throws Exception {
+    void createUserWithNullRequest() throws Exception {
         UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForeName", "TestSurName");
 
         when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenReturn(userTestData);
@@ -54,7 +54,7 @@ public class TestUsersControllerTest {
     }
 
     @Test
-    public void createUserThrowsDataException() throws Exception {
+    void createUserThrowsDataException() throws Exception {
         UsersSpec usersSpec = new UsersSpec();
         when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenThrow(new DataException("Error"));
 
@@ -62,7 +62,7 @@ public class TestUsersControllerTest {
     }
 
     @Test
-    public void deleteUser() throws Exception {
+    void deleteUser() throws Exception {
         String userId = "12345";
 
         when(usersTestDataService.userExists(userId)).thenReturn(true);
@@ -76,7 +76,7 @@ public class TestUsersControllerTest {
     }
 
     @Test
-    public void deleteUserNotFound() throws Exception {
+    void deleteUserNotFound() throws Exception {
         String userId = "12345";
 
         when(usersTestDataService.userExists(userId)).thenReturn(false);
@@ -88,7 +88,7 @@ public class TestUsersControllerTest {
     }
 
     @Test
-    public void deleteUserThrowsDataException() throws Exception {
+    void deleteUserThrowsDataException() throws Exception {
         String userId = "12345";
 
         when(usersTestDataService.userExists(userId)).thenReturn(true);
@@ -98,7 +98,7 @@ public class TestUsersControllerTest {
     }
 
     @Test
-    public void deleteUserThrowsNoDataFoundException() throws Exception {
+    void deleteUserThrowsNoDataFoundException() throws Exception {
         String userId = "12345";
 
         when(usersTestDataService.userExists(userId)).thenReturn(true);

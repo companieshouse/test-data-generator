@@ -15,7 +15,6 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -39,16 +38,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserTestData createUser(UsersSpec usersSpec) throws DataException {
-        LocalDate now = LocalDate.now();
-        Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
+        var now = LocalDate.now();
+        var dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
         long timestamp = System.currentTimeMillis();
         final String password = usersSpec.getPassword();
-        final Users user = new Users();
+        final var user = new Users();
         List<RolesSpec> roleList = usersSpec.getRoles();
         if(roleList!=null){
-            Roles role = new Roles();
+            var role = new Roles();
             List<String> rolesList = new ArrayList<>();
-            for (RolesSpec roleData : roleList) {
+            for (var roleData : roleList) {
                 if (roleData.getId() == null || roleData.getPermissions() == null) {
                     throw new DataException("Role does not exist");
                 }
