@@ -126,4 +126,45 @@ class UserServiceImplTest {
 
         assertThrows(DataException.class, () -> userServiceImpl.deleteUser("userId"));
     }
+
+    @Test
+    void testCreateUserWithInvalidRole() {
+        UsersSpec usersSpec = new UsersSpec();
+        usersSpec.setPassword("password");
+
+        RolesSpec roleSpec = new RolesSpec();
+        roleSpec.setId(null); // or roleSpec.setPermissions(null);
+        usersSpec.setRoles(List.of(roleSpec));
+
+        DataException exception = assertThrows(DataException.class, () -> {
+            userServiceImpl.createUser(usersSpec);
+        });
+
+        assertEquals("Role does not exist", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteUserWithRoles() throws DataException {
+        String userId = "userId";
+        Users mockUser = new Users();
+        mockUser.setId(userId);
+        mockUser.setRoles(List.of("role1", "role2"));
+
+        Roles mockRole1 = new Roles();
+        mockRole1.setId("role1");
+        Roles mockRole2 = new Roles();
+        mockRole2.setId("role2");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(roleRepository.findById("role1")).thenReturn(Optional.of(mockRole1));
+        when(roleRepository.findById("role2")).thenReturn(Optional.of(mockRole2));
+        doNothing().when(roleRepository).delete(any(Roles.class));
+        doNothing().when(userRepository).delete(any(Users.class));
+
+        userServiceImpl.deleteUser(userId);
+
+        verify(roleRepository, times(1)).delete(mockRole1);
+        verify(roleRepository, times(1)).delete(mockRole2);
+        verify(userRepository, times(1)).delete(mockUser);
+    }
 }
