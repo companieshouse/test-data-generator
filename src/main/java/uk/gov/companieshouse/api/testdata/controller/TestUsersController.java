@@ -5,12 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.service.UsersTestDataService;
@@ -41,5 +39,21 @@ public class TestUsersController {
         data.put("user id", createdUser.getUserId());
         LOG.info("New user created", data);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/users/{userId}")
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException, NoDataFoundException {
+        if(!userTestDataService.userExists(userId)) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", HttpStatus.NOT_FOUND.value());
+            response.put("userId", "User not found "+ userId);
+            LOG.info(userId+ " User not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        userTestDataService.deleteUserTestData(userId);
+        Map<String, Object> data = new HashMap<>();
+        data.put("user id", userId);
+        LOG.info("User deleted", data);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

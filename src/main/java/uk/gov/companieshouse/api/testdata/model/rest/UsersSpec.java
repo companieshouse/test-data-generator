@@ -7,11 +7,11 @@ import java.util.List;
 
 public class UsersSpec {
 
-    @JsonProperty
-    private List<String> roles;
+    @JsonProperty("roles")
+    private List<RolesSpec> roles;
 
     @JsonProperty
-    @NotNull (message = "password is required")
+    @NotNull(message = "password is required")
     private String password;
 
     public String getPassword() {
@@ -22,12 +22,14 @@ public class UsersSpec {
         this.password = password;
     }
 
-    public List<String> getRoles() {
+    public List<RolesSpec> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<String> roles) {
+    public void setRoles(List<RolesSpec> roles) {
         this.roles = roles;
+
     }
+
 
 }

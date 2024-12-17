@@ -2,15 +2,18 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Roles;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
+import uk.gov.companieshouse.api.testdata.model.rest.RolesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
-import uk.gov.companieshouse.api.testdata.service.RolesService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -18,10 +21,9 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Service
-public class UserServiceImpl implements UserService, RolesService {
+public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
-
-    private static final String ROLE_STEM = "/users/";
+    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
     private UserRepository repository;
@@ -35,28 +37,28 @@ public class UserServiceImpl implements UserService, RolesService {
         return existingUser.isPresent();
     }
 
-
     @Override
-    public UserTestData creteUser(UsersSpec usersSpec) throws DataException {
+    public UserTestData createUser(UsersSpec usersSpec) throws DataException {
         LocalDate now = LocalDate.now();
         Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
-        final String password = usersSpec.getPassword();
-
-        final List<String> roleList = usersSpec.getRoles();
-        final Users user = new Users();
-
-        if (user.getRoles() == null) {
-            user.setRoles(new ArrayList<>());
-        }
-//
-//        if (roleList != null && !roleList.isEmpty()) {
-//            createRole(roleList);
-//        }
-//        else{
-//            throw new DataException("Role does not exist");
-//        }
-//        user.setRoles(roleList);
         long timestamp = System.currentTimeMillis();
+        final String password = usersSpec.getPassword();
+        final Users user = new Users();
+        List<RolesSpec> roleList = usersSpec.getRoles();
+        if(roleList!=null){
+            Roles role = new Roles();
+            List<String> rolesList = new ArrayList<>();
+            for (RolesSpec roleData : roleList) {
+                if (roleData.getId() == null || roleData.getPermissions() == null) {
+                    throw new DataException("Role does not exist");
+                }
+                role.setId(roleData.getId()+"-playwright-role"+timestamp);
+                role.setPermissions(roleData.getPermissions());
+                rolesList.add(role.getId());
+                roleRepository.save(role);
+            }
+            user.setRoles(rolesList);
+        }
         String randomUser = "playwright-user" + timestamp + "@test.companieshouse.gov.uk";
         user.setId(generateRandomString(24));
         user.setEmail(randomUser);
@@ -71,38 +73,32 @@ public class UserServiceImpl implements UserService, RolesService {
     }
 
     @Override
-    public void deleteUser(String userId) {
-
-    }
-
-    @Override
-    public boolean roleExists(String role) {
-        Optional<Roles> existingRole = roleRepository.findById(role);
-        return existingRole.isPresent();
-    }
-
-    @Override
-    public void createRole(List<String> roleList) throws DataException {
-        for (final String role : roleList) {
-            if (!roleExists(role)) {
-                throw new DataException("Role does not exist");
+    public void deleteUser(String userId) throws DataException {
+        try {
+            Optional<Users> existingUser = repository.findById(userId);
+            if (existingUser.isPresent()) {
+                Users user = existingUser.get();
+                if (user.getRoles() != null) {
+                    for (String roleId : user.getRoles()) {
+                        Optional<Roles> existingRole = roleRepository.findById(roleId);
+                        existingRole.ifPresent(roleRepository::delete);
+                    }
+                }
+                existingUser.ifPresent(repository::delete);
             }
-            // Initialise the Role structure
-            Roles newRole = new Roles();
-            newRole.setPermissions(roleList);
-            String randomRoleId = generateRandomString(8);
-            newRole.setId(role + "-playwright-role" + randomRoleId);
-            roleRepository.save(newRole);
+            else {
+                LOG.error("User id" + userId + " not found");
+                throw new DataException("User id" + userId + " not found");
+            }
+        }
+        catch (Exception e) {
+            LOG.error("Failed to delete user");
+            throw new DataException("Failed to delete user");
         }
     }
 
     private String generateRandomString(int length) {
         String uuid = UUID.randomUUID().toString().replace("-", "");
         return uuid.substring(0, length);
-    }
-
-    @Override
-    public void deleteRole(String role) {
-
     }
 }
