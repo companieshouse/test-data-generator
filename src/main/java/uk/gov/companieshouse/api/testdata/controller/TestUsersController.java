@@ -32,7 +32,7 @@ public class TestUsersController {
         Optional<UsersSpec> optionalRequest = Optional.ofNullable(request);
         var spec = optionalRequest.orElse(new UsersSpec());
 
-        UserTestData createdUser = userTestDataService.createUserTestData(spec);
+        var createdUser = userTestDataService.createUserTestData(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put("user email", createdUser.getEmail());
