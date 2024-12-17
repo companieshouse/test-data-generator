@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -136,9 +137,7 @@ class UserServiceImplTest {
         roleSpec.setId(null); // or roleSpec.setPermissions(null);
         usersSpec.setRoles(List.of(roleSpec));
 
-        DataException exception = assertThrows(DataException.class, () -> {
-            userServiceImpl.createUser(usersSpec);
-        });
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.createUser(usersSpec));
 
         assertEquals("Role does not exist", exception.getMessage());
     }
@@ -166,5 +165,24 @@ class UserServiceImplTest {
         verify(roleRepository, times(1)).delete(mockRole1);
         verify(roleRepository, times(1)).delete(mockRole2);
         verify(userRepository, times(1)).delete(mockUser);
+    }
+
+    @Test
+    void testDeleteUserThrowsException() {
+        String userId = "userId";
+        when(userRepository.findById(userId)).thenThrow(new RuntimeException("Database error"));
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.deleteUser(userId));
+
+        assertEquals("Failed to delete user", exception.getMessage());
+    }
+
+    @Test
+    void testGenerateRandomString() throws Exception {
+        Method method = UserServiceImpl.class.getDeclaredMethod("generateRandomString", int.class);
+        method.setAccessible(true);
+        String randomString = (String) method.invoke(userServiceImpl, 24);
+        assertNotNull(randomString);
+        assertEquals(24, randomString.length());
     }
 }
