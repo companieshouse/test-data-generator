@@ -129,20 +129,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testCreateUserWithInvalidRole() {
-        UsersSpec usersSpec = new UsersSpec();
-        usersSpec.setPassword("password");
-
-        RolesSpec roleSpec = new RolesSpec();
-        roleSpec.setId(null); // or roleSpec.setPermissions(null);
-        usersSpec.setRoles(List.of(roleSpec));
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.createUser(usersSpec));
-
-        assertEquals("Role does not exist", exception.getMessage());
-    }
-
-    @Test
     void testDeleteUserWithRoles() throws DataException {
         String userId = "userId";
         Users mockUser = new Users();
@@ -184,5 +170,34 @@ class UserServiceImplTest {
         String randomString = (String) method.invoke(userServiceImpl, 24);
         assertNotNull(randomString);
         assertEquals(24, randomString.length());
+    }
+    @Test
+    void testCreateUserWithNullRoleId() {
+        UsersSpec usersSpec = new UsersSpec();
+        usersSpec.setPassword("password");
+
+        RolesSpec roleSpec = new RolesSpec();
+        roleSpec.setId(null); // Role ID is null
+        roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
+        usersSpec.setRoles(List.of(roleSpec));
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.createUser(usersSpec));
+
+        assertEquals("Role does not exist", exception.getMessage());
+    }
+
+    @Test
+    void testCreateUserWithNullRolePermissions() {
+        UsersSpec usersSpec = new UsersSpec();
+        usersSpec.setPassword("password");
+
+        RolesSpec roleSpec = new RolesSpec();
+        roleSpec.setId("role-id");
+        roleSpec.setPermissions(null); // Role permissions are null
+        usersSpec.setRoles(List.of(roleSpec));
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.createUser(usersSpec));
+
+        assertEquals("Role does not exist", exception.getMessage());
     }
 }

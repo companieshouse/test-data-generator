@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -22,7 +21,7 @@ public class UserTestDataServiceImpl implements UsersTestDataService {
             throw new IllegalArgumentException("Password can not be null");
         }
         try {
-           usersTestData = this.userService.createUser(usersSpec);
+            usersTestData = this.userService.createUser(usersSpec);
         } catch (Exception e) {
             throw new DataException("Failed to create user test data", e);
         }
@@ -35,7 +34,7 @@ public class UserTestDataServiceImpl implements UsersTestDataService {
     }
 
     @Override
-    public boolean userExists(String userId) throws NoDataFoundException {
+    public boolean userExists(String userId) {
         return this.userService.userExits(userId);
     }
 }

@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -63,7 +62,7 @@ class UserTestDataServiceImplTest {
     }
 
     @Test
-    void testUserExists() throws NoDataFoundException {
+    void testUserExists() {
         when(userService.userExits("userId")).thenReturn(true);
 
         boolean userExists = userTestDataServiceImpl.userExists("userId");
@@ -73,13 +72,26 @@ class UserTestDataServiceImplTest {
     }
 
     @Test
-    void testUserDoesNotExist() throws NoDataFoundException {
+    void testUserDoesNotExist() {
         when(userService.userExits("userId")).thenReturn(false);
 
         boolean userExists = userTestDataServiceImpl.userExists("userId");
 
         assertFalse(userExists);
         verify(userService, times(1)).userExits("userId");
+    }
+
+    @Test
+    void testCreateUserTestDataThrowsException() throws DataException {
+        UsersSpec usersSpec = new UsersSpec();
+        usersSpec.setPassword("password");
+
+        when(userService.createUser(any(UsersSpec.class))).thenThrow(new RuntimeException("Service exception"));
+
+        DataException exception = assertThrows(DataException.class, () -> userTestDataServiceImpl.createUserTestData(usersSpec));
+
+        assertEquals("Failed to create user test data", exception.getMessage());
+        verify(userService, times(1)).createUser(any(UsersSpec.class));
     }
 }
 
