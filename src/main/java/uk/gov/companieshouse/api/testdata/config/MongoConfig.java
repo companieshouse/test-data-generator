@@ -26,6 +26,7 @@ import uk.gov.companieshouse.api.testdata.repository.*;
 public class MongoConfig {
 
     private final MongoProperties mongoProperties;
+    private static final String ACCOUNT_DATABASE = "account";
 
     public MongoConfig(MongoProperties mongoProperties) {
         super();
@@ -39,7 +40,7 @@ public class MongoConfig {
 
     @Bean
     public CompanyAuthCodeRepository accountRepository() {
-        return getMongoRepositoryBean(CompanyAuthCodeRepository.class, "account");
+        return getMongoRepositoryBean(CompanyAuthCodeRepository.class, ACCOUNT_DATABASE);
     }
 
     @Bean
@@ -74,12 +75,12 @@ public class MongoConfig {
 
     @Bean
     public UserRepository userRepository() {
-        return getMongoRepositoryBean(UserRepository.class, "account");
+        return getMongoRepositoryBean(UserRepository.class, ACCOUNT_DATABASE);
     }
 
     @Bean
     public RoleRepository roleRepository() {
-        return getMongoRepositoryBean(RoleRepository.class, "account");
+        return getMongoRepositoryBean(RoleRepository.class, ACCOUNT_DATABASE);
     }
 
     private MongoTemplate createMongoTemplate(final String database) {

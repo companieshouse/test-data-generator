@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class WebConfigTest {
+class WebConfigTest {
     private static final String USERS_ENDPOINTS = "/test-data/users**";
 
     @Mock
