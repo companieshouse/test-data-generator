@@ -13,20 +13,28 @@ public class Users {
     @Id
     @Field("id")
     private String id;
+
     @Field("email")
     private String email;
+
     @Field("password")
     private String password;
+
     @Field("created")
     private Instant created;
+
     @Field("locale")
     private String locale;
+
     @Field("forename")
     private String forename;
+
     @Field("surname")
     private String surname;
+
     @Field("roles")
     private List<String> roles;
+
     @Field("direct_login_privilege")
     private Boolean directLoginPrivilege;
 

@@ -30,6 +30,4 @@ public class UsersSpec {
         this.roles = roles;
 
     }
-
-
 }

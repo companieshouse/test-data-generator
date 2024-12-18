@@ -12,6 +12,7 @@ public class Roles {
     @Id
     @Field("id")
     private String id;
+
     @Field("permissions")
     private List<String> permissions;
 

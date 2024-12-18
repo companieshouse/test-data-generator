@@ -31,7 +31,7 @@ class TestUsersControllerTest {
     @Test
     void createUser() throws Exception {
         UsersSpec usersSpec = new UsersSpec();
-        UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForeName", "TestSurName");
+        UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForename", "TestSurname");
 
         when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenReturn(userTestData);
 
@@ -43,7 +43,7 @@ class TestUsersControllerTest {
 
     @Test
     void createUserWithNullRequest() throws Exception {
-        UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForeName", "TestSurName");
+        UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForename", "TestSurname");
 
         when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenReturn(userTestData);
 

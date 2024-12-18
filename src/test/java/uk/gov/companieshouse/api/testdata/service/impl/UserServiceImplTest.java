@@ -49,8 +49,8 @@ class UserServiceImplTest {
 
         assertNotNull(userTestData.getUserId(), "User ID should not be null");
         assertNotNull(userTestData.getEmail(), "Email should not be null");
-        assertTrue(userTestData.getForeName().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userTestData.getSurName().contains("Surname"), "Surname should contain Surname");
+        assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
+        assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
     }
 
     @Test
@@ -77,8 +77,8 @@ class UserServiceImplTest {
 
         assertNotNull(userTestData.getUserId(), "User ID should not be null");
         assertNotNull(userTestData.getEmail(), "Email should not be null");
-        assertTrue(userTestData.getForeName().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userTestData.getSurName().contains("Surname"), "Surname should contain Surname");
+        assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
+        assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
 
         // Verify that the role repository was called
         verify(roleRepository, times(1)).save(any(Roles.class));
@@ -88,7 +88,7 @@ class UserServiceImplTest {
     void testUserExists() {
         when(userRepository.findById(any(String.class))).thenReturn(Optional.of(new Users()));
 
-        boolean userExists = userServiceImpl.userExits("userId");
+        boolean userExists = userServiceImpl.userExists("userId");
 
         assertTrue(userExists, "User should exist");
         verify(userRepository, times(1)).findById("userId");
@@ -98,7 +98,7 @@ class UserServiceImplTest {
     void testUserDoesNotExist() {
         when(userRepository.findById(any(String.class))).thenReturn(Optional.empty());
 
-        boolean userExists = userServiceImpl.userExits("userId");
+        boolean userExists = userServiceImpl.userExists("userId");
 
         assertFalse(userExists, "User should not exist");
         verify(userRepository, times(1)).findById("userId");
@@ -112,7 +112,7 @@ class UserServiceImplTest {
         when(userRepository.findById("userId")).thenReturn(Optional.of(mockUser));
         doNothing().when(userRepository).delete(any(Users.class));
 
-        assertTrue(userServiceImpl.userExits("userId"), "User should exist before deletion");
+        assertTrue(userServiceImpl.userExists("userId"), "User should exist before deletion");
 
         userServiceImpl.deleteUser("userId");
 
@@ -123,7 +123,7 @@ class UserServiceImplTest {
     void testDeleteUserNotFound() {
         when(userRepository.findById("userId")).thenReturn(Optional.empty());
 
-        assertFalse(userServiceImpl.userExits("userId"), "User should not exist before deletion");
+        assertFalse(userServiceImpl.userExists("userId"), "User should not exist before deletion");
 
         assertThrows(DataException.class, () -> userServiceImpl.deleteUser("userId"));
     }

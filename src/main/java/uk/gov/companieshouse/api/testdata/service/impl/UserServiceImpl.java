@@ -31,15 +31,14 @@ public class UserServiceImpl implements UserService {
     private RoleRepository roleRepository;
 
     @Override
-    public boolean userExits(String userId) {
+    public boolean userExists(String userId) {
         Optional<Users> existingUser = repository.findById(userId);
         return existingUser.isPresent();
     }
 
     @Override
     public UserTestData createUser(UsersSpec usersSpec) throws DataException {
-        var now = LocalDate.now();
-        var dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
+        var dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
         long timestamp = System.currentTimeMillis();
         final String password = usersSpec.getPassword();
         final var user = new Users();
@@ -86,8 +85,8 @@ public class UserServiceImpl implements UserService {
                 existingUser.ifPresent(repository::delete);
             }
             else {
-                LOG.error("User id" + userId + " not found");
-                throw new DataException("User id" + userId + " not found");
+                LOG.error("User id " + userId + " not found");
+                throw new DataException("User id " + userId + " not found");
             }
         }
         catch (Exception e) {

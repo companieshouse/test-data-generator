@@ -6,18 +6,21 @@ public class UserTestData {
 
     @JsonProperty("user_id")
     private final String userId;
+
     @JsonProperty("email")
     private final String email;
-    @JsonProperty("forename")
-    private final String foreName;
-    @JsonProperty("surname")
-    private final String surName;
 
-    public UserTestData(String userId, String email, String foreName, String surName) {
+    @JsonProperty("forename")
+    private final String forename;
+
+    @JsonProperty("surname")
+    private final String surname;
+
+    public UserTestData(String userId, String email, String forename, String surname) {
         this.userId = userId;
         this.email = email;
-        this.foreName = foreName;
-        this.surName = surName;
+        this.forename = forename;
+        this.surname = surname;
     }
 
     public String getUserId() {
@@ -28,11 +31,11 @@ public class UserTestData {
         return email;
     }
 
-    public String getForeName() {
-        return foreName;
+    public String getForename() {
+        return forename;
     }
 
-    public String getSurName() {
-        return surName;
+    public String getSurname() {
+        return surname;
     }
 }

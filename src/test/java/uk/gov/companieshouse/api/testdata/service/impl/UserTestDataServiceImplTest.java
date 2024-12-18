@@ -36,12 +36,12 @@ class UserTestDataServiceImplTest {
         assertNotNull(userTestData);
         assertEquals("userId", userTestData.getUserId());
         assertEquals("email@example.com", userTestData.getEmail());
-        assertEquals("Forename", userTestData.getForeName());
-        assertEquals("Surname", userTestData.getSurName());
+        assertEquals("Forename", userTestData.getForename());
+        assertEquals("Surname", userTestData.getSurname());
     }
 
     @Test
-    void testCreateUserTestDataWithOutPassword() {
+    void testCreateUserTestDataWithoutPassword() {
         UsersSpec usersSpec = new UsersSpec();
         assertThrows(IllegalArgumentException.class, () -> userTestDataServiceImpl.createUserTestData(usersSpec));
     }
@@ -63,22 +63,22 @@ class UserTestDataServiceImplTest {
 
     @Test
     void testUserExists() {
-        when(userService.userExits("userId")).thenReturn(true);
+        when(userService.userExists("userId")).thenReturn(true);
 
         boolean userExists = userTestDataServiceImpl.userExists("userId");
 
         assertTrue(userExists);
-        verify(userService, times(1)).userExits("userId");
+        verify(userService, times(1)).userExists("userId");
     }
 
     @Test
     void testUserDoesNotExist() {
-        when(userService.userExits("userId")).thenReturn(false);
+        when(userService.userExists("userId")).thenReturn(false);
 
         boolean userExists = userTestDataServiceImpl.userExists("userId");
 
         assertFalse(userExists);
-        verify(userService, times(1)).userExits("userId");
+        verify(userService, times(1)).userExists("userId");
     }
 
     @Test

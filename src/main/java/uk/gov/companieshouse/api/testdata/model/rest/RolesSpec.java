@@ -12,7 +12,6 @@ public class RolesSpec {
     @JsonProperty("permissions")
     private List<String> permissions;
 
-    // Getters and Setters
     public String getId() {
         return id;
     }

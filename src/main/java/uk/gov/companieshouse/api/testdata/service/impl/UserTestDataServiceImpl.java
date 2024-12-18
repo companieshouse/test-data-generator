@@ -18,14 +18,14 @@ public class UserTestDataServiceImpl implements UsersTestDataService {
     public UserTestData createUserTestData(UsersSpec usersSpec) throws DataException {
         UserTestData usersTestData = null;
         if(usersSpec.getPassword() == null) {
-            throw new IllegalArgumentException("Password can not be null");
+            throw new IllegalArgumentException("Password cannot be null");
         }
         try {
             usersTestData = this.userService.createUser(usersSpec);
         } catch (Exception e) {
             throw new DataException("Failed to create user test data", e);
         }
-        return new UserTestData(usersTestData.getUserId(),usersTestData.getEmail(),usersTestData.getForeName(),usersTestData.getSurName());
+        return new UserTestData(usersTestData.getUserId(),usersTestData.getEmail(),usersTestData.getForename(),usersTestData.getSurname());
     }
 
     @Override
@@ -35,6 +35,6 @@ public class UserTestDataServiceImpl implements UsersTestDataService {
 
     @Override
     public boolean userExists(String userId) {
-        return this.userService.userExits(userId);
+        return this.userService.userExists(userId);
     }
 }
