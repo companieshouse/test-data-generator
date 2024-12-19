@@ -21,7 +21,7 @@ public class UserTestDataServiceImpl implements UsersTestDataService {
             throw new IllegalArgumentException("Password cannot be null");
         }
         try {
-            usersTestData = this.userService.createUser(usersSpec);
+            usersTestData = this.userService.create(usersSpec);
         } catch (Exception e) {
             throw new DataException("Failed to create user test data", e);
         }
@@ -30,7 +30,7 @@ public class UserTestDataServiceImpl implements UsersTestDataService {
 
     @Override
     public void deleteUserTestData(String userId) throws DataException {
-        this.userService.deleteUser(userId);
+        this.userService.delete(userId);
     }
 
     @Override

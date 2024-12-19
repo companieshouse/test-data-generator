@@ -24,9 +24,8 @@ import uk.gov.companieshouse.api.testdata.repository.*;
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
 public class MongoConfig {
-
-    private final MongoProperties mongoProperties;
     private static final String ACCOUNT_DATABASE = "account";
+    private final MongoProperties mongoProperties;
 
     public MongoConfig(MongoProperties mongoProperties) {
         super();

@@ -1,5 +1,11 @@
 package uk.gov.companieshouse.api.testdata.config;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -9,12 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import uk.gov.companieshouse.api.interceptor.InternalUserInterceptor;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class WebConfigTest {
-    private static final String USERS_ENDPOINTS = "/test-data/users**";
 
     @Mock
     private InterceptorRegistry registry;

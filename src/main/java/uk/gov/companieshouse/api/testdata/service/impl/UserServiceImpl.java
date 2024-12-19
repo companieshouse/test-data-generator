@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserTestData createUser(UsersSpec usersSpec) throws DataException {
+    public UserTestData create(UsersSpec usersSpec) throws DataException {
         var dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
         long timestamp = System.currentTimeMillis();
         final String password = usersSpec.getPassword();
@@ -71,7 +71,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(String userId) throws DataException {
+    public void delete(String userId) throws DataException {
         try {
             Optional<Users> existingUser = repository.findById(userId);
             if (existingUser.isPresent()) {

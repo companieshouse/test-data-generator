@@ -1,7 +1,20 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,9 +32,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -39,18 +49,18 @@ class UserServiceImplTest {
     void testCreateUserWithoutRoles() throws DataException {
         UsersSpec usersSpec = new UsersSpec();
         usersSpec.setPassword("password");
-
-        Users mockUser = new Users();
-        mockUser.setId("generated-user-id");
-
-        when(userRepository.save(any(Users.class))).thenReturn(mockUser);
-
-        UserTestData userTestData = userServiceImpl.createUser(usersSpec);
-
+        UserTestData userTestData = userServiceImpl.create(usersSpec);
+        verify(userRepository).save(argThat(user -> {
+            assertEquals(usersSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
+            return true;
+        }));
         assertNotNull(userTestData.getUserId(), "User ID should not be null");
         assertNotNull(userTestData.getEmail(), "Email should not be null");
         assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
+
+        ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
+        verify(roleRepository, times(0)).save(rolesCaptor.capture());
     }
 
     @Test
@@ -63,31 +73,31 @@ class UserServiceImplTest {
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
         usersSpec.setRoles(List.of(roleSpec));
 
-        Roles mockRole = new Roles();
-        mockRole.setId("role-id-playwright-role" + System.currentTimeMillis());
-        mockRole.setPermissions(roleSpec.getPermissions());
+        UserTestData userTestData = userServiceImpl.create(usersSpec);
+        ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
+        verify(roleRepository).save(rolesCaptor.capture());
 
-        Users mockUser = new Users();
-        mockUser.setId("generated-user-id");
+        Roles capturedRole = rolesCaptor.getValue();
+        assertNotNull(capturedRole, "Captured role should not be null");
+        assertTrue(capturedRole.getId().contains(roleSpec.getId()), "Role ID should match the one set in RolesSpec");
+        assertEquals(roleSpec.getPermissions(), capturedRole.getPermissions(), "Permissions should match the ones set in RolesSpec");
 
-        when(roleRepository.save(any(Roles.class))).thenReturn(mockRole);
-        when(userRepository.save(any(Users.class))).thenReturn(mockUser);
+        ArgumentCaptor<Users> usersCaptor = ArgumentCaptor.forClass(Users.class);
+        verify(userRepository).save(usersCaptor.capture());
 
-        UserTestData userTestData = userServiceImpl.createUser(usersSpec);
+        Users capturedUser = usersCaptor.getValue();
+        assertNotNull(capturedUser.getRoles(), "User roles should not be null");
+        assertEquals(1, capturedUser.getRoles().size(), "User should have one role assigned");
+        assertEquals(capturedRole.getId(), capturedUser.getRoles().get(0), "The assigned role should match the captured role");
 
         assertNotNull(userTestData.getUserId(), "User ID should not be null");
         assertNotNull(userTestData.getEmail(), "Email should not be null");
         assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
-
-        // Verify that the role repository was called
-        verify(roleRepository, times(1)).save(any(Roles.class));
     }
-
     @Test
     void testUserExists() {
-        when(userRepository.findById(any(String.class))).thenReturn(Optional.of(new Users()));
-
+        when(userRepository.findById("userId")).thenReturn(Optional.of(new Users()));
         boolean userExists = userServiceImpl.userExists("userId");
 
         assertTrue(userExists, "User should exist");
@@ -114,7 +124,7 @@ class UserServiceImplTest {
 
         assertTrue(userServiceImpl.userExists("userId"), "User should exist before deletion");
 
-        userServiceImpl.deleteUser("userId");
+        userServiceImpl.delete("userId");
 
         verify(userRepository, times(1)).delete(mockUser);
     }
@@ -125,7 +135,7 @@ class UserServiceImplTest {
 
         assertFalse(userServiceImpl.userExists("userId"), "User should not exist before deletion");
 
-        assertThrows(DataException.class, () -> userServiceImpl.deleteUser("userId"));
+        assertThrows(DataException.class, () -> userServiceImpl.delete("userId"));
     }
 
     @Test
@@ -146,7 +156,7 @@ class UserServiceImplTest {
         doNothing().when(roleRepository).delete(any(Roles.class));
         doNothing().when(userRepository).delete(any(Users.class));
 
-        userServiceImpl.deleteUser(userId);
+        userServiceImpl.delete(userId);
 
         verify(roleRepository, times(1)).delete(mockRole1);
         verify(roleRepository, times(1)).delete(mockRole2);
@@ -158,7 +168,7 @@ class UserServiceImplTest {
         String userId = "userId";
         when(userRepository.findById(userId)).thenThrow(new RuntimeException("Database error"));
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.deleteUser(userId));
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
 
         assertEquals("Failed to delete user", exception.getMessage());
     }
@@ -181,7 +191,7 @@ class UserServiceImplTest {
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
         usersSpec.setRoles(List.of(roleSpec));
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.createUser(usersSpec));
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(usersSpec));
 
         assertEquals("Role does not exist", exception.getMessage());
     }
@@ -196,7 +206,7 @@ class UserServiceImplTest {
         roleSpec.setPermissions(null); // Role permissions are null
         usersSpec.setRoles(List.of(roleSpec));
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.createUser(usersSpec));
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(usersSpec));
 
         assertEquals("Role does not exist", exception.getMessage());
     }
