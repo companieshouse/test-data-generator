@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -42,7 +41,7 @@ public class TestUsersController {
     }
 
     @DeleteMapping("/users/{userId}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException, NoDataFoundException {
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException {
         if(!userService.userExists(userId)) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.NOT_FOUND.value());
