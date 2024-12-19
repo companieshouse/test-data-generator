@@ -19,7 +19,7 @@ public class RandomServiceImpl implements RandomService {
     private static final SecureRandom RND = new SecureRandom();
 
     @Override
-    public Long getNumber(int digits) {
+    public long getNumber(int digits) {
         long min = (long) Math.pow(10, digits - (double) 1);
 
         return ThreadLocalRandom.current().nextLong(min, min * 10);

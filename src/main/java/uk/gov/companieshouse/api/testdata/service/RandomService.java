@@ -6,11 +6,11 @@ public interface RandomService {
 
     /**
      * Generate a random number with {@code digits} amounts of digits
-     * 
+     *
      * @param digits The number of digits of the returned random number
      * @return A random long
      */
-    Long getNumber(int digits);
+    long getNumber(int digits);
 
     /**
      * Generate a random number between a set range
