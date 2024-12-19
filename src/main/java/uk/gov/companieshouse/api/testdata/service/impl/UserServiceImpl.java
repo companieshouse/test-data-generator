@@ -6,8 +6,8 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Roles;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
-import uk.gov.companieshouse.api.testdata.model.rest.RolesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -17,7 +17,10 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -37,18 +40,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserTestData create(UsersSpec usersSpec) throws DataException {
+    public UserTestData create(UserSpec userSpec) throws DataException {
         var dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
-        long timestamp = System.currentTimeMillis();
-        final String password = usersSpec.getPassword();
+        long timestamp = dateNow.toEpochMilli();
+        final String password = userSpec.getPassword();
         final var user = new Users();
-        List<RolesSpec> roleList = usersSpec.getRoles();
+        List<RoleSpec> roleList = userSpec.getRoles();
         if(roleList!=null){
             var role = new Roles();
             List<String> rolesList = new ArrayList<>();
             for (var roleData : roleList) {
                 if (roleData.getId() == null || roleData.getPermissions() == null) {
-                    throw new DataException("Role does not exist");
+                    throw new DataException("Role ID and permissions are required to create a role");
                 }
                 role.setId(roleData.getId()+"-playwright-role"+timestamp);
                 role.setPermissions(roleData.getPermissions());
@@ -74,7 +77,7 @@ public class UserServiceImpl implements UserService {
     public void delete(String userId) throws DataException {
         try {
             if (userExists(userId)) {
-                Users user = repository.findById(userId).get();
+                Users user = repository.findById(userId).orElseThrow(() -> new DataException("User not found"));
                 if (user.getRoles() != null) {
                     for (String roleId : user.getRoles()) {
                         Optional<Roles> existingRole = roleRepository.findById(roleId);

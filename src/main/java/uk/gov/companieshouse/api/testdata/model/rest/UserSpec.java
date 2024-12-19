@@ -5,10 +5,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
-public class UsersSpec {
+public class UserSpec {
 
     @JsonProperty("roles")
-    private List<RolesSpec> roles;
+    private List<RoleSpec> roles;
 
     @JsonProperty
     @NotNull(message = "password is required")
@@ -22,11 +22,11 @@ public class UsersSpec {
         this.password = password;
     }
 
-    public List<RolesSpec> getRoles() {
+    public List<RoleSpec> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<RolesSpec> roles) {
+    public void setRoles(List<RoleSpec> roles) {
         this.roles = roles;
 
     }

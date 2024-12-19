@@ -17,7 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
-import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 import java.util.Map;
@@ -33,12 +33,12 @@ class TestUsersControllerTest {
 
     @Test
     void createUser() throws Exception {
-        UsersSpec usersSpec = new UsersSpec();
+        UserSpec userSpec = new UserSpec();
         UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForename", "TestSurname");
 
-        when(usersService.create(any(UsersSpec.class))).thenReturn(userTestData);
+        when(usersService.create(any(UserSpec.class))).thenReturn(userTestData);
 
-        ResponseEntity<UserTestData> response = testUsersController.createUser(usersSpec);
+        ResponseEntity<UserTestData> response = testUsersController.createUser(userSpec);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(userTestData, response.getBody());
@@ -48,7 +48,7 @@ class TestUsersControllerTest {
     void createUserWithNullRequest() throws Exception {
         UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForename", "TestSurname");
 
-        when(usersService.create(any(UsersSpec.class))).thenReturn(userTestData);
+        when(usersService.create(any(UserSpec.class))).thenReturn(userTestData);
 
         ResponseEntity<UserTestData> response = testUsersController.createUser(null);
 
@@ -58,10 +58,10 @@ class TestUsersControllerTest {
 
     @Test
     void createUserThrowsDataException() throws Exception {
-        UsersSpec usersSpec = new UsersSpec();
-        when(usersService.create(any(UsersSpec.class))).thenThrow(new DataException("Error"));
+        UserSpec userSpec = new UserSpec();
+        when(usersService.create(any(UserSpec.class))).thenThrow(new DataException("Error"));
 
-        assertThrows(DataException.class, () -> testUsersController.createUser(usersSpec));
+        assertThrows(DataException.class, () -> testUsersController.createUser(userSpec));
     }
 
     @Test

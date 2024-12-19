@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 
 public interface UserService {
@@ -17,11 +17,11 @@ public interface UserService {
     /**
      * Creates a new user based on the provided user specifications.
      *
-     * @param usersSpec the specifications of the user to create
+     * @param userSpec the specifications of the user to create
      * @return the created user's test data
      * @throws DataException if there is an error during user creation
      */
-    UserTestData create(UsersSpec usersSpec) throws DataException;
+    UserTestData create(UserSpec userSpec) throws DataException;
 
     /**
      * Deletes a user by their user ID.

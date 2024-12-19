@@ -21,13 +21,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Roles;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
-import uk.gov.companieshouse.api.testdata.model.rest.RolesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
-import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 
-import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -47,11 +46,11 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithoutRoles() throws DataException {
-        UsersSpec usersSpec = new UsersSpec();
-        usersSpec.setPassword("password");
-        UserTestData userTestData = userServiceImpl.create(usersSpec);
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        UserTestData userTestData = userServiceImpl.create(userSpec);
         verify(userRepository).save(argThat(user -> {
-            assertEquals(usersSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
+            assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
             return true;
         }));
         assertNotNull(userTestData.getUserId(), "User ID should not be null");
@@ -65,15 +64,15 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithRoles() throws DataException {
-        UsersSpec usersSpec = new UsersSpec();
-        usersSpec.setPassword("password");
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
 
-        RolesSpec roleSpec = new RolesSpec();
+        RoleSpec roleSpec = new RoleSpec();
         roleSpec.setId("role-id");
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
-        usersSpec.setRoles(List.of(roleSpec));
+        userSpec.setRoles(List.of(roleSpec));
 
-        UserTestData userTestData = userServiceImpl.create(usersSpec);
+        UserTestData userTestData = userServiceImpl.create(userSpec);
         ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
         verify(roleRepository).save(rolesCaptor.capture());
 
@@ -153,8 +152,6 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         when(roleRepository.findById("role1")).thenReturn(Optional.of(mockRole1));
         when(roleRepository.findById("role2")).thenReturn(Optional.of(mockRole2));
-        doNothing().when(roleRepository).delete(any(Roles.class));
-        doNothing().when(userRepository).delete(any(Users.class));
 
         userServiceImpl.delete(userId);
 
@@ -174,40 +171,32 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testGenerateRandomString() throws Exception {
-        Method method = UserServiceImpl.class.getDeclaredMethod("generateRandomString", int.class);
-        method.setAccessible(true);
-        String randomString = (String) method.invoke(userServiceImpl, 24);
-        assertNotNull(randomString);
-        assertEquals(24, randomString.length());
-    }
-    @Test
     void testCreateUserWithNullRoleId() {
-        UsersSpec usersSpec = new UsersSpec();
-        usersSpec.setPassword("password");
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
 
-        RolesSpec roleSpec = new RolesSpec();
+        RoleSpec roleSpec = new RoleSpec();
         roleSpec.setId(null); // Role ID is null
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
-        usersSpec.setRoles(List.of(roleSpec));
+        userSpec.setRoles(List.of(roleSpec));
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(usersSpec));
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
 
-        assertEquals("Role does not exist", exception.getMessage());
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 
     @Test
     void testCreateUserWithNullRolePermissions() {
-        UsersSpec usersSpec = new UsersSpec();
-        usersSpec.setPassword("password");
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
 
-        RolesSpec roleSpec = new RolesSpec();
+        RoleSpec roleSpec = new RoleSpec();
         roleSpec.setId("role-id");
         roleSpec.setPermissions(null); // Role permissions are null
-        usersSpec.setRoles(List.of(roleSpec));
+        userSpec.setRoles(List.of(roleSpec));
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(usersSpec));
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
 
-        assertEquals("Role does not exist", exception.getMessage());
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 }

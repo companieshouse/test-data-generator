@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
@@ -28,9 +28,9 @@ public class TestUsersController {
     private UserService userService;
 
     @PostMapping("/users")
-    public ResponseEntity<UserTestData> createUser(@Valid @RequestBody(required = false) UsersSpec request) throws DataException {
-        Optional<UsersSpec> optionalRequest = Optional.ofNullable(request);
-        var spec = optionalRequest.orElse(new UsersSpec());
+    public ResponseEntity<UserTestData> createUser(@Valid @RequestBody(required = false) UserSpec request) throws DataException {
+        Optional<UserSpec> optionalRequest = Optional.ofNullable(request);
+        var spec = optionalRequest.orElse(new UserSpec());
 
         var createdUser = userService.create(spec);
 

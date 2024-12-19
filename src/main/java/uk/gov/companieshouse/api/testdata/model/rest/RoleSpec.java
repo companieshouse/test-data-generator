@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
-public class RolesSpec {
+public class RoleSpec {
 
     @JsonProperty("_id")
     private String id;
