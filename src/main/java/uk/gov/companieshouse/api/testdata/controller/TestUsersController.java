@@ -11,7 +11,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
-import uk.gov.companieshouse.api.testdata.service.UsersTestDataService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -25,14 +25,14 @@ public class TestUsersController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
-    private UsersTestDataService userTestDataService;
+    private UserService userService;
 
     @PostMapping("/users")
     public ResponseEntity<UserTestData> createUser(@Valid @RequestBody(required = false) UsersSpec request) throws DataException {
         Optional<UsersSpec> optionalRequest = Optional.ofNullable(request);
         var spec = optionalRequest.orElse(new UsersSpec());
 
-        var createdUser = userTestDataService.createUserTestData(spec);
+        var createdUser = userService.create(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put("user email", createdUser.getEmail());
@@ -43,14 +43,14 @@ public class TestUsersController {
 
     @DeleteMapping("/users/{userId}")
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException, NoDataFoundException {
-        if(!userTestDataService.userExists(userId)) {
+        if(!userService.userExists(userId)) {
             Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.NOT_FOUND.value());
             response.put("userId", "User not found "+ userId);
             LOG.info(userId+ " User not found");
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-        userTestDataService.deleteUserTestData(userId);
+        userService.delete(userId);
         Map<String, Object> data = new HashMap<>();
         data.put("user id", userId);
         LOG.info("User deleted", data);

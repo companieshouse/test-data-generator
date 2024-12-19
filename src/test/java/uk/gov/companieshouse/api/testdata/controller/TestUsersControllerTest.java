@@ -18,7 +18,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.model.rest.UsersSpec;
-import uk.gov.companieshouse.api.testdata.service.UsersTestDataService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
 
 import java.util.Map;
 import java.util.Objects;
@@ -26,7 +26,7 @@ import java.util.Objects;
 @ExtendWith(MockitoExtension.class)
 class TestUsersControllerTest {
     @Mock
-    private UsersTestDataService usersTestDataService;
+    private UserService usersService;
 
     @InjectMocks
     private TestUsersController testUsersController;
@@ -36,7 +36,7 @@ class TestUsersControllerTest {
         UsersSpec usersSpec = new UsersSpec();
         UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForename", "TestSurname");
 
-        when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenReturn(userTestData);
+        when(usersService.create(any(UsersSpec.class))).thenReturn(userTestData);
 
         ResponseEntity<UserTestData> response = testUsersController.createUser(usersSpec);
 
@@ -48,7 +48,7 @@ class TestUsersControllerTest {
     void createUserWithNullRequest() throws Exception {
         UserTestData userTestData = new UserTestData("test1234user", "test@test.com", "TestForename", "TestSurname");
 
-        when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenReturn(userTestData);
+        when(usersService.create(any(UsersSpec.class))).thenReturn(userTestData);
 
         ResponseEntity<UserTestData> response = testUsersController.createUser(null);
 
@@ -59,7 +59,7 @@ class TestUsersControllerTest {
     @Test
     void createUserThrowsDataException() throws Exception {
         UsersSpec usersSpec = new UsersSpec();
-        when(usersTestDataService.createUserTestData(any(UsersSpec.class))).thenThrow(new DataException("Error"));
+        when(usersService.create(any(UsersSpec.class))).thenThrow(new DataException("Error"));
 
         assertThrows(DataException.class, () -> testUsersController.createUser(usersSpec));
     }
@@ -68,21 +68,21 @@ class TestUsersControllerTest {
     void deleteUser() throws Exception {
         String userId = "12345";
 
-        when(usersTestDataService.userExists(userId)).thenReturn(true);
+        when(usersService.userExists(userId)).thenReturn(true);
 
         ResponseEntity<Map<String, Object>> response = testUsersController.deleteUser(userId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
 
-        verify(usersTestDataService).deleteUserTestData(userId);
+        verify(usersService).delete(userId);
     }
 
     @Test
     void deleteUserNotFound() throws Exception {
         String userId = "12345";
 
-        when(usersTestDataService.userExists(userId)).thenReturn(false);
+        when(usersService.userExists(userId)).thenReturn(false);
 
         ResponseEntity<Map<String, Object>> response = testUsersController.deleteUser(userId);
 
@@ -94,8 +94,8 @@ class TestUsersControllerTest {
     void deleteUserThrowsDataException() throws Exception {
         String userId = "12345";
 
-        when(usersTestDataService.userExists(userId)).thenReturn(true);
-        doThrow(new DataException("Error")).when(usersTestDataService).deleteUserTestData(userId);
+        when(usersService.userExists(userId)).thenReturn(true);
+        doThrow(new DataException("Error")).when(usersService).delete(userId);
 
         assertThrows(DataException.class, () -> testUsersController.deleteUser(userId));
     }
@@ -104,8 +104,8 @@ class TestUsersControllerTest {
     void deleteUserThrowsNoDataFoundException() throws Exception {
         String userId = "12345";
 
-        when(usersTestDataService.userExists(userId)).thenReturn(true);
-        doThrow(new DataException("Error")).when(usersTestDataService).deleteUserTestData(userId);
+        when(usersService.userExists(userId)).thenReturn(true);
+        doThrow(new DataException("Error")).when(usersService).delete(userId);
 
         assertThrows(DataException.class, () -> testUsersController.deleteUser(userId));
     }
