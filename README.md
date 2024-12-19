@@ -38,8 +38,9 @@ The docker compose file for this service is `docker-chs-development/services/tes
       - "4022:4022"
 
 ### Usage
-In order to use the generator, there are 2 possible endpoints that can be used.
+In order to use the generator, there are different possible endpoints that can be used.
 
+#### Creating test companies
 - POST: Sending a POST request to `{Base URL}/test-data/company` will generate a new test company and accompanying Authcode. The request body can include an optional `CompanySpec` parameter to customise the generated company.
   - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`). Defaults to `england_wales`.
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
@@ -48,6 +49,14 @@ In order to use the generator, there are 2 possible endpoints that can be used.
   An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
+
+#### Creating test users
+- POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/users` will generate a new test user. The request body can include `UserSpec` parameter to customise the generated user.
+    - `password`: The password of the user.
+    - `roles`: The roles of the user along with `permissions`. This is optional and defaults to an empty list.
+    
+    An usage example looks like this: `{ "password": "password", "roles": [ { "role": "role1", "permissions": [ "permission1", "permission2" ] }, { "role": "role2", "permissions": [ "permission3", "permission4" ] }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/users/{userId}` will delete the test user. user id is required to delete the user. An usage example looks like this: `{Base URL}/test-data/users/123456`
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
