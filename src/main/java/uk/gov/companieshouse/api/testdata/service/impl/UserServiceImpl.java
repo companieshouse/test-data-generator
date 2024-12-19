@@ -73,16 +73,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(String userId) throws DataException {
         try {
-            Optional<Users> existingUser = repository.findById(userId);
-            if (existingUser.isPresent()) {
-                Users user = existingUser.get();
+            if (userExists(userId)) {
+                Users user = repository.findById(userId).get();
                 if (user.getRoles() != null) {
                     for (String roleId : user.getRoles()) {
                         Optional<Roles> existingRole = roleRepository.findById(roleId);
                         existingRole.ifPresent(roleRepository::delete);
                     }
                 }
-                existingUser.ifPresent(repository::delete);
+                repository.delete(user);
             }
             else {
                 LOG.error("User id " + userId + " not found");
