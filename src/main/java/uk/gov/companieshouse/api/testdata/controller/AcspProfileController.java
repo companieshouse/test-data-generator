@@ -41,7 +41,6 @@ public class AcspProfileController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("acsp number", createdAcsp.getAcspNumber());
-        data.put("jurisdiction", spec.getJurisdiction());
         LOG.info("New acsp profile created", data);
         return new ResponseEntity<>(createdAcsp, HttpStatus.CREATED);
     }

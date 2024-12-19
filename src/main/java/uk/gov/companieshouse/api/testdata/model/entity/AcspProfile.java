@@ -299,4 +299,22 @@ public class AcspProfile {
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
     }
+
+    public static class Audit {
+        @Field("at")
+        private Instant at;
+        @Field("by")
+        private String by;
+        @Field("type")
+        private String type;
+
+        public Instant getAt() { return at; }
+        public void setAt(Instant at) { this.at = at; }
+
+        public String getBy() { return by; }
+        public void setBy(String by) { this.by = by; }
+
+        public String getType() { return type; }
+        public void setType(String type) { this.type = type; }
+    }
 }

@@ -84,7 +84,7 @@ class AcspTestDataServiceImplTest {
 
         AcspData result = acspTestDataService.createAcspData(spec);
 
-        assertEquals(newNumber, Long.parseLong(result.getAcspNumber()));
+        assertEquals(newNumber, result.getAcspNumber());
         assertEquals(API_URL + "/acsp/" + newNumber, result.getAcspUri());
     }
 

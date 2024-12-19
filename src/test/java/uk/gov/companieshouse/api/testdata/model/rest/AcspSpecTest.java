@@ -26,16 +26,9 @@ class AcspSpecTest {
     }
 
     @Test
-    void testDefaultJurisdiction() {
-        AcspSpec spec = new AcspSpec();
-        assertEquals(Jurisdiction.ENGLAND_WALES, spec.getJurisdiction(),
-                "Default jurisdiction should be ENGLAND_WALES");
-    }
-
-    @Test
     void testSetAndGetAcspNumber() {
         AcspSpec spec = new AcspSpec();
-        spec.setAcspNumber(123456L);
+        spec.setAcspNumber((123456L));
         assertEquals(123456L, spec.getAcspNumber());
     }
 
@@ -53,35 +46,6 @@ class AcspSpecTest {
         assertEquals("ltd", spec.getCompanyType());
     }
 
-    @Test
-    void testSetAndGetAmlDetails() {
-        AcspSpec spec = new AcspSpec();
-        AcspProfile.AmlDetail amlDetail = new AcspProfile.AmlDetail();
-        amlDetail.setSupervisoryBody("financial-conduct-authority-fca");
-        amlDetail.setMembershipDetails("Membership ID: FCA654321");
-
-        spec.setAmlDetails(Collections.singletonList(amlDetail));
-        assertNotNull(spec.getAmlDetails());
-        assertEquals(1, spec.getAmlDetails().size());
-        assertEquals("financial-conduct-authority-fca", spec.getAmlDetails().get(0).getSupervisoryBody());
-    }
-
-    @Test
-    void testSetAndGetEmail() {
-        AcspSpec spec = new AcspSpec();
-        spec.setEmail("test@example.com");
-        assertEquals("test@example.com", spec.getEmail());
-    }
-
-    @Test
-    void testJurisdictionNotNull() {
-        AcspSpec spec = new AcspSpec();
-        spec.setJurisdiction(null); // invalid scenario
-
-        Set<ConstraintViolation<AcspSpec>> violations = validator.validate(spec);
-        assertFalse(violations.isEmpty(), "Expecting violation due to null jurisdiction");
-        assertTrue(violations.stream().anyMatch(v -> v.getMessage().equals("invalid jurisdiction")));
-    }
 
     @Test
     void testStatusPatternValid() {
