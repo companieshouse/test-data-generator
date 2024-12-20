@@ -6,11 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,7 +111,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testDeleteUser() {
+    void testDeleteUser() throws DataException {
         Users mockUser = new Users();
         mockUser.setId("userId");
 
@@ -134,7 +131,7 @@ class UserServiceImplTest {
 
         assertFalse(userServiceImpl.userExists("userId"), "User should not exist before deletion");
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete("userId"));
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete("userId"));
 
         assertEquals("Failed to delete user", exception.getMessage());
     }
@@ -160,16 +157,6 @@ class UserServiceImplTest {
         verify(roleRepository, times(1)).delete(mockRole1);
         verify(roleRepository, times(1)).delete(mockRole2);
         verify(userRepository, times(1)).delete(mockUser);
-    }
-
-    @Test
-    void testDeleteUserThrowsException() {
-        String userId = "userId";
-        when(userRepository.findById(userId)).thenThrow(new RuntimeException("Database error"));
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete(userId));
-
-        assertEquals("Failed to delete user", exception.getMessage());
     }
 
     @Test
@@ -200,5 +187,23 @@ class UserServiceImplTest {
         DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteUserRoleRepositoryThrowsException() {
+        String userId = "userId";
+        Users mockUser = new Users();
+        mockUser.setId(userId);
+        mockUser.setRoles(List.of("role1"));
+
+        Roles mockRole = new Roles();
+        mockRole.setId("role1");
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        when(roleRepository.findById("role1")).thenReturn(Optional.of(mockRole));
+        doThrow(new RuntimeException("Database error")).when(roleRepository).delete(mockRole);
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
+        assertEquals("Failed to delete user", exception.getMessage());
     }
 }

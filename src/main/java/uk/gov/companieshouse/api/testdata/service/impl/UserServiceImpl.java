@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public boolean delete(String userId) {
+    public boolean delete(String userId) throws DataException {
         try {
             if (userExists(userId)) {
                 Users user = repository.findById(userId).orElseThrow(() -> new DataException("User not found"));
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
         }
         catch (Exception e) {
             LOG.error("Failed to delete user");
-            throw new RuntimeException("Failed to delete user", e);
+            throw new DataException("Failed to delete user", e);
         }
         return repository.findById(userId).isPresent();
     }

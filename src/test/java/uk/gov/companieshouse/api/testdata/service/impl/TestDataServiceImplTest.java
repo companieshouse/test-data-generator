@@ -330,7 +330,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataProfileException() {
+    void deleteCompanyDataProfileException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -350,7 +350,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataFilingHistoryException() {
+    void deleteCompanyDataFilingHistoryException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(filingHistoryService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -370,7 +370,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataAuthCodeException() {
+    void deleteCompanyDataAuthCodeException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(companyAuthCodeService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -390,7 +390,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataAppointmentException() {
+    void deleteCompanyDataAppointmentException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(appointmentService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -410,7 +410,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataPscStatementException() {
+    void deleteCompanyDataPscStatementException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -430,7 +430,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataPscsException() {
+    void deleteCompanyDataPscsException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(companyPscsService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -451,7 +451,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataMetricsException() {
+    void deleteCompanyDataMetricsException() throws DataException {
         RuntimeException ex = new RuntimeException("exception");
         when(metricsService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -471,7 +471,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataMultipleExceptions() {
+    void deleteCompanyDataMultipleExceptions() throws DataException {
         RuntimeException profileException = new RuntimeException("exception");
         when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(profileException);
 
