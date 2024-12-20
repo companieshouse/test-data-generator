@@ -23,6 +23,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,6 +40,9 @@ class UserServiceImplTest {
     @Mock
     private RoleRepository roleRepository;
 
+    @Mock
+    private RandomService randomService;
+
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
@@ -46,6 +50,7 @@ class UserServiceImplTest {
     void testCreateUserWithoutRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
+        when(randomService.getString(anyInt())).thenReturn("randomUserId");
         UserTestData userTestData = userServiceImpl.create(userSpec);
         verify(userRepository).save(argThat(user -> {
             assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
@@ -70,6 +75,7 @@ class UserServiceImplTest {
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
         userSpec.setRoles(List.of(roleSpec));
 
+        when(randomService.getString(anyInt())).thenReturn("randomUserId");
         UserTestData userTestData = userServiceImpl.create(userSpec);
         ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
         verify(roleRepository).save(rolesCaptor.capture());
@@ -134,7 +140,7 @@ class UserServiceImplTest {
 
         DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete("userId"));
 
-        assertEquals("Failed to delete user", exception.getMessage());
+        assertEquals("User id userId not found", exception.getMessage());
     }
 
     @Test
@@ -226,7 +232,7 @@ class UserServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
         userSpec.setRoles(new ArrayList<>()); // Empty roles list
-
+        when(randomService.getString(anyInt())).thenReturn("randomUserId");
         UserTestData userTestData = userServiceImpl.create(userSpec);
 
         assertNotNull(userTestData.getUserId(), "User ID should not be null");

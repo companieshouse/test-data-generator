@@ -11,6 +11,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -20,7 +21,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,6 +32,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private RandomService randomService;
 
     @Override
     public boolean userExists(String userId) {
@@ -61,7 +64,7 @@ public class UserServiceImpl implements UserService {
             user.setRoles(rolesList);
         }
         String randomUser = "playwright-user" + timestamp + "@test.companieshouse.gov.uk";
-        user.setId(generateRandomString(24));
+        user.setId(randomService.getString(24));
         user.setEmail(randomUser);
         user.setForename("Forename-"+timestamp);
         user.setSurname("Surname-"+timestamp);
@@ -79,23 +82,19 @@ public class UserServiceImpl implements UserService {
         Users user = repository.findById(userId).orElseThrow(() -> new DataException("User id " + userId + " not found"));
         try {
             if (user.getRoles() != null) {
-                for (String roleId : user.getRoles()) {
-                    roleRepository.findById(roleId).ifPresent(roleRepository::delete);
-                }
+                user.getRoles().stream().map(roleRepository::findById)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .forEach(roleRepository::delete);
             }
             repository.delete(user);
             if (userExists(userId)) {
-                throw new DataException("Failed to delete user with id " + userId + ", user still exists");
+                return false;
             }
         } catch (Exception e) {
             LOG.error("Failed to delete user", e);
             throw new DataException("Failed to delete user", e);
         }
         return repository.findById(userId).isEmpty();
-    }
-
-    private String generateRandomString(int length) {
-        String uuid = UUID.randomUUID().toString().replace("-", "");
-        return uuid.substring(0, length);
     }
 }
