@@ -29,17 +29,17 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyProfileService companyProfileService;
     @Autowired
-    private DataService<FilingHistory> filingHistoryService;
+    private DataService<FilingHistory,CompanySpec> filingHistoryService;
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private DataService<Appointment> appointmentService;
+    private DataService<Appointment,CompanySpec> appointmentService;
     @Autowired
-    private DataService<CompanyMetrics> companyMetricsService;
+    private DataService<CompanyMetrics,CompanySpec> companyMetricsService;
     @Autowired
-    private DataService<CompanyPscStatement> companyPscStatementService;
+    private DataService<CompanyPscStatement,CompanySpec> companyPscStatementService;
     @Autowired
-    private DataService<CompanyPscs> companyPscsService;
+    private DataService<CompanyPscs,CompanySpec> companyPscsService;
     @Autowired
     private RandomService randomService;
 

@@ -4,7 +4,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 
-public interface UserService {
+public interface UserService extends DataService<UserTestData,UserSpec> {
 
     /**
      * Checks if a user exists by their user ID.
@@ -13,21 +13,4 @@ public interface UserService {
      * @return true if the user exists, false otherwise
      */
     boolean userExists(String userId);
-
-    /**
-     * Creates a new user based on the provided user specifications.
-     *
-     * @param userSpec the specifications of the user to create
-     * @return the created user's test data
-     * @throws DataException if there is an error during user creation
-     */
-    UserTestData create(UserSpec userSpec) throws DataException;
-
-    /**
-     * Deletes a user by their user ID.
-     *
-     * @param userId the ID of the user to delete
-     * @throws DataException if there is an error during user deletion
-     */
-    void delete(String userId) throws DataException;
 }

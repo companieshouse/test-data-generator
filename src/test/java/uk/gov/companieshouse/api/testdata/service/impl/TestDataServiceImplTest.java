@@ -48,17 +48,17 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyProfileService companyProfileService;
     @Mock
-    private DataService<FilingHistory> filingHistoryService;
+    private DataService<FilingHistory,CompanySpec> filingHistoryService;
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
     @Mock
-    private DataService<Appointment> appointmentService;
+    private DataService<Appointment,CompanySpec> appointmentService;
     @Mock
-    private DataService<CompanyMetrics> metricsService;
+    private DataService<CompanyMetrics,CompanySpec> metricsService;
     @Mock
-    private DataService<CompanyPscStatement> companyPscStatementService;
+    private DataService<CompanyPscStatement,CompanySpec> companyPscStatementService;
     @Mock
-    private DataService<CompanyPscs> companyPscsService;
+    private DataService<CompanyPscs,CompanySpec> companyPscsService;
 
     @Mock
     private RandomService randomService;

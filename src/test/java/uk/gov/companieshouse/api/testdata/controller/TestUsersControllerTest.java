@@ -91,22 +91,22 @@ class TestUsersControllerTest {
     }
 
     @Test
-    void deleteUserThrowsDataException() throws Exception {
+    void deleteUserThrowsRuntimeException() throws Exception {
         String userId = "12345";
 
         when(usersService.userExists(userId)).thenReturn(true);
-        doThrow(new DataException("Error")).when(usersService).delete(userId);
+        doThrow(new RuntimeException("Error")).when(usersService).delete(userId);
 
-        assertThrows(DataException.class, () -> testUsersController.deleteUser(userId));
+        assertThrows(RuntimeException.class, () -> testUsersController.deleteUser(userId));
     }
 
     @Test
-    void deleteUserThrowsNoDataFoundException() throws Exception {
+    void deleteUserThrowsNoRuntimeException() throws Exception {
         String userId = "12345";
 
         when(usersService.userExists(userId)).thenReturn(true);
-        doThrow(new DataException("Error")).when(usersService).delete(userId);
+        doThrow(new RuntimeException("Error")).when(usersService).delete(userId);
 
-        assertThrows(DataException.class, () -> testUsersController.deleteUser(userId));
+        assertThrows(RuntimeException.class, () -> testUsersController.deleteUser(userId));
     }
 }

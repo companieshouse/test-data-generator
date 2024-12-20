@@ -114,7 +114,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testDeleteUser() throws DataException {
+    void testDeleteUser() {
         Users mockUser = new Users();
         mockUser.setId("userId");
 
@@ -134,7 +134,9 @@ class UserServiceImplTest {
 
         assertFalse(userServiceImpl.userExists("userId"), "User should not exist before deletion");
 
-        assertThrows(DataException.class, () -> userServiceImpl.delete("userId"));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete("userId"));
+
+        assertEquals("Failed to delete user", exception.getMessage());
     }
 
     @Test
@@ -165,7 +167,7 @@ class UserServiceImplTest {
         String userId = "userId";
         when(userRepository.findById(userId)).thenThrow(new RuntimeException("Database error"));
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete(userId));
 
         assertEquals("Failed to delete user", exception.getMessage());
     }

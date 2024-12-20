@@ -1,16 +1,22 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 
-public interface DataService<T> {
-    T create(CompanySpec companySpec) throws DataException;
-
+public interface DataService<T,S> {
     /**
-     * Delete information for the given {@code companyNymber}
-     * 
-     * @param companyNumber
-     * @return True if the data could be found and deleted. False if no data found
+     * Creates a new entity based on the provided specification.
+     *
+     * @param spec the specification of the entity to create
+     * @return the created entity
+     * @throws DataException if an error occurs during creation
      */
-    boolean delete(String companyNumber);
+    T create(S spec) throws DataException;
+
+      /**
+     * Deletes an entity by its ID.
+     *
+     * @param id the ID of the entity to delete
+     * @return true if the entity was deleted, false otherwise
+     */
+    boolean delete(String id);
 }

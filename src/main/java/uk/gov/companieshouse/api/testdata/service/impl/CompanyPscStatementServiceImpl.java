@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement> {
+public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement,CompanySpec> {
 
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;

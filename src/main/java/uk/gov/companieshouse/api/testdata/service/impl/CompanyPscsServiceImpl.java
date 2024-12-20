@@ -15,7 +15,7 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Service
-public class CompanyPscsServiceImpl implements DataService<CompanyPscs> {
+public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySpec> {
 
     protected static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
         "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
