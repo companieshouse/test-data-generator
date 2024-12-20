@@ -109,4 +109,13 @@ class TestUsersControllerTest {
 
         assertThrows(RuntimeException.class, () -> testUsersController.deleteUser(userId));
     }
+
+    @Test
+    void deleteUserUserExistsThrowsException() throws Exception {
+        String userId = "12345";
+
+        doThrow(new RuntimeException("Error")).when(usersService).userExists(userId);
+
+        assertThrows(RuntimeException.class, () -> testUsersController.deleteUser(userId));
+    }
 }

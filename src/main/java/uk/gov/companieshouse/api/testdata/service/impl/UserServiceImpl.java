@@ -35,8 +35,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean userExists(String userId) {
-        Optional<Users> existingUser = repository.findById(userId);
-        return existingUser.isPresent();
+        return repository.findById(userId).isPresent();
     }
 
     @Override
@@ -44,15 +43,16 @@ public class UserServiceImpl implements UserService {
         var dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
         long timestamp = dateNow.toEpochMilli();
         final String password = userSpec.getPassword();
+        if (password == null || password.isEmpty()) throw new DataException("Password is required to create a user");
         final var user = new Users();
         List<RoleSpec> roleList = userSpec.getRoles();
         if(roleList!=null){
-            var role = new Roles();
             List<String> rolesList = new ArrayList<>();
             for (var roleData : roleList) {
                 if (roleData.getId() == null || roleData.getPermissions() == null) {
                     throw new DataException("Role ID and permissions are required to create a role");
                 }
+                var role = new Roles();
                 role.setId(roleData.getId()+"-playwright-role"+timestamp);
                 role.setPermissions(roleData.getPermissions());
                 rolesList.add(role.getId());
@@ -76,27 +76,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean delete(String userId) throws DataException {
+        Users user = repository.findById(userId).orElseThrow(() -> new DataException("User id " + userId + " not found"));
         try {
-            if (userExists(userId)) {
-                Users user = repository.findById(userId).orElseThrow(() -> new DataException("User not found"));
-                if (user.getRoles() != null) {
-                    for (String roleId : user.getRoles()) {
-                        Optional<Roles> existingRole = roleRepository.findById(roleId);
-                        existingRole.ifPresent(roleRepository::delete);
-                    }
+            if (user.getRoles() != null) {
+                for (String roleId : user.getRoles()) {
+                    roleRepository.findById(roleId).ifPresent(roleRepository::delete);
                 }
-                repository.delete(user);
             }
-            else {
-                LOG.error("User id " + userId + " not found");
-                throw new DataException("User id " + userId + " not found");
+            repository.delete(user);
+            if (userExists(userId)) {
+                throw new DataException("Failed to delete user with id " + userId + ", user still exists");
             }
-        }
-        catch (Exception e) {
-            LOG.error("Failed to delete user");
+        } catch (Exception e) {
+            LOG.error("Failed to delete user", e);
             throw new DataException("Failed to delete user", e);
         }
-        return repository.findById(userId).isPresent();
+        return repository.findById(userId).isEmpty();
     }
 
     private String generateRandomString(int length) {

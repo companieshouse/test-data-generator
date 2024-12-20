@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -205,5 +206,44 @@ class UserServiceImplTest {
 
         DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
         assertEquals("Failed to delete user", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteUserUserRepositoryThrowsException() {
+        String userId = "userId";
+        Users mockUser = new Users();
+        mockUser.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        doThrow(new RuntimeException("Database error")).when(userRepository).delete(mockUser);
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
+        assertEquals("Failed to delete user", exception.getMessage());
+    }
+
+    @Test
+    void testCreateUserWithEmptyRolesList() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setRoles(new ArrayList<>()); // Empty roles list
+
+        UserTestData userTestData = userServiceImpl.create(userSpec);
+
+        assertNotNull(userTestData.getUserId(), "User ID should not be null");
+        assertNotNull(userTestData.getEmail(), "Email should not be null");
+        assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
+        assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
+
+        verify(roleRepository, times(0)).save(any(Roles.class));
+    }
+
+    @Test
+    void testCreateUserWithEmptyPassword() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword(""); // Empty password
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+
+        assertEquals("Password is required to create a user", exception.getMessage());
     }
 }
