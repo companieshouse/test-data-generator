@@ -50,11 +50,12 @@ public class UserServiceImpl implements UserService {
         final var user = new Users();
         List<RoleSpec> roleList = userSpec.getRoles();
         if(roleList!=null){
+            boolean invalidRole = roleList.stream().anyMatch(roleData -> roleData.getId() == null || roleData.getPermissions() == null || roleData.getPermissions().isEmpty());
+            if (invalidRole) {
+                throw new DataException("Role ID and permissions are required to create a role");
+            }
             List<String> rolesList = new ArrayList<>();
             for (var roleData : roleList) {
-                if (roleData.getId() == null || roleData.getPermissions() == null) {
-                    throw new DataException("Role ID and permissions are required to create a role");
-                }
                 var role = new Roles();
                 role.setId(roleData.getId()+"-playwright-role"+timestamp);
                 role.setPermissions(roleData.getPermissions());

@@ -53,9 +53,9 @@ In order to use the generator, there are different possible endpoints that can b
 #### Creating test users
 - POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/users` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
     - `password`: The password of the user. This is mandatory.
-    - `roles`: The roles of the user along with `permissions`. This is optional and defaults to an empty list.
+    - `roles`: The roles of the user along with `permissions`. Roles is optional and defaults to an empty list. If we provide the roles, we need to provide the `_id` of the role and the `permissions` associated with the role. permissions are mandatory if we provide role id and vice versa.
     
-    An usage example looks like this: `{ "password": "password", "roles": [ { "role": "role1", "permissions": [ "permission1", "permission2" ] }, { "role": "role2", "permissions": [ "permission3", "permission4" ] }`
+    An usage example looks like this: `{ "password": "password", "roles": [ { "_id": "roleId1", "permissions": [ "permission1", "permission2" ] }, { "_id": "roleId2", "permissions": [ "permission3", "permission4" ] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/users/{userId}` will delete the test user. `userid` is required to delete the user.
 
 ## Environment Variables

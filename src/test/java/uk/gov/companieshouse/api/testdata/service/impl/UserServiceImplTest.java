@@ -63,6 +63,7 @@ class UserServiceImplTest {
 
         ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
         verify(roleRepository, times(0)).save(rolesCaptor.capture());
+        verifyNoInteractions(roleRepository);
     }
 
     @Test
@@ -251,5 +252,53 @@ class UserServiceImplTest {
         DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
 
         assertEquals("Password is required to create a user", exception.getMessage());
+    }
+
+    @Test
+    void testCreateUserWithValidAndEmptyPermissions() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec roleSpec1 = new RoleSpec();
+        roleSpec1.setId("role-id-1");
+        roleSpec1.setPermissions(Arrays.asList("permission1", "permission2"));
+
+        RoleSpec roleSpec2 = new RoleSpec();
+        roleSpec2.setId("role-id-2");
+        roleSpec2.setPermissions(Arrays.asList("permission3", "permission4"));
+
+        RoleSpec roleSpec3 = new RoleSpec();
+        roleSpec3.setId("role-id-3");
+        roleSpec3.setPermissions(new ArrayList<>()); // Empty permissions
+
+        userSpec.setRoles(Arrays.asList(roleSpec1, roleSpec2, roleSpec3));
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void testCreateUserWithMixedValidAndEmptyRoles() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec roleSpec1 = new RoleSpec();
+        roleSpec1.setId("role-id-1");
+        roleSpec1.setPermissions(Arrays.asList("permission1", "permission2"));
+
+        RoleSpec roleSpec2 = new RoleSpec();
+        roleSpec2.setId("role-id-2");
+        roleSpec2.setPermissions(Arrays.asList("permission3", "permission4"));
+
+        RoleSpec roleSpec3 = new RoleSpec();
+        roleSpec3.setId(""); // Empty role ID
+        roleSpec3.setPermissions(Arrays.asList("permission5", "permission6"));
+
+        userSpec.setRoles(Arrays.asList(roleSpec1, roleSpec2, roleSpec3));
+
+        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 }
