@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
-public class RoleServiceImplTest {
+class RoleServiceImplTest {
     @Mock
     private RoleRepository roleRepository;
 
