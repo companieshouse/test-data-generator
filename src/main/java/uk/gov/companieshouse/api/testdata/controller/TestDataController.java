@@ -21,9 +21,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -42,7 +40,7 @@ public class TestDataController {
     private CompanyAuthCodeService companyAuthCodeService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+    public ResponseEntity<CompanyData> createCompany(@Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
         Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
         CompanySpec spec = optionalRequest.orElse(new CompanySpec());
@@ -57,8 +55,8 @@ public class TestDataController {
     }
 
     @DeleteMapping("/company/{companyNumber}")
-    public ResponseEntity<Void> delete(@PathVariable("companyNumber") String companyNumber,
-            @Valid @RequestBody DeleteCompanyRequest request)
+    public ResponseEntity<Void> deleteCompany(@PathVariable("companyNumber") String companyNumber,
+                                              @Valid @RequestBody DeleteCompanyRequest request)
             throws DataException, InvalidAuthCodeException, NoDataFoundException {
 
         if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
@@ -73,4 +71,35 @@ public class TestDataController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PostMapping("/user")
+    public ResponseEntity<UserTestData> createUser(@Valid @RequestBody(required = false) UserSpec request) throws DataException {
+        Optional<UserSpec> optionalRequest = Optional.ofNullable(request);
+        var spec = optionalRequest.orElse(new UserSpec());
+
+        var createdUser = testDataService.createUserTestData(spec);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("user email", createdUser.getEmail());
+        data.put("user id", createdUser.getUserId());
+        LOG.info("New user created", data);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException {
+        boolean deleteUser= testDataService.deleteUserTestData(userId);
+        if(deleteUser) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("user id", userId);
+            LOG.info("User deleted", data);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        else {
+            Map<String, Object> response = new HashMap<>();
+            response.put("status", HttpStatus.NOT_FOUND.value());
+            response.put("userId", "User not found "+ userId);
+            LOG.info(userId+ " User not found");
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
 }

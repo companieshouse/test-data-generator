@@ -3,13 +3,14 @@ package uk.gov.companieshouse.api.testdata.service;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 
-public interface UserService extends DataService<UserTestData,UserSpec> {
+import java.util.List;
 
+public interface UserService extends DataService<UserTestData,UserSpec> {
     /**
-     * Checks if a user exists by their user ID.
+     * Retrieves the roles associated with a given user ID.
      *
-     * @param userId the ID of the user to check
-     * @return true if the user exists, false otherwise
+     * @param userId the ID of the user whose roles are to be retrieved
+     * @return a list of role IDs associated with the user
      */
-    boolean userExists(String userId);
+    List<String> getRolesByUserId(String userId);
 }

@@ -28,6 +28,5 @@ public class UserSpec {
 
     public void setRoles(List<RoleSpec> roles) {
         this.roles = roles;
-
     }
 }

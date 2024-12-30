@@ -10,7 +10,7 @@ import uk.gov.companieshouse.api.interceptor.InternalUserInterceptor;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private static final String USERS_ENDPOINTS = "/test-data/users/**";
+    private static final String USERS_ENDPOINTS = "/test-data/user/**";
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

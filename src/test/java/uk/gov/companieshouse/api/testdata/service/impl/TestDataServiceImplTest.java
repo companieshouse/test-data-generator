@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -26,13 +25,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.service.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
@@ -62,6 +59,10 @@ class TestDataServiceImplTest {
 
     @Mock
     private RandomService randomService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private RoleService roleService;
     @InjectMocks
     private TestDataServiceImpl testDataService;
     
@@ -317,9 +318,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataNullSpec() throws DataException {
-        CompanySpec spec = null;
-        assertThrows(IllegalArgumentException.class, () -> this.testDataService.createCompanyData(spec));
-        
+        assertThrows(IllegalArgumentException.class, () -> this.testDataService.createCompanyData(null));
         verify(companyProfileService, never()).delete(any());
         verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
@@ -496,5 +495,108 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void createUserTestData() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        UserTestData mockUserTestData = new UserTestData("userId", "email@example.com", "Forename", "Surname");
+
+        when(userService.create(userSpec)).thenReturn(mockUserTestData);
+
+        UserTestData createdUserTestData = testDataService.createUserTestData(userSpec);
+
+        assertEquals("userId", createdUserTestData.getUserId());
+        assertEquals("email@example.com", createdUserTestData.getEmail());
+        assertEquals("Forename", createdUserTestData.getForename());
+        assertEquals("Surname", createdUserTestData.getSurname());
+    }
+
+    @Test
+    void createUserTestDataThrowsException() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        when(userService.create(userSpec)).thenThrow(new RuntimeException("Database error"));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Database error", exception.getMessage());
+    }
+
+    @Test
+    void deleteUserTestData() throws DataException {
+        String userId = "userId";
+
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserTestData(userId);
+
+        assertTrue(result);
+    }
+
+    @Test
+    void deleteUserTestDataThrowsException() throws DataException {
+        String userId = "userId";
+
+        when(userService.delete(userId)).thenThrow(new DataException("Failed to delete user"));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteUserTestData(userId));
+
+        assertEquals("Failed to delete user", exception.getMessage());
+    }
+
+    @Test
+    void createUserTestDataWithInvalidRoles() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec invalidRole = new RoleSpec();
+        invalidRole.setId("");
+        invalidRole.setPermissions(new ArrayList<>());
+
+        userSpec.setRoles(List.of(invalidRole));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void deleteUserTestDataWithRoles() throws DataException {
+        String userId = "userId";
+        List<String> roles = List.of("role1", "role2");
+
+        when(userService.getRolesByUserId(userId)).thenReturn(roles);
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserTestData(userId);
+
+        assertTrue(result);
+        verify(roleService, times(1)).delete("role1");
+        verify(roleService, times(1)).delete("role2");
+        verify(userService, times(1)).delete(userId);
+    }
+
+    @Test
+    void testCreateUserWithMixedValidAndEmptyRoles() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec validRole = new RoleSpec();
+        validRole.setId("validRoleId");
+        validRole.setPermissions(List.of("permission1"));
+
+        RoleSpec emptyRole = new RoleSpec();
+        emptyRole.setId("");
+        emptyRole.setPermissions(new ArrayList<>());
+
+        userSpec.setRoles(List.of(validRole, emptyRole));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 }

@@ -37,7 +37,7 @@ class WebConfigTest {
 
         ArgumentCaptor<InternalUserInterceptor> interceptorCaptor = ArgumentCaptor.forClass(InternalUserInterceptor.class);
         verify(registry, times(1)).addInterceptor(interceptorCaptor.capture());
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/users**");
+        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
 
         InternalUserInterceptor capturedInterceptor = interceptorCaptor.getValue();
         assertNotNull(capturedInterceptor);

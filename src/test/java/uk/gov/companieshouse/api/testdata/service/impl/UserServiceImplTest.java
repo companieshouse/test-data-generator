@@ -7,21 +7,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Roles;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -36,9 +38,6 @@ class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
-
-    @Mock
-    private RoleRepository roleRepository;
 
     @Mock
     private RandomService randomService;
@@ -60,11 +59,8 @@ class UserServiceImplTest {
         assertNotNull(userTestData.getEmail(), "Email should not be null");
         assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
-
-        ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
-        verify(roleRepository, times(0)).save(rolesCaptor.capture());
-        verifyNoInteractions(roleRepository);
     }
+
 
     @Test
     void testCreateUserWithRoles() throws DataException {
@@ -78,26 +74,20 @@ class UserServiceImplTest {
 
         when(randomService.getString(anyInt())).thenReturn("randomUserId");
         UserTestData userTestData = userServiceImpl.create(userSpec);
-        ArgumentCaptor<Roles> rolesCaptor = ArgumentCaptor.forClass(Roles.class);
-        verify(roleRepository).save(rolesCaptor.capture());
 
-        Roles capturedRole = rolesCaptor.getValue();
-        assertNotNull(capturedRole, "Captured role should not be null");
-        assertTrue(capturedRole.getId().contains(roleSpec.getId()), "Role ID should match the one set in RolesSpec");
-        assertEquals(roleSpec.getPermissions(), capturedRole.getPermissions(), "Permissions should match the ones set in RolesSpec");
-
-        ArgumentCaptor<Users> usersCaptor = ArgumentCaptor.forClass(Users.class);
-        verify(userRepository).save(usersCaptor.capture());
-
-        Users capturedUser = usersCaptor.getValue();
-        assertNotNull(capturedUser.getRoles(), "User roles should not be null");
-        assertEquals(1, capturedUser.getRoles().size(), "User should have one role assigned");
-        assertEquals(capturedRole.getId(), capturedUser.getRoles().get(0), "The assigned role should match the captured role");
+        verify(userRepository).save(argThat(user -> {
+            assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UserSpec");
+            assertEquals(1, user.getRoles().size(), "User should have one role assigned");
+            assertEquals(roleSpec.getId(), user.getRoles().getFirst(), "The assigned role should match the role ID");
+            return true;
+        }));
 
         assertNotNull(userTestData.getUserId(), "User ID should not be null");
         assertNotNull(userTestData.getEmail(), "Email should not be null");
         assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
+
+
     }
     @Test
     void testUserExists() {
@@ -133,87 +123,6 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).delete(mockUser);
     }
 
-    @Test
-    void testDeleteUserNotFound() {
-        when(userRepository.findById("userId")).thenReturn(Optional.empty());
-
-        assertFalse(userServiceImpl.userExists("userId"), "User should not exist before deletion");
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete("userId"));
-
-        assertEquals("User id userId not found", exception.getMessage());
-    }
-
-    @Test
-    void testDeleteUserWithRoles() throws DataException {
-        String userId = "userId";
-        Users mockUser = new Users();
-        mockUser.setId(userId);
-        mockUser.setRoles(List.of("role1", "role2"));
-
-        Roles mockRole1 = new Roles();
-        mockRole1.setId("role1");
-        Roles mockRole2 = new Roles();
-        mockRole2.setId("role2");
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        when(roleRepository.findById("role1")).thenReturn(Optional.of(mockRole1));
-        when(roleRepository.findById("role2")).thenReturn(Optional.of(mockRole2));
-
-        userServiceImpl.delete(userId);
-
-        verify(roleRepository, times(1)).delete(mockRole1);
-        verify(roleRepository, times(1)).delete(mockRole2);
-        verify(userRepository, times(1)).delete(mockUser);
-    }
-
-    @Test
-    void testCreateUserWithNullRoleId() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-
-        RoleSpec roleSpec = new RoleSpec();
-        roleSpec.setId(null); // Role ID is null
-        roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
-        userSpec.setRoles(List.of(roleSpec));
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
-
-        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
-    }
-
-    @Test
-    void testCreateUserWithNullRolePermissions() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-
-        RoleSpec roleSpec = new RoleSpec();
-        roleSpec.setId("role-id");
-        roleSpec.setPermissions(null); // Role permissions are null
-        userSpec.setRoles(List.of(roleSpec));
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
-
-        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
-    }
-
-    @Test
-    void testDeleteUserRoleRepositoryThrowsException() {
-        String userId = "userId";
-        Users mockUser = new Users();
-        mockUser.setId(userId);
-        mockUser.setRoles(List.of("role1"));
-
-        Roles mockRole = new Roles();
-        mockRole.setId("role1");
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        when(roleRepository.findById("role1")).thenReturn(Optional.of(mockRole));
-        doThrow(new RuntimeException("Database error")).when(roleRepository).delete(mockRole);
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
-        assertEquals("Failed to delete user", exception.getMessage());
-    }
 
     @Test
     void testDeleteUserUserRepositoryThrowsException() {
@@ -240,65 +149,36 @@ class UserServiceImplTest {
         assertNotNull(userTestData.getEmail(), "Email should not be null");
         assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
-
-        verify(roleRepository, times(0)).save(any(Roles.class));
     }
 
     @Test
-    void testCreateUserWithEmptyPassword() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword(""); // Empty password
+    void testGetRolesByUserId() {
+        String userId = "userId";
+        List<String> roles = List.of("role1", "role2");
+        Users user = new Users();
+        user.setId(userId);
+        user.setRoles(roles);
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        assertEquals("Password is required to create a user", exception.getMessage());
+        List<String> result = userServiceImpl.getRolesByUserId(userId);
+
+        assertNotNull(result, "Roles list should not be null");
+        assertEquals(roles.size(), result.size(), "Roles list size should match");
+        assertTrue(result.containsAll(roles), "Roles list should contain all roles");
+        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
-    void testCreateUserWithValidAndEmptyPermissions() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
+    void testGetRolesByUserIdUserNotFound() {
+        String userId = "userId";
 
-        RoleSpec roleSpec1 = new RoleSpec();
-        roleSpec1.setId("role-id-1");
-        roleSpec1.setPermissions(Arrays.asList("permission1", "permission2"));
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        RoleSpec roleSpec2 = new RoleSpec();
-        roleSpec2.setId("role-id-2");
-        roleSpec2.setPermissions(Arrays.asList("permission3", "permission4"));
+        List<String> result = userServiceImpl.getRolesByUserId(userId);
 
-        RoleSpec roleSpec3 = new RoleSpec();
-        roleSpec3.setId("role-id-3");
-        roleSpec3.setPermissions(new ArrayList<>()); // Empty permissions
-
-        userSpec.setRoles(Arrays.asList(roleSpec1, roleSpec2, roleSpec3));
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
-
-        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
-    }
-
-    @Test
-    void testCreateUserWithMixedValidAndEmptyRoles() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-
-        RoleSpec roleSpec1 = new RoleSpec();
-        roleSpec1.setId("role-id-1");
-        roleSpec1.setPermissions(Arrays.asList("permission1", "permission2"));
-
-        RoleSpec roleSpec2 = new RoleSpec();
-        roleSpec2.setId("role-id-2");
-        roleSpec2.setPermissions(Arrays.asList("permission3", "permission4"));
-
-        RoleSpec roleSpec3 = new RoleSpec();
-        roleSpec3.setId(""); // Empty role ID
-        roleSpec3.setPermissions(Arrays.asList("permission5", "permission6"));
-
-        userSpec.setRoles(Arrays.asList(roleSpec1, roleSpec2, roleSpec3));
-
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
-
-        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+        assertNotNull(result, "Roles list should not be null");
+        assertTrue(result.isEmpty(), "Roles list should be empty when user is not found");
+        verify(userRepository, times(1)).findById(userId);
     }
 }
