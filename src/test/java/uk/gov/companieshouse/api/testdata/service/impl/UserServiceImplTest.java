@@ -181,4 +181,17 @@ class UserServiceImplTest {
         assertTrue(result.isEmpty(), "Roles list should be empty when user is not found");
         verify(userRepository, times(1)).findById(userId);
     }
+
+    @Test
+    void testDeleteUserNotFound() throws DataException {
+        String userId = "nonExistentUserId";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        boolean result = userServiceImpl.delete(userId);
+
+        assertFalse(result, "Delete should return false when user does not exist");
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(0)).delete(any(Users.class));
+    }
 }

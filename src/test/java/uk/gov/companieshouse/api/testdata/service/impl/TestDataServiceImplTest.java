@@ -599,4 +599,88 @@ class TestDataServiceImplTest {
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
+
+    @Test
+    void createUserTestDataWithNullPassword() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword(null);
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Password is required to create a user", exception.getMessage());
+    }
+
+    @Test
+    void createUserTestDataWithEmptyPassword() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("");
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Password is required to create a user", exception.getMessage());
+    }
+
+    @Test
+    void createUserTestDataWithNullRoleId() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec invalidRole = new RoleSpec();
+        invalidRole.setId(null);
+        invalidRole.setPermissions(List.of("permission1"));
+
+        userSpec.setRoles(List.of(invalidRole));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void createUserTestDataWithEmptyRoleId() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec invalidRole = new RoleSpec();
+        invalidRole.setId("");
+        invalidRole.setPermissions(List.of("permission1"));
+
+        userSpec.setRoles(List.of(invalidRole));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void createUserTestDataWithNullPermissions() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec invalidRole = new RoleSpec();
+        invalidRole.setId("role-id");
+        invalidRole.setPermissions(null);
+
+        userSpec.setRoles(List.of(invalidRole));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void createUserTestDataWithEmptyPermissions() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec invalidRole = new RoleSpec();
+        invalidRole.setId("role-id");
+        invalidRole.setPermissions(new ArrayList<>());
+
+        userSpec.setRoles(List.of(invalidRole));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
 }

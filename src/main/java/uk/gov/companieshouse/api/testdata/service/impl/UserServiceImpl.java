@@ -18,6 +18,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -41,7 +42,7 @@ public class UserServiceImpl implements UserService {
         final String password = userSpec.getPassword();
         final var user = new Users();
         if(userSpec.getRoles() != null){
-            user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).toList());
+            user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
         String randomUser = "playwright-user" + timestamp + "@test.companieshouse.gov.uk";
         user.setId(randomService.getString(24));
@@ -62,8 +63,8 @@ public class UserServiceImpl implements UserService {
         if(!userExists(userId)){
             return false;
         }
-        Users user = repository.findById(userId).get();
         try {
+            Users user = repository.findById(userId).orElseThrow(() -> new DataException("User not found"));
             repository.delete(user);
             return !userExists(userId);
         } catch (Exception e) {
