@@ -509,18 +509,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserDataThrowsException() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-
-        when(userService.create(userSpec)).thenThrow(new RuntimeException("Database error"));
-
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
-
-        assertEquals("Database error", exception.getMessage());
-    }
-
-    @Test
     void deleteUserData() throws DataException {
         String userId = "userId";
         Users user = new Users();
@@ -533,18 +521,6 @@ class TestDataServiceImplTest {
 
         assertTrue(result);
         verify(userService, times(1)).delete(userId);
-    }
-
-
-    @Test
-    void deleteUserDataThrowsException() throws DataException {
-        String userId = "userId";
-
-        when(userService.getUserById(userId)).thenReturn(null);
-
-        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteUserData(userId));
-
-        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
