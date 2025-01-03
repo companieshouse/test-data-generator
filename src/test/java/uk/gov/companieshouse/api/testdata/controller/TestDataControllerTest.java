@@ -159,10 +159,10 @@ class TestDataControllerTest {
     void createCompanyUser() throws Exception {
         UserSpec request = new UserSpec();
         request.setPassword("password");
-        UserTestData user = new UserTestData("userId", "email@example.com", "Forename", "Surname");
+        UserData user = new UserData("userId", "email@example.com", "Forename", "Surname");
 
-        when(this.testDataService.createUserTestData(request)).thenReturn(user);
-        ResponseEntity<UserTestData> response = this.testDataController.createUser(request);
+        when(this.testDataService.createUserData(request)).thenReturn(user);
+        ResponseEntity<UserData> response = this.testDataController.createUser(request);
 
         assertEquals(user, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -174,7 +174,7 @@ class TestDataControllerTest {
         request.setPassword("password");
         Throwable exception = new DataException("Error message");
 
-        when(this.testDataService.createUserTestData(request)).thenThrow(exception);
+        when(this.testDataService.createUserData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () -> this.testDataController.createUser(request));
         assertEquals(exception, thrown);
@@ -184,14 +184,14 @@ class TestDataControllerTest {
     void deleteCompanyUser() throws Exception {
         final String userId = "userId";
 
-        when(this.testDataService.deleteUserTestData(userId)).thenReturn(true);
+        when(this.testDataService.deleteUserData(userId)).thenReturn(true);
 
         ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
 
-        verify(testDataService).deleteUserTestData(userId);
+        verify(testDataService).deleteUserData(userId);
     }
 
     @Test
@@ -199,7 +199,7 @@ class TestDataControllerTest {
         final String userId = "userId";
         Throwable exception = new DataException("Error message");
 
-        when(this.testDataService.deleteUserTestData(userId)).thenThrow(exception);
+        when(this.testDataService.deleteUserData(userId)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () -> this.testDataController.deleteUser(userId));
         assertEquals(exception, thrown);

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class UserSpec {
 
-    @JsonProperty("roles")
+    @JsonProperty
     private List<RoleSpec> roles;
 
     @JsonProperty

@@ -4,7 +4,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 
 public interface TestDataService {
     /**
@@ -31,7 +31,7 @@ public interface TestDataService {
      * @return the created user's test data
      * @throws DataException if there is an error during user creation
      */
-    UserTestData createUserTestData(UserSpec userSpec) throws DataException;
+    UserData createUserData(UserSpec userSpec) throws DataException;
 
     /**
      * Deletes a user test data by their user ID.
@@ -39,5 +39,5 @@ public interface TestDataService {
      * @param userId the ID of the user to delete
      * @throws DataException if there is an error during user deletion
      */
-    boolean deleteUserTestData(String userId) throws DataException;
+    boolean deleteUserData(String userId) throws DataException;
 }

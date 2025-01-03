@@ -2,7 +2,7 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class UserTestData {
+public class UserData {
 
     @JsonProperty("user_id")
     private final String userId;
@@ -16,7 +16,7 @@ public class UserTestData {
     @JsonProperty("surname")
     private final String surname;
 
-    public UserTestData(String userId, String email, String forename, String surname) {
+    public UserData(String userId, String email, String forename, String surname) {
         this.userId = userId;
         this.email = email;
         this.forename = forename;

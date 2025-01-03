@@ -18,5 +18,5 @@ public interface DataService<T,S> {
      * @param id the ID of the entity to delete
      * @return true if the entity was deleted, false otherwise
      */
-    boolean delete(String id) throws DataException;
+    boolean delete(String id);
 }

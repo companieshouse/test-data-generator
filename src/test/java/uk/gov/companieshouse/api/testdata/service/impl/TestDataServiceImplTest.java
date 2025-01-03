@@ -18,13 +18,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.service.*;
 
@@ -498,58 +492,63 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserTestData() throws DataException {
+    void createUserData() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
-        UserTestData mockUserTestData = new UserTestData("userId", "email@example.com", "Forename", "Surname");
+        UserData mockUserData = new UserData("userId", "email@example.com", "Forename", "Surname");
 
-        when(userService.create(userSpec)).thenReturn(mockUserTestData);
+        when(userService.create(userSpec)).thenReturn(mockUserData);
 
-        UserTestData createdUserTestData = testDataService.createUserTestData(userSpec);
+        UserData createdUserData = testDataService.createUserData(userSpec);
 
-        assertEquals("userId", createdUserTestData.getUserId());
-        assertEquals("email@example.com", createdUserTestData.getEmail());
-        assertEquals("Forename", createdUserTestData.getForename());
-        assertEquals("Surname", createdUserTestData.getSurname());
+        assertEquals("userId", createdUserData.getUserId());
+        assertEquals("email@example.com", createdUserData.getEmail());
+        assertEquals("Forename", createdUserData.getForename());
+        assertEquals("Surname", createdUserData.getSurname());
     }
 
     @Test
-    void createUserTestDataThrowsException() throws DataException {
+    void createUserDataThrowsException() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
         when(userService.create(userSpec)).thenThrow(new RuntimeException("Database error"));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Database error", exception.getMessage());
     }
 
     @Test
-    void deleteUserTestData() throws DataException {
+    void deleteUserData() throws DataException {
         String userId = "userId";
+        Users user = new Users();
+        user.setRoles(new ArrayList<>());
 
+        when(userService.getUserById(userId)).thenReturn(user);
         when(userService.delete(userId)).thenReturn(true);
 
-        boolean result = testDataService.deleteUserTestData(userId);
+        boolean result = testDataService.deleteUserData(userId);
 
         assertTrue(result);
+        verify(userService, times(1)).delete(userId);
     }
 
+
     @Test
-    void deleteUserTestDataThrowsException() throws DataException {
+    void deleteUserDataThrowsException() throws DataException {
         String userId = "userId";
 
-        when(userService.delete(userId)).thenThrow(new DataException("Failed to delete user"));
+        when(userService.getUserById(userId)).thenReturn(null);
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteUserTestData(userId));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteUserData(userId));
 
-        assertEquals("Failed to delete user", exception.getMessage());
+        assertEquals("User not found", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithInvalidRoles() {
+    void createUserDataWithInvalidRoles() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -559,20 +558,23 @@ class TestDataServiceImplTest {
 
         userSpec.setRoles(List.of(invalidRole));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 
+
     @Test
-    void deleteUserTestDataWithRoles() throws DataException {
+    void deleteUserDataWithRoles() throws DataException {
         String userId = "userId";
         List<String> roles = List.of("role1", "role2");
+        Users user = new Users();
+        user.setRoles(roles);
 
-        when(userService.getRolesByUserId(userId)).thenReturn(roles);
+        when(userService.getUserById(userId)).thenReturn(user);
         when(userService.delete(userId)).thenReturn(true);
 
-        boolean result = testDataService.deleteUserTestData(userId);
+        boolean result = testDataService.deleteUserData(userId);
 
         assertTrue(result);
         verify(roleService, times(1)).delete("role1");
@@ -595,33 +597,33 @@ class TestDataServiceImplTest {
 
         userSpec.setRoles(List.of(validRole, emptyRole));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithNullPassword() {
+    void createUserDataWithNullPassword() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword(null);
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Password is required to create a user", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithEmptyPassword() {
+    void createUserDataWithEmptyPassword() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("");
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Password is required to create a user", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithNullRoleId() {
+    void createUserDataWithNullRoleId() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -631,13 +633,13 @@ class TestDataServiceImplTest {
 
         userSpec.setRoles(List.of(invalidRole));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithEmptyRoleId() {
+    void createUserDataWithEmptyRoleId() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -647,13 +649,13 @@ class TestDataServiceImplTest {
 
         userSpec.setRoles(List.of(invalidRole));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithNullPermissions() {
+    void createUserDataWithNullPermissions() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -663,13 +665,13 @@ class TestDataServiceImplTest {
 
         userSpec.setRoles(List.of(invalidRole));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
     }
 
     @Test
-    void createUserTestDataWithEmptyPermissions() {
+    void createUserDataWithEmptyPermissions() {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -679,8 +681,41 @@ class TestDataServiceImplTest {
 
         userSpec.setRoles(List.of(invalidRole));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserTestData(userSpec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+    }
+
+    @Test
+    void createUserDataWithRoles() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec role1 = new RoleSpec();
+        role1.setId("role1");
+        role1.setPermissions(List.of("permission1"));
+
+        RoleSpec role2 = new RoleSpec();
+        role2.setId("role2");
+        role2.setPermissions(List.of("permission2"));
+
+        userSpec.setRoles(List.of(role1, role2));
+
+        UserData mockUserData = new UserData("userId", "email@example.com", "Forename", "Surname");
+
+        when(roleService.create(role1)).thenReturn(new RoleData("role1"));
+        when(roleService.create(role2)).thenReturn(new RoleData("role2"));
+        when(userService.create(userSpec)).thenReturn(mockUserData);
+
+        UserData createdUserData = testDataService.createUserData(userSpec);
+
+        assertEquals("userId", createdUserData.getUserId());
+        assertEquals("email@example.com", createdUserData.getEmail());
+        assertEquals("Forename", createdUserData.getForename());
+        assertEquals("Surname", createdUserData.getSurname());
+
+        verify(roleService, times(1)).create(role1);
+        verify(roleService, times(1)).create(role2);
+        verify(userService, times(1)).create(userSpec);
     }
 }

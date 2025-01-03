@@ -72,11 +72,11 @@ public class TestDataController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<UserTestData> createUser(@Valid @RequestBody(required = false) UserSpec request) throws DataException {
+    public ResponseEntity<UserData> createUser(@Valid @RequestBody(required = false) UserSpec request) throws DataException {
         Optional<UserSpec> optionalRequest = Optional.ofNullable(request);
         var spec = optionalRequest.orElse(new UserSpec());
 
-        var createdUser = testDataService.createUserTestData(spec);
+        var createdUser = testDataService.createUserData(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put("user email", createdUser.getEmail());
@@ -87,18 +87,18 @@ public class TestDataController {
 
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException {
-        boolean deleteUser= testDataService.deleteUserTestData(userId);
+        Map<String, Object> response = new HashMap<>();
+        response.put("user id", userId);
+        boolean deleteUser= testDataService.deleteUserData(userId);
+
         if(deleteUser) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("user id", userId);
-            LOG.info("User deleted", data);
+            LOG.info("User deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         else {
-            Map<String, Object> response = new HashMap<>();
             response.put("status", HttpStatus.NOT_FOUND.value());
-            response.put("userId", "User not found "+ userId);
-            LOG.info(userId+ " User not found");
+            response.put("message", "User not found " + userId);
+            LOG.info("User not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

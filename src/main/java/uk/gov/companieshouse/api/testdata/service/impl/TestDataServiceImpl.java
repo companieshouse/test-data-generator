@@ -133,36 +133,43 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public UserTestData createUserTestData(UserSpec userSpec) throws DataException {
-        UserTestData usersTestData;
-        try {
-            final String password = userSpec.getPassword();
-            if (password == null || password.isEmpty()) throw new DataException("Password is required to create a user");
-            List<RoleSpec> roleList = userSpec.getRoles();
-            if(roleList!=null){
-                boolean invalidRole = roleList.stream().anyMatch(roleData -> roleData.getId() == null || roleData.getId().isEmpty() || roleData.getPermissions() == null || roleData.getPermissions().isEmpty());
-                if (invalidRole) {
-                    throw new DataException("Role ID and permissions are required to create a role");
-                }
-                List<RoleSpec> rolesList = new ArrayList<>();
-                for (var roleData : roleList) {
-                    roleService.create(roleData);
-                    rolesList.add(roleData);
-                }
-                userSpec.setRoles(rolesList);
-            }
-            usersTestData = this.userService.create(userSpec);
-        } catch (Exception e) {
-            throw new DataException(e.getMessage(),e);
+    public UserData createUserData(UserSpec userSpec) throws DataException {
+        final String password = userSpec.getPassword();
+        if (password == null || password.isEmpty()) {
+            throw new DataException("Password is required to create a user");
         }
-        return new UserTestData(usersTestData.getUserId(),usersTestData.getEmail(),usersTestData.getForename(),usersTestData.getSurname());
+        List<RoleSpec> roleList = userSpec.getRoles();
+        if (roleList != null) {
+            boolean invalidRole = roleList.stream().anyMatch(roleData -> !roleData.isValid());
+            if (invalidRole) {
+                throw new DataException("Role ID and permissions are required to create a role");
+            }
+            for (var roleData : roleList) {
+                roleService.create(roleData);
+            }
+        }
+        return userService.create(userSpec);
     }
 
     @Override
-    public boolean deleteUserTestData(String userId) throws DataException {
-        for (var role : this.userService.getRolesByUserId(userId)) {
-            this.roleService.delete(role);
+    public boolean deleteUserData(String userId) {
+        Users user = userService.getUserById(userId);
+        if (user == null) {
+            return false;
         }
-        return this.userService.delete(userId);
+        user.getRoles().forEach(roleId -> {
+            try {
+                roleService.delete(roleId);
+            } catch (Exception e) {
+                LOG.error("Failed to delete role", e);
+            }
+        });
+
+        try {
+            return this.userService.delete(userId);
+        } catch (Exception e) {
+            LOG.error("Failed to delete user", e);
+            return false;
+        }
     }
 }

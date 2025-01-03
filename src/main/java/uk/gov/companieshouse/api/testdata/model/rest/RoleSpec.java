@@ -6,10 +6,10 @@ import java.util.List;
 
 public class RoleSpec {
 
-    @JsonProperty("_id")
+    @JsonProperty
     private String id;
 
-    @JsonProperty("permissions")
+    @JsonProperty
     private List<String> permissions;
 
     public String getId() {
@@ -26,5 +26,11 @@ public class RoleSpec {
 
     public void setPermissions(List<String> permissions) {
         this.permissions = permissions;
+    }
+
+    public boolean isValid() {
+        return id != null && !id.isEmpty() &&
+                permissions != null && !permissions.isEmpty() &&
+                permissions.stream().allMatch(permission -> permission != null && !permission.isEmpty());
     }
 }

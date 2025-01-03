@@ -1,10 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
@@ -22,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Users;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserTestData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -50,15 +46,15 @@ class UserServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
         when(randomService.getString(anyInt())).thenReturn("randomUserId");
-        UserTestData userTestData = userServiceImpl.create(userSpec);
+        UserData userData = userServiceImpl.create(userSpec);
         verify(userRepository).save(argThat(user -> {
             assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
             return true;
         }));
-        assertNotNull(userTestData.getUserId(), "User ID should not be null");
-        assertNotNull(userTestData.getEmail(), "Email should not be null");
-        assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
+        assertNotNull(userData.getUserId(), "User ID should not be null");
+        assertNotNull(userData.getEmail(), "Email should not be null");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
     }
 
 
@@ -73,7 +69,7 @@ class UserServiceImplTest {
         userSpec.setRoles(List.of(roleSpec));
 
         when(randomService.getString(anyInt())).thenReturn("randomUserId");
-        UserTestData userTestData = userServiceImpl.create(userSpec);
+        UserData userData = userServiceImpl.create(userSpec);
 
         verify(userRepository).save(argThat(user -> {
             assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UserSpec");
@@ -82,44 +78,25 @@ class UserServiceImplTest {
             return true;
         }));
 
-        assertNotNull(userTestData.getUserId(), "User ID should not be null");
-        assertNotNull(userTestData.getEmail(), "Email should not be null");
-        assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
+        assertNotNull(userData.getUserId(), "User ID should not be null");
+        assertNotNull(userData.getEmail(), "Email should not be null");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
 
 
     }
-    @Test
-    void testUserExists() {
-        when(userRepository.findById("userId")).thenReturn(Optional.of(new Users()));
-        boolean userExists = userServiceImpl.userExists("userId");
-
-        assertTrue(userExists, "User should exist");
-        verify(userRepository, times(1)).findById("userId");
-    }
 
     @Test
-    void testUserDoesNotExist() {
-        when(userRepository.findById(any(String.class))).thenReturn(Optional.empty());
-
-        boolean userExists = userServiceImpl.userExists("userId");
-
-        assertFalse(userExists, "User should not exist");
-        verify(userRepository, times(1)).findById("userId");
-    }
-
-    @Test
-    void testDeleteUser() throws DataException {
+    void testDeleteUser() {
         Users mockUser = new Users();
         mockUser.setId("userId");
 
         when(userRepository.findById("userId")).thenReturn(Optional.of(mockUser));
         doNothing().when(userRepository).delete(any(Users.class));
 
-        assertTrue(userServiceImpl.userExists("userId"), "User should exist before deletion");
+        boolean result = userServiceImpl.delete("userId");
 
-        userServiceImpl.delete("userId");
-
+        assertTrue(result, "User should be deleted successfully");
         verify(userRepository, times(1)).delete(mockUser);
     }
 
@@ -133,8 +110,9 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         doThrow(new RuntimeException("Database error")).when(userRepository).delete(mockUser);
 
-        DataException exception = assertThrows(DataException.class, () -> userServiceImpl.delete(userId));
-        assertEquals("Failed to delete user", exception.getMessage());
+        boolean result = userServiceImpl.delete(userId);
+
+        assertFalse(result, "Delete should return false when an exception occurs");
     }
 
     @Test
@@ -143,16 +121,16 @@ class UserServiceImplTest {
         userSpec.setPassword("password");
         userSpec.setRoles(new ArrayList<>()); // Empty roles list
         when(randomService.getString(anyInt())).thenReturn("randomUserId");
-        UserTestData userTestData = userServiceImpl.create(userSpec);
+        UserData userData = userServiceImpl.create(userSpec);
 
-        assertNotNull(userTestData.getUserId(), "User ID should not be null");
-        assertNotNull(userTestData.getEmail(), "Email should not be null");
-        assertTrue(userTestData.getForename().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userTestData.getSurname().contains("Surname"), "Surname should contain Surname");
+        assertNotNull(userData.getUserId(), "User ID should not be null");
+        assertNotNull(userData.getEmail(), "Email should not be null");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
     }
 
     @Test
-    void testGetRolesByUserId() {
+    void testGetUserById() {
         String userId = "userId";
         List<String> roles = List.of("role1", "role2");
         Users user = new Users();
@@ -161,29 +139,28 @@ class UserServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        List<String> result = userServiceImpl.getRolesByUserId(userId);
+        Users result = userServiceImpl.getUserById(userId);
 
         assertNotNull(result, "Roles list should not be null");
-        assertEquals(roles.size(), result.size(), "Roles list size should match");
-        assertTrue(result.containsAll(roles), "Roles list should contain all roles");
+        assertEquals(roles.size(), result.getRoles().size(), "Roles list size should match");
+        assertTrue(result.getRoles().containsAll(roles), "Roles list should contain all roles");
         verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
-    void testGetRolesByUserIdUserNotFound() {
+    void testGetUserIdUserByNotFound() {
         String userId = "userId";
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        List<String> result = userServiceImpl.getRolesByUserId(userId);
+        Users result = userServiceImpl.getUserById(userId);
 
-        assertNotNull(result, "Roles list should not be null");
-        assertTrue(result.isEmpty(), "Roles list should be empty when user is not found");
+        assertNull(result, "User should be null when not found");
         verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
-    void testDeleteUserNotFound() throws DataException {
+    void testDeleteUserNotFound() {
         String userId = "nonExistentUserId";
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
