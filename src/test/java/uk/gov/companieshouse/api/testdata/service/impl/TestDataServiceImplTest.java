@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.testdata.service.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
@@ -56,7 +57,7 @@ class TestDataServiceImplTest {
     @Mock
     private UserService userService;
     @Mock
-    private RoleService roleService;
+    private DataService<RoleData,RoleSpec> roleService;
     @InjectMocks
     private TestDataServiceImpl testDataService;
     
@@ -511,10 +512,10 @@ class TestDataServiceImplTest {
     @Test
     void deleteUserData() throws DataException {
         String userId = "userId";
-        Users user = new Users();
+        User user = new User();
         user.setRoles(new ArrayList<>());
 
-        when(userService.getUserById(userId)).thenReturn(user);
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
         when(userService.delete(userId)).thenReturn(true);
 
         boolean result = testDataService.deleteUserData(userId);
@@ -544,10 +545,10 @@ class TestDataServiceImplTest {
     void deleteUserDataWithRoles() throws DataException {
         String userId = "userId";
         List<String> roles = List.of("role1", "role2");
-        Users user = new Users();
+        User user = new User();
         user.setRoles(roles);
 
-        when(userService.getUserById(userId)).thenReturn(user);
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
         when(userService.delete(userId)).thenReturn(true);
 
         boolean result = testDataService.deleteUserData(userId);

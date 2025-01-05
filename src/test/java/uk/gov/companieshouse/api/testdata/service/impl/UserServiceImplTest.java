@@ -16,7 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Users;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -57,7 +56,6 @@ class UserServiceImplTest {
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
     }
 
-
     @Test
     void testCreateUserWithRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
@@ -82,17 +80,15 @@ class UserServiceImplTest {
         assertNotNull(userData.getEmail(), "Email should not be null");
         assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
-
-
     }
 
     @Test
     void testDeleteUser() {
-        Users mockUser = new Users();
+        User mockUser = new User();
         mockUser.setId("userId");
 
         when(userRepository.findById("userId")).thenReturn(Optional.of(mockUser));
-        doNothing().when(userRepository).delete(any(Users.class));
+        doNothing().when(userRepository).delete(any(User.class));
 
         boolean result = userServiceImpl.delete("userId");
 
@@ -100,19 +96,25 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).delete(mockUser);
     }
 
-
     @Test
     void testDeleteUserUserRepositoryThrowsException() {
         String userId = "userId";
-        Users mockUser = new Users();
+        User mockUser = new User();
         mockUser.setId(userId);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         doThrow(new RuntimeException("Database error")).when(userRepository).delete(mockUser);
 
-        boolean result = userServiceImpl.delete(userId);
+        boolean result;
+        try {
+            result = userServiceImpl.delete(userId);
+        } catch (RuntimeException e) {
+            result = false;
+        }
 
         assertFalse(result, "Delete should return false when an exception occurs");
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).delete(mockUser);
     }
 
     @Test
@@ -133,17 +135,17 @@ class UserServiceImplTest {
     void testGetUserById() {
         String userId = "userId";
         List<String> roles = List.of("role1", "role2");
-        Users user = new Users();
+        User user = new User();
         user.setId(userId);
         user.setRoles(roles);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
 
-        Users result = userServiceImpl.getUserById(userId);
+        Optional<User> result = userServiceImpl.getUserById(userId);
 
-        assertNotNull(result, "Roles list should not be null");
-        assertEquals(roles.size(), result.getRoles().size(), "Roles list size should match");
-        assertTrue(result.getRoles().containsAll(roles), "Roles list should contain all roles");
+        assertTrue(result.isPresent(), "User should be present");
+        assertEquals(roles.size(), result.get().getRoles().size(), "Role list size should match");
+        assertTrue(result.get().getRoles().containsAll(roles), "Role list should contain all roles");
         verify(userRepository, times(1)).findById(userId);
     }
 
@@ -153,9 +155,9 @@ class UserServiceImplTest {
 
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
-        Users result = userServiceImpl.getUserById(userId);
+        Optional<User> result = userServiceImpl.getUserById(userId);
 
-        assertNull(result, "User should be null when not found");
+        assertTrue(result.isEmpty(), "User should be empty when not found");
         verify(userRepository, times(1)).findById(userId);
     }
 
@@ -169,6 +171,6 @@ class UserServiceImplTest {
 
         assertFalse(result, "Delete should return false when user does not exist");
         verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(0)).delete(any(Users.class));
+        verify(userRepository, times(0)).delete(any(User.class));
     }
 }

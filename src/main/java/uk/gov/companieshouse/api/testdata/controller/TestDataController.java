@@ -96,8 +96,7 @@ public class TestDataController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         else {
-            response.put("status", HttpStatus.NOT_FOUND.value());
-            response.put("message", "User not found " + userId);
+            response.put("status", HttpStatus.NOT_FOUND);
             LOG.info("User not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }

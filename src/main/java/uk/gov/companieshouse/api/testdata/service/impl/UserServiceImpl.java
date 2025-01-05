@@ -2,28 +2,23 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Users;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
-    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
     private UserRepository repository;
@@ -36,7 +31,7 @@ public class UserServiceImpl implements UserService {
         var dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
         long timestamp = dateNow.toEpochMilli();
         final String password = userSpec.getPassword();
-        final var user = new Users();
+        final var user = new User();
         if(userSpec.getRoles() != null){
             user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
@@ -56,18 +51,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public boolean delete(String userId) {
-        try {
-            var user = repository.findById(userId);
-            user.ifPresent(repository::delete);
-            return user.isPresent();
-        } catch (Exception e) {
-            LOG.error("Failed to delete user", e);
-            return false;
-        }
+        var user = repository.findById(userId);
+        user.ifPresent(repository::delete);
+        return user.isPresent();
     }
 
     @Override
-    public Users getUserById(String userId) {
-        return repository.findById(userId).orElse(null);
+    public Optional<User> getUserById(String userId) {
+        return repository.findById(userId);
     }
 }

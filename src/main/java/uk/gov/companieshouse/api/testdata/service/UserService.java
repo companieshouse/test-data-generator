@@ -1,17 +1,17 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Users;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 
-import java.util.List;
+import java.util.Optional;
 
-public interface UserService extends DataService<UserData,UserSpec> {
+public interface UserService extends DataService<UserData, UserSpec> {
     /**
      * Retrieves the roles associated with a given user ID.
      *
      * @param userId the ID of the user whose roles are to be retrieved
-     * @return a list of role IDs associated with the user
+     * @return an Optional containing the user if found, or empty if not found
      */
-    Users getUserById(String userId);
+    Optional<User> getUserById(String userId);
 }

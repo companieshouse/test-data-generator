@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.util.List;
 
 @Document(collection = "users")
-public class Users {
+public class User {
 
     @Id
     @Field("id")

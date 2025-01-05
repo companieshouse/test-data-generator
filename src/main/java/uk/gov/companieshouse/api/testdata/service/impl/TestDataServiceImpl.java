@@ -40,7 +40,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private UserService userService;
     @Autowired
-    private RoleService roleService;
+    private DataService<RoleData,RoleSpec> roleService;
     @Value("${api.url}")
     private String apiUrl;
 
@@ -152,8 +152,10 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public boolean deleteUserData(String userId) {
-        Users user = userService.getUserById(userId);
+    public boolean deleteUserData(String userId) throws DataException {
+        List<Exception> suppressedExceptions = new ArrayList<>();
+
+        User user = userService.getUserById(userId).orElse(null);
         if (user == null) {
             return false;
         }
@@ -161,15 +163,22 @@ public class TestDataServiceImpl implements TestDataService {
             try {
                 roleService.delete(roleId);
             } catch (Exception e) {
-                LOG.error("Failed to delete role", e);
+                LOG.error("Failed to delete role "+ roleId, e);
+                suppressedExceptions.add(e);
             }
         });
+
+        if (!suppressedExceptions.isEmpty()) {
+            DataException ex = new DataException("Failed to delete roles");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
+        }
 
         try {
             return this.userService.delete(userId);
         } catch (Exception e) {
-            LOG.error("Failed to delete user", e);
-            return false;
+            LOG.error("Failed to delete user "+ userId, e);
+            throw new DataException("Failed to delete user", e);
         }
     }
 }
