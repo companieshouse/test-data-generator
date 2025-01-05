@@ -153,27 +153,18 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public boolean deleteUserData(String userId) throws DataException {
-        List<Exception> suppressedExceptions = new ArrayList<>();
-
         User user = userService.getUserById(userId).orElse(null);
         if (user == null) {
             return false;
         }
-        user.getRoles().forEach(roleId -> {
+        for (String roleId : user.getRoles()) {
             try {
                 roleService.delete(roleId);
             } catch (Exception e) {
-                LOG.error("Failed to delete role "+ roleId, e);
-                suppressedExceptions.add(e);
+                LOG.error("Failed to delete role " + roleId, e);
+                throw new DataException("Failed to delete role", e);
             }
-        });
-
-        if (!suppressedExceptions.isEmpty()) {
-            DataException ex = new DataException("Failed to delete roles");
-            suppressedExceptions.forEach(ex::addSuppressed);
-            throw ex;
         }
-
         try {
             return this.userService.delete(userId);
         } catch (Exception e) {

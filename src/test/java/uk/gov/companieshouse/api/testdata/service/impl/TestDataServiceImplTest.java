@@ -2,10 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -694,5 +691,22 @@ class TestDataServiceImplTest {
         verify(roleService, times(1)).create(role1);
         verify(roleService, times(1)).create(role2);
         verify(userService, times(1)).create(userSpec);
+    }
+
+    @Test
+    void deleteUserDataThrowsDataExceptionWhileDeletingUser() throws DataException {
+        String userId = "userId";
+        User user = new User();
+        user.setRoles(new ArrayList<>());
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        doAnswer(invocation -> {
+            throw new DataException("Failed to delete user");
+        }).when(userService).delete(userId);
+
+        DataException thrown = assertThrows(DataException.class, () -> testDataService.deleteUserData(userId));
+
+        assertEquals("Failed to delete user", thrown.getMessage());
+        verify(userService, times(1)).delete(userId);
     }
 }
