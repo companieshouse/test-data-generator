@@ -153,7 +153,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public boolean deleteUserData(String userId) {
-        User user = userService.getUserById(userId).orElse(null);
+        var user = userService.getUserById(userId).orElse(null);
         if (user == null) {
             return false;
         }
