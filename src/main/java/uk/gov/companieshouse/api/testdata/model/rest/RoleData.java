@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class RoleData {
 
-    @JsonProperty("role_id")
-    private final String roleId;
+    @JsonProperty("id")
+    private final String id;
 
-    public RoleData(String roleId) {
-        this.roleId = roleId;
+    public RoleData(String id) {
+        this.id = id;
     }
 
-    public String getRoleId() {
-        return roleId;
+    public String getId() {
+        return id;
     }
 }

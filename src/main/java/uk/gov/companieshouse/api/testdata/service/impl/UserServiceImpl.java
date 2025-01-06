@@ -35,9 +35,9 @@ public class UserServiceImpl implements UserService {
         if(userSpec.getRoles() != null){
             user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
-        String randomUser = "test-data-generated" + timestamp + "@test.companieshouse.gov.uk";
+        String email = "test-data-generated" + timestamp + "@test.companieshouse.gov.uk";
         user.setId(randomService.getString(24));
-        user.setEmail(randomUser);
+        user.setEmail(email);
         user.setForename("Forename-"+timestamp);
         user.setSurname("Surname-"+timestamp);
         user.setLocale("GB_en");

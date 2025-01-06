@@ -50,7 +50,7 @@ class UserServiceImplTest {
             assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
             return true;
         }));
-        assertNotNull(userData.getUserId(), "User ID should not be null");
+        assertNotNull(userData.getId(), "User ID should not be null");
         assertNotNull(userData.getEmail(), "Email should not be null");
         assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
@@ -76,7 +76,7 @@ class UserServiceImplTest {
             return true;
         }));
 
-        assertNotNull(userData.getUserId(), "User ID should not be null");
+        assertNotNull(userData.getId(), "User ID should not be null");
         assertNotNull(userData.getEmail(), "Email should not be null");
         assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
@@ -125,7 +125,7 @@ class UserServiceImplTest {
         when(randomService.getString(anyInt())).thenReturn("randomUserId");
         UserData userData = userServiceImpl.create(userSpec);
 
-        assertNotNull(userData.getUserId(), "User ID should not be null");
+        assertNotNull(userData.getId(), "User ID should not be null");
         assertNotNull(userData.getEmail(), "Email should not be null");
         assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");

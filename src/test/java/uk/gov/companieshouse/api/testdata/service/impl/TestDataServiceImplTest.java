@@ -500,7 +500,7 @@ class TestDataServiceImplTest {
 
         UserData createdUserData = testDataService.createUserData(userSpec);
 
-        assertEquals("userId", createdUserData.getUserId());
+        assertEquals("userId", createdUserData.getId());
         assertEquals("email@example.com", createdUserData.getEmail());
         assertEquals("Forename", createdUserData.getForename());
         assertEquals("Surname", createdUserData.getSurname());
@@ -683,7 +683,7 @@ class TestDataServiceImplTest {
 
         UserData createdUserData = testDataService.createUserData(userSpec);
 
-        assertEquals("userId", createdUserData.getUserId());
+        assertEquals("userId", createdUserData.getId());
         assertEquals("email@example.com", createdUserData.getEmail());
         assertEquals("Forename", createdUserData.getForename());
         assertEquals("Surname", createdUserData.getSurname());

@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class UserData {
 
-    @JsonProperty("user_id")
-    private final String userId;
+    @JsonProperty("id")
+    private final String id;
 
     @JsonProperty("email")
     private final String email;
@@ -16,15 +16,15 @@ public class UserData {
     @JsonProperty("surname")
     private final String surname;
 
-    public UserData(String userId, String email, String forename, String surname) {
-        this.userId = userId;
+    public UserData(String id, String email, String forename, String surname) {
+        this.id = id;
         this.email = email;
         this.forename = forename;
         this.surname = surname;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getId() {
+        return id;
     }
 
     public String getEmail() {

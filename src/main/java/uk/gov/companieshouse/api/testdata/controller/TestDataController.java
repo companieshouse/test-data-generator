@@ -72,15 +72,11 @@ public class TestDataController {
     }
 
     @PostMapping("/user")
-    public ResponseEntity<UserData> createUser(@Valid @RequestBody(required = false) UserSpec request) throws DataException {
-        Optional<UserSpec> optionalRequest = Optional.ofNullable(request);
-        var spec = optionalRequest.orElse(new UserSpec());
-
-        var createdUser = testDataService.createUserData(spec);
-
+    public ResponseEntity<UserData> createUser(@Valid @RequestBody(required = true) UserSpec request) throws DataException {
+        var createdUser = testDataService.createUserData(request);
         Map<String, Object> data = new HashMap<>();
         data.put("user email", createdUser.getEmail());
-        data.put("user id", createdUser.getUserId());
+        data.put("user id", createdUser.getId());
         LOG.info("New user created", data);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
