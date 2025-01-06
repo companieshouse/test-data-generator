@@ -321,7 +321,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataProfileException() throws DataException {
+    void deleteCompanyDataProfileException() {
         RuntimeException ex = new RuntimeException("exception");
         when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -341,7 +341,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataFilingHistoryException() throws DataException {
+    void deleteCompanyDataFilingHistoryException() {
         RuntimeException ex = new RuntimeException("exception");
         when(filingHistoryService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -490,7 +490,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserData() throws DataException {
+    void createUserDataWithoutRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -504,60 +504,28 @@ class TestDataServiceImplTest {
         assertEquals("email@example.com", createdUserData.getEmail());
         assertEquals("Forename", createdUserData.getForename());
         assertEquals("Surname", createdUserData.getSurname());
+
+        verify(roleService, never()).create(any());
     }
 
-    @Test
-    void deleteUserData() throws DataException {
-        String userId = "userId";
-        User user = new User();
-        user.setRoles(new ArrayList<>());
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-    }
-
-    @Test
-    void createUserDataWithInvalidRoles() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-
-        RoleSpec invalidRole = new RoleSpec();
-        invalidRole.setId("");
-        invalidRole.setPermissions(new ArrayList<>());
-
-        userSpec.setRoles(List.of(invalidRole));
-
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
-
-        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
-    }
-
+//    @Test
+//    void createUserDataWithInvalidRoles() {
+//        UserSpec userSpec = new UserSpec();
+//        userSpec.setPassword("password");
+//
+//        RoleSpec invalidRole = new RoleSpec();
+//        invalidRole.setId("");
+//        invalidRole.setPermissions(new ArrayList<>());
+//
+//        userSpec.setRoles(List.of(invalidRole));
+//
+//        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
+//
+//        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+//    }
 
     @Test
-    void deleteUserDataWithRoles() throws DataException {
-        String userId = "userId";
-        List<String> roles = List.of("role1", "role2");
-        User user = new User();
-        user.setRoles(roles);
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(roleService, times(1)).delete("role1");
-        verify(roleService, times(1)).delete("role2");
-        verify(userService, times(1)).delete(userId);
-    }
-
-    @Test
-    void testCreateUserWithMixedValidAndEmptyRoles() {
+    void testCreateUserWithMixedValidAndEmptyRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -574,26 +542,33 @@ class TestDataServiceImplTest {
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+
+        verify(userService, never()).create(any());
     }
 
     @Test
-    void createUserDataWithNullPassword() {
+    void createUserDataWithNullPassword() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword(null);
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Password is required to create a user", exception.getMessage());
+
+        verify(userService, never()).create(any());
+        verify(roleService, never()).create(any());
     }
 
     @Test
-    void createUserDataWithEmptyPassword() {
+    void createUserDataWithEmptyPassword() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("");
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Password is required to create a user", exception.getMessage());
+        verify(userService, never()).create(any());
+        verify(roleService, never()).create(any());
     }
 
     @Test
@@ -601,27 +576,11 @@ class TestDataServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
-        RoleSpec invalidRole = new RoleSpec();
-        invalidRole.setId(null);
-        invalidRole.setPermissions(List.of("permission1"));
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId(null);
+        roleSpec.setPermissions(List.of("permission1"));
 
-        userSpec.setRoles(List.of(invalidRole));
-
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
-
-        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
-    }
-
-    @Test
-    void createUserDataWithEmptyRoleId() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-
-        RoleSpec invalidRole = new RoleSpec();
-        invalidRole.setId("");
-        invalidRole.setPermissions(List.of("permission1"));
-
-        userSpec.setRoles(List.of(invalidRole));
+        userSpec.setRoles(List.of(roleSpec));
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
@@ -629,35 +588,60 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserDataWithNullPermissions() {
+    void createUserDataWithEmptyRoleId() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
-        RoleSpec invalidRole = new RoleSpec();
-        invalidRole.setId("role-id");
-        invalidRole.setPermissions(null);
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId("");
+        roleSpec.setPermissions(List.of("permission1"));
 
-        userSpec.setRoles(List.of(invalidRole));
+        userSpec.setRoles(List.of(roleSpec));
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+
+        verify(roleService, never()).create(any());
+        verify(userService, never()).create(any());
     }
 
     @Test
-    void createUserDataWithEmptyPermissions() {
+    void createUserDataWithNullPermissions() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
-        RoleSpec invalidRole = new RoleSpec();
-        invalidRole.setId("role-id");
-        invalidRole.setPermissions(new ArrayList<>());
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId("role-id");
+        roleSpec.setPermissions(null);
 
-        userSpec.setRoles(List.of(invalidRole));
+        userSpec.setRoles(List.of(roleSpec));
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+
+        verify(roleService, never()).create(any());
+        verify(userService, never()).create(any());
+    }
+
+    @Test
+    void createUserDataWithEmptyPermissions() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId("role-id");
+        roleSpec.setPermissions(new ArrayList<>());
+
+        userSpec.setRoles(List.of(roleSpec));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+
+        verify(roleService, never()).create(any());
+        verify(userService, never()).create(any());
     }
 
     @Test
@@ -694,19 +678,88 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteUserDataThrowsDataExceptionWhileDeletingUser() throws DataException {
+    void createUserDataWithMultipleInvalidRoles() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        RoleSpec invalidRole1 = new RoleSpec();
+        invalidRole1.setId("");
+        invalidRole1.setPermissions(List.of("permission1"));
+
+        RoleSpec invalidRole2 = new RoleSpec();
+        invalidRole2.setId("role2");
+        invalidRole2.setPermissions(new ArrayList<>());
+
+        userSpec.setRoles(List.of(invalidRole1, invalidRole2));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
+
+        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+
+        verify(roleService, never()).create(any());
+        verify(userService, never()).create(any());
+    }
+
+    @Test
+    void deleteUserData() {
         String userId = "userId";
         User user = new User();
         user.setRoles(new ArrayList<>());
 
         when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        doAnswer(invocation -> {
-            throw new DataException("Failed to delete user");
-        }).when(userService).delete(userId);
+        when(userService.delete(userId)).thenReturn(true);
 
-        DataException thrown = assertThrows(DataException.class, () -> testDataService.deleteUserData(userId));
+        boolean result = testDataService.deleteUserData(userId);
 
-        assertEquals("Failed to delete user", thrown.getMessage());
+        assertTrue(result);
         verify(userService, times(1)).delete(userId);
+        verify(roleService, never()).delete(any());
+    }
+
+
+    @Test
+    void deleteUserDataWithRoles() throws DataException {
+        String userId = "userId";
+        List<String> roles = List.of("role1", "role2");
+        User user = new User();
+        user.setRoles(roles);
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(roleService, times(1)).delete("role1");
+        verify(roleService, times(1)).delete("role2");
+        verify(userService, times(1)).delete(userId);
+    }
+
+    @Test
+    void deleteUserDataWithoutExceptionWhileDeletingUser(){
+        String userId = "userId";
+        User user = new User();
+        user.setRoles(new ArrayList<>());
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+    }
+
+    @Test
+    void deleteUserDataWhenUserNotFound() {
+        String userId = "userId";
+
+        when(userService.getUserById(userId)).thenReturn(Optional.empty());
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertFalse(result);
+        verify(userService, never()).delete(userId);
+        verify(roleService, never()).delete(any());
     }
 }

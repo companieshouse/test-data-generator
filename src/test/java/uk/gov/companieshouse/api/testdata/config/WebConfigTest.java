@@ -31,16 +31,15 @@ class WebConfigTest {
 
     @Test
     void shouldAddInternalUserInterceptorToRegistry() {
-        when(registry.addInterceptor(any(InternalUserInterceptor.class))).thenReturn(interceptorRegistration);
+        ArgumentCaptor<InternalUserInterceptor> interceptorCaptor = ArgumentCaptor.forClass(InternalUserInterceptor.class);
+        when(registry.addInterceptor(interceptorCaptor.capture())).thenReturn(interceptorRegistration);
 
         webConfig.addInterceptors(registry);
 
-        ArgumentCaptor<InternalUserInterceptor> interceptorCaptor = ArgumentCaptor.forClass(InternalUserInterceptor.class);
-        verify(registry, times(1)).addInterceptor(interceptorCaptor.capture());
+        verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
 
-        InternalUserInterceptor capturedInterceptor = interceptorCaptor.getValue();
-        assertNotNull(capturedInterceptor);
+        assertNotNull(interceptorCaptor.getValue());
     }
 
     @Test

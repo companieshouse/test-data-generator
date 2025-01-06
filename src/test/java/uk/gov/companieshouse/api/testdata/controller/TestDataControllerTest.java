@@ -156,7 +156,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyUser() throws Exception {
+    void createUser() throws Exception {
         UserSpec request = new UserSpec();
         request.setPassword("password");
         UserData user = new UserData("userId", "email@example.com", "Forename", "Surname");
@@ -169,7 +169,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyUserException() throws Exception {
+    void createUserException() throws Exception {
         UserSpec request = new UserSpec();
         request.setPassword("password");
         Throwable exception = new DataException("Error message");
@@ -181,7 +181,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void deleteCompanyUser() throws Exception {
+    void deleteUser() throws Exception {
         final String userId = "userId";
 
         when(this.testDataService.deleteUserData(userId)).thenReturn(true);
@@ -195,7 +195,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void deleteCompanyUserException() throws Exception {
+    void deleteUserException() throws Exception {
         final String userId = "userId";
         Throwable exception = new DataException("Error message");
 
@@ -203,5 +203,20 @@ class TestDataControllerTest {
 
         DataException thrown = assertThrows(DataException.class, () -> this.testDataController.deleteUser(userId));
         assertEquals(exception, thrown);
+    }
+
+    @Test
+    void deleteUserNotFound() throws Exception {
+        final String userId = "userId";
+
+        when(this.testDataService.deleteUserData(userId)).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("userId", response.getBody().get("user id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService).deleteUserData(userId);
     }
 }

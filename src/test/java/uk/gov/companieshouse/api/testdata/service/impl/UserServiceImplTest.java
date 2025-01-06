@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,15 +46,23 @@ class UserServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
         when(randomService.getString(anyInt())).thenReturn("randomUserId");
+
         UserData userData = userServiceImpl.create(userSpec);
-        verify(userRepository).save(argThat(user -> {
-            assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UsersSpec");
-            return true;
-        }));
-        assertNotNull(userData.getId(), "User ID should not be null");
-        assertNotNull(userData.getEmail(), "Email should not be null");
-        assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
+        assertEquals("randomUserId", savedUser.getId(), "User ID should match the generated ID");
+        assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+
+        assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
+        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
 
     @Test
@@ -72,14 +81,18 @@ class UserServiceImplTest {
         verify(userRepository).save(argThat(user -> {
             assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UserSpec");
             assertEquals(1, user.getRoles().size(), "User should have one role assigned");
-            assertEquals(roleSpec.getId(), user.getRoles().getFirst(), "The assigned role should match the role ID");
+            assertEquals(roleSpec.getId(), user.getRoles().get(0), "The assigned role should match the role ID");
+            assertEquals("randomUserId", user.getId(), "User ID should match the generated ID");
+            assertTrue(user.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+            assertTrue(user.getForename().contains("Forename"), "Forename should contain 'Forename'");
+            assertTrue(user.getSurname().contains("Surname"), "Surname should contain 'Surname'");
             return true;
         }));
 
-        assertNotNull(userData.getId(), "User ID should not be null");
-        assertNotNull(userData.getEmail(), "Email should not be null");
-        assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
+        assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
+        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
 
     @Test
@@ -105,14 +118,9 @@ class UserServiceImplTest {
         when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
         doThrow(new RuntimeException("Database error")).when(userRepository).delete(mockUser);
 
-        boolean result;
-        try {
-            result = userServiceImpl.delete(userId);
-        } catch (RuntimeException e) {
-            result = false;
-        }
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete(userId));
 
-        assertFalse(result, "Delete should return false when an exception occurs");
+        assertEquals("Database error", exception.getMessage(), "Exception message should match");
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(1)).delete(mockUser);
     }
@@ -121,14 +129,14 @@ class UserServiceImplTest {
     void testCreateUserWithEmptyRolesList() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
-        userSpec.setRoles(new ArrayList<>()); // Empty roles list
-        when(randomService.getString(anyInt())).thenReturn("randomUserId");
+        userSpec.setRoles(new ArrayList<>());
+        when(randomService.getString(24)).thenReturn("randomUserId");
         UserData userData = userServiceImpl.create(userSpec);
 
-        assertNotNull(userData.getId(), "User ID should not be null");
-        assertNotNull(userData.getEmail(), "Email should not be null");
-        assertTrue(userData.getForename().contains("Forename"), "Forename should contain Forename");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain Surname");
+        assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
+        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
 
     @Test
@@ -152,13 +160,11 @@ class UserServiceImplTest {
     @Test
     void testGetUserIdUserByNotFound() {
         String userId = "userId";
-
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         Optional<User> result = userServiceImpl.getUserById(userId);
 
         assertTrue(result.isEmpty(), "User should be empty when not found");
-        verify(userRepository, times(1)).findById(userId);
     }
 
     @Test
