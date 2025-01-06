@@ -508,22 +508,6 @@ class TestDataServiceImplTest {
         verify(roleService, never()).create(any());
     }
 
-//    @Test
-//    void createUserDataWithInvalidRoles() {
-//        UserSpec userSpec = new UserSpec();
-//        userSpec.setPassword("password");
-//
-//        RoleSpec invalidRole = new RoleSpec();
-//        invalidRole.setId("");
-//        invalidRole.setPermissions(new ArrayList<>());
-//
-//        userSpec.setRoles(List.of(invalidRole));
-//
-//        DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
-//
-//        assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
-//    }
-
     @Test
     void testCreateUserWithMixedValidAndEmptyRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
