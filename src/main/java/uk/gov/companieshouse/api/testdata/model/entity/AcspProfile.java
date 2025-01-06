@@ -20,8 +20,8 @@ public class AcspProfile {
     @Field("data")
     private Data data = new Data();
 
-    @Field("sensitive_data")
-    private SensitiveData sensitiveData;
+//    @Field("sensitive_data")
+//    private SensitiveData sensitiveData;
 
     public String getId() {
         return id;
@@ -37,9 +37,9 @@ public class AcspProfile {
 
     public void setData(Data data) { this.data = data; }
 
-    public SensitiveData getSensitiveData() { return sensitiveData; }
-
-    public void setSensitiveData(SensitiveData sensitiveData) { this.sensitiveData = sensitiveData; }
+//    public SensitiveData getSensitiveData() { return sensitiveData; }
+//
+//    public void setSensitiveData(SensitiveData sensitiveData) { this.sensitiveData = sensitiveData; }
 
     /**
      * Setter methods delegating to Data fields
@@ -64,13 +64,13 @@ public class AcspProfile {
         this.data.setLinks(links);
     }
 
-    public void setRegisteredOfficeAddress(Address address) {
-        this.data.setRegisteredOfficeAddress(address);
-    }
+//    public void setRegisteredOfficeAddress(Address address) {
+//        this.data.setRegisteredOfficeAddress(address);
+//    }
 
-    public void setJurisdiction(String jurisdiction) {
-        this.data.setJurisdiction(jurisdiction);
-    }
+//    public void setJurisdiction(String jurisdiction) {
+//        this.data.setJurisdiction(jurisdiction);
+//    }
 
     public static class Data {
 
@@ -80,8 +80,8 @@ public class AcspProfile {
         @Field("name")
         private String name;
 
-        @Field("notified_from")
-        private Instant notifiedFrom;
+//        @Field("notified_from")
+//        private Instant notifiedFrom;
 
         @Field("status")
         private String status;
@@ -89,26 +89,26 @@ public class AcspProfile {
         @Field("type")
         private String type;
 
-        @Field("business_sector")
-        private String businessSector;
+//        @Field("business_sector")
+//        private String businessSector;
 
-        @Field("etag")
-        private String etag;
+//        @Field("etag")
+//        private String etag;
 
-        @Field("registered_office_address")
-        private Address registeredOfficeAddress;
-
-        @Field("service_address")
-        private Address serviceAddress;
-
-        @Field("aml_details")
-        private List<AmlDetail> amlDetails;
+//        @Field("registered_office_address")
+//        private Address registeredOfficeAddress;
+//
+//        @Field("service_address")
+//        private Address serviceAddress;
+//
+//        @Field("aml_details")
+//        private List<AmlDetail> amlDetails;
 
         @Field("links")
         private Links links;
 
-        @Field("jurisdiction")
-        private String jurisdiction;
+//        @Field("jurisdiction")
+//        private String jurisdiction;
 
         public String getAcspNumber() {
             return acspNumber;
@@ -126,13 +126,13 @@ public class AcspProfile {
             this.name = name;
         }
 
-        public Instant getNotifiedFrom() {
-            return notifiedFrom;
-        }
-
-        public void setNotifiedFrom(Instant notifiedFrom) {
-            this.notifiedFrom = notifiedFrom;
-        }
+//        public Instant getNotifiedFrom() {
+//            return notifiedFrom;
+//        }
+//
+//        public void setNotifiedFrom(Instant notifiedFrom) {
+//            this.notifiedFrom = notifiedFrom;
+//        }
 
         public String getStatus() {
             return status;
@@ -150,45 +150,45 @@ public class AcspProfile {
             this.type = type;
         }
 
-        public String getBusinessSector() {
-            return businessSector;
-        }
+//        public String getBusinessSector() {
+//            return businessSector;
+//        }
+//
+//        public void setBusinessSector(String businessSector) {
+//            this.businessSector = businessSector;
+//        }
 
-        public void setBusinessSector(String businessSector) {
-            this.businessSector = businessSector;
-        }
+//        public String getEtag() {
+//            return etag;
+//        }
+//
+//        public void setEtag(String etag) {
+//            this.etag = etag;
+//        }
 
-        public String getEtag() {
-            return etag;
-        }
-
-        public void setEtag(String etag) {
-            this.etag = etag;
-        }
-
-        public Address getRegisteredOfficeAddress() {
-            return registeredOfficeAddress;
-        }
-
-        public void setRegisteredOfficeAddress(Address registeredOfficeAddress) {
-            this.registeredOfficeAddress = registeredOfficeAddress;
-        }
-
-        public Address getServiceAddress() {
-            return serviceAddress;
-        }
-
-        public void setServiceAddress(Address serviceAddress) {
-            this.serviceAddress = serviceAddress;
-        }
-
-        public List<AmlDetail> getAmlDetails() {
-            return amlDetails;
-        }
-
-        public void setAmlDetails(List<AmlDetail> amlDetails) {
-            this.amlDetails = amlDetails;
-        }
+//        public Address getRegisteredOfficeAddress() {
+//            return registeredOfficeAddress;
+//        }
+//
+//        public void setRegisteredOfficeAddress(Address registeredOfficeAddress) {
+//            this.registeredOfficeAddress = registeredOfficeAddress;
+//        }
+//
+//        public Address getServiceAddress() {
+//            return serviceAddress;
+//        }
+//
+//        public void setServiceAddress(Address serviceAddress) {
+//            this.serviceAddress = serviceAddress;
+//        }
+//
+//        public List<AmlDetail> getAmlDetails() {
+//            return amlDetails;
+//        }
+//
+//        public void setAmlDetails(List<AmlDetail> amlDetails) {
+//            this.amlDetails = amlDetails;
+//        }
 
         public Links getLinks() {
             return links;
@@ -198,13 +198,13 @@ public class AcspProfile {
             this.links = links;
         }
 
-        public String getJurisdiction() {
-            return jurisdiction;
-        }
-
-        public void setJurisdiction(String jurisdiction) {
-            this.jurisdiction = jurisdiction;
-        }
+//        public String getJurisdiction() {
+//            return jurisdiction;
+//        }
+//
+//        public void setJurisdiction(String jurisdiction) {
+//            this.jurisdiction = jurisdiction;
+//        }
     }
 
     public static class Links {
@@ -301,18 +301,18 @@ public class AcspProfile {
     }
 
     public static class Audit {
-        @Field("at")
-        private Instant at;
-        @Field("by")
-        private String by;
+//        @Field("at")
+//        private Instant at;
+//        @Field("by")
+//        private String by;
         @Field("type")
         private String type;
 
-        public Instant getAt() { return at; }
-        public void setAt(Instant at) { this.at = at; }
-
-        public String getBy() { return by; }
-        public void setBy(String by) { this.by = by; }
+//        public Instant getAt() { return at; }
+//        public void setAt(Instant at) { this.at = at; }
+//
+//        public String getBy() { return by; }
+//        public void setBy(String by) { this.by = by; }
 
         public String getType() { return type; }
         public void setType(String type) { this.type = type; }

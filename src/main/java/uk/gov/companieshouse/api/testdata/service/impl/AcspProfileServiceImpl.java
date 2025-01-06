@@ -25,7 +25,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class AcspProfileServiceImpl implements AcspProfileService {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
-    private static final String LINK_STEM = "/acsp/";
+    private static final String LINK_STEM = "/authorised-corporate-service-providers/";
 
     @Autowired
     private RandomService randomService;
@@ -57,13 +57,13 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         profile.setCompanyName("Example ACSP Ltd"); // from the given JSON
         profile.setType(Objects.requireNonNullElse(companyType, "limited-company"));
         profile.setStatus(Objects.requireNonNullElse(companyStatus, "active"));
-        profile.setJurisdiction(jurisdiction.toString());
+        //profile.setJurisdiction(jurisdiction.toString());
 
         // Set other data fields from example JSON:
         // notified_from, business_sector, etag
-        profile.getData().setNotifiedFrom(Instant.parse("2024-04-02T00:00:00.000Z"));
-        profile.getData().setBusinessSector("financial-institutions");
-        profile.getData().setEtag("47e85fcf644420129b4388ef9c87496794620893");
+//        profile.getData().setNotifiedFrom(Instant.parse("2024-04-02T00:00:00.000Z"));
+//        profile.getData().setBusinessSector("financial-institutions");
+        //profile.getData().setEtag("47e85fcf644420129b4388ef9c87496794620893");
 
         // Registered Office Address from JSON
         Address roa = new Address();
@@ -76,7 +76,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         roa.setPostalCode("M1 2AB");
         roa.setPremises("Another Building");
         roa.setRegion("Greater Manchester");
-        profile.setRegisteredOfficeAddress(roa);
+//        profile.setRegisteredOfficeAddress(roa);
 
         // Service Address from JSON
         Address serviceAddress = new Address();
@@ -89,13 +89,13 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         serviceAddress.setPostalCode("M1 2AB");
         serviceAddress.setPremises("Another Building");
         serviceAddress.setRegion("Greater Manchester");
-        profile.getData().setServiceAddress(serviceAddress);
+//        profile.getData().setServiceAddress(serviceAddress);
 
         // AML Details from JSON
         AmlDetail amlDetail = new AmlDetail();
         amlDetail.setSupervisoryBody("financial-conduct-authority-fca");
         amlDetail.setMembershipDetails("Membership ID: FCA654321");
-        profile.getData().setAmlDetails(Collections.singletonList(amlDetail));
+//        profile.getData().setAmlDetails(Collections.singletonList(amlDetail));
 
         // Links
         Links links = new Links();
@@ -105,7 +105,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         // Sensitive data
         SensitiveData sensitiveData = new SensitiveData();
         sensitiveData.setEmail("john.doe@example.com");
-        profile.setSensitiveData(sensitiveData);
+        //profile.setSensitiveData(sensitiveData);
 
         return repository.save(profile);
     }
