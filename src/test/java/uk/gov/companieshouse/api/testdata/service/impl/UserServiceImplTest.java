@@ -95,35 +95,6 @@ class UserServiceImplTest {
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
 
-    @Test
-    void testDeleteUser() {
-        User mockUser = new User();
-        mockUser.setId("userId");
-
-        when(userRepository.findById("userId")).thenReturn(Optional.of(mockUser));
-        doNothing().when(userRepository).delete(any(User.class));
-
-        boolean result = userServiceImpl.delete("userId");
-
-        assertTrue(result, "User should be deleted successfully");
-        verify(userRepository, times(1)).delete(mockUser);
-    }
-
-    @Test
-    void testDeleteUserUserRepositoryThrowsException() {
-        String userId = "userId";
-        User mockUser = new User();
-        mockUser.setId(userId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
-        doThrow(new RuntimeException("Database error")).when(userRepository).delete(mockUser);
-
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete(userId));
-
-        assertEquals("Database error", exception.getMessage(), "Exception message should match");
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).delete(mockUser);
-    }
 
     @Test
     void testCreateUserWithEmptyRolesList() throws DataException {
@@ -165,6 +136,36 @@ class UserServiceImplTest {
         Optional<User> result = userServiceImpl.getUserById(userId);
 
         assertTrue(result.isEmpty(), "User should be empty when not found");
+    }
+
+    @Test
+    void testDeleteUser() {
+        User mockUser = new User();
+        mockUser.setId("userId");
+
+        when(userRepository.findById("userId")).thenReturn(Optional.of(mockUser));
+        doNothing().when(userRepository).delete(any(User.class));
+
+        boolean result = userServiceImpl.delete("userId");
+
+        assertTrue(result, "User should be deleted successfully");
+        verify(userRepository, times(1)).delete(mockUser);
+    }
+
+    @Test
+    void testDeleteUserUserRepositoryThrowsException() {
+        String userId = "userId";
+        User mockUser = new User();
+        mockUser.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+        doThrow(new RuntimeException("Database error")).when(userRepository).delete(mockUser);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> userServiceImpl.delete(userId));
+
+        assertEquals("Database error", exception.getMessage(), "Exception message should match");
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).delete(mockUser);
     }
 
     @Test
