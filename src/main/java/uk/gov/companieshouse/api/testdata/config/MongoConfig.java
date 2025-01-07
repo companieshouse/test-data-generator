@@ -24,7 +24,7 @@ import uk.gov.companieshouse.api.testdata.repository.*;
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
 public class MongoConfig {
-
+    private static final String ACCOUNT_DATABASE = "account";
     private final MongoProperties mongoProperties;
 
     public MongoConfig(MongoProperties mongoProperties) {
@@ -39,7 +39,7 @@ public class MongoConfig {
 
     @Bean
     public CompanyAuthCodeRepository accountRepository() {
-        return getMongoRepositoryBean(CompanyAuthCodeRepository.class, "account");
+        return getMongoRepositoryBean(CompanyAuthCodeRepository.class, ACCOUNT_DATABASE);
     }
 
     @Bean
@@ -73,8 +73,13 @@ public class MongoConfig {
     }
 
     @Bean
-    public AcspProfileRepository acspProfileRepository() {
-        return getMongoRepositoryBean(AcspProfileRepository.class, "acsp_profile");
+    public UserRepository userRepository() {
+        return getMongoRepositoryBean(UserRepository.class, ACCOUNT_DATABASE);
+    }
+
+    @Bean
+    public RoleRepository roleRepository() {
+        return getMongoRepositoryBean(RoleRepository.class, ACCOUNT_DATABASE);
     }
 
     private MongoTemplate createMongoTemplate(final String database) {

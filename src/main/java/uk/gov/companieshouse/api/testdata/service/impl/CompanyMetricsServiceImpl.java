@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics> {
+public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics,CompanySpec> {
 
     @Autowired
     private CompanyMetricsRepository repository;

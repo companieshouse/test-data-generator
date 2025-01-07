@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class FilingHistoryServiceImpl implements DataService<FilingHistory> {
+public class FilingHistoryServiceImpl implements DataService<FilingHistory,CompanySpec> {
 
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
