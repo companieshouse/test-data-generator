@@ -7,7 +7,7 @@ public interface AcspDataService<T> {
     T create(AcspSpec acspSpec) throws DataException;
 
     /**
-     * Delete information for the given {@code companyNymber}
+     * Delete information for the given {@code acspNymber}
      *
      * @param acspNumber
      * @return True if the data could be found and deleted. False if no data found
