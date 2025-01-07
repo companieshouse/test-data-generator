@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doNothing;
@@ -45,7 +44,7 @@ class UserServiceImplTest {
     void testCreateUserWithoutRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
-        when(randomService.getString(anyInt())).thenReturn("randomUserId");
+        when(randomService.getString(24)).thenReturn("randomUserId");
 
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -58,6 +57,9 @@ class UserServiceImplTest {
         assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
         assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
         assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
+        assertEquals(true,savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
+        assertNotNull(savedUser.getCreated(), "Created date should not be null");
 
         assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
         assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
@@ -75,21 +77,26 @@ class UserServiceImplTest {
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
         userSpec.setRoles(List.of(roleSpec));
 
-        when(randomService.getString(anyInt())).thenReturn("randomUserId");
+        String generatedUserId = "randomUserId";
+        when(randomService.getString(anyInt())).thenReturn(generatedUserId);
         UserData userData = userServiceImpl.create(userSpec);
 
-        verify(userRepository).save(argThat(user -> {
-            assertEquals(userSpec.getPassword(), user.getPassword(), "Password should match the one set in UserSpec");
-            assertEquals(1, user.getRoles().size(), "User should have one role assigned");
-            assertEquals(roleSpec.getId(), user.getRoles().get(0), "The assigned role should match the role ID");
-            assertEquals("randomUserId", user.getId(), "User ID should match the generated ID");
-            assertTrue(user.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-            assertTrue(user.getForename().contains("Forename"), "Forename should contain 'Forename'");
-            assertTrue(user.getSurname().contains("Surname"), "Surname should contain 'Surname'");
-            return true;
-        }));
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
 
-        assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
+        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
+        assertEquals(1, savedUser.getRoles().size(), "User should have one role assigned");
+        assertEquals(roleSpec.getId(), savedUser.getRoles().getFirst(), "The assigned role should match the role ID");
+        assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
+        assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
+        assertEquals(true,savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
+        assertNotNull(savedUser.getCreated(), "Created date should not be null");
+
+        assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
         assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
         assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
@@ -103,6 +110,20 @@ class UserServiceImplTest {
         userSpec.setRoles(new ArrayList<>());
         when(randomService.getString(24)).thenReturn("randomUserId");
         UserData userData = userServiceImpl.create(userSpec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
+        assertEquals(0, savedUser.getRoles().size(), "User should have no roles assigned");
+        assertEquals("randomUserId", savedUser.getId(), "User ID should match the generated ID");
+        assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
+        assertEquals(true,savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
+        assertNotNull(savedUser.getCreated(), "Created date should not be null");
 
         assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
         assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");

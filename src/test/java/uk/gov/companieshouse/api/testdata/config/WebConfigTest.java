@@ -8,7 +8,6 @@ import static org.mockito.Mockito.any;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -31,15 +30,12 @@ class WebConfigTest {
 
     @Test
     void shouldAddInternalUserInterceptorToRegistry() {
-        ArgumentCaptor<InternalUserInterceptor> interceptorCaptor = ArgumentCaptor.forClass(InternalUserInterceptor.class);
-        when(registry.addInterceptor(interceptorCaptor.capture())).thenReturn(interceptorRegistration);
+        when(registry.addInterceptor(any(InternalUserInterceptor.class))).thenReturn(interceptorRegistration);
 
         webConfig.addInterceptors(registry);
 
         verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
-
-        assertNotNull(interceptorCaptor.getValue());
     }
 
     @Test

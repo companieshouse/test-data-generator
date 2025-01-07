@@ -309,7 +309,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createCompanyDataNullSpec() throws DataException {
+    void createCompanyDataNullSpec() {
         assertThrows(IllegalArgumentException.class, () -> this.testDataService.createCompanyData(null));
         verify(companyProfileService, never()).delete(any());
         verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
@@ -361,7 +361,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataAuthCodeException() throws DataException {
+    void deleteCompanyDataAuthCodeException() {
         RuntimeException ex = new RuntimeException("exception");
         when(companyAuthCodeService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -381,7 +381,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataAppointmentException() throws DataException {
+    void deleteCompanyDataAppointmentException() {
         RuntimeException ex = new RuntimeException("exception");
         when(appointmentService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -401,7 +401,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataPscStatementException() throws DataException {
+    void deleteCompanyDataPscStatementException() {
         RuntimeException ex = new RuntimeException("exception");
         when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -421,7 +421,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataPscsException() throws DataException {
+    void deleteCompanyDataPscsException() {
         RuntimeException ex = new RuntimeException("exception");
         when(companyPscsService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -442,7 +442,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataMetricsException() throws DataException {
+    void deleteCompanyDataMetricsException() {
         RuntimeException ex = new RuntimeException("exception");
         when(metricsService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -462,7 +462,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataMultipleExceptions() throws DataException {
+    void deleteCompanyDataMultipleExceptions() {
         RuntimeException profileException = new RuntimeException("exception");
         when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(profileException);
 
@@ -556,7 +556,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserDataWithNullRoleId() {
+    void createUserDataWithNullRoleId() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
 
@@ -569,6 +569,8 @@ class TestDataServiceImplTest {
         DataException exception = assertThrows(DataException.class, () -> testDataService.createUserData(userSpec));
 
         assertEquals("Role ID and permissions are required to create a role", exception.getMessage());
+        verify(roleService, never()).create(any());
+        verify(userService, never()).create(any());
     }
 
     @Test
@@ -702,7 +704,7 @@ class TestDataServiceImplTest {
 
 
     @Test
-    void deleteUserDataWithRoles() throws DataException {
+    void deleteUserDataWithRoles() {
         String userId = "userId";
         List<String> roles = List.of("role1", "role2");
         User user = new User();
@@ -732,6 +734,7 @@ class TestDataServiceImplTest {
 
         assertTrue(result);
         verify(userService, times(1)).delete(userId);
+        verify(roleService, never()).delete(any());
     }
 
     @Test

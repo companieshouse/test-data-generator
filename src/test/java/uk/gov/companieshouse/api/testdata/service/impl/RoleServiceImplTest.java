@@ -42,29 +42,6 @@ class RoleServiceImplTest {
     }
 
     @Test
-    void testDeleteRole() {
-        String roleId = "role-id";
-        Role role = new Role();
-        role.setId(roleId);
-        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
-
-        boolean result = roleServiceImpl.delete(roleId);
-
-        assertTrue(result, "Role should be deleted successfully");
-        verify(roleRepository).delete(role);
-    }
-
-    @Test
-    void testDeleteRoleNotFound() {
-        String roleId = "role-id";
-        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
-
-        boolean result = roleServiceImpl.delete(roleId);
-
-        assertFalse(result, "Role should not be found and thus not deleted");
-    }
-
-    @Test
     void testCreateRoleWithEmptyPermissions() {
         RoleSpec roleSpec = new RoleSpec();
         roleSpec.setId("role-id");
@@ -107,6 +84,30 @@ class RoleServiceImplTest {
     void testDeleteRoleWithEmptyId() {
         String roleId = "";
         boolean result = roleServiceImpl.delete(roleId);
+        assertFalse(result, "Role should not be found and thus not deleted");
+        verify(roleRepository, never()).delete(any());
+    }
+
+    @Test
+    void testDeleteRole() {
+        String roleId = "role-id";
+        Role role = new Role();
+        role.setId(roleId);
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+
+        boolean result = roleServiceImpl.delete(roleId);
+
+        assertTrue(result, "Role should be deleted successfully");
+        verify(roleRepository).delete(role);
+    }
+
+    @Test
+    void testDeleteRoleNotFound() {
+        String roleId = "role-id";
+        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
+
+        boolean result = roleServiceImpl.delete(roleId);
+
         assertFalse(result, "Role should not be found and thus not deleted");
         verify(roleRepository, never()).delete(any());
     }
