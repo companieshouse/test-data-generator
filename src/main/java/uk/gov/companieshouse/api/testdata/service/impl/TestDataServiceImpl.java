@@ -16,10 +16,11 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class TestDataServiceImpl implements TestDataService {
+public class TestDataServiceImpl implements TestDataService, AcspTestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
+    private static final int ACSP_NUMBER_LENGTH = 8;
 
     @Autowired
     private CompanyProfileService companyProfileService;
@@ -41,6 +42,8 @@ public class TestDataServiceImpl implements TestDataService {
     private UserService userService;
     @Autowired
     private DataService<RoleData,RoleSpec> roleService;
+    @Autowired
+    private AcspProfileService acspProfileService;
     @Value("${api.url}")
     private String apiUrl;
 
@@ -163,5 +166,67 @@ public class TestDataServiceImpl implements TestDataService {
             }
         }
         return this.userService.delete(userId);
+    }
+
+//    /**
+//     * @param acspSpec The specification the new acsp profile must adhere to
+//     * @return
+//     * @throws DataException
+//     */
+//    @Override
+//    public AcspData createAcspData(AcspSpec acspSpec) throws DataException {
+//        return null;
+//    }
+//
+//    /**
+//     * @param acspNumber The acsp number to be deleted
+//     * @throws DataException
+//     */
+//    @Override
+//    public void deleteAcspData(long acspNumber) throws DataException {
+//
+//    }
+@Override
+public AcspData createAcspData(final AcspSpec spec) throws DataException {
+    if (spec == null) {
+        throw new IllegalArgumentException("AcspSpec can not be null");
+    }
+
+    do {
+        // acsp number format: 123456
+        spec.setAcspNumber(randomService.getNumber(ACSP_NUMBER_LENGTH ));
+    } while (acspProfileService.acspProfileExists(spec.getAcspNumber()));
+
+    try {
+        this.acspProfileService.create(spec);
+
+       // String acspUri = this.apiUrl + "/acsp/" + spec.getAcspNumber();
+        return new AcspData(spec.getAcspNumber());
+    } catch (Exception ex) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("acsp number", spec.getAcspNumber());
+        LOG.error("Rolling back creation of acsp", data);
+        // Rollback all successful insertions
+        deleteAcspData(spec.getAcspNumber());
+        throw new DataException(ex);
+    }
+}
+
+    @Override
+    public void deleteAcspData(long acspNumber) throws DataException {
+        List<Exception> suppressedExceptions = new ArrayList<>();
+
+        try {
+            this.acspProfileService.delete(String.valueOf(acspNumber));
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+
+
+        if (!suppressedExceptions.isEmpty()) {
+            DataException ex = new DataException("Error deleting acsp data");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
+        }
     }
 }

@@ -1,10 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 public interface TestDataService {
     /**
@@ -40,4 +37,21 @@ public interface TestDataService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteUserData(String userId) throws DataException;
+
+    /**
+     * Create company data with given {@code companySpec}
+     *
+     * @param acspSpec The specification the new acsp profile must adhere to
+     * @return A {@link AcspData}
+     * @throws DataException If any error occurs
+     */
+    AcspData createAcspData(AcspSpec acspSpec) throws DataException;
+
+    /**
+     * Delete all data for acsp {@code acspNumber}
+     *
+     * @param acspNumber The acsp number to be deleted
+     * @throws DataException If any error occurs
+     */
+    void deleteAcspData(long acspNumber) throws DataException;
 }

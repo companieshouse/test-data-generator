@@ -28,7 +28,7 @@ class AcspSpecTest {
     @Test
     void testSetAndGetAcspNumber() {
         AcspSpec spec = new AcspSpec();
-        spec.setAcspNumber((123456L));
+        spec.setAcspNumber(123456L);
         assertEquals(123456L, spec.getAcspNumber());
     }
 

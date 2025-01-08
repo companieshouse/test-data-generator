@@ -46,7 +46,7 @@ class AcspProfileServiceImplTest {
     @BeforeEach
     void setUp() {
         spec = new AcspSpec();
-        spec.setAcspNumber((123456L));
+        spec.setAcspNumber(123456L);
         spec.setCompanyStatus("active");
         spec.setCompanyType("ltd");
     }
@@ -83,7 +83,7 @@ class AcspProfileServiceImplTest {
         AcspProfile profile = new AcspProfile();
         when(repository.findById("123456")).thenReturn(Optional.of(profile));
 
-        boolean deleted = acspProfileService.delete(123456L);
+        boolean deleted = acspProfileService.delete(String.valueOf(123456L));
         assertTrue(deleted);
         verify(repository).delete(profile);
     }
@@ -92,7 +92,7 @@ class AcspProfileServiceImplTest {
     void deleteWhenNotFound() {
         when(repository.findById("999999")).thenReturn(Optional.empty());
 
-        boolean deleted = acspProfileService.delete(999999L);
+        boolean deleted = acspProfileService.delete(String.valueOf(999999L));
         assertFalse(deleted);
         verify(repository, never()).delete(any());
     }

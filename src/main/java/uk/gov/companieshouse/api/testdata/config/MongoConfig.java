@@ -73,6 +73,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public AcspProfileRepository acspProfileRepository() {
+        return getMongoRepositoryBean(AcspProfileRepository.class, "acsp_profile");
+    }
+
+    @Bean
     public UserRepository userRepository() {
         return getMongoRepositoryBean(UserRepository.class, ACCOUNT_DATABASE);
     }

@@ -5,22 +5,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class AcspData {
 
     @JsonProperty("acsp_number")
-    private final String acspNumber;
+    private long acspNumber;
 
-//    @JsonProperty("acsp_uri")
-//    private final String acspUri;
 
-    public AcspData(long acspNumber, String acspUri) {
-        this.acspNumber = String.valueOf(acspNumber);
-        //this.acspUri = acspUri;
+    public AcspData(long acspNumber) {
+        this.acspNumber = acspNumber;
     }
 
-    public String getAcspNumber() {
+    public long getAcspNumber() {
         return acspNumber;
     }
-
-//    public String getAcspUri() {
-//        return acspUri;
-//    }
 
 }

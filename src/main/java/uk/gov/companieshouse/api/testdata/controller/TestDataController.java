@@ -97,4 +97,31 @@ public class TestDataController {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
+
+    @PostMapping("/acsp")
+    public ResponseEntity<AcspData> create(@Valid @RequestBody(required = false) AcspSpec request) throws DataException {
+
+        // Optional<AcspSpec> optionalRequest = Optional.ofNullable(request);
+        AcspSpec spec = new AcspSpec();
+
+
+        AcspData createdAcsp = testDataService.createAcspData(spec);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("acsp number", createdAcsp.getAcspNumber());
+        LOG.info("New acsp profile created", data);
+        return new ResponseEntity<>(createdAcsp, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/acsp/{acspNumber}")
+    public ResponseEntity<Void> delete(@PathVariable("acspNumber") long acspNumber)
+            throws DataException, NoDataFoundException {
+
+        testDataService.deleteAcspData(acspNumber);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("acsp number", acspNumber);
+        LOG.info("Acsp Profile deleted", data);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
