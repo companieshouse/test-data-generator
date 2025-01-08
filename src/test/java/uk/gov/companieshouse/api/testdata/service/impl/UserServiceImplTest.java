@@ -44,7 +44,8 @@ class UserServiceImplTest {
     void testCreateUserWithoutRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
-        when(randomService.getString(24)).thenReturn("randomUserId");
+        var generatedUserId = "randomuserid";
+        when(randomService.getString(24)).thenReturn(generatedUserId);
 
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -52,19 +53,8 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
-        assertEquals("randomUserId", savedUser.getId(), "User ID should match the generated ID");
-        assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-        assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
-        assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
-        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
-        assertEquals(true,savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
-        assertNotNull(savedUser.getCreated(), "Created date should not be null");
-
-        assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
-        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
+        assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
 
     @Test
@@ -77,7 +67,7 @@ class UserServiceImplTest {
         roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
         userSpec.setRoles(List.of(roleSpec));
 
-        String generatedUserId = "randomUserId";
+        String generatedUserId = "randomuserid";
         when(randomService.getString(anyInt())).thenReturn(generatedUserId);
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -85,50 +75,28 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
+        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
         assertEquals(1, savedUser.getRoles().size(), "User should have one role assigned");
         assertEquals(roleSpec.getId(), savedUser.getRoles().getFirst(), "The assigned role should match the role ID");
-        assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
-        assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-        assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
-        assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
-        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
-        assertEquals(true,savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
-        assertNotNull(savedUser.getCreated(), "Created date should not be null");
-
-        assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
-        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
-
 
     @Test
     void testCreateUserWithEmptyRolesList() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
         userSpec.setRoles(new ArrayList<>());
-        when(randomService.getString(24)).thenReturn("randomUserId");
+
+        String generatedUserId = "randomuserid";
+        when(randomService.getString(24)).thenReturn(generatedUserId);
+
         UserData userData = userServiceImpl.create(userSpec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
+        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
         assertEquals(0, savedUser.getRoles().size(), "User should have no roles assigned");
-        assertEquals("randomUserId", savedUser.getId(), "User ID should match the generated ID");
-        assertTrue(savedUser.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-        assertTrue(savedUser.getForename().contains("Forename"), "Forename should contain 'Forename'");
-        assertTrue(savedUser.getSurname().contains("Surname"), "Surname should contain 'Surname'");
-        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
-        assertEquals(true,savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
-        assertNotNull(savedUser.getCreated(), "Created date should not be null");
-
-        assertEquals("randomUserId", userData.getId(), "User ID should match the generated ID");
-        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
-        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
 
     @Test
@@ -200,5 +168,21 @@ class UserServiceImplTest {
         assertFalse(result, "Delete should return false when user does not exist");
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, times(0)).delete(any(User.class));
+    }
+
+    private void assertCommonUserAssertions(UserSpec userSpec, User savedUser, UserData userData, String generatedUserId) {
+        assertEquals(userSpec.getPassword(), savedUser.getPassword(), "Password should match the one set in UserSpec");
+        assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
+        assertEquals("test-data-generated" + generatedUserId + "@test.companieshouse.gov.uk", savedUser.getEmail(), "Email should match the generated email");
+        assertEquals("Forename-" + generatedUserId, savedUser.getForename(), "Forename should match the generated forename");
+        assertEquals("Surname-" + generatedUserId, savedUser.getSurname(), "Surname should match the generated surname");
+        assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
+        assertEquals(true, savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
+        assertNotNull(savedUser.getCreated(), "Created date should not be null");
+
+        assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
+        assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
+        assertTrue(userData.getForename().contains("Forename"), "Forename should contain 'Forename'");
+        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
     }
 }

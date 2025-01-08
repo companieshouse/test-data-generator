@@ -11,8 +11,9 @@ import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -28,18 +29,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserData create(UserSpec userSpec) throws DataException {
-        var dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
-        long timestamp = dateNow.toEpochMilli();
+        var dateNow = LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC);
+        var randomId = randomService.getString(24).toLowerCase();
         final String password = userSpec.getPassword();
         final var user = new User();
         if(userSpec.getRoles() != null){
             user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
-        String email = "test-data-generated" + timestamp + "@test.companieshouse.gov.uk";
-        user.setId(randomService.getString(24));
+        String email = "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
+        user.setId(randomId);
         user.setEmail(email);
-        user.setForename("Forename-"+timestamp);
-        user.setSurname("Surname-"+timestamp);
+        user.setForename("Forename-"+randomId);
+        user.setSurname("Surname-"+randomId);
         user.setLocale("GB_en");
         user.setPassword(password);
         user.setDirectLoginPrivilege(true);
