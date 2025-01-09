@@ -10,103 +10,103 @@ import java.util.List;
 @Document(collection = "users")
 public class User {
 
-    @Id
-    @Field("id")
-    private String id;
+  @Id
+  @Field("id")
+  private String id;
 
-    @Field("email")
-    private String email;
+  @Field("email")
+  private String email;
 
-    @Field("password")
-    private String password;
+  @Field("password")
+  private String password;
 
-    @Field("created")
-    private Instant created;
+  @Field("created")
+  private Instant created;
 
-    @Field("locale")
-    private String locale;
+  @Field("locale")
+  private String locale;
 
-    @Field("forename")
-    private String forename;
+  @Field("forename")
+  private String forename;
 
-    @Field("surname")
-    private String surname;
+  @Field("surname")
+  private String surname;
 
-    @Field("roles")
-    private List<String> roles;
+  @Field("roles")
+  private List<String> roles;
 
-    @Field("direct_login_privilege")
-    private Boolean directLoginPrivilege;
+  @Field("direct_login_privilege")
+  private Boolean directLoginPrivilege;
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public String getEmail() {
-        return email;
-    }
+  public String getEmail() {
+    return email;
+  }
 
-    public String getPassword() {
-        return password;
-    }
+  public String getPassword() {
+    return password;
+  }
 
-    public Instant getCreated() {
-        return created;
-    }
+  public Instant getCreated() {
+    return created;
+  }
 
-    public String getLocale() {
-        return locale;
-    }
+  public String getLocale() {
+    return locale;
+  }
 
-    public String getForename() {
-        return forename;
-    }
+  public String getForename() {
+    return forename;
+  }
 
-    public String getSurname() {
-        return surname;
-    }
+  public String getSurname() {
+    return surname;
+  }
 
-    public List<String> getRoles() {
-        return roles;
-    }
+  public List<String> getRoles() {
+    return roles;
+  }
 
-    public Boolean getDirectLoginPrivilege() {
-        return directLoginPrivilege;
-    }
+  public Boolean getDirectLoginPrivilege() {
+    return directLoginPrivilege;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+  public void setEmail(String email) {
+    this.email = email;
+  }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+  public void setPassword(String password) {
+    this.password = password;
+  }
 
-    public void setCreated(Instant created) {
-        this.created = created;
-    }
+  public void setCreated(Instant created) {
+    this.created = created;
+  }
 
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
+  public void setLocale(String locale) {
+    this.locale = locale;
+  }
 
-    public void setForename(String forename) {
-        this.forename = forename;
-    }
+  public void setForename(String forename) {
+    this.forename = forename;
+  }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
+  public void setSurname(String surname) {
+    this.surname = surname;
+  }
 
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
-    }
+  public void setRoles(List<String> roles) {
+    this.roles = roles;
+  }
 
-    public void setDirectLoginPrivilege(Boolean directLoginPrivilege) {
-        this.directLoginPrivilege = directLoginPrivilege;
-    }
+  public void setDirectLoginPrivilege(Boolean directLoginPrivilege) {
+    this.directLoginPrivilege = directLoginPrivilege;
+  }
 }

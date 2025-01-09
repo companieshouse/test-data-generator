@@ -9,26 +9,26 @@ import java.util.List;
 @Document(collection = "roles")
 public class Role {
 
-    @Id
-    @Field("id")
-    private String id;
+  @Id
+  @Field("id")
+  private String id;
 
-    @Field("permissions")
-    private List<String> permissions;
+  @Field("permissions")
+  private List<String> permissions;
 
-    public String getId() {
-        return id;
-    }
+  public String getId() {
+    return id;
+  }
 
-    public List<String> getPermissions() {
-        return permissions;
-    }
+  public List<String> getPermissions() {
+    return permissions;
+  }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+  public void setId(String id) {
+    this.id = id;
+  }
 
-    public void setPermissions(List<String> permissions) {
-        this.permissions = permissions;
-    }
+  public void setPermissions(List<String> permissions) {
+    this.permissions = permissions;
+  }
 }

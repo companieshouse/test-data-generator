@@ -31,70 +31,71 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TestDataController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+  private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @Autowired
-    private TestDataService testDataService;
-    
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
+  @Autowired private TestDataService testDataService;
 
-    @PostMapping("/company")
-    public ResponseEntity<CompanyData> createCompany(@Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+  @Autowired private CompanyAuthCodeService companyAuthCodeService;
 
-        Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
-        CompanySpec spec = optionalRequest.orElse(new CompanySpec());
+  @PostMapping("/company")
+  public ResponseEntity<CompanyData> createCompany(
+      @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
+    Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
+    CompanySpec spec = optionalRequest.orElse(new CompanySpec());
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("company number", createdCompany.getCompanyNumber());
-        data.put("jurisdiction", spec.getJurisdiction());
-        LOG.info("New company created", data);
-        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+    CompanyData createdCompany = testDataService.createCompanyData(spec);
+
+    Map<String, Object> data = new HashMap<>();
+    data.put("company number", createdCompany.getCompanyNumber());
+    data.put("jurisdiction", spec.getJurisdiction());
+    LOG.info("New company created", data);
+    return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+  }
+
+  @DeleteMapping("/company/{companyNumber}")
+  public ResponseEntity<Void> deleteCompany(
+      @PathVariable("companyNumber") String companyNumber,
+      @Valid @RequestBody DeleteCompanyRequest request)
+      throws DataException, InvalidAuthCodeException, NoDataFoundException {
+
+    if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
+      throw new InvalidAuthCodeException(companyNumber);
     }
 
-    @DeleteMapping("/company/{companyNumber}")
-    public ResponseEntity<Void> deleteCompany(@PathVariable("companyNumber") String companyNumber,
-                                              @Valid @RequestBody DeleteCompanyRequest request)
-            throws DataException, InvalidAuthCodeException, NoDataFoundException {
+    testDataService.deleteCompanyData(companyNumber);
 
-        if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
-            throw new InvalidAuthCodeException(companyNumber);
-        }
+    Map<String, Object> data = new HashMap<>();
+    data.put("company number", companyNumber);
+    LOG.info("Company deleted", data);
+    return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  }
 
-        testDataService.deleteCompanyData(companyNumber);
+  @PostMapping("/user")
+  public ResponseEntity<UserData> createUser(@Valid @RequestBody(required = true) UserSpec request)
+      throws DataException {
+    var createdUser = testDataService.createUserData(request);
+    Map<String, Object> data = new HashMap<>();
+    data.put("user email", createdUser.getEmail());
+    data.put("user id", createdUser.getId());
+    LOG.info("New user created", data);
+    return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+  }
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("company number", companyNumber);
-        LOG.info("Company deleted", data);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+  @DeleteMapping("/user/{userId}")
+  public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId)
+      throws DataException {
+    Map<String, Object> response = new HashMap<>();
+    response.put("user id", userId);
+    boolean deleteUser = testDataService.deleteUserData(userId);
+
+    if (deleteUser) {
+      LOG.info("User deleted", response);
+      return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    } else {
+      response.put("status", HttpStatus.NOT_FOUND);
+      LOG.info("User not found", response);
+      return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
-
-    @PostMapping("/user")
-    public ResponseEntity<UserData> createUser(@Valid @RequestBody(required = true) UserSpec request) throws DataException {
-        var createdUser = testDataService.createUserData(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("user email", createdUser.getEmail());
-        data.put("user id", createdUser.getId());
-        LOG.info("New user created", data);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/user/{userId}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("user id", userId);
-        boolean deleteUser= testDataService.deleteUserData(userId);
-
-        if(deleteUser) {
-            LOG.info("User deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        }
-        else {
-            response.put("status", HttpStatus.NOT_FOUND);
-            LOG.info("User not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
+  }
 }

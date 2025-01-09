@@ -15,32 +15,29 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import uk.gov.companieshouse.api.interceptor.InternalUserInterceptor;
 
-
 @ExtendWith(MockitoExtension.class)
 class WebConfigTest {
 
-    @Mock
-    private InterceptorRegistry registry;
+  @Mock private InterceptorRegistry registry;
 
-    @InjectMocks
-    private WebConfig webConfig;
+  @InjectMocks private WebConfig webConfig;
 
-    @Mock
-    private InterceptorRegistration interceptorRegistration;
+  @Mock private InterceptorRegistration interceptorRegistration;
 
-    @Test
-    void shouldAddInternalUserInterceptorToRegistry() {
-        when(registry.addInterceptor(any(InternalUserInterceptor.class))).thenReturn(interceptorRegistration);
+  @Test
+  void shouldAddInternalUserInterceptorToRegistry() {
+    when(registry.addInterceptor(any(InternalUserInterceptor.class)))
+        .thenReturn(interceptorRegistration);
 
-        webConfig.addInterceptors(registry);
+    webConfig.addInterceptors(registry);
 
-        verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
-    }
+    verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
+    verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
+  }
 
-    @Test
-    void shouldCreateInternalUserInterceptorBean() {
-        InternalUserInterceptor interceptor = webConfig.internalUserInterceptor();
-        assertNotNull(interceptor);
-    }
+  @Test
+  void shouldCreateInternalUserInterceptorBean() {
+    InternalUserInterceptor interceptor = webConfig.internalUserInterceptor();
+    assertNotNull(interceptor);
+  }
 }
