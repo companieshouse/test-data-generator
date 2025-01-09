@@ -101,7 +101,7 @@ public class TestDataController {
     @PostMapping("/acsp")
     public ResponseEntity<AcspData> create(@Valid @RequestBody(required = false) AcspSpec request) throws DataException {
 
-        // Optional<AcspSpec> optionalRequest = Optional.ofNullable(request);
+        Optional<AcspSpec> optionalRequest = Optional.ofNullable(request);
         AcspSpec spec = new AcspSpec();
 
 

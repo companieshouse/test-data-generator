@@ -168,24 +168,6 @@ public class TestDataServiceImpl implements TestDataService, AcspTestDataService
         return this.userService.delete(userId);
     }
 
-//    /**
-//     * @param acspSpec The specification the new acsp profile must adhere to
-//     * @return
-//     * @throws DataException
-//     */
-//    @Override
-//    public AcspData createAcspData(AcspSpec acspSpec) throws DataException {
-//        return null;
-//    }
-//
-//    /**
-//     * @param acspNumber The acsp number to be deleted
-//     * @throws DataException
-//     */
-//    @Override
-//    public void deleteAcspData(long acspNumber) throws DataException {
-//
-//    }
 @Override
 public AcspData createAcspData(final AcspSpec spec) throws DataException {
     if (spec == null) {

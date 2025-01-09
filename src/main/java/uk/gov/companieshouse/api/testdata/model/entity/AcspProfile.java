@@ -38,7 +38,7 @@ public class AcspProfile {
     /**
      * Setter methods delegating to Data fields
      */
-    public void setAcspNumber(long acspNumber) {
+    public void setAcspNumber(String acspNumber) {
         this.data.setAcspNumber(acspNumber);
     }
 
@@ -80,7 +80,7 @@ public class AcspProfile {
             return acspNumber;
         }
 
-        public void setAcspNumber(long acspNumber) {
+        public void setAcspNumber(String acspNumber) {
             this.acspNumber = String.valueOf(acspNumber);
         }
 

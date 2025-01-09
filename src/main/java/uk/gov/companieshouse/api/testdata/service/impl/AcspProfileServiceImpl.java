@@ -20,6 +20,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String LINK_STEM = "/authorised-corporate-service-providers/";
+    private static final String ACSP_PREFIX = "PlaywrightACSP";
 
     @Autowired
     private RandomService randomService;
@@ -39,11 +40,11 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         AcspProfile profile = new AcspProfile();
 
         // Set the ID and version
-        profile.setId(String.valueOf(acspNumber));
+        profile.setId(acspNumber);
         profile.setVersion(0L);
 
         // Fields from spec
-        profile.setAcspNumber(Long.parseLong(acspNumber));
+        profile.setAcspNumber(ACSP_PREFIX + acspNumber);
         profile.setCompanyName("Example ACSP Ltd"); // from the given JSON
         profile.setType(Objects.requireNonNullElse(companyType, "limited-company"));
         profile.setStatus(Objects.requireNonNullElse(companyStatus, "active"));

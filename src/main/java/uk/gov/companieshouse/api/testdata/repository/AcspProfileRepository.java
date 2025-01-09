@@ -10,5 +10,5 @@ import java.util.Optional;
 
 @NoRepositoryBean
 public interface AcspProfileRepository extends MongoRepository<AcspProfile, String> {
-    //Optional<Appointment> findByAcspNumber(String acspNumber);
+    Optional<Appointment> findByAcspNumber(String acspNumber);
 }
