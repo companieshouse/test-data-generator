@@ -6,8 +6,9 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.Test;
 import java.util.Set;
+import org.junit.jupiter.api.Test;
+
 
 class CompanySpecTest {
 
@@ -33,6 +34,8 @@ class CompanySpecTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         Validator validator = factory.getValidator();
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
-        assertTrue(violations.stream().anyMatch(v -> expectedViolationMessage.equals(v.getMessage())), "Expected a violation message for " + expectedViolationMessage);
+        assertTrue(violations.stream().anyMatch(v ->
+                expectedViolationMessage.equals(v.getMessage())),
+                "Expected a violation message for " + expectedViolationMessage);
     }
 }

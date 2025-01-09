@@ -21,46 +21,49 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 
 @Service
 public class UserServiceImpl implements UserService {
-  private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
+    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
-  @Autowired private UserRepository repository;
+    @Autowired
+    private UserRepository repository;
 
-  @Autowired private RandomService randomService;
+    @Autowired
+    private RandomService randomService;
 
-  @Override
-  public UserData create(UserSpec userSpec) throws DataException {
-    var randomId = randomService.getString(24).toLowerCase();
-    final String password = userSpec.getPassword();
-    final var user = new User();
-    if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {
-      user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).collect(Collectors.toList()));
+    @Override
+    public UserData create(UserSpec userSpec) throws DataException {
+        var randomId = randomService.getString(24).toLowerCase();
+        final String password = userSpec.getPassword();
+        final var user = new User();
+        if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {
+            user.setRoles(userSpec.getRoles()
+                    .stream().map(RoleSpec::getId).collect(Collectors.toList()));
+        }
+        String email = "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
+        user.setId(randomId);
+        user.setEmail(email);
+        user.setForename("Forename-" + randomId);
+        user.setSurname("Surname-" + randomId);
+        user.setLocale("GB_en");
+        user.setPassword(password);
+        user.setDirectLoginPrivilege(true);
+        user.setCreated(getDateNow());
+        repository.save(user);
+        return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
     }
-    String email = "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
-    user.setId(randomId);
-    user.setEmail(email);
-    user.setForename("Forename-" + randomId);
-    user.setSurname("Surname-" + randomId);
-    user.setLocale("GB_en");
-    user.setPassword(password);
-    user.setDirectLoginPrivilege(true);
-    user.setCreated(getDateNow());
-    repository.save(user);
-    return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
-  }
 
-  @Override
-  public boolean delete(String userId) {
-    var user = repository.findById(userId);
-    user.ifPresent(repository::delete);
-    return user.isPresent();
-  }
+    @Override
+    public boolean delete(String userId) {
+        var user = repository.findById(userId);
+        user.ifPresent(repository::delete);
+        return user.isPresent();
+    }
 
-  @Override
-  public Optional<User> getUserById(String userId) {
-    return repository.findById(userId);
-  }
+    @Override
+    public Optional<User> getUserById(String userId) {
+        return repository.findById(userId);
+    }
 
-  protected Instant getDateNow() {
-    return LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC);
-  }
+    protected Instant getDateNow() {
+        return LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC);
+    }
 }

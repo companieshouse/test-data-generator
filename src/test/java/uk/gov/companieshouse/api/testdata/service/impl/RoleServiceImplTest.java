@@ -4,10 +4,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.never;
+
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,95 +27,97 @@ import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 
 @ExtendWith(MockitoExtension.class)
 class RoleServiceImplTest {
-  @Mock private RoleRepository roleRepository;
+    @Mock
+    private RoleRepository roleRepository;
 
-  @InjectMocks private RoleServiceImpl roleServiceImpl;
+    @InjectMocks
+    private RoleServiceImpl roleServiceImpl;
 
-  @Test
-  void testCreateRole() {
-    RoleSpec roleSpec = new RoleSpec();
-    roleSpec.setId("role-id");
-    roleSpec.setPermissions(List.of("permission1", "permission2"));
+    @Test
+    void testCreateRole() {
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId("role-id");
+        roleSpec.setPermissions(List.of("permission1", "permission2"));
 
-    RoleData roleData = roleServiceImpl.create(roleSpec);
-    assertEquals(roleSpec.getId(), roleData.getId(), "Role ID should match");
+        RoleData roleData = roleServiceImpl.create(roleSpec);
+        assertEquals(roleSpec.getId(), roleData.getId(), "Role ID should match");
 
-    ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
-    verify(roleRepository).save(roleCaptor.capture());
-    Role capturedRole = roleCaptor.getValue();
-    assertEquals(roleSpec.getId(), capturedRole.getId(), "Role ID should match");
-    assertEquals(
-        roleSpec.getPermissions(), capturedRole.getPermissions(), "Permissions should match");
-  }
+        ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
+        verify(roleRepository).save(roleCaptor.capture());
+        Role capturedRole = roleCaptor.getValue();
+        assertEquals(roleSpec.getId(), capturedRole.getId(), "Role ID should match");
+        assertEquals(roleSpec.getPermissions(), capturedRole.getPermissions(),
+                "Permissions should match");
+    }
 
-  @Test
-  void testCreateRoleWithEmptyPermissions() {
-    RoleSpec roleSpec = new RoleSpec();
-    roleSpec.setId("role-id");
-    roleSpec.setPermissions(List.of());
+    @Test
+    void testCreateRoleWithEmptyPermissions() {
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId("role-id");
+        roleSpec.setPermissions(List.of());
 
-    RoleData roleData = roleServiceImpl.create(roleSpec);
-    assertEquals(roleSpec.getId(), roleData.getId(), "Role ID should match");
+        RoleData roleData = roleServiceImpl.create(roleSpec);
+        assertEquals(roleSpec.getId(), roleData.getId(), "Role ID should match");
 
-    ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
-    verify(roleRepository).save(roleCaptor.capture());
-    Role capturedRole = roleCaptor.getValue();
-    assertEquals(roleSpec.getId(), capturedRole.getId(), "Role ID should match");
-    assertTrue(capturedRole.getPermissions().isEmpty(), "Permissions should be empty");
-  }
+        ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
+        verify(roleRepository).save(roleCaptor.capture());
+        Role capturedRole = roleCaptor.getValue();
+        assertEquals(roleSpec.getId(), capturedRole.getId(), "Role ID should match");
+        assertTrue(capturedRole.getPermissions().isEmpty(), "Permissions should be empty");
+    }
 
-  @Test
-  void testCreateRoleWithNullPermissions() {
-    RoleSpec roleSpec = new RoleSpec();
-    roleSpec.setId("role-id");
-    roleSpec.setPermissions(null);
+    @Test
+    void testCreateRoleWithNullPermissions() {
+        RoleSpec roleSpec = new RoleSpec();
+        roleSpec.setId("role-id");
+        roleSpec.setPermissions(null);
 
-    RoleData roleData = roleServiceImpl.create(roleSpec);
-    assertEquals(roleSpec.getId(), roleData.getId(), "Role ID should match");
+        RoleData roleData = roleServiceImpl.create(roleSpec);
+        assertEquals(roleSpec.getId(), roleData.getId(), "Role ID should match");
 
-    ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
-    verify(roleRepository).save(roleCaptor.capture());
-    Role capturedRole = roleCaptor.getValue();
-    assertEquals(roleSpec.getId(), capturedRole.getId(), "Role ID should match");
-    assertNull(capturedRole.getPermissions(), "Permissions should be null");
-  }
+        ArgumentCaptor<Role> roleCaptor = ArgumentCaptor.forClass(Role.class);
+        verify(roleRepository).save(roleCaptor.capture());
+        Role capturedRole = roleCaptor.getValue();
+        assertEquals(roleSpec.getId(), capturedRole.getId(), "Role ID should match");
+        assertNull(capturedRole.getPermissions(), "Permissions should be null");
+    }
 
-  @Test
-  void testDeleteRoleWithNullId() {
-    boolean result = roleServiceImpl.delete(null);
-    assertFalse(result, "Role should not be found and thus not deleted");
-    verify(roleRepository, never()).delete(any());
-  }
+    @Test
+    void testDeleteRoleWithNullId() {
+        boolean result = roleServiceImpl.delete(null);
+        assertFalse(result, "Role should not be found and thus not deleted");
+        verify(roleRepository, never()).delete(any());
+    }
 
-  @Test
-  void testDeleteRoleWithEmptyId() {
-    String roleId = "";
-    boolean result = roleServiceImpl.delete(roleId);
-    assertFalse(result, "Role should not be found and thus not deleted");
-    verify(roleRepository, never()).delete(any());
-  }
+    @Test
+    void testDeleteRoleWithEmptyId() {
+        String roleId = "";
+        boolean result = roleServiceImpl.delete(roleId);
+        assertFalse(result, "Role should not be found and thus not deleted");
+        verify(roleRepository, never()).delete(any());
+    }
 
-  @Test
-  void testDeleteRole() {
-    String roleId = "role-id";
-    Role role = new Role();
-    role.setId(roleId);
-    when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
+    @Test
+    void testDeleteRole() {
+        String roleId = "role-id";
+        Role role = new Role();
+        role.setId(roleId);
+        when(roleRepository.findById(roleId)).thenReturn(Optional.of(role));
 
-    boolean result = roleServiceImpl.delete(roleId);
+        boolean result = roleServiceImpl.delete(roleId);
 
-    assertTrue(result, "Role should be deleted successfully");
-    verify(roleRepository).delete(role);
-  }
+        assertTrue(result, "Role should be deleted successfully");
+        verify(roleRepository).delete(role);
+    }
 
-  @Test
-  void testDeleteRoleNotFound() {
-    String roleId = "role-id";
-    when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
+    @Test
+    void testDeleteRoleNotFound() {
+        String roleId = "role-id";
+        when(roleRepository.findById(roleId)).thenReturn(Optional.empty());
 
-    boolean result = roleServiceImpl.delete(roleId);
+        boolean result = roleServiceImpl.delete(roleId);
 
-    assertFalse(result, "Role should not be found and thus not deleted");
-    verify(roleRepository, never()).delete(any());
-  }
+        assertFalse(result, "Role should not be found and thus not deleted");
+        verify(roleRepository, never()).delete(any());
+    }
 }

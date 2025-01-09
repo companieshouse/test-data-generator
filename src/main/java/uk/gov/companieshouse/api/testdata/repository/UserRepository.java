@@ -5,4 +5,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 
 @NoRepositoryBean
-public interface UserRepository extends MongoRepository<User, String> {}
+public interface UserRepository extends MongoRepository<User, String> {
+}
