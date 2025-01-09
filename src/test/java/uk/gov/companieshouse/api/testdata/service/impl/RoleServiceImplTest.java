@@ -24,8 +24,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 
-
-
 @ExtendWith(MockitoExtension.class)
 class RoleServiceImplTest {
   @Mock private RoleRepository roleRepository;
