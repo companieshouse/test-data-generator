@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         var randomId = randomService.getString(24).toLowerCase();
         final String password = userSpec.getPassword();
         final var user = new User();
-        if(userSpec.getRoles() != null){
+        if(userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()){
             user.setRoles(userSpec.getRoles().stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
         String email = "test-data-generated" + randomId + "@test.companieshouse.gov.uk";

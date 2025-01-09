@@ -96,7 +96,7 @@ class UserServiceImplTest {
         User savedUser = userCaptor.getValue();
 
         assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
-        assertEquals(0, savedUser.getRoles().size(), "User should have no roles assigned");
+        assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
 
     @Test
