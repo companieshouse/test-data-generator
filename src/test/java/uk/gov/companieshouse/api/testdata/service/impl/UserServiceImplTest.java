@@ -1,20 +1,32 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
@@ -23,13 +35,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
+    private static final Instant DATE_NOW = Instant.now();
 
     @Mock
     private UserRepository userRepository;
@@ -37,6 +45,7 @@ class UserServiceImplTest {
     @Mock
     private RandomService randomService;
 
+    @Spy
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
@@ -46,6 +55,7 @@ class UserServiceImplTest {
         userSpec.setPassword("password");
         var generatedUserId = "randomuserid";
         when(randomService.getString(24)).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -69,6 +79,8 @@ class UserServiceImplTest {
 
         String generatedUserId = "randomuserid";
         when(randomService.getString(anyInt())).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
         UserData userData = userServiceImpl.create(userSpec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -88,6 +100,7 @@ class UserServiceImplTest {
 
         String generatedUserId = "randomuserid";
         when(randomService.getString(24)).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -178,7 +191,7 @@ class UserServiceImplTest {
         assertEquals("Surname-" + generatedUserId, savedUser.getSurname(), "Surname should match the generated surname");
         assertEquals("GB_en", savedUser.getLocale(), "Locale should be 'GB_en'");
         assertEquals(true, savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
-        assertNotNull(savedUser.getCreated(), "Created date should not be null");
+        assertEquals(DATE_NOW, savedUser.getCreated(), "Created date should be set to today's date");
 
         assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
         assertTrue(userData.getEmail().contains("test-data-generated"), "Email should contain 'test-data-generated'");
