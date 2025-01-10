@@ -4,19 +4,34 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
+
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -29,19 +44,23 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyProfileService companyProfileService;
     @Autowired
-    private DataService<FilingHistory> filingHistoryService;
+    private DataService<FilingHistory, CompanySpec> filingHistoryService;
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private DataService<Appointment> appointmentService;
+    private DataService<Appointment, CompanySpec> appointmentService;
     @Autowired
-    private DataService<CompanyMetrics> companyMetricsService;
+    private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
-    private DataService<CompanyPscStatement> companyPscStatementService;
+    private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
     @Autowired
-    private DataService<CompanyPscs> companyPscsService;
+    private DataService<CompanyPscs, CompanySpec> companyPscsService;
     @Autowired
     private RandomService randomService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private DataService<RoleData, RoleSpec> roleService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -60,7 +79,8 @@ public class TestDataServiceImpl implements TestDataService {
         do {
             // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
             spec.setCompanyNumber(companyNumberPrefix
-                    + randomService.getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+                    + randomService
+                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
@@ -126,12 +146,43 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
 
-
         if (!suppressedExceptions.isEmpty()) {
             DataException ex = new DataException("Error deleting company data");
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
     }
-    
+
+    @Override
+    public UserData createUserData(UserSpec userSpec) throws DataException {
+        final String password = userSpec.getPassword();
+        if (password == null || password.isEmpty()) {
+            throw new DataException("Password is required to create a user");
+        }
+        List<RoleSpec> roleList = userSpec.getRoles();
+        if (roleList != null) {
+            boolean invalidRole = roleList.stream().anyMatch(roleData -> !roleData.isValid());
+            if (invalidRole) {
+                throw new DataException("Role ID and permissions are required to create a role");
+            }
+            for (var roleData : roleList) {
+                roleService.create(roleData);
+            }
+        }
+        return userService.create(userSpec);
+    }
+
+    @Override
+    public boolean deleteUserData(String userId) {
+        var user = userService.getUserById(userId).orElse(null);
+        if (user == null) {
+            return false;
+        }
+        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+            for (String roleId : user.getRoles()) {
+                roleService.delete(roleId);
+            }
+        }
+        return this.userService.delete(userId);
+    }
 }

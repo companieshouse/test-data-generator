@@ -20,7 +20,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class AppointmentsServiceImpl implements DataService<Appointment> {
+public class AppointmentsServiceImpl implements DataService<Appointment,CompanySpec> {
 
     private static final int SALT_LENGTH = 8;
     private static final int ID_LENGTH = 10;

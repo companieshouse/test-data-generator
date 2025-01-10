@@ -1,10 +1,9 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +23,9 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -37,12 +39,13 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
-    
+
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> create(@Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+    public ResponseEntity<CompanyData> createCompany(
+            @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
         Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
         CompanySpec spec = optionalRequest.orElse(new CompanySpec());
@@ -57,7 +60,8 @@ public class TestDataController {
     }
 
     @DeleteMapping("/company/{companyNumber}")
-    public ResponseEntity<Void> delete(@PathVariable("companyNumber") String companyNumber,
+    public ResponseEntity<Void> deleteCompany(
+            @PathVariable("companyNumber") String companyNumber,
             @Valid @RequestBody DeleteCompanyRequest request)
             throws DataException, InvalidAuthCodeException, NoDataFoundException {
 
@@ -73,4 +77,31 @@ public class TestDataController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @PostMapping("/user")
+    public ResponseEntity<UserData> createUser(@Valid @RequestBody() UserSpec request)
+            throws DataException {
+        var createdUser = testDataService.createUserData(request);
+        Map<String, Object> data = new HashMap<>();
+        data.put("user email", createdUser.getEmail());
+        data.put("user id", createdUser.getId());
+        LOG.info("New user created", data);
+        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("user id", userId);
+        boolean deleteUser = testDataService.deleteUserData(userId);
+
+        if (deleteUser) {
+            LOG.info("User deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put("status", HttpStatus.NOT_FOUND);
+            LOG.info("User not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
 }

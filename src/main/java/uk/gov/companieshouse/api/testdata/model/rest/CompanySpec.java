@@ -1,13 +1,13 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 /**
- * Requirements a new company must meet
+ * Requirements a new company must meet.
  */
 public class CompanySpec {
 
