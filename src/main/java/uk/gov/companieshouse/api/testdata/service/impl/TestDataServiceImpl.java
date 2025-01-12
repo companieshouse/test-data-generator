@@ -18,12 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -31,6 +26,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -59,6 +55,8 @@ public class TestDataServiceImpl implements TestDataService {
     private RandomService randomService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private AcspProfileService acspProfileService;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
 
@@ -184,5 +182,19 @@ public class TestDataServiceImpl implements TestDataService {
             }
         }
         return this.userService.delete(userId);
+    }
+
+    @Override
+    public AcspProfileData createAcspProfileData(AcspProfileSpec acspProfileSpec) throws DataException {
+        return acspProfileService.create(acspProfileSpec);
+    }
+
+    @Override
+    public boolean deleteAcspProfileData(String acspNumber) {
+        var acspProfile = acspProfileService.getAcspProfileById(acspNumber).orElse(null);
+        if (acspProfile == null) {
+            return false;
+        }
+        return this.acspProfileService.delete(acspNumber);
     }
 }

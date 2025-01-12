@@ -20,11 +20,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -103,5 +99,16 @@ public class TestDataController {
             LOG.info("User not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/acsp")
+    public ResponseEntity<AcspProfileData> createAcspProfile(@Valid @RequestBody() AcspProfileSpec request)
+            throws DataException {
+        var createdAcspProfile = testDataService.createAcspProfileData(request);
+        Map<String, Object> data = new HashMap<>();
+        data.put("Acsp number", createdAcspProfile.getAcspNumber());
+        data.put("Acsp Profile id", createdAcspProfile.getId());
+        LOG.info("New acsp profile created", data);
+        return new ResponseEntity<>(createdAcspProfile, HttpStatus.CREATED);
     }
 }
