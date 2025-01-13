@@ -102,12 +102,11 @@ public class TestDataController {
     }
 
     @PostMapping("/acsp")
-    public ResponseEntity<AcspProfileData> createAcspProfile(@Valid @RequestBody() AcspProfileSpec request)
+    public ResponseEntity<AcspProfileData> createAcspProfile(@Valid @RequestBody(required = false) AcspProfileSpec request)
             throws DataException {
         var createdAcspProfile = testDataService.createAcspProfileData(request);
         Map<String, Object> data = new HashMap<>();
         data.put("Acsp number", createdAcspProfile.getAcspNumber());
-        data.put("Acsp Profile id", createdAcspProfile.getId());
         LOG.info("New acsp profile created", data);
         return new ResponseEntity<>(createdAcspProfile, HttpStatus.CREATED);
     }

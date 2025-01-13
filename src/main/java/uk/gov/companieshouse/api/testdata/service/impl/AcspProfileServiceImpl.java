@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.*;
@@ -10,6 +11,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import java.util.Optional;
 
+@Service
 public class AcspProfileServiceImpl implements AcspProfileService {
 
     private static final String LINK_STEM = "/authorised-corporate-service-providers/";
@@ -25,17 +27,19 @@ public class AcspProfileServiceImpl implements AcspProfileService {
     public AcspProfileData create(AcspProfileSpec acspProfileSpec) throws DataException {
         var randomId = randomService.getNumber(8);
         final var acspProfile = new AcspProfile();
+        final String companyType = acspProfileSpec.getCompanyType();
+        final String companyStatus = acspProfileSpec.getCompanyStatus();
 
         acspProfile.setId(ACSP_PREFIX + (randomId));
-        acspProfile.getVersion(0L);
+        acspProfile.setVersion(0L);
         acspProfile.setAcspNumber(ACSP_PREFIX + (randomId));
-        acspProfile.setStatus("active");
-        acspProfile.setType("limited-company");
-        acspProfile.setName("Example CompanyLtd");
+        acspProfile.setStatus(companyStatus);
+        acspProfile.setType(companyType);
+        acspProfile.setName("Example" + randomId + "CompanyLtd");
         acspProfile.setLinksSelf(LINK_STEM + ACSP_PREFIX + randomId);
 
         repository.save(acspProfile);
-        return new AcspProfileData(acspProfile.getId(), acspProfile.getAcspNumber());
+        return new AcspProfileData(acspProfile.getAcspNumber());
     }
 
     @Override
