@@ -110,4 +110,21 @@ public class TestDataController {
         LOG.info("New acsp profile created", data);
         return new ResponseEntity<>(createdAcspProfile, HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/acsp/{acspNumber}")
+    public ResponseEntity<Map<String, Object>> deleteAcspProfile(@PathVariable("acspNumber") String acspNumber)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("acsp number", acspNumber);
+        boolean deleteAcspProfile = testDataService.deleteAcspProfileData(acspNumber);
+
+        if (deleteAcspProfile) {
+            LOG.info("Acsp profile deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put("status", HttpStatus.NOT_FOUND);
+            LOG.info("Acsp profile not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
 }

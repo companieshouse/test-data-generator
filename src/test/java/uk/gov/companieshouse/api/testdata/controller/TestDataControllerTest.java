@@ -1,12 +1,8 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Map;
 import java.util.Objects;
@@ -34,6 +30,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -247,5 +245,96 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteUserData(userId);
+    }
+
+    @Test
+    void createAcspProfileSuccess() throws DataException {
+
+        AcspProfileSpec request = new AcspProfileSpec();
+        request.setCompanyStatus("active");
+        request.setCompanyType("ltd");
+
+        AcspProfileData mockResponse = new AcspProfileData("PlaywrightACSP123456");
+        when(testDataService.createAcspProfileData(request)).thenReturn(mockResponse);
+
+        ResponseEntity<AcspProfileData> response =
+                testDataController.createAcspProfile(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("PlaywrightACSP123456", response.getBody().getAcspNumber());
+        verify(testDataService, times(1)).createAcspProfileData(request);
+    }
+
+    @Test
+    void createAcspProfileNoRequest() throws DataException {
+
+        AcspProfileData mockResponse = new AcspProfileData("PlaywrightACSP999999");
+        when(testDataService.createAcspProfileData(null)).thenReturn(mockResponse);
+
+        ResponseEntity<AcspProfileData> response =
+                testDataController.createAcspProfile(null);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("PlaywrightACSP999999", response.getBody().getAcspNumber());
+        verify(testDataService, times(1)).createAcspProfileData(null);
+    }
+
+    @Test
+    void createAcspProfileDataException() throws DataException {
+
+        AcspProfileSpec request = new AcspProfileSpec();
+        DataException exception = new DataException("ACSP creation error");
+
+        when(testDataService.createAcspProfileData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createAcspProfile(request));
+        assertEquals("ACSP creation error", thrown.getMessage());
+        verify(testDataService, times(1)).createAcspProfileData(request);
+    }
+
+    @Test
+    void deleteAcspProfileFound() throws DataException {
+
+        String acspNumber = "PlaywrightACSP123456";
+        when(testDataService.deleteAcspProfileData(acspNumber)).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response =
+                testDataController.deleteAcspProfile(acspNumber);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody(), "Body should be null with 204 status");
+        verify(testDataService, times(1)).deleteAcspProfileData(acspNumber);
+    }
+
+    @Test
+    void deleteAcspProfileNotFound() throws DataException {
+
+        String acspNumber = "PlaywrightACSPNoSuch";
+        when(testDataService.deleteAcspProfileData(acspNumber)).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response =
+                testDataController.deleteAcspProfile(acspNumber);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        Map<String, Object> responseBody = response.getBody();
+        assertNotNull(responseBody, "Body should contain the 'not found' details");
+        assertEquals(acspNumber, responseBody.get("acsp number"));
+        assertEquals(HttpStatus.NOT_FOUND, responseBody.get("status"));
+        verify(testDataService, times(1)).deleteAcspProfileData(acspNumber);
+    }
+
+    @Test
+    void deleteAcspProfileDataException() throws DataException {
+
+        String acspNumber = "PlaywrightACSP123456";
+        DataException exception = new DataException("Deletion error");
+        doThrow(exception).when(testDataService).deleteAcspProfileData(acspNumber);
+
+        DataException thrown =
+                assertThrows(DataException.class, () -> testDataController.deleteAcspProfile(acspNumber));
+        assertEquals("Deletion error", thrown.getMessage());
+        verify(testDataService, times(1)).deleteAcspProfileData(acspNumber);
     }
 }

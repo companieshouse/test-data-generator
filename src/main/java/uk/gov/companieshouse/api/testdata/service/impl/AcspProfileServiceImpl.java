@@ -1,15 +1,18 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspRepository;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import java.util.Optional;
 
 @Service
 public class AcspProfileServiceImpl implements AcspProfileService {
@@ -33,9 +36,9 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         acspProfile.setId(ACSP_PREFIX + (randomId));
         acspProfile.setVersion(0L);
         acspProfile.setAcspNumber(ACSP_PREFIX + (randomId));
-        acspProfile.setStatus(companyStatus);
-        acspProfile.setType(companyType);
-        acspProfile.setName("Example" + randomId + "CompanyLtd");
+        acspProfile.setStatus(Objects.requireNonNullElse(companyStatus, "active"));
+        acspProfile.setType(Objects.requireNonNullElse(companyType, "ltd"));
+        acspProfile.setName("Example " + randomId + " CompanyLtd");
         acspProfile.setLinksSelf(LINK_STEM + ACSP_PREFIX + randomId);
 
         repository.save(acspProfile);

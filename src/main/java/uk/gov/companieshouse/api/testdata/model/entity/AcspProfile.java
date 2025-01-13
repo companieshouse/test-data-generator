@@ -33,7 +33,7 @@ public class AcspProfile {
         return id;
     }
 
-    public Long getVersion(long l) {
+    public Long getVersion() {
         return version;
     }
 
