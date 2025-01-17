@@ -804,8 +804,8 @@ class TestDataServiceImplTest {
     void createAcspProfileDataSuccess() throws DataException {
 
         AcspProfileSpec spec = new AcspProfileSpec();
-        spec.setCompanyType("some-type");
-        spec.setCompanyStatus("some-status");
+        spec.setType("some-type");
+        spec.setStatus("some-status");
 
         AcspProfileData mockData = new AcspProfileData("PlaywrightACSP123456");
         when(acspProfileService.create(spec)).thenReturn(mockData);

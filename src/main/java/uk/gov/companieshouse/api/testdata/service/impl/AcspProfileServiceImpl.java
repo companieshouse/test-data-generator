@@ -30,14 +30,14 @@ public class AcspProfileServiceImpl implements AcspProfileService {
     public AcspProfileData create(AcspProfileSpec acspProfileSpec) throws DataException {
         var randomId = randomService.getNumber(8);
         final var acspProfile = new AcspProfile();
-        final String companyType = acspProfileSpec.getCompanyType();
-        final String companyStatus = acspProfileSpec.getCompanyStatus();
+        final String type = acspProfileSpec.getType();
+        final String status = acspProfileSpec.getStatus();
 
         acspProfile.setId(ACSP_PREFIX + (randomId));
         acspProfile.setVersion(0L);
         acspProfile.setAcspNumber(ACSP_PREFIX + (randomId));
-        acspProfile.setStatus(Objects.requireNonNullElse(companyStatus, "active"));
-        acspProfile.setType(Objects.requireNonNullElse(companyType, "ltd"));
+        acspProfile.setStatus(Objects.requireNonNullElse(status, "active"));
+        acspProfile.setType(Objects.requireNonNullElse(type, "ltd"));
         acspProfile.setName("Example " + randomId + " CompanyLtd");
         acspProfile.setLinksSelf(LINK_STEM + ACSP_PREFIX + randomId);
 

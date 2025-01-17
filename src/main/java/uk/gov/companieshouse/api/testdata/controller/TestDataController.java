@@ -20,8 +20,16 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
 
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
+import uk.gov.companieshouse.api.testdata.service.AcspMembersService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -38,6 +46,9 @@ public class TestDataController {
 
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
+
+    @Autowired
+    private AcspMembersService acspMembersService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -101,30 +112,50 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/acsp")
-    public ResponseEntity<AcspProfileData> createAcspProfile(@Valid @RequestBody(required = false) AcspProfileSpec request)
+    @PostMapping("/acsp-members")
+    public ResponseEntity<AcspMembersData> createAcspMemeber(@Valid @RequestBody(required = true)
+                                                             AcspMembersSpec request)
             throws DataException {
-        var createdAcspProfile = testDataService.createAcspProfileData(request);
+        var createdAcspMemeber = testDataService.createAcspMembersData(request);
         Map<String, Object> data = new HashMap<>();
-        data.put("Acsp number", createdAcspProfile.getAcspNumber());
+        data.put("Acsp member user Id", createdAcspMemeber.getAcspMemberId());
         LOG.info("New acsp profile created", data);
-        return new ResponseEntity<>(createdAcspProfile, HttpStatus.CREATED);
+        return new ResponseEntity<>(createdAcspMemeber, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/acsp/{acspNumber}")
-    public ResponseEntity<Map<String, Object>> deleteAcspProfile(@PathVariable("acspNumber") String acspNumber)
+    @DeleteMapping("/acsp-members/{acspMemberId}")
+    public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
+                                                                   String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
-        response.put("acsp number", acspNumber);
-        boolean deleteAcspProfile = testDataService.deleteAcspProfileData(acspNumber);
+        response.put("Acsp Member Id", acspMemberId);
 
-        if (deleteAcspProfile) {
-            LOG.info("Acsp profile deleted", response);
+        var maybeMember = acspMembersService.getAcspMembersById(acspMemberId);
+        if (maybeMember.isEmpty()) {
+            response.put("status", HttpStatus.NOT_FOUND);
+            LOG.info("Acsp member not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+
+        var member = maybeMember.get();
+        String acspNumber = member.getAcspNumber();
+        response.put("acsp number", acspNumber);
+
+        boolean deletedAcspProfile = testDataService.deleteAcspProfileData(acspNumber);
+        if (!deletedAcspProfile) {
+            LOG.info("Associated AcspProfile not found for " + acspNumber);
+        }
+
+        boolean deletedMember = testDataService.deleteAcspMembersData(acspMemberId);
+
+        if (deletedMember) {
+            LOG.info("Acsp member deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             response.put("status", HttpStatus.NOT_FOUND);
-            LOG.info("Acsp profile not found", response);
+            LOG.info("Acsp member not found during delete", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
+
 }

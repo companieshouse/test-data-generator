@@ -44,8 +44,8 @@ class AcspProfileServiceImplTest {
         // Given
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setAcspNumber("ACSP_NUMBER");   // Not actually used for ID, since the code uses randomService
-        spec.setCompanyType("ltd");
-        spec.setCompanyStatus("active");
+        spec.setType("ltd");
+        spec.setStatus("active");
 
         long randomId = 12345678L;
         when(randomService.getNumber(8)).thenReturn(randomId);

@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.config;
 
+import com.mongodb.client.MongoClients;
 import java.io.Serializable;
 
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
@@ -17,9 +18,18 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 
-import com.mongodb.client.MongoClients;
-
-import uk.gov.companieshouse.api.testdata.repository.*;
+import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspRepository;
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
+import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
+import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -64,7 +74,8 @@ public class MongoConfig {
 
     @Bean
     public CompanyPscStatementRepository companyPscStatement() {
-        return getMongoRepositoryBean(CompanyPscStatementRepository.class, "company_psc_statements");
+        return getMongoRepositoryBean(CompanyPscStatementRepository.class,
+                "company_psc_statements");
     }
 
     @Bean
@@ -87,18 +98,28 @@ public class MongoConfig {
         return getMongoRepositoryBean(AcspRepository.class, "acsp_profile");
     }
 
+    @Bean
+    public AcspMembersRepository acspMembersRepository() {
+        return getMongoRepositoryBean(AcspMembersRepository.class, "acsp_members");
+    }
+
+
     private MongoTemplate createMongoTemplate(final String database) {
-        SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
+        SimpleMongoClientDatabaseFactory simpleMongoDbFactory =
+                new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
-        MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(simpleMongoDbFactory);
+        MappingMongoConverter mappingMongoConverter
+                = getMappingMongoConverter(simpleMongoDbFactory);
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
     }
 
     private MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory factory) {
         DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
         MongoMappingContext mappingContext = new MongoMappingContext();
-        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, mappingContext);
-        mappingContext.setSimpleTypeHolder(mappingConverter.getCustomConversions().getSimpleTypeHolder());
+        MappingMongoConverter mappingConverter =
+                new MappingMongoConverter(dbRefResolver, mappingContext);
+        mappingContext.setSimpleTypeHolder(mappingConverter.getCustomConversions()
+                .getSimpleTypeHolder());
         mappingContext.afterPropertiesSet();
         mappingConverter.afterPropertiesSet();
 
@@ -108,9 +129,11 @@ public class MongoConfig {
         return mappingConverter;
     }
 
-    private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
+    private <T extends Repository<S, I>, S, I
+            extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
             String database) {
-        MongoRepositoryFactoryBean<T, S, I> mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(repositoryClass);
+        MongoRepositoryFactoryBean<T, S, I> mongoDbFactoryBean =
+                new MongoRepositoryFactoryBean<>(repositoryClass);
         mongoDbFactoryBean.setMongoOperations(createMongoTemplate(database));
         mongoDbFactoryBean.afterPropertiesSet();
         return mongoDbFactoryBean.getObject();

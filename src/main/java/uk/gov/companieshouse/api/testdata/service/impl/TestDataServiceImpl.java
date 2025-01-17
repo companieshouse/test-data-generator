@@ -18,8 +18,18 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+import uk.gov.companieshouse.api.testdata.service.AcspMembersService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -58,6 +68,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private AcspProfileService acspProfileService;
     @Autowired
+    private AcspMembersService acspMembersService;
+    @Autowired
     private DataService<RoleData, RoleSpec> roleService;
 
     @Value("${api.url}")
@@ -85,12 +97,12 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyProfileService.create(spec);
             this.filingHistoryService.create(spec);
             this.appointmentService.create(spec);
-            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
             this.companyMetricsService.create(spec);
             this.companyPscStatementService.create(spec);
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
+            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
@@ -185,7 +197,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AcspProfileData createAcspProfileData(AcspProfileSpec acspProfileSpec) throws DataException {
+    public AcspProfileData createAcspProfileData(AcspProfileSpec acspProfileSpec)
+            throws DataException {
         return acspProfileService.create(acspProfileSpec);
     }
 
@@ -196,5 +209,20 @@ public class TestDataServiceImpl implements TestDataService {
             return false;
         }
         return this.acspProfileService.delete(acspNumber);
+    }
+
+    @Override
+    public AcspMembersData createAcspMembersData(AcspMembersSpec acspMembersSpec)
+            throws DataException {
+        return acspMembersService.create(acspMembersSpec);
+    }
+
+    @Override
+    public boolean deleteAcspMembersData(String acspMemberId) {
+        var acspMembers = acspMembersService.getAcspMembersById(acspMemberId).orElse(null);
+        if (acspMembers == null) {
+            return false;
+        }
+        return this.acspMembersService.delete(acspMemberId);
     }
 }
