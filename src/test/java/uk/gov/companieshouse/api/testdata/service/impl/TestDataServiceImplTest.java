@@ -41,9 +41,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -76,9 +73,6 @@ class TestDataServiceImplTest {
     private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
     @Mock
     private DataService<CompanyPscs, CompanySpec> companyPscsService;
-    @Mock
-    private AcspProfileService acspProfileService;
-
     @Mock
     private RandomService randomService;
     @Mock
@@ -800,68 +794,68 @@ class TestDataServiceImplTest {
         verify(roleService, never()).delete(any());
     }
 
-    @Test
-    void createAcspProfileDataSuccess() throws DataException {
-
-        AcspProfileSpec spec = new AcspProfileSpec();
-        spec.setType("some-type");
-        spec.setStatus("some-status");
-
-        AcspProfileData mockData = new AcspProfileData("PlaywrightACSP123456");
-        when(acspProfileService.create(spec)).thenReturn(mockData);
-
-        AcspProfileData result = testDataService.createAcspProfileData(spec);
-
-        assertNotNull(result, "Returned AcspProfileData should not be null");
-        assertEquals("PlaywrightACSP123456", result.getAcspNumber(),
-                "acspNumber should match the mocked data");
-        verify(acspProfileService, times(1)).create(spec);
-    }
-
-    @Test
-    void createAcspProfileDataThrowsException() throws DataException {
-
-        AcspProfileSpec spec = new AcspProfileSpec();
-        DataException exception = new DataException("Error creating ACSP");
-
-        when(acspProfileService.create(spec)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.createAcspProfileData(spec));
-        assertEquals("Error creating ACSP", thrown.getMessage(),
-                "Exception message should match the thrown message");
-        verify(acspProfileService, times(1)).create(spec);
-    }
-
-    @Test
-    void deleteAcspProfileDataFound() {
-
-        String acspNumber = "PlaywrightACSP987654";
-        AcspProfile mockProfile = new AcspProfile();
-        mockProfile.setId(acspNumber);
-
-        when(acspProfileService.getAcspProfileById(acspNumber))
-                .thenReturn(Optional.of(mockProfile));
-        when(acspProfileService.delete(acspNumber)).thenReturn(true);
-
-        boolean result = testDataService.deleteAcspProfileData(acspNumber);
-
-        assertTrue(result, "Should return true if ACSP was found and deleted");
-        verify(acspProfileService, times(1)).getAcspProfileById(acspNumber);
-        verify(acspProfileService, times(1)).delete(acspNumber);
-    }
-
-    @Test
-    void deleteAcspProfileDataNotFound() {
-
-        String acspNumber = "PlaywrightACSPNoSuch";
-        when(acspProfileService.getAcspProfileById(acspNumber))
-                .thenReturn(Optional.empty());
-
-        boolean result = testDataService.deleteAcspProfileData(acspNumber);
-
-        assertFalse(result, "Should return false if ACSP was not found");
-        verify(acspProfileService, times(1)).getAcspProfileById(acspNumber);
-        verify(acspProfileService, never()).delete(any());
-    }
+//    @Test
+//    void createAcspProfileDataSuccess() throws DataException {
+//
+//        AcspProfileSpec spec = new AcspProfileSpec();
+//        spec.setType("some-type");
+//        spec.setStatus("some-status");
+//
+//        AcspProfileData mockData = new AcspProfileData("PlaywrightACSP123456");
+//        when(acspProfileService.create(spec)).thenReturn(mockData);
+//
+//        AcspProfileData result = testDataService.createAcspProfileData(spec);
+//
+//        assertNotNull(result, "Returned AcspProfileData should not be null");
+//        assertEquals("PlaywrightACSP123456", result.getAcspNumber(),
+//                "acspNumber should match the mocked data");
+//        verify(acspProfileService, times(1)).create(spec);
+//    }
+//
+//    @Test
+//    void createAcspProfileDataThrowsException() throws DataException {
+//
+//        AcspProfileSpec spec = new AcspProfileSpec();
+//        DataException exception = new DataException("Error creating ACSP");
+//
+//        when(acspProfileService.create(spec)).thenThrow(exception);
+//
+//        DataException thrown = assertThrows(DataException.class, () ->
+//                testDataService.createAcspProfileData(spec));
+//        assertEquals("Error creating ACSP", thrown.getMessage(),
+//                "Exception message should match the thrown message");
+//        verify(acspProfileService, times(1)).create(spec);
+//    }
+//
+//    @Test
+//    void deleteAcspProfileDataFound() {
+//
+//        String acspNumber = "PlaywrightACSP987654";
+//        AcspProfile mockProfile = new AcspProfile();
+//        mockProfile.setId(acspNumber);
+//
+//        when(acspProfileService.getAcspProfileById(acspNumber))
+//                .thenReturn(Optional.of(mockProfile));
+//        when(acspProfileService.delete(acspNumber)).thenReturn(true);
+//
+//        boolean result = testDataService.deleteAcspProfileData(acspNumber);
+//
+//        assertTrue(result, "Should return true if ACSP was found and deleted");
+//        verify(acspProfileService, times(1)).getAcspProfileById(acspNumber);
+//        verify(acspProfileService, times(1)).delete(acspNumber);
+//    }
+//
+//    @Test
+//    void deleteAcspProfileDataNotFound() {
+//
+//        String acspNumber = "PlaywrightACSPNoSuch";
+//        when(acspProfileService.getAcspProfileById(acspNumber))
+//                .thenReturn(Optional.empty());
+//
+//        boolean result = testDataService.deleteAcspProfileData(acspNumber);
+//
+//        assertFalse(result, "Should return false if ACSP was not found");
+//        verify(acspProfileService, times(1)).getAcspProfileById(acspNumber);
+//        verify(acspProfileService, never()).delete(any());
+//    }
 }

@@ -11,32 +11,12 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
-import uk.gov.companieshouse.api.testdata.service.AcspMembersService;
-import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.*;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -46,6 +26,7 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
+    private static final int ACSP_MEMBER_ID_LENGTH = 9;
 
     @Autowired
     private CompanyProfileService companyProfileService;
@@ -66,11 +47,13 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private UserService userService;
     @Autowired
-    private AcspProfileService acspProfileService;
+    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
-    private AcspMembersService acspMembersService;
+    private AcspMembersRepository acspMembersRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
+    @Autowired
+    private AcspProfileService acspProfileService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -196,33 +179,62 @@ public class TestDataServiceImpl implements TestDataService {
         return this.userService.delete(userId);
     }
 
-    @Override
-    public AcspProfileData createAcspProfileData(AcspProfileSpec acspProfileSpec)
-            throws DataException {
-        return acspProfileService.create(acspProfileSpec);
-    }
 
     @Override
-    public boolean deleteAcspProfileData(String acspNumber) {
-        var acspProfile = acspProfileService.getAcspProfileById(acspNumber).orElse(null);
-        if (acspProfile == null) {
-            return false;
+    public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {
+
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create an ACSP member");
         }
-        return this.acspProfileService.delete(acspNumber);
-    }
 
-    @Override
-    public AcspMembersData createAcspMembersData(AcspMembersSpec acspMembersSpec)
-            throws DataException {
-        return acspMembersService.create(acspMembersSpec);
-    }
+        try {
+            var acspProfileData = this.acspProfileService.create();
 
-    @Override
-    public boolean deleteAcspMembersData(String acspMemberId) {
-        var acspMembers = acspMembersService.getAcspMembersById(acspMemberId).orElse(null);
-        if (acspMembers == null) {
-            return false;
+            spec.setAcspNumber(acspProfileData.getAcspNumber());
+
+            var createdMember = this.acspMembersService.create(spec);
+
+            return new AcspMembersData(
+                    createdMember.getAcspMemberId(),
+                    createdMember.getAcspNumber(),
+                    createdMember.getUserId(),
+                    createdMember.getStatus(),
+                    createdMember.getUserRole()
+            );
+
+        } catch (Exception ex) {
+            throw new DataException(ex);
         }
-        return this.acspMembersService.delete(acspMemberId);
     }
+
+    @Override
+    public boolean deleteAcspMembersData(String acspMemberId) throws DataException {
+        List<Exception> suppressedExceptions = new ArrayList<>();
+
+        try {
+            var maybeMember = acspMembersRepository.findById(acspMemberId);
+            if (maybeMember.isPresent()) {
+                var member = maybeMember.get();
+                String acspNumber = member.getAcspNumber();
+
+                acspMembersService.delete(acspMemberId);
+
+                this.acspProfileService.delete(acspNumber);
+            } else {
+                return false;
+            }
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+
+        if (!suppressedExceptions.isEmpty()) {
+            DataException ex = new DataException("Error deleting acsp member's data");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
+        }
+
+        return true;
+    }
+
+
 }

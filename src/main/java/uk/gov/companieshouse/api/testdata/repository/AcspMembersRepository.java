@@ -6,4 +6,5 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 
 @NoRepositoryBean
 public interface AcspMembersRepository extends MongoRepository<AcspMembers, String> {
+    boolean existsByAcspMemberId(String acspMemberId);
 }

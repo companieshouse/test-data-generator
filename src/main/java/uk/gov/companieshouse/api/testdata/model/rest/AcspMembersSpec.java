@@ -9,9 +9,6 @@ public class AcspMembersSpec {
     private String acspNumber;
 
     @JsonProperty
-    private String acspMemberId;
-
-    @JsonProperty
     @NotNull(message = "User not present")
     private String userId;
 
@@ -41,14 +38,6 @@ public class AcspMembersSpec {
 
     public void setUserId(String userId) {
         this.userId = userId;
-    }
-
-    public String getAcspMemberId() {
-        return acspMemberId;
-    }
-
-    public void setAcspMemberId(String acspMemberId) {
-        this.acspMemberId = acspMemberId;
     }
 
     public String getStatus() {

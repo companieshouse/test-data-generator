@@ -3,28 +3,32 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AcspMembersData {
+
+    @JsonProperty("acspMemberId")
+    private final String acspMemberId;
+
     @JsonProperty("acspNumber")
     private final String acspNumber;
 
     @JsonProperty("userId")
     private final String userId;
 
-    @JsonProperty("acspMemberId")
-    private final String acspMemberId;
+    @JsonProperty("status")
+    private final String status;
 
     @JsonProperty("userRole")
     private final String userRole;
 
-    @JsonProperty("status")
-    private final String status;
-
-    public AcspMembersData(String acspNumber, String userId, String acspMemberId,
-                           String userRole, String status) {
+    public AcspMembersData(String acspMemberId,
+                           String acspNumber,
+                           String userId,
+                           String status,
+                           String userRole) {
+        this.acspMemberId = acspMemberId;
         this.acspNumber = acspNumber;
         this.userId = userId;
-        this.acspMemberId = acspMemberId;
-        this.userRole = userRole;
         this.status = status;
+        this.userRole = userRole;
     }
 
     public String getAcspNumber() {
