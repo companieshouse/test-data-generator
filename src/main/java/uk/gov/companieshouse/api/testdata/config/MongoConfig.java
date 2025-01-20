@@ -16,18 +16,8 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
-import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
-import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
-import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
-import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
-import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 
+import uk.gov.companieshouse.api.testdata.repository.*;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)

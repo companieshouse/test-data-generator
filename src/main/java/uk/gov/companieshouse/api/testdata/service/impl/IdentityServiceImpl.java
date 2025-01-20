@@ -13,7 +13,6 @@ import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-
 @Service
 public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpec> {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
