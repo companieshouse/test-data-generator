@@ -36,13 +36,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -87,6 +81,9 @@ class TestDataServiceImplTest {
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
+
+    @Mock
+    private DataService<IdentityData, IdentitySpec> identityService;
 
     @BeforeEach
     void setUp() {
@@ -795,5 +792,85 @@ class TestDataServiceImplTest {
         assertFalse(result);
         verify(userService, never()).delete(userId);
         verify(roleService, never()).delete(any());
+    }
+
+    @Test
+    void createIdentityData() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("userId");
+        identitySpec.setEmail("email@example.com");
+
+        IdentityData mockIdentityData = new IdentityData("identityId");
+
+        when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
+
+        IdentityData createdIdentityData = testDataService.createIdentityData(identitySpec);
+
+        assertEquals("identityId", createdIdentityData.getId());
+
+        verify(identityService, times(1)).create(identitySpec);
+    }
+
+    @Test
+    void createIdentityDataWithMissingUserId() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setEmail("email@example.com");
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.createIdentityData(identitySpec));
+
+        assertEquals("User Id is required to create an identity", exception.getMessage());
+        verify(identityService, never()).create(any());
+    }
+
+    @Test
+    void createIdentityDataWithMissingEmail() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("userId");
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.createIdentityData(identitySpec));
+
+        assertEquals("Email is required to create an identity", exception.getMessage());
+        verify(identityService, never()).create(any());
+    }
+
+    @Test
+    void createIdentityDataThrowsException() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("userId");
+        identitySpec.setEmail("email@example.com");
+
+        when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.createIdentityData(identitySpec));
+
+        assertEquals("Error creating identity", exception.getMessage());
+        verify(identityService, times(1)).create(identitySpec);
+    }
+
+    @Test
+    void deleteIdentityData() throws DataException {
+        String identityId = "identityId";
+
+        when(identityService.delete(identityId)).thenReturn(true);
+
+        boolean result = testDataService.deleteIdentityData(identityId);
+
+        assertTrue(result);
+        verify(identityService, times(1)).delete(identityId);
+    }
+
+    @Test
+    void deleteIdentityDataWhenIdentityNotFound() throws DataException {
+        String identityId = "identityId";
+
+        when(identityService.delete(identityId)).thenReturn(false);
+
+        boolean result = testDataService.deleteIdentityData(identityId);
+
+        assertFalse(result);
+        verify(identityService, times(1)).delete(identityId);
     }
 }
