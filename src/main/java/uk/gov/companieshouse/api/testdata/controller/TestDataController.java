@@ -23,6 +23,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
@@ -101,6 +102,33 @@ public class TestDataController {
         } else {
             response.put("status", HttpStatus.NOT_FOUND);
             LOG.info("User not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PostMapping("/identity")
+    public ResponseEntity<Map<String, Object>> createIdentity(
+            @Valid @RequestBody() IdentitySpec request) throws DataException {
+        var createdIdentity = testDataService.createIdentityData(request);
+        Map<String, Object> data = new HashMap<>();
+        data.put("identity id", createdIdentity.getId());
+        LOG.info("New identity created", data);
+        return new ResponseEntity<>(data, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/identity/{identityId}")
+    public ResponseEntity<Map<String, Object>> deleteIdentity(
+            @PathVariable("identityId") String identityId) throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("identity id", identityId);
+        boolean deleteIdentity = testDataService.deleteIdentityData(identityId);
+
+        if (deleteIdentity) {
+            LOG.info("Identity deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put("status", HttpStatus.NOT_FOUND);
+            LOG.info("Identity not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
