@@ -36,7 +36,15 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -851,7 +859,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteIdentityData() throws DataException {
+    void deleteIdentityData() {
         String identityId = "identityId";
 
         when(identityService.delete(identityId)).thenReturn(true);
@@ -863,7 +871,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteIdentityDataWhenIdentityNotFound() throws DataException {
+    void deleteIdentityDataWhenIdentityNotFound() {
         String identityId = "identityId";
 
         when(identityService.delete(identityId)).thenReturn(false);
