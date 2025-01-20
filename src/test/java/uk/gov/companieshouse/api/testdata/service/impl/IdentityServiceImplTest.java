@@ -26,7 +26,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 
 @ExtendWith(MockitoExtension.class)
-public class IdentityServiceImplTest {
+class IdentityServiceImplTest {
 
     @Mock
     private IdentityRepository identityRepository;

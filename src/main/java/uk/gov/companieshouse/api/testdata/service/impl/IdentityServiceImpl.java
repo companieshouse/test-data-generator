@@ -27,7 +27,7 @@ public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpe
     @Override
     public IdentityData create(IdentitySpec identitySpec) {
         var randomId = randomService.getString(24).toLowerCase();
-        Identity identity = new Identity();
+        var identity = new Identity();
         identity.setId(randomId);
         identity.setEmail(identitySpec.getEmail());
         identity.setCreated(LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC));
