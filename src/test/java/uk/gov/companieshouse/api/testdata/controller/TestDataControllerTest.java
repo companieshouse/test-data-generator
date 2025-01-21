@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +16,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -48,6 +48,9 @@ class TestDataControllerTest {
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
+
+    @Captor
+    private ArgumentCaptor<AcspMembersSpec> acspMemberSpecCaptor;
 
     @Test
     void createCompany() throws Exception {
@@ -247,4 +250,81 @@ class TestDataControllerTest {
         verify(testDataService).deleteUserData(userId);
     }
 
+    @Test
+    void createAcspMember() throws Exception {
+        AcspMembersSpec request = new AcspMembersSpec();
+        AcspMembersData acspMember = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+
+        when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);
+        ResponseEntity<AcspMembersData> response = this.testDataController.createAcspMember(request);
+
+        assertEquals(acspMember, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createAcspMemberNoRequest() throws Exception {
+        AcspMembersData acspMember = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+
+        when(this.testDataService.createAcspMembersData(any())).thenReturn(acspMember);
+        ResponseEntity<AcspMembersData> response = this.testDataController.createAcspMember(null);
+
+        assertEquals(acspMember, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        verify(testDataService).createAcspMembersData(acspMemberSpecCaptor.capture());
+        AcspMembersSpec usedSpec = acspMemberSpecCaptor.getValue();
+
+        assertNotNull(usedSpec);
+    }
+
+    @Test
+    void createAcspMemberException() throws Exception {
+        AcspMembersSpec request = new AcspMembersSpec();
+        Throwable exception = new DataException("Error message");
+
+        when(this.testDataService.createAcspMembersData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createAcspMember(request));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void deleteAcspMember() throws Exception {
+        final String acspMemberId = "memberId";
+
+        when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteAcspMember(acspMemberId);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteAcspMembersData(acspMemberId);
+    }
+
+    @Test
+    void deleteAcspMemberNotFound() throws Exception {
+        final String acspMemberId = "memberId";
+
+        when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(false);
+        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteAcspMember(acspMemberId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp member id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService).deleteAcspMembersData(acspMemberId);
+    }
+
+    @Test
+    void deleteAcspMemberException() throws Exception {
+        final String acspMemberId = "memberId";
+        Throwable exception = new DataException("Error message");
+
+        when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenThrow(exception);
+
+        DataException thrown =
+                assertThrows(DataException.class, () -> this.testDataController.deleteAcspMember(acspMemberId));
+        assertEquals(exception, thrown);
+    }
 }

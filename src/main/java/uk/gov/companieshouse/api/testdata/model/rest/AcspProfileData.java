@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AcspProfileData {
 
-    @JsonProperty("acspNumber")
+    @JsonProperty("acsp_number")
     private final String acspNumber;
 
     public AcspProfileData(String acspNumber) {

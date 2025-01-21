@@ -4,19 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AcspMembersData {
 
-    @JsonProperty("acspMemberId")
+    @JsonProperty("acsp_member_id")
     private final String acspMemberId;
 
-    @JsonProperty("acspNumber")
+    @JsonProperty("acsp_number")
     private final String acspNumber;
 
-    @JsonProperty("userId")
+    @JsonProperty("user_id")
     private final String userId;
 
     @JsonProperty("status")
     private final String status;
 
-    @JsonProperty("userRole")
+    @JsonProperty("user_role")
     private final String userRole;
 
     public AcspMembersData(String acspMemberId,

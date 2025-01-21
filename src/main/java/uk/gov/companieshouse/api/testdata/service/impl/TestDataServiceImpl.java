@@ -11,13 +11,31 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.*;
-
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.service.*;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -26,7 +44,6 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
-    private static final int ACSP_MEMBER_ID_LENGTH = 9;
 
     @Autowired
     private CompanyProfileService companyProfileService;
@@ -53,7 +70,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
-    private AcspProfileService acspProfileService;
+    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -179,7 +196,6 @@ public class TestDataServiceImpl implements TestDataService {
         return this.userService.delete(userId);
     }
 
-
     @Override
     public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {
 
@@ -188,7 +204,14 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         try {
-            var acspProfileData = this.acspProfileService.create();
+            var  acspProfileSpec = new AcspProfileSpec();
+            if (spec.getAcspProfile() != null) {
+                acspProfileSpec.setStatus(spec.getAcspProfile().getStatus());
+            }
+            if (spec.getAcspProfile() != null) {
+                acspProfileSpec.setType(spec.getAcspProfile().getType());
+            }
+            var acspProfileData = this.acspProfileService.create(acspProfileSpec);
 
             spec.setAcspNumber(acspProfileData.getAcspNumber());
 
@@ -235,6 +258,5 @@ public class TestDataServiceImpl implements TestDataService {
 
         return true;
     }
-
 
 }

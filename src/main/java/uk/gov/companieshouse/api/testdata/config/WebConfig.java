@@ -14,8 +14,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(internalUserInterceptor()).addPathPatterns(USERS_ENDPOINTS);
-        registry.addInterceptor(internalUserInterceptor()).addPathPatterns(ACSP_ENDPOINTS);
+        registry.addInterceptor(internalUserInterceptor())
+                .addPathPatterns(USERS_ENDPOINTS)
+                .addPathPatterns(ACSP_ENDPOINTS);
     }
 
     @Bean

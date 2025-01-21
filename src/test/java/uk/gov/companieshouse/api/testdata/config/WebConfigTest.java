@@ -37,6 +37,7 @@ class WebConfigTest {
 
         verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
+        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/acsp-members/**");
     }
 
     @Test

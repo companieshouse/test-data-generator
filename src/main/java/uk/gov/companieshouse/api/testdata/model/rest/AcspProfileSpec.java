@@ -1,34 +1,24 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.Pattern;
+import java.util.List;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 
 public class AcspProfileSpec {
-    @JsonIgnore
-    private String acspNumber;
-
-    @JsonProperty("status")
-    @Pattern(regexp = "active|suspended|ceased")
+    @JsonProperty
     private String status;
 
-    @JsonProperty("type")
-    @Pattern(regexp = "assurance-company|charitable-incorporated-organisation|company_delta|converted-or-closed|eeig|eeig-establishment|european-public-limited-liability-company-se|fake-type|further-education-or-sixth-form-college-corporation|icvc-securities|icvc-umbrella|icvc-warrant|industrial-and-provident-society|invalid|investment-company-with-variable-capital|limited-partnership|llp|ltd|northern-ireland|northern-ireland-other|old-public-company|other|oversea-company|plc|private-limited-guarant-nsc|private-limited-guarant-nsc-limited-exemption|private-limited-shares-section-30-exemption|private-unlimited|private-unlimited-nsc|protected-cell-company|registered-overseas-entity|registered-society-non-jurisdictional|royal-charter|scottish-charitable-incorporated-organisation|scottish-partnership|uk-establishment|ukeig|united-kingdom-societas|unregistered-company", message = "Invalid company type")
+    @JsonProperty
     private String type;
 
-    public String getAcspNumber() {
-        return acspNumber;
-    }
-
-    public void setAcspNumber(String acspNumber) {
-        this.acspNumber = acspNumber;
-    }
+    @JsonProperty
+    private List<AcspProfile.AmlDetail> amlDetails;
 
     public String getStatus() {
         return status;
     }
 
-    public void setStatus(String companyStatus) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
@@ -36,7 +26,15 @@ public class AcspProfileSpec {
         return type;
     }
 
-    public void setType(String companyType) {
+    public void setType(String type) {
         this.type = type;
+    }
+
+    public List<AcspProfile.AmlDetail> getAmlDetails() {
+        return amlDetails;
+    }
+
+    public void setAmlDetails(List<AcspProfile.AmlDetail> amlDetails) {
+        this.amlDetails = amlDetails;
     }
 }

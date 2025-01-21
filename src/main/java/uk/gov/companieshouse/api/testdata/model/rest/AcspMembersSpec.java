@@ -13,16 +13,23 @@ public class AcspMembersSpec {
     private String userId;
 
     @JsonProperty("status")
-    @Pattern(regexp = "active|suspended|ceased")
+    @Pattern(regexp = "active|suspended|ceased", message = "Invalid acsp member status")
     private String status;
 
-    @JsonProperty("type")
-    @Pattern(regexp = "assurance-company|charitable-incorporated-organisation|company_delta|converted-or-closed|eeig|eeig-establishment|european-public-limited-liability-company-se|fake-type|further-education-or-sixth-form-college-corporation|icvc-securities|icvc-umbrella|icvc-warrant|industrial-and-provident-society|invalid|investment-company-with-variable-capital|limited-partnership|llp|ltd|northern-ireland|northern-ireland-other|old-public-company|other|oversea-company|plc|private-limited-guarant-nsc|private-limited-guarant-nsc-limited-exemption|private-limited-shares-section-30-exemption|private-unlimited|private-unlimited-nsc|protected-cell-company|registered-overseas-entity|registered-society-non-jurisdictional|royal-charter|scottish-charitable-incorporated-organisation|scottish-partnership|uk-establishment|ukeig|united-kingdom-societas|unregistered-company", message = "Invalid company type")
-    private String type;
-
-    @JsonProperty("userRole")
-    @Pattern(regexp = "owner|admin|standard")
+    @JsonProperty("user_role")
+    @Pattern(regexp = "owner|admin|standard", message = "Invalid user role")
     private String userRole;
+
+    @JsonProperty("acsp_profile")
+    AcspProfileSpec acspProfile;
+
+    public AcspProfileSpec getAcspProfile() {
+        return acspProfile;
+    }
+
+    public void setAcspProfile(AcspProfileSpec acspProfile) {
+        this.acspProfile = acspProfile;
+    }
 
     public String getAcspNumber() {
         return acspNumber;
@@ -44,23 +51,16 @@ public class AcspMembersSpec {
         return status;
     }
 
-    public void setStatus(String companyStatus) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
 
     public String getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(String role) {
-        this.type = userRole;
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
     }
 }
