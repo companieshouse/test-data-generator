@@ -58,6 +58,14 @@ In order to use the generator, there are different possible endpoints that can b
     An usage example looks like this: `{ "password": "password", "roles": [ { "id": "roleId1", "permissions": [ "permission1", "permission2" ] }, { "id": "roleId2", "permissions": [ "permission3", "permission4" ] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
 
+#### Validating user Identity
+- POST: Sending a POST request to validate the user identity `{Base URL}/test-data/identity` will validate the user identity. The request body must include `IdentitySpec` parameter to validate the user identity.
+    - `email`: The email id of the user. This is mandatory.
+    - `user_id`: The user id of the user. This is mandatory.
+    - `verification_source`: The verification source of the user. This is mandatory.'
+    
+    An usage example looks like this: `{ "email": "test@test.com", "user_id": "userid", "verification_source": "TEST" }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/identity/{identityId}` will delete the test user identity. `identityId` is required to delete the user identity.
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 

@@ -210,11 +210,11 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public boolean deleteIdentityData(String identityId) {
+    public boolean deleteIdentityData(String identityId) throws DataException {
         try {
             return identityService.delete(identityId);
         } catch (Exception ex) {
-            return false;
+            throw new DataException("Error deleting identity", ex);
         }
     }
 }

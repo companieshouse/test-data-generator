@@ -815,7 +815,7 @@ class TestDataServiceImplTest {
 
         IdentityData createdIdentityData = testDataService.createIdentityData(identitySpec);
 
-        assertEquals("identityId", createdIdentityData.getId());
+        assertEquals(mockIdentityData.getId(), createdIdentityData.getId());
 
         verify(identityService, times(1)).create(identitySpec);
     }
@@ -877,7 +877,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteIdentityData() {
+    void deleteIdentityData() throws DataException {
         String identityId = "identityId";
 
         when(identityService.delete(identityId)).thenReturn(true);
@@ -889,7 +889,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteIdentityDataWhenIdentityNotFound() {
+    void deleteIdentityDataWhenIdentityNotFound() throws DataException {
         String identityId = "identityId";
 
         when(identityService.delete(identityId)).thenReturn(false);
@@ -897,6 +897,21 @@ class TestDataServiceImplTest {
         boolean result = testDataService.deleteIdentityData(identityId);
 
         assertFalse(result);
+        verify(identityService, times(1)).delete(identityId);
+    }
+
+    @Test
+    void deleteIdentityDataThrowsException() {
+        String identityId = "identityId";
+        RuntimeException ex = new RuntimeException("error");
+
+        when(identityService.delete(identityId)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.deleteIdentityData(identityId));
+
+        assertEquals("Error deleting identity", exception.getMessage());
+        assertEquals(ex, exception.getCause());
         verify(identityService, times(1)).delete(identityId);
     }
 }

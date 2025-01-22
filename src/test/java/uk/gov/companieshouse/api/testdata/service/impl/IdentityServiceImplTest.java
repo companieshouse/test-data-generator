@@ -11,6 +11,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,10 +46,9 @@ class IdentityServiceImplTest {
         identitySpec.setUserId("randomised");
         identitySpec.setEmail("test@test.com");
         identitySpec.setVerificationSource("source");
-
         String generatedIdentityId = "randomised";
         when(randomService.getString(24)).thenReturn(generatedIdentityId);
-
+        final var createdDate = LocalDateTime.now(ZoneId.of("UTC")).toInstant(ZoneOffset.UTC);
         IdentityData createdIdentity = identityServiceImpl.create(identitySpec);
         assertEquals(createdIdentity.getId(), generatedIdentityId,
                 "ID should match the generated ID");
@@ -61,6 +63,9 @@ class IdentityServiceImplTest {
                 "Verification source should match");
         assertEquals(generatedIdentityId, savedIdentity.getId(),
                 "ID should match the generated ID");
+        assertEquals("VALID", savedIdentity.getStatus(), "Status should be VALID");
+        assertTrue(createdDate.isBefore(savedIdentity.getCreated()),
+                "Created timestamp should be before the saved timestamp");
     }
 
     @Test
