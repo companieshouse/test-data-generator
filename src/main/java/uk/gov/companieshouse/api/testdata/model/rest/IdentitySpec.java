@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 public class IdentitySpec {
     @JsonProperty("user_id")
