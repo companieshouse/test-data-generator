@@ -6,27 +6,27 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import java.time.Instant;
 import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
 
 @ExtendWith(MockitoExtension.class)
 class IdentityServiceImplTest {
@@ -37,6 +37,7 @@ class IdentityServiceImplTest {
     @Mock
     private RandomService randomService;
 
+    @Spy
     @InjectMocks
     private IdentityServiceImpl identityServiceImpl;
 
@@ -46,10 +47,15 @@ class IdentityServiceImplTest {
         identitySpec.setUserId("randomised");
         identitySpec.setEmail("test@test.com");
         identitySpec.setVerificationSource("source");
+
         String generatedIdentityId = "randomised";
         when(randomService.getString(24)).thenReturn(generatedIdentityId);
-        final var createdDate = LocalDateTime.now(ZoneId.of("UTC")).toInstant(ZoneOffset.UTC);
+
+        final var createdDate = Instant.now();
+        doReturn(createdDate).when(identityServiceImpl).getCurrentDateTime();
+
         IdentityData createdIdentity = identityServiceImpl.create(identitySpec);
+
         assertEquals(createdIdentity.getId(), generatedIdentityId,
                 "ID should match the generated ID");
 
@@ -64,8 +70,9 @@ class IdentityServiceImplTest {
         assertEquals(generatedIdentityId, savedIdentity.getId(),
                 "ID should match the generated ID");
         assertEquals("VALID", savedIdentity.getStatus(), "Status should be VALID");
-        assertTrue(createdDate.isBefore(savedIdentity.getCreated()),
-                "Created timestamp should be before the saved timestamp");
+        assertEquals(createdDate, savedIdentity.getCreated(),
+                "Created date should be set to the current date");
+        verify(identityServiceImpl).getCurrentDateTime();
     }
 
     @Test

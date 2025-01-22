@@ -246,7 +246,7 @@ class TestDataControllerTest {
         ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("userId", Objects.requireNonNull(response.getBody()).get("user id"));
+        assertEquals("userId", response.getBody().get("user id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteUserData(userId);
@@ -314,7 +314,7 @@ class TestDataControllerTest {
                 = this.testDataController.deleteIdentity(identityId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("identityId", Objects.requireNonNull(response.getBody()).get("identity id"));
+        assertEquals("identityId", response.getBody().get("identity id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteIdentityData(identityId);

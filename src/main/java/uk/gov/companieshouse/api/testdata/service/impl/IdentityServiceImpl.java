@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
@@ -29,7 +30,7 @@ public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpe
         var identity = new Identity();
         identity.setId(randomId);
         identity.setEmail(identitySpec.getEmail());
-        identity.setCreated(LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC));
+        identity.setCreated(getCurrentDateTime());
         identity.setStatus("VALID");
         identity.setUserId(identitySpec.getUserId());
         identity.setVerificationSource(identitySpec.getVerificationSource());
@@ -42,5 +43,9 @@ public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpe
         var identity = repository.findById(identityId);
         identity.ifPresent(repository::delete);
         return identity.isPresent();
+    }
+
+    protected Instant getCurrentDateTime() {
+        return LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC);
     }
 }
