@@ -32,7 +32,7 @@ public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpe
         identity.setCreated(LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC));
         identity.setStatus("VALID");
         identity.setUserId(identitySpec.getUserId());
-        identity.setVerificationSource("ONE_LOGIN");
+        identity.setVerificationSource(identitySpec.getVerificationSource());
         repository.save(identity);
         return new IdentityData(identity.getId());
     }

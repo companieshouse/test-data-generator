@@ -807,6 +807,7 @@ class TestDataServiceImplTest {
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("userId");
         identitySpec.setEmail("email@example.com");
+        identitySpec.setVerificationSource("source");
 
         IdentityData mockIdentityData = new IdentityData("identityId");
 
@@ -823,6 +824,7 @@ class TestDataServiceImplTest {
     void createIdentityDataWithMissingUserId() throws DataException {
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setEmail("email@example.com");
+        identitySpec.setVerificationSource("source");
 
         DataException exception = assertThrows(DataException.class, () ->
                 testDataService.createIdentityData(identitySpec));
@@ -835,6 +837,7 @@ class TestDataServiceImplTest {
     void createIdentityDataWithMissingEmail() throws DataException {
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("userId");
+        identitySpec.setVerificationSource("source");
 
         DataException exception = assertThrows(DataException.class, () ->
                 testDataService.createIdentityData(identitySpec));
@@ -844,10 +847,25 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void createIdentityDataWithMissingVerificationSource() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setEmail("email@example.com");
+        identitySpec.setUserId("userId");
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.createIdentityData(identitySpec));
+
+        assertEquals("Verification source is required to create an identity",
+                exception.getMessage());
+        verify(identityService, never()).create(any());
+    }
+
+    @Test
     void createIdentityDataThrowsException() throws DataException {
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("userId");
         identitySpec.setEmail("email@example.com");
+        identitySpec.setVerificationSource("source");
 
         when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
 

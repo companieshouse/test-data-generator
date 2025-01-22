@@ -42,6 +42,8 @@ class IdentityServiceImplTest {
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("randomised");
         identitySpec.setEmail("test@test.com");
+        identitySpec.setVerificationSource("source");
+
         String generatedIdentityId = "randomised";
         when(randomService.getString(24)).thenReturn(generatedIdentityId);
 
@@ -54,6 +56,9 @@ class IdentityServiceImplTest {
         Identity savedIdentity = identityCaptor.getValue();
 
         assertEquals(identitySpec.getEmail(), savedIdentity.getEmail(), "Email should match");
+        assertEquals(identitySpec.getUserId(), savedIdentity.getUserId(), "User ID should match");
+        assertEquals(identitySpec.getVerificationSource(), savedIdentity.getVerificationSource(),
+                "Verification source should match");
         assertEquals(generatedIdentityId, savedIdentity.getId(),
                 "ID should match the generated ID");
     }
@@ -63,6 +68,8 @@ class IdentityServiceImplTest {
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("randomised");
         identitySpec.setEmail("test@test.com");
+        identitySpec.setVerificationSource("source");
+
         String generatedIdentityId = "randomised";
         when(randomService.getString(24)).thenReturn(generatedIdentityId);
         doThrow(new RuntimeException("Database error"))
@@ -70,7 +77,6 @@ class IdentityServiceImplTest {
 
         Exception exception = assertThrows(RuntimeException.class, ()
                 -> identityServiceImpl.create(identitySpec));
-
         assertEquals("Database error", exception.getMessage());
     }
 

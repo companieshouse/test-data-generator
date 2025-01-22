@@ -192,13 +192,15 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException {
-        final String userId = identitySpec.getUserId();
-        final String email = identitySpec.getEmail();
-        if (userId == null || userId.isEmpty()) {
+        if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
             throw new DataException("User Id is required to create an identity");
         }
-        if (email == null || email.isEmpty()) {
+        if (identitySpec.getEmail() == null || identitySpec.getEmail().isEmpty()) {
             throw new DataException("Email is required to create an identity");
+        }
+        if (identitySpec.getVerificationSource() == null
+                || identitySpec.getVerificationSource().isEmpty()) {
+            throw new DataException("Verification source is required to create an identity");
         }
         try {
             return identityService.create(identitySpec);
