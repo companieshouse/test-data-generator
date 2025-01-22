@@ -71,12 +71,6 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfileNullSpec() {
-        DataException exception = assertThrows(DataException.class, () -> service.create(null));
-        assertEquals("AcspProfileSpec cannot be null", exception.getMessage());
-    }
-
-    @Test
     void deleteAcspProfile() {
         AcspProfile acspProfile = new AcspProfile();
         when(repository.findById("profileId")).thenReturn(Optional.of(acspProfile));

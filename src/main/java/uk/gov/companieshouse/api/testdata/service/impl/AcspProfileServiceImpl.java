@@ -21,29 +21,18 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
     @Autowired
     private RandomService randomService;
 
-    @Override
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
-        if (spec == null) {
-            throw new DataException("AcspProfileSpec cannot be null");
-        }
-
         String randomId = randomService.getString(8);
+
         AcspProfile profile = new AcspProfile();
-        profile.setId(String.valueOf(randomId));
+        profile.setId(randomId);
         profile.setVersion(0L);
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
         profile.setType(Objects.requireNonNullElse(spec.getType(), "ltd"));
         profile.setAcspNumber(randomId);
         profile.setName("Test Data Generator " + randomId + " Company Ltd");
-        profile.setAmlDetails(Objects.requireNonNullElse(spec.getAmlDetails(),
-                Collections.singletonList(new AcspProfile.AmlDetail() {{
-                        setSupervisoryBody("association-of-chartered-certified-accountants-acca");
-                        setMembershipDetails("123");
-                        }
-                })));
         profile.setLinksSelf(LINK_STEM + randomId);
         AcspProfile savedProfile = repository.save(profile);
-
         return new AcspProfileData(savedProfile.getAcspNumber());
     }
 

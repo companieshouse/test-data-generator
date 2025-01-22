@@ -29,9 +29,6 @@ public class AcspProfile {
     @Field("data.etag")
     private String etag;
 
-    @Field("data.aml_details")
-    private List<AmlDetail> amlDetails;
-
     @Field("data.links.self")
     private String linksSelf;
 
@@ -83,14 +80,6 @@ public class AcspProfile {
         this.etag = etag;
     }
 
-    public List<AmlDetail> getAmlDetails() {
-        return amlDetails;
-    }
-
-    public void setAmlDetails(List<AmlDetail> amlDetails) {
-        this.amlDetails = amlDetails;
-    }
-
     public String getLinksSelf() {
         return linksSelf;
     }
@@ -101,29 +90,5 @@ public class AcspProfile {
 
     public void setVersion(long version) {
         this.version = version;
-    }
-
-    public static class AmlDetail {
-        @Field("supervisory_body")
-        private String supervisoryBody;
-
-        @Field("membership_details")
-        private String membershipDetails;
-
-        public String getSupervisoryBody() {
-            return supervisoryBody;
-        }
-
-        public void setSupervisoryBody(String supervisoryBody) {
-            this.supervisoryBody = supervisoryBody;
-        }
-
-        public String getMembershipDetails() {
-            return membershipDetails;
-        }
-
-        public void setMembershipDetails(String membershipDetails) {
-            this.membershipDetails = membershipDetails;
-        }
     }
 }
