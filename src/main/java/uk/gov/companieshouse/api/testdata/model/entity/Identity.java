@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.time.Instant;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -73,7 +74,4 @@ public class Identity {
     public void setEmail(String email) {
         this.email = email;
     }
-
-
-
 }
