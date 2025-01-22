@@ -54,7 +54,7 @@ class UserServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
         var generatedUserId = "randomised";
-        when(randomService.getString(24)).thenReturn(generatedUserId);
+        when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         UserData userData = userServiceImpl.create(userSpec);
@@ -102,7 +102,7 @@ class UserServiceImplTest {
         userSpec.setRoles(new ArrayList<>());
 
         String generatedUserId = "randomised";
-        when(randomService.getString(24)).thenReturn(generatedUserId);
+        when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         UserData userData = userServiceImpl.create(userSpec);
