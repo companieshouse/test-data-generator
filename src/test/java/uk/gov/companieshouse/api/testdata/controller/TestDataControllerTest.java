@@ -29,9 +29,12 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
@@ -243,9 +246,77 @@ class TestDataControllerTest {
         ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("userId", Objects.requireNonNull(response.getBody()).get("user id"));
+        assertEquals("userId", response.getBody().get("user id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteUserData(userId);
+    }
+
+    @Test
+    void createIdentity() throws Exception {
+        IdentitySpec request = new IdentitySpec();
+        when(this.testDataService.createIdentityData(request))
+                .thenReturn(new IdentityData("identityId"));
+
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.createIdentity(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals("identityId", Objects.requireNonNull(response.getBody()).get("identity id"));
+    }
+
+    @Test
+    void createIdentityException() throws Exception {
+        IdentitySpec request = new IdentitySpec();
+        DataException exception = new DataException("Error message");
+
+        when(this.testDataService.createIdentityData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createIdentity(request));
+        assertEquals(exception.getMessage(), thrown.getMessage()); // Match message
+    }
+
+    @Test
+    void deleteIdentity() throws Exception {
+        final String identityId = "identityId";
+
+        when(this.testDataService.deleteIdentityData(identityId)).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteIdentity(identityId);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        verify(testDataService).deleteIdentityData(identityId);
+    }
+
+    @Test
+    void deleteIdentityException() throws Exception {
+        final String identityId = "identityId";
+        DataException exception = new DataException("Error message");
+
+        when(this.testDataService.deleteIdentityData(identityId)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.deleteIdentity(identityId));
+        assertEquals(exception.getMessage(), thrown.getMessage()); // Match message
+    }
+
+    @Test
+    void deleteIdentityNotFound() throws Exception {
+        final String identityId = "identityId";
+
+        when(this.testDataService.deleteIdentityData(identityId)).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteIdentity(identityId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("identityId", response.getBody().get("identity id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService).deleteIdentityData(identityId);
     }
 }

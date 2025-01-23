@@ -20,6 +20,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -61,6 +63,8 @@ public class TestDataServiceImpl implements TestDataService {
     private UserService userService;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
+    @Autowired
+    private DataService<IdentityData, IdentitySpec> identityService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -184,5 +188,33 @@ public class TestDataServiceImpl implements TestDataService {
             }
         }
         return this.userService.delete(userId);
+    }
+
+    @Override
+    public IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException {
+        if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
+            throw new DataException("User Id is required to create an identity");
+        }
+        if (identitySpec.getEmail() == null || identitySpec.getEmail().isEmpty()) {
+            throw new DataException("Email is required to create an identity");
+        }
+        if (identitySpec.getVerificationSource() == null
+                || identitySpec.getVerificationSource().isEmpty()) {
+            throw new DataException("Verification source is required to create an identity");
+        }
+        try {
+            return identityService.create(identitySpec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating identity", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteIdentityData(String identityId) throws DataException {
+        try {
+            return identityService.delete(identityId);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting identity", ex);
+        }
     }
 }

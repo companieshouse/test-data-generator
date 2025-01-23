@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.api.testdata.config;
 
+import com.mongodb.client.MongoClients;
 import java.io.Serializable;
-
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,8 +16,6 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
-
-import com.mongodb.client.MongoClients;
 
 import uk.gov.companieshouse.api.testdata.repository.*;
 
@@ -82,6 +80,11 @@ public class MongoConfig {
         return getMongoRepositoryBean(RoleRepository.class, ACCOUNT_DATABASE);
     }
 
+    @Bean
+    public IdentityRepository identityRepository() {
+        return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
@@ -104,7 +107,7 @@ public class MongoConfig {
     }
 
     private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
-            String database) {
+                                                                                             String database) {
         MongoRepositoryFactoryBean<T, S, I> mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(repositoryClass);
         mongoDbFactoryBean.setMongoOperations(createMongoTemplate(database));
         mongoDbFactoryBean.afterPropertiesSet();
