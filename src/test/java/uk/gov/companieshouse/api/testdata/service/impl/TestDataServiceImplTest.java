@@ -815,7 +815,7 @@ class TestDataServiceImplTest {
 
         IdentityData createdIdentityData = testDataService.createIdentityData(identitySpec);
 
-        assertEquals(mockIdentityData.getId(), createdIdentityData.getId());
+        assertEquals(mockIdentityData, createdIdentityData);
 
         verify(identityService, times(1)).create(identitySpec);
     }
