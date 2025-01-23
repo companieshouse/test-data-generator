@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.config;
 
 import com.mongodb.client.MongoClients;
 import java.io.Serializable;
-
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -103,6 +102,11 @@ public class MongoConfig {
         return getMongoRepositoryBean(AcspMembersRepository.class, "acsp_members");
     }
 
+
+    @Bean
+    public IdentityRepository identityRepository() {
+        return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
+    }
 
     private MongoTemplate createMongoTemplate(final String database) {
         SimpleMongoClientDatabaseFactory simpleMongoDbFactory =

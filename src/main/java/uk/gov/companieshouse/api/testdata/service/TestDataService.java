@@ -5,8 +5,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 
 
 public interface TestDataService {
@@ -43,6 +46,23 @@ public interface TestDataService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteUserData(String userId) throws DataException;
+
+    /**
+     * Creates a new identity test data based on the provided identity specifications.
+     *
+     * @param identitySpec the specifications of the identity to create
+     * @return the created identity's test data
+     * @throws DataException if there is an error during identity creation
+     */
+    IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException;
+
+    /**
+     * Deletes an identity test data by their identity ID.
+     *
+     * @param identityId the ID of the identity to delete
+     * @throws DataException if there is an error during identity deletion
+     */
+    boolean deleteIdentityData(String identityId) throws DataException;
 
     /**
      * Creates a new acsp member test data based on the provided user specifications.

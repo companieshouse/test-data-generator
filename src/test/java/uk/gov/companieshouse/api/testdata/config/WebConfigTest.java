@@ -32,12 +32,14 @@ class WebConfigTest {
     void shouldAddInternalUserInterceptorToRegistry() {
         when(registry.addInterceptor(any(InternalUserInterceptor.class)))
                 .thenReturn(interceptorRegistration);
-
+        when(interceptorRegistration.addPathPatterns(any(String[].class)))
+                .thenReturn(interceptorRegistration);
         webConfig.addInterceptors(registry);
 
         verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/acsp-members/**");
+        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/identity/**");
     }
 
     @Test
