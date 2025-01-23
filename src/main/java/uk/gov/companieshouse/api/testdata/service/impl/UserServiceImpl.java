@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserData create(UserSpec userSpec) throws DataException {
-        var randomId = randomService.getString(24).toLowerCase();
+        var randomId = randomService.getString(23).toLowerCase();
         final String password = userSpec.getPassword();
         final var user = new User();
         if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {

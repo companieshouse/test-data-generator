@@ -23,6 +23,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -30,12 +32,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -70,6 +72,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
+    private DataService<IdentityData, IdentitySpec> identityService;
+    @Autowired
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
 
     @Value("${api.url}")
@@ -97,12 +101,12 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyProfileService.create(spec);
             this.filingHistoryService.create(spec);
             this.appointmentService.create(spec);
+            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
             this.companyMetricsService.create(spec);
             this.companyPscStatementService.create(spec);
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
-            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
@@ -194,6 +198,34 @@ public class TestDataServiceImpl implements TestDataService {
             }
         }
         return this.userService.delete(userId);
+    }
+
+    @Override
+    public IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException {
+        if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
+            throw new DataException("User Id is required to create an identity");
+        }
+        if (identitySpec.getEmail() == null || identitySpec.getEmail().isEmpty()) {
+            throw new DataException("Email is required to create an identity");
+        }
+        if (identitySpec.getVerificationSource() == null
+                || identitySpec.getVerificationSource().isEmpty()) {
+            throw new DataException("Verification source is required to create an identity");
+        }
+        try {
+            return identityService.create(identitySpec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating identity", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteIdentityData(String identityId) throws DataException {
+        try {
+            return identityService.delete(identityId);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting identity", ex);
+        }
     }
 
     @Override
