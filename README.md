@@ -66,6 +66,19 @@ In order to use the generator, there are different possible endpoints that can b
     
     An usage example looks like this: `{ "email": "test@test.com", "user_id": "userid", "verification_source": "TEST" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/identity/{identityId}` will delete the test user identity. `identityId` is required to delete the user identity.
+
+#### Creating Acsp Members and Acsp Profiles
+- POST: Sending a POST request to create Acsp Members and Acsp Profiles `{Base URL}/test-data/acsp-members` will generate a new Acsp Member and Acsp Profile. The request body must include mandatory `userId` and optional `AcspMembersSpec` and `AcspProfile` parameter to customise the generated Acsp Member and Acsp Profile.
+    - `userId`: The User Id of user from the user db. This is mandatory.
+    - `userRole`: this is the role of the ACSP Member (owner, standard or Admin).
+    - `status`: Status of the Acsp member (active, ceased, suspended),
+    - `acspProfile`: {
+    - `type`: company type of the AcspProfile. This is optional with a default of `ltd`, when not provided
+    - `status`: Status of the Acsp Profile. This is optional with a default of `active` when not provided
+    
+    A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "admin","status": "active","acspProfile": {"type": "ltd","status": "active"}}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
+
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 

@@ -27,15 +27,6 @@ public class AcspMembers {
     @Field("added_at")
     private Date addedAt;
 
-    @Field("added_by")
-    private String addedBy;
-
-    @Field("removed_at")
-    private Date removedAt;
-
-    @Field("removed_by")
-    private String removedBy;
-
     @Field("status")
     private String status;
 
@@ -67,18 +58,6 @@ public class AcspMembers {
 
     public Date getAddedAt() {
         return addedAt;
-    }
-
-    public String getAddedBy() {
-        return addedBy;
-    }
-
-    public Date getRemovedAt() {
-        return removedAt;
-    }
-
-    public String getRemovedBy() {
-        return removedBy;
     }
 
     public String getStatus() {
@@ -115,18 +94,6 @@ public class AcspMembers {
 
     public void setAddedAt(Date addedAt) {
         this.addedAt = addedAt;
-    }
-
-    public void setAddedBy(String addedBy) {
-        this.addedBy = addedBy;
-    }
-
-    public void setRemovedAt(Date removedAt) {
-        this.removedAt = removedAt;
-    }
-
-    public void setRemovedBy(String removedBy) {
-        this.removedBy = removedBy;
     }
 
     public void setStatus(String status) {

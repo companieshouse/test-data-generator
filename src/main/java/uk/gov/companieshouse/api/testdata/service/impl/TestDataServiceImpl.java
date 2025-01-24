@@ -236,18 +236,29 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         try {
-            var  acspProfileSpec = new AcspProfileSpec();
+            var acspProfileSpec = new AcspProfileSpec();
             if (spec.getAcspProfile() != null) {
                 acspProfileSpec.setStatus(spec.getAcspProfile().getStatus());
             }
             if (spec.getAcspProfile() != null) {
                 acspProfileSpec.setType(spec.getAcspProfile().getType());
             }
-            var acspProfileData = this.acspProfileService.create(acspProfileSpec);
+
+            AcspProfileData acspProfileData;
+            try {
+                acspProfileData = this.acspProfileService.create(acspProfileSpec);
+            } catch (Exception ex) {
+                throw new DataException("Error creating ACSP profile", ex);
+            }
 
             spec.setAcspNumber(acspProfileData.getAcspNumber());
 
-            var createdMember = this.acspMembersService.create(spec);
+            AcspMembersData createdMember;
+            try {
+                createdMember = this.acspMembersService.create(spec);
+            } catch (Exception ex) {
+                throw new DataException("Error creating ACSP member", ex);
+            }
 
             return new AcspMembersData(
                     createdMember.getAcspMemberId(),
@@ -272,9 +283,17 @@ public class TestDataServiceImpl implements TestDataService {
                 var member = maybeMember.get();
                 String acspNumber = member.getAcspNumber();
 
-                acspMembersService.delete(acspMemberId);
+                try {
+                    acspMembersService.delete(acspMemberId);
+                } catch (Exception ex) {
+                    suppressedExceptions.add(new DataException("Error deleting ACSP member", ex));
+                }
 
-                this.acspProfileService.delete(acspNumber);
+                try {
+                    this.acspProfileService.delete(acspNumber);
+                } catch (Exception ex) {
+                    suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
+                }
             } else {
                 return false;
             }

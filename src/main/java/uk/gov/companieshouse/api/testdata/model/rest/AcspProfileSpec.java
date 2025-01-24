@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.util.List;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 
 public class AcspProfileSpec {
     @JsonProperty

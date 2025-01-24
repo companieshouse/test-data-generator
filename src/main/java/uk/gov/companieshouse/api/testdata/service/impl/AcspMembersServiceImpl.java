@@ -22,20 +22,14 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
     private AcspMembersRepository repository;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private RandomService randomService;
 
 
     @Override
     public AcspMembersData create(AcspMembersSpec acspMembersSpec) throws DataException {
-        if (acspMembersSpec == null) {
-            throw new DataException("AcspMembersSpec cannot be null");
-        }
-
         String randomId = randomService.getString(12);
         AcspMembers acspMembers = new AcspMembers();
+        Date currentDate = Date.from(Instant.now());
 
         acspMembers.setAcspMemberId(randomId);
         acspMembers.setAcspNumber(acspMembersSpec.getAcspNumber());
@@ -44,8 +38,8 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
                 "member"));
         acspMembers.setStatus(Objects.requireNonNullElse(acspMembersSpec.getStatus(),
                 "active"));
-        acspMembers.setCreatedAt(Date.from(Instant.now()));
-        acspMembers.setAddedAt(Date.from(Instant.now()));
+        acspMembers.setCreatedAt(currentDate);
+        acspMembers.setAddedAt(currentDate);
         acspMembers.setEtag(randomService.getEtag());
         acspMembers.setVersion(0);
 

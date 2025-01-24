@@ -29,6 +29,7 @@ import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -329,6 +330,11 @@ class TestDataControllerTest {
     @Test
     void createAcspMember() throws Exception {
         AcspMembersSpec request = new AcspMembersSpec();
+        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
+        request.setUserRole("role");
+        request.setStatus("active");
+        request.setAcspProfile(new AcspProfileSpec());
+
         AcspMembersData acspMember = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
         when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);

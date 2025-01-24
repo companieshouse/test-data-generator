@@ -5,5 +5,5 @@ import org.springframework.data.repository.NoRepositoryBean;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 
 @NoRepositoryBean
-public interface AcspRepository extends MongoRepository<AcspProfile, String> {
+public interface AcspProfileRepository extends MongoRepository<AcspProfile, String> {
 }

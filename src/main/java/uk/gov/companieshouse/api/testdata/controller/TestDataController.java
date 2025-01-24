@@ -143,7 +143,7 @@ public class TestDataController {
         AcspMembersData createdAcspMember = testDataService.createAcspMembersData(request);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("acsp member id", createdAcspMember.getAcspMemberId());
+        data.put("acsp-member-id", createdAcspMember.getAcspMemberId());
         LOG.info("New acsp member created", data);
         return new ResponseEntity<>(createdAcspMember, HttpStatus.CREATED);
     }
@@ -153,15 +153,15 @@ public class TestDataController {
                                                                     String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
-        response.put("acsp member id", acspMemberId);
+        response.put("acsp-member-id", acspMemberId);
         boolean deleteAcspMember = testDataService.deleteAcspMembersData(acspMemberId);
 
         if (deleteAcspMember) {
-            LOG.info("Acsp Member deleted", response);
+            LOG.info("Acsp Member Deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             response.put("status", HttpStatus.NOT_FOUND);
-            LOG.info("Acsp member not found", response);
+            LOG.info("Acsp Member Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
