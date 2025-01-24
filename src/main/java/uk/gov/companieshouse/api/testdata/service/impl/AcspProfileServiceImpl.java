@@ -21,9 +21,9 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
     private RandomService randomService;
 
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
-        String randomId = randomService.getString(8);
+        var randomId = randomService.getString(8);
 
-        AcspProfile profile = new AcspProfile();
+        var profile = new AcspProfile();
         profile.setId(randomId);
         profile.setVersion(0L);
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
