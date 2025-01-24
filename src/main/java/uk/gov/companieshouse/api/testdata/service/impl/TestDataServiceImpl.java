@@ -243,7 +243,7 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         try {
-            AcspProfileData acspProfileData = createAcspProfile(acspProfileSpec);
+            var acspProfileData = createAcspProfile(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
 
             AcspMembersData createdMember = createAcspMember(spec);
@@ -298,7 +298,7 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         if (!suppressedExceptions.isEmpty()) {
-            DataException ex = new DataException("Error deleting acsp member's data");
+            var ex = new DataException("Error deleting acsp member's data");
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
