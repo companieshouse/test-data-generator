@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,10 +57,8 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfileWithDefaultAmlDetails() throws DataException {
+    void createAcspProfileWithDefaultValues() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
-        spec.setStatus("active");
-        spec.setType("ltd");
 
         when(randomService.getString(8)).thenReturn("randomId");
         AcspProfile savedProfile = new AcspProfile();
@@ -71,7 +70,17 @@ class AcspProfileServiceImplTest {
         assertNotNull(result);
         assertEquals("randomId", result.getAcspNumber());
 
-        verify(repository).save(any(AcspProfile.class));
+        ArgumentCaptor<AcspProfile> captor = ArgumentCaptor.forClass(AcspProfile.class);
+        verify(repository).save(captor.capture());
+
+        AcspProfile captured = captor.getValue();
+        assertEquals("randomId", captured.getId());
+        assertEquals("randomId", captured.getAcspNumber());
+        assertEquals("active", captured.getStatus()); // Default value
+        assertEquals("ltd", captured.getType()); // Default value
+        assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
+        assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+        assertEquals(0L, captured.getVersion());
     }
 
     @Test

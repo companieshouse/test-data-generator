@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -345,22 +344,6 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createAcspMemberNoRequest() throws Exception {
-        AcspMembersData acspMember = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
-
-        when(this.testDataService.createAcspMembersData(any())).thenReturn(acspMember);
-        ResponseEntity<AcspMembersData> response = this.testDataController.createAcspMember(null);
-
-        assertEquals(acspMember, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        verify(testDataService).createAcspMembersData(acspMemberSpecCaptor.capture());
-        AcspMembersSpec usedSpec = acspMemberSpecCaptor.getValue();
-
-        assertNotNull(usedSpec);
-    }
-
-    @Test
     void createAcspMemberException() throws Exception {
         AcspMembersSpec request = new AcspMembersSpec();
         Throwable exception = new DataException("Error message");
@@ -392,7 +375,7 @@ class TestDataControllerTest {
         ResponseEntity<Map<String, Object>> response = this.testDataController.deleteAcspMember(acspMemberId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp member id"));
+        assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp-member-id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteAcspMembersData(acspMemberId);

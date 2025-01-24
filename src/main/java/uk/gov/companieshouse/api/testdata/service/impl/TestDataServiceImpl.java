@@ -230,7 +230,6 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {
-
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create an ACSP member");
         }

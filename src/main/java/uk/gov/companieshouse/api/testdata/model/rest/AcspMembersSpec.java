@@ -8,7 +8,7 @@ public class AcspMembersSpec {
     @JsonProperty
     private String acspNumber;
 
-    @JsonProperty
+    @JsonProperty("user_id")
     @NotNull(message = "User not present")
     private String userId;
 

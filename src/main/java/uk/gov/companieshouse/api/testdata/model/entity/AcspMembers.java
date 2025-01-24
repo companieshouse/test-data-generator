@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
-import java.util.Date;
+import java.time.Instant;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -22,10 +22,10 @@ public class AcspMembers {
     private String userRole;
 
     @Field("created_at")
-    private Date createdAt;
+    private Instant createdAt;
 
     @Field("added_at")
-    private Date addedAt;
+    private Instant addedAt;
 
     @Field("status")
     private String status;
@@ -52,11 +52,11 @@ public class AcspMembers {
         return userRole;
     }
 
-    public Date getCreatedAt() {
+    public Instant getCreatedAt() {
         return createdAt;
     }
 
-    public Date getAddedAt() {
+    public Instant getAddedAt() {
         return addedAt;
     }
 
@@ -88,11 +88,11 @@ public class AcspMembers {
         this.userRole = userRole;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
 
-    public void setAddedAt(Date addedAt) {
+    public void setAddedAt(Instant addedAt) {
         this.addedAt = addedAt;
     }
 

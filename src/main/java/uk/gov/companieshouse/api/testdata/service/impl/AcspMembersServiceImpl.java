@@ -1,7 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
-import java.util.Date;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -29,7 +28,7 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
     public AcspMembersData create(AcspMembersSpec acspMembersSpec) throws DataException {
         String randomId = randomService.getString(12);
         AcspMembers acspMembers = new AcspMembers();
-        Date currentDate = Date.from(Instant.now());
+        var currentDate = getCurrentDateTime();
 
         acspMembers.setAcspMemberId(randomId);
         acspMembers.setAcspNumber(acspMembersSpec.getAcspNumber());
@@ -59,5 +58,9 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
         var acspMembers = repository.findById(acspMemberId);
         acspMembers.ifPresent(repository::delete);
         return acspMembers.isPresent();
+    }
+
+    protected Instant getCurrentDateTime() {
+        return Instant.now().atZone(ZoneOffset.UTC).toInstant();
     }
 }

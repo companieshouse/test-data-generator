@@ -69,14 +69,15 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating Acsp Members and Acsp Profiles
 - POST: Sending a POST request to create Acsp Members and Acsp Profiles `{Base URL}/test-data/acsp-members` will generate a new Acsp Member and Acsp Profile. The request body must include mandatory `userId` and optional `AcspMembersSpec` and `AcspProfile` parameter to customise the generated Acsp Member and Acsp Profile.
-    - `userId`: The User Id of user from the user db. This is mandatory.
-    - `userRole`: this is the role of the ACSP Member (owner, standard or Admin).
-    - `status`: Status of the Acsp member (active, ceased, suspended),
+    - `userId`: The User ID of user from the user db. This is mandatory.
+    - `userRole`: This is the role of the ACSP Member. This is optional
+    - `status`: Status of the Acsp Member. This is optional
     - `acspProfile`: {
-    - `type`: company type of the AcspProfile. This is optional with a default of `ltd`, when not provided
-    - `status`: Status of the Acsp Profile. This is optional with a default of `active` when not provided
+      - `type`: company type of the AcspProfile. This is optional with a defaults to `ltd`.
+      - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
+    - }
     
-    A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "admin","status": "active","acspProfile": {"type": "ltd","status": "active"}}`
+    A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test"}}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
 
 ## Environment Variables

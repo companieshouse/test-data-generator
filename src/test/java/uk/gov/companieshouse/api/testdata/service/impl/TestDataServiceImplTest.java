@@ -928,8 +928,9 @@ class TestDataServiceImplTest {
         assertEquals(ex, exception.getCause());
         verify(identityService, times(1)).delete(identityId);
     }
+
     @Test
-    void createAcspMembersData() throws DataException {
+        void createAcspMembersData() throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
         AcspProfileSpec acspProfileSpec = new AcspProfileSpec();
@@ -965,10 +966,61 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenThrow(new DataException("Error"));
+        when(acspProfileService.create(any(AcspProfileSpec.class))).thenThrow(new DataException("Error creating ACSP profile"));
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error", exception.getMessage());
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile", exception.getMessage());
+    }
+
+    @Test
+    void createAcspMembersDataWithDefaultProfileValues() throws DataException {
+        AcspMembersSpec spec = new AcspMembersSpec();
+        spec.setUserId("userId");
+
+        AcspProfileSpec acspProfileSpec = new AcspProfileSpec();
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+
+        when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
+        when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(acspMembersData);
+
+        AcspMembersData result = testDataService.createAcspMembersData(spec);
+
+        assertNotNull(result);
+        assertEquals("memberId", result.getAcspMemberId());
+        assertEquals("acspNumber", result.getAcspNumber());
+        assertEquals("userId", result.getUserId());
+        assertEquals("active", result.getStatus());
+        assertEquals("role", result.getUserRole());
+
+        verify(acspProfileService).create(any(AcspProfileSpec.class));
+        verify(acspMembersService).create(any(AcspMembersSpec.class));
+    }
+
+    @Test
+    void createAcspMembersDataProfileCreationException() throws DataException {
+        AcspMembersSpec spec = new AcspMembersSpec();
+        spec.setUserId("userId");
+
+        when(acspProfileService.create(any(AcspProfileSpec.class))).thenThrow(new DataException("Error creating ACSP profile"));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile", exception.getMessage());
+    }
+
+    @Test
+    void createAcspMembersDataMemberCreationException() throws DataException {
+        AcspMembersSpec spec = new AcspMembersSpec();
+        spec.setUserId("userId");
+
+        AcspProfileSpec acspProfileSpec = new AcspProfileSpec();
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+
+        when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
+        when(acspMembersService.create(any(AcspMembersSpec.class))).thenThrow(new DataException("Error creating ACSP member"));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP member", exception.getMessage());
     }
 
     @Test

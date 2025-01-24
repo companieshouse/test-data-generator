@@ -6,16 +6,21 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -35,6 +40,7 @@ class AcspMembersServiceImplTest {
     private RandomService randomService;
 
     @InjectMocks
+    @Spy
     private AcspMembersServiceImpl service;
 
     @Test
@@ -44,6 +50,9 @@ class AcspMembersServiceImplTest {
         spec.setUserId("userId");
         spec.setUserRole("role");
         spec.setStatus("active");
+
+        final var createdDate = Instant.now();
+        doReturn(createdDate).when(service).getCurrentDateTime();
 
         when(randomService.getString(12)).thenReturn("randomId");
         when(randomService.getEtag()).thenReturn("etag");
@@ -57,13 +66,65 @@ class AcspMembersServiceImplTest {
         assertEquals("active", result.getStatus());
         assertEquals("role", result.getUserRole());
 
-        verify(repository).save(any(AcspMembers.class));
+        ArgumentCaptor<AcspMembers> captor = ArgumentCaptor.forClass(AcspMembers.class);
+        verify(repository).save(captor.capture());
+
+        AcspMembers captured = captor.getValue();
+        assertEquals("randomId", captured.getAcspMemberId());
+        assertEquals("acspNumber", captured.getAcspNumber());
+        assertEquals("userId", captured.getUserId());
+        assertEquals("active", captured.getStatus());
+        assertEquals("role", captured.getUserRole());
+        assertEquals(createdDate, captured.getCreatedAt());
+        assertEquals(createdDate, captured.getAddedAt());
+        assertEquals(0L, captured.getVersion());
+        assertEquals("etag", captured.getEtag());
     }
 
     @Test
-    void createAcspMemberNullSpec() {
-        DataException exception = assertThrows(DataException.class, () -> service.create(null));
-        assertEquals("AcspMembersSpec cannot be null", exception.getMessage());
+    void createAcspMemberWithDefaultValues() throws DataException {
+        AcspMembersSpec spec = new AcspMembersSpec();
+        spec.setAcspNumber("acspNumber");
+        spec.setUserId("userId");
+
+        final var createdDate = Instant.now();
+        doReturn(createdDate).when(service).getCurrentDateTime();
+
+        when(randomService.getString(12)).thenReturn("randomId");
+        when(randomService.getEtag()).thenReturn("etag");
+
+        AcspMembersData result = service.create(spec);
+
+        assertNotNull(result);
+        assertEquals("randomId", result.getAcspMemberId());
+        assertEquals("acspNumber", result.getAcspNumber());
+        assertEquals("userId", result.getUserId());
+        assertEquals("active", result.getStatus());
+        assertEquals("member", result.getUserRole());
+
+        ArgumentCaptor<AcspMembers> captor = ArgumentCaptor.forClass(AcspMembers.class);
+        verify(repository).save(captor.capture());
+
+        AcspMembers captured = captor.getValue();
+        assertEquals("randomId", captured.getAcspMemberId());
+        assertEquals("acspNumber", captured.getAcspNumber());
+        assertEquals("userId", captured.getUserId());
+        assertEquals("active", captured.getStatus());
+        assertEquals("member", captured.getUserRole());
+        assertEquals(createdDate, captured.getCreatedAt());
+        assertEquals(createdDate, captured.getAddedAt());
+        assertEquals(0L, captured.getVersion());
+        assertEquals("etag", captured.getEtag());
+    }
+
+    @Test
+    void deleteAcspMemberException() {
+        AcspMembers acspMember = new AcspMembers();
+        when(repository.findById("memberId")).thenReturn(Optional.of(acspMember));
+        doThrow(new RuntimeException("Deletion error")).when(repository).delete(acspMember);
+
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> service.delete("memberId"));
+        assertEquals("Deletion error", exception.getMessage());
     }
 
     @Test
