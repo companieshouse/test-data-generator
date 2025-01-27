@@ -71,7 +71,8 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
-        assertCreateCompanyProfile(spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
+        assertCreateCompanyProfile(spec.getCompanyStatus(),
+                spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
@@ -79,7 +80,8 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
-        assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
+                spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
     // Test that a company profile is deleted
@@ -107,7 +109,8 @@ class CompanyProfileServiceImplTest {
     void createDissolvedCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        assertCreateCompanyProfile(spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
+        assertCreateCompanyProfile(spec.getCompanyStatus(),
+                spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
     }
 
     // Test that a company profile is created with plc company type
@@ -115,11 +118,13 @@ class CompanyProfileServiceImplTest {
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
-        assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
+                spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
 
-    private void assertCreateCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
+    private void assertCreateCompanyProfile(String companyStatus, String jurisdiction,
+                                            String companyType, Boolean hasInsolvencyHistory) {
         Address mockRegiseteredAddress = new Address("", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -127,7 +132,8 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
         assertEquals(savedProfile, returnedProfile);
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
         CompanyProfile profile = companyProfileCaptor.getValue();
@@ -149,13 +155,15 @@ class CompanyProfileServiceImplTest {
         assertOnAccounts(profile.getAccounts());
         assertOnDateOfCreation(profile.getDateOfCreation());
         assertEquals("/company/" + COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/" + COMPANY_NUMBER + "/filing-history", profile.getLinks().getFilingHistory());
+        assertEquals("/company/" + COMPANY_NUMBER + "/filing-history",
+                profile.getLinks().getFilingHistory());
         assertEquals("/company/" + COMPANY_NUMBER + "/officers", profile.getLinks().getOfficers());
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
     }
 
-    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement confirmationStatement) {
+    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement
+                                                       confirmationStatement) {
         assertNotNull(confirmationStatement.getNextMadeUpTo());
         assertEquals(false, confirmationStatement.getOverdue());
         assertNotNull(confirmationStatement.getNextDue());
@@ -199,7 +207,8 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
         assertEquals(savedProfile, returnedProfile);
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
         CompanyProfile profile = companyProfileCaptor.getValue();
@@ -220,7 +229,8 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
         assertEquals(savedProfile, returnedProfile);
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor =
+                ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
         CompanyProfile profile = companyProfileCaptor.getValue();
