@@ -45,8 +45,9 @@ In order to use the generator, there are different possible endpoints that can b
   - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`). Defaults to `england_wales`.
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
   - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
+  - `subtype`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype. 
 
-  An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc"}`
+  An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "subtype":"community-interest-company"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
