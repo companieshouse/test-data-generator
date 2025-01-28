@@ -237,4 +237,26 @@ class CompanyProfileServiceImplTest {
         assertNull(profile.getSubtype());
         assertNull(profile.getIsCommunityInterestCompany());
     }
+
+    @Test
+    void createCompanyWithNonCicSubType() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setSubType("private-fund-limited-partnership");
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor =
+                ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals("private-fund-limited-partnership", profile.getSubtype());
+        assertFalse(profile.getIsCommunityInterestCompany());
+    }
 }
