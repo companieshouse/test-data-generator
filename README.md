@@ -69,11 +69,11 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating Acsp Members and Acsp Profiles
 - POST: Sending a POST request to create Acsp Members and Acsp Profiles `{Base URL}/test-data/acsp-members` will generate a new Acsp Member and Acsp Profile. The request body must include mandatory `userId` and optional `AcspMembersSpec` and `AcspProfile` parameter to customise the generated Acsp Member and Acsp Profile.
-    - `userId`: The User ID of user from the user db. This is mandatory.
-    - `userRole`: This is the role of the ACSP Member. This is optional
+    - `user_id`: The User ID of user from the user db. This is mandatory.
+    - `user_role`: This is the role of the ACSP Member. This is optional
     - `status`: Status of the Acsp Member. This is optional
-    - `acspProfile`: {
-      - `type`: company type of the AcspProfile. This is optional with a defaults to `ltd`.
+    - `acsp_profile`: {
+      - `type`: Company type of the AcspProfile. This is optional with a defaults to `ltd`.
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
     - }
     
