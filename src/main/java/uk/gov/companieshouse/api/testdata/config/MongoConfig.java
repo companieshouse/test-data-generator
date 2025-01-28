@@ -81,6 +81,17 @@ public class MongoConfig {
     }
 
     @Bean
+    public AcspProfileRepository acspProfileRepository() {
+        return getMongoRepositoryBean(AcspProfileRepository.class, "acsp_profile");
+    }
+
+    @Bean
+    public AcspMembersRepository acspMembersRepository() {
+        return getMongoRepositoryBean(AcspMembersRepository.class, "acsp_members");
+    }
+
+
+    @Bean
     public IdentityRepository identityRepository() {
         return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
     }

@@ -17,7 +17,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
@@ -27,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -62,9 +66,15 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private UserService userService;
     @Autowired
+    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    @Autowired
+    private AcspMembersRepository acspMembersRepository;
+    @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
     private DataService<IdentityData, IdentitySpec> identityService;
+    @Autowired
+    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -217,4 +227,99 @@ public class TestDataServiceImpl implements TestDataService {
             throw new DataException("Error deleting identity", ex);
         }
     }
+
+    @Override
+    public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create an ACSP member");
+        }
+
+        var acspProfileSpec = new AcspProfileSpec();
+        if (spec.getAcspProfile() != null) {
+            acspProfileSpec.setStatus(spec.getAcspProfile().getStatus());
+        }
+        if (spec.getAcspProfile() != null) {
+            acspProfileSpec.setType(spec.getAcspProfile().getType());
+        }
+
+        try {
+            var acspProfileData = createAcspProfile(acspProfileSpec);
+            spec.setAcspNumber(acspProfileData.getAcspNumber());
+
+            AcspMembersData createdMember = createAcspMember(spec);
+
+            return new AcspMembersData(
+                    createdMember.getAcspMemberId(),
+                    createdMember.getAcspNumber(),
+                    createdMember.getUserId(),
+                    createdMember.getStatus(),
+                    createdMember.getUserRole()
+            );
+
+        } catch (Exception ex) {
+            throw new DataException(ex);
+        }
+    }
+
+    private AcspProfileData createAcspProfile(AcspProfileSpec acspProfileSpec)
+            throws DataException {
+        try {
+            return this.acspProfileService.create(acspProfileSpec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating ACSP profile", ex);
+        }
+    }
+
+    private AcspMembersData createAcspMember(AcspMembersSpec spec) throws DataException {
+        try {
+            return this.acspMembersService.create(spec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating ACSP member", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteAcspMembersData(String acspMemberId) throws DataException {
+        List<Exception> suppressedExceptions = new ArrayList<>();
+
+        try {
+            var maybeMember = acspMembersRepository.findById(acspMemberId);
+            if (maybeMember.isPresent()) {
+                var member = maybeMember.get();
+                String acspNumber = member.getAcspNumber();
+
+                deleteAcspMember(acspMemberId, suppressedExceptions);
+                deleteAcspProfile(acspNumber, suppressedExceptions);
+            } else {
+                return false;
+            }
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+
+        if (!suppressedExceptions.isEmpty()) {
+            var ex = new DataException("Error deleting acsp member's data");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
+        }
+
+        return true;
+    }
+
+    private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
+        try {
+            acspMembersService.delete(acspMemberId);
+        } catch (Exception ex) {
+            suppressedExceptions.add(new DataException("Error deleting ACSP member", ex));
+        }
+    }
+
+    private void deleteAcspProfile(String acspNumber, List<Exception> suppressedExceptions) {
+        try {
+            this.acspProfileService.delete(acspNumber);
+        } catch (Exception ex) {
+            suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
+        }
+    }
+
 }
