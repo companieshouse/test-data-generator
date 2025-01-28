@@ -18,14 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -65,6 +58,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
     private DataService<IdentityData, IdentitySpec> identityService;
+    @Autowired
+    private DataService<CompanyAuthAllowListData, CompanyAuthAllowListSpec> companyAuthAllowListService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -215,6 +210,25 @@ public class TestDataServiceImpl implements TestDataService {
             return identityService.delete(identityId);
         } catch (Exception ex) {
             throw new DataException("Error deleting identity", ex);
+        }
+    }
+
+    @Override
+    public CompanyAuthAllowListData createCompanyAuthAllowListData(
+            CompanyAuthAllowListSpec spec) throws DataException {
+        if (spec.getEmailAddress() == null) {
+            throw new DataException("Email address is required to create a company auth allow list");
+        }
+        return companyAuthAllowListService.create(spec);
+    }
+
+    @Override
+    public boolean deleteCompanyAuthAllowListData(
+            String companyAuthAllowListId) throws DataException {
+        try {
+            return companyAuthAllowListService.delete(companyAuthAllowListId);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting company auth allow list", ex);
         }
     }
 }

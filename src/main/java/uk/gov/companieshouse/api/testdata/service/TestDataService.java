@@ -1,13 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 
 public interface TestDataService {
@@ -61,4 +55,16 @@ public interface TestDataService {
      * @throws DataException if there is an error during identity deletion
      */
     boolean deleteIdentityData(String identityId) throws DataException;
+
+    /**
+     * Creates a new company auth allow list data based on the provided specifications.
+     *
+     * @param companyAuthAllowListSpec the specifications of the company auth allow list to create
+     * @return the created company auth allow list data
+     * @throws DataException if there is an error during creation
+     */
+    CompanyAuthAllowListData createCompanyAuthAllowListData(
+            CompanyAuthAllowListSpec companyAuthAllowListSpec) throws DataException;
+
+    boolean deleteCompanyAuthAllowListData(String companyAuthAllowListId) throws DataException;
 }
