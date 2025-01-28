@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -64,12 +65,14 @@ class CompanyProfileServiceImplTest {
         savedProfile = new CompanyProfile();
     }
 
-    // Test that a company profile is created with default company type with England and Wales jurisdiction
+    // Test that a company profile is created with default company type
+    // with England and Wales jurisdiction
     @Test
     void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
-        assertCreateCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
+        assertCreateCompanyProfile(spec.getCompanyStatus(),
+                spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, false);
     }
 
     // Test that a company profile is created with default company status with SCOTLAND jurisdiction
@@ -77,7 +80,8 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithoutCompanyStatusAndWithScotland() {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
-        assertCreateCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
+                spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
     // Test that a company profile is deleted
@@ -105,7 +109,8 @@ class CompanyProfileServiceImplTest {
     void createDissolvedCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
-        assertCreateCompanyProfile( spec.getCompanyStatus(), spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
+        assertCreateCompanyProfile(spec.getCompanyStatus(),
+                spec.getJurisdiction().toString(), COMPANY_TYPE_LTD, true);
     }
 
     // Test that a company profile is created with plc company type
@@ -113,11 +118,13 @@ class CompanyProfileServiceImplTest {
     void createPlcCompany() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
-        assertCreateCompanyProfile( COMPANY_STATUS_ACTIVE, spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+        assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
+                spec.getJurisdiction().toString(), spec.getCompanyType(), false);
     }
 
 
-    private void assertCreateCompanyProfile(String companyStatus, String jurisdiction, String companyType, Boolean hasInsolvencyHistory) {
+    private void assertCreateCompanyProfile(String companyStatus, String jurisdiction,
+                                            String companyType, Boolean hasInsolvencyHistory) {
         Address mockRegiseteredAddress = new Address("", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -125,7 +132,8 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile returnedProfile = this.companyProfileService.create(spec);
         assertEquals(savedProfile, returnedProfile);
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
 
         CompanyProfile profile = companyProfileCaptor.getValue();
@@ -146,14 +154,16 @@ class CompanyProfileServiceImplTest {
         assertEquals(ETAG, profile.getEtag());
         assertOnAccounts(profile.getAccounts());
         assertOnDateOfCreation(profile.getDateOfCreation());
-        assertEquals("/company/"+COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/"+COMPANY_NUMBER+ "/persons-with-significant-control-statement",
+        assertEquals("/company/" + COMPANY_NUMBER, profile.getLinks().getSelf());
+        assertEquals("/company/" + COMPANY_NUMBER + "/filing-history",
+                profile.getLinks().getFilingHistory());
+        assertEquals("/company/" + COMPANY_NUMBER + "/officers", profile.getLinks().getOfficers());
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statement",
                 profile.getLinks().getPersonsWithSignificantControlStatement());
     }
 
-    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement confirmationStatement) {
+    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement
+                                                       confirmationStatement) {
         assertNotNull(confirmationStatement.getNextMadeUpTo());
         assertEquals(false, confirmationStatement.getOverdue());
         assertNotNull(confirmationStatement.getNextDue());
@@ -182,5 +192,71 @@ class CompanyProfileServiceImplTest {
 
         long days = Duration.between(t1, t2).toDays();
         assertTrue(days == 365 || days == 366); // cater for leap years
+    }
+
+    @Test
+    void createCompanyWithSubType() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setSubType("community-interest-company");
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals("community-interest-company", profile.getSubtype());
+        assertTrue(profile.getIsCommunityInterestCompany());
+    }
+
+    @Test
+    void createCompanyWithoutSubType() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setSubType(null);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor =
+                ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNull(profile.getSubtype());
+        assertNull(profile.getIsCommunityInterestCompany());
+    }
+
+    @Test
+    void createCompanyWithNonCicSubType() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setSubType("private-fund-limited-partnership");
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor =
+                ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals("private-fund-limited-partnership", profile.getSubtype());
+        assertFalse(profile.getIsCommunityInterestCompany());
     }
 }

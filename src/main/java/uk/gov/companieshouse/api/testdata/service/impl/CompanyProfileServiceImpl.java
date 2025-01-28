@@ -41,6 +41,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final Jurisdiction jurisdiction = spec.getJurisdiction();
         final String companyStatus = spec.getCompanyStatus();
         final String companyType = spec.getCompanyType();
+        final String subType = spec.getSubType();
 
         LocalDate now = LocalDate.now();
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
@@ -87,6 +88,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
+        if (subType != null) {
+            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
+            profile.setSubtype(subType);
+        }
+
         return repository.save(profile);
     }
 
@@ -103,14 +109,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private Links createLinks(String companyNumber) {
-
         Links links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
         links.setFilingHistory(LINK_STEM + companyNumber + "/filing-history");
         links.setOfficers(LINK_STEM + companyNumber + "/officers");
-        links.setPersonsWithSignificantControlStatement(LINK_STEM + companyNumber +
-                "/persons-with-significant-control-statement");
-
+        links.setPersonsWithSignificantControlStatement(LINK_STEM + companyNumber
+                + "/persons-with-significant-control-statement");
         return links;
     }
 
