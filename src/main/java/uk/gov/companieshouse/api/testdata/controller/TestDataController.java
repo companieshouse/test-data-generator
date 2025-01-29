@@ -20,7 +20,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -130,35 +129,6 @@ public class TestDataController {
         } else {
             response.put("status", HttpStatus.NOT_FOUND);
             LOG.info("Identity not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PostMapping("/company-auth-allow-list")
-    public ResponseEntity<Map<String, Object>> createCompanyAuthAllowList(
-            @Valid @RequestBody() CompanyAuthAllowListSpec request) throws DataException {
-        var createdCompanyAuthAllowList = testDataService.createCompanyAuthAllowListData(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("company-auth-allow-list-id", createdCompanyAuthAllowList.getId());
-        LOG.info("New company auth allow list created", data);
-        return new ResponseEntity<>(data, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/company-auth-allow-list/{companyAuthAllowListId}")
-    public ResponseEntity<Map<String, Object>> deleteCompanyAuthAllowList(
-            @PathVariable("companyAuthAllowListId") String companyAuthAllowListId)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("company-auth-allow-list-id", companyAuthAllowListId);
-        boolean deleteCompanyAuthAllowList =
-                testDataService.deleteCompanyAuthAllowListData(companyAuthAllowListId);
-
-        if (deleteCompanyAuthAllowList) {
-            LOG.info("Company auth allow list deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put("status", HttpStatus.NOT_FOUND);
-            LOG.info("company-auth-allow-list-id not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

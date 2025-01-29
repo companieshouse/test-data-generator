@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 @Document(collection = "company_auth_allow_list")
 public class CompanyAuthAllowList {
 
+    @Id
     @Field("_id")
     private String id;
 

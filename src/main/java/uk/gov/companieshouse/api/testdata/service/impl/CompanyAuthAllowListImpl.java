@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -7,12 +8,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthAllowList;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthAllowListRepository;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyAuthAllowListImpl implements DataService<CompanyAuthAllowListData,
-        CompanyAuthAllowListSpec> {
+public class CompanyAuthAllowListImpl implements CompanyAuthAllowListService {
 
     @Autowired
     private CompanyAuthAllowListRepository repository;
@@ -35,5 +35,12 @@ public class CompanyAuthAllowListImpl implements DataService<CompanyAuthAllowLis
         var companyAuthAllowList = repository.findById(id);
         companyAuthAllowList.ifPresent(repository::delete);
         return companyAuthAllowList.isPresent();
+    }
+
+    @Override
+    public String getAuthId(String emailAddress) {
+        Optional<CompanyAuthAllowList> companyAuthAllowList
+                = repository.findByEmailAddress(emailAddress);
+        return companyAuthAllowList.map(CompanyAuthAllowList::getId).orElse(null);
     }
 }

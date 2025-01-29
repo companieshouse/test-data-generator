@@ -55,16 +55,4 @@ public interface TestDataService {
      * @throws DataException if there is an error during identity deletion
      */
     boolean deleteIdentityData(String identityId) throws DataException;
-
-    /**
-     * Creates a new company auth allow list data based on the provided specifications.
-     *
-     * @param companyAuthAllowListSpec the specifications of the company auth allow list to create
-     * @return the created company auth allow list data
-     * @throws DataException if there is an error during creation
-     */
-    CompanyAuthAllowListData createCompanyAuthAllowListData(
-            CompanyAuthAllowListSpec companyAuthAllowListSpec) throws DataException;
-
-    boolean deleteCompanyAuthAllowListData(String companyAuthAllowListId) throws DataException;
 }

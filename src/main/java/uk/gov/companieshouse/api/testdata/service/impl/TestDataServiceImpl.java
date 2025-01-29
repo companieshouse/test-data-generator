@@ -20,12 +20,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
 import uk.gov.companieshouse.api.testdata.model.rest.*;
 
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.*;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -59,7 +54,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<IdentityData, IdentitySpec> identityService;
     @Autowired
-    private DataService<CompanyAuthAllowListData, CompanyAuthAllowListSpec> companyAuthAllowListService;
+    private CompanyAuthAllowListService companyAuthAllowListService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -168,7 +163,13 @@ public class TestDataServiceImpl implements TestDataService {
                 roleService.create(roleData);
             }
         }
-        return userService.create(userSpec);
+        UserData userData = userService.create(userSpec);
+        if (userSpec.getIsCompanyAuthAllowList() != null && userSpec.getIsCompanyAuthAllowList()) {
+            CompanyAuthAllowListSpec companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
+            companyAuthAllowListSpec.setEmailAddress(userData.getEmail());
+            companyAuthAllowListService.create(companyAuthAllowListSpec);
+        }
+        return userData;
     }
 
     @Override
@@ -181,6 +182,10 @@ public class TestDataServiceImpl implements TestDataService {
             for (String roleId : user.getRoles()) {
                 roleService.delete(roleId);
             }
+        }
+        var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
+        if (allowListId != null) {
+            companyAuthAllowListService.delete(allowListId);
         }
         return this.userService.delete(userId);
     }
@@ -210,25 +215,6 @@ public class TestDataServiceImpl implements TestDataService {
             return identityService.delete(identityId);
         } catch (Exception ex) {
             throw new DataException("Error deleting identity", ex);
-        }
-    }
-
-    @Override
-    public CompanyAuthAllowListData createCompanyAuthAllowListData(
-            CompanyAuthAllowListSpec spec) throws DataException {
-        if (spec.getEmailAddress() == null) {
-            throw new DataException("Email address is required to create a company auth allow list");
-        }
-        return companyAuthAllowListService.create(spec);
-    }
-
-    @Override
-    public boolean deleteCompanyAuthAllowListData(
-            String companyAuthAllowListId) throws DataException {
-        try {
-            return companyAuthAllowListService.delete(companyAuthAllowListId);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting company auth allow list", ex);
         }
     }
 }
