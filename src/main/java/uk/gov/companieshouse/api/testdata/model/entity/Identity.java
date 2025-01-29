@@ -27,6 +27,9 @@ public class Identity {
     @Field("email")
     private String email;
 
+    @Field("secure_indicator")
+    private Boolean secureIndicator;
+
     public String getId() {
         return id;
     }
@@ -73,5 +76,13 @@ public class Identity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getSecureIndicator() {
+        return secureIndicator;
+    }
+
+    public void setSecureIndicator(Boolean secureIndicator) {
+        this.secureIndicator = secureIndicator;
     }
 }

@@ -34,6 +34,7 @@ public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpe
         identity.setStatus("VALID");
         identity.setUserId(identitySpec.getUserId());
         identity.setVerificationSource(identitySpec.getVerificationSource());
+        identity.setSecureIndicator(false);
         repository.save(identity);
         return new IdentityData(identity.getId());
     }
