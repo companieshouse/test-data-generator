@@ -187,9 +187,9 @@ public class TestDataServiceImpl implements TestDataService {
                 roleService.create(roleData);
             }
         }
-        UserData userData = userService.create(userSpec);
+        var userData = userService.create(userSpec);
         if (userSpec.getIsCompanyAuthAllowList() != null && userSpec.getIsCompanyAuthAllowList()) {
-            CompanyAuthAllowListSpec companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
+            var companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
             companyAuthAllowListSpec.setEmailAddress(userData.getEmail());
             companyAuthAllowListService.create(companyAuthAllowListSpec);
         }

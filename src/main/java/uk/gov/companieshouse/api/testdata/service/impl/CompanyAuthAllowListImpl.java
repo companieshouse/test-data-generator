@@ -24,7 +24,7 @@ public class CompanyAuthAllowListImpl implements CompanyAuthAllowListService {
     @Override
     public CompanyAuthAllowListData create(CompanyAuthAllowListSpec spec) throws DataException {
         var randomId = randomService.getString(24).toLowerCase();
-        CompanyAuthAllowList companyAuthAllowList = new CompanyAuthAllowList();
+        var companyAuthAllowList = new CompanyAuthAllowList();
         companyAuthAllowList.setId(randomId);
         companyAuthAllowList.setEmailAddress(spec.getEmailAddress());
         repository.save(companyAuthAllowList);
