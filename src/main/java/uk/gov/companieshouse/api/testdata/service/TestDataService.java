@@ -1,8 +1,14 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
-
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 public interface TestDataService {
     /**
@@ -55,4 +61,21 @@ public interface TestDataService {
      * @throws DataException if there is an error during identity deletion
      */
     boolean deleteIdentityData(String identityId) throws DataException;
+
+    /**
+     * Creates a new acsp member test data based on the provided user specifications.
+     *
+     * @param acspMembersSpec the specifications of the acsp member to create
+     * @return the created acsp members' test data
+     * @throws DataException if there is an error during user creation
+     */
+    AcspMembersData createAcspMembersData(AcspMembersSpec acspMembersSpec) throws DataException;
+
+    /**
+     * Deletes an acsp members' test data by their user id.
+     *
+     * @param acspMemberId the ID of the profile to delete
+     * @throws DataException if there is an error during user deletion
+     */
+    boolean deleteAcspMembersData(String acspMemberId) throws DataException;
 }

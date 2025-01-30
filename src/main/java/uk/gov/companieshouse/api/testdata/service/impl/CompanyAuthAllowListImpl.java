@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -39,8 +40,12 @@ public class CompanyAuthAllowListImpl implements CompanyAuthAllowListService {
 
     @Override
     public String getAuthId(String emailAddress) {
-        Optional<CompanyAuthAllowList> companyAuthAllowList
-                = repository.findByEmailAddress(emailAddress);
-        return companyAuthAllowList.map(CompanyAuthAllowList::getId).orElse(null);
+        if (emailAddress != null) {
+            Optional<CompanyAuthAllowList> companyAuthAllowList
+                    = repository.findByEmailAddress(emailAddress);
+            return companyAuthAllowList.map(CompanyAuthAllowList::getId).orElse(null);
+        } else {
+            return null;
+        }
     }
 }

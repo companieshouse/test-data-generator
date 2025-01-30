@@ -1,12 +1,12 @@
 
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
+import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
-import java.util.List;
 
 @Document(collection = "company_profile")
 public class CompanyProfile {
@@ -164,6 +164,10 @@ public class CompanyProfile {
     private Boolean hasCharges;
     @Field("data.can_file")
     private Boolean canFile;
+    @Field("data.subtype")
+    private String subtype;
+    @Field("data.is_community_interest_company")
+    private Boolean isCommunityInterestCompany;
 
     public String getId() {
         return id;
@@ -213,7 +217,8 @@ public class CompanyProfile {
         return undeliverableRegisteredOfficeAddress;
     }
 
-    public void setUndeliverableRegisteredOfficeAddress(Boolean undeliverableRegisteredOfficeAddress) {
+    public void setUndeliverableRegisteredOfficeAddress(
+            Boolean undeliverableRegisteredOfficeAddress) {
         this.undeliverableRegisteredOfficeAddress = undeliverableRegisteredOfficeAddress;
     }
 
@@ -299,5 +304,21 @@ public class CompanyProfile {
 
     public void setCanFile(Boolean canFile) {
         this.canFile = canFile;
+    }
+
+    public String getSubtype() {
+        return subtype;
+    }
+
+    public void setSubtype(String subtype) {
+        this.subtype = subtype;
+    }
+
+    public Boolean getIsCommunityInterestCompany() {
+        return isCommunityInterestCompany;
+    }
+
+    public void setIsCommunityInterestCompany(Boolean isCommunityInterestCompany) {
+        this.isCommunityInterestCompany = isCommunityInterestCompany;
     }
 }
