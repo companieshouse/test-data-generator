@@ -103,4 +103,10 @@ class CompanyAuthAllowListImplTest {
 
         assertNull(authId);
     }
+
+    @Test
+    void getAuthIdNullEmail() {
+        String authId = companyAuthAllowListImpl.getAuthId(null);
+        assertNull(authId);
+    }
 }

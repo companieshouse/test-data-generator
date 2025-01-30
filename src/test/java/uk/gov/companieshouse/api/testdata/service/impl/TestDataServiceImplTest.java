@@ -1108,6 +1108,26 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void createUserDataWithNullCompanyAuthAllowList() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setIsCompanyAuthAllowList(null);
+
+        UserData userData = new UserData("userId", "test@example.com", "Forename", "Surname");
+        when(userService.create(userSpec)).thenReturn(userData);
+
+        UserData result = testDataService.createUserData(userSpec);
+
+        assertEquals("test@example.com", result.getEmail());
+        assertEquals("Forename", result.getForename());
+        assertEquals("Surname", result.getSurname());
+        assertEquals("userId", result.getId());
+        assertNull(userSpec.getIsCompanyAuthAllowList());
+        verify(userService, times(1)).create(userSpec);
+        verify(companyAuthAllowListService, never()).create(any(CompanyAuthAllowListSpec.class));
+    }
+
+    @Test
     void deleteCompanyAuthAllowList() {
         String userId = "userId";
         User user = new User();
@@ -1133,6 +1153,72 @@ class TestDataServiceImplTest {
         when(userService.getUserById(userId)).thenReturn(Optional.of(user));
         when(userService.delete(userId)).thenReturn(true);
         when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataWithEmailAndAllowListId() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("email@example.com");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("authId");
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, times(1)).delete("authId");
+    }
+
+    @Test
+    void deleteUserDataWithEmailAndNoAllowListId() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("email@example.com");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataWithNullEmail() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail(null);
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataWithEmptyEmail() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
 
         boolean result = testDataService.deleteUserData(userId);
 
