@@ -73,6 +73,8 @@ class IdentityServiceImplTest {
         assertEquals(createdDate, savedIdentity.getCreated(),
                 "Created date should be set to the current date");
         verify(identityServiceImpl).getCurrentDateTime();
+        assertEquals(false, savedIdentity.getSecureIndicator(),
+                "Secure indicator should be false");
     }
 
     @Test
