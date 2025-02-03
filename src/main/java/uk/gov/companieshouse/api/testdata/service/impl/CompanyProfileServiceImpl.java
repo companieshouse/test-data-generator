@@ -70,7 +70,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
         profile.setUndeliverableRegisteredOfficeAddress(false);
-        profile.setHasSuperSecurePscs(hasSuperSecurePscs);
+
+        if (hasSuperSecurePscs != null) {
+            profile.setHasSuperSecurePscs(hasSuperSecurePscs);
+        }
         profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
         profile.setSicCodes(Collections.singletonList("71200"));
 
