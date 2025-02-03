@@ -223,9 +223,11 @@ public class CompanyProfile {
             Boolean undeliverableRegisteredOfficeAddress) {
         this.undeliverableRegisteredOfficeAddress = undeliverableRegisteredOfficeAddress;
     }
+
     public Boolean getHasSuperSecurePscs() {
         return hasSuperSecurePscs;
     }
+
     public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
     }
