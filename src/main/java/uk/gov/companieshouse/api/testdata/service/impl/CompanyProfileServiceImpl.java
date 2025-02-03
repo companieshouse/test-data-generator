@@ -42,6 +42,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String companyStatus = spec.getCompanyStatus();
         final String companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
+        final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
 
         LocalDate now = LocalDate.now();
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
@@ -69,6 +70,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
         profile.setUndeliverableRegisteredOfficeAddress(false);
+        profile.setHasSuperSecurePscs(hasSuperSecurePscs);
         profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
         profile.setSicCodes(Collections.singletonList("71200"));
 

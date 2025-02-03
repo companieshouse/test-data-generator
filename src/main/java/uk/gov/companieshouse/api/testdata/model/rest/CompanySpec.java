@@ -31,6 +31,9 @@ public class CompanySpec {
             message = "Invalid company subtype")
     private String subType;
 
+    @JsonProperty("has_super_secure_pscs")
+    private Boolean hasSuperSecurePscs;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -73,5 +76,13 @@ public class CompanySpec {
 
     public void setSubType(String subType) {
         this.subType = subType;
+    }
+
+    public Boolean getHasSuperSecurePscs() {
+        return hasSuperSecurePscs;
+    }
+
+    public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
+        this.hasSuperSecurePscs = hasSuperSecurePscs;
     }
 }
