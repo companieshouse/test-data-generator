@@ -21,6 +21,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
@@ -31,6 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -75,6 +77,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<IdentityData, IdentitySpec> identityService;
     @Autowired
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    @Autowired
+    private CompanyAuthAllowListService companyAuthAllowListService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -183,7 +187,13 @@ public class TestDataServiceImpl implements TestDataService {
                 roleService.create(roleData);
             }
         }
-        return userService.create(userSpec);
+        var userData = userService.create(userSpec);
+        if (userSpec.getIsCompanyAuthAllowList() != null && userSpec.getIsCompanyAuthAllowList()) {
+            var companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
+            companyAuthAllowListSpec.setEmailAddress(userData.getEmail());
+            companyAuthAllowListService.create(companyAuthAllowListSpec);
+        }
+        return userData;
     }
 
     @Override
@@ -195,6 +205,12 @@ public class TestDataServiceImpl implements TestDataService {
         if (user.getRoles() != null && !user.getRoles().isEmpty()) {
             for (String roleId : user.getRoles()) {
                 roleService.delete(roleId);
+            }
+        }
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
+            if (companyAuthAllowListService.getAuthId(user.getEmail()) != null) {
+                companyAuthAllowListService.delete(allowListId);
             }
         }
         return this.userService.delete(userId);
@@ -302,7 +318,6 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
-
         return true;
     }
 
@@ -321,5 +336,4 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
         }
     }
-
 }

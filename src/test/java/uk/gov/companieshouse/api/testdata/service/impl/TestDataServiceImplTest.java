@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -44,6 +45,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
@@ -55,6 +57,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -106,6 +109,9 @@ class TestDataServiceImplTest {
 
     @Mock
     private DataService<IdentityData, IdentitySpec> identityService;
+
+    @Mock
+    private CompanyAuthAllowListService companyAuthAllowListService;
 
     @BeforeEach
     void setUp() {
@@ -930,10 +936,9 @@ class TestDataServiceImplTest {
     }
 
     @Test
-        void createAcspMembersData() throws DataException {
+    void createAcspMembersData() throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
-        AcspProfileSpec acspProfileSpec = new AcspProfileSpec();
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
         AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
@@ -977,7 +982,6 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileSpec acspProfileSpec = new AcspProfileSpec();
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
         AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
@@ -1013,9 +1017,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileSpec acspProfileSpec = new AcspProfileSpec();
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class))).thenThrow(new DataException("Error creating ACSP member"));
 
@@ -1052,7 +1054,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteAcspMembersDataException() throws DataException {
+    void deleteAcspMembersDataException() {
         String acspMemberId = "memberId";
         AcspMembers member = new AcspMembers();
         member.setAcspNumber("acspNumber");
@@ -1062,5 +1064,166 @@ class TestDataServiceImplTest {
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.deleteAcspMembersData(acspMemberId));
         assertEquals("Error deleting acsp member's data", exception.getMessage());
+    }
+
+    @Test
+    void createUserDataWithCompanyAuthAllowList() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setIsCompanyAuthAllowList(true);
+
+        UserData mockUserData = new UserData("userId", "email@example.com", "Forename", "Surname");
+
+        when(userService.create(userSpec)).thenReturn(mockUserData);
+
+        UserData createdUserData = testDataService.createUserData(userSpec);
+
+        assertEquals("userId", createdUserData.getId());
+        assertEquals("email@example.com", createdUserData.getEmail());
+        assertEquals("Forename", createdUserData.getForename());
+        assertEquals("Surname", createdUserData.getSurname());
+        assertTrue(userSpec.getIsCompanyAuthAllowList());
+
+        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListSpec.class));
+    }
+
+    @Test
+    void createUserDataWithOutCompanyAuthAllow() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+
+        UserData mockUserData = new UserData("userId", "email@example.com", "Forename", "Surname");
+
+        when(userService.create(userSpec)).thenReturn(mockUserData);
+
+        UserData createdUserData = testDataService.createUserData(userSpec);
+
+        assertEquals("userId", createdUserData.getId());
+        assertEquals("email@example.com", createdUserData.getEmail());
+        assertEquals("Forename", createdUserData.getForename());
+        assertEquals("Surname", createdUserData.getSurname());
+        assertNull(userSpec.getIsCompanyAuthAllowList());
+
+        verify(companyAuthAllowListService, times(0)).create(any(CompanyAuthAllowListSpec.class));
+    }
+
+    @Test
+    void createUserDataWithNullCompanyAuthAllowList() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setIsCompanyAuthAllowList(null);
+
+        UserData userData = new UserData("userId", "test@example.com", "Forename", "Surname");
+        when(userService.create(userSpec)).thenReturn(userData);
+
+        UserData result = testDataService.createUserData(userSpec);
+
+        assertEquals("test@example.com", result.getEmail());
+        assertEquals("Forename", result.getForename());
+        assertEquals("Surname", result.getSurname());
+        assertEquals("userId", result.getId());
+        assertNull(userSpec.getIsCompanyAuthAllowList());
+        verify(userService, times(1)).create(userSpec);
+        verify(companyAuthAllowListService, never()).create(any(CompanyAuthAllowListSpec.class));
+    }
+
+    @Test
+    void deleteCompanyAuthAllowList() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("email@example.com");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("authId");
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, times(1)).delete("authId");
+    }
+
+    @Test
+    void deleteCompanyAuthAllowListWhenNull() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("email@example.com");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataWithEmailAndAllowListId() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("email@example.com");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("authId");
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, times(1)).delete("authId");
+    }
+
+    @Test
+    void deleteUserDataWithEmailAndNoAllowListId() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("email@example.com");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataWithNullEmail() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail(null);
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataWithEmptyEmail() {
+        String userId = "userId";
+        User user = new User();
+        user.setEmail("");
+
+        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
+        when(userService.delete(userId)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserData(userId);
+
+        assertTrue(result);
+        verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, never()).delete(anyString());
     }
 }

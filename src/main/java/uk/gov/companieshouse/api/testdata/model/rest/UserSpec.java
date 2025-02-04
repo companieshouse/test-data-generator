@@ -14,6 +14,9 @@ public class UserSpec {
     @NotEmpty(message = "password is required")
     private String password;
 
+    @JsonProperty("is_company_auth_allow_list")
+    private Boolean isCompanyAuthAllowList;
+
     public String getPassword() {
         return password;
     }
@@ -28,5 +31,13 @@ public class UserSpec {
 
     public void setRoles(List<RoleSpec> roles) {
         this.roles = roles;
+    }
+
+    public Boolean getIsCompanyAuthAllowList() {
+        return isCompanyAuthAllowList;
+    }
+
+    public void setIsCompanyAuthAllowList(Boolean isCompanyAuthAllowList) {
+        this.isCompanyAuthAllowList = isCompanyAuthAllowList;
     }
 }

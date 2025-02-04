@@ -96,6 +96,12 @@ public class MongoConfig {
         return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
     }
 
+    @Bean
+    public CompanyAuthAllowListRepository companyAuthAllowListRepository() {
+        return getMongoRepositoryBean(CompanyAuthAllowListRepository.class,
+                "efs_submissions");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
