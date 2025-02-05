@@ -142,6 +142,8 @@ public class CompanyProfile {
     private String type;
     @Field("data.undeliverable_registered_office_address")
     private Boolean undeliverableRegisteredOfficeAddress;
+    @Field("data.has_super_secure_pscs")
+    private Boolean hasSuperSecurePscs;
     @Field("data.company_name")
     private String companyName;
     @Field("data.sic_codes")
@@ -220,6 +222,14 @@ public class CompanyProfile {
     public void setUndeliverableRegisteredOfficeAddress(
             Boolean undeliverableRegisteredOfficeAddress) {
         this.undeliverableRegisteredOfficeAddress = undeliverableRegisteredOfficeAddress;
+    }
+
+    public Boolean getHasSuperSecurePscs() {
+        return hasSuperSecurePscs;
+    }
+
+    public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
+        this.hasSuperSecurePscs = hasSuperSecurePscs;
     }
 
     public String getCompanyName() {
