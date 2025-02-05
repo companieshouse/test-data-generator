@@ -31,6 +31,8 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         profile.setAcspNumber(randomId);
         profile.setName("Test Data Generator " + randomId + " Company Ltd");
         profile.setLinksSelf(LINK_STEM + randomId);
+        profile.setSupervisoryBody(spec.getSupervisoryBody());
+        profile.setMembershipDetails("Member " + randomId);
         AcspProfile savedProfile = repository.save(profile);
         return new AcspProfileData(savedProfile.getAcspNumber());
     }

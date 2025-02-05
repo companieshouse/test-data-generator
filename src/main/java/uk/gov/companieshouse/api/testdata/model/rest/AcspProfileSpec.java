@@ -9,6 +9,9 @@ public class AcspProfileSpec {
     @JsonProperty
     private String type;
 
+    @JsonProperty
+    private String supervisoryBody;
+
     public String getStatus() {
         return status;
     }
@@ -23,5 +26,13 @@ public class AcspProfileSpec {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getSupervisoryBody() {
+        return supervisoryBody;
+    }
+
+    public void setSupervisoryBody(String supervisoryBody) {
+        this.supervisoryBody = supervisoryBody;
     }
 }

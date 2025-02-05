@@ -31,6 +31,12 @@ public class AcspProfile {
     @Field("data.links.self")
     private String linksSelf;
 
+    @Field("data.aml_details.supervisory_body")
+    private String supervisoryBody;
+
+    @Field("data.aml_details.membership_details")
+    private String membershipDetails;
+
     public String getId() {
         return id;
     }
@@ -94,4 +100,14 @@ public class AcspProfile {
     public long getVersion() {
         return version;
     }
+
+    public String getSupervisoryBody() { return supervisoryBody; }
+
+    public void setSupervisoryBody(String supervisoryBody) {
+        this.supervisoryBody = supervisoryBody;
+    }
+
+    public String getMembershipDetails() { return membershipDetails; }
+
+    public void setMembershipDetails(String membershipDetails) { this.membershipDetails = membershipDetails; }
 }

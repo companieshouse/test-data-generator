@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.awt.*;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,36 @@ class AcspProfileServiceImplTest {
         assertEquals(0L, captured.getVersion());
     }
 
+    @Test
+    void createAcspProfileWithAmlDetails() throws DataException {
+        AcspProfileSpec spec = new AcspProfileSpec();
+
+        when(randomService.getString(8)).thenReturn("randomId");
+        AcspProfile savedProfile = new AcspProfile();
+        savedProfile.setAcspNumber("randomId");
+        spec.setSupervisoryBody("test");
+        savedProfile.setMembershipDetails("Member randomId");
+        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
+
+        AcspProfileData result = service.create(spec);
+
+        assertNotNull(result);
+        assertEquals("randomId", result.getAcspNumber());
+
+        ArgumentCaptor<AcspProfile> captor = ArgumentCaptor.forClass(AcspProfile.class);
+        verify(repository).save(captor.capture());
+
+        AcspProfile captured = captor.getValue();
+        assertEquals("randomId", captured.getId());
+        assertEquals("randomId", captured.getAcspNumber());
+        assertEquals("active", captured.getStatus()); // Default value
+        assertEquals("ltd", captured.getType()); // Default value
+        assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
+        assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+        assertEquals("test", captured.getSupervisoryBody());
+        assertEquals("Member randomId", captured.getMembershipDetails());
+        assertEquals(0L, captured.getVersion());
+    }
     @Test
     void deleteAcspProfile() {
         AcspProfile acspProfile = new AcspProfile();
