@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.Objects;
+import java.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -10,6 +11,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
 
 @Service
 public class AcspProfileServiceImpl implements DataService<AcspProfileData, AcspProfileSpec> {
@@ -31,8 +33,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         profile.setAcspNumber(randomId);
         profile.setName("Test Data Generator " + randomId + " Company Ltd");
         profile.setLinksSelf(LINK_STEM + randomId);
-        profile.setSupervisoryBody(spec.getSupervisoryBody());
-        profile.setMembershipDetails("Member " + randomId);
+        profile.setAmlDetails(spec.getAmlDetails());
         AcspProfile savedProfile = repository.save(profile);
         return new AcspProfileData(savedProfile.getAcspNumber());
     }

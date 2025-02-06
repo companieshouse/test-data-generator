@@ -11,12 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -235,11 +230,15 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         var acspProfileSpec = new AcspProfileSpec();
-        if (spec.getAcspProfile() != null) {
+        if (spec.getAcspProfile().getStatus() != null) {
             acspProfileSpec.setStatus(spec.getAcspProfile().getStatus());
         }
-        if (spec.getAcspProfile() != null) {
+        if (spec.getAcspProfile().getType() != null) {
             acspProfileSpec.setType(spec.getAcspProfile().getType());
+        }
+        if(spec.getAcspProfile().getAmlDetails() != null) {
+            List<AmlDetails> amlDetails = spec.getAcspProfile().getAmlDetails();
+            acspProfileSpec.setAmlDetails(spec.getAcspProfile().getAmlDetails());
         }
 
         try {

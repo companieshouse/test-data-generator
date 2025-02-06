@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
 
 public class AcspProfileSpec {
     @JsonProperty
@@ -10,7 +12,8 @@ public class AcspProfileSpec {
     private String type;
 
     @JsonProperty
-    private String supervisoryBody;
+    private List<AmlDetails> amlDetails;
+
 
     public String getStatus() {
         return status;
@@ -28,11 +31,11 @@ public class AcspProfileSpec {
         this.type = type;
     }
 
-    public String getSupervisoryBody() {
-        return supervisoryBody;
+    public List<AmlDetails> getAmlDetails() {
+        return amlDetails;
     }
 
-    public void setSupervisoryBody(String supervisoryBody) {
-        this.supervisoryBody = supervisoryBody;
+    public void setAmlDetails(List<AmlDetails> amlDetails) {
+        this.amlDetails = amlDetails;
     }
 }

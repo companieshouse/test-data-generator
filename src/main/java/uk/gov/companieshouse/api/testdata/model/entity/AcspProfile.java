@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -31,11 +32,8 @@ public class AcspProfile {
     @Field("data.links.self")
     private String linksSelf;
 
-    @Field("data.aml_details.supervisory_body")
-    private String supervisoryBody;
-
-    @Field("data.aml_details.membership_details")
-    private String membershipDetails;
+    @Field("data.aml_details")
+    private List<AmlDetails> amlDetails;
 
     public String getId() {
         return id;
@@ -101,13 +99,9 @@ public class AcspProfile {
         return version;
     }
 
-    public String getSupervisoryBody() { return supervisoryBody; }
+    public List<AmlDetails> getAmlDetails() { return amlDetails; }
 
-    public void setSupervisoryBody(String supervisoryBody) {
-        this.supervisoryBody = supervisoryBody;
+    public void setAmlDetails(List<AmlDetails> amlDetails) {
+        this.amlDetails = amlDetails;
     }
-
-    public String getMembershipDetails() { return membershipDetails; }
-
-    public void setMembershipDetails(String membershipDetails) { this.membershipDetails = membershipDetails; }
 }
