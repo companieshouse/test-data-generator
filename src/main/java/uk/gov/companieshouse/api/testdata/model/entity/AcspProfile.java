@@ -4,8 +4,12 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Document(collection = "acsp_profile")
 public class AcspProfile {
+
     @Id
     @Field("_id")
     private String id;
@@ -30,6 +34,9 @@ public class AcspProfile {
 
     @Field("data.links.self")
     private String linksSelf;
+
+    @Field("data.aml_details")
+    private List<AmlDetails> amlDetails;
 
     public String getId() {
         return id;
@@ -93,5 +100,12 @@ public class AcspProfile {
 
     public long getVersion() {
         return version;
+    }
+
+    public List<AmlDetails> getAmlDetails() {
+        return amlDetails;
+    }
+    public void setAmlDetails(List<AmlDetails> amlDetails) {
+        this.amlDetails = amlDetails;
     }
 }
