@@ -15,10 +15,10 @@ import java.time.ZoneId;
 import java.util.*;
 
 @Service
-public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySpec> {
+public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanySpec> {
 
     protected static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
-        "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
+            "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
     public static final String WALES = "Wales";
@@ -38,9 +38,13 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
 
         CompanyPscs companyPsc = new CompanyPscs();
         final String companyNumber = spec.getCompanyNumber();
+        final Boolean accountsOverdue = spec.getAccountsOverdue();
         companyPsc.setCompanyNumber(companyNumber);
 
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        if (accountsOverdue != null && accountsOverdue) {
+            dateNow = LocalDate.now().minusYears(2).minusMonths(10).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         companyPsc.setId(id);
@@ -97,7 +101,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         String linkType;
         Optional<List<CompanyPscs>> existingPscs = repository.findByCompanyNumber(companyPsc.getCompanyNumber());
 
-        switch (existingPscs.orElse(new ArrayList<>()).size()){
+        switch (existingPscs.orElse(new ArrayList<>()).size()) {
             case 0:
                 pscType = "individual-person-with-significant-control";
                 linkType = "individual";
@@ -140,7 +144,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         companyPsc.setKind(pscType);
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType +"/" + companyPsc.getId());
+        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
 
         return companyPsc;
@@ -161,7 +165,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         companyPsc.setName("Mr A Jones");
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType +"/" + companyPsc.getId());
+        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
 
         return companyPsc;

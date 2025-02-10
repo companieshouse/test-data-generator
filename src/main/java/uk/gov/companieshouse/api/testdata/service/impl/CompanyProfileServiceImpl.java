@@ -43,8 +43,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
+        final Boolean accountsOverdue = spec.getAccountsOverdue();
 
         LocalDate now = LocalDate.now();
+        if (accountsOverdue != null && accountsOverdue) {
+            now = now.minusYears(2);
+            now = now.minusMonths(10);
+        }
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
         Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
         Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
@@ -61,7 +66,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setPeriodStart(dateNow);
         accounts.setPeriodEnd(dateInOneYear);
         accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
-        accounts.setNextAccountsOverdue(false);
+        accounts.setNextAccountsOverdue(Objects.requireNonNullElse(accountsOverdue, false));
         accounts.setNextMadeUpTo(dateInOneYear);
         accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
         accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));

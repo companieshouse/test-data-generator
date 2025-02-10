@@ -39,6 +39,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
+        final Boolean accountsOverdue = spec.getAccountsOverdue();
 
         try {
             barcode = barcodeService.getBarcode();
@@ -46,10 +47,14 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
             throw new DataException(ex.getMessage(), ex);
         }
 
-
         FilingHistory filingHistory = new FilingHistory();
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        if (accountsOverdue != null && accountsOverdue) {
+            dayTimeNow = Instant.now().minus(2, java.time.temporal.ChronoUnit.YEARS).minus(10, java.time.temporal.ChronoUnit.MONTHS);
+            dayNow = LocalDate.now().minusYears(2).minusMonths(10).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 

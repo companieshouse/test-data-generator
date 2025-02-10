@@ -37,10 +37,16 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     @Override
     public CompanyPscStatement create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
+        final Boolean accountsOverdue = spec.getAccountsOverdue();
+
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
 
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        if (accountsOverdue != null && accountsOverdue) {
+            dateNow = LocalDate.now().minusYears(2).minusMonths(10).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         companyPscStatement.setId(id);

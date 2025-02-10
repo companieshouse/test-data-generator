@@ -34,6 +34,12 @@ public class CompanySpec {
     @JsonProperty("has_super_secure_pscs")
     private Boolean hasSuperSecurePscs;
 
+    @JsonProperty("accounts_overdue")
+    private Boolean accountsOverdue;
+
+    @JsonProperty("accounts_next_due_in_months")
+    private String accountsNextDueInMonths;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -84,5 +90,21 @@ public class CompanySpec {
 
     public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
+    }
+
+    public Boolean getAccountsOverdue() {
+        return accountsOverdue;
+    }
+
+    public void setAccountsOverdue(Boolean accountsOverdue) {
+        this.accountsOverdue = accountsOverdue;
+    }
+
+    public String getAccountsNextDueInMonths() {
+        return accountsNextDueInMonths;
+    }
+
+    public void setAccountsNextDueInMonths(String accountsNextDueInMonths) {
+        this.accountsNextDueInMonths = accountsNextDueInMonths;
     }
 }
