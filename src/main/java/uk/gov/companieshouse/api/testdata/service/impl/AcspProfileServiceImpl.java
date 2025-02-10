@@ -39,7 +39,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         if (spec.getAmlDetails() != null) {
             List<AmlDetails> amlDetailsList = new ArrayList<>();
             for (AmlSpec amlSpec : spec.getAmlDetails()) {
-                AmlDetails amlDetails = new AmlDetails();
+                var amlDetails = new AmlDetails();
                 amlDetails.setSupervisoryBody(amlSpec.getSupervisoryBody());
                 amlDetails.setMembershipDetails(amlSpec.getMembershipDetails());
                 amlDetailsList.add(amlDetails);
