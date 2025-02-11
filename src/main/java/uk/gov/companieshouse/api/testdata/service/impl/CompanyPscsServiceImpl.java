@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
@@ -50,7 +51,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         companyPsc.setCompanyNumber(companyNumber);
 
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-        if (accountsDueStatus != null) {
+        if (StringUtils.hasText(accountsDueStatus)) {
             var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
             dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }

@@ -1,11 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -43,7 +47,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-        if (accountsDueStatus != null) {
+        if (StringUtils.hasText(accountsDueStatus)) {
             var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
             dateTimeNow = now.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
             dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();

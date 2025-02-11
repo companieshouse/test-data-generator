@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -46,7 +47,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String accountsDueStatus = spec.getAccountsDueStatus();
 
         LocalDate now = LocalDate.now();
-        if (accountsDueStatus != null) {
+        if (StringUtils.hasText(accountsDueStatus)) {
             now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
         }
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();

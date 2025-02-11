@@ -10,6 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.GenerateEtagUtil;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -70,7 +71,7 @@ public class RandomServiceImpl implements RandomService {
     @Override
     public LocalDate generateAccountsDueDateByStatus(String accountsDueStatus) {
         var now = LocalDate.now();
-        if (accountsDueStatus != null) {
+        if (StringUtils.hasText(accountsDueStatus)) {
             if (accountsDueStatus.equalsIgnoreCase("overdue")) {
                 now = now.minusYears(1).minusMonths(11);
             } else if (accountsDueStatus.equalsIgnoreCase("due-soon")) {

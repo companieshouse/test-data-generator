@@ -69,16 +69,30 @@ class RandomServiceImplTest {
     }
 
     @Test
-    void generateAccountsDueDateByStatus() {
+    void generateAccountsDueDateByStatus_overdue() {
         LocalDate now = LocalDate.now();
-
         LocalDate overdueDate = randomService.generateAccountsDueDateByStatus("overdue");
         assertEquals(now.minusYears(1).minusMonths(11), overdueDate);
+    }
 
+    @Test
+    void generateAccountsDueDateByStatus_dueSoon() {
+        LocalDate now = LocalDate.now();
         LocalDate dueSoonDate = randomService.generateAccountsDueDateByStatus("due-soon");
         assertEquals(now.minusYears(1).minusMonths(9), dueSoonDate);
+    }
 
+    @Test
+    void generateAccountsDueDateByStatus_default() {
+        LocalDate now = LocalDate.now();
         LocalDate defaultDate = randomService.generateAccountsDueDateByStatus(null);
         assertEquals(now, defaultDate);
+    }
+
+    @Test
+    void generateAccountsDueDateByStatus_empty() {
+        LocalDate now = LocalDate.now();
+        LocalDate emptyDate = randomService.generateAccountsDueDateByStatus("");
+        assertEquals(now, emptyDate);
     }
 }

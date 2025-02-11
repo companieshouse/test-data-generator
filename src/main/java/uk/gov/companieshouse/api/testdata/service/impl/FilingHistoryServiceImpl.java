@@ -12,6 +12,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
@@ -52,7 +53,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-        if (accountsDueStatus != null) {
+        if (StringUtils.hasText(accountsDueStatus)) {
             var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
             dayTimeNow = now.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
             dayNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
