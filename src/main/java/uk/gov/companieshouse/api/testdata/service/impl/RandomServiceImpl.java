@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,5 +65,18 @@ public class RandomServiceImpl implements RandomService {
         String salt = getString(saltLength);
         String baseSalt = baseString + salt;
         return Base64.getUrlEncoder().encodeToString(baseSalt.getBytes(UTF_8));
+    }
+
+    @Override
+    public LocalDate generateAccountsDueDateByStatus(String accountsDueStatus) {
+        LocalDate now = LocalDate.now();
+        if (accountsDueStatus != null) {
+            if (accountsDueStatus.equalsIgnoreCase("overdue")) {
+                now = now.minusYears(1).minusMonths(11);
+            } else if (accountsDueStatus.equalsIgnoreCase("due-soon")) {
+                now = now.minusYears(1).minusMonths(9);
+            }
+        }
+        return now;
     }
 }

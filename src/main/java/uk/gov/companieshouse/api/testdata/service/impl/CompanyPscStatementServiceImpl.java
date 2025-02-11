@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
+import java.time.*;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +14,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement,CompanySpec> {
+public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement, CompanySpec> {
 
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
@@ -31,21 +29,24 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
      * creates PSC statement deliberately misspelt as 'signficant' to match api-enumeration and live data
      * can be corrected when api-enumeration is fixed.
      * psc-statement-data-api java services utilises the enum values and correct spelling will cause failures in environments that run the java service
+     *
      * @param spec
      * @return
      */
     @Override
     public CompanyPscStatement create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
-        final Boolean accountsOverdue = spec.getAccountsOverdue();
+        final String accountsDueStatus = spec.getAccountsDueStatus();
 
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
 
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-        if (accountsOverdue != null && accountsOverdue) {
-            dateNow = LocalDate.now().minusYears(2).minusMonths(10).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        if (accountsDueStatus != null) {
+            var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            dateTimeNow = now.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
+            dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);

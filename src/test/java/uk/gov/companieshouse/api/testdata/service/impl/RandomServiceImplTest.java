@@ -1,11 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import org.junit.jupiter.api.Test;
-
-import java.util.Base64;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDate;
+import java.util.Base64;
+import java.util.OptionalLong;
+import org.junit.jupiter.api.Test;
 
 class RandomServiceImplTest {
 
@@ -34,7 +36,8 @@ class RandomServiceImplTest {
         String randomEncodedWithSalt = this.randomService.getEncodedIdWithSalt(5, 5);
         assertNotNull(randomEncodedWithSalt);
 
-        String randomDecodedWithSalt = new String(Base64.getUrlDecoder().decode(randomEncodedWithSalt));
+        String randomDecodedWithSalt = new String(Base64.getUrlDecoder()
+                .decode(randomEncodedWithSalt));
         assertEquals(10, randomDecodedWithSalt.length());
     }
     
@@ -53,5 +56,29 @@ class RandomServiceImplTest {
 
         String saltedDecodedWithSalt = new String(Base64.getUrlDecoder().decode(salted));
         assertEquals(10, saltedDecodedWithSalt.length());
+    }
+
+    @Test
+    void getNumberInRange() {
+        int startInclusive = 10;
+        int endExclusive = 20;
+
+        OptionalLong random = randomService.getNumberInRange(startInclusive, endExclusive);
+        assertTrue(random.isPresent());
+        assertTrue(random.getAsLong() >= startInclusive && random.getAsLong() < endExclusive);
+    }
+
+    @Test
+    void generateAccountsDueDateByStatus() {
+        LocalDate now = LocalDate.now();
+
+        LocalDate overdueDate = randomService.generateAccountsDueDateByStatus("overdue");
+        assertEquals(now.minusYears(1).minusMonths(11), overdueDate);
+
+        LocalDate dueSoonDate = randomService.generateAccountsDueDateByStatus("due-soon");
+        assertEquals(now.minusYears(1).minusMonths(9), dueSoonDate);
+
+        LocalDate defaultDate = randomService.generateAccountsDueDateByStatus(null);
+        assertEquals(now, defaultDate);
     }
 }

@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,12 +24,12 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class FilingHistoryServiceImpl implements DataService<FilingHistory,CompanySpec> {
+public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
 
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
- 
+
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
     @Autowired
@@ -39,7 +40,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
-        final Boolean accountsOverdue = spec.getAccountsOverdue();
+        final String accountsDueStatus = spec.getAccountsDueStatus();
 
         try {
             barcode = barcodeService.getBarcode();
@@ -51,13 +52,13 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-        if (accountsOverdue != null && accountsOverdue) {
-            dayTimeNow = Instant.now().minus(2, java.time.temporal.ChronoUnit.YEARS).minus(10, java.time.temporal.ChronoUnit.MONTHS);
-            dayNow = LocalDate.now().minusYears(2).minusMonths(10).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        if (accountsDueStatus != null) {
+            var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            dayTimeNow = now.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
+            dayNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
-
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(filingHistory));
@@ -69,10 +70,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
         filingHistory.setOriginalDescription("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
-
-
         filingHistory.setBarcode(barcode);
-
         return filingHistoryRepository.save(filingHistory);
     }
 
@@ -84,7 +82,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         return filingHistory.isPresent();
     }
 
-    private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow){
+    private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow) {
 
         ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,7 +42,7 @@ class FilingHistoryServiceImplTest {
 
     @Mock
     private FilingHistoryRepository repository;
-    
+
     @Mock
     private RandomService randomService;
 
@@ -51,23 +52,29 @@ class FilingHistoryServiceImplTest {
     @InjectMocks
     private FilingHistoryServiceImpl filingHistoryService;
 
+    private static final String CERTIFICATE_DESCRIPTION
+            = "Certificate of incorporation general company details & statements of; "
+            + "officers, capital & shareholdings, guarantee, compliance memorandum of association";
+
     @Test
     void create() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
-        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
+                .thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
-        
+
         FilingHistory savedHistory = new FilingHistory();
         when(repository.save(Mockito.any())).thenReturn(savedHistory);
-        
+
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(returnedHistory, savedHistory);
-        
-        ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
+
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor
+                = ArgumentCaptor.forClass(FilingHistory.class);
         verify(repository).save(filingHistoryCaptor.capture());
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
@@ -79,13 +86,12 @@ class FilingHistoryServiceImplTest {
         assertEquals("NEWINC", filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
         assertEquals(ENTITY_ID_PREFIX + UNENCODED_ID, filingHistory.getEntityId());
-        assertEquals("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association",
-                filingHistory.getOriginalDescription());
+        assertEquals(CERTIFICATE_DESCRIPTION, filingHistory.getOriginalDescription());
         assertEquals(BARCODE, filingHistory.getBarcode());
 
         List<AssociatedFiling> associatedFilings = filingHistory.getAssociatedFilings();
         assertEquals(2, associatedFilings.size());
-        AssociatedFiling incorporation = associatedFilings.get(0);
+        AssociatedFiling incorporation = associatedFilings.getFirst();
         assertEquals("incorporation", incorporation.getCategory());
         assertNotNull(incorporation.getDate());
         assertEquals("model-articles-adopted", incorporation.getDescription());
@@ -102,7 +108,7 @@ class FilingHistoryServiceImplTest {
     }
 
     @Test
-    void createBarcodeServiceException() throws BarcodeServiceException{
+    void createBarcodeServiceException() throws BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -132,6 +138,113 @@ class FilingHistoryServiceImplTest {
 
         assertFalse(this.filingHistoryService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void createWhenAccountsDueStatusIsNull() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setAccountsDueStatus(null);
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
+                .thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+
+        FilingHistory savedHistory = new FilingHistory();
+        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+
+        FilingHistory returnedHistory = this.filingHistoryService.create(spec);
+
+        assertEquals(returnedHistory, savedHistory);
+
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor
+                = ArgumentCaptor.forClass(FilingHistory.class);
+        verify(repository).save(filingHistoryCaptor.capture());
+        FilingHistory filingHistory = filingHistoryCaptor.getValue();
+        assertEquals(TEST_ID, filingHistory.getId());
+        assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
+        assertNotNull(filingHistory.getLinks());
+        assertEquals("incorporation", filingHistory.getCategory());
+        assertEquals("incorporation-company", filingHistory.getDescription());
+        assertNotNull(filingHistory.getDate());
+        assertEquals("NEWINC", filingHistory.getType());
+        assertEquals(Integer.valueOf(10), filingHistory.getPages());
+        assertEquals(ENTITY_ID_PREFIX + UNENCODED_ID, filingHistory.getEntityId());
+        assertEquals(CERTIFICATE_DESCRIPTION ,filingHistory.getOriginalDescription());
+        assertEquals(BARCODE, filingHistory.getBarcode());
+    }
+
+    @Test
+    void createWhenAccountsDueStatusIsDueSoon() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setAccountsDueStatus("due-soon");
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
+                .thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+        when(randomService.generateAccountsDueDateByStatus("due-soon")).thenReturn(LocalDate.now());
+
+        FilingHistory savedHistory = new FilingHistory();
+        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+
+        FilingHistory returnedHistory = this.filingHistoryService.create(spec);
+
+        assertEquals(returnedHistory, savedHistory);
+
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor
+                = ArgumentCaptor.forClass(FilingHistory.class);
+        verify(repository).save(filingHistoryCaptor.capture());
+        FilingHistory filingHistory = filingHistoryCaptor.getValue();
+        assertEquals(TEST_ID, filingHistory.getId());
+        assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
+        assertNotNull(filingHistory.getLinks());
+        assertEquals("incorporation", filingHistory.getCategory());
+        assertEquals("incorporation-company", filingHistory.getDescription());
+        assertNotNull(filingHistory.getDate());
+        assertEquals("NEWINC", filingHistory.getType());
+        assertEquals(Integer.valueOf(10), filingHistory.getPages());
+        assertEquals(ENTITY_ID_PREFIX + UNENCODED_ID, filingHistory.getEntityId());
+        assertEquals(CERTIFICATE_DESCRIPTION, filingHistory.getOriginalDescription());
+        assertEquals(BARCODE, filingHistory.getBarcode());
+    }
+
+    @Test
+    void createWhenAccountsDueStatusIsOverdue() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setAccountsDueStatus("overdue");
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
+                .thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+        when(randomService.generateAccountsDueDateByStatus("overdue")).thenReturn(LocalDate.now());
+
+        FilingHistory savedHistory = new FilingHistory();
+        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+
+        FilingHistory returnedHistory = this.filingHistoryService.create(spec);
+
+        assertEquals(returnedHistory, savedHistory);
+
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor
+                = ArgumentCaptor.forClass(FilingHistory.class);
+        verify(repository).save(filingHistoryCaptor.capture());
+        FilingHistory filingHistory = filingHistoryCaptor.getValue();
+        assertEquals(TEST_ID, filingHistory.getId());
+        assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
+        assertNotNull(filingHistory.getLinks());
+        assertEquals("incorporation", filingHistory.getCategory());
+        assertEquals("incorporation-company", filingHistory.getDescription());
+        assertNotNull(filingHistory.getDate());
+        assertEquals("NEWINC", filingHistory.getType());
+        assertEquals(Integer.valueOf(10), filingHistory.getPages());
+        assertEquals(ENTITY_ID_PREFIX + UNENCODED_ID, filingHistory.getEntityId());
+        assertEquals(CERTIFICATE_DESCRIPTION, filingHistory.getOriginalDescription());
+        assertEquals(BARCODE, filingHistory.getBarcode());
     }
 
 }

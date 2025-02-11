@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -38,12 +39,13 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
         CompanyPscs companyPsc = new CompanyPscs();
         final String companyNumber = spec.getCompanyNumber();
-        final Boolean accountsOverdue = spec.getAccountsOverdue();
+        final String accountsDueStatus = spec.getAccountsDueStatus();
         companyPsc.setCompanyNumber(companyNumber);
 
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-        if (accountsOverdue != null && accountsOverdue) {
-            dateNow = LocalDate.now().minusYears(2).minusMonths(10).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        if (accountsDueStatus != null) {
+            var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);

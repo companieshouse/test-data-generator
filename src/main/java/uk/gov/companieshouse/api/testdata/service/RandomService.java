@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import java.time.LocalDate;
 import java.util.OptionalLong;
 
 public interface RandomService {
@@ -53,4 +54,6 @@ public interface RandomService {
      * @return A base-64-encoded string
      */
     String addSaltAndEncode(String baseString, int saltLength);
+
+    LocalDate generateAccountsDueDateByStatus(String accountsDueStatus);
 }
