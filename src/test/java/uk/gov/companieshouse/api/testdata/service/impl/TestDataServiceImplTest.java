@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -41,8 +43,21 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 
-import uk.gov.companieshouse.api.testdata.model.rest.*;
-
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
+import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -124,7 +139,8 @@ class TestDataServiceImplTest {
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
         CompanySpec spec = new CompanySpec();
-        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany;
+        createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -162,7 +178,8 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
-        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany;
+        createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -182,7 +199,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createCompanyDataNISpec() throws Exception {
+    void createCompanyDataNiSpec() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
         CompanyProfile mockCompany = new CompanyProfile();
@@ -200,7 +217,8 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
-        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany;
+        createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -223,7 +241,8 @@ class TestDataServiceImplTest {
     void createCompanyDataSpec() throws Exception {
         final String companyNumber = "12345678";
 
-        CompanySpec spec = new CompanySpec();
+        CompanySpec spec;
+        spec = new CompanySpec();
         CompanyProfile mockCompany = new CompanyProfile();
         mockCompany.setCompanyNumber(COMPANY_NUMBER);
 
@@ -239,7 +258,8 @@ class TestDataServiceImplTest {
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
-        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany;
+        createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -284,7 +304,8 @@ class TestDataServiceImplTest {
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
-        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany;
+        createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -927,7 +948,8 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        AcspMembersData acspMembersData;
+        acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(acspMembersData);
@@ -949,7 +971,8 @@ class TestDataServiceImplTest {
     void createAcspMembersDataNullUserId() {
         AcspMembersSpec spec = new AcspMembersSpec();
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createAcspMembersData(spec));
         assertEquals("User ID is required to create an ACSP member", exception.getMessage());
     }
 
@@ -958,10 +981,13 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenThrow(new DataException("Error creating ACSP profile"));
+        when(acspProfileService.create(any(AcspProfileSpec.class)))
+                .thenThrow(new DataException("Error creating ACSP profile"));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile", exception.getMessage());
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createAcspMembersData(spec));
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException:"
+                + " Error creating ACSP profile", exception.getMessage());
     }
 
     @Test
@@ -970,7 +996,8 @@ class TestDataServiceImplTest {
         spec.setUserId("userId");
 
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        AcspMembersData acspMembersData;
+        acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(acspMembersData);
@@ -994,7 +1021,8 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData;
+        acspProfileData = new AcspProfileData("acspNumber");
         AcspMembersData acspMembersData;
         acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
@@ -1018,8 +1046,10 @@ class TestDataServiceImplTest {
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("ACTIVE", spec.getAcspProfile().getStatus());
         assertEquals("TypeA", spec.getAcspProfile().getType());
-        assertEquals("supervisoryBody", spec.getAcspProfile().getAmlDetails().getFirst().getSupervisoryBody());
-        assertEquals("membershipDetails", spec.getAcspProfile().getAmlDetails().getFirst().getMembershipDetails());
+        assertEquals("supervisoryBody",
+                spec.getAcspProfile().getAmlDetails().getFirst().getSupervisoryBody());
+        assertEquals("membershipDetails",
+                spec.getAcspProfile().getAmlDetails().getFirst().getMembershipDetails());
         assertEquals("memberId", result.getAcspMemberId());
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
@@ -1027,7 +1057,12 @@ class TestDataServiceImplTest {
         assertEquals("role", result.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
-                "TypeA".equals(profile.getType()) && "ACTIVE".equals(profile.getStatus()) && profile.getAmlDetails() != null && !profile.getAmlDetails().isEmpty() && "supervisoryBody".equals(profile.getAmlDetails().get(0).getSupervisoryBody()) && "membershipDetails".equals(profile.getAmlDetails().get(0).getMembershipDetails())
+                "TypeA".equals(profile.getType()) && "ACTIVE".equals(profile.getStatus())
+                        && profile.getAmlDetails() != null && !profile.getAmlDetails().isEmpty()
+                        && "supervisoryBody".equals(
+                                profile.getAmlDetails().getFirst().getSupervisoryBody())
+                        && "membershipDetails".equals(
+                                profile.getAmlDetails().getFirst().getMembershipDetails())
         ));
         verify(acspProfileService).create(any(AcspProfileSpec.class));
         verify(acspMembersService).create(any(AcspMembersSpec.class));
@@ -1058,9 +1093,9 @@ class TestDataServiceImplTest {
         assertEquals("role", result.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
-                profile.getStatus() == null &&
-                        profile.getType() == null &&
-                        profile.getAmlDetails() == null));
+                profile.getStatus() == null
+                        && profile.getType() == null
+                        && profile.getAmlDetails() == null));
         verify(acspProfileService).create(any(AcspProfileSpec.class));
         verify(acspMembersService).create(any(AcspMembersSpec.class));
     }
@@ -1070,10 +1105,13 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenThrow(new DataException("Error creating ACSP profile"));
+        when(acspProfileService.create(any(AcspProfileSpec.class)))
+                .thenThrow(new DataException("Error creating ACSP profile"));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile", exception.getMessage());
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createAcspMembersData(spec));
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException:"
+                + " Error creating ACSP profile", exception.getMessage());
     }
 
     @Test
@@ -1083,10 +1121,13 @@ class TestDataServiceImplTest {
 
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
-        when(acspMembersService.create(any(AcspMembersSpec.class))).thenThrow(new DataException("Error creating ACSP member"));
+        when(acspMembersService.create(any(AcspMembersSpec.class)))
+                .thenThrow(new DataException("Error creating ACSP member"));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP member", exception.getMessage());
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createAcspMembersData(spec));
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException:"
+                + " Error creating ACSP member", exception.getMessage());
     }
 
     @Test
@@ -1124,10 +1165,13 @@ class TestDataServiceImplTest {
         member.setAcspNumber("acspNumber");
 
         when(acspMembersRepository.findById(acspMemberId)).thenReturn(Optional.of(member));
-        doThrow(new RuntimeException(new DataException("Error"))).when(acspMembersService).delete(acspMemberId);
+        doThrow(new RuntimeException(new DataException("Error")))
+                .when(acspMembersService).delete(acspMemberId);
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteAcspMembersData(acspMemberId));
-        assertEquals("Error deleting acsp member's data", exception.getMessage());
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.deleteAcspMembersData(acspMemberId));
+        assertEquals("Error deleting acsp member's data",
+                exception.getMessage());
     }
 
     @Test
