@@ -95,4 +95,12 @@ class RandomServiceImplTest {
         LocalDate emptyDate = randomService.generateAccountsDueDateByStatus("");
         assertEquals(now, emptyDate);
     }
+
+    @Test
+    void testGenerateAccountsDueDate_UnknownStatus() {
+        String status = "random-status";
+        LocalDate expectedDate = LocalDate.now();
+        LocalDate result = randomService.generateAccountsDueDateByStatus(status);
+        assertEquals(expectedDate, result, "Unknown status should return default date.");
+    }
 }
