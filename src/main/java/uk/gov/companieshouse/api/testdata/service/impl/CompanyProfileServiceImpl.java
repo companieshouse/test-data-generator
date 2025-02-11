@@ -54,8 +54,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
         Instant dateInOneYearTwoWeeks = now.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
         Instant dateInOneYearNineMonths = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInTwoYear = now.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInTwoYearTwoWeeks = now.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        var dateInTwoYear = now.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        var dateInTwoYearTwoWeeks = now.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
         CompanyProfile profile = new CompanyProfile();
 
         profile.setId(companyNumber);

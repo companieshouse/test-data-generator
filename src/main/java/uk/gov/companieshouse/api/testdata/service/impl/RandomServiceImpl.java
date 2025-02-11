@@ -69,7 +69,7 @@ public class RandomServiceImpl implements RandomService {
 
     @Override
     public LocalDate generateAccountsDueDateByStatus(String accountsDueStatus) {
-        LocalDate now = LocalDate.now();
+        var now = LocalDate.now();
         if (accountsDueStatus != null) {
             if (accountsDueStatus.equalsIgnoreCase("overdue")) {
                 now = now.minusYears(1).minusMonths(11);
