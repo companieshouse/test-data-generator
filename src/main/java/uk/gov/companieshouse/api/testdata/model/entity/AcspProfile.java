@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.util.List;
 
 @Document(collection = "acsp_profile")
 public class AcspProfile {
@@ -104,6 +104,7 @@ public class AcspProfile {
     public List<AmlDetails> getAmlDetails() {
         return amlDetails;
     }
+
     public void setAmlDetails(List<AmlDetails> amlDetails) {
         this.amlDetails = amlDetails;
     }
