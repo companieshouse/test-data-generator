@@ -80,8 +80,8 @@ In order to use the generator, there are different possible endpoints that can b
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
       - `aml_details`: [<br/>
         {<br/>
-         `supervisory_body`: Supervisory body of the Acsp Profile. This is optional and the value are populated from supervisory body enum.<br />
-         `membershipd_details`: Membership details of the Acsp Profile. This is optional.<br/>
+           `supervisory_body`: Supervisory body of the Acsp Profile. This is optional and the value are populated from supervisory body enum.<br />
+           `membershipd_details`: Membership details of the Acsp Profile. This is optional.<br/>
          }<br/>
         ]<br/> 
     - }
