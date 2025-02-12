@@ -78,6 +78,12 @@ In order to use the generator, there are different possible endpoints that can b
     - `acsp_profile`: {
       - `type`: Company type of the AcspProfile. This is optional with a defaults to `ltd`.
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
+      - `aml_details`: [
+        - {
+          - `supervisory_body`: Supervisory body of the Acsp Profile. This is optional and the value are populated from supervisory body enum. 
+          - `membershipd_details`: Membership details of the Acsp Profile. This is optional
+        - }
+      - ]
     - }
     
     A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test"}}`
