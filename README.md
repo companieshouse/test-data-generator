@@ -83,7 +83,7 @@ In order to use the generator, there are different possible endpoints that can b
            `supervisory_body`: Supervisory body of the Acsp Profile. This is optional and the value are populated from supervisory body enum.<br />
            `membershipd_details`: Membership details of the Acsp Profile. This is optional.<br/>
          }<br/>
-        ]<br/> 
+      - ] 
     - }
     
     A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test"}}`
