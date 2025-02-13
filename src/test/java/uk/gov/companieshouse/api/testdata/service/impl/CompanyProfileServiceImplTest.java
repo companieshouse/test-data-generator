@@ -39,10 +39,12 @@ class CompanyProfileServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ETAG = "ETAG";
     private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
-    private static final String COMPANY_TYPE_PLC = "plc";
     private static final String COMPANY_STATUS_ACTIVE = "active";
-    private static final String COMPANY_TYPE_LTD = "ltd";
     private static final String COMPANY_STATUS_ADMINISTRATION = "administration";
+    private static final String COMPANY_TYPE_LTD = "ltd";
+    private static final String COMPANY_TYPE_PLC = "plc";
+    private static final String COMPANY_TYPE_ROYAL_CHARTER = "royal-charter";
+    private static final String COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY = "industrial-and-provident-society";
 
     @Mock
     private RandomService randomService;
@@ -315,5 +317,47 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(null, profile.getHasSuperSecurePscs());
+    }
+
+    @Test
+    void createRoyalCharterCompanyAndVerifyPartialData() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_ROYAL_CHARTER);
+        spec.setSubType(null);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_ROYAL_CHARTER, profile.getType());
+        assertEquals("full-data-available-from-the-company", profile.getPartialDataAvailable());
+    }
+
+    @Test
+    void createIndustrialAndProvidentCompanyAndVerifyPartialData() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY);
+        spec.setSubType(null);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY, profile.getType());
+        assertEquals("full-data-available-from-financial-conduct-authority-mutuals-public-register", profile.getPartialDataAvailable());
     }
 }

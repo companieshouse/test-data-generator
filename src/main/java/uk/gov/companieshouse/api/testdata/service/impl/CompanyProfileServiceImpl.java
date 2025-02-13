@@ -69,6 +69,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setCompanyNumber(companyNumber);
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
+        profile.setPartialDataAvailable(profile.getType());
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
