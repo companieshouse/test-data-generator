@@ -78,4 +78,14 @@ public interface TestDataService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteAcspMembersData(String acspMemberId) throws DataException;
+
+    /**
+     * Deletes all appeals data for a given penalty reference and company number.
+     *
+     * @param companyNumber the company number
+     * @param penaltyReference the penalty reference
+     * @return true if the entity was deleted, false otherwise
+     * @throws DataException if there is an error during deletion
+     */
+    boolean deleteAppealsData(String companyNumber, String penaltyReference) throws DataException;
 }
