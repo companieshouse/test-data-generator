@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
-
 public interface AppealsService {
     /**
      * Deletes an entity by its penalty reference and company number.
