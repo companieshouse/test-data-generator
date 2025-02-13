@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -164,6 +165,28 @@ public class TestDataController {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Acsp Member Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/appeals")
+    public ResponseEntity<Void> deleteAppeal(
+            @Valid @RequestBody DeleteAppealsRequest request) throws DataException {
+
+        if (request == null) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        boolean isDeleted = testDataService
+                .deleteAppealsData(request.getCompanyNumber(), request.getPenaltyReference());
+
+        if (isDeleted) {
+            LOG.info("Appeals data deleted for company number : " + request.getCompanyNumber()
+                    + " and penalty reference: " + request.getPenaltyReference());
+            return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            LOG.info("No appeals data found for company number : " + request.getCompanyNumber()
+                    + " and penalty reference: " + request.getPenaltyReference());
+            return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 }
