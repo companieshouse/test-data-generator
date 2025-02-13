@@ -180,11 +180,11 @@ public class TestDataController {
                 .deleteAppealsData(request.getCompanyNumber(), request.getPenaltyReference());
 
         if (isDeleted) {
-            LOG.info("Appeals data deleted for company number : " + request.getCompanyNumber()
+            LOG.info("Appeals data deleted for company number: " + request.getCompanyNumber()
                     + " and penalty reference: " + request.getPenaltyReference());
             return  new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            LOG.info("No appeals data found for company number : " + request.getCompanyNumber()
+            LOG.info("No appeals data found for company number: " + request.getCompanyNumber()
                     + " and penalty reference: " + request.getPenaltyReference());
             return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
