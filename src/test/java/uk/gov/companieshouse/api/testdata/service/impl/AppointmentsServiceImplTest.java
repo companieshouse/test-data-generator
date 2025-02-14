@@ -192,6 +192,19 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
+    void createWithMixedValidAndInvalidOfficerRoles() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setOfficerRoles(List.of("director", "invalid_role", "secretary"));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            appointmentsService.create(spec);
+        });
+
+        assertEquals("Invalid officer role: invalid_role", exception.getMessage());
+    }
+
+    @Test
     void createWithMultipleAppointments() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
@@ -217,7 +230,13 @@ class AppointmentsServiceImplTest {
         assertNotNull(returnedApts);
         assertEquals(3, returnedApts.size());
 
-        verify(appointmentsRepository, times(3)).save(any(Appointment.class));
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
+
+        List<Appointment> capturedAppointments = aptCaptor.getAllValues();
+        assertEquals("director", capturedAppointments.get(0).getOfficerRole());
+        assertEquals("secretary", capturedAppointments.get(1).getOfficerRole());
+        assertEquals("director", capturedAppointments.get(2).getOfficerRole());
     }
 
     @Test
