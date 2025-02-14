@@ -107,6 +107,22 @@ public class CompanySpec {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
     }
 
+    public int getNumberOfAppointments() {
+        return numberOfAppointments;
+    }
+
+    public void setNumberOfAppointments(int numberOfAppointments) {
+        this.numberOfAppointments = numberOfAppointments;
+    }
+
+    public List<String> getOfficerRoles() {
+        return officerRoles;
+    }
+
+    public void setOfficerRoles(List<String> officerRoles) {
+        this.officerRoles = officerRoles;
+    }
+
     public List<RegistersSpec> getRegisters() {
         return registers;
     }
@@ -129,21 +145,5 @@ public class CompanySpec {
 
     public void setFilingHistory(FilingHistorySpec filingHistory) {
         this.filingHistory = filingHistory;
-    }
-
-    public int getNumberOfAppointments() {
-        return numberOfAppointments;
-    }
-
-    public void setNumberOfAppointments(int numberOfAppointments) {
-        this.numberOfAppointments = numberOfAppointments;
-    }
-
-    public List<String> getOfficerRoles() {
-        return officerRoles;
-    }
-
-    public void setOfficerRoles(List<String> officerRoles) {
-        this.officerRoles = officerRoles;
     }
 }

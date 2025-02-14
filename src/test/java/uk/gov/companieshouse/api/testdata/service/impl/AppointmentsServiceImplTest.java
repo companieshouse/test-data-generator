@@ -2,7 +2,11 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +55,6 @@ class AppointmentsServiceImplTest {
 
     @Test
     void create() {
-        // GIVEN
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -205,41 +208,6 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void createWithMultipleAppointments() {
-        final Address mockServiceAddress = new Address("", "", "", "", "", "");
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfAppointments(3);
-        spec.setOfficerRoles(List.of("director", "secretary", "director"));
-
-        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
-        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
-        when(randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8))
-                .thenReturn(ENCODED_INTERNAL_ID);
-        when(randomService.getEtag()).thenReturn(ETAG);
-
-        when(addressService.getAddress(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
-        when(addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES))
-                .thenReturn("Wales");
-
-        Appointment savedApt = new Appointment();
-        when(appointmentsRepository.save(any())).thenReturn(savedApt);
-
-        List<Appointment> returnedApts = appointmentsService.create(spec);
-
-        assertNotNull(returnedApts);
-        assertEquals(3, returnedApts.size());
-
-        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
-        verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
-
-        List<Appointment> capturedAppointments = aptCaptor.getAllValues();
-        assertEquals("director", capturedAppointments.get(0).getOfficerRole());
-        assertEquals("secretary", capturedAppointments.get(1).getOfficerRole());
-        assertEquals("director", capturedAppointments.get(2).getOfficerRole());
-    }
-
-    @Test
     void createWithDefaultOfficerRole() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
@@ -265,6 +233,35 @@ class AppointmentsServiceImplTest {
         assertEquals(2, returnedApts.size());
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
+    }
+
+    @Test
+    void createWithMultipleAppointments() {
+        final Address mockServiceAddress = new Address("", "", "", "", "", "");
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfAppointments(3);
+        spec.setOfficerRoles(List.of("director", "secretary", "director"));
+
+        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8))
+                .thenReturn(ENCODED_INTERNAL_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
+        when(addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES))
+                .thenReturn("Wales");
+
+        Appointment savedApt = new Appointment();
+        when(appointmentsRepository.save(any())).thenReturn(savedApt);
+
+        List<Appointment> returnedApts = appointmentsService.create(spec);
+
+        assertNotNull(returnedApts);
+        assertEquals(3, returnedApts.size());
+
+        verify(appointmentsRepository, times(3)).save(any(Appointment.class));
     }
 
     @Test

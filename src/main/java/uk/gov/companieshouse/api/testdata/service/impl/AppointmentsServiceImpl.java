@@ -195,8 +195,23 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         officerAppointmentItem.setCompanyName("Company " + companyNumber);
         officerAppointmentItem.setCompanyNumber(companyNumber);
         officerAppointmentItem.setCompanyStatus("active");
+        OfficerAppointmentItem item = new OfficerAppointmentItem();
+        item.setOccupation(OCCUPATION);
+        item.setAddress(addressService.getAddress(jurisdiction));
+        item.setForename("Test");
+        item.setSurname(OCCUPATION);
+        item.setOfficerRole(role);
+        item.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
+        item.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
+        item.setAppointedOn(dayNow);
+        item.setNationality("British");
+        item.setUpdatedAt(dayTimeNow);
+        item.setName("Test DIRECTOR");
+        item.setCompanyName("Company " + companyNumber);
+        item.setCompanyNumber(companyNumber);
+        item.setCompanyStatus("active");
 
-        officerAppointmentItemList.add(officerAppointmentItem);
+        officerAppointmentItemList.add(item);
 
         return officerAppointmentItemList;
     }
