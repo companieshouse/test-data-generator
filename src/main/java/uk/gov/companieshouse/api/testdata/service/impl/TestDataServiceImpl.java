@@ -33,6 +33,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -58,7 +59,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private DataService<Appointment, CompanySpec> appointmentService;
+    private AppointmentService appointmentService;
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
