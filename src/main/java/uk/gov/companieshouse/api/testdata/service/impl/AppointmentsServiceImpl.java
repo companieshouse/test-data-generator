@@ -211,7 +211,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         item.setCompanyNumber(companyNumber);
         item.setCompanyStatus("active");
 
-        officerAppointmentItemList.add(item);
+        officerAppointmentItemList.add(officerAppointmentItem);
 
         return officerAppointmentItemList;
     }
