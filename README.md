@@ -83,6 +83,13 @@ In order to use the generator, there are different possible endpoints that can b
     A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test"}}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
 
+#### Deleting Appeals
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing 
+  - `company_number`: The company number of the company. This is mandatory.
+  - `penalty_reference`: The penalty reference of the appeal. This is mandatory.
+  
+  An usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
+
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
