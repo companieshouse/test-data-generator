@@ -18,11 +18,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
-import uk.gov.companieshouse.api.testdata.service.AppointmentService;
+import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class AppointmentsServiceImpl implements AppointmentService {
+public class AppointmentsServiceImpl implements DataService<List<Appointment>,CompanySpec> {
 
     private static final int SALT_LENGTH = 8;
     private static final int ID_LENGTH = 10;
@@ -44,7 +44,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Override
     public List<Appointment> create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
-        final String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
+        final String countryOfResidence =
+                addressService.getCountryOfResidence(spec.getJurisdiction());
         int numberOfAppointments = spec.getNumberOfAppointments();
         if (numberOfAppointments <= 0) {
             numberOfAppointments = 1;
@@ -73,8 +74,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
             Appointment appointment = new Appointment();
 
             String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
-            String internalId = INTERNAL_ID_PREFIX + this.randomService.getNumber(INTERNAL_ID_LENGTH);
-            String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+            String internalId =
+                    INTERNAL_ID_PREFIX + this.randomService.getNumber(INTERNAL_ID_LENGTH);
+            String officerId =
+                    randomService.addSaltAndEncode(internalId, SALT_LENGTH);
 
             LocalDate officerDob = LocalDate.of(1990, 3, 6);
             Instant dateTimeNow = Instant.now();
@@ -181,23 +184,25 @@ public class AppointmentsServiceImpl implements AppointmentService {
         String companyNumber = companySpec.getCompanyNumber();
         Jurisdiction jurisdiction = companySpec.getJurisdiction();
 
-        OfficerAppointmentItem item = new OfficerAppointmentItem();
-        item.setOccupation(OCCUPATION);
-        item.setAddress(addressService.getAddress(jurisdiction));
-        item.setForename("Test");
-        item.setSurname(OCCUPATION);
-        item.setOfficerRole(role);
-        item.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
-        item.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
-        item.setAppointedOn(dayNow);
-        item.setNationality("British");
-        item.setUpdatedAt(dayTimeNow);
-        item.setName("Test DIRECTOR");
-        item.setCompanyName("Company " + companyNumber);
-        item.setCompanyNumber(companyNumber);
-        item.setCompanyStatus("active");
+        OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
+        officerAppointmentItem.setOccupation(OCCUPATION);
+        officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
+        officerAppointmentItem.setForename("Test");
+        officerAppointmentItem.setSurname(OCCUPATION);
+        officerAppointmentItem.setOfficerRole(role);
+        officerAppointmentItem.setLinks(
+                createOfficerAppointmentItemLinks(companyNumber, appointmentId));
+        officerAppointmentItem.setCountryOfResidence(
+                addressService.getCountryOfResidence(jurisdiction));
+        officerAppointmentItem.setAppointedOn(dayNow);
+        officerAppointmentItem.setNationality("British");
+        officerAppointmentItem.setUpdatedAt(dayTimeNow);
+        officerAppointmentItem.setName("Test DIRECTOR");
+        officerAppointmentItem.setCompanyName("Company " + companyNumber);
+        officerAppointmentItem.setCompanyNumber(companyNumber);
+        officerAppointmentItem.setCompanyStatus("active");
 
-        officerAppointmentItemList.add(item);
+        officerAppointmentItemList.add(officerAppointmentItem);
 
         return officerAppointmentItemList;
     }

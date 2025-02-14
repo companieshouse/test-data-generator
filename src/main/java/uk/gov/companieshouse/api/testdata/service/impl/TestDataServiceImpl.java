@@ -59,7 +59,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private AppointmentService appointmentService;
+    private DataService<List<Appointment>, CompanySpec> appointmentService;
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
