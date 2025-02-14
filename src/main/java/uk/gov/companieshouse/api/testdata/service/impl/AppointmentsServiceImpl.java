@@ -56,12 +56,6 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             officerRoles = new ArrayList<>();
         }
 
-        for (String role : officerRoles) {
-            if (!role.equalsIgnoreCase("director") && !role.equalsIgnoreCase("secretary")) {
-                throw new IllegalArgumentException("Invalid officer role: " + role);
-            }
-        }
-
         while (officerRoles.size() < numberOfAppointments) {
             officerRoles.add("director");
         }

@@ -86,7 +86,7 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
     @Mock
-    private DataService<Appointment, CompanySpec> appointmentService;
+    private DataService<List<Appointment>, CompanySpec> appointmentService;
     @Mock
     private DataService<CompanyMetrics, CompanySpec> metricsService;
     @Mock
@@ -144,7 +144,7 @@ class TestDataServiceImplTest {
         final String fullCompanyNumber = COMPANY_NUMBER;
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        when(this.appointmentService.create(any())).thenReturn(List.of(mockAppointment));
 
         CompanySpec spec = new CompanySpec();
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
@@ -184,7 +184,8 @@ class TestDataServiceImplTest {
         final String fullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        when(this.appointmentService.create(any())).thenReturn(List.of(mockAppointment));
+
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
@@ -222,7 +223,8 @@ class TestDataServiceImplTest {
         final String fullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        when(this.appointmentService.create(any())).thenReturn(List.of(mockAppointment));
+
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
@@ -260,7 +262,7 @@ class TestDataServiceImplTest {
         when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(companyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        when(this.appointmentService.create(any())).thenReturn(List.of(mockAppointment));
 
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
@@ -305,7 +307,7 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
 
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+        when(this.appointmentService.create(any())).thenReturn(List.of(mockAppointment));
 
         CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
