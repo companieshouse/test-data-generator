@@ -360,4 +360,25 @@ class CompanyProfileServiceImplTest {
         assertEquals(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY, profile.getType());
         assertEquals("full-data-available-from-financial-conduct-authority-mutuals-public-register", profile.getPartialDataAvailable());
     }
+
+    @Test
+    void createLtdCompanyAndVerifyNoPartialData() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setSubType(null);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_LTD, profile.getType());
+        assertNull(profile.getPartialDataAvailable());
+    }
 }

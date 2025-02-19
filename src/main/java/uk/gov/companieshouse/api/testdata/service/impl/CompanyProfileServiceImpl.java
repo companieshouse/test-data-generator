@@ -3,9 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +23,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
     private static final String LINK_STEM = "/company/";
+
+    public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY =
+            "full-data-available-from-the-company";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY =
+            "full-data-available-from-financial-conduct-authority";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER =
+            "full-data-available-from-financial-conduct-authority-mutuals-public-register";
 
     @Autowired
     private RandomService randomService;
@@ -69,7 +74,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setCompanyNumber(companyNumber);
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
-        profile.setPartialDataAvailable(profile.getType());
+
+        Map<String, String> companyTypes = createPartialDataCompanies();
+        if (companyTypes.containsValue(companyType)) {
+            profile.setPartialDataAvailable(companyTypes.get(companyType));
+        }
+        
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
@@ -100,6 +110,15 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
 
         return repository.save(profile);
+    }
+
+    private static Map<String, String> createPartialDataCompanies() {
+        Map<String, String> companyTypes = new HashMap<>();
+        companyTypes.put("investment-company-with-variable-capital", FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
+        companyTypes.put("assurance-company", FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
+        companyTypes.put("royal-charter", FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
+        companyTypes.put("industrial-and-provident-society", FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
+        return companyTypes;
     }
 
     @Override
