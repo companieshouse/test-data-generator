@@ -2,9 +2,7 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
