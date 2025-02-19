@@ -34,9 +34,6 @@ public class CompanySpec {
     @JsonProperty("has_super_secure_pscs")
     private Boolean hasSuperSecurePscs;
 
-    @JsonProperty("partial_data_available")
-    private String partialDataAvailable;
-
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -88,8 +85,4 @@ public class CompanySpec {
     public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
     }
-
-    public String getPartialDataAvailable() { return partialDataAvailable; }
-
-    public void setPartialDataAvailable(String partialDataAvailable) { this.partialDataAvailable = partialDataAvailable; }
 }

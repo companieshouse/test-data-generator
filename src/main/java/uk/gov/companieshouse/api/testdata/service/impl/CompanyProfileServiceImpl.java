@@ -24,13 +24,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private static final String LINK_STEM = "/company/";
 
-    public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY =
-            "full-data-available-from-the-company";
-    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY =
-            "full-data-available-from-financial-conduct-authority";
-    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER =
-            "full-data-available-from-financial-conduct-authority-mutuals-public-register";
-
     @Autowired
     private RandomService randomService;
 
@@ -75,9 +68,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
 
-        Map<String, String> companyTypes = createPartialDataCompanies();
-        if (companyTypes.containsValue(companyType)) {
-            profile.setPartialDataAvailable(companyTypes.get(companyType));
+        Map<String, String> partialDataOptions = createPartialDataCompanies();
+        if (partialDataOptions.containsValue(companyType)) {
+            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
         }
         
         profile.setUndeliverableRegisteredOfficeAddress(false);
@@ -113,12 +106,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private static Map<String, String> createPartialDataCompanies() {
-        Map<String, String> companyTypes = new HashMap<>();
-        companyTypes.put("investment-company-with-variable-capital", FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
-        companyTypes.put("assurance-company", FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
-        companyTypes.put("royal-charter", FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
-        companyTypes.put("industrial-and-provident-society", FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
-        return companyTypes;
+        Map<String, String> partialDataOptions = new HashMap<>();
+        partialDataOptions.put("investment-company-with-variable-capital",
+                "full-data-available-from-financial-conduct-authority");
+        partialDataOptions.put("assurance-company", "full-data-available-from-financial-conduct-authority");
+        partialDataOptions.put("royal-charter", "full-data-available-from-the-company");
+        partialDataOptions.put("industrial-and-provident-society",
+                "full-data-available-from-financial-conduct-authority-mutuals-public-register");
+        return partialDataOptions;
     }
 
     @Override
