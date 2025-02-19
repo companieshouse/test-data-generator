@@ -72,11 +72,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
 
-        Map<String, String> partialDataOptions = createPartialDataCompanies();
-        if (partialDataOptions.containsValue(companyType)) {
-            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
-        }
-        
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
@@ -101,6 +96,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
+        Map<String, String> partialDataOptions = createPartialDataOptionsMap(String.valueOf(jurisdiction));
+        if (partialDataOptions.containsKey(companyType)) {
+            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
+        }
+
         if (subType != null) {
             profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
             profile.setSubtype(subType);
@@ -109,14 +109,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return repository.save(profile);
     }
 
-    private static Map<String, String> createPartialDataCompanies() {
+    private static Map<String, String> createPartialDataOptionsMap(String companyJurisdiction) {
         Map<String, String> partialDataOptions = new HashMap<>();
         partialDataOptions.put("investment-company-with-variable-capital",
                 "full-data-available-from-financial-conduct-authority");
         partialDataOptions.put("assurance-company", "full-data-available-from-financial-conduct-authority");
         partialDataOptions.put("royal-charter", "full-data-available-from-the-company");
-        partialDataOptions.put("industrial-and-provident-society",
-                "full-data-available-from-financial-conduct-authority-mutuals-public-register");
+        if (companyJurisdiction.equals("northern-ireland")) {
+            partialDataOptions.put("industrial-and-provident-society",
+                    "full-data-available-from-department-of-the-economy");
+        } else {
+            partialDataOptions.put("industrial-and-provident-society",
+                    "full-data-available-from-financial-conduct-authority-mutuals-public-register");
+        }
         return partialDataOptions;
     }
 

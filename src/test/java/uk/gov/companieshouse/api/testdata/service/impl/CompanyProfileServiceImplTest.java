@@ -341,7 +341,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createIndustrialAndProvidentCompanyAndVerifyPartialData() {
+    void createEnglandWalesIndustrialAndProvidentCompanyAndVerifyPartialData() {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY);
         spec.setSubType(null);
@@ -359,6 +359,27 @@ class CompanyProfileServiceImplTest {
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY, profile.getType());
         assertEquals("full-data-available-from-financial-conduct-authority-mutuals-public-register", profile.getPartialDataAvailable());
+    }
+
+    @Test
+    void createNortherIrelandIndustrialAndProvidentCompanyAndVerifyPartialData() {
+        spec.setJurisdiction(Jurisdiction.NI);
+        spec.setCompanyType(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY);
+        spec.setSubType(null);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY, profile.getType());
+        assertEquals("full-data-available-from-department-of-the-economy", profile.getPartialDataAvailable());
     }
 
     @Test
