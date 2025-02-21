@@ -34,7 +34,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String PSC_LINK = "/company/%s/persons-with-significant-control?register_view=true";
     private static final String DIRECTORS_TEXT = "directors";
     private static final String SECRETARIES_TEXT = "secretaries";
-    private static final String PSC_TEXT = "psc";
+    private static final String PSC_TEXT = "persons-with-significant-control";
     private static final String MEMBERS_TEXT = "members";
 
     @Override
