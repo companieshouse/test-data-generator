@@ -35,7 +35,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @Autowired
     private CompanyProfileRepository repository;
 
-    private Boolean hasCompanyRegisters = false;
+    private boolean hasCompanyRegisters = false;
 
     @Override
     public CompanyProfile create(CompanySpec spec) {
