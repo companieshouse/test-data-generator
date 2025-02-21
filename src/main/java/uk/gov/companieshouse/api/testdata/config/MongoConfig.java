@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.repository.*;
 
 @Configuration
@@ -100,6 +101,11 @@ public class MongoConfig {
     public CompanyAuthAllowListRepository companyAuthAllowListRepository() {
         return getMongoRepositoryBean(CompanyAuthAllowListRepository.class,
                 "efs_submissions");
+    }
+
+    @Bean
+    public CompanyRegistersRepository companyRegistersRepository() {
+        return getMongoRepositoryBean(CompanyRegistersRepository.class, "company_registers");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {

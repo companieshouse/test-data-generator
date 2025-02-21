@@ -31,30 +31,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -112,6 +91,9 @@ class TestDataServiceImplTest {
 
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
+
+    @Mock
+    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
 
     @BeforeEach
     void setUp() {
@@ -317,6 +299,48 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void createCompanyDataWithCompanyRegisters() throws Exception {
+        CompanyProfile mockCompany = new CompanyProfile();
+        mockCompany.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+
+        Appointment mockAppointment = new Appointment();
+        mockAppointment.setOfficerId(OFFICER_ID);
+        mockAppointment.setAppointmentId(APPOINTMENT_ID);
+
+        when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+
+        CompanySpec spec = new CompanySpec();
+        RegistersSpec directorsRegister = new RegistersSpec();
+        directorsRegister.setRegisterType("directors");
+        directorsRegister.setRegisterMovedTo("Companies House");
+        spec.setRegisters(List.of(directorsRegister));
+
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
+        verify(companyRegistersService, times(1)).create(expectedSpec);
+
+        assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals(API_URL + "/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
+    }
+
+    @Test
     void createCompanyDataRollBack() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
@@ -351,6 +375,7 @@ class TestDataServiceImplTest {
         verify(appointmentService).delete(fullCompanyNumber);
         verify(companyPscStatementService).delete(fullCompanyNumber);
         verify(metricsService).delete(fullCompanyNumber);
+        verify(companyRegistersService).delete(fullCompanyNumber);
         verify(companyPscsService, times(1)).delete(fullCompanyNumber);
     }
 
@@ -365,6 +390,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -378,6 +404,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
         verify(companyPscsService, never()).delete(COMPANY_NUMBER);
         verify(metricsService, never()).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, never()).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -398,6 +425,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -418,6 +446,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -438,6 +467,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -458,6 +488,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -478,6 +509,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -498,6 +530,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -518,6 +551,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -531,13 +565,17 @@ class TestDataServiceImplTest {
         RuntimeException pscStatementException = new RuntimeException("exception");
         when(companyPscStatementService.delete(COMPANY_NUMBER)).thenThrow(pscStatementException);
 
+        RuntimeException companyRegistersException = new RuntimeException("exception");
+        when(companyRegistersService.delete(COMPANY_NUMBER)).thenThrow(companyRegistersException);
+
         DataException thrown = assertThrows(DataException.class, () ->
                 this.testDataService.deleteCompanyData(COMPANY_NUMBER));
 
-        assertEquals(3, thrown.getSuppressed().length);
+        assertEquals(4, thrown.getSuppressed().length);
         assertEquals(profileException, thrown.getSuppressed()[0]);
         assertEquals(authCodeException, thrown.getSuppressed()[1]);
         assertEquals(pscStatementException, thrown.getSuppressed()[2]);
+        assertEquals(companyRegistersException, thrown.getSuppressed()[3]);
 
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -546,6 +584,7 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test

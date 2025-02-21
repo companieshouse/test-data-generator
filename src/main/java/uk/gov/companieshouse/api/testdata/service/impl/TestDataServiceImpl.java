@@ -11,12 +11,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -30,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -79,6 +75,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Autowired
     private CompanyAuthAllowListService companyAuthAllowListService;
+    @Autowired
+    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -111,6 +109,10 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
+
+            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                this.companyRegistersService.create(spec);
+            }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
@@ -160,6 +162,12 @@ public class TestDataServiceImpl implements TestDataService {
         }
         try {
             this.companyMetricsService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+
+        try {
+            this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }

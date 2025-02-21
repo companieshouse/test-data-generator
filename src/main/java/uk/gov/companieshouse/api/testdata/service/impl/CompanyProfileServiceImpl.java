@@ -35,6 +35,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @Autowired
     private CompanyProfileRepository repository;
 
+    private Boolean hasCompanyRegisters = false;
+
     @Override
     public CompanyProfile create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
@@ -54,6 +56,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         CompanyProfile profile = new CompanyProfile();
 
         profile.setId(companyNumber);
+        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+            hasCompanyRegisters = true;
+        }
         profile.setLinks(createLinks(companyNumber));
 
         CompanyProfile.Accounts accounts = profile.getAccounts();
@@ -120,6 +125,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         links.setOfficers(LINK_STEM + companyNumber + "/officers");
         links.setPersonsWithSignificantControlStatement(LINK_STEM + companyNumber
                 + "/persons-with-significant-control-statement");
+        if (hasCompanyRegisters) {
+            links.setRegisters(LINK_STEM + companyNumber + "/registers");
+        }
         return links;
     }
 

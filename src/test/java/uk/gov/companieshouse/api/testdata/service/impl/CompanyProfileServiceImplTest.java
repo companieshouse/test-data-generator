@@ -14,6 +14,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,10 +26,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -315,5 +317,49 @@ class CompanyProfileServiceImplTest {
 
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(null, profile.getHasSuperSecurePscs());
+    }
+
+    @Test
+    void createCompanyWithRegisters() {
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        RegistersSpec directorsRegister = new RegistersSpec();
+        directorsRegister.setRegisterType("directors");
+        directorsRegister.setRegisterMovedTo("Companies House");
+        spec.setRegisters(List.of(directorsRegister));
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNotNull(profile.getLinks().getRegisters());
+    }
+
+    @Test
+    void createCompanyWithoutRegisters() {
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setRegisters(Collections.emptyList());
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNull(profile.getLinks().getRegisters());
     }
 }

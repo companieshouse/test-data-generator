@@ -19,6 +19,8 @@ public class Links {
     private String officerAppointments;
     @Field("company")
     private String company;
+    @Field("registers")
+    private String registers;
 
     public String getFilingHistory() {
         return filingHistory;
@@ -40,7 +42,8 @@ public class Links {
         return personsWithSignificantControlStatement;
     }
 
-    public void setPersonsWithSignificantControlStatement(String personsWithSignificantControlStatement) {
+    public void setPersonsWithSignificantControlStatement(
+            String personsWithSignificantControlStatement) {
         this.personsWithSignificantControlStatement = personsWithSignificantControlStatement;
     }
 
@@ -74,5 +77,13 @@ public class Links {
 
     public void setCompany(String company) {
         this.company = company;
+    }
+
+    public String getRegisters() {
+        return registers;
+    }
+
+    public void setRegisters(String registers) {
+        this.registers = registers;
     }
 }
