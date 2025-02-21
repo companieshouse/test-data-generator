@@ -32,11 +32,15 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String DIRECTORS_LINK = "/company/%s/officers?register_view=true&register_type=directors";
     private static final String SECRETARIES_LINK = "/company/%s/officers?register_view=true&register_type=secretaries";
     private static final String PSC_LINK = "/company/%s/persons-with-significant-control?register_view=true";
+    private static final String DIRECTORS_TEXT = "directors";
+    private static final String SECRETARIES_TEXT = "secretaries";
+    private static final String PSC_TEXT = "psc";
+    private static final String MEMBERS_TEXT = "members";
 
     @Override
     public CompanyRegisters create(CompanySpec companySpec) throws DataException {
-        LocalDate now = LocalDate.now();
-        CompanyRegisters companyRegisters = new CompanyRegisters();
+        var now = LocalDate.now();
+        var companyRegisters = new CompanyRegisters();
 
         companyRegisters.setCompanyNumber(companySpec.getCompanyNumber());
         companyRegisters.setCreatedAt(now);
@@ -76,10 +80,10 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     }
 
     private Register buildRegister(RegistersSpec registerSpec, String companyNumber) {
-        RegisterItem registerItem = new RegisterItem();
+        var registerItem = new RegisterItem();
         registerItem.setRegisterMovedTo(registerSpec.getRegisterMovedTo());
         registerItem.setMovedOn(LocalDate.now());
-        Register register = new Register();
+        var register = new Register();
         register.setRegisterType(registerSpec.getRegisterType());
         register.setItems(Collections.singletonList(registerItem));
         Map<String, String> registerLinks = generateRegisterLinks(registerSpec.getRegisterType(), companyNumber);
@@ -91,20 +95,20 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
 
     private Map<String, String> generateRegisterLinks(String registerType, String companyNumber) {
         return switch (registerType) {
-            case "directors" -> Map.of("directors_register", DIRECTORS_LINK.formatted(companyNumber));
-            case "secretaries" -> Map.of("secretaries_register", SECRETARIES_LINK.formatted(companyNumber));
-            case "psc" -> Map.of("persons_with_significant_control_register", PSC_LINK.formatted(companyNumber));
+            case DIRECTORS_TEXT -> Map.of("directors_register", DIRECTORS_LINK.formatted(companyNumber));
+            case SECRETARIES_TEXT -> Map.of("secretaries_register", SECRETARIES_LINK.formatted(companyNumber));
+            case PSC_TEXT -> Map.of("persons_with_significant_control_register", PSC_LINK.formatted(companyNumber));
             default -> Collections.emptyMap();
         };
     }
 
     private enum RegisterType {
-        DIRECTORS("directors", "directors"),
-        SECRETARIES("secretaries", "secretaries"),
+        DIRECTORS(DIRECTORS_TEXT, DIRECTORS_TEXT),
+        SECRETARIES(SECRETARIES_TEXT, SECRETARIES_TEXT),
         PSC("persons-with-significant-control", "persons_with_significant_control"),
         USUAL_RESIDENTIAL_ADDRESS("usual-residential-address", "usual_residential_address"),
-        MEMBERS("members", "members"),
-        LLP_MEMBERS("llp-members", "members"),
+        MEMBERS(MEMBERS_TEXT, MEMBERS_TEXT),
+        LLP_MEMBERS("llp-members", MEMBERS_TEXT),
         LLP_USUAL_RESIDENTIAL_ADDRESS("llp-usual-residential-address", "usual_residential_address");
 
         private static final Map<String, String> TYPE_MAP = Arrays.stream(values())
