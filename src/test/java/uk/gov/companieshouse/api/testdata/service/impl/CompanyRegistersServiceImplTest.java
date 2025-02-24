@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -125,6 +126,15 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
+    void testGenerateRegisterLinksForNull() throws DataException {
+        setRegister("members");
+        CompanyRegisters createdRegisters = service.create(companySpec);
+        Map<String, String> links = createdRegisters.getRegisters()
+                .get("members").getLinks();
+        assertNull(links);
+    }
+
+    @Test
     void testCreateWithNoRegisters() throws DataException {
         setRegister("directors");
         companySpec.setRegisters(Collections.emptyList());
@@ -167,7 +177,7 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
-    void testDeleteCompanyRegistersExists() {
+    void testDeletedCompanyRegistersExists() {
         CompanyRegisters mockRegister = new CompanyRegisters();
         mockRegister.setCompanyNumber("12345678");
         when(repository.deleteByCompanyNumber("12345678")).thenReturn(Optional.of(mockRegister));
@@ -179,7 +189,7 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
-    void testDeleteCompanyRegistersNotExists() {
+    void testDeletedCompanyRegistersNotExists() {
         when(repository.deleteByCompanyNumber("99999999")).thenReturn(Optional.empty());
         boolean deleted = service.delete("99999999");
         assertFalse(deleted);
@@ -187,8 +197,9 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
-    void testDeleteCompanyRegistersThrowsException() {
-        when(repository.deleteByCompanyNumber("12345678")).thenThrow(new RuntimeException("Database error"));
+    void testDeletedCompanyRegistersThrowsException() {
+        when(repository.deleteByCompanyNumber("12345678"))
+                .thenThrow(new RuntimeException("Database error"));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class, () -> service.delete("12345678"));
