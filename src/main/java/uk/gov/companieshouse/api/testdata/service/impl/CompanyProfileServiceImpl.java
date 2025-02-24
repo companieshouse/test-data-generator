@@ -66,9 +66,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
         Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
         Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYearTwoWeeks
+        var dateInOneYearTwoWeeks
                 = now.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYearNineMonths
+        var dateInOneYearNineMonths
                 = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
 
         if (Jurisdiction.UNITED_KINGDOM.equals(jurisdiction)) {
@@ -85,6 +85,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             overseasEntity.setHasSuperSecurePscs(hasSuperSecurePscs);
             overseasEntity.setHasCharges(false);
             overseasEntity.setHasInsolvencyHistory(false);
+            var dissolved = false;
+            overseasEntity.setHasInsolvencyHistory(dissolved);
             overseasEntity.setJurisdiction(jurisdiction.toString());
 
             overseasEntity.getConfirmationStatement().setNextDue(dateInOneYearNineMonths);
@@ -125,6 +127,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             updated.setBy(randomService.getString(16));
             updated.setType(UPDATED_TYPE);
             overseasEntity.setUpdated(updated);
+            overseasEntity.setDeltaAt(Instant.now());
 
             repository.save(overseasEntity);
             LOG.info("Returning a CompanyProfile view for overseas entity. " + companyNumber);
@@ -160,8 +163,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
         profile.setSicCodes(Collections.singletonList("71200"));
 
-        CompanyProfile.ConfirmationStatement
-                confirmationStatement = profile.getConfirmationStatement();
+        var confirmationStatement = profile.getConfirmationStatement();
         confirmationStatement.setNextMadeUpTo(dateInOneYear);
         confirmationStatement.setOverdue(false);
         confirmationStatement.setNextDue(dateInOneYearTwoWeeks);

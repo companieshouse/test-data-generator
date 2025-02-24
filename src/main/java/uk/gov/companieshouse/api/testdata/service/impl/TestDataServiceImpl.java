@@ -112,7 +112,7 @@ public class TestDataServiceImpl implements TestDataService {
             companyProfileService.create(spec);
             filingHistoryService.create(spec);
             appointmentService.create(spec);
-            CompanyAuthCode authCode = companyAuthCodeService.create(spec);
+            var authCode = companyAuthCodeService.create(spec);
             companyMetricsService.create(spec);
             companyPscStatementService.create(spec);
 
