@@ -49,6 +49,8 @@ In order to use the generator, there are different possible endpoints that can b
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to no value, field not present in the database.
   -  `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
 
+  An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true}`
+- A usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
   An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "persons-with-significant-control", "register_type: "directors"]}`
 - A usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
