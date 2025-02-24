@@ -105,7 +105,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private enum RegisterType {
         DIRECTORS(DIRECTORS_TEXT, DIRECTORS_TEXT),
         SECRETARIES(SECRETARIES_TEXT, SECRETARIES_TEXT),
-        PSC("persons-with-significant-control", "persons_with_significant_control"),
+        PSC(PSC_TEXT, "persons_with_significant_control"),
         USUAL_RESIDENTIAL_ADDRESS("usual-residential-address", "usual_residential_address"),
         MEMBERS(MEMBERS_TEXT, MEMBERS_TEXT),
         LLP_MEMBERS("llp-members", MEMBERS_TEXT),

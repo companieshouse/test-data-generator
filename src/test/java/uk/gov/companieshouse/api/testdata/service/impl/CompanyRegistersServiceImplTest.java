@@ -86,7 +86,7 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
-    void testGenerateRegisterLinks() throws DataException {
+    void testGenerateRegisterLinksForDirectors() throws DataException {
         setRegister("directors");
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
@@ -125,6 +125,48 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
+    void testCreateWithNoRegisters() throws DataException {
+        setRegister("directors");
+        companySpec.setRegisters(Collections.emptyList());
+        CompanyRegisters createdRegisters = service.create(companySpec);
+        assertNotNull(createdRegisters);
+        assertTrue(createdRegisters.getRegisters().isEmpty());
+        verify(repository, times(1)).save(any(CompanyRegisters.class));
+    }
+
+    @Test
+    void testCreateCompanyRegistersWithNullRegisterType() {
+        setCompanySpec(null, "Companies House");
+        DataException exception = assertThrows(
+                DataException.class, () -> service.create(companySpec));
+        assertEquals("Register type must be provided", exception.getMessage());
+    }
+
+    @Test
+    void testCreateCompanyRegistersWithBlankRegisterType() {
+        setCompanySpec("", "public_register");
+        DataException exception = assertThrows(
+                DataException.class, () -> service.create(companySpec));
+        assertEquals("Register type must be provided", exception.getMessage());
+    }
+
+    @Test
+    void testCreateCompanyRegistersWithNullRegisterMovedTo() {
+        setCompanySpec("directors", null);
+        DataException exception = assertThrows(
+                DataException.class, () -> service.create(companySpec));
+        assertEquals("Register moved to must be provided", exception.getMessage());
+    }
+
+    @Test
+    void testCreateCompanyRegistersWithBlankRegisterMovedTo() {
+        setCompanySpec("members", "");
+        DataException exception = assertThrows(
+                DataException.class, () -> service.create(companySpec));
+        assertEquals("Register moved to must be provided", exception.getMessage());
+    }
+
+    @Test
     void testDeleteCompanyRegistersExists() {
         CompanyRegisters mockRegister = new CompanyRegisters();
         mockRegister.setCompanyNumber("12345678");
@@ -145,80 +187,28 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
-    void testCreateWithNoRegisters() throws DataException {
-        setRegister("directors");
-        companySpec.setRegisters(Collections.emptyList());
-        CompanyRegisters createdRegisters = service.create(companySpec);
-        assertNotNull(createdRegisters);
-        assertTrue(createdRegisters.getRegisters().isEmpty());
-        verify(repository, times(1)).save(any(CompanyRegisters.class));
-    }
+    void testDeleteCompanyRegistersThrowsException() {
+        when(repository.deleteByCompanyNumber("12345678")).thenThrow(new RuntimeException("Database error"));
 
-    @Test
-    void testCreateCompanyRegistersWithNullRegisterType() {
-        companySpec = new CompanySpec();
-        companySpec.setCompanyNumber("12345678");
-        RegistersSpec register = new RegistersSpec();
-        register.setRegisterType(null);
-        register.setRegisterMovedTo("Companies House");
-        companySpec.setRegisters(List.of(register));
-
-        DataException exception = assertThrows(
-                DataException.class, () -> service.create(companySpec));
-        assertEquals("Register type must be provided", exception.getMessage());
-    }
-
-    @Test
-    void testCreateCompanyRegistersWithBlankRegisterType() {
-        companySpec = new CompanySpec();
-        companySpec.setCompanyNumber("12345678");
-        RegistersSpec register = new RegistersSpec();
-        register.setRegisterType("");
-        register.setRegisterMovedTo("Companies House");
-        companySpec.setRegisters(List.of(register));
-
-        DataException exception = assertThrows(
-                DataException.class, () -> service.create(companySpec));
-        assertEquals("Register type must be provided", exception.getMessage());
-    }
-
-    @Test
-    void testCreateCompanyRegistersWithNullRegisterMovedTo() {
-        companySpec = new CompanySpec();
-        companySpec.setCompanyNumber("12345678");
-        RegistersSpec register = new RegistersSpec();
-        register.setRegisterType("directors");
-        register.setRegisterMovedTo(null);
-        companySpec.setRegisters(List.of(register));
-
-        DataException exception = assertThrows(
-                DataException.class, () -> service.create(companySpec));
-        assertEquals("Register moved to must be provided", exception.getMessage());
-    }
-
-    @Test
-    void testCreateCompanyRegistersWithBlankRegisterMovedTo() {
-        companySpec = new CompanySpec();
-        companySpec.setCompanyNumber("12345678");
-        RegistersSpec register = new RegistersSpec();
-        register.setRegisterType("members");
-        register.setRegisterMovedTo("");
-        companySpec.setRegisters(List.of(register));
-
-        DataException exception = assertThrows(
-                DataException.class, () -> service.create(companySpec));
-        assertEquals("Register moved to must be provided", exception.getMessage());
+        RuntimeException exception = assertThrows(
+                RuntimeException.class, () -> service.delete("12345678"));
+        assertEquals("Database error", exception.getMessage());
+        verify(repository, times(1)).deleteByCompanyNumber("12345678");
     }
 
     private void setRegister(String registerType) {
-        companySpec = new CompanySpec();
-        companySpec.setCompanyNumber("12345678");
-        RegistersSpec directorsRegister = new RegistersSpec();
-        directorsRegister.setRegisterType(registerType);
-        directorsRegister.setRegisterMovedTo("Companies House");
-        companySpec.setRegisters(List.of(directorsRegister));
+        setCompanySpec(registerType, "Companies House");
         when(randomService.getEtag()).thenReturn("dummy-etag");
         when(repository.save(any(CompanyRegisters.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+    }
+
+    private void setCompanySpec(String registerType, String registerMovedTo) {
+        companySpec = new CompanySpec();
+        companySpec.setCompanyNumber("12345678");
+        RegistersSpec register = new RegistersSpec();
+        register.setRegisterType(registerType);
+        register.setRegisterMovedTo(registerMovedTo);
+        companySpec.setRegisters(List.of(register));
     }
 }
