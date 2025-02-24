@@ -1288,4 +1288,86 @@ class TestDataServiceImplTest {
         verify(userService, times(1)).delete(userId);
         verify(companyAuthAllowListService, never()).delete(anyString());
     }
+
+    @Test
+    void createCompanyDataWithNullRegisters() throws Exception {
+        CompanyProfile mockCompany = new CompanyProfile();
+        mockCompany.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+
+        Appointment mockAppointment = new Appointment();
+        mockAppointment.setOfficerId(OFFICER_ID);
+        mockAppointment.setAppointmentId(APPOINTMENT_ID);
+
+        when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+
+        CompanySpec spec = new CompanySpec();
+        spec.setRegisters(null);
+
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
+        verify(companyRegistersService, never()).create(expectedSpec);
+
+        assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals(API_URL + "/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
+
+        // Add assertions to use the mockAppointment object
+        assertEquals(OFFICER_ID, mockAppointment.getOfficerId());
+        assertEquals(APPOINTMENT_ID, mockAppointment.getAppointmentId());
+    }
+
+    @Test
+    void createCompanyDataWithEmptyRegisters() throws Exception {
+        CompanyProfile mockCompany = new CompanyProfile();
+        mockCompany.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+
+        Appointment mockAppointment = new Appointment();
+        mockAppointment.setOfficerId(OFFICER_ID);
+        mockAppointment.setAppointmentId(APPOINTMENT_ID);
+
+        when(this.randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+        when(this.appointmentService.create(any())).thenReturn(mockAppointment);
+
+        CompanySpec spec = new CompanySpec();
+        spec.setRegisters(new ArrayList<>());
+
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(COMPANY_NUMBER, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.ENGLAND_WALES, expectedSpec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
+        verify(companyPscsService, times(3)).create(expectedSpec);
+        verify(companyRegistersService, never()).create(expectedSpec);
+
+        assertEquals(COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals(API_URL + "/company/" + COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
+    }
 }
