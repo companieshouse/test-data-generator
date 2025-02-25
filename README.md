@@ -72,6 +72,7 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating Acsp Members and Acsp Profiles
 - POST: Sending a POST request to create Acsp Members and Acsp Profiles `{Base URL}/test-data/acsp-members` will generate a new Acsp Member and Acsp Profile. The request body must include mandatory `userId` and optional `AcspMembersSpec` and `AcspProfile` parameter to customise the generated Acsp Member and Acsp Profile.
+````
     - `user_id`: The User ID of user from the user db. This is mandatory.
     - `user_role`: This is the role of the ACSP Member. This is optional
     - `status`: Status of the Acsp Member. This is optional
@@ -79,13 +80,13 @@ In order to use the generator, there are different possible endpoints that can b
       - `type`: Company type of the AcspProfile. This is optional with a defaults to `ltd`.
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
         - `aml_details`: [   
-          {   
-             `supervisory_body`: Supervisory body of the Acsp Profile. This is optional and the value are populated from supervisory body enum.   
-             `membershipd_details`: Membership details of the Acsp Profile. This is optional.   
-           }   
-        ]   
-    }
-    
+            {   
+              `supervisory_body`: Supervisory body of the Acsp Profile. This is optional and the value are populated from taf-playwright-common repository.   
+              `membership_details`: Membership details of the Acsp Profile. This is optional.   
+            }   
+          ]   
+      }
+````
     A usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test", "aml_details": [ {"supervisory_body": "test","membership_details": "test"} ] {}}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
 

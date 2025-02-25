@@ -43,6 +43,12 @@ class AcspProfileServiceImplTest {
     @InjectMocks
     private AcspProfileServiceImpl service;
 
+    private AcspProfile createSavedProfile() {
+        AcspProfile profile = new AcspProfile();
+        profile.setAcspNumber("randomId");
+        return profile;
+    }
+
     @Test
     void createAcspProfile() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
@@ -50,8 +56,7 @@ class AcspProfileServiceImplTest {
         spec.setType("ltd");
 
         when(randomService.getString(8)).thenReturn("randomId");
-        AcspProfile savedProfile = new AcspProfile();
-        savedProfile.setAcspNumber("randomId");
+        AcspProfile savedProfile = createSavedProfile();
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
         AcspProfileData result = service.create(spec);
@@ -65,8 +70,7 @@ class AcspProfileServiceImplTest {
     @Test
     void createAcspProfileWithDefaultValues() throws DataException {
         when(randomService.getString(8)).thenReturn("randomId");
-        AcspProfile savedProfile = new AcspProfile();
-        savedProfile.setAcspNumber("randomId");
+            AcspProfile savedProfile = createSavedProfile();
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
         AcspProfileSpec spec = new AcspProfileSpec();
@@ -100,7 +104,7 @@ class AcspProfileServiceImplTest {
         AcspProfileData result = service.create(spec);
 
         assertNotNull(result);
-        assertEquals("randomId", result.getAcspNumber());
+        assertEquals(savedProfile.getAcspNumber(), result.getAcspNumber());
 
         ArgumentCaptor<AcspProfile> captor = ArgumentCaptor.forClass(AcspProfile.class);
         verify(repository).save(captor.capture());
@@ -108,8 +112,8 @@ class AcspProfileServiceImplTest {
         AcspProfile captured = captor.getValue();
         assertEquals("randomId", captured.getId());
         assertEquals("randomId", captured.getAcspNumber());
-        assertEquals("active", captured.getStatus());
-        assertEquals("ltd", captured.getType());
+        assertEquals(spec.getStatus(), captured.getStatus());
+        assertEquals(spec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertEquals(0L, captured.getVersion());
@@ -130,9 +134,8 @@ class AcspProfileServiceImplTest {
                 captured.getAmlDetails().get(2).getMembershipDetails());
     }
 
-    private static AcspProfile getAcspProfile(AcspProfileSpec spec) {
-        AcspProfile savedProfile = new AcspProfile();
-        savedProfile.setAcspNumber("randomId");
+    private AcspProfile getAcspProfile(AcspProfileSpec spec) {
+        AcspProfile savedProfile = createSavedProfile();
 
         List<AmlDetails> amlDetailsList = new ArrayList<>();
         for (AmlSpec amlSpec : spec.getAmlDetails()) {
@@ -145,7 +148,7 @@ class AcspProfileServiceImplTest {
         return savedProfile;
     }
 
-    private static AcspProfileSpec getAcspProfileSpec() {
+    private AcspProfileSpec getAcspProfileSpec() {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
@@ -175,9 +178,7 @@ class AcspProfileServiceImplTest {
         spec.setAmlDetails(null); // Setting AmlDetails as null
 
         when(randomService.getString(8)).thenReturn("randomId");
-        AcspProfile savedProfile = new AcspProfile();
-        savedProfile.setAcspNumber("randomId");
-        savedProfile.setAmlDetails(null); // Ensure null is handled correctly
+            AcspProfile savedProfile = createSavedProfile();
 
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
@@ -191,6 +192,12 @@ class AcspProfileServiceImplTest {
 
         AcspProfile captured = captor.getValue();
         assertNotNull(captured);
+        assertEquals("randomId", captured.getId());
+        assertEquals("randomId", captured.getAcspNumber());
+        assertEquals(spec.getStatus(), captured.getStatus()); // Default value
+        assertEquals(spec.getType(), captured.getType()); // Default value
+        assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
+        assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertNull(captured.getAmlDetails()); // Ensure it remains null
     }
 
@@ -202,8 +209,7 @@ class AcspProfileServiceImplTest {
         spec.setAmlDetails(Collections.emptyList()); // Setting an empty list
 
         when(randomService.getString(8)).thenReturn("randomId");
-        AcspProfile savedProfile = new AcspProfile();
-        savedProfile.setAcspNumber("randomId");
+        AcspProfile savedProfile = createSavedProfile();
         savedProfile.setAmlDetails(new ArrayList<>()); // Ensure it's an empty list
 
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);

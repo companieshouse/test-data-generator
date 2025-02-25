@@ -984,10 +984,8 @@ class TestDataServiceImplTest {
         when(acspProfileService.create(any(AcspProfileSpec.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
 
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException:"
-                + " Error creating ACSP profile", exception.getMessage());
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
+        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile", exception.getMessage());
     }
 
     @Test
@@ -1015,7 +1013,6 @@ class TestDataServiceImplTest {
         verify(acspMembersService).create(any(AcspMembersSpec.class));
     }
 
-    @SuppressWarnings("checkstyle:OperatorWrap")
     @Test
     void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
@@ -1025,13 +1022,17 @@ class TestDataServiceImplTest {
         acspProfileData = new AcspProfileData("acspNumber");
         AcspMembersData acspMembersData;
         acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        var acspStatus = "active";
+        var acspType = "ltd";
+        var supervisoryBody = "financial-conduct-authority-fca";
+        var membershipDetails = "Membership ID: FCA654321";
 
         AcspProfileSpec acspProfile = new AcspProfileSpec();
-        acspProfile.setStatus("ACTIVE");
-        acspProfile.setType("TypeA");
+        acspProfile.setStatus(acspStatus);
+        acspProfile.setType(acspType);
         AmlSpec amlSpec = new AmlSpec();
-        amlSpec.setSupervisoryBody("supervisoryBody");
-        amlSpec.setMembershipDetails("membershipDetails");
+        amlSpec.setSupervisoryBody(supervisoryBody);
+        amlSpec.setMembershipDetails(membershipDetails);
 
         acspProfile.setAmlDetails(Collections.singletonList(amlSpec));
 
@@ -1044,28 +1045,29 @@ class TestDataServiceImplTest {
 
         assertNotNull(result);
         assertEquals("acspNumber", result.getAcspNumber());
-        assertEquals("ACTIVE", spec.getAcspProfile().getStatus());
-        assertEquals("TypeA", spec.getAcspProfile().getType());
-        assertEquals("supervisoryBody",
+        assertEquals(acspStatus, spec.getAcspProfile().getStatus());
+        assertEquals(acspType, spec.getAcspProfile().getType());
+        assertEquals(supervisoryBody,
                 spec.getAcspProfile().getAmlDetails().getFirst().getSupervisoryBody());
-        assertEquals("membershipDetails",
+        assertEquals(membershipDetails,
                 spec.getAcspProfile().getAmlDetails().getFirst().getMembershipDetails());
         assertEquals("memberId", result.getAcspMemberId());
-        assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
         assertEquals("role", result.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
-                "TypeA".equals(profile.getType()) && "ACTIVE".equals(profile.getStatus())
+                acspType.equals(profile.getType()) && acspStatus.equals(profile.getStatus())
                         && profile.getAmlDetails() != null && !profile.getAmlDetails().isEmpty()
-                        && "supervisoryBody".equals(
+                        && supervisoryBody.equals(
                                 profile.getAmlDetails().getFirst().getSupervisoryBody())
-                        && "membershipDetails".equals(
+                        && membershipDetails.equals(
                                 profile.getAmlDetails().getFirst().getMembershipDetails())
         ));
-        verify(acspProfileService).create(any(AcspProfileSpec.class));
-        verify(acspMembersService).create(any(AcspMembersSpec.class));
+
+        verify(acspMembersService).create(argThat(membersSpec ->
+                acspMembersData.getUserId().equals(membersSpec.getUserId())
+        ));
     }
 
     @Test
@@ -1096,8 +1098,10 @@ class TestDataServiceImplTest {
                 profile.getStatus() == null
                         && profile.getType() == null
                         && profile.getAmlDetails() == null));
-        verify(acspProfileService).create(any(AcspProfileSpec.class));
-        verify(acspMembersService).create(any(AcspMembersSpec.class));
+
+        verify(acspMembersService).create(argThat(membersSpec ->
+                acspMembersData.getUserId().equals(membersSpec.getUserId())
+        ));
     }
 
     @Test
