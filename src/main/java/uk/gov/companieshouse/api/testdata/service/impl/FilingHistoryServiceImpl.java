@@ -39,7 +39,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
-        boolean hasFilingHistory = false;
+        var hasFilingHistory = false;
 
         try {
             barcode = barcodeService.getBarcode();

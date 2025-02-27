@@ -5,8 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-
 /**
  * Requirements a new company must meet.
  */
