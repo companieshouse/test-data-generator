@@ -39,16 +39,10 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
-        var hasFilingHistory = false;
-
         try {
             barcode = barcodeService.getBarcode();
         } catch (BarcodeServiceException ex) {
             throw new DataException(ex.getMessage(), ex);
-        }
-
-        if (spec.getFilingHistory() != null) {
-            hasFilingHistory = true;
         }
 
         FilingHistory filingHistory = new FilingHistory();
@@ -57,14 +51,16 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 
+        var hasFilingHistory = spec.getFilingHistory() != null;
+
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(filingHistory));
         filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
-        filingHistory.setCategory(hasFilingHistory ? spec.getFilingHistory().getCategory() :"incorporation");
-        filingHistory.setDescription(hasFilingHistory ? spec.getFilingHistory().getDescription() :"incorporation-company");
+        filingHistory.setCategory(hasFilingHistory ? spec.getFilingHistory().getCategory() : "incorporation");
+        filingHistory.setDescription(hasFilingHistory ? spec.getFilingHistory().getDescription() : "incorporation-company");
         filingHistory.setDate(dayTimeNow);
-        filingHistory.setType(hasFilingHistory ? spec.getFilingHistory().getType() :"NEWINC");
+        filingHistory.setType(hasFilingHistory ? spec.getFilingHistory().getType() : "NEWINC");
         filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
         filingHistory.setOriginalDescription(hasFilingHistory ? spec.getFilingHistory().getOriginalDescription() : "Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
