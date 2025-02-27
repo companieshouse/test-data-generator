@@ -39,6 +39,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
+        boolean hasFilingHistory = false;
 
         try {
             barcode = barcodeService.getBarcode();
@@ -46,6 +47,9 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
             throw new DataException(ex.getMessage(), ex);
         }
 
+        if (spec.getFilingHistory() != null) {
+            hasFilingHistory = true;
+        }
 
         FilingHistory filingHistory = new FilingHistory();
         Instant dayTimeNow = Instant.now();
@@ -57,14 +61,13 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(filingHistory));
         filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
-        filingHistory.setCategory("incorporation");
-        filingHistory.setDescription("incorporation-company");
+        filingHistory.setCategory(hasFilingHistory ? spec.getFilingHistory().getCategory() :"incorporation");
+        filingHistory.setDescription(hasFilingHistory ? spec.getFilingHistory().getDescription() :"incorporation-company");
         filingHistory.setDate(dayTimeNow);
-        filingHistory.setType("NEWINC");
+        filingHistory.setType(hasFilingHistory ? spec.getFilingHistory().getType() :"NEWINC");
         filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
-        filingHistory.setOriginalDescription("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
-
+        filingHistory.setOriginalDescription(hasFilingHistory ? spec.getFilingHistory().getOriginalDescription() : "Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
 
         filingHistory.setBarcode(barcode);
 

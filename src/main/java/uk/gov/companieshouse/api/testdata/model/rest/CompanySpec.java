@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
 /**
  * Requirements a new company must meet.
@@ -33,6 +34,14 @@ public class CompanySpec {
 
     @JsonProperty("has_super_secure_pscs")
     private Boolean hasSuperSecurePscs;
+
+    @JsonProperty("company_status_detail")
+    @Pattern(regexp = "active|dissolved|converted-closed|transferred-from-uk|active-proposal-to-strike-off|petition-to-restore-dissolved|transformed-to-se|converted-to-plc|converted-to-uk-societas|converted-to-ukeig",
+            message = "Invalid company status detail")
+    private String companyStatusDetail;
+
+    @JsonProperty("filing_history")
+    private FilingHistorySpec filingHistory;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -84,5 +93,21 @@ public class CompanySpec {
 
     public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
+    }
+
+    public String getCompanyStatusDetail() {
+        return companyStatusDetail;
+    }
+
+    public void setCompanyStatusDetail(String companyStatusDetail) {
+        this.companyStatusDetail = companyStatusDetail;
+    }
+
+    public FilingHistorySpec getFilingHistory() {
+        return filingHistory;
+    }
+
+    public void setFilingHistory(FilingHistorySpec filingHistory) {
+        this.filingHistory = filingHistory;
     }
 }
