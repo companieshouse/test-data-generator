@@ -26,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
@@ -37,6 +38,7 @@ class CompanyProfileServiceImplTest {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String OVERSEAS_COMPANY_NUMBER = "FC123456";
     private static final String ETAG = "ETAG";
     private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
     private static final String COMPANY_TYPE_PLC = "plc";
@@ -56,6 +58,7 @@ class CompanyProfileServiceImplTest {
 
     private CompanySpec spec;
     private CompanyProfile savedProfile;
+    private OverseasEntity savedOverseaProfile;
 
 
     @BeforeEach
@@ -63,6 +66,7 @@ class CompanyProfileServiceImplTest {
         spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         savedProfile = new CompanyProfile();
+        savedOverseaProfile = new OverseasEntity();
     }
 
     // Test that a company profile is created with default company type
@@ -82,6 +86,118 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType(COMPANY_TYPE_LTD);
         assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
                 spec.getJurisdiction().toString(), spec.getCompanyType(), false);
+    }
+
+    @Test
+    void createOverseaCompany() {
+        spec.setCompanyNumber(OVERSEAS_COMPANY_NUMBER); // Set the correct company number
+        spec.setCompanyType("oversea-company");
+        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        spec.setCompanyStatus("active");
+        spec.setHasSuperSecurePscs(false);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedOverseaProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        OverseasEntity returnedProfile = (OverseasEntity) this.companyProfileService.create(spec);
+        assertEquals(savedOverseaProfile, returnedProfile);
+
+        ArgumentCaptor<OverseasEntity> companyProfileCaptor = ArgumentCaptor.forClass(OverseasEntity.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        OverseasEntity overseaProfile = companyProfileCaptor.getValue();
+        assertEquals(OVERSEAS_COMPANY_NUMBER, overseaProfile.getId());
+        assertEquals(OVERSEAS_COMPANY_NUMBER, overseaProfile.getCompanyNumber());
+        assertEquals("COMPANY " + OVERSEAS_COMPANY_NUMBER + " LIMITED", overseaProfile.getCompanyName());
+        assertEquals("active", overseaProfile.getCompanyStatus());
+        assertEquals("oversea-company", overseaProfile.getType());
+        assertEquals(mockRegisteredAddress, overseaProfile.getRegisteredOfficeAddress());
+        assertEquals(mockRegisteredAddress, overseaProfile.getServiceAddress());
+        assertEquals(false, overseaProfile.getUndeliverableRegisteredOfficeAddress());
+        assertEquals(ETAG, overseaProfile.getEtag());
+        assertEquals(0, overseaProfile.getSuperSecureManagingOfficerCount());
+        assertNotNull(overseaProfile.getForeignCompanyDetails());
+        assertNotNull(overseaProfile.getLinks());
+        assertNotNull(overseaProfile.getUpdated());
+        assertOnAccounts(overseaProfile.getAccounts());
+    }
+
+    private void assertOnOverseasAccounts(CompanyProfile.Accounts accounts) {
+        assertNotNull(accounts);
+        assertNotNull(accounts.getNextDue());
+        assertNotNull(accounts.getPeriodStart());
+        assertNotNull(accounts.getPeriodEnd());
+        assertNotNull(accounts.getNextAccountsDueOn());
+        assertEquals(false, accounts.getNextAccountsOverdue());
+        assertNotNull(accounts.getNextMadeUpTo());
+        assertNotNull(accounts.getAccountingReferenceDateDay());
+        assertNotNull(accounts.getAccountingReferenceDateMonth());
+        assertNotNull(accounts.getLastAccountsMadeUpTo());
+        assertNotNull(accounts.getLastAccountsPeriodEndOn());
+        assertNotNull(accounts.getLastAccountsType());
+        assertEquals(false, accounts.getOverdue());
+    }
+
+    @Test
+    void createOverseaCompanyForeignDetailsTest() {
+        // Set up the spec for an oversea-company
+        spec.setCompanyNumber(OVERSEAS_COMPANY_NUMBER);
+        spec.setCompanyType("oversea-company");
+        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM); // Will be forced anyway
+        spec.setCompanyStatus("active");
+        spec.setHasSuperSecurePscs(false);
+
+        Address mockAddress = new Address("line1", "line2", "locality", "region", "postcode", "country");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedOverseaProfile);
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(mockAddress);
+
+        OverseasEntity returnedProfile = (OverseasEntity) companyProfileService.create(spec);
+        assertEquals(savedOverseaProfile, returnedProfile);
+
+        ArgumentCaptor<OverseasEntity> captor = ArgumentCaptor.forClass(OverseasEntity.class);
+        verify(repository).save(captor.capture());
+        OverseasEntity overseaProfile = captor.getValue();
+
+        assertEquals(OVERSEAS_COMPANY_NUMBER, overseaProfile.getId());
+        assertEquals("oversea-company", overseaProfile.getType());
+        assertEquals("active", overseaProfile.getCompanyStatus());
+        assertEquals(mockAddress, overseaProfile.getRegisteredOfficeAddress());
+        assertEquals(mockAddress, overseaProfile.getServiceAddress());
+        assertEquals(ETAG, overseaProfile.getEtag());
+
+        assertNotNull(overseaProfile.getForeignCompanyDetails());
+        var foreignDetails = overseaProfile.getForeignCompanyDetails();
+
+        assertNotNull(foreignDetails.getAccountingRequirement());
+        assertEquals("accounts-publication-date-supplied-by-company", foreignDetails.getAccountingRequirement().getTermsOfAccountPublication());
+        assertEquals("accounting-requirements-of-originating-country-apply", foreignDetails.getAccountingRequirement().getForeignAccountType());
+
+        assertNotNull(foreignDetails.getOriginatingRegistry());
+        assertEquals("Companies Registration Office Barbados", foreignDetails.getOriginatingRegistry().getName());
+        assertEquals("BARBADOS", foreignDetails.getOriginatingRegistry().getCountry());
+
+        assertEquals("Barbados", foreignDetails.getGovernedBy());
+        assertEquals("Test Limited (Private Limited Company)", foreignDetails.getLegalForm());
+        assertEquals("123456", foreignDetails.getRegistrationNumber());
+        assertFalse(foreignDetails.getIsACreditFinancialInstitution());
+        assertEquals("Manufacturer And Seller Of Cable Harnesses", foreignDetails.getBusinessActivity());
+
+        assertNotNull(foreignDetails.getAccounts());
+        var foreignAccounts = foreignDetails.getAccounts();
+
+        assertNotNull(foreignAccounts.getMustFileWithin());
+        assertEquals("6", foreignAccounts.getMustFileWithin().getMonths());
+
+        assertNotNull(foreignAccounts.getAccountPeriodTo());
+        assertEquals("3", foreignAccounts.getAccountPeriodTo().getMonth());
+        assertEquals("31", foreignAccounts.getAccountPeriodTo().getDay());
+
+        assertNotNull(foreignAccounts.getAccountPeriodFrom());
+        assertEquals("4", foreignAccounts.getAccountPeriodFrom().getMonth());
+        assertEquals("1", foreignAccounts.getAccountPeriodFrom().getDay());
     }
 
     // Test that a company profile is deleted

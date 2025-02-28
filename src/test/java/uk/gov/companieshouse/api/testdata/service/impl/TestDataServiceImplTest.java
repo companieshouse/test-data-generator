@@ -39,6 +39,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
@@ -68,6 +69,7 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 class TestDataServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String OVERSEA_COMPANY_NUMBER = "FC123456";
     private static final String AUTH_CODE = "123456";
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
@@ -352,6 +354,59 @@ class TestDataServiceImplTest {
         verify(companyPscStatementService).delete(fullCompanyNumber);
         verify(metricsService).delete(fullCompanyNumber);
         verify(companyPscsService, times(1)).delete(fullCompanyNumber);
+    }
+
+    @Test
+    void createCompanyDataOverseaCompany() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyType("oversea-company");
+        spec.setCompanyStatus("active");
+        spec.setHasSuperSecurePscs(false);
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(companyProfileService.companyExists(OVERSEA_COMPANY_NUMBER)).thenReturn(false);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode("AUTH123");
+        when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        OverseasEntity savedProfile = new OverseasEntity();
+        savedProfile.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
+        when(companyProfileService.create(any())).thenReturn(savedProfile);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+
+        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
+        verify(companyProfileService).create(specCaptor.capture());
+        CompanySpec capturedSpec = specCaptor.getValue();
+        assertEquals(OVERSEA_COMPANY_NUMBER, capturedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.UNITED_KINGDOM, capturedSpec.getJurisdiction());
+
+        verify(companyPscsService, never()).create(any());
+
+        assertEquals(OVERSEA_COMPANY_NUMBER, createdCompany.getCompanyNumber());
+        assertEquals(API_URL + "/company/" + OVERSEA_COMPANY_NUMBER, createdCompany.getCompanyUri());
+        assertEquals("AUTH123", createdCompany.getAuthCode());
+    }
+
+    @Test
+    void createCompanyDataOverseaCompanyRollBack() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyType("oversea-company");
+        spec.setCompanyStatus("active");
+        spec.setHasSuperSecurePscs(false);
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(companyProfileService.companyExists(OVERSEA_COMPANY_NUMBER)).thenReturn(false);
+
+        DataException exceptionToThrow = new DataException("error");
+        when(companyPscStatementService.create(spec)).thenThrow(exceptionToThrow);
+
+        DataException thrown = assertThrows(DataException.class, () -> testDataService.createCompanyData(spec));
+        assertEquals(exceptionToThrow, thrown.getCause());
+
+        verify(companyProfileService).delete(OVERSEA_COMPANY_NUMBER);
+        verify(companyAuthCodeService).delete(OVERSEA_COMPANY_NUMBER);
     }
 
     @Test

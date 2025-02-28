@@ -26,6 +26,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -92,25 +93,39 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
+        final String companyNumberPrefix;
+        if ("oversea-company".equals(spec.getCompanyType())) {
+            companyNumberPrefix = "FC";
+            spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        } else {
+            companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
+        }
 
         do {
-            // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
+            // Company number format: PP+123456 (
+            // Prefix either 0 or 2 chars; here using a 2-char prefix example)
             spec.setCompanyNumber(companyNumberPrefix
-                    + randomService
-                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+                    + randomService.getNumber(COMPANY_NUMBER_LENGTH
+                    - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            this.companyProfileService.create(spec);
-            this.filingHistoryService.create(spec);
-            this.appointmentService.create(spec);
-            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
-            this.companyMetricsService.create(spec);
-            this.companyPscStatementService.create(spec);
-            this.companyPscsService.create(spec);
-            this.companyPscsService.create(spec);
-            this.companyPscsService.create(spec);
+            companyProfileService.create(spec);
+            filingHistoryService.create(spec);
+            appointmentService.create(spec);
+            var authCode = companyAuthCodeService.create(spec);
+            companyMetricsService.create(spec);
+            companyPscStatementService.create(spec);
+
+            if (!"oversea-company".equals(spec.getCompanyType())) {
+                if (Jurisdiction.UNITED_KINGDOM.equals(spec.getJurisdiction())) {
+                    companyPscsService.create(spec);
+                } else {
+                    companyPscsService.create(spec);
+                    companyPscsService.create(spec);
+                    companyPscsService.create(spec);
+                }
+            }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
