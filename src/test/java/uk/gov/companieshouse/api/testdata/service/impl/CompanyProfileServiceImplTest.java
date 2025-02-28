@@ -38,7 +38,7 @@ class CompanyProfileServiceImplTest {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String OVERSEAS_COMPANY_NUMBER = "FC123456";
+    private static final String OVERSEA_COMPANY_NUMBER = "FC123456";
     private static final String ETAG = "ETAG";
     private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
     private static final String COMPANY_TYPE_PLC = "plc";
@@ -90,7 +90,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createOverseaCompany() {
-        spec.setCompanyNumber(OVERSEAS_COMPANY_NUMBER); // Set the correct company number
+        spec.setCompanyNumber(OVERSEA_COMPANY_NUMBER); // Set the correct company number
         spec.setCompanyType("oversea-company");
         spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         spec.setCompanyStatus("active");
@@ -108,9 +108,9 @@ class CompanyProfileServiceImplTest {
         verify(repository).save(companyProfileCaptor.capture());
 
         OverseasEntity overseaProfile = companyProfileCaptor.getValue();
-        assertEquals(OVERSEAS_COMPANY_NUMBER, overseaProfile.getId());
-        assertEquals(OVERSEAS_COMPANY_NUMBER, overseaProfile.getCompanyNumber());
-        assertEquals("COMPANY " + OVERSEAS_COMPANY_NUMBER + " LIMITED", overseaProfile.getCompanyName());
+        assertEquals(OVERSEA_COMPANY_NUMBER, overseaProfile.getId());
+        assertEquals(OVERSEA_COMPANY_NUMBER, overseaProfile.getCompanyNumber());
+        assertEquals("COMPANY " + OVERSEA_COMPANY_NUMBER + " LIMITED", overseaProfile.getCompanyName());
         assertEquals("active", overseaProfile.getCompanyStatus());
         assertEquals("oversea-company", overseaProfile.getType());
         assertEquals(mockRegisteredAddress, overseaProfile.getRegisteredOfficeAddress());
@@ -124,7 +124,7 @@ class CompanyProfileServiceImplTest {
         assertOnAccounts(overseaProfile.getAccounts());
     }
 
-    private void assertOnOverseasAccounts(CompanyProfile.Accounts accounts) {
+    private void assertOnOverseaAccounts(CompanyProfile.Accounts accounts) {
         assertNotNull(accounts);
         assertNotNull(accounts.getNextDue());
         assertNotNull(accounts.getPeriodStart());
@@ -143,7 +143,7 @@ class CompanyProfileServiceImplTest {
     @Test
     void createOverseaCompanyForeignDetailsTest() {
         // Set up the spec for an oversea-company
-        spec.setCompanyNumber(OVERSEAS_COMPANY_NUMBER);
+        spec.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
         spec.setCompanyType("oversea-company");
         spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM); // Will be forced anyway
         spec.setCompanyStatus("active");
@@ -161,7 +161,7 @@ class CompanyProfileServiceImplTest {
         verify(repository).save(captor.capture());
         OverseasEntity overseaProfile = captor.getValue();
 
-        assertEquals(OVERSEAS_COMPANY_NUMBER, overseaProfile.getId());
+        assertEquals(OVERSEA_COMPANY_NUMBER, overseaProfile.getId());
         assertEquals("oversea-company", overseaProfile.getType());
         assertEquals("active", overseaProfile.getCompanyStatus());
         assertEquals(mockAddress, overseaProfile.getRegisteredOfficeAddress());
