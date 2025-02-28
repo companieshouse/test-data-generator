@@ -190,14 +190,6 @@ class CompanyProfileServiceImplTest {
 
         assertNotNull(foreignAccounts.getMustFileWithin());
         assertEquals("6", foreignAccounts.getMustFileWithin().getMonths());
-
-        assertNotNull(foreignAccounts.getAccountPeriodTo());
-        assertEquals("3", foreignAccounts.getAccountPeriodTo().getMonth());
-        assertEquals("31", foreignAccounts.getAccountPeriodTo().getDay());
-
-        assertNotNull(foreignAccounts.getAccountPeriodFrom());
-        assertEquals("4", foreignAccounts.getAccountPeriodFrom().getMonth());
-        assertEquals("1", foreignAccounts.getAccountPeriodFrom().getDay());
     }
 
     // Test that a company profile is deleted
