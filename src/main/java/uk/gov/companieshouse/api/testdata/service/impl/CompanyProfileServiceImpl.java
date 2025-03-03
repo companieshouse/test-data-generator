@@ -62,7 +62,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             var overseaCompany = new OverseasEntity();
             overseaCompany.setId(companyNumber);
             overseaCompany.setCompanyNumber(companyNumber);
-            overseaCompany.setVersion(3L);
             overseaCompany.setHasMortgages(false);
             overseaCompany.setCompanyStatus("active");
             overseaCompany.setType("oversea-company");

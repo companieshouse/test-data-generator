@@ -102,11 +102,11 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         do {
-            // Company number format: PP+123456 (
-            // Prefix either 0 or 2 chars; here using a 2-char prefix example)
+            // Company number format: PP+123456
+            // (Prefix either 0 or 2 chars; here using a 2-char prefix example)
             spec.setCompanyNumber(companyNumberPrefix
-                    + randomService.getNumber(COMPANY_NUMBER_LENGTH
-                    - companyNumberPrefix.length()));
+                    + randomService.getNumber(
+                            COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
@@ -115,16 +115,12 @@ public class TestDataServiceImpl implements TestDataService {
             appointmentService.create(spec);
             var authCode = companyAuthCodeService.create(spec);
             companyMetricsService.create(spec);
-            companyPscStatementService.create(spec);
 
             if (!"oversea-company".equals(spec.getCompanyType())) {
-                if (Jurisdiction.UNITED_KINGDOM.equals(spec.getJurisdiction())) {
-                    companyPscsService.create(spec);
-                } else {
-                    companyPscsService.create(spec);
-                    companyPscsService.create(spec);
-                    companyPscsService.create(spec);
-                }
+                companyPscStatementService.create(spec);
+                companyPscsService.create(spec);
+                companyPscsService.create(spec);
+                companyPscsService.create(spec);
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();

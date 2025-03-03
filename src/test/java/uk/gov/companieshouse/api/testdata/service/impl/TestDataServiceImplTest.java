@@ -367,7 +367,7 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(OVERSEA_COMPANY_NUMBER)).thenReturn(false);
 
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
-        mockAuthCode.setAuthCode("AUTH123");
+        mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         OverseasEntity savedProfile = new OverseasEntity();
@@ -383,10 +383,11 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.UNITED_KINGDOM, capturedSpec.getJurisdiction());
 
         verify(companyPscsService, never()).create(any());
+        verify(companyPscStatementService, never()).create(any());
 
         assertEquals(OVERSEA_COMPANY_NUMBER, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + OVERSEA_COMPANY_NUMBER, createdCompany.getCompanyUri());
-        assertEquals("AUTH123", createdCompany.getAuthCode());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
     @Test
@@ -400,13 +401,15 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(OVERSEA_COMPANY_NUMBER)).thenReturn(false);
 
         DataException exceptionToThrow = new DataException("error");
-        when(companyPscStatementService.create(spec)).thenThrow(exceptionToThrow);
+        when(metricsService.create(spec)).thenThrow(exceptionToThrow);
 
         DataException thrown = assertThrows(DataException.class, () -> testDataService.createCompanyData(spec));
         assertEquals(exceptionToThrow, thrown.getCause());
 
         verify(companyProfileService).delete(OVERSEA_COMPANY_NUMBER);
         verify(companyAuthCodeService).delete(OVERSEA_COMPANY_NUMBER);
+        verify(companyPscsService, never()).create(any());
+        verify(companyPscStatementService, never()).create(any());
     }
 
     @Test
