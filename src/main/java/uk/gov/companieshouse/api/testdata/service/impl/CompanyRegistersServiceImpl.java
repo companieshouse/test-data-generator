@@ -36,6 +36,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String SECRETARIES_TEXT = "secretaries";
     private static final String PSC_TEXT = "persons-with-significant-control";
     private static final String MEMBERS_TEXT = "members";
+    private static final String REGISTER_STEM = "/registers";
 
     @Override
     public CompanyRegisters create(CompanySpec companySpec) throws DataException {
@@ -61,7 +62,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     }
 
     private String generateSelfLink(String companyNumber) {
-        return LINK_STEM + companyNumber + "/registers";
+        return LINK_STEM + companyNumber + REGISTER_STEM;
     }
 
     private Map<String, Register> createRegisters(List<RegistersSpec> registers, String companyNumber) throws DataException {

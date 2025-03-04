@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -25,6 +26,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
     private static final String LINK_STEM = "/company/";
+    private static final String FILLING_HISTORY_STEM = "/filing-history";
+    private static final String OFFICERS_STEM = "/officers";
+    private static final String PSC_STATEMENT_STEM = "/persons-with-significant-control-statement";
+    private static final String REGISTERS_STEM = "/registers";
 
     @Autowired
     private RandomService randomService;
@@ -42,7 +47,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String companyNumber = spec.getCompanyNumber();
         final Jurisdiction jurisdiction = spec.getJurisdiction();
         final String companyStatus = spec.getCompanyStatus();
-        final String companyType = spec.getCompanyType();
+        final CompanyType companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
 
@@ -73,7 +78,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         profile.setCompanyNumber(companyNumber);
         profile.setDateOfCreation(dateOneYearAgo);
-        profile.setType(Objects.requireNonNullElse(companyType, "ltd"));
+        profile.setType(companyType != null ? companyType.toString() : "ltd");
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
@@ -121,12 +126,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private Links createLinks(String companyNumber) {
         Links links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
-        links.setFilingHistory(LINK_STEM + companyNumber + "/filing-history");
-        links.setOfficers(LINK_STEM + companyNumber + "/officers");
+        links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+        links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
         links.setPersonsWithSignificantControlStatement(LINK_STEM + companyNumber
-                + "/persons-with-significant-control-statement");
+                + PSC_STATEMENT_STEM);
         if (hasCompanyRegisters) {
-            links.setRegisters(LINK_STEM + companyNumber + "/registers");
+            links.setRegisters(LINK_STEM + companyNumber + REGISTERS_STEM);
         }
         return links;
     }
