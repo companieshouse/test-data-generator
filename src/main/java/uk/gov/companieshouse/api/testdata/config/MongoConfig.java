@@ -102,6 +102,11 @@ public class MongoConfig {
                 "efs_submissions");
     }
 
+    @Bean
+    public AppealsRepository appealsRepository() {
+        return getMongoRepositoryBean(AppealsRepository.class, "appeals");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
