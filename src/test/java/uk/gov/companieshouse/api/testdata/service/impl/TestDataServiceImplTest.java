@@ -71,6 +71,7 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 class TestDataServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String OVERSEAS_COMPANY_NUMBER = "OE123456";
     private static final String AUTH_CODE = "123456";
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
@@ -404,6 +405,41 @@ class TestDataServiceImplTest {
         verify(metricsService).delete(fullCompanyNumber);
         verify(companyRegistersService).delete(fullCompanyNumber);
         verify(companyPscsService, times(1)).delete(fullCompanyNumber);
+    }
+
+    @Test
+    void createCompanyDataOverseasSpec() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        CompanyProfile mockCompany = new CompanyProfile();
+        mockCompany.setCompanyNumber(OVERSEAS_COMPANY_NUMBER);
+
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+
+        when(this.randomService.getNumber(6)).thenReturn(Long.valueOf(OVERSEAS_COMPANY_NUMBER.substring(2)));
+        final String fullCompanyNumber = OVERSEAS_COMPANY_NUMBER;
+        when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
+        when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
+
+        verify(companyProfileService, times(1)).create(specCaptor.capture());
+        CompanySpec expectedSpec = specCaptor.getValue();
+        assertEquals(fullCompanyNumber, expectedSpec.getCompanyNumber());
+        assertEquals(Jurisdiction.UNITED_KINGDOM, expectedSpec.getJurisdiction());
+
+        verify(filingHistoryService, times(1)).create(expectedSpec);
+        verify(companyAuthCodeService, times(1)).create(expectedSpec);
+        verify(appointmentService, times(1)).create(expectedSpec);
+        verify(companyPscStatementService, times(1)).create(expectedSpec);
+        verify(metricsService, times(1)).create(expectedSpec);
+
+        verify(companyPscsService, times(1)).create(expectedSpec);
+
+        assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
+        assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
+        assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
     @Test

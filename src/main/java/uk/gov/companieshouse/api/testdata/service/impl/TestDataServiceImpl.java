@@ -27,6 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -108,15 +109,23 @@ public class TestDataServiceImpl implements TestDataService {
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            this.companyProfileService.create(spec);
-            this.filingHistoryService.create(spec);
-            this.appointmentService.create(spec);
-            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
-            this.companyMetricsService.create(spec);
-            this.companyPscStatementService.create(spec);
-            this.companyPscsService.create(spec);
-            this.companyPscsService.create(spec);
-            this.companyPscsService.create(spec);
+            companyProfileService.create(spec);
+            filingHistoryService.create(spec);
+            appointmentService.create(spec);
+            CompanyAuthCode authCode = companyAuthCodeService.create(spec);
+            companyMetricsService.create(spec);
+            companyPscStatementService.create(spec);
+
+            // Logic for creating PSCs checks the repository for existing PSCs
+            // before proceeding to create a PSC. This creates a default of 3 PSCs
+            // Personal, Legal and Corporate PSCs.
+            if (Jurisdiction.UNITED_KINGDOM.equals(spec.getJurisdiction())) {
+                companyPscsService.create(spec);
+            } else {
+                companyPscsService.create(spec);
+                companyPscsService.create(spec);
+                companyPscsService.create(spec);
+            }
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 this.companyRegistersService.create(spec);
