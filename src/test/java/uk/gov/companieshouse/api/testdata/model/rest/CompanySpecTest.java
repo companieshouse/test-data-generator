@@ -31,8 +31,10 @@ class CompanySpecTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
 
+        String invalidCompanyType = "invalid-company-type";
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            spec.setCompanyType(CompanyType.valueOf("invalid-company-type"));
+            CompanyType companyType = CompanyType.valueOf(invalidCompanyType);
+            spec.setCompanyType(companyType);
         });
 
         assertTrue(exception.getMessage().contains("No enum constant"));
