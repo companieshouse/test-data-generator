@@ -28,6 +28,14 @@ public class CompanyProfile {
         private String accountingReferenceDateDay;
         @Field("accounting_reference_date.month")
         private String accountingReferenceDateMonth;
+        @Field("last_accounts.made_up_to")
+        private Instant lastAccountsMadeUpTo;
+        @Field("last_accounts.period_end_on")
+        private Instant lastAccountsPeriodEndOn;
+        @Field("last_accounts.type")
+        private String lastAccountsType;
+        @Field("overdue")
+        private Boolean overdue;
 
         public Instant getNextDue() {
             return nextDue;
@@ -92,6 +100,39 @@ public class CompanyProfile {
         public void setAccountingReferenceDateMonth(String accountingReferenceDateMonth) {
             this.accountingReferenceDateMonth = accountingReferenceDateMonth;
         }
+
+        public Instant getLastAccountsMadeUpTo() {
+            return lastAccountsMadeUpTo;
+        }
+
+        public void setLastAccountsMadeUpTo(Instant lastAccountsMadeUpTo) {
+            this.lastAccountsMadeUpTo = lastAccountsMadeUpTo;
+        }
+
+        public Instant getLastAccountsPeriodEndOn() {
+            return lastAccountsPeriodEndOn;
+        }
+
+        public void setLastAccountsPeriodEndOn(Instant lastAccountsPeriodEndOn) {
+            this.lastAccountsPeriodEndOn = lastAccountsPeriodEndOn;
+        }
+
+        public String getLastAccountsType() {
+            return lastAccountsType;
+        }
+
+        public void setLastAccountsType(String lastAccountsType) {
+            this.lastAccountsType = lastAccountsType;
+        }
+
+        public Boolean getOverdue() {
+            return overdue;
+        }
+
+        public void setOverdue(Boolean overdue) {
+            this.overdue = overdue;
+        }
+
     }
 
     public class ConfirmationStatement {

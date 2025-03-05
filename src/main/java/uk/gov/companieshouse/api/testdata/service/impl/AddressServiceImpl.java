@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.testdata.service.AddressService;
 public class AddressServiceImpl implements AddressService {
 
     private static final String UNITED_KINGDOM = "United Kingdom";
+
     private static final Address ENGLAND_WALES_ADDRESS = new Address(
             "1",
             "Companies House",
@@ -17,6 +18,7 @@ public class AddressServiceImpl implements AddressService {
             "Cardiff",
             "CF14 3UZ"
     );
+
     private static final Address SCOTLAND_ADDRESS = new Address(
             "1",
             "4th Floor Edinburgh Quay 2",
@@ -25,6 +27,7 @@ public class AddressServiceImpl implements AddressService {
             "Edinburgh",
             "EH3 9FF"
     );
+
     private static final Address NI_ADDRESS = new Address(
             "1",
             "Second Floor The Linenhall",
@@ -32,6 +35,15 @@ public class AddressServiceImpl implements AddressService {
             UNITED_KINGDOM,
             "Belfast",
             "BT2 8BG"
+    );
+
+    private static final Address OVERSEAS_ADDRESS = new Address(
+            "1",
+            "Gordon Cummins Hwy",
+            "Grantley Adams International Airport",
+            "Barbados",
+            "Christ Church",
+            "123123"
     );
 
     @Override
@@ -43,6 +55,8 @@ public class AddressServiceImpl implements AddressService {
                 return SCOTLAND_ADDRESS;
             case NI:
                 return NI_ADDRESS;
+            case UNITED_KINGDOM:
+                return OVERSEAS_ADDRESS;
             default:
                 throw new IllegalArgumentException("No address for jurisdiction");
         }
@@ -50,13 +64,15 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public String getCountryOfResidence(Jurisdiction jurisdiction) {
-        switch(jurisdiction) {
+        switch (jurisdiction) {
             case ENGLAND_WALES:
                 return "Wales";
             case SCOTLAND:
                 return "Scotland";
             case NI:
                 return "Northern Ireland";
+            case UNITED_KINGDOM:
+                return "Barbados";
             default:
                 throw new IllegalArgumentException("No valid jurisdiction provided");
         }

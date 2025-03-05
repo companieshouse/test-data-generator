@@ -49,6 +49,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to no value, field not present in the database.
 
   An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true}`
+  A usage example for creating oversea-company looks like this: `{"type": "oversea-company}`, this will create an oversea company with hardcoded values which includes foreign company details
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
