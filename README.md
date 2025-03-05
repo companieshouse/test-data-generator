@@ -42,14 +42,17 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating test companies
 - POST: Sending a POST request to `{Base URL}/test-data/company` will generate a new test company and accompanying Authcode. The request body can include an optional `CompanySpec` parameter to customise the generated company.
-  - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`). Defaults to `england_wales`.
+  - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`, `united-kingdom`). Defaults to `england_wales`.
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
   - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
   - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to no value, field not present in the database.
   -  `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
 
+  An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true}`
+- A usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
   An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "persons-with-significant-control", "register_type: "directors"]}`
+- A usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 

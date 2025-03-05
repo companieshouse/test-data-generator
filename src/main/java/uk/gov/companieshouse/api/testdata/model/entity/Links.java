@@ -11,6 +11,8 @@ public class Links {
     private String officers;
     @Field("persons_with_significant_control_statement")
     private String personsWithSignificantControlStatement;
+    @Field("persons_with_significant_control")
+    private String personsWithSignificantControl;
     @Field("self")
     private String self;
     @Field("officer.self")
@@ -45,6 +47,14 @@ public class Links {
     public void setPersonsWithSignificantControlStatement(
             String personsWithSignificantControlStatement) {
         this.personsWithSignificantControlStatement = personsWithSignificantControlStatement;
+    }
+
+    public String getPersonsWithSignificantControl() {
+        return personsWithSignificantControl;
+    }
+
+    public void setPersonsWithSignificantControl(String personsWithSignificantControl) {
+        this.personsWithSignificantControl = personsWithSignificantControl;
     }
 
     public String getSelf() {
