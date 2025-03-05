@@ -170,6 +170,8 @@ public class CompanyProfile {
     private String subtype;
     @Field("data.is_community_interest_company")
     private Boolean isCommunityInterestCompany;
+    @Field("data.partial_data_available")
+    private String partialDataAvailable;
 
     public String getId() {
         return id;
@@ -330,5 +332,11 @@ public class CompanyProfile {
 
     public void setIsCommunityInterestCompany(Boolean isCommunityInterestCompany) {
         this.isCommunityInterestCompany = isCommunityInterestCompany;
+    }
+
+    public String getPartialDataAvailable() {return this.partialDataAvailable; }
+
+    public void setPartialDataAvailable(String partialDataAvailable) {
+        this.partialDataAvailable = partialDataAvailable;
     }
 }
