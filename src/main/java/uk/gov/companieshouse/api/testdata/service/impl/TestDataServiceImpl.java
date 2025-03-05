@@ -16,6 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -82,6 +83,8 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Autowired
     AppealsService appealsService;
+    @Autowired
+    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -114,6 +117,10 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
             this.companyPscsService.create(spec);
+
+            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                this.companyRegistersService.create(spec);
+            }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
@@ -163,6 +170,12 @@ public class TestDataServiceImpl implements TestDataService {
         }
         try {
             this.companyMetricsService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+
+        try {
+            this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
