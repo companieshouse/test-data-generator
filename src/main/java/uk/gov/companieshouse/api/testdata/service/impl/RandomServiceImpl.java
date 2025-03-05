@@ -70,14 +70,14 @@ public class RandomServiceImpl implements RandomService {
 
     @Override
     public LocalDate generateAccountsDueDateByStatus(String accountsDueStatus) {
-        var now = LocalDate.now();
+        var result = LocalDate.now();
         if (StringUtils.hasText(accountsDueStatus)) {
-            if (accountsDueStatus.equalsIgnoreCase("overdue")) {
-                now = now.minusYears(1).minusMonths(11);
-            } else if (accountsDueStatus.equalsIgnoreCase("due-soon")) {
-                now = now.minusYears(1).minusMonths(9);
+            if ("overdue".equalsIgnoreCase(accountsDueStatus)) {
+                result = result.minusYears(1).minusMonths(11);
+            } else if ("due-soon".equalsIgnoreCase(accountsDueStatus)) {
+                result = result.minusYears(1).minusMonths(9);
             }
         }
-        return now;
+        return result;
     }
 }

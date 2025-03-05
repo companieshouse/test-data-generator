@@ -55,5 +55,9 @@ public interface RandomService {
      */
     String addSaltAndEncode(String baseString, int saltLength);
 
+    /**
+     * Generate a random date
+     * @return A random date
+     */
     LocalDate generateAccountsDueDateByStatus(String accountsDueStatus);
 }

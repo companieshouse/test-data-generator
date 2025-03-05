@@ -54,9 +54,9 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         if (StringUtils.hasText(accountsDueStatus)) {
-            var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
-            dayTimeNow = now.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
-            dayNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
+            var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            dayTimeNow = dueDateNow.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
+            dayNow = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);

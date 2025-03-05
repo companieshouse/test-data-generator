@@ -46,17 +46,17 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
         final String accountsDueStatus = spec.getAccountsDueStatus();
 
-        LocalDate now = LocalDate.now();
+        LocalDate localDateNow = LocalDate.now();
         if (StringUtils.hasText(accountsDueStatus)) {
-            now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            localDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
         }
-        Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYearTwoWeeks = now.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYearNineMonths = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        var dateInTwoYear = now.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        var dateInTwoYearTwoWeeks = now.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateOneYearAgo = localDateNow.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateNow = localDateNow.atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYear = localDateNow.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYearTwoWeeks = localDateNow.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYearNineMonths = localDateNow.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInTwoYear = localDateNow.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInTwoYearTwoWeeks = localDateNow.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
         CompanyProfile profile = new CompanyProfile();
 
         profile.setId(companyNumber);
@@ -69,8 +69,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
         accounts.setNextAccountsOverdue(false);
         accounts.setNextMadeUpTo(dateInOneYear);
-        accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
-        accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
+        accounts.setAccountingReferenceDateDay(String.valueOf(localDateNow.getDayOfMonth()));
+        accounts.setAccountingReferenceDateMonth(String.valueOf(localDateNow.getMonthValue()));
 
         profile.setCompanyNumber(companyNumber);
         profile.setDateOfCreation(dateOneYearAgo);
@@ -84,7 +84,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setSicCodes(Collections.singletonList("71200"));
 
         CompanyProfile.ConfirmationStatement confirmationStatement = profile.getConfirmationStatement();
-        if (accountsDueStatus != null && accountsDueStatus.equalsIgnoreCase("due-soon")) {
+        if ("due-soon".equalsIgnoreCase(accountsDueStatus)) {
             confirmationStatement.setLastMadeUpTo(dateInOneYear);
             confirmationStatement.setNextMadeUpTo(dateInTwoYear);
             confirmationStatement.setOverdue(false);

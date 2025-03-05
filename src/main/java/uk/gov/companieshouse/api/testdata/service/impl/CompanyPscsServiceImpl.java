@@ -26,7 +26,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanySpec> {
 
-    protected static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
+    static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
             "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
@@ -52,8 +52,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
         Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         if (StringUtils.hasText(accountsDueStatus)) {
-            var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
-            dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
+            var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            dateNow = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);

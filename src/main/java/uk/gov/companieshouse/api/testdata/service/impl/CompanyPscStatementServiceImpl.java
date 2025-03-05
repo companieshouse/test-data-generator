@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement, CompanySpec> {
 
+    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
 
@@ -45,12 +46,12 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
 
         Instant dateTimeNow = Instant.now();
-        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
 
         if (StringUtils.hasText(accountsDueStatus)) {
             var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
-            dateTimeNow = now.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
-            dateNow = now.atStartOfDay(ZoneId.of("UTC")).toInstant();
+            dateTimeNow = now.atTime(LocalTime.now()).atZone(ZONE_ID_UTC).toInstant();
+            dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
         }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
