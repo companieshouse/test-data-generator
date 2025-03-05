@@ -59,6 +59,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -114,6 +115,9 @@ class TestDataServiceImplTest {
 
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
+
+    @Mock
+    private AppealsService appealsService;
 
     @Mock
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
@@ -1287,6 +1291,48 @@ class TestDataServiceImplTest {
         assertTrue(result);
         verify(userService, times(1)).delete(userId);
         verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteAppealsDataSuccess() throws DataException {
+        String companyNumber = "12345678";
+        String penaltyReference = "penaltyRef";
+
+        when(appealsService.delete(companyNumber, penaltyReference)).thenReturn(true);
+
+        boolean result = testDataService.deleteAppealsData(companyNumber, penaltyReference);
+
+        assertTrue(result);
+        verify(appealsService, times(1)).delete(companyNumber, penaltyReference);
+    }
+
+    @Test
+    void deleteAppealsDataFailure() throws DataException {
+        String companyNumber = "12345678";
+        String penaltyReference = "penaltyRef";
+
+        when(appealsService.delete(companyNumber, penaltyReference)).thenReturn(false);
+
+        boolean result = testDataService.deleteAppealsData(companyNumber, penaltyReference);
+
+        assertFalse(result);
+        verify(appealsService, times(1)).delete(companyNumber, penaltyReference);
+    }
+
+    @Test
+    void deleteAppealsDataThrowsException() {
+        String companyNumber = "12345678";
+        String penaltyReference = "penaltyRef";
+        RuntimeException ex = new RuntimeException("error");
+
+        when(appealsService.delete(companyNumber, penaltyReference)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.deleteAppealsData(companyNumber, penaltyReference));
+
+        assertEquals("Error deleting appeals data", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(appealsService, times(1)).delete(companyNumber, penaltyReference);
     }
 
     @Test

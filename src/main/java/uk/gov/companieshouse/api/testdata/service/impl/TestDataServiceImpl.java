@@ -33,6 +33,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -80,6 +81,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Autowired
     private CompanyAuthAllowListService companyAuthAllowListService;
+    @Autowired
+    AppealsService appealsService;
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
 
@@ -332,6 +335,16 @@ public class TestDataServiceImpl implements TestDataService {
             throw ex;
         }
         return true;
+    }
+
+    @Override
+    public boolean deleteAppealsData(String companyNumber, String penaltyReference)
+            throws DataException {
+        try {
+            return appealsService.delete(companyNumber, penaltyReference);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting appeals data", ex);
+        }
     }
 
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {

@@ -103,6 +103,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public AppealsRepository appealsRepository() {
+        return getMongoRepositoryBean(AppealsRepository.class, "appeals");
+    }
+
+    @Bean
     public CompanyRegistersRepository companyRegistersRepository() {
         return getMongoRepositoryBean(CompanyRegistersRepository.class, "company_registers");
     }
