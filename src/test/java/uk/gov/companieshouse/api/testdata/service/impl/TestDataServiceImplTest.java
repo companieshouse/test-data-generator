@@ -139,8 +139,7 @@ class TestDataServiceImplTest {
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
         CompanySpec spec = new CompanySpec();
-        CompanyData createdCompany;
-        createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -178,8 +177,7 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
-        CompanyData createdCompany;
-        createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -217,8 +215,7 @@ class TestDataServiceImplTest {
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
-        CompanyData createdCompany;
-        createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -258,8 +255,7 @@ class TestDataServiceImplTest {
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
-        CompanyData createdCompany;
-        createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
@@ -304,8 +300,7 @@ class TestDataServiceImplTest {
         when(this.companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
         when(this.appointmentService.create(any())).thenReturn(mockAppointment);
 
-        CompanyData createdCompany;
-        createdCompany = this.testDataService.createCompanyData(spec);
+        CompanyData createdCompany = this.testDataService.createCompanyData(spec);
 
         verify(companyProfileService, times(1)).create(specCaptor.capture());
         CompanySpec expectedSpec = specCaptor.getValue();
