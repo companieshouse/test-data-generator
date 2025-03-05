@@ -99,7 +99,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             profile.setSubtype(subType);
         }
 
-        if (companyStatusDetail != null) {
+        if (!Objects.isNull(companyStatusDetail)) {
             profile.setCompanyStatusDetail(companyStatusDetail);
         }
 
