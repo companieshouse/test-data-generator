@@ -154,11 +154,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
 
         profile.setDateOfCreation(dateOneYearAgo);
-        if (companyType != null) {
-            profile.setType(companyType.getValue());
-        } else {
-            profile.setType("ltd");
-        }
+        profile.setType(companyType != null ? companyType.getValue() : "ltd");
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
