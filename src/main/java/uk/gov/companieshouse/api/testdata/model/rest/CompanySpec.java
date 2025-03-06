@@ -40,6 +40,14 @@ public class CompanySpec {
     @Valid
     private List<RegistersSpec> registers;
 
+    @JsonProperty("company_status_detail")
+    @Pattern(regexp = "active|dissolved|converted-closed|transferred-from-uk|active-proposal-to-strike-off|petition-to-restore-dissolved|transformed-to-se|converted-to-plc|converted-to-uk-societas|converted-to-ukeig",
+            message = "Invalid company status detail")
+    private String companyStatusDetail;
+
+    @JsonProperty("filing_history")
+    private FilingHistorySpec filingHistory;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -98,5 +106,21 @@ public class CompanySpec {
 
     public void setRegisters(List<RegistersSpec> registers) {
         this.registers = registers;
+    }
+
+    public String getCompanyStatusDetail() {
+        return companyStatusDetail;
+    }
+
+    public void setCompanyStatusDetail(String companyStatusDetail) {
+        this.companyStatusDetail = companyStatusDetail;
+    }
+
+    public FilingHistorySpec getFilingHistory() {
+        return filingHistory;
+    }
+
+    public void setFilingHistory(FilingHistorySpec filingHistory) {
+        this.filingHistory = filingHistory;
     }
 }

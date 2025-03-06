@@ -61,6 +61,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final CompanyType companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
+        final String companyStatusDetail = spec.getCompanyStatusDetail();
 
         LocalDate now = LocalDate.now();
         Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
@@ -181,6 +182,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (subType != null) {
             profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
             profile.setSubtype(subType);
+        }
+
+        if (!Objects.isNull(companyStatusDetail)) {
+            profile.setCompanyStatusDetail(companyStatusDetail);
         }
 
         return repository.save(profile);

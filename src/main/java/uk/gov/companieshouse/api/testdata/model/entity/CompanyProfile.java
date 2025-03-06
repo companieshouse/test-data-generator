@@ -170,6 +170,8 @@ public class CompanyProfile {
     private String subtype;
     @Field("data.is_community_interest_company")
     private Boolean isCommunityInterestCompany;
+    @Field ("data.company_status_detail")
+    private String companyStatusDetail;
 
     public String getId() {
         return id;
@@ -330,5 +332,13 @@ public class CompanyProfile {
 
     public void setIsCommunityInterestCompany(Boolean isCommunityInterestCompany) {
         this.isCommunityInterestCompany = isCommunityInterestCompany;
+    }
+
+    public String getCompanyStatusDetail() {
+        return companyStatusDetail;
+    }
+
+    public void setCompanyStatusDetail(String companyStatusDetail) {
+        this.companyStatusDetail = companyStatusDetail;
     }
 }
