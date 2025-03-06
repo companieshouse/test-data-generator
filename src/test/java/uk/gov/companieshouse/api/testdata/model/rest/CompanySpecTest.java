@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.validation.ConstraintViolation;
@@ -8,8 +9,11 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 
+@ExtendWith(MockitoExtension.class)
 class CompanySpecTest {
 
     //Test that the CompanySpec does not accept invalid company status
@@ -26,8 +30,14 @@ class CompanySpecTest {
     void testInvalidCompanyType() {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType("invalid-company-type");
-        validateCompanySpec(spec, "Invalid company type");
+
+        String invalidCompanyType = "invalid-company-type";
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            CompanyType companyType = CompanyType.valueOf(invalidCompanyType);
+            spec.setCompanyType(companyType);
+        });
+
+        assertTrue(exception.getMessage().contains("No enum constant"));
     }
 
     // Test that the CompanySpec does not accept invalid company subtype

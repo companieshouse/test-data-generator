@@ -6,7 +6,8 @@ public enum Jurisdiction {
 
     ENGLAND_WALES("england-wales", ""),
     SCOTLAND("scotland", "SC"),
-    NI("northern-ireland", "NI");
+    NI("northern-ireland", "NI"),
+    UNITED_KINGDOM("united-kingdom", "OE");
 
     @JsonValue
     private final String jurisdictionString;
