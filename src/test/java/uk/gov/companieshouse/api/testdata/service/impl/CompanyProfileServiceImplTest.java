@@ -96,7 +96,7 @@ class CompanyProfileServiceImplTest {
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setCompanyType(COMPANY_TYPE_LTD);
         assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
-                spec.getJurisdiction().toString(), spec.getCompanyType().toString(), false);
+                spec.getJurisdiction().toString(), spec.getCompanyType().getValue(), false);
     }
 
     // Test that a company profile is deleted
@@ -134,7 +134,7 @@ class CompanyProfileServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_PLC);
         assertCreateCompanyProfile(COMPANY_STATUS_ACTIVE,
-                spec.getJurisdiction().toString(), spec.getCompanyType().toString(), false);
+                spec.getJurisdiction().toString(), spec.getCompanyType().getValue(), false);
     }
 
 
