@@ -1,30 +1,49 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
-import org.springframework.data.mongodb.core.mapping.Field;
-
+import java.beans.ConstructorProperties;
 import java.util.Objects;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 public class Address {
     @Field("premise")
-    private final String premise;
+    private String premise;
     @Field("address_line_1")
-    private final String addressLine1;
+    private String addressLine1;
     @Field("address_line_2")
-    private final String addressLine2;
+    private String addressLine2;
     @Field("country")
-    private final String country;
+    private String country;
     @Field("locality")
-    private final String locality;
+    private String locality;
     @Field("postal_code")
-    private final String postalCode;
+    private String postalCode;
 
-    public Address(String premise, String addressLine1, String addressLine2, String country, String locality, String postalCode) {
+    public Address() {
+        this("", "", "", "", "", "");
+    }
+
+    @ConstructorProperties({
+            "premise", "address_line_1", "address_line_2", "country", "locality", "postal_code"})
+    public Address(String premise,
+                   String addressLine1,
+                   String addressLine2,
+                   String country,
+                   String locality,
+                   String postalCode) {
         this.premise = premise;
         this.addressLine1 = addressLine1;
         this.addressLine2 = addressLine2;
         this.country = country;
         this.locality = locality;
         this.postalCode = postalCode;
+    }
+
+    public Address(String addressLine1,
+                   String addressLine2,
+                   String country,
+                   String locality,
+                   String postalCode) {
+        this("", addressLine1, addressLine2, country, locality, postalCode);
     }
 
     public String getPremise() {
@@ -52,24 +71,24 @@ public class Address {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean equals(Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(obj instanceof Address)) {
             return false;
         }
-        Address address = (Address) o;
-        return Objects.equals(getPremise(), address.getPremise()) &&
-                Objects.equals(getAddressLine1(), address.getAddressLine1()) &&
-                Objects.equals(getAddressLine2(), address.getAddressLine2()) &&
-                Objects.equals(getCountry(), address.getCountry()) &&
-                Objects.equals(getLocality(), address.getLocality()) &&
-                Objects.equals(getPostalCode(), address.getPostalCode());
+        var address = (Address) obj;
+        return Objects.equals(premise, address.premise)
+                && Objects.equals(addressLine1, address.addressLine1)
+                && Objects.equals(addressLine2, address.addressLine2)
+                && Objects.equals(country, address.country)
+                && Objects.equals(locality, address.locality)
+                && Objects.equals(postalCode, address.postalCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPremise(), getAddressLine1(), getAddressLine2(), getCountry(), getLocality(), getPostalCode());
+        return Objects.hash(premise, addressLine1, addressLine2, country, locality, postalCode);
     }
 }

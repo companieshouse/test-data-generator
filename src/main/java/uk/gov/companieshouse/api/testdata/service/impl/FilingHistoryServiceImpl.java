@@ -30,6 +30,10 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
+    private static final String CATEGORY = "incorporation";
+    private static final String DESCRIPTION = "incorporation-company";
+    private static final String TYPE = "NEWINC";
+    private static final String ORIGINAL_DESCRIPTION = "Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association";
 
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
@@ -42,7 +46,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
         final String accountsDueStatus = spec.getAccountsDueStatus();
-
         try {
             barcode = barcodeService.getBarcode();
         } catch (BarcodeServiceException ex) {
@@ -60,17 +63,20 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
+
+        var hasFilingHistory = spec.getFilingHistory() != null;
+
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(filingHistory));
         filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
-        filingHistory.setCategory("incorporation");
-        filingHistory.setDescription("incorporation-company");
+        filingHistory.setCategory(hasFilingHistory ? spec.getFilingHistory().getCategory() : CATEGORY);
+        filingHistory.setDescription(hasFilingHistory ? spec.getFilingHistory().getDescription() : DESCRIPTION);
         filingHistory.setDate(dayTimeNow);
-        filingHistory.setType("NEWINC");
+        filingHistory.setType(hasFilingHistory ? spec.getFilingHistory().getType() : TYPE);
         filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
-        filingHistory.setOriginalDescription("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association");
+        filingHistory.setOriginalDescription(hasFilingHistory ? spec.getFilingHistory().getOriginalDescription() : ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
         return filingHistoryRepository.save(filingHistory);
     }
