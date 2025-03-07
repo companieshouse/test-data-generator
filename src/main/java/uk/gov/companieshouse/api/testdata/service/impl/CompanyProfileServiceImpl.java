@@ -65,19 +65,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String companyStatusDetail = spec.getCompanyStatusDetail();
         final String accountsDueStatus = spec.getAccountsDueStatus();
 
-        LocalDate localDateNow = LocalDate.now();
+        LocalDate accountingReferenceDate = LocalDate.now();
         if (StringUtils.hasText(accountsDueStatus)) {
-            localDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            accountingReferenceDate = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
         }
-        Instant dateOneYearAgo = localDateNow.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateNow = localDateNow.atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYear = localDateNow.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateOneYearAgo = accountingReferenceDate.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateNow = accountingReferenceDate.atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYear = accountingReferenceDate.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
         var dateInOneYearTwoWeeks
-                = localDateNow.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+                = accountingReferenceDate.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
         var dateInOneYearNineMonths
-                = localDateNow.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInTwoYear = localDateNow.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInTwoYearTwoWeeks = localDateNow.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+                = accountingReferenceDate.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInTwoYear = accountingReferenceDate.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInTwoYearTwoWeeks = accountingReferenceDate.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
 
         if (Jurisdiction.UNITED_KINGDOM.equals(jurisdiction)) {
             LOG.info("Creating OverseasEntity for " + companyNumber);
@@ -158,8 +158,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
         accounts.setNextAccountsOverdue(false);
         accounts.setNextMadeUpTo(dateInOneYear);
-        accounts.setAccountingReferenceDateDay(String.valueOf(localDateNow.getDayOfMonth()));
-        accounts.setAccountingReferenceDateMonth(String.valueOf(localDateNow.getMonthValue()));
+        accounts.setAccountingReferenceDateDay(String.valueOf(accountingReferenceDate.getDayOfMonth()));
+        accounts.setAccountingReferenceDateMonth(String.valueOf(accountingReferenceDate.getMonthValue()));
 
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(companyType != null ? companyType.getValue() : "ltd");

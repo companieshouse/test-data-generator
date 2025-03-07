@@ -50,10 +50,10 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         final String accountsDueStatus = spec.getAccountsDueStatus();
         companyPsc.setCompanyNumber(companyNumber);
 
-        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant createdUpdatedAt = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         if (StringUtils.hasText(accountsDueStatus)) {
             var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
-            dateNow = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
+            createdUpdatedAt = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
@@ -70,8 +70,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         companyPsc.setRegion("UK");
         companyPsc.setAddressSameAsRegisteredOfficeAddress(true);
 
-        companyPsc.setCeasedOn(dateNow);
-        companyPsc.setCreatedAt(dateNow);
+        companyPsc.setCeasedOn(createdUpdatedAt);
+        companyPsc.setCreatedAt(createdUpdatedAt);
 
         String etag = this.randomService.getEtag();
         companyPsc.setEtag(etag);
@@ -86,13 +86,13 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
         companyPsc.setNaturesOfControl(naturesOfControl);
 
-        companyPsc.setNotifiedOn(dateNow);
+        companyPsc.setNotifiedOn(createdUpdatedAt);
         companyPsc.setReferenceEtag("reference etag");
         companyPsc.setReferencePscId("reference psc id");
-        companyPsc.setRegisterEntryDate(dateNow);
-        companyPsc.setUpdatedAt(dateNow);
+        companyPsc.setRegisterEntryDate(createdUpdatedAt);
+        companyPsc.setUpdatedAt(createdUpdatedAt);
 
-        companyPsc.setStatementActionDate(dateNow);
+        companyPsc.setStatementActionDate(createdUpdatedAt);
         companyPsc.setStatementType("statement type");
 
         return repository.save(differentiatePsc(companyPsc));
