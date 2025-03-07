@@ -3,12 +3,14 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.SecureRandom;
+import java.time.LocalDate;
 import java.util.Base64;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.GenerateEtagUtil;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -64,5 +66,18 @@ public class RandomServiceImpl implements RandomService {
         String salt = getString(saltLength);
         String baseSalt = baseString + salt;
         return Base64.getUrlEncoder().encodeToString(baseSalt.getBytes(UTF_8));
+    }
+
+    @Override
+    public LocalDate generateAccountsDueDateByStatus(String accountsDueStatus) {
+        var result = LocalDate.now();
+        if (StringUtils.hasText(accountsDueStatus)) {
+            if ("overdue".equalsIgnoreCase(accountsDueStatus)) {
+                result = result.minusYears(1).minusMonths(11);
+            } else if ("due-soon".equalsIgnoreCase(accountsDueStatus)) {
+                result = result.minusYears(1).minusMonths(9);
+            }
+        }
+        return result;
     }
 }
