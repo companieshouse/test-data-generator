@@ -48,6 +48,8 @@ In order to use the generator, there are different possible endpoints that can b
   - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to no value, field not present in the database.
   -  `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
+  - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1.
+  - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
   - `filing_history`: {
@@ -57,8 +59,6 @@ In order to use the generator, there are different possible endpoints that can b
     - `original_description`: The original description of the filing (e.g., `First gazette notice for voluntary strike-off`). Defaults to `Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association`.
     }
   
-  An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true}`
-- A usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
   An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "persons-with-significant-control", "register_type: "directors"]}`
 - A usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
