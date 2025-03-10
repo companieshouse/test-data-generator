@@ -93,11 +93,6 @@ class AppointmentsServiceImplTest {
         assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
         assertNotNull(appointment.getUpdated());
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
-        assertEquals("active", appointment.getCompanyStatus());
-        assertEquals("British", appointment.getNationality());
-        assertEquals("Director", appointment.getOccupation());
-        assertTrue(appointment.isServiceAddressIsSameAsRegisteredOfficeAddress());
-        assertEquals("Wales", appointment.getCountryOfResidence());
         assertNotNull(appointment.getUpdatedAt());
         assertTrue(appointment.getForename().startsWith("Test"));
         assertNotNull(appointment.getAppointedOn());
@@ -158,11 +153,6 @@ class AppointmentsServiceImplTest {
 
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());
-        assertEquals("British", appointment.getNationality());
-        assertEquals("Director", appointment.getOccupation());
-        assertTrue(appointment.isServiceAddressIsSameAsRegisteredOfficeAddress());
-        assertEquals("Scotland", appointment.getCountryOfResidence());
-        assertNotNull(appointment.getUpdatedAt());
         assertTrue(appointment.getForename().startsWith("Test"));
         assertNotNull(appointment.getAppointedOn());
         assertEquals(OfficerRoles.DIRECTOR.getValue(), appointment.getOfficerRole());

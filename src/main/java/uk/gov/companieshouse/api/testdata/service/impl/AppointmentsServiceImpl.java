@@ -86,7 +86,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
 
             LocalDate officerDob = LocalDate.of(1990, 3, 6);
             Instant dateTimeNow = Instant.now();
-            Instant today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+            var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
             Instant dob = officerDob.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
             appointment.setId(appointmentId);
