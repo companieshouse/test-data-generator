@@ -52,7 +52,7 @@ public class CompanySpec {
     private int numberOfAppointments = 1;
 
     @JsonProperty("officer_roles")
-    private List<@Pattern(regexp = "director|secretary",
+    private List<@Pattern(regexp = "director|secretary|nominee-director|corporate-secretary",
             message = "Invalid officer role") String> officerRoles;
 
     public CompanySpec() {

@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -27,10 +28,15 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
     private static final int SALT_LENGTH = 8;
     private static final int ID_LENGTH = 10;
     private static final int INTERNAL_ID_LENGTH = 9;
+    private static final String NATIONALITY = "British";
+    private static final String SURNAME = "DIRECTOR";
+    private static final String FORENAME = "Test ";
+    private static final String COMPANY_STATUS = "active";
     private static final String INTERNAL_ID_PREFIX = "8";
     private static final String COMPANY_LINK = "/company/";
     private static final String OFFICERS_LINK = "/officers/";
     private static final String OCCUPATION = "Director";
+    private static final String APPOINTMENT_LINK_STEM = "/appointments";
 
     @Autowired
     private AddressService addressService;
@@ -55,23 +61,25 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         if (officerRoles == null) {
             officerRoles = new ArrayList<>();
         }
-
         while (officerRoles.size() < numberOfAppointments) {
-            officerRoles.add("director");
+            officerRoles.add(OfficerRoles.DIRECTOR.getValue());
         }
 
         List<Appointment> createdAppointments = new ArrayList<>();
 
         for (int i = 0; i < numberOfAppointments; i++) {
             String currentRole = officerRoles.get(i);
+            try {
+                OfficerRoles.valueOf(currentRole.toUpperCase().replace("-", "_"));
+            } catch (IllegalArgumentException ex) {
+                throw new IllegalArgumentException("Invalid officer role: " + currentRole);
+            }
 
             Appointment appointment = new Appointment();
 
             String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
-            String internalId =
-                    INTERNAL_ID_PREFIX + this.randomService.getNumber(INTERNAL_ID_LENGTH);
-            String officerId =
-                    randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+            String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
+            String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
 
             LocalDate officerDob = LocalDate.of(1990, 3, 6);
             Instant dateTimeNow = Instant.now();
@@ -82,12 +90,12 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             appointment.setCreated(dateTimeNow);
             appointment.setInternalId(internalId);
             appointment.setAppointmentId(appointmentId);
-            appointment.setNationality("British");
+            appointment.setNationality(NATIONALITY);
             appointment.setOccupation(OCCUPATION);
             appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
             appointment.setCountryOfResidence(countryOfResidence);
             appointment.setUpdatedAt(dateTimeNow);
-            appointment.setForename("Test " + (i + 1));
+            appointment.setForename(FORENAME + (i + 1));
             appointment.setAppointedOn(dateNow);
             appointment.setOfficerRole(currentRole);
             appointment.setEtag(randomService.getEtag());
@@ -95,15 +103,15 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             appointment.setDataCompanyNumber(companyNumber);
 
             Links links = new Links();
-            links.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + officerId);
+            links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + officerId);
             links.setOfficerSelf(OFFICERS_LINK + officerId);
-            links.setOfficerAppointments(OFFICERS_LINK + officerId + "/appointments");
+            links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
             appointment.setLinks(links);
 
-            appointment.setSurname("DIRECTOR");
+            appointment.setSurname(SURNAME);
             appointment.setDateOfBirth(dob);
             appointment.setCompanyName("Company " + companyNumber);
-            appointment.setCompanyStatus("active");
+            appointment.setCompanyStatus(COMPANY_STATUS);
             appointment.setOfficerId(officerId);
             appointment.setCompanyNumber(companyNumber);
             appointment.setUpdated(dateTimeNow);
@@ -148,10 +156,10 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         officerAppointment.setInactiveCount(0);
         officerAppointment.setResignedCount(1);
         officerAppointment.setCorporateOfficer(false);
-        officerAppointment.setName("Test DIRECTOR");
+        officerAppointment.setName(FORENAME + " " + SURNAME);
 
         Links links = new Links();
-        links.setSelf(OFFICERS_LINK + officerId + "/appointments");
+        links.setSelf(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
         officerAppointment.setLinks(links);
 
         officerAppointment.setEtag(randomService.getEtag());
@@ -181,7 +189,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
         officerAppointmentItem.setOccupation(OCCUPATION);
         officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
-        officerAppointmentItem.setForename("Test");
+        officerAppointmentItem.setForename(FORENAME);
         officerAppointmentItem.setSurname(OCCUPATION);
         officerAppointmentItem.setOfficerRole(role);
         officerAppointmentItem.setLinks(
@@ -189,27 +197,27 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         officerAppointmentItem.setCountryOfResidence(
                 addressService.getCountryOfResidence(jurisdiction));
         officerAppointmentItem.setAppointedOn(dayNow);
-        officerAppointmentItem.setNationality("British");
+        officerAppointmentItem.setNationality(NATIONALITY);
         officerAppointmentItem.setUpdatedAt(dayTimeNow);
-        officerAppointmentItem.setName("Test DIRECTOR");
+        officerAppointmentItem.setName(SURNAME + " " + FORENAME);
         officerAppointmentItem.setCompanyName("Company " + companyNumber);
         officerAppointmentItem.setCompanyNumber(companyNumber);
-        officerAppointmentItem.setCompanyStatus("active");
+        officerAppointmentItem.setCompanyStatus(COMPANY_STATUS);
         OfficerAppointmentItem item = new OfficerAppointmentItem();
         item.setOccupation(OCCUPATION);
         item.setAddress(addressService.getAddress(jurisdiction));
-        item.setForename("Test");
+        item.setForename(FORENAME);
         item.setSurname(OCCUPATION);
         item.setOfficerRole(role);
         item.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
         item.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
         item.setAppointedOn(dayNow);
-        item.setNationality("British");
+        item.setNationality(NATIONALITY);
         item.setUpdatedAt(dayTimeNow);
-        item.setName("Test DIRECTOR");
+        item.setName(FORENAME + " " + SURNAME);
         item.setCompanyName("Company " + companyNumber);
         item.setCompanyNumber(companyNumber);
-        item.setCompanyStatus("active");
+        item.setCompanyStatus(COMPANY_STATUS);
 
         officerAppointmentItemList.add(officerAppointmentItem);
 
@@ -219,7 +227,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
     private Links createOfficerAppointmentItemLinks(String companyNumber, String appointmentId) {
 
         Links links = new Links();
-        links.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + appointmentId);
+        links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + appointmentId);
         links.setCompany(COMPANY_LINK + companyNumber);
 
         return links;
