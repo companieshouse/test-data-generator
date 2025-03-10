@@ -172,6 +172,8 @@ public class CompanyProfile {
     private Boolean isCommunityInterestCompany;
     @Field ("data.company_status_detail")
     private String companyStatusDetail;
+    @Field("data.partial_data_available")
+    private String partialDataAvailable;
 
     public String getId() {
         return id;
@@ -340,5 +342,11 @@ public class CompanyProfile {
 
     public void setCompanyStatusDetail(String companyStatusDetail) {
         this.companyStatusDetail = companyStatusDetail;
+    }
+
+    public String getPartialDataAvailable() {return this.partialDataAvailable; }
+
+    public void setPartialDataAvailable(String partialDataAvailable) {
+        this.partialDataAvailable = partialDataAvailable;
     }
 }
