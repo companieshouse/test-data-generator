@@ -3,10 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
@@ -90,12 +88,10 @@ class AppointmentsServiceImplTest {
         assertEquals(ENCODED_VALUE, appointment.getId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertNotNull(appointment.getCreated());
-
         assertEquals(INTERNAL_ID_PREFIX + GENERATED_ID, appointment.getInternalId());
         assertEquals(ENCODED_INTERNAL_ID, appointment.getOfficerId());
         assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
         assertNotNull(appointment.getUpdated());
-
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());
         assertEquals("British", appointment.getNationality());
@@ -125,6 +121,7 @@ class AppointmentsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        spec.setOfficerRoles(Collections.singletonList(OfficerRoles.DIRECTOR));
 
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -154,7 +151,6 @@ class AppointmentsServiceImplTest {
         assertEquals(ENCODED_VALUE, appointment.getId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertNotNull(appointment.getCreated());
-
         assertEquals(INTERNAL_ID_PREFIX + GENERATED_ID, appointment.getInternalId());
         assertEquals(ENCODED_INTERNAL_ID, appointment.getOfficerId());
         assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
@@ -187,20 +183,9 @@ class AppointmentsServiceImplTest {
     void createWithInvalidOfficerRole() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setOfficerRoles(List.of("invalid_role"));
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentsService.create(spec);
-        });
-        assertEquals("Invalid officer role: invalid_role", exception.getMessage());
-    }
-
-    @Test
-    void createWithMixedValidAndInvalidOfficerRoles() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfAppointments(3);
-        spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR.getValue(), "invalid_role", OfficerRoles.SECRETARY.getValue()));
+        OfficerRoles invalidRole = Mockito.spy(OfficerRoles.DIRECTOR);
+        when(invalidRole.getValue()).thenReturn("invalid_role");
+        spec.setOfficerRoles(Collections.singletonList(invalidRole));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             appointmentsService.create(spec);
@@ -242,7 +227,7 @@ class AppointmentsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfAppointments(3);
-        spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR.getValue(), OfficerRoles.SECRETARY.getValue(), OfficerRoles.DIRECTOR.getValue()));
+        spec.setOfficerRoles(Collections.singletonList(OfficerRoles.DIRECTOR));
 
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);

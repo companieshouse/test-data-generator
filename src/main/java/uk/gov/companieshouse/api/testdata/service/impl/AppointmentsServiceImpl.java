@@ -57,18 +57,22 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             numberOfAppointments = 1;
         }
 
-        List<String> officerRoles = spec.getOfficerRoles();
-        if (officerRoles == null) {
-            officerRoles = new ArrayList<>();
+        List<OfficerRoles> officerRoleList = new ArrayList<>();
+        if (spec.getOfficerRoles() != null) {
+            officerRoleList.addAll(spec.getOfficerRoles());
         }
-        while (officerRoles.size() < numberOfAppointments) {
-            officerRoles.add(OfficerRoles.DIRECTOR.getValue());
+        while (officerRoleList.size() < numberOfAppointments) {
+            officerRoleList.add(OfficerRoles.DIRECTOR);
         }
 
         List<Appointment> createdAppointments = new ArrayList<>();
 
         for (int i = 0; i < numberOfAppointments; i++) {
-            String currentRole = officerRoles.get(i);
+            OfficerRoles currentRoleEnum = officerRoleList.get(i);
+            if (currentRoleEnum == null) {
+                throw new IllegalArgumentException("Invalid officer role: null");
+            }
+            String currentRole = currentRoleEnum.getValue();
             try {
                 OfficerRoles.valueOf(currentRole.toUpperCase().replace("-", "_"));
             } catch (IllegalArgumentException ex) {
@@ -76,14 +80,13 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             }
 
             Appointment appointment = new Appointment();
-
             String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
             String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
             String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
 
             LocalDate officerDob = LocalDate.of(1990, 3, 6);
             Instant dateTimeNow = Instant.now();
-            Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+            Instant today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
             Instant dob = officerDob.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
             appointment.setId(appointmentId);
@@ -96,7 +99,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             appointment.setCountryOfResidence(countryOfResidence);
             appointment.setUpdatedAt(dateTimeNow);
             appointment.setForename(FORENAME + (i + 1));
-            appointment.setAppointedOn(dateNow);
+            appointment.setAppointedOn(today);
             appointment.setOfficerRole(currentRole);
             appointment.setEtag(randomService.getEtag());
             appointment.setServiceAddress(addressService.getAddress(spec.getJurisdiction()));
@@ -121,7 +124,6 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             Appointment savedAppointment = appointmentsRepository.save(appointment);
             createdAppointments.add(savedAppointment);
         }
-
         return createdAppointments;
     }
 

@@ -52,8 +52,7 @@ public class CompanySpec {
     private int numberOfAppointments = 1;
 
     @JsonProperty("officer_roles")
-    private List<@Pattern(regexp = "director|secretary|nominee-director|corporate-secretary",
-            message = "Invalid officer role") String> officerRoles;
+    private List<OfficerRoles> officerRoles;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -115,11 +114,11 @@ public class CompanySpec {
         this.numberOfAppointments = numberOfAppointments;
     }
 
-    public List<String> getOfficerRoles() {
+    public List<OfficerRoles> getOfficerRoles() {
         return officerRoles;
     }
 
-    public void setOfficerRoles(List<String> officerRoles) {
+    public void setOfficerRoles(List<OfficerRoles> officerRoles) {
         this.officerRoles = officerRoles;
     }
 
