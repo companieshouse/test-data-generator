@@ -37,6 +37,31 @@ public class AddressServiceImpl implements AddressService {
             "BT2 8BG"
     );
 
+    private static final Address ENGLAND_ADDRESS = new Address(
+            "1",
+            "Companies House,4th Floor, The Linen Hall",
+            "162-168 Regent Street",
+            UNITED_KINGDOM,
+            "London",
+            "W1B 5TF"
+    );
+
+    private static final Address EUROPEAN_UNION_ADDRESS = new Address(
+            "1",
+            "Schiphol Boulevard Tower 403 Tower C-4",
+            "1118bk Schiphol",
+            "Amsterdam",
+            "Netherlands"
+    );
+
+    private static final Address NON_EU_ADDRESS = new Address(
+            "1",
+            "Edificio Salduba Tercer Piso",
+            "Calle 53 Este",
+            "Marbella",
+            "Panama"
+    );
+
     private static final Address OVERSEAS_ADDRESS = new Address(
             "1",
             "Gordon Cummins Hwy",
@@ -48,33 +73,29 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address getAddress(Jurisdiction jurisdiction) {
-        switch (jurisdiction) {
-            case ENGLAND_WALES:
-                return ENGLAND_WALES_ADDRESS;
-            case SCOTLAND:
-                return SCOTLAND_ADDRESS;
-            case NI:
-                return NI_ADDRESS;
-            case UNITED_KINGDOM:
-                return OVERSEAS_ADDRESS;
-            default:
-                throw new IllegalArgumentException("No address for jurisdiction");
-        }
+        return switch (jurisdiction) {
+            case ENGLAND_WALES, WALES -> ENGLAND_WALES_ADDRESS;
+            case SCOTLAND -> SCOTLAND_ADDRESS;
+            case NI -> NI_ADDRESS;
+            case UNITED_KINGDOM -> OVERSEAS_ADDRESS;
+            case ENGLAND -> ENGLAND_ADDRESS;
+            case EUROPEAN_UNION -> EUROPEAN_UNION_ADDRESS;
+            case NON_EU -> NON_EU_ADDRESS;
+            default -> throw new IllegalArgumentException("No address for jurisdiction");
+        };
     }
 
     @Override
     public String getCountryOfResidence(Jurisdiction jurisdiction) {
-        switch (jurisdiction) {
-            case ENGLAND_WALES:
-                return "Wales";
-            case SCOTLAND:
-                return "Scotland";
-            case NI:
-                return "Northern Ireland";
-            case UNITED_KINGDOM:
-                return "Barbados";
-            default:
-                throw new IllegalArgumentException("No valid jurisdiction provided");
-        }
+        return switch (jurisdiction) {
+            case ENGLAND_WALES, WALES -> "Wales";
+            case SCOTLAND -> "Scotland";
+            case NI -> "Northern Ireland";
+            case UNITED_KINGDOM -> "Barbados";
+            case ENGLAND -> "England";
+            case NON_EU -> "Panama";
+            case EUROPEAN_UNION -> "Netherlands";
+            default -> throw new IllegalArgumentException("No valid jurisdiction provided");
+        };
     }
 }

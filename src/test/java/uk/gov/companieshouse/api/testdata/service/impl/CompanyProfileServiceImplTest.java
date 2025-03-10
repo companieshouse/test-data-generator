@@ -167,7 +167,7 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType(COMPANY_TYPE_LTD);
         CompanyProfile profile = createAndCapture(spec);
         assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE,
-                spec.getJurisdiction().toString(), spec.getCompanyType().toString(), false);
+                spec.getJurisdiction().toString(), spec.getCompanyType().getValue(), false);
     }
 
     @Test
@@ -185,7 +185,7 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType(COMPANY_TYPE_PLC);
         CompanyProfile profile = createAndCapture(spec);
         assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE,
-                spec.getJurisdiction().toString(), spec.getCompanyType().toString(), false);
+                spec.getJurisdiction().toString(), spec.getCompanyType().getValue(), false);
     }
 
     @Test

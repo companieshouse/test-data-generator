@@ -44,6 +44,16 @@ public enum Jurisdiction {
         }
         String companyType = spec.getCompanyType() != null ? spec.getCompanyType().getValue() : "ltd";
         Jurisdiction jurisdiction = spec.getJurisdiction() != null ? spec.getJurisdiction() : ENGLAND_WALES;
+        if ("registered-society-non-jurisdictional".equals(companyType)) {
+            jurisdiction = null;
+            return "RS";
+        }
+        if ("royal-charter".equals(companyType)) {
+            return "RC";
+        }
+        if ("uk-establishment".equals(companyType)) {
+            return "BR";
+        }
         return COMPANY_PREFIX_MAP.getOrDefault(companyType, new EnumMap<>(Jurisdiction.class))
                 .getOrDefault(jurisdiction, this.companyNumberPrefix);
     }
@@ -112,25 +122,16 @@ public enum Jurisdiction {
                 UNITED_KINGDOM, "FC"
         ));
         registerPrefixes("protected-cell-company", Map.of(
-                UNITED_KINGDOM, "PC"
+                ENGLAND_WALES, "PC"
         ));
         registerPrefixes("registered-overseas-entity", Map.of(
                 UNITED_KINGDOM, "OE"
-        ));
-        registerPrefixes("registered-society-non-jurisdictional", Map.of(
-                UNITED_KINGDOM, "RS"
-        ));
-        registerPrefixes("royal-charter", Map.of(
-                UNITED_KINGDOM, "RC"
         ));
         registerPrefixes("scottish-charitable-incorporated-organisation", Map.of(
                 SCOTLAND, "CS"
         ));
         registerPrefixes("scottish-partnership", Map.of(
                 SCOTLAND, "SG"
-        ));
-        registerPrefixes("uk-establishment", Map.of(
-                UNITED_KINGDOM, "BR"
         ));
         registerPrefixes("unregistered-company", Map.of(
                 ENGLAND_WALES, "ZC",

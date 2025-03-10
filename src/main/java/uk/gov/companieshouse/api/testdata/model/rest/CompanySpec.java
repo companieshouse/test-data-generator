@@ -15,7 +15,6 @@ import java.util.List;
 public class CompanySpec {
 
     @JsonProperty
-    @NotNull(message = "invalid jurisdiction")
     private Jurisdiction jurisdiction;
 
     @JsonIgnore

@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -81,8 +82,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
             overseasEntity.setVersion(3L);
             overseasEntity.setHasMortgages(false);
-            overseasEntity.setCompanyStatus(COMPANY_STATUS_REGISTERED);
-            overseasEntity.setType(OVERSEAS_ENTITY_TYPE);
+            overseasEntity.setType(companyType != null ? companyType.getValue() : OVERSEAS_ENTITY_TYPE);
+            if (OVERSEAS_ENTITY_TYPE.equals(overseasEntity.getType())) {
+                overseasEntity.setCompanyStatus(COMPANY_STATUS_REGISTERED);
+            } else {
+                overseasEntity.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
+            }
             overseasEntity.setHasSuperSecurePscs(hasSuperSecurePscs);
             overseasEntity.setHasCharges(false);
             overseasEntity.setHasInsolvencyHistory(false);
@@ -142,7 +147,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             hasCompanyRegisters = true;
         }
         profile.setCompanyNumber(companyNumber);
-        profile.setLinks(createLinks(companyNumber));
+        String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
+        String nonJurisdictionType = checkNonJurisdictionTypes(
+                jurisdiction.toString(), companyTypeValue);
+        if (nonJurisdictionType.isEmpty()) {
+            profile.setLinks(createLinkForSelf(companyNumber));
+        } else {
+            profile.setLinks(createLinks(companyNumber));
+        }
 
         CompanyProfile.Accounts accounts = profile.getAccounts();
         accounts.setNextDue(dateInOneYearNineMonths);
@@ -155,7 +167,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
 
         profile.setDateOfCreation(dateOneYearAgo);
-        profile.setType(companyType != null ? companyType.getValue() : "ltd");
+        profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
@@ -174,8 +186,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
-        profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
-        profile.setJurisdiction(jurisdiction.toString());
+        if (!nonJurisdictionType.isEmpty()) {
+            profile.setJurisdiction(jurisdiction.toString());
+            profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+        }
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
@@ -214,6 +228,26 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             links.setRegisters(LINK_STEM + companyNumber + REGISTERS_STEM);
         }
         return links;
+    }
+
+    private Links createLinkForSelf(String companyNumber) {
+        Links links = new Links();
+        links.setSelf(LINK_STEM + companyNumber);
+        return links;
+    }
+
+    private String checkNonJurisdictionTypes(String jurisdiction, String companyType) {
+        Set<String> noJurisdictionTypes = Set.of(
+                "registered-society-non-jurisdictional",
+                "royal-charter",
+                "uk-establishment"
+        );
+        if (companyType != null) {
+            if (noJurisdictionTypes.contains(companyType)) {
+                return "";
+            }
+        }
+        return jurisdiction;
     }
 
 }
