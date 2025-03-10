@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.api.testdata.model.rest.CompanyType.ROYAL_CHARTER;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
@@ -45,12 +47,18 @@ class CompanyProfileServiceImplTest {
     private static final String OVERSEAS_COMPANY_NUMBER = "OE001234";
     private static final String ETAG = "ETAG";
     private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
-    private static final CompanyType COMPANY_TYPE_PLC = CompanyType.PLC;
     private static final String COMPANY_STATUS_ACTIVE = "active";
     private static final String OVERSEAS_STATUS_REGISTERED = "registered";
     private static final CompanyType OVERSEAS_ENTITY_TYPE = CompanyType.REGISTERED_OVERSEAS_ENTITY;
-    private static final CompanyType COMPANY_TYPE_LTD = CompanyType.LTD;
     private static final String COMPANY_STATUS_ADMINISTRATION = "administration";
+    private static final CompanyType COMPANY_TYPE_LTD = CompanyType.LTD;
+    private static final CompanyType COMPANY_TYPE_PLC = CompanyType.PLC;
+    private static final CompanyType COMPANY_TYPE_ROYAL_CHARTER = CompanyType.ROYAL_CHARTER;
+    private static final CompanyType COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY = CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY;
+    public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY = "full-data-available-from-the-company";
+    public static final String FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY = "full-data-available-from-department-of-the-economy";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
+
 
     @Mock
     private RandomService randomService;
@@ -104,7 +112,7 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
         assertEquals(companyStatus, profile.getCompanyStatus());
         assertEquals(jurisdiction, profile.getJurisdiction());
-        assertEquals(companyType, profile.getType());
+        assertEquals(companyType.toLowerCase(), profile.getType());
         assertNotNull(profile.getRegisteredOfficeAddress());
         assertFalse(profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
@@ -304,15 +312,7 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType(COMPANY_TYPE_LTD);
         spec.setCompanyStatusDetail("status-detail");
 
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
-
-        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
-        assertEquals(savedProfile, returnedProfile);
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
 
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals("status-detail", profile.getCompanyStatusDetail());
@@ -324,6 +324,66 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType(COMPANY_TYPE_LTD);
         spec.setCompanyStatusDetail(null);
 
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNull(profile.getCompanyStatusDetail());
+    }
+
+    @Test
+    void createRoyalCharterCompanyAndVerifyPartialData() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_ROYAL_CHARTER);
+        spec.setCompanyStatusDetail(null);
+        // spec.setSubType(null);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_ROYAL_CHARTER.getValue(), profile.getType());
+        assertEquals(FULL_DATA_AVAILABLE_FROM_THE_COMPANY, profile.getPartialDataAvailable());
+    }
+
+    @Test
+    void createEnglandWalesIndustrialAndProvidentCompanyAndVerifyPartialData() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
+        spec.setSubType(null);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY.getValue(), profile.getType());
+        assertEquals(FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER, profile.getPartialDataAvailable());
+    }
+
+    @Test
+    void createNortherIrelandIndustrialAndProvidentCompanyAndVerifyPartialData() {
+        spec.setJurisdiction(Jurisdiction.NI);
+        spec.setCompanyType(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
+        spec.setSubType(null);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY.getValue(), profile.getType());
+        assertEquals(FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY, profile.getPartialDataAvailable());
+    }
+
+    @Test
+    void createLtdCompanyAndVerifyNoPartialData() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setSubType(null);
+
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertEquals(COMPANY_TYPE_LTD.getValue(), profile.getType());
+        assertNull(profile.getPartialDataAvailable());
+    }
+
+    private ArgumentCaptor<CompanyProfile> createCompanyProfile() {
         Address mockRegisteredAddress = new Address("", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -333,8 +393,6 @@ class CompanyProfileServiceImplTest {
         assertEquals(savedProfile, returnedProfile);
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
-        assertNull(profile.getCompanyStatusDetail());
+        return companyProfileCaptor;
     }
 }
