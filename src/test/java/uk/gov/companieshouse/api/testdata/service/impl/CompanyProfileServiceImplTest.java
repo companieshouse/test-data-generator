@@ -55,7 +55,6 @@ class CompanyProfileServiceImplTest {
     private static final CompanyType COMPANY_TYPE_PLC = CompanyType.PLC;
     private static final CompanyType COMPANY_TYPE_ROYAL_CHARTER = CompanyType.ROYAL_CHARTER;
     private static final CompanyType COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY = CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY;
-    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY = "full-data-available-from-financial-conduct-authority";
     public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY = "full-data-available-from-the-company";
     public static final String FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY = "full-data-available-from-department-of-the-economy";
     public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
