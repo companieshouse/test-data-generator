@@ -250,21 +250,6 @@ class CompanyProfileServiceImplTest {
         spec.setHasSuperSecurePscs(true);
         CompanyProfile profile = createAndCapture(spec);
         assertTrue(profile.getHasSuperSecurePscs());
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
-
-        when(randomService.getEtag()).thenReturn("ETAG");
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
-
-        CompanyProfile returnedProfile = companyProfileService.create(spec);
-        assertEquals(savedProfile, returnedProfile);
-
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor
-                = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
-        assertEquals(true, profile.getHasSuperSecurePscs());
     }
 
     @Test
@@ -272,42 +257,12 @@ class CompanyProfileServiceImplTest {
         spec.setHasSuperSecurePscs(false);
         CompanyProfile profile = createAndCapture(spec);
         assertFalse(profile.getHasSuperSecurePscs());
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
-
-        when(randomService.getEtag()).thenReturn("ETAG");
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
-
-        CompanyProfile returnedProfile = companyProfileService.create(spec);
-        assertEquals(savedProfile, returnedProfile);
-
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor
-                = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
-        assertEquals(false, profile.getHasSuperSecurePscs());
     }
 
     @Test
     void createCompanyWithSuperSecurePscsNull() {
         spec.setHasSuperSecurePscs(null);
         CompanyProfile profile = createAndCapture(spec);
-        assertNull(profile.getHasSuperSecurePscs());
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
-
-        when(randomService.getEtag()).thenReturn("ETAG");
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
-
-        CompanyProfile returnedProfile = companyProfileService.create(spec);
-        assertEquals(savedProfile, returnedProfile);
-
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor
-                = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(companyProfileCaptor.capture());
-
-        CompanyProfile profile = companyProfileCaptor.getValue();
         assertNull(profile.getHasSuperSecurePscs());
     }
 
