@@ -52,8 +52,7 @@ public class CompanySpec {
     private int numberOfAppointments = 1;
 
     @JsonProperty("officer_roles")
-    private List<@Pattern(regexp = "director|secretary",
-            message = "Invalid officer role") String> officerRoles;
+    private List<OfficerRoles> officerRoles;
 
     @JsonProperty("accounts_due_status")
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
@@ -119,11 +118,11 @@ public class CompanySpec {
         this.numberOfAppointments = numberOfAppointments;
     }
 
-    public List<String> getOfficerRoles() {
+    public List<OfficerRoles> getOfficerRoles() {
         return officerRoles;
     }
 
-    public void setOfficerRoles(List<String> officerRoles) {
+    public void setOfficerRoles(List<OfficerRoles> officerRoles) {
         this.officerRoles = officerRoles;
     }
 

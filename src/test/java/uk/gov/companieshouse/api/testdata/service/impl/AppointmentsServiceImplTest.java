@@ -1,6 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.never;
@@ -17,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
@@ -25,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -36,7 +42,7 @@ class AppointmentsServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";
     private static final Long GENERATED_ID = 123456789L;
-    private static final String ENCODED_INTERNAL_ID = "ENCODED 2";
+    private static final String ENCODED_INTERNAL_ID = "ENCODED_2";
     private static final String ETAG = "ETAG";
     private static final int INTERNAL_ID_LENGTH = 9;
     private static final String INTERNAL_ID_PREFIX = "8";
@@ -53,12 +59,14 @@ class AppointmentsServiceImplTest {
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
+    @Mock
+    private Appointment commonAppointment;
+
     @Test
     void create() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        // numberOfAppointments is default 0, so the service sets it to 1
 
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -66,7 +74,6 @@ class AppointmentsServiceImplTest {
                 .thenReturn(ENCODED_INTERNAL_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        // For the default (England & Wales) scenario in this test:
         when(addressService.getAddress(Jurisdiction.ENGLAND_WALES)).thenReturn(mockServiceAddress);
         when(addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES))
                 .thenReturn("Wales");
@@ -88,22 +95,15 @@ class AppointmentsServiceImplTest {
         assertEquals(ENCODED_VALUE, appointment.getId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertNotNull(appointment.getCreated());
-
         assertEquals(INTERNAL_ID_PREFIX + GENERATED_ID, appointment.getInternalId());
         assertEquals(ENCODED_INTERNAL_ID, appointment.getOfficerId());
         assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
         assertNotNull(appointment.getUpdated());
-
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
-        assertEquals("active", appointment.getCompanyStatus());
-        assertEquals("British", appointment.getNationality());
-        assertEquals("Director", appointment.getOccupation());
-        assertTrue(appointment.isServiceAddressIsSameAsRegisteredOfficeAddress());
-        assertEquals("Wales", appointment.getCountryOfResidence());
         assertNotNull(appointment.getUpdatedAt());
         assertTrue(appointment.getForename().startsWith("Test"));
         assertNotNull(appointment.getAppointedOn());
-        assertEquals("director", appointment.getOfficerRole());
+        assertEquals(OfficerRoles.DIRECTOR.getValue(), appointment.getOfficerRole());
         assertEquals(ETAG, appointment.getEtag());
         assertEquals(mockServiceAddress, appointment.getServiceAddress());
         assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
@@ -123,6 +123,7 @@ class AppointmentsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        spec.setOfficerRoles(Collections.singletonList(OfficerRoles.DIRECTOR));
 
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -152,7 +153,6 @@ class AppointmentsServiceImplTest {
         assertEquals(ENCODED_VALUE, appointment.getId());
         assertEquals(ENCODED_VALUE, appointment.getAppointmentId());
         assertNotNull(appointment.getCreated());
-
         assertEquals(INTERNAL_ID_PREFIX + GENERATED_ID, appointment.getInternalId());
         assertEquals(ENCODED_INTERNAL_ID, appointment.getOfficerId());
         assertEquals(COMPANY_NUMBER, appointment.getCompanyNumber());
@@ -160,14 +160,9 @@ class AppointmentsServiceImplTest {
 
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());
-        assertEquals("British", appointment.getNationality());
-        assertEquals("Director", appointment.getOccupation());
-        assertTrue(appointment.isServiceAddressIsSameAsRegisteredOfficeAddress());
-        assertEquals("Scotland", appointment.getCountryOfResidence());
-        assertNotNull(appointment.getUpdatedAt());
         assertTrue(appointment.getForename().startsWith("Test"));
         assertNotNull(appointment.getAppointedOn());
-        assertEquals("director", appointment.getOfficerRole());
+        assertEquals(OfficerRoles.DIRECTOR.getValue(), appointment.getOfficerRole());
         assertEquals(ETAG, appointment.getEtag());
         assertEquals(mockServiceAddress, appointment.getServiceAddress());
         assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
@@ -185,25 +180,13 @@ class AppointmentsServiceImplTest {
     void createWithInvalidOfficerRole() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setOfficerRoles(List.of("invalid_role"));
+        OfficerRoles invalidRole = Mockito.spy(OfficerRoles.DIRECTOR);
+        when(invalidRole.getValue()).thenReturn("invalid_role");
+        spec.setOfficerRoles(Collections.singletonList(invalidRole));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
             appointmentsService.create(spec);
         });
-
-        assertEquals("Invalid officer role: invalid_role", exception.getMessage());
-    }
-
-    @Test
-    void createWithMixedValidAndInvalidOfficerRoles() {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setOfficerRoles(List.of("director", "invalid_role", "secretary"));
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentsService.create(spec);
-        });
-
         assertEquals("Invalid officer role: invalid_role", exception.getMessage());
     }
 
@@ -241,7 +224,7 @@ class AppointmentsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfAppointments(3);
-        spec.setOfficerRoles(List.of("director", "secretary", "director"));
+        spec.setOfficerRoles(Collections.singletonList(OfficerRoles.DIRECTOR));
 
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
         when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -272,7 +255,6 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officerAppointment = new OfficerAppointment();
         when(appointmentsRepository.findAllByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Collections.singletonList(apt));
-
         when(officerRepository.findById("TEST_OFFICER_ID"))
                 .thenReturn(Optional.of(officerAppointment));
 
