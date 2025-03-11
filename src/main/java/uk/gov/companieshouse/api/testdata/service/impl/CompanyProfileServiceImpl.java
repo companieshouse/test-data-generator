@@ -6,6 +6,8 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Map;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String LEGAL_FORM = "Plc";
     private static final String ORIGINATING_REGISTRY_NAME = "Barbados Financial Services";
     private static final String UPDATED_TYPE = "psc_delta";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY = "full-data-available-from-financial-conduct-authority";
+    public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY = "full-data-available-from-the-company";
+    public static final String FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY = "full-data-available-from-department-of-the-economy";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
 
     @Autowired
     private RandomService randomService;
@@ -197,6 +203,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasCharges(false);
         profile.setCanFile(true);
 
+        Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
+        if (partialDataOptions.containsKey(companyType)) {
+            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
+        }
+
         if (subType != null) {
             profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
             profile.setSubtype(subType);
@@ -207,6 +218,22 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
 
         return repository.save(profile);
+    }
+
+    private static Map<CompanyType, String> createPartialDataOptionsMap(Jurisdiction companyJurisdiction) {
+        Map<CompanyType, String> partialDataOptions = new HashMap<>();
+        partialDataOptions.put(CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL,
+                FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
+        partialDataOptions.put(CompanyType.ASSURANCE_COMPANY, FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
+        partialDataOptions.put(CompanyType.ROYAL_CHARTER, FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
+        if (companyJurisdiction.equals(Jurisdiction.NI)) {
+            partialDataOptions.put(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY,
+                    FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY);
+        } else {
+            partialDataOptions.put(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY,
+                    FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
+        }
+        return partialDataOptions;
     }
 
     @Override

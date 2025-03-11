@@ -48,6 +48,13 @@ public class CompanySpec {
     @JsonProperty("filing_history")
     private FilingHistorySpec filingHistory;
 
+    @JsonProperty("number_of_appointments")
+    private int numberOfAppointments = 1;
+
+    @JsonProperty("officer_roles")
+    private List<@Pattern(regexp = "director|secretary",
+            message = "Invalid officer role") String> officerRoles;
+
     @JsonProperty("accounts_due_status")
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
     private String accountsDueStatus;
@@ -102,6 +109,22 @@ public class CompanySpec {
 
     public void setHasSuperSecurePscs(Boolean hasSuperSecurePscs) {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
+    }
+
+    public int getNumberOfAppointments() {
+        return numberOfAppointments;
+    }
+
+    public void setNumberOfAppointments(int numberOfAppointments) {
+        this.numberOfAppointments = numberOfAppointments;
+    }
+
+    public List<String> getOfficerRoles() {
+        return officerRoles;
+    }
+
+    public void setOfficerRoles(List<String> officerRoles) {
+        this.officerRoles = officerRoles;
     }
 
     public List<RegistersSpec> getRegisters() {

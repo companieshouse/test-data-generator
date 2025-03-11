@@ -12,6 +12,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -58,7 +59,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private DataService<Appointment, CompanySpec> appointmentService;
+    private DataService<List<Appointment>, CompanySpec> appointmentService;
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
