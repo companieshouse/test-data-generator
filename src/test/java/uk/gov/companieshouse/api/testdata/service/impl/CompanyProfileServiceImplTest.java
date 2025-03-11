@@ -13,6 +13,7 @@ import static uk.gov.companieshouse.api.testdata.model.rest.CompanyType.ROYAL_CH
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Collections;
@@ -271,6 +272,74 @@ class CompanyProfileServiceImplTest {
         spec.setHasSuperSecurePscs(null);
         CompanyProfile profile = createAndCapture(spec);
         assertNull(profile.getHasSuperSecurePscs());
+    }
+
+    @Test
+    void createCompanyWithAccountsDueSoon() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setAccountsDueStatus("due-soon");
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+        when(randomService.generateAccountsDueDateByStatus("due-soon")).thenReturn(LocalDate.now());
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNotNull(profile.getAccounts());
+        assertEquals(LocalDate.now().plusYears(1).plusMonths(9)
+                .atStartOfDay(ZONE_ID_UTC).toInstant(), profile.getAccounts().getNextDue());
+    }
+
+    @Test
+    void createCompanyWithAccountsOverdue() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setAccountsDueStatus("overdue");
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+        when(randomService.generateAccountsDueDateByStatus("overdue")).thenReturn(LocalDate.now());
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNotNull(profile.getAccounts());
+        assertEquals(LocalDate.now().plusYears(1).plusMonths(9)
+                .atStartOfDay(ZONE_ID_UTC).toInstant(), profile.getAccounts().getNextDue());
+    }
+
+    @Test
+    void createCompanyWithAccountsDueStatusNull() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        spec.setAccountsDueStatus(null);
+
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockRegisteredAddress);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor
+                = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
+
+        CompanyProfile profile = companyProfileCaptor.getValue();
+        assertNotNull(profile.getAccounts());
+        assertNotNull(profile.getAccounts().getNextDue());
     }
 
     @Test

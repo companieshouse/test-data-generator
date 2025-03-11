@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
@@ -23,7 +25,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class FilingHistoryServiceImpl implements DataService<FilingHistory,CompanySpec> {
+public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
 
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
@@ -43,6 +45,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
         String barcode;
+        final String accountsDueStatus = spec.getAccountsDueStatus();
         try {
             barcode = barcodeService.getBarcode();
         } catch (BarcodeServiceException ex) {
@@ -52,6 +55,12 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         FilingHistory filingHistory = new FilingHistory();
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        if (StringUtils.hasText(accountsDueStatus)) {
+            var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            dayTimeNow = dueDateNow.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
+            dayNow = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
 
@@ -68,9 +77,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
         filingHistory.setOriginalDescription(hasFilingHistory ? spec.getFilingHistory().getOriginalDescription() : ORIGINAL_DESCRIPTION);
-
         filingHistory.setBarcode(barcode);
-
         return filingHistoryRepository.save(filingHistory);
     }
 
@@ -82,7 +89,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory,Compa
         return filingHistory.isPresent();
     }
 
-    private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow){
+    private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow) {
 
         ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 

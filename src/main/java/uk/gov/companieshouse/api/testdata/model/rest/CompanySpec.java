@@ -51,8 +51,11 @@ public class CompanySpec {
     private int numberOfAppointments = 1;
 
     @JsonProperty("officer_roles")
-    private List<@Pattern(regexp = "director|secretary",
-            message = "Invalid officer role") String> officerRoles;
+    private List<OfficerRoles> officerRoles;
+
+    @JsonProperty("accounts_due_status")
+    @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
+    private String accountsDueStatus;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -114,11 +117,11 @@ public class CompanySpec {
         this.numberOfAppointments = numberOfAppointments;
     }
 
-    public List<String> getOfficerRoles() {
+    public List<OfficerRoles> getOfficerRoles() {
         return officerRoles;
     }
 
-    public void setOfficerRoles(List<String> officerRoles) {
+    public void setOfficerRoles(List<OfficerRoles> officerRoles) {
         this.officerRoles = officerRoles;
     }
 
@@ -145,4 +148,13 @@ public class CompanySpec {
     public void setFilingHistory(FilingHistorySpec filingHistory) {
         this.filingHistory = filingHistory;
     }
+
+    public String getAccountsDueStatus() {
+        return accountsDueStatus;
+    }
+
+    public void setAccountsDueStatus(String accountsDueStatus) {
+        this.accountsDueStatus = accountsDueStatus;
+    }
 }
+
