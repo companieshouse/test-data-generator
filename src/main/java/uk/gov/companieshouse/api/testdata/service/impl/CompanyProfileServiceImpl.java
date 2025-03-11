@@ -4,10 +4,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -155,7 +155,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setCompanyNumber(companyNumber);
         String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
         String nonJurisdictionType = checkNonJurisdictionTypes(
-                jurisdiction.toString(), companyTypeValue);
+                jurisdiction, companyTypeValue);
         if (nonJurisdictionType.isEmpty()) {
             profile.setLinks(createLinkForSelf(companyNumber));
         } else {
@@ -198,7 +198,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
         profile.setHasCharges(false);
         profile.setCanFile(true);
-
         Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
         if (partialDataOptions.containsKey(companyType)) {
             profile.setPartialDataAvailable(partialDataOptions.get(companyType));
@@ -222,7 +221,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
         partialDataOptions.put(CompanyType.ASSURANCE_COMPANY, FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
         partialDataOptions.put(CompanyType.ROYAL_CHARTER, FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
-        if (companyJurisdiction.equals(Jurisdiction.NI)) {
+        partialDataOptions.put(CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL, FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
+        if (Jurisdiction.NI.equals(companyJurisdiction)) {
             partialDataOptions.put(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY,
                     FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY);
         } else {
@@ -263,18 +263,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return links;
     }
 
-    private String checkNonJurisdictionTypes(String jurisdiction, String companyType) {
+    private String checkNonJurisdictionTypes(Jurisdiction jurisdiction, String companyType) {
         Set<String> noJurisdictionTypes = Set.of(
-                "registered-society-non-jurisdictional",
-                "royal-charter",
-                "uk-establishment"
+                CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue(),
+                CompanyType.ROYAL_CHARTER.getValue(),
+                CompanyType.UK_ESTABLISHMENT.getValue()
         );
-        if (companyType != null) {
-            if (noJurisdictionTypes.contains(companyType)) {
-                return "";
-            }
+        if (jurisdiction == null) {
+            return "";
         }
-        return jurisdiction;
+        return (companyType != null && noJurisdictionTypes.contains(companyType)) ? "" : jurisdiction.toString();
     }
 
 }

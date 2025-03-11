@@ -113,7 +113,9 @@ class CompanyProfileServiceImplTest {
         assertEquals(companyStatus, profile.getCompanyStatus());
         assertEquals(jurisdiction, profile.getJurisdiction());
         assertEquals(companyType.toLowerCase(), profile.getType());
-        assertNotNull(profile.getRegisteredOfficeAddress());
+        if (jurisdiction != null) {
+            assertNotNull(profile.getRegisteredOfficeAddress());
+        }
         assertFalse(profile.getUndeliverableRegisteredOfficeAddress());
         assertNotNull(profile.getSicCodes());
         assertOnConfirmationStatement(profile.getConfirmationStatement());
@@ -124,11 +126,17 @@ class CompanyProfileServiceImplTest {
         assertEquals(ETAG, profile.getEtag());
         assertOnAccounts(profile.getAccounts());
         assertOnDateOfCreation(profile.getDateOfCreation());
-        assertEquals("/company/" + COMPANY_NUMBER, profile.getLinks().getSelf());
-        assertEquals("/company/" + COMPANY_NUMBER + "/filing-history", profile.getLinks().getFilingHistory());
-        assertEquals("/company/" + COMPANY_NUMBER + "/officers", profile.getLinks().getOfficers());
-        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statement",
-                profile.getLinks().getPersonsWithSignificantControlStatement());
+        if (jurisdiction != null) {
+            assertEquals("/company/" + COMPANY_NUMBER, profile.getLinks().getSelf());
+            assertEquals("/company/" + COMPANY_NUMBER
+                    + "/filing-history", profile.getLinks().getFilingHistory());
+            assertEquals("/company/" + COMPANY_NUMBER
+                    + "/officers", profile.getLinks().getOfficers());
+            assertEquals("/company/" + COMPANY_NUMBER
+                    + "/persons-with-significant-control-statement",
+                    profile.getLinks().getPersonsWithSignificantControlStatement());
+        }
+
     }
 
     private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement cs) {
@@ -335,9 +343,14 @@ class CompanyProfileServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyType(COMPANY_TYPE_ROYAL_CHARTER);
         spec.setCompanyStatusDetail(null);
-        // spec.setSubType(null);
 
-        ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        CompanyProfile returnedProfile = this.companyProfileService.create(spec);
+        assertEquals(savedProfile, returnedProfile);
+        ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(companyProfileCaptor.capture());
 
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals(COMPANY_TYPE_ROYAL_CHARTER.getValue(), profile.getType());
@@ -394,5 +407,128 @@ class CompanyProfileServiceImplTest {
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(companyProfileCaptor.capture());
         return companyProfileCaptor;
+    }
+
+    @Test
+    void createCompanyWithEmptyJurisdiction() {
+        spec.setJurisdiction(null);
+        spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        companyProfileService.create(spec);
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        var profile = captor.getValue();
+        assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE, null, CompanyType.UK_ESTABLISHMENT.getValue(), false);
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertNotNull(profile.getLinks().getSelf());
+        assertNull(profile.getLinks().getFilingHistory());
+        assertNull(profile.getLinks().getOfficers());
+        assertNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+    }
+
+    @Test
+    void createCompanyWithJurisdictionAndCompanyType() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(COMPANY_TYPE_LTD);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertNotNull(profile.getLinks().getSelf());
+        assertNotNull(profile.getLinks().getFilingHistory());
+        assertNotNull(profile.getLinks().getOfficers());
+        assertNotNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+    }
+
+    @Test
+    void createCompanyWithJurisdictionAndNoCompanyType() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(null);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertNotNull(profile.getLinks().getSelf());
+        assertNotNull(profile.getLinks().getFilingHistory());
+        assertNotNull(profile.getLinks().getOfficers());
+        assertNotNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+    }
+
+    @Test
+    void createCompanyWithNoJurisdictionAndNoCompanyType() {
+        spec.setJurisdiction(null);
+        spec.setCompanyType(null);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+        companyProfileService.create(spec);
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        var profile = captor.getValue();
+        assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
+        assertNotNull(profile.getLinks().getSelf());
+        assertNull(profile.getLinks().getFilingHistory());
+        assertNull(profile.getLinks().getOfficers());
+        assertNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixEnglandWales() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(CompanyType.LTD);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("", prefix);
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixScotland() {
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        spec.setCompanyType(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("SP", prefix);
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixNorthernIreland() {
+        spec.setJurisdiction(Jurisdiction.NI);
+        spec.setCompanyType(CompanyType.LLP);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("NC", prefix);
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixUnitedKingdom() {
+        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("FC", prefix);
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixSpecialTypes() {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(CompanyType.ROYAL_CHARTER);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("RC", prefix);
+
+        spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
+        prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("BR", prefix);
+
+        spec.setCompanyType(CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL);
+        prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("RS", prefix);
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixNoCompanyType() {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("", prefix);
+    }
+
+    @Test
+    void testGetCompanyNumberPrefixNoJurisdiction() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
+        String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        assertEquals("BR", prefix);
     }
 }
