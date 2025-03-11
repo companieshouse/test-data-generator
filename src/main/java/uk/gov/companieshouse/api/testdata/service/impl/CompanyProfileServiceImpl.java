@@ -12,6 +12,7 @@ import java.util.HashMap;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
@@ -68,15 +69,21 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
         final String companyStatusDetail = spec.getCompanyStatusDetail();
+        final String accountsDueStatus = spec.getAccountsDueStatus();
 
-        LocalDate now = LocalDate.now();
-        Instant dateOneYearAgo = now.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
-        Instant dateInOneYear = now.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        LocalDate accountingReferenceDate = LocalDate.now();
+        if (StringUtils.hasText(accountsDueStatus)) {
+            accountingReferenceDate = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+        }
+        Instant dateOneYearAgo = accountingReferenceDate.minusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateNow = accountingReferenceDate.atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInOneYear = accountingReferenceDate.plusYears(1L).atStartOfDay(ZONE_ID_UTC).toInstant();
         var dateInOneYearTwoWeeks
-                = now.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
+                = accountingReferenceDate.plusYears(1L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
         var dateInOneYearNineMonths
-                = now.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
+                = accountingReferenceDate.plusYears(1L).plusMonths(9L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInTwoYear = accountingReferenceDate.plusYears(2L).atStartOfDay(ZONE_ID_UTC).toInstant();
+        Instant dateInTwoYearTwoWeeks = accountingReferenceDate.plusYears(2L).plusDays(14L).atStartOfDay(ZONE_ID_UTC).toInstant();
 
         if (Jurisdiction.UNITED_KINGDOM.equals(jurisdiction)) {
             LOG.info("Creating OverseasEntity for " + companyNumber);
@@ -157,8 +164,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
         accounts.setNextAccountsOverdue(false);
         accounts.setNextMadeUpTo(dateInOneYear);
-        accounts.setAccountingReferenceDateDay(String.valueOf(now.getDayOfMonth()));
-        accounts.setAccountingReferenceDateMonth(String.valueOf(now.getMonthValue()));
+        accounts.setAccountingReferenceDateDay(String.valueOf(accountingReferenceDate.getDayOfMonth()));
+        accounts.setAccountingReferenceDateMonth(String.valueOf(accountingReferenceDate.getMonthValue()));
 
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(companyType != null ? companyType.getValue() : "ltd");
@@ -171,6 +178,17 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setSicCodes(Collections.singletonList("71200"));
 
         var confirmationStatement = profile.getConfirmationStatement();
+        if ("due-soon".equalsIgnoreCase(accountsDueStatus)) {
+            confirmationStatement.setLastMadeUpTo(dateInOneYear);
+            confirmationStatement.setNextMadeUpTo(dateInTwoYear);
+            confirmationStatement.setOverdue(false);
+            confirmationStatement.setNextDue(dateInTwoYearTwoWeeks);
+        } else {
+            confirmationStatement.setNextMadeUpTo(dateInOneYear);
+            confirmationStatement.setOverdue(false);
+            confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
+            profile.setRegisteredOfficeIsInDispute(false);
+        }
         confirmationStatement.setNextMadeUpTo(dateInOneYear);
         confirmationStatement.setOverdue(false);
         confirmationStatement.setNextDue(dateInOneYearTwoWeeks);

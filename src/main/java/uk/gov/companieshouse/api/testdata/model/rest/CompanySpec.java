@@ -54,6 +54,10 @@ public class CompanySpec {
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
 
+    @JsonProperty("accounts_due_status")
+    @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
+    private String accountsDueStatus;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -145,4 +149,13 @@ public class CompanySpec {
     public void setFilingHistory(FilingHistorySpec filingHistory) {
         this.filingHistory = filingHistory;
     }
+
+    public String getAccountsDueStatus() {
+        return accountsDueStatus;
+    }
+
+    public void setAccountsDueStatus(String accountsDueStatus) {
+        this.accountsDueStatus = accountsDueStatus;
+    }
 }
+
