@@ -1081,7 +1081,6 @@ class TestDataServiceImplTest {
         assertNotNull(result);
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("memberId", result.getAcspMemberId());
-        assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
         assertEquals("role", result.getUserRole());
