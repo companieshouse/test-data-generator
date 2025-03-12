@@ -47,19 +47,19 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address EUROPEAN_UNION_ADDRESS = new Address(
-            "1",
             "Schiphol Boulevard Tower 403 Tower C-4",
             "1118bk Schiphol",
+            "Netherlands",
             "Amsterdam",
-            "Netherlands"
+            "123123"
     );
 
     private static final Address NON_EU_ADDRESS = new Address(
-            "1",
             "Edificio Salduba Tercer Piso",
             "Calle 53 Este",
+            "Panama",
             "Marbella",
-            "Panama"
+            "123123"
     );
 
     private static final Address OVERSEAS_ADDRESS = new Address(
