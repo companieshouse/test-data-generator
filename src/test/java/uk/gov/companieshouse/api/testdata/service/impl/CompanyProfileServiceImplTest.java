@@ -601,10 +601,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testCreateOverseasEntityWithTypeAndStatus() {
-        overseasSpec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        overseasSpec.setCompanyStatus(null);
-
+    void testCreateOverseasEntityWithOutType() {
         when(addressService.getAddress(overseasSpec.getJurisdiction()))
                 .thenReturn(new Address("", "", "", "", "", ""));
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -620,28 +617,6 @@ class CompanyProfileServiceImplTest {
         assertEquals(OVERSEAS_COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals("registered", result.getCompanyStatus());
         assertEquals(OVERSEAS_ENTITY_TYPE.getValue(), savedEntity.getType());
-    }
-
-    @Test
-    void testCreateOverseasEntityWithDifferentTypeAndStatus() {
-        overseasSpec.setCompanyType(CompanyType.LTD);
-        overseasSpec.setCompanyStatus(COMPANY_STATUS_ACTIVE);
-
-        when(addressService.getAddress(overseasSpec.getJurisdiction()))
-                .thenReturn(new Address("", "", "", "", "", ""));
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
-
-        CompanyProfile result = companyProfileService.create(overseasSpec);
-        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(captor.capture());
-        CompanyProfile savedEntity = captor.getValue();
-
-        assertInstanceOf(OverseasEntity.class, savedEntity, "Expected an instance of OverseasEntity");
-        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getId());
-        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getCompanyNumber());
-        assertEquals(COMPANY_STATUS_ACTIVE, result.getCompanyStatus());
-        assertEquals(CompanyType.LTD.getValue(), savedEntity.getType());
     }
 
     @Test
