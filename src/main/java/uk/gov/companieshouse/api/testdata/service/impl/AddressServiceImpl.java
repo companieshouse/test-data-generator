@@ -81,7 +81,6 @@ public class AddressServiceImpl implements AddressService {
             case ENGLAND -> ENGLAND_ADDRESS;
             case EUROPEAN_UNION -> EUROPEAN_UNION_ADDRESS;
             case NON_EU -> NON_EU_ADDRESS;
-            default -> throw new IllegalArgumentException("No address for jurisdiction");
         };
     }
 
@@ -95,7 +94,6 @@ public class AddressServiceImpl implements AddressService {
             case ENGLAND -> "England";
             case NON_EU -> "Panama";
             case EUROPEAN_UNION -> "Netherlands";
-            default -> throw new IllegalArgumentException("No valid jurisdiction provided");
         };
     }
 }
