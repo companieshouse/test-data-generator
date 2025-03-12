@@ -78,14 +78,11 @@ In order to use the generator, there are different possible endpoints that can b
     - `acsp_profile`: {
       - `type`: Company type of the AcspProfile. This is optional with a defaults to `ltd`.
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
-      - `aml_details`: [
-         {
+      - `aml_details`:
           - `supervisory_body`: Supervisory body of the Acsp Profile. This is optional.
-          - `membership_details`: Membership details of the Acsp Profile. This is optional.   
-        }
-      ]
-    }
-    
+          - `membership_details`: Membership details of the Acsp Profile. This is optional.
+   - }
+
   An usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test", "aml_details": [ {"supervisory_body": "association-of-chartered-certified-accountants-acca","membership_details": "test"} ] } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
 
