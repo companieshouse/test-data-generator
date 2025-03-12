@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -9,7 +10,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.companieshouse.api.testdata.model.rest.CompanyType.ROYAL_CHARTER;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -28,7 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.springframework.boot.autoconfigure.security.oauth2.client.reactive.ReactiveOAuth2ClientAutoConfiguration;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
@@ -599,5 +598,61 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("BR", prefix);
+    }
+
+    @Test
+    void testCreateOverseasEntityWithTypeAndStatus() {
+        overseasSpec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        overseasSpec.setCompanyStatus(null);
+
+        when(addressService.getAddress(overseasSpec.getJurisdiction()))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        CompanyProfile result = companyProfileService.create(overseasSpec);
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile savedEntity = captor.getValue();
+
+        assertInstanceOf(OverseasEntity.class, savedEntity, "Expected an instance of OverseasEntity");
+        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getId());
+        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals("registered", result.getCompanyStatus());
+        assertEquals(OVERSEAS_ENTITY_TYPE.getValue(), savedEntity.getType());
+    }
+
+    @Test
+    void testCreateOverseasEntityWithDifferentTypeAndStatus() {
+        overseasSpec.setCompanyType(CompanyType.LTD);
+        overseasSpec.setCompanyStatus(COMPANY_STATUS_ACTIVE);
+
+        when(addressService.getAddress(overseasSpec.getJurisdiction()))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        CompanyProfile result = companyProfileService.create(overseasSpec);
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile savedEntity = captor.getValue();
+
+        assertInstanceOf(OverseasEntity.class, savedEntity, "Expected an instance of OverseasEntity");
+        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getId());
+        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(COMPANY_STATUS_ACTIVE, result.getCompanyStatus());
+        assertEquals(CompanyType.LTD.getValue(), savedEntity.getType());
+    }
+
+    @Test
+    void testCompanyExistsWhenCompanyExists() {
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(savedProfile));
+        assertTrue(companyProfileService.companyExists(COMPANY_NUMBER));
+    }
+
+    @Test
+    void testCompanyExistsWhenCompanyDoesNotExist() {
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertFalse(companyProfileService.companyExists(COMPANY_NUMBER));
     }
 }

@@ -160,9 +160,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);
-        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-            hasCompanyRegisters = true;
-        }
+        checkAndSetCompanyRegisters(spec);
         profile.setCompanyNumber(companyNumber);
         String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
         String nonJurisdictionType = (jurisdiction != null)
@@ -210,25 +208,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
-        if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
-            profile.setJurisdiction(jurisdiction.toString());
-            profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
-        }
+        setJurisdictionAndAddress(profile, jurisdiction, nonJurisdictionType);
         profile.setHasCharges(false);
         profile.setCanFile(true);
-        Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
-        if (partialDataOptions.containsKey(companyType)) {
-            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
-        }
-
-        if (subType != null) {
-            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
-            profile.setSubtype(subType);
-        }
-
-        if (!Objects.isNull(companyStatusDetail)) {
-            profile.setCompanyStatusDetail(companyStatusDetail);
-        }
+        setPartialDataOptions(profile, jurisdiction, companyType);
+        setSubType(profile, subType);
+        setCompanyStatusDetail(profile, companyStatusDetail);
 
         return repository.save(profile);
     }
@@ -291,6 +276,39 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             return "";
         }
         return (companyType != null && noJurisdictionTypes.contains(companyType)) ? "" : jurisdiction.toString();
+    }
+
+    private void setPartialDataOptions(CompanyProfile profile, Jurisdiction jurisdiction, CompanyType companyType) {
+        Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
+        if (partialDataOptions.containsKey(companyType)) {
+            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
+        }
+    }
+
+    private void setSubType(CompanyProfile profile, String subType) {
+        if (subType != null) {
+            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
+            profile.setSubtype(subType);
+        }
+    }
+
+    private void setCompanyStatusDetail(CompanyProfile profile, String companyStatusDetail) {
+        if (!Objects.isNull(companyStatusDetail)) {
+            profile.setCompanyStatusDetail(companyStatusDetail);
+        }
+    }
+
+    private void setJurisdictionAndAddress(CompanyProfile profile, Jurisdiction jurisdiction, String nonJurisdictionType) {
+        if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
+            profile.setJurisdiction(jurisdiction.toString());
+            profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+        }
+    }
+
+    private void checkAndSetCompanyRegisters(CompanySpec spec) {
+        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+            hasCompanyRegisters = true;
+        }
     }
 
 }
