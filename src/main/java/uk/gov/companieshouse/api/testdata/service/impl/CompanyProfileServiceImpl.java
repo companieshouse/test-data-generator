@@ -165,14 +165,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
         profile.setCompanyNumber(companyNumber);
         String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
-        String nonJurisdictionType = checkNonJurisdictionTypes(
-                jurisdiction, companyTypeValue);
-        if (jurisdiction == null || nonJurisdictionType.isEmpty()) {
-            profile.setLinks(createLinkForSelf(companyNumber));
-        } else {
-            profile.setLinks(createLinks(companyNumber));
-        }
-
+        String nonJurisdictionType = (jurisdiction != null)
+                ? checkNonJurisdictionTypes(jurisdiction, companyTypeValue) : "";
+        profile.setLinks(nonJurisdictionType.isEmpty()
+                ? createLinkForSelf(companyNumber) : createLinks(companyNumber));
         CompanyProfile.Accounts accounts = profile.getAccounts();
         accounts.setNextDue(dateInOneYearNineMonths);
         accounts.setPeriodStart(dateNow);
