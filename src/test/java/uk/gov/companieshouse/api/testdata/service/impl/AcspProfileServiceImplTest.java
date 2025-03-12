@@ -70,7 +70,7 @@ class AcspProfileServiceImplTest {
     @Test
     void createAcspProfileWithDefaultValues() throws DataException {
         when(randomService.getString(8)).thenReturn("randomId");
-            AcspProfile savedProfile = createSavedProfile();
+        AcspProfile savedProfile = createSavedProfile();
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
         AcspProfileSpec spec = new AcspProfileSpec();
@@ -178,7 +178,7 @@ class AcspProfileServiceImplTest {
         spec.setAmlDetails(null); // Setting AmlDetails as null
 
         when(randomService.getString(8)).thenReturn("randomId");
-            AcspProfile savedProfile = createSavedProfile();
+        AcspProfile savedProfile = createSavedProfile();
 
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 

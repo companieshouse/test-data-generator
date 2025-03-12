@@ -930,8 +930,7 @@ class TestDataServiceImplTest {
 
         when(identityService.delete(identityId)).thenThrow(ex);
 
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.deleteIdentityData(identityId));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteIdentityData(identityId));
 
         assertEquals("Error deleting identity", exception.getMessage());
         assertEquals(ex, exception.getCause());
@@ -966,8 +965,7 @@ class TestDataServiceImplTest {
     void createAcspMembersDataNullUserId() {
         AcspMembersSpec spec = new AcspMembersSpec();
 
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
         assertEquals("User ID is required to create an ACSP member", exception.getMessage());
     }
 
@@ -976,8 +974,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        when(acspProfileService.create(any(AcspProfileSpec.class)))
-                .thenThrow(new DataException("Error creating ACSP profile"));
+        when(acspProfileService.create(any(AcspProfileSpec.class))).thenThrow(new DataException("Error creating ACSP profile"));
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.createAcspMembersData(spec));
         assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile", exception.getMessage());
