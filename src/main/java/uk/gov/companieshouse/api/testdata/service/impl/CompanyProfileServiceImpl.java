@@ -210,7 +210,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
-        if (!nonJurisdictionType.isEmpty()) {
+        if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
             profile.setJurisdiction(jurisdiction.toString());
             profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
         }
