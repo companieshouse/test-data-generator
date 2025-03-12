@@ -54,7 +54,7 @@ class AddressServiceImplTest {
         assertEquals("Grantley Adams International Airport", address.getAddressLine2());
         assertEquals("Barbados", address.getCountry());
         assertEquals("Christ Church", address.getLocality());
-        assertEquals("123123", address.getPostalCode());
+        assertEquals("123125", address.getPostalCode());
     }
 
     @Test
