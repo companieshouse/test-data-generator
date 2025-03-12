@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import org.apache.commons.collections4.EnumerationUtils;
 
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -43,9 +42,8 @@ public enum Jurisdiction {
             return "";
         }
         String companyType = spec.getCompanyType() != null ? spec.getCompanyType().getValue() : "ltd";
-        Jurisdiction jurisdiction = spec.getJurisdiction() != null ? spec.getJurisdiction() : ENGLAND_WALES;
+        var jurisdiction = spec.getJurisdiction() != null ? spec.getJurisdiction() : ENGLAND_WALES;
         if ("registered-society-non-jurisdictional".equals(companyType)) {
-            jurisdiction = null;
             return "RS";
         }
         if ("royal-charter".equals(companyType)) {

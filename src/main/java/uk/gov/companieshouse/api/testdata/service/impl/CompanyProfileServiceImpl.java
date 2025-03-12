@@ -280,7 +280,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private Links createLinkForSelf(String companyNumber) {
-        Links links = new Links();
+        var links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
         return links;
     }
