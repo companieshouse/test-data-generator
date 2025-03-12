@@ -282,6 +282,10 @@ public class TestDataServiceImpl implements TestDataService {
             acspProfileSpec.setType(spec.getAcspProfile().getType());
         }
 
+        if (spec.getAcspProfile() != null) {
+            acspProfileSpec.setAcspNumber(spec.getAcspProfile().getAcspNumber());
+        }
+
         try {
             var acspProfileData = createAcspProfile(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
