@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -48,12 +49,13 @@ class CompanyPscStatementServiceImplTest {
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscStatement savedStatement = new CompanyPscStatement();
         when(this.repository.save(any())).thenReturn(savedStatement);
-        
+
         CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
-        
+
         assertEquals(savedStatement, returnedStatement);
-        
-        ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
+
+        ArgumentCaptor<CompanyPscStatement> statementCaptor
+                = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
 
         CompanyPscStatement statement = statementCaptor.getValue();
@@ -64,9 +66,8 @@ class CompanyPscStatementServiceImplTest {
         assertEquals(ENCODED_VALUE, statement.getPscStatementId());
 
         Links links = statement.getLinks();
-        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/" + ENCODED_VALUE,
-                links.getSelf());
-
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
+                + ENCODED_VALUE, links.getSelf());
         assertNotNull(statement.getNotifiedOn());
         assertEquals(ETAG, statement.getEtag());
         assertEquals("persons-with-significant-control-statement", statement.getKind());
@@ -79,18 +80,134 @@ class CompanyPscStatementServiceImplTest {
     @Test
     void delete() {
         CompanyPscStatement companyPscStatement = new CompanyPscStatement();
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(companyPscStatement));
-
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(companyPscStatement));
         assertTrue(this.companyPscStatementService.delete(COMPANY_NUMBER));
         verify(repository).delete(companyPscStatement);
     }
 
     @Test
     void deleteNoDataException() {
-        CompanyPscStatement companyPscStatement = null;
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(companyPscStatement));
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.empty());
 
         assertFalse(this.companyPscStatementService.delete(COMPANY_NUMBER));
-        verify(repository, never()).delete(companyPscStatement);
+        verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void createWhenAccountsDueStatusIsNull() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setAccountsDueStatus(null);
+
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+
+        ArgumentCaptor<CompanyPscStatement> statementCaptor
+                = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertNotNull(capturedStatement);
+        assertEquals(ENCODED_VALUE, capturedStatement.getId());
+        assertNotNull(capturedStatement.getUpdatedAt());
+        assertEquals(COMPANY_NUMBER, capturedStatement.getCompanyNumber());
+        assertEquals(ENCODED_VALUE, capturedStatement.getPscStatementId());
+
+        Links links = capturedStatement.getLinks();
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
+                        + ENCODED_VALUE, links.getSelf());
+        assertNotNull(capturedStatement.getNotifiedOn());
+        assertEquals(ETAG, capturedStatement.getEtag());
+        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
+        assertEquals("no-individual-or-entity-with-signficant-control",
+                capturedStatement.getStatement());
+        assertNotNull(capturedStatement.getCreatedAt());
+    }
+
+    @Test
+    void createWhenAccountsDueStatusIsDueSoon() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setAccountsDueStatus("due-soon");
+
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.generateAccountsDueDateByStatus("due-soon")).thenReturn(LocalDate.now());
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+
+        ArgumentCaptor<CompanyPscStatement> statementCaptor
+                = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertNotNull(capturedStatement);
+        assertEquals(ENCODED_VALUE, capturedStatement.getId());
+        assertNotNull(capturedStatement.getUpdatedAt());
+        assertEquals(COMPANY_NUMBER, capturedStatement.getCompanyNumber());
+        assertEquals(ENCODED_VALUE, capturedStatement.getPscStatementId());
+
+        Links links = capturedStatement.getLinks();
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
+                        + ENCODED_VALUE, links.getSelf());
+        assertNotNull(capturedStatement.getNotifiedOn());
+        assertEquals(ETAG, capturedStatement.getEtag());
+        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
+        assertEquals("no-individual-or-entity-with-signficant-control",
+                capturedStatement.getStatement());
+        assertNotNull(capturedStatement.getCreatedAt());
+    }
+
+    @Test
+    void createWhenAccountsDueStatusIsOverDue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setAccountsDueStatus("overdue");
+
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.generateAccountsDueDateByStatus("overdue")).thenReturn(LocalDate.now());
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+
+        ArgumentCaptor<CompanyPscStatement> statementCaptor
+                = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertNotNull(capturedStatement);
+        assertEquals(ENCODED_VALUE, capturedStatement.getId());
+        assertNotNull(capturedStatement.getUpdatedAt());
+        assertEquals(COMPANY_NUMBER, capturedStatement.getCompanyNumber());
+        assertEquals(ENCODED_VALUE, capturedStatement.getPscStatementId());
+
+        Links links = capturedStatement.getLinks();
+        assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
+                        + ENCODED_VALUE, links.getSelf());
+        assertNotNull(capturedStatement.getNotifiedOn());
+        assertEquals(ETAG, capturedStatement.getEtag());
+        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
+        assertEquals("no-individual-or-entity-with-signficant-control",
+                capturedStatement.getStatement());
+        assertNotNull(capturedStatement.getCreatedAt());
     }
 }

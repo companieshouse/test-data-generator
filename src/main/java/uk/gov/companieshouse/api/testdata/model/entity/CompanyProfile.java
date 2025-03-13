@@ -101,6 +101,8 @@ public class CompanyProfile {
         private Boolean overdue;
         @Field("next_due")
         private Instant nextDue;
+        @Field("last_made_up_to")
+        private Instant lastMadeUpTo;
 
         public Instant getNextMadeUpTo() {
             return nextMadeUpTo;
@@ -124,6 +126,14 @@ public class CompanyProfile {
 
         public void setNextDue(Instant nextDue) {
             this.nextDue = nextDue;
+        }
+
+        public Instant getLastMadeUpTo() {
+            return lastMadeUpTo;
+        }
+
+        public void setLastMadeUpTo(Instant lastMadeUpTo) {
+            this.lastMadeUpTo = lastMadeUpTo;
         }
     }
 
@@ -172,6 +182,8 @@ public class CompanyProfile {
     private Boolean isCommunityInterestCompany;
     @Field ("data.company_status_detail")
     private String companyStatusDetail;
+    @Field("data.partial_data_available")
+    private String partialDataAvailable;
 
     public String getId() {
         return id;
@@ -340,5 +352,11 @@ public class CompanyProfile {
 
     public void setCompanyStatusDetail(String companyStatusDetail) {
         this.companyStatusDetail = companyStatusDetail;
+    }
+
+    public String getPartialDataAvailable() {return this.partialDataAvailable; }
+
+    public void setPartialDataAvailable(String partialDataAvailable) {
+        this.partialDataAvailable = partialDataAvailable;
     }
 }

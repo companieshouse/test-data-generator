@@ -48,6 +48,16 @@ public class CompanySpec {
     @JsonProperty("filing_history")
     private FilingHistorySpec filingHistory;
 
+    @JsonProperty("number_of_appointments")
+    private int numberOfAppointments = 1;
+
+    @JsonProperty("officer_roles")
+    private List<OfficerRoles> officerRoles;
+
+    @JsonProperty("accounts_due_status")
+    @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
+    private String accountsDueStatus;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -100,6 +110,22 @@ public class CompanySpec {
         this.hasSuperSecurePscs = hasSuperSecurePscs;
     }
 
+    public int getNumberOfAppointments() {
+        return numberOfAppointments;
+    }
+
+    public void setNumberOfAppointments(int numberOfAppointments) {
+        this.numberOfAppointments = numberOfAppointments;
+    }
+
+    public List<OfficerRoles> getOfficerRoles() {
+        return officerRoles;
+    }
+
+    public void setOfficerRoles(List<OfficerRoles> officerRoles) {
+        this.officerRoles = officerRoles;
+    }
+
     public List<RegistersSpec> getRegisters() {
         return registers;
     }
@@ -123,4 +149,13 @@ public class CompanySpec {
     public void setFilingHistory(FilingHistorySpec filingHistory) {
         this.filingHistory = filingHistory;
     }
+
+    public String getAccountsDueStatus() {
+        return accountsDueStatus;
+    }
+
+    public void setAccountsDueStatus(String accountsDueStatus) {
+        this.accountsDueStatus = accountsDueStatus;
+    }
 }
+
