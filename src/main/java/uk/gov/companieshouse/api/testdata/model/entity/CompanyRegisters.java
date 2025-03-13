@@ -38,6 +38,14 @@ public class CompanyRegisters {
     @Field("updated.at")
     private LocalDate updatedAt;
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     public LocalDate getCreatedAt() {
         return createdAt;
     }

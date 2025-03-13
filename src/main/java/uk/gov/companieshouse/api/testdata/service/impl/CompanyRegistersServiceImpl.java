@@ -42,7 +42,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     public CompanyRegisters create(CompanySpec companySpec) throws DataException {
         var now = LocalDate.now();
         var companyRegisters = new CompanyRegisters();
-
+        companyRegisters.setId(companySpec.getCompanyNumber());
         companyRegisters.setCompanyNumber(companySpec.getCompanyNumber());
         companyRegisters.setCreatedAt(now);
         companyRegisters.setUpdatedAt(now);
