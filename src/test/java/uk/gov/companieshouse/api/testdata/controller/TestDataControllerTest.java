@@ -4,7 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -31,6 +33,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
@@ -40,7 +43,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
-
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -56,9 +58,6 @@ class TestDataControllerTest {
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
-
-    @Captor
-    private ArgumentCaptor<AcspMembersSpec> acspMemberSpecCaptor;
 
     @Test
     void createCompany() throws Exception {
@@ -334,10 +333,12 @@ class TestDataControllerTest {
         request.setStatus("active");
         request.setAcspProfile(new AcspProfileSpec());
 
-        AcspMembersData acspMember = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        AcspMembersData acspMember = new AcspMembersData(
+                "memberId", "acspNumber", "userId", "active", "role");
 
         when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);
-        ResponseEntity<AcspMembersData> response = this.testDataController.createAcspMember(request);
+        ResponseEntity<AcspMembersData> response
+                = this.testDataController.createAcspMember(request);
 
         assertEquals(acspMember, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -360,7 +361,8 @@ class TestDataControllerTest {
         final String acspMemberId = "memberId";
 
         when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteAcspMember(acspMemberId);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteAcspMember(acspMemberId);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -372,7 +374,8 @@ class TestDataControllerTest {
         final String acspMemberId = "memberId";
 
         when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteAcspMember(acspMemberId);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteAcspMember(acspMemberId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp-member-id"));
@@ -388,8 +391,53 @@ class TestDataControllerTest {
 
         when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenThrow(exception);
 
-        DataException thrown =
-                assertThrows(DataException.class, () -> this.testDataController.deleteAcspMember(acspMemberId));
+        DataException thrown = assertThrows(
+                DataException.class, () -> this.testDataController.deleteAcspMember(acspMemberId));
         assertEquals(exception, thrown);
+    }
+
+    @Test
+    void deleteAppealSuccess() throws Exception {
+        DeleteAppealsRequest request = new DeleteAppealsRequest();
+        request.setCompanyNumber("12345678");
+        request.setPenaltyReference("PR123");
+
+        when(testDataService.deleteAppealsData(
+                request.getCompanyNumber(), request.getPenaltyReference()))
+                .thenReturn(true);
+
+        ResponseEntity<Void> response = testDataController.deleteAppeal(request);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService, times(1))
+                .deleteAppealsData(request.getCompanyNumber(), request.getPenaltyReference());
+    }
+
+    @Test
+    void deleteAppealNotFound() throws Exception {
+        DeleteAppealsRequest request = new DeleteAppealsRequest();
+        request.setCompanyNumber("12345678");
+        request.setPenaltyReference("PR123");
+
+        when(testDataService.deleteAppealsData(
+                request.getCompanyNumber(), request.getPenaltyReference()))
+                .thenReturn(false);
+
+        ResponseEntity<Void> response = testDataController.deleteAppeal(request);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(testDataService, times(1))
+                .deleteAppealsData(request.getCompanyNumber(), request.getPenaltyReference());
+    }
+
+    @Test
+    void deleteAppealBadRequest() throws Exception {
+        ResponseEntity<Void> response = testDataController.deleteAppeal(null);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verify(testDataService, times(0)).deleteAppealsData(anyString(), anyString());
     }
 }

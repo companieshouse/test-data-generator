@@ -1,24 +1,33 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
+import uk.gov.companieshouse.api.testdata.model.entity.Identification;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.NameElements;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.*;
-
 @Service
-public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySpec> {
+public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanySpec> {
 
-    protected static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
-        "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
+    static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
+            "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
     public static final String WALES = "Wales";
@@ -38,9 +47,14 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
 
         CompanyPscs companyPsc = new CompanyPscs();
         final String companyNumber = spec.getCompanyNumber();
+        final String accountsDueStatus = spec.getAccountsDueStatus();
         companyPsc.setCompanyNumber(companyNumber);
 
-        Instant dateNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        Instant createdUpdatedAt = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        if (StringUtils.hasText(accountsDueStatus)) {
+            var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+            createdUpdatedAt = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
 
         String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         companyPsc.setId(id);
@@ -56,8 +70,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         companyPsc.setRegion("UK");
         companyPsc.setAddressSameAsRegisteredOfficeAddress(true);
 
-        companyPsc.setCeasedOn(dateNow);
-        companyPsc.setCreatedAt(dateNow);
+        companyPsc.setCeasedOn(createdUpdatedAt);
+        companyPsc.setCreatedAt(createdUpdatedAt);
 
         String etag = this.randomService.getEtag();
         companyPsc.setEtag(etag);
@@ -72,13 +86,13 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
 
         companyPsc.setNaturesOfControl(naturesOfControl);
 
-        companyPsc.setNotifiedOn(dateNow);
+        companyPsc.setNotifiedOn(createdUpdatedAt);
         companyPsc.setReferenceEtag("reference etag");
         companyPsc.setReferencePscId("reference psc id");
-        companyPsc.setRegisterEntryDate(dateNow);
-        companyPsc.setUpdatedAt(dateNow);
+        companyPsc.setRegisterEntryDate(createdUpdatedAt);
+        companyPsc.setUpdatedAt(createdUpdatedAt);
 
-        companyPsc.setStatementActionDate(dateNow);
+        companyPsc.setStatementActionDate(createdUpdatedAt);
         companyPsc.setStatementType("statement type");
 
         return repository.save(differentiatePsc(companyPsc));
@@ -97,7 +111,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         String linkType;
         Optional<List<CompanyPscs>> existingPscs = repository.findByCompanyNumber(companyPsc.getCompanyNumber());
 
-        switch (existingPscs.orElse(new ArrayList<>()).size()){
+        switch (existingPscs.orElse(new ArrayList<>()).size()) {
             case 0:
                 pscType = "individual-person-with-significant-control";
                 linkType = "individual";
@@ -140,7 +154,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         companyPsc.setKind(pscType);
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType +"/" + companyPsc.getId());
+        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
 
         return companyPsc;
@@ -161,7 +175,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs,CompanySp
         companyPsc.setName("Mr A Jones");
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType +"/" + companyPsc.getId());
+        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
 
         return companyPsc;

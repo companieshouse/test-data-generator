@@ -16,6 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -26,12 +27,14 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -56,7 +59,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private DataService<Appointment, CompanySpec> appointmentService;
+    private DataService<List<Appointment>, CompanySpec> appointmentService;
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
@@ -79,6 +82,10 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Autowired
     private CompanyAuthAllowListService companyAuthAllowListService;
+    @Autowired
+    AppealsService appealsService;
+    @Autowired
+    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -102,15 +109,27 @@ public class TestDataServiceImpl implements TestDataService {
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            this.companyProfileService.create(spec);
-            this.filingHistoryService.create(spec);
-            this.appointmentService.create(spec);
-            CompanyAuthCode authCode = this.companyAuthCodeService.create(spec);
-            this.companyMetricsService.create(spec);
-            this.companyPscStatementService.create(spec);
-            this.companyPscsService.create(spec);
-            this.companyPscsService.create(spec);
-            this.companyPscsService.create(spec);
+            companyProfileService.create(spec);
+            filingHistoryService.create(spec);
+            appointmentService.create(spec);
+            var authCode = companyAuthCodeService.create(spec);
+            companyMetricsService.create(spec);
+            companyPscStatementService.create(spec);
+
+            // Logic for creating PSCs checks the repository for existing PSCs
+            // before proceeding to create a PSC. This creates a default of 3 PSCs
+            // Personal, Legal and Corporate PSCs.
+            if (Jurisdiction.UNITED_KINGDOM.equals(spec.getJurisdiction())) {
+                companyPscsService.create(spec);
+            } else {
+                companyPscsService.create(spec);
+                companyPscsService.create(spec);
+                companyPscsService.create(spec);
+            }
+
+            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                this.companyRegistersService.create(spec);
+            }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
@@ -160,6 +179,12 @@ public class TestDataServiceImpl implements TestDataService {
         }
         try {
             this.companyMetricsService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+
+        try {
+            this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
@@ -318,6 +343,16 @@ public class TestDataServiceImpl implements TestDataService {
             throw ex;
         }
         return true;
+    }
+
+    @Override
+    public boolean deleteAppealsData(String companyNumber, String penaltyReference)
+            throws DataException {
+        try {
+            return appealsService.delete(companyNumber, penaltyReference);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting appeals data", ex);
+        }
     }
 
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
