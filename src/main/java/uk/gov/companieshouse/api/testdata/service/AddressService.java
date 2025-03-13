@@ -10,6 +10,7 @@ public interface AddressService {
      * @return the companies house office address in given {@code jurisdiction}
      */
     Address getAddress(Jurisdiction jurisdiction);
+    Address getOverseasAddress();
 
     /**
      * Returns the country of residence string for the given {@code jurisdiction}
