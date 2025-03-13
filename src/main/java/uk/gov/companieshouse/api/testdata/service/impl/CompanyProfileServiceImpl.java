@@ -99,12 +99,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
             overseasEntity.setVersion(3L);
             overseasEntity.setHasMortgages(false);
-            overseasEntity.setType(companyType != null ? companyType.getValue() : OVERSEAS_ENTITY_TYPE);
-            if (OVERSEAS_ENTITY_TYPE.equals(overseasEntity.getType())) {
-                overseasEntity.setCompanyStatus(COMPANY_STATUS_REGISTERED);
-            } else {
-                overseasEntity.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
-            }
+            String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
+            overseasEntity.setType(companyTypeValue);
+            setCompanyStatus(overseasEntity, companyStatus, companyTypeValue);
             overseasEntity.setHasSuperSecurePscs(hasSuperSecurePscs);
             overseasEntity.setHasCharges(false);
             overseasEntity.setHasInsolvencyHistory(false);
@@ -117,7 +114,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
             overseasEntity.setExternalRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
-            overseasEntity.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+            setCompanyName(overseasEntity, companyNumber, companyTypeValue);
             overseasEntity.setRegisteredOfficeIsInDispute(false);
             overseasEntity.setEtag(randomService.getEtag());
             overseasEntity.setSuperSecureManagingOfficerCount(0);
@@ -184,7 +181,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (hasSuperSecurePscs != null) {
             profile.setHasSuperSecurePscs(hasSuperSecurePscs);
         }
-        profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+        setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
 
         var confirmationStatement = profile.getConfirmationStatement();
@@ -204,7 +201,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
 
         profile.setRegisteredOfficeIsInDispute(false);
-        profile.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
+        setCompanyStatus(profile, companyStatus, companyTypeValue);
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
@@ -213,7 +210,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setCanFile(true);
         setPartialDataOptions(profile, jurisdiction, companyType);
         setSubType(profile, subType);
-        setCompanyStatusDetail(profile, companyStatusDetail);
+        setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
         return repository.save(profile);
     }
@@ -292,8 +289,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setCompanyStatusDetail(CompanyProfile profile, String companyStatusDetail) {
-        if (!Objects.isNull(companyStatusDetail)) {
+    private void setCompanyStatusDetail(CompanyProfile profile, String companyStatusDetail, String companyType) {
+        if (companyType.equals(CompanyType.UKEIG.getValue())) {
+            profile.setCompanyStatusDetail("converted-to-ukeig");
+        } else if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
+            profile.setCompanyStatusDetail("converted-to-uk-societas");
+        } else if (!Objects.isNull(companyStatusDetail)) {
             profile.setCompanyStatusDetail(companyStatusDetail);
         }
     }
@@ -308,6 +309,24 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private void checkAndSetCompanyRegisters(CompanySpec spec) {
         if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
             hasCompanyRegisters = true;
+        }
+    }
+
+    private void setCompanyStatus(CompanyProfile profile, String companyStatus, String companyType) {
+        if (CompanyType.NORTHERN_IRELAND.getValue().equals(companyType) || CompanyType.NORTHERN_IRELAND_OTHER.getValue().equals(companyType)) {
+            profile.setCompanyStatus("converted-closed");
+        } else if (CompanyType.REGISTERED_OVERSEAS_ENTITY.getValue().equals(companyType)) {
+            profile.setCompanyStatus(COMPANY_STATUS_REGISTERED);
+        } else {
+            profile.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
+        }
+    }
+
+    private void setCompanyName(CompanyProfile profile, String companyNumber, String companyType) {
+        if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
+            profile.setCompanyName("COMPANY " + companyNumber + " UK SOCIETAS");
+        } else {
+            profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
         }
     }
 

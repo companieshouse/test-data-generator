@@ -135,6 +135,9 @@ public enum Jurisdiction {
                 ENGLAND_WALES, "ZC",
                 SCOTLAND, "SZ"
         ));
+        registerPrefixes("united-kingdom-societas", Map.of(
+                UNITED_KINGDOM, "SE"
+        ));
     }
 
     private static void registerPrefixes(String companyType, Map<Jurisdiction, String> prefixes) {

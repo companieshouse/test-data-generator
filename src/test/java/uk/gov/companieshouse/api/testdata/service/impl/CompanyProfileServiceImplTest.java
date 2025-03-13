@@ -630,4 +630,41 @@ class CompanyProfileServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         assertFalse(companyProfileService.companyExists(COMPANY_NUMBER));
     }
+
+    @Test
+    void createCompanyWithNorthernIrelandType() {
+        spec.setCompanyNumber("12345678");
+        spec.setJurisdiction(Jurisdiction.NI);
+        spec.setCompanyType(CompanyType.NORTHERN_IRELAND);
+
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals("converted-closed", profile.getCompanyStatus());
+    }
+
+    @Test
+    void createCompanyWithNorthernIrelandOtherType() {
+        spec.setCompanyNumber("12345678");
+        spec.setJurisdiction(Jurisdiction.NI);
+        spec.setCompanyType(CompanyType.NORTHERN_IRELAND_OTHER);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals("converted-closed", profile.getCompanyStatus());
+    }
+
+    @Test
+    void createCompanyWithRegisteredOverseasEntityType() {
+        spec.setCompanyNumber("12345678");
+        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals(OVERSEAS_STATUS_REGISTERED, profile.getCompanyStatus());
+    }
+
+    @Test
+    void createCompanyWithOtherType() {
+        spec.setCompanyNumber("12345678");
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyType(CompanyType.LTD);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals("active", profile.getCompanyStatus());
+    }
 }
