@@ -356,7 +356,7 @@ class TestDataServiceImplTest {
     void createCompanyDataRollBack() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
-        final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix() + COMPANY_NUMBER;
+        final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
         DataException pscStatementException = new DataException("error");
         when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
