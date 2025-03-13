@@ -884,9 +884,14 @@ class TestDataServiceImplTest {
 
     @Test
     void createAcspMembersData() throws DataException {
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileSpec profileSpec = new AcspProfileSpec();
+        profileSpec.setAcspNumber("acspNumber");
+        profileSpec.setStatus("active");
+        profileSpec.setType("limited-company");
+
+        AcspProfileData acspProfileData = new AcspProfileData(profileSpec.getAcspNumber());
         AcspMembersData expectedMembersData =
-                new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+                new AcspMembersData("memberId", profileSpec.getAcspNumber(), "userId", "active", "role");
 
         AcspMembersData result = createAcspMembersDataHelper("userId", acspProfileData, expectedMembersData);
 
