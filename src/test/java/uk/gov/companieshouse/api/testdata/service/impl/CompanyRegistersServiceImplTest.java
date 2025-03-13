@@ -51,6 +51,7 @@ class CompanyRegistersServiceImplTest {
         setRegister("directors");
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
+        assertEquals("12345678", createdRegisters.getId());
         assertEquals("12345678", createdRegisters.getCompanyNumber());
         assertEquals("dummy-etag", createdRegisters.getEtag());
         assertEquals("/company/12345678/registers", createdRegisters.getSelfLink());
