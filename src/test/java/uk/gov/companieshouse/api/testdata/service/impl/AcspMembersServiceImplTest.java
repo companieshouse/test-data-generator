@@ -100,7 +100,7 @@ class AcspMembersServiceImplTest {
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
-        assertEquals("member", result.getUserRole());
+        assertEquals("owner", result.getUserRole());
 
         ArgumentCaptor<AcspMembers> captor = ArgumentCaptor.forClass(AcspMembers.class);
         verify(repository).save(captor.capture());
@@ -110,7 +110,7 @@ class AcspMembersServiceImplTest {
         assertEquals("acspNumber", captured.getAcspNumber());
         assertEquals("userId", captured.getUserId());
         assertEquals("active", captured.getStatus());
-        assertEquals("member", captured.getUserRole());
+        assertEquals("owner", captured.getUserRole());
         assertEquals(createdDate, captured.getCreatedAt());
         assertEquals(createdDate, captured.getAddedAt());
         assertEquals(0L, captured.getVersion());

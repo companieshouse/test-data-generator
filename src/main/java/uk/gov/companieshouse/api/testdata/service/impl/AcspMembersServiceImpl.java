@@ -34,7 +34,7 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
         acspMembers.setAcspNumber(acspMembersSpec.getAcspNumber());
         acspMembers.setUserId(acspMembersSpec.getUserId());
         acspMembers.setUserRole(Objects.requireNonNullElse(acspMembersSpec.getUserRole(),
-                "member"));
+                "owner"));
         acspMembers.setStatus(Objects.requireNonNullElse(acspMembersSpec.getStatus(),
                 "active"));
         acspMembers.setCreatedAt(currentDate);

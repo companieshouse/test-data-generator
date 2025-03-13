@@ -13,7 +13,7 @@ public class AcspMembersSpec {
     private String userId;
 
     @JsonProperty("status")
-    @Pattern(regexp = "active|suspended|ceased", message = "Invalid acsp member status")
+    @Pattern(regexp = "active|removed", message = "Invalid acsp member status")
     private String status;
 
     @JsonProperty("user_role")

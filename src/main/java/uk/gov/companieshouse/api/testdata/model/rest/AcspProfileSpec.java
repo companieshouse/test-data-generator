@@ -9,6 +9,9 @@ public class AcspProfileSpec {
     @JsonProperty
     private String type;
 
+    @JsonProperty("acsp_number")
+    private String acspNumber;
+
     public String getStatus() {
         return status;
     }
@@ -23,5 +26,13 @@ public class AcspProfileSpec {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getAcspNumber() {
+        return acspNumber;
+    }
+
+    public void setAcspNumber(String acspNumber) {
+        this.acspNumber = acspNumber;
     }
 }
