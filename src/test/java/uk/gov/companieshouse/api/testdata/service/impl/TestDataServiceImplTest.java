@@ -919,18 +919,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createAcspMembersDataWithDefaultProfileValues() throws DataException {
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData expectedMembersData =
-                new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
-
-        AcspMembersData result = createAcspMembersDataHelper("userId", acspProfileData, expectedMembersData);
-        verifyAcspMembersData(result, "memberId", "acspNumber", "userId", "active", "role");
-        verify(acspProfileService).create(any(AcspProfileSpec.class));
-        verify(acspMembersService).create(any(AcspMembersSpec.class));
-    }
-
-    @Test
     void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");

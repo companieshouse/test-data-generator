@@ -277,9 +277,7 @@ public class TestDataServiceImpl implements TestDataService {
 
         var acspProfileSpec = new AcspProfileSpec();
         if (spec.getAcspProfile() != null) {
-            acspProfileSpec.setStatus(spec.getAcspProfile().getStatus());
-            acspProfileSpec.setType(spec.getAcspProfile().getType());
-            acspProfileSpec.setAmlDetails(spec.getAcspProfile().getAmlDetails());
+            acspProfileSpec = spec.getAcspProfile();
         }
 
         try {
