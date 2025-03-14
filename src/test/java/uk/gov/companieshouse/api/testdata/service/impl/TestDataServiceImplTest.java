@@ -889,6 +889,7 @@ class TestDataServiceImplTest {
 
         AcspMembersData result = createAcspMembersDataHelper("userId", acspProfileData, expectedMembersData);
 
+        verifyAcspMembersData(result, expectedMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), expectedMembersData.getUserId(), expectedMembersData.getStatus(), expectedMembersData.getUserRole());
         verify(acspMembersService).create(any(AcspMembersSpec.class));
         verify(acspProfileService).create(argThat(profile -> profile.getAmlDetails() == null));
     }
@@ -944,24 +945,13 @@ class TestDataServiceImplTest {
 
         AcspMembersData result = testDataService.createAcspMembersData(spec);
 
-        assertNotNull(result);
-        assertEquals(acspProfileData.getAcspNumber(), result.getAcspNumber());
-        assertEquals(acspMembersData.getAcspMemberId(), result.getAcspMemberId());
-        assertEquals(acspMembersData.getUserId(), result.getUserId());
-        assertEquals(acspMembersData.getStatus(), result.getStatus());
-        assertEquals(acspMembersData.getUserRole(), result.getUserRole());
+        verifyAcspMembersData(result, acspMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
 
-        verify(acspProfileService).create(argThat(profile ->
-                acspType.equals(profile.getType()) && acspStatus.equals(profile.getStatus())
-                        && profile.getAmlDetails() != null && !profile.getAmlDetails().isEmpty()
-                        && supervisoryBody.equals(
-                                profile.getAmlDetails().getFirst().getSupervisoryBody())
-                        && membershipDetails.equals(
-                                profile.getAmlDetails().getFirst().getMembershipDetails())
-        ));
+        verify(acspProfileService).create(acspProfile);
 
         verify(acspMembersService).create(argThat(membersSpec ->
                 acspMembersData.getUserId().equals(membersSpec.getUserId())
+                && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
@@ -980,12 +970,7 @@ class TestDataServiceImplTest {
 
         AcspMembersData result = testDataService.createAcspMembersData(spec);
 
-        assertNotNull(result);
-        assertEquals(acspProfileData.getAcspNumber(), result.getAcspNumber());
-        assertEquals(acspMembersData.getAcspMemberId(), result.getAcspMemberId());
-        assertEquals(acspMembersData.getUserId(), result.getUserId());
-        assertEquals(acspMembersData.getStatus(), result.getStatus());
-        assertEquals(acspMembersData.getUserRole(), result.getUserRole());
+        verifyAcspMembersData(result, acspMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
                 profile.getStatus() == null
