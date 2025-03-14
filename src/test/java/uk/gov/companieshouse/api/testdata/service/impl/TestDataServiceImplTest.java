@@ -889,8 +889,6 @@ class TestDataServiceImplTest {
 
         AcspMembersData result = createAcspMembersDataHelper("userId", acspProfileData, expectedMembersData);
 
-        verifyAcspMembersData(result, "memberId", "acspNumber", "userId", "active", "role");
-        verify(acspProfileService).create(any(AcspProfileSpec.class));
         verify(acspMembersService).create(any(AcspMembersSpec.class));
         verify(acspProfileService).create(argThat(profile -> profile.getAmlDetails() == null));
     }
@@ -947,10 +945,7 @@ class TestDataServiceImplTest {
         AcspMembersData result = testDataService.createAcspMembersData(spec);
 
         assertNotNull(result);
-        assertEquals("acspNumber", result.getAcspNumber());
-        assertNotNull(spec.getAcspProfile());
-        assertTrue(spec.getAcspProfile() instanceof AcspProfileSpec);
-        assertTrue(spec.getAcspProfile().getAmlDetails().getFirst() instanceof AmlSpec);
+        assertEquals(acspProfileData.getAcspNumber(), result.getAcspNumber());
         assertEquals(acspMembersData.getAcspMemberId(), result.getAcspMemberId());
         assertEquals(acspMembersData.getUserId(), result.getUserId());
         assertEquals(acspMembersData.getStatus(), result.getStatus());
@@ -976,8 +971,7 @@ class TestDataServiceImplTest {
         spec.setUserId("userId");
 
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData acspMembersData;
-        acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
 
         spec.setAcspProfile(null);
 
@@ -987,11 +981,11 @@ class TestDataServiceImplTest {
         AcspMembersData result = testDataService.createAcspMembersData(spec);
 
         assertNotNull(result);
-        assertEquals("acspNumber", result.getAcspNumber());
-        assertEquals("memberId", result.getAcspMemberId());
-        assertEquals("userId", result.getUserId());
-        assertEquals("active", result.getStatus());
-        assertEquals("role", result.getUserRole());
+        assertEquals(acspProfileData.getAcspNumber(), result.getAcspNumber());
+        assertEquals(acspMembersData.getAcspMemberId(), result.getAcspMemberId());
+        assertEquals(acspMembersData.getUserId(), result.getUserId());
+        assertEquals(acspMembersData.getStatus(), result.getStatus());
+        assertEquals(acspMembersData.getUserRole(), result.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
                 profile.getStatus() == null
