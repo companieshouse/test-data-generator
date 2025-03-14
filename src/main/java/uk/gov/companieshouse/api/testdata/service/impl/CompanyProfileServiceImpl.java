@@ -4,10 +4,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,10 +45,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String LEGAL_FORM = "Plc";
     private static final String ORIGINATING_REGISTRY_NAME = "Barbados Financial Services";
     private static final String UPDATED_TYPE = "psc_delta";
-    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY = "full-data-available-from-financial-conduct-authority";
-    public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY = "full-data-available-from-the-company";
-    public static final String FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY = "full-data-available-from-department-of-the-economy";
-    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY
+            = "full-data-available-from-financial-conduct-authority";
+    public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY
+            = "full-data-available-from-the-company";
+    public static final String FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY
+            = "full-data-available-from-department-of-the-economy";
+    public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER
+            = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
 
     @Autowired
     private RandomService randomService;
@@ -94,8 +99,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
             overseasEntity.setVersion(3L);
             overseasEntity.setHasMortgages(false);
-            overseasEntity.setCompanyStatus(COMPANY_STATUS_REGISTERED);
-            overseasEntity.setType(OVERSEAS_ENTITY_TYPE);
+            String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
+            overseasEntity.setType(companyTypeValue);
+            setCompanyStatus(overseasEntity, companyStatus, companyTypeValue);
             overseasEntity.setHasSuperSecurePscs(hasSuperSecurePscs);
             overseasEntity.setHasCharges(false);
             overseasEntity.setHasInsolvencyHistory(false);
@@ -108,7 +114,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
             overseasEntity.setExternalRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
-            overseasEntity.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+            setCompanyName(overseasEntity, companyNumber, companyTypeValue);
             overseasEntity.setRegisteredOfficeIsInDispute(false);
             overseasEntity.setEtag(randomService.getEtag());
             overseasEntity.setSuperSecureManagingOfficerCount(0);
@@ -151,12 +157,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);
-        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-            hasCompanyRegisters = true;
-        }
+        checkAndSetCompanyRegisters(spec);
         profile.setCompanyNumber(companyNumber);
-        profile.setLinks(createLinks(companyNumber));
-
+        String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
+        String nonJurisdictionType = (jurisdiction != null)
+                ? checkNonJurisdictionTypes(jurisdiction, companyTypeValue) : "";
+        profile.setLinks(nonJurisdictionType.isEmpty()
+                ? createLinkForSelf(companyNumber) : createLinks(companyNumber));
         CompanyProfile.Accounts accounts = profile.getAccounts();
         accounts.setNextDue(dateInOneYearNineMonths);
         accounts.setPeriodStart(dateNow);
@@ -168,13 +175,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setAccountingReferenceDateMonth(String.valueOf(accountingReferenceDate.getMonthValue()));
 
         profile.setDateOfCreation(dateOneYearAgo);
-        profile.setType(companyType != null ? companyType.getValue() : "ltd");
+        profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         if (hasSuperSecurePscs != null) {
             profile.setHasSuperSecurePscs(hasSuperSecurePscs);
         }
-        profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+        setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
 
         var confirmationStatement = profile.getConfirmationStatement();
@@ -194,28 +201,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
 
         profile.setRegisteredOfficeIsInDispute(false);
-        profile.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
+        setCompanyStatus(profile, companyStatus, companyTypeValue);
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
-        profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
-        profile.setJurisdiction(jurisdiction.toString());
+        setJurisdictionAndAddress(profile, jurisdiction, nonJurisdictionType);
         profile.setHasCharges(false);
         profile.setCanFile(true);
-
-        Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
-        if (partialDataOptions.containsKey(companyType)) {
-            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
-        }
-
-        if (subType != null) {
-            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
-            profile.setSubtype(subType);
-        }
-
-        if (!Objects.isNull(companyStatusDetail)) {
-            profile.setCompanyStatusDetail(companyStatusDetail);
-        }
+        setPartialDataOptions(profile, jurisdiction, companyType);
+        setSubType(profile, subType);
+        setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
         return repository.save(profile);
     }
@@ -226,7 +221,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
         partialDataOptions.put(CompanyType.ASSURANCE_COMPANY, FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
         partialDataOptions.put(CompanyType.ROYAL_CHARTER, FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
-        if (companyJurisdiction.equals(Jurisdiction.NI)) {
+        partialDataOptions.put(CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL, FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
+        if (Jurisdiction.NI.equals(companyJurisdiction)) {
             partialDataOptions.put(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY,
                     FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY);
         } else {
@@ -259,6 +255,79 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             links.setRegisters(LINK_STEM + companyNumber + REGISTERS_STEM);
         }
         return links;
+    }
+
+    private Links createLinkForSelf(String companyNumber) {
+        var links = new Links();
+        links.setSelf(LINK_STEM + companyNumber);
+        return links;
+    }
+
+    private String checkNonJurisdictionTypes(Jurisdiction jurisdiction, String companyType) {
+        Set<String> noJurisdictionTypes = Set.of(
+                CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue(),
+                CompanyType.ROYAL_CHARTER.getValue(),
+                CompanyType.UK_ESTABLISHMENT.getValue()
+        );
+        if (jurisdiction == null) {
+            return "";
+        }
+        return (companyType != null && noJurisdictionTypes.contains(companyType)) ? "" : jurisdiction.toString();
+    }
+
+    private void setPartialDataOptions(CompanyProfile profile, Jurisdiction jurisdiction, CompanyType companyType) {
+        Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
+        if (partialDataOptions.containsKey(companyType)) {
+            profile.setPartialDataAvailable(partialDataOptions.get(companyType));
+        }
+    }
+
+    private void setSubType(CompanyProfile profile, String subType) {
+        if (subType != null) {
+            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
+            profile.setSubtype(subType);
+        }
+    }
+
+    private void setCompanyStatusDetail(CompanyProfile profile, String companyStatusDetail, String companyType) {
+        if (companyType.equals(CompanyType.UKEIG.getValue())) {
+            profile.setCompanyStatusDetail("converted-to-ukeig");
+        } else if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
+            profile.setCompanyStatusDetail("converted-to-uk-societas");
+        } else if (!Objects.isNull(companyStatusDetail)) {
+            profile.setCompanyStatusDetail(companyStatusDetail);
+        }
+    }
+
+    private void setJurisdictionAndAddress(CompanyProfile profile, Jurisdiction jurisdiction, String nonJurisdictionType) {
+        if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
+            profile.setJurisdiction(jurisdiction.toString());
+            profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+        }
+    }
+
+    private void checkAndSetCompanyRegisters(CompanySpec spec) {
+        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+            hasCompanyRegisters = true;
+        }
+    }
+
+    private void setCompanyStatus(CompanyProfile profile, String companyStatus, String companyType) {
+        if (CompanyType.NORTHERN_IRELAND.getValue().equals(companyType) || CompanyType.NORTHERN_IRELAND_OTHER.getValue().equals(companyType)) {
+            profile.setCompanyStatus("converted-closed");
+        } else if (CompanyType.REGISTERED_OVERSEAS_ENTITY.getValue().equals(companyType)) {
+            profile.setCompanyStatus(COMPANY_STATUS_REGISTERED);
+        } else {
+            profile.setCompanyStatus(Objects.requireNonNullElse(companyStatus, "active"));
+        }
+    }
+
+    private void setCompanyName(CompanyProfile profile, String companyNumber, String companyType) {
+        if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
+            profile.setCompanyName("COMPANY " + companyNumber + " UK SOCIETAS");
+        } else {
+            profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+        }
     }
 
 }
