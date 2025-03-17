@@ -2,6 +2,8 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class AcspProfileSpec {
     @JsonProperty
     private String status;
@@ -9,8 +11,8 @@ public class AcspProfileSpec {
     @JsonProperty
     private String type;
 
-    @JsonProperty("acsp_number")
-    private String acspNumber;
+    @JsonProperty("aml_details")
+    private List<AmlSpec> amlDetails;
 
     public String getStatus() {
         return status;
@@ -28,11 +30,11 @@ public class AcspProfileSpec {
         this.type = type;
     }
 
-    public String getAcspNumber() {
-        return acspNumber;
+    public List<AmlSpec> getAmlDetails() {
+        return amlDetails;
     }
 
-    public void setAcspNumber(String acspNumber) {
-        this.acspNumber = acspNumber;
+    public void setAmlDetails(List<AmlSpec> amlDetails) {
+        this.amlDetails = amlDetails;
     }
 }
