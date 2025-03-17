@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,41 +20,29 @@ class AddressServiceImplTest {
     @Test
     void getAddressForJurisdictionEnglandWales() {
         Address address = addressService.getAddress(Jurisdiction.ENGLAND_WALES);
-        assertEquals("Companies House", address.getAddressLine1());
-        assertEquals("Crownway", address.getAddressLine2());
-        assertEquals("United Kingdom", address.getCountry());
-        assertEquals("Cardiff", address.getLocality());
-        assertEquals("CF14 3UZ", address.getPostalCode());
+        assertAddress(address, "Companies House", "Crownway",
+                "United Kingdom", "Cardiff", "CF14 3UZ");
     }
 
     @Test
     void getAddressForJurisdictionScotland() {
         Address address = addressService.getAddress(Jurisdiction.SCOTLAND);
-        assertEquals("4th Floor Edinburgh Quay 2", address.getAddressLine1());
-        assertEquals("139 Fountain Bridge", address.getAddressLine2());
-        assertEquals("United Kingdom", address.getCountry());
-        assertEquals("Edinburgh", address.getLocality());
-        assertEquals("EH3 9FF", address.getPostalCode());
+        assertAddress(address, "4th Floor Edinburgh Quay 2", "139 Fountain Bridge",
+                "United Kingdom", "Edinburgh", "EH3 9FF");
     }
 
     @Test
     void getAddressForJurisdictionNI() {
         Address address = addressService.getAddress(Jurisdiction.NI);
-        assertEquals("Second Floor The Linenhall", address.getAddressLine1());
-        assertEquals("32 - 38 Linenhall Street", address.getAddressLine2());
-        assertEquals("United Kingdom", address.getCountry());
-        assertEquals("Belfast", address.getLocality());
-        assertEquals("BT2 8BG", address.getPostalCode());
+        assertAddress(address, "Second Floor The Linenhall", "32 - 38 Linenhall Street",
+                "United Kingdom", "Belfast", "BT2 8BG");
     }
 
     @Test
     void getAddressForJurisdictionUnitedKingdom() {
         Address address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
-        assertEquals("Gordon Cummins Hwy", address.getAddressLine1());
-        assertEquals("Grantley Adams International Airport", address.getAddressLine2());
-        assertEquals("Barbados", address.getCountry());
-        assertEquals("Christ Church", address.getLocality());
-        assertEquals("123125", address.getPostalCode());
+        assertAddress(address, "Gordon Cummins Hwy", "Grantley Adams International Airport",
+                "Barbados", "Christ Church", "123125");
     }
 
     @Test
@@ -91,29 +76,22 @@ class AddressServiceImplTest {
     @Test
     void getAddressForJurisdictionEngland() {
         Address address = addressService.getAddress(Jurisdiction.ENGLAND);
-        assertEquals("Companies House,4th Floor, The Linen Hall", address.getAddressLine1());
-        assertEquals("162-168 Regent Street", address.getAddressLine2());
-        assertEquals("United Kingdom", address.getCountry());
-        assertEquals("London", address.getLocality());
-        assertEquals("W1B 5TF", address.getPostalCode());
+        assertAddress(address, "Companies House,4th Floor, The Linen Hall",
+                "162-168 Regent Street", "United Kingdom", "London", "W1B 5TF");
     }
 
     @Test
     void getAddressForJurisdictionEuropeanUnion() {
         Address address = addressService.getAddress(Jurisdiction.EUROPEAN_UNION);
-        assertEquals("Schiphol Boulevard Tower 403 Tower C-4", address.getAddressLine1());
-        assertEquals("1118bk Schiphol", address.getAddressLine2());
-        assertEquals("Amsterdam", address.getLocality());
-        assertEquals("Netherlands", address.getCountry());
+        assertAddress(address, "Schiphol Boulevard Tower 403 Tower C-4",
+                "1118bk Schiphol", "Netherlands", "Amsterdam", "123123");
     }
 
     @Test
     void getAddressForJurisdictionNonEu() {
         Address address = addressService.getAddress(Jurisdiction.NON_EU);
-        assertEquals("Edificio Salduba Tercer Piso", address.getAddressLine1());
-        assertEquals("Calle 53 Este", address.getAddressLine2());
-        assertEquals("Marbella", address.getLocality());
-        assertEquals("Panama", address.getCountry());
+        assertAddress(address, "Edificio Salduba Tercer Piso", "Calle 53 Este",
+                "Panama", "Marbella", "123124");
     }
 
     @Test
@@ -135,5 +113,14 @@ class AddressServiceImplTest {
         String addressServiceCountryOfResidence
                 = addressService.getCountryOfResidence(Jurisdiction.NON_EU);
         assertEquals("Panama", addressServiceCountryOfResidence);
+    }
+
+    private void assertAddress(Address address, String addressLine1, String addressLine2,
+                               String country, String locality, String postalCode) {
+        assertEquals(addressLine1, address.getAddressLine1());
+        assertEquals(addressLine2, address.getAddressLine2());
+        assertEquals(country, address.getCountry());
+        assertEquals(locality, address.getLocality());
+        assertEquals(postalCode, address.getPostalCode());
     }
 }

@@ -179,8 +179,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithoutCompanyStatusAndWithScotland() {
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.SCOTLAND,CompanyType.LTD);
         CompanyProfile profile = createAndCapture(spec);
         assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE,
                 spec.getJurisdiction().toString(), spec.getCompanyType().getValue(), false);
@@ -197,8 +196,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createPlcCompany() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_PLC);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.PLC);
         CompanyProfile profile = createAndCapture(spec);
         assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE,
                 spec.getJurisdiction().toString(), spec.getCompanyType().getValue(), false);
@@ -224,8 +222,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithSubType() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setSubType("community-interest-company");
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("community-interest-company", profile.getSubtype());
@@ -234,8 +231,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithoutSubType() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setSubType(null);
         CompanyProfile profile = createAndCapture(spec);
         assertNull(profile.getSubtype());
@@ -244,8 +240,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithNonCicSubType() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setSubType("private-fund-limited-partnership");
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("private-fund-limited-partnership", profile.getSubtype());
@@ -275,8 +270,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithAccountsDueSoon() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setAccountsDueStatus("due-soon");
 
         Address mockRegisteredAddress = new Address("", "", "", "", "", "");
@@ -298,10 +292,8 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithAccountsOverdue() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setAccountsDueStatus("overdue");
-
         Address mockRegisteredAddress = new Address("", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -321,8 +313,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithAccountsDueStatusNull() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setAccountsDueStatus(null);
 
         Address mockRegisteredAddress = new Address("", "", "", "", "", "");
@@ -384,24 +375,18 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithCompanyStatusDetail() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setCompanyStatusDetail("status-detail");
-
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
-
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertEquals("status-detail", profile.getCompanyStatusDetail());
     }
 
     @Test
     void createCompanyWithoutCompanyStatusDetail() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setCompanyStatusDetail(null);
-
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
-
         CompanyProfile profile = companyProfileCaptor.getValue();
         assertNull(profile.getCompanyStatusDetail());
     }
@@ -479,8 +464,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithEmptyJurisdiction() {
-        spec.setJurisdiction(null);
-        spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
+        setCompanyJurisdictionAndType(null,CompanyType.UK_ESTABLISHMENT);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         companyProfileService.create(spec);
@@ -497,8 +481,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithJurisdictionAndCompanyType() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(COMPANY_TYPE_LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,COMPANY_TYPE_LTD);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         assertNotNull(profile.getLinks().getSelf());
@@ -509,8 +492,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithJurisdictionAndNoCompanyType() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(null);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,null);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         assertNotNull(profile.getLinks().getSelf());
@@ -521,8 +503,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithNoJurisdictionAndNoCompanyType() {
-        spec.setJurisdiction(null);
-        spec.setCompanyType(null);
+        setCompanyJurisdictionAndType(null,null);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         companyProfileService.create(spec);
@@ -538,40 +519,35 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void testGetCompanyNumberPrefixEnglandWales() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(CompanyType.LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("", prefix);
     }
 
     @Test
     void testGetCompanyNumberPrefixScotland() {
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
-        spec.setCompanyType(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
+        setCompanyJurisdictionAndType(Jurisdiction.SCOTLAND,CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("SP", prefix);
     }
 
     @Test
     void testGetCompanyNumberPrefixNorthernIreland() {
-        spec.setJurisdiction(Jurisdiction.NI);
-        spec.setCompanyType(CompanyType.LLP);
+        setCompanyJurisdictionAndType(Jurisdiction.NI,CompanyType.LLP);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("NC", prefix);
     }
 
     @Test
     void testGetCompanyNumberPrefixUnitedKingdom() {
-        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
-        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
+        setCompanyJurisdictionAndType(Jurisdiction.UNITED_KINGDOM,CompanyType.OVERSEA_COMPANY);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("FC", prefix);
     }
 
     @Test
     void testGetCompanyNumberPrefixSpecialTypes() {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(CompanyType.ROYAL_CHARTER);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.ROYAL_CHARTER);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("RC", prefix);
 
@@ -586,15 +562,13 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void testGetCompanyNumberPrefixNoCompanyType() {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,null);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("", prefix);
     }
 
     @Test
     void testGetCompanyNumberPrefixNoJurisdiction() {
-        CompanySpec spec = new CompanySpec();
         spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
         String prefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
         assertEquals("BR", prefix);
@@ -633,38 +607,34 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void createCompanyWithNorthernIrelandType() {
-        spec.setCompanyNumber("12345678");
-        spec.setJurisdiction(Jurisdiction.NI);
-        spec.setCompanyType(CompanyType.NORTHERN_IRELAND);
-
+        setCompanyJurisdictionAndType(Jurisdiction.NI,CompanyType.NORTHERN_IRELAND);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("converted-closed", profile.getCompanyStatus());
     }
 
     @Test
     void createCompanyWithNorthernIrelandOtherType() {
-        spec.setCompanyNumber("12345678");
-        spec.setJurisdiction(Jurisdiction.NI);
-        spec.setCompanyType(CompanyType.NORTHERN_IRELAND_OTHER);
+        setCompanyJurisdictionAndType(Jurisdiction.NI,CompanyType.NORTHERN_IRELAND_OTHER);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("converted-closed", profile.getCompanyStatus());
     }
 
     @Test
     void createCompanyWithRegisteredOverseasEntityType() {
-        spec.setCompanyNumber("12345678");
-        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
-        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        setCompanyJurisdictionAndType(Jurisdiction.UNITED_KINGDOM,CompanyType.REGISTERED_OVERSEAS_ENTITY);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals(OVERSEAS_STATUS_REGISTERED, profile.getCompanyStatus());
     }
 
     @Test
     void createCompanyWithOtherType() {
-        spec.setCompanyNumber("12345678");
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        spec.setCompanyType(CompanyType.LTD);
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("active", profile.getCompanyStatus());
+    }
+
+    private void setCompanyJurisdictionAndType(Jurisdiction jurisdiction, CompanyType companyType) {
+        spec.setJurisdiction(jurisdiction);
+        spec.setCompanyType(companyType);
     }
 }

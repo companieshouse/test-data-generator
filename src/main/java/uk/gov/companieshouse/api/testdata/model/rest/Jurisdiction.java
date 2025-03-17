@@ -9,9 +9,9 @@ import java.util.Map;
 public enum Jurisdiction {
 
     ENGLAND_WALES("england-wales", ""),
-    SCOTLAND("scotland", "SC"),
-    NI("northern-ireland", "NI"),
-    UNITED_KINGDOM("united-kingdom", "OE"),
+    SCOTLAND("scotland", Prefix.SC.value),
+    NI("northern-ireland", Prefix.NI.value),
+    UNITED_KINGDOM("united-kingdom", Prefix.OE.value),
     WALES("wales", ""),
     ENGLAND("england", ""),
     EUROPEAN_UNION("european-union", ""),
@@ -21,7 +21,8 @@ public enum Jurisdiction {
     private final String jurisdictionString;
     public final String companyNumberPrefix;
 
-    private static final Map<String, Map<Jurisdiction, String>> COMPANY_PREFIX_MAP = new HashMap<>();
+    private static final Map<String, Map<Jurisdiction, String>> COMPANY_PREFIX_MAP
+            = new HashMap<>();
 
     Jurisdiction(String jurisdictionString, String companyNumberPrefix) {
         this.jurisdictionString = jurisdictionString;
@@ -43,105 +44,119 @@ public enum Jurisdiction {
         }
         String companyType = spec.getCompanyType() != null ? spec.getCompanyType().getValue() : "ltd";
         var jurisdiction = spec.getJurisdiction() != null ? spec.getJurisdiction() : ENGLAND_WALES;
-        if ("registered-society-non-jurisdictional".equals(companyType)) {
-            return "RS";
+        if (CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue().equals(companyType)) {
+            return Prefix.RS.value;
         }
-        if ("royal-charter".equals(companyType)) {
-            return "RC";
+        if (CompanyType.ROYAL_CHARTER.getValue().equals(companyType)) {
+            return Prefix.RC.value;
         }
-        if ("uk-establishment".equals(companyType)) {
-            return "BR";
+        if (CompanyType.UK_ESTABLISHMENT.getValue().equals(companyType)) {
+            return Prefix.BR.value;
         }
         return COMPANY_PREFIX_MAP.getOrDefault(companyType, new EnumMap<>(Jurisdiction.class))
                 .getOrDefault(jurisdiction, this.companyNumberPrefix);
     }
 
     private static void registerCompanyPrefixes() {
-        registerPrefixes("assurance-company", Map.of(
-                ENGLAND_WALES, "AC",
-                SCOTLAND, "SA"
+        registerPrefixes(CompanyType.ASSURANCE_COMPANY, Map.of(
+                ENGLAND_WALES, Prefix.AC.value,
+                SCOTLAND, Prefix.SA.value
         ));
-        registerPrefixes("charitable-incorporated-organisation", Map.of(
-                ENGLAND_WALES, "CE"
+        registerPrefixes(CompanyType.CHARITABLE_INCORPORATED_ORGANISATION, Map.of(
+                ENGLAND_WALES, Prefix.CE.value
         ));
-        registerPrefixes("eeig", Map.of(
-                ENGLAND_WALES, "GE"
+        registerPrefixes(CompanyType.EEIG, Map.of(
+                ENGLAND_WALES, Prefix.GE.value
         ));
-        registerPrefixes("eeig-establishment", Map.of(
-                ENGLAND_WALES, "GE"
+        registerPrefixes(CompanyType.EEIG_ESTABLISHMENT, Map.of(
+                ENGLAND_WALES, Prefix.GE.value
         ));
-        registerPrefixes("ukeig", Map.of(
-                ENGLAND_WALES, "GE"
+        registerPrefixes(CompanyType.UKEIG, Map.of(
+                ENGLAND_WALES, Prefix.GE.value
         ));
-        registerPrefixes("european-public-limited-liability-company-se", Map.of(
-                UNITED_KINGDOM, "SE"
+        registerPrefixes(CompanyType.EUROPEAN_PUBLIC_LIMITED_LIABILITY_COMPANY_SE, Map.of(
+                UNITED_KINGDOM, Prefix.SE.value
         ));
-        registerPrefixes("further-education-or-sixth-form-college-corporation", Map.of(
-                ENGLAND_WALES, "FE"
+        registerPrefixes(CompanyType.FURTHER_EDUCATION_OR_SIXTH_FORM_COLLEGE_CORPORATION, Map.of(
+                ENGLAND_WALES, Prefix.FE.value
         ));
-        registerPrefixes("icvc-securities", Map.of(
-                ENGLAND_WALES, "IC",
-                SCOTLAND, "SI"
+        registerPrefixes(CompanyType.ICVC_SECURITIES, Map.of(
+                ENGLAND_WALES, Prefix.IC.value,
+                SCOTLAND, Prefix.SI.value
         ));
-        registerPrefixes("icvc-umbrella", Map.of(
-                ENGLAND_WALES, "IC",
-                SCOTLAND, "SI"
+        registerPrefixes(CompanyType.ICVC_UMBRELLA, Map.of(
+                ENGLAND_WALES, Prefix.IC.value,
+                SCOTLAND, Prefix.SI.value
         ));
-        registerPrefixes("icvc-warrant", Map.of(
-                ENGLAND_WALES, "IC",
-                SCOTLAND, "SI"
+        registerPrefixes(CompanyType.ICVC_WARRANT, Map.of(
+                ENGLAND_WALES, Prefix.IC.value,
+                SCOTLAND, Prefix.SI.value
         ));
-        registerPrefixes("investment-company-with-variable-capital", Map.of(
-                ENGLAND_WALES, "IC",
-                SCOTLAND, "SI"
+        registerPrefixes(CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL, Map.of(
+                ENGLAND_WALES, Prefix.IC.value,
+                SCOTLAND, Prefix.SI.value
         ));
-        registerPrefixes("industrial-and-provident-society", Map.of(
-                ENGLAND_WALES, "IP",
-                SCOTLAND, "SP",
-                NI, "NP"
+        registerPrefixes(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY, Map.of(
+                ENGLAND_WALES, Prefix.IP.value,
+                SCOTLAND, Prefix.SP.value,
+                NI, Prefix.NP.value
         ));
-        registerPrefixes("limited-partnership", Map.of(
-                ENGLAND_WALES, "LP",
-                SCOTLAND, "SL",
-                NI, "NL"
+        registerPrefixes(CompanyType.LIMITED_PARTNERSHIP, Map.of(
+                ENGLAND_WALES, Prefix.LP.value,
+                SCOTLAND, Prefix.SL.value,
+                NI, Prefix.NL.value
         ));
-        registerPrefixes("llp", Map.of(
-                ENGLAND_WALES, "OC",
-                SCOTLAND, "SO",
-                NI, "NC"
+        registerPrefixes(CompanyType.LLP, Map.of(
+                ENGLAND_WALES, Prefix.OC.value,
+                SCOTLAND, Prefix.SO.value,
+                NI, Prefix.NC.value
         ));
-        registerPrefixes("northern-ireland", Map.of(
-                NI, "NI"
+        registerPrefixes(CompanyType.NORTHERN_IRELAND, Map.of(
+                NI, Prefix.NI.value
         ));
-        registerPrefixes("northern-ireland-other", Map.of(
-                NI, "OC"
+        registerPrefixes(CompanyType.NORTHERN_IRELAND_OTHER, Map.of(
+                NI, Prefix.OC.value
         ));
-        registerPrefixes("oversea-company", Map.of(
-                UNITED_KINGDOM, "FC"
+        registerPrefixes(CompanyType.OVERSEA_COMPANY, Map.of(
+                UNITED_KINGDOM, Prefix.FC.value
         ));
-        registerPrefixes("protected-cell-company", Map.of(
-                ENGLAND_WALES, "PC"
+        registerPrefixes(CompanyType.PROTECTED_CELL_COMPANY, Map.of(
+                ENGLAND_WALES, Prefix.PC.value
         ));
-        registerPrefixes("registered-overseas-entity", Map.of(
-                UNITED_KINGDOM, "OE"
+        registerPrefixes(CompanyType.REGISTERED_OVERSEAS_ENTITY, Map.of(
+                UNITED_KINGDOM, Prefix.OE.value
         ));
-        registerPrefixes("scottish-charitable-incorporated-organisation", Map.of(
-                SCOTLAND, "CS"
+        registerPrefixes(CompanyType.SCOTTISH_CHARITABLE_INCORPORATED_ORGANISATION, Map.of(
+                SCOTLAND, Prefix.CS.value
         ));
-        registerPrefixes("scottish-partnership", Map.of(
-                SCOTLAND, "SG"
+        registerPrefixes(CompanyType.SCOTTISH_PARTNERSHIP, Map.of(
+                SCOTLAND, Prefix.SG.value
         ));
-        registerPrefixes("unregistered-company", Map.of(
-                ENGLAND_WALES, "ZC",
-                SCOTLAND, "SZ"
+        registerPrefixes(CompanyType.UNREGISTERED_COMPANY, Map.of(
+                ENGLAND_WALES, Prefix.ZC.value,
+                SCOTLAND, Prefix.SZ.value
         ));
-        registerPrefixes("united-kingdom-societas", Map.of(
-                UNITED_KINGDOM, "SE"
+        registerPrefixes(CompanyType.UNITED_KINGDOM_SOCIETAS, Map.of(
+                UNITED_KINGDOM, Prefix.SE.value
         ));
     }
 
-    private static void registerPrefixes(String companyType, Map<Jurisdiction, String> prefixes) {
-        COMPANY_PREFIX_MAP.computeIfAbsent(companyType, k -> new EnumMap<>(Jurisdiction.class))
-                .putAll(prefixes);
+    private static void registerPrefixes(CompanyType companyType,
+                                         Map<Jurisdiction, String> prefixes) {
+        COMPANY_PREFIX_MAP.computeIfAbsent(
+                companyType.getValue(), k -> new EnumMap<>(Jurisdiction.class)).putAll(prefixes);
+    }
+
+    private enum Prefix {
+        AC("AC"), SA("SA"), CE("CE"), GE("GE"), SE("SE"), FE("FE"), IC("IC"), SI("SI"), IP("IP"),
+        SP("SP"), NP("NP"), LP("LP"), SL("SL"), NL("NL"), OC("OC"), SO("SO"), NC("NC"), NI("NI"),
+        FC("FC"), PC("PC"), OE("OE"), CS("CS"), SG("SG"), ZC("ZC"), SZ("SZ"), RS("RS"), RC("RC"),
+        BR("BR"), SC("SC");
+
+        public final String value;
+
+        Prefix(String value) {
+            this.value = value;
+        }
     }
 }
