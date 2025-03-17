@@ -354,7 +354,6 @@ class TestDataServiceImplTest {
     @Test
     void createCompanyDataRollBack() throws DataException {
         CompanySpec spec = new CompanySpec();
-        spec.setCompanyType(CompanyType.UK_ESTABLISHMENT);
         spec.setJurisdiction(Jurisdiction.NI);
         final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
