@@ -27,15 +27,16 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
 
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
         var randomId = randomService.getString(8);
+        var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
 
         var profile = new AcspProfile();
-        profile.setId(randomId);
+        profile.setId(acspNumber);
         profile.setVersion(0L);
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
-        profile.setType(Objects.requireNonNullElse(spec.getType(), "ltd"));
-        profile.setAcspNumber(randomId);
-        profile.setName("Test Data Generator " + randomId + " Company Ltd");
-        profile.setLinksSelf(LINK_STEM + randomId);
+        profile.setType(Objects.requireNonNullElse(spec.getType(), "limited-company"));
+        profile.setAcspNumber(acspNumber);
+        profile.setName("Test Data Generator " + acspNumber + " Company Ltd");
+        profile.setLinksSelf(LINK_STEM + acspNumber);
         if (spec.getAmlDetails() != null) {
             List<AmlDetails> amlDetailsList = new ArrayList<>();
             for (AmlSpec amlSpec : spec.getAmlDetails()) {

@@ -100,7 +100,8 @@ class AcspProfileServiceImplTest {
         assertEquals("randomId", captured.getId());
         assertEquals("randomId", captured.getAcspNumber());
         assertEquals("active", captured.getStatus()); // Default value
-        assertEquals("ltd", captured.getType()); // Default value
+        assertEquals("limited-company", captured.getType()); //
+        // Default value
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertEquals(0L, captured.getVersion());
@@ -185,6 +186,23 @@ class AcspProfileServiceImplTest {
         assertEquals(spec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+    }
+
+    @Test
+    void createAcspProfileWithProvidedAcspNumber() throws DataException {
+        AcspProfileSpec spec = new AcspProfileSpec();
+        spec.setAcspNumber("TestACSP");
+
+        AcspProfile savedProfile = new AcspProfile();
+        savedProfile.setAcspNumber(spec.getAcspNumber());
+
+        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
+
+        AcspProfileData result = service.create(spec);
+
+        assertNotNull(result);
+        assertEquals("TestACSP", result.getAcspNumber());
+        verify(repository).save(any(AcspProfile.class));
     }
 
     @Test

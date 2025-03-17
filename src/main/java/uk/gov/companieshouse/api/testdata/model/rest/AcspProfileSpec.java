@@ -11,6 +11,9 @@ public class AcspProfileSpec {
     @JsonProperty
     private String type;
 
+    @JsonProperty("acsp_number")
+    private String acspNumber;
+
     @JsonProperty("aml_details")
     private List<AmlSpec> amlDetails;
 
@@ -28,6 +31,14 @@ public class AcspProfileSpec {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public String getAcspNumber() {
+        return acspNumber;
+    }
+
+    public void setAcspNumber(String acspNumber) {
+        this.acspNumber = acspNumber;
     }
 
     public List<AmlSpec> getAmlDetails() {
