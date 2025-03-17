@@ -30,7 +30,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -38,7 +37,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
@@ -358,7 +356,7 @@ class TestDataServiceImplTest {
     void createCompanyDataRollBack() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
-        final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix() + COMPANY_NUMBER;
+        final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
         DataException pscStatementException = new DataException("error");
         when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
