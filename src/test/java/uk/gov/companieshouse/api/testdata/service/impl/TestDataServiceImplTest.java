@@ -181,9 +181,10 @@ class TestDataServiceImplTest {
      */
     private AcspMembersData createAcspMembersDataHelper(String userId,
                                                         AcspProfileData profileData,
-                                                        AcspMembersData membersData) throws DataException {
+                                                        AcspMembersData membersData, AcspProfileSpec profileSpec) throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId(userId);
+        spec.setAcspProfile(profileSpec);
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(profileData);
         when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(membersData);
         return testDataService.createAcspMembersData(spec);
@@ -883,11 +884,18 @@ class TestDataServiceImplTest {
 
     @Test
     void createAcspMembersData() throws DataException {
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData expectedMembersData =
-                new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        AcspProfileSpec profileSpec = new AcspProfileSpec();
+        profileSpec.setAcspNumber("acspNumber");
+        profileSpec.setStatus("active");
+        profileSpec.setType("limited-company");
 
-        AcspMembersData result = createAcspMembersDataHelper("userId", acspProfileData, expectedMembersData);
+        AcspProfileData acspProfileData =
+                new AcspProfileData(profileSpec.getAcspNumber());
+        AcspMembersData expectedMembersData =
+                new AcspMembersData("memberId", profileSpec.getAcspNumber(), "userId", "active", "role");
+
+        AcspMembersData result = createAcspMembersDataHelper(
+                "userId", acspProfileData, expectedMembersData, profileSpec);
 
         verifyAcspMembersData(result, expectedMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), expectedMembersData.getUserId(), expectedMembersData.getStatus(), expectedMembersData.getUserRole());
         verify(acspMembersService).create(any(AcspMembersSpec.class));

@@ -91,13 +91,14 @@ In order to use the generator, there are different possible endpoints that can b
     - `user_role`: This is the role of the ACSP Member. This is optional
     - `status`: Status of the Acsp Member. This is optional
     - `acsp_profile`:
-      - `type`: Company type of the AcspProfile. This is optional with a defaults to `ltd`.
+      - `type`: Company type of the AcspProfile. This is optional with a defaults to `limited-company`.
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
+      - `acsp_number`: ACSP number of the ACSP Profile. This is optional.
       - `aml_details`:
           - `supervisory_body`: Supervisory body of the Acsp Profile. This is optional.
           - `membership_details`: Membership details of the Acsp Profile. This is optional.
 
-  An usage example looks like this: `{"userId": "rsf3pdwywvse5yz55mfodfx8","userRole": "test","status": "test","acspProfile": {"type": "test","status": "test", "aml_details": [ {"supervisory_body": "association-of-chartered-certified-accountants-acca","membership_details": "test"} ] } }`
+  A usage example looks like this: `{"user_id": "rsf3pdwywvse5yz55mfodfx8","user_role": "test","status": "test","acsp_profile": {"type": "test","status": "test", "acsp_number": "TestACSP", "aml_details": [ {"supervisory_body": "association-of-chartered-certified-accountants-acca","membership_details": "test"} ] } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
 
 #### Deleting Appeals
