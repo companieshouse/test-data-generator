@@ -87,9 +87,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String companyStatus = spec.getCompanyStatus();
         final String accountsDueStatus = spec.getAccountsDueStatus();
 
-        AccountParameters accountParams = new AccountParameters(accountsDueStatus, randomService);
-        DateParameters dateParams = new DateParameters(accountParams.getAccountingReferenceDate());
-        CompanyDetailsParameters companyParams = new CompanyDetailsParameters(
+        var accountParams = new AccountParameters(accountsDueStatus, randomService);
+        var dateParams = new DateParameters(accountParams.getAccountingReferenceDate());
+        var companyParams = new CompanyDetailsParameters(
                 companyType, hasSuperSecurePscs, companyStatus, subType, companyStatusDetail);
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
