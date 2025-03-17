@@ -43,6 +43,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String OVERSEAS_ENTITY_TYPE = "registered-overseas-entity";
     private static final String OVERSEA_COMPANY_TYPE = "oversea-company";
     private static final String EXT_REGISTRATION_NUMBER = "124234R34";
+    private static final String COMPANY_NAME_PREFIX = "COMPANY ";
+    private static final String COMPANY_NAME_SUFFIX = " LIMITED";
     private static final String FCD_COUNTRY = "Barbados";
     private static final String LEGAL_FORM = "Plc";
     private static final String BUSINESS_ACTIVITY = "Trading";
@@ -78,11 +80,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     public CompanyProfile create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
         final Jurisdiction jurisdiction = spec.getJurisdiction();
-        final String companyStatus = spec.getCompanyStatus();
         final CompanyType companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
         final String companyStatusDetail = spec.getCompanyStatusDetail();
+        final String companyStatus = spec.getCompanyStatus();
         final String accountsDueStatus = spec.getAccountsDueStatus();
 
         AccountParameters accountParams = new AccountParameters(accountsDueStatus, randomService);
@@ -90,18 +92,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         CompanyDetailsParameters companyParams = new CompanyDetailsParameters(
                 companyType, hasSuperSecurePscs, companyStatus, subType, companyStatusDetail);
 
-
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
-            return createOverseasEntity(companyNumber, jurisdiction,
-                    spec, dateParams.getDateOneYearAgo(), dateParams.getDateNow(),
-                    dateParams.getDateInOneYear(),
-                    dateParams.getDateInOneYearTwoWeeks(), dateParams.getDateInOneYearNineMonths(),
+            return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
                     OVERSEAS_ENTITY_TYPE, companyType);
         } else if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            return createOverseasEntity(companyNumber, jurisdiction,
-                    spec, dateParams.getDateOneYearAgo(), dateParams.getDateNow(),
-                    dateParams.getDateInOneYear(),
-                    dateParams.getDateInOneYearTwoWeeks(), dateParams.getDateInOneYearNineMonths(),
+            return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
                     OVERSEA_COMPANY_TYPE, companyType);
         } else {
             return createNormalCompanyProfile(companyNumber, jurisdiction,
@@ -128,7 +123,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setLinks(nonJurisdictionType.isEmpty()
                 ? createLinkForSelf(companyNumber) : createLinks(companyNumber));
 
-        CompanyProfile.Accounts accounts = profile.getAccounts();
+        var accounts = profile.getAccounts();
         accounts.setNextDue(dateParams.getDateInOneYearNineMonths());
         accounts.setPeriodStart(dateParams.getDateNow());
         accounts.setPeriodEnd(dateParams.getDateInOneYear());
@@ -184,10 +179,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private OverseasEntity createOverseasEntity(String companyNumber,
                                                 Jurisdiction jurisdiction, CompanySpec spec,
-                                                Instant dateOneYearAgo, Instant dateNow,
-                                                Instant dateInOneYear,
-                                                Instant dateInOneYearTwoWeeks,
-                                                Instant dateInOneYearNineMonths,
+                                                DateParameters dateParams,
                                                 String entityType, CompanyType companyType) {
         LOG.info("Creating " + entityType + " for " + companyNumber);
 
@@ -204,16 +196,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setHasInsolvencyHistory(false);
         overseasEntity.setJurisdiction(jurisdiction.toString());
 
-        overseasEntity.setDateOfCreation(dateOneYearAgo);
+        overseasEntity.setDateOfCreation(dateParams.getDateOneYearAgo());
 
         // Confirmation Statement
-        overseasEntity.getConfirmationStatement().setNextMadeUpTo(dateInOneYear);
-        overseasEntity.getConfirmationStatement().setNextDue(dateInOneYearTwoWeeks);
+        overseasEntity.getConfirmationStatement().setNextMadeUpTo(dateParams.getDateInOneYear());
+        overseasEntity.getConfirmationStatement().setNextDue(dateParams.getDateInOneYearTwoWeeks());
         overseasEntity.getConfirmationStatement().setOverdue(false);
 
         // Company Details
         overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
-        overseasEntity.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+        overseasEntity.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
         overseasEntity.setRegisteredOfficeIsInDispute(false);
         overseasEntity.setEtag(randomService.getEtag());
         overseasEntity.setSuperSecureManagingOfficerCount(0);
@@ -227,7 +219,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                 OverseasEntity.createForeignCompanyDetails();
         foreignCompanyDetails.setGovernedBy(GOVERNED_BY);
         foreignCompanyDetails.setLegalForm(LEGAL_FORM);
-        foreignCompanyDetails.setACreditFinancialInstitution(true);
+        foreignCompanyDetails.setCreditFinancialInstitution(true);
         foreignCompanyDetails.setBusinessActivity(BUSINESS_ACTIVITY);
 
         // Originating Registry
@@ -269,8 +261,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         // Accounts
         OverseasEntity.IAccounts accounts = OverseasEntity.createAccounts();
         accounts.setOverdue(false);
-        accounts.setNextMadeUpTo(dateInOneYear);
-        accounts.setNextDue(dateInOneYearTwoWeeks);
+        accounts.setNextMadeUpTo(dateParams.getDateInOneYear());
+        accounts.setNextDue(dateParams.getDateInOneYearTwoWeeks());
 
         // Accounting Reference Date
         var accountingReferenceDate = new OverseasEntity.AccountingReferenceDate();
@@ -281,17 +273,17 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         // Next Accounts
         var nextAccounts = new OverseasEntity.NextAccounts();
         nextAccounts.setOverdue(false);
-        nextAccounts.setDueOn(dateInOneYearTwoWeeks);
-        nextAccounts.setPeriodStartOn(dateNow);
-        nextAccounts.setPeriodEndOn(dateInOneYear);
+        nextAccounts.setDueOn(dateParams.getDateInOneYearTwoWeeks());
+        nextAccounts.setPeriodStartOn(dateParams.getDateNow());
+        nextAccounts.setPeriodEndOn(dateParams.getDateInOneYear());
         accounts.setNextAccounts(nextAccounts);
 
         // Last Accounts
         var lastAccounts = new OverseasEntity.LastAccounts();
         lastAccounts.setType("aa");
-        lastAccounts.setPeriodStartOn(dateOneYearAgo);
-        lastAccounts.setPeriodEndOn(dateNow);
-        lastAccounts.setMadeUpTo(dateInOneYear);
+        lastAccounts.setPeriodStartOn(dateParams.getDateOneYearAgo());
+        lastAccounts.setPeriodEndOn(dateParams.getDateNow());
+        lastAccounts.setMadeUpTo(dateParams.getDateInOneYear());
         accounts.setLastAccounts(lastAccounts);
 
         overseasEntity.setAccounts(accounts);
@@ -432,9 +424,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private void setCompanyName(CompanyProfile profile, String companyNumber, String companyType) {
         if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
-            profile.setCompanyName("COMPANY " + companyNumber + " UK SOCIETAS");
+            profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + " UK SOCIETAS");
         } else {
-            profile.setCompanyName("COMPANY " + companyNumber + " LIMITED");
+            profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
         }
     }
 }

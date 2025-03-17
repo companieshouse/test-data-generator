@@ -40,43 +40,61 @@ public class OverseasEntity extends CompanyProfile {
     // Interfaces for nested objects
     public static interface IUpdated {
         void setAt(Instant at);
+
         void setBy(String by);
+
         void setType(String type);
     }
 
     public static interface IForeignCompanyDetails {
         void setGovernedBy(String governedBy);
+
         void setLegalForm(String legalForm);
+
         void setOriginatingRegistry(IOriginatingRegistry originatingRegistry);
-        void setACreditFinancialInstitution(Boolean ACreditFinancialInstitution);
+
+        void setCreditFinancialInstitution(Boolean creditFinancialInstitution);
+
         void setBusinessActivity(String businessActivity);
+
         void setRegistrationNumber(String registrationNumber);
+
         void setAccountingRequirement(IAccountingRequirement accountingRequirement);
+
         void setAccounts(IAccountsDetails accountsDetails);
     }
 
     public static interface IOriginatingRegistry {
         void setCountry(String country);
+
         void setName(String name);
     }
 
     public static interface IAccountingRequirement {
         void setForeignAccountType(String foreignAccountType);
+
         void setTermsOfAccountPublication(String termsOfAccountPublication);
     }
 
     public static interface IAccountsDetails {
         void setAccountPeriodFrom(String day, String month);
+
         void setAccountPeriodTo(String day, String month);
+
         void setMustFileWithin(String months);
     }
 
     public static interface IAccounts {
         void setOverdue(Boolean overdue);
+
         void setNextMadeUpTo(Instant nextMadeUpTo);
+
         void setNextDue(Instant nextDue);
+
         void setAccountingReferenceDate(AccountingReferenceDate accountingReferenceDate);
+
         void setNextAccounts(NextAccounts nextAccounts);
+
         void setLastAccounts(LastAccounts lastAccounts);
     }
 
@@ -216,8 +234,8 @@ public class OverseasEntity extends CompanyProfile {
         }
 
         @Override
-        public void setACreditFinancialInstitution(Boolean ACreditFinancialInstitution) {
-            this.isACreditFinancialInstitution = ACreditFinancialInstitution;
+        public void setCreditFinancialInstitution(Boolean creditFinancialInstitution) {
+            this.isACreditFinancialInstitution = creditFinancialInstitution;
         }
 
         @Override
