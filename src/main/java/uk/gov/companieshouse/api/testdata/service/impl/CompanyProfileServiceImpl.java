@@ -240,7 +240,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         OverseasEntity.IAccountsDetails accountsDetails = OverseasEntity.createAccountsDetails();
         accountsDetails.setAccountPeriodFrom("1", "January");
         accountsDetails.setAccountPeriodTo("31", "December");
-        accountsDetails.setMustFileWithin("12");
+
+
+        OverseasEntity.IMustFileWithin mustFileWithin = OverseasEntity.createMustFileWithin();
+        mustFileWithin.setMonths(12);
+        accountsDetails.setMustFileWithin(mustFileWithin);
+
         foreignCompanyDetails.setAccounts(accountsDetails);
 
         overseasEntity.setForeignCompanyDetails(foreignCompanyDetails);

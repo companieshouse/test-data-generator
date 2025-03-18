@@ -81,7 +81,11 @@ public class OverseasEntity extends CompanyProfile {
 
         void setAccountPeriodTo(String day, String month);
 
-        void setMustFileWithin(String months);
+        void setMustFileWithin(IMustFileWithin mustFileWithin);
+    }
+
+    public static interface IMustFileWithin {
+        void setMonths(int months);
     }
 
     public static interface IAccounts {
@@ -113,6 +117,10 @@ public class OverseasEntity extends CompanyProfile {
 
     public static IAccountsDetails createAccountsDetails() {
         return new AccountsDetails();
+    }
+
+    public static IMustFileWithin createMustFileWithin() {
+        return new MustFileWithin();
     }
 
     public static IUpdated createUpdated() {
@@ -307,7 +315,7 @@ public class OverseasEntity extends CompanyProfile {
         private AccountPeriod accountPeriodTo;
 
         @Field("must_file_within")
-        private String mustFileWithin;
+        private MustFileWithin mustFileWithin;  // Changed to MustFileWithin
 
         @Override
         public void setAccountPeriodFrom(String day, String month) {
@@ -320,8 +328,24 @@ public class OverseasEntity extends CompanyProfile {
         }
 
         @Override
-        public void setMustFileWithin(String months) {
-            this.mustFileWithin = months;
+        public void setMustFileWithin(IMustFileWithin mustFileWithin) {
+            if (mustFileWithin instanceof MustFileWithin) {
+                this.mustFileWithin = (MustFileWithin) mustFileWithin;
+            }
+        }
+    }
+
+    private static class MustFileWithin implements IMustFileWithin {
+        @Field("months")
+        private int months;
+
+        @Override
+        public void setMonths(int months) {
+            this.months = months;
+        }
+
+        public int getMonths() {
+            return months;
         }
     }
 
