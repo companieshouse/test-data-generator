@@ -47,6 +47,9 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
             }
             profile.setAmlDetails(amlDetailsList);
         }
+        if (spec.getSensitiveDataEmail() != null) {
+            profile.setSensitiveDataEmail(spec.getSensitiveDataEmail());
+        }
         AcspProfile savedProfile = repository.save(profile);
         return new AcspProfileData(savedProfile.getAcspNumber());
     }

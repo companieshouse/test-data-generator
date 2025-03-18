@@ -78,8 +78,9 @@ class AcspProfileServiceImplTest {
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
 
-        // Validate that AML details are null
+        // Validate that AML details and Sensitive Data are null
         assertNull(captured.getAmlDetails());
+        assertNull(captured.getSensitiveDataEmail());
     }
 
     @Test
@@ -115,7 +116,7 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfileWithAmlDetails() throws DataException {
+    void createAcspProfileWithAmlDetailsAndSensitiveData() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
@@ -123,6 +124,7 @@ class AcspProfileServiceImplTest {
         AmlSpec amlSpec1 = getAmlSpec("association-of-chartered-certified-accountants-acca", "Membership Id: 127678");
         AmlSpec amlSpec2 = getAmlSpec("association-of-accounting-technicians-aat", "Membership Id: 765678");
         AmlSpec amlSpec3 = getAmlSpec("association-of-international-accountants-aia", "Membership Id: 656767");
+        spec.setSensitiveDataEmail("testdatagenerator@companieshouse.gov.uk");
 
         spec.setAmlDetails(List.of(amlSpec1, amlSpec2, amlSpec3));
 
@@ -155,14 +157,16 @@ class AcspProfileServiceImplTest {
         assertEquals(amlSpec2.getMembershipDetails(), captured.getAmlDetails().get(1).getMembershipDetails());
         assertEquals(amlSpec3.getSupervisoryBody(), captured.getAmlDetails().get(2).getSupervisoryBody());
         assertEquals(amlSpec3.getMembershipDetails(), captured.getAmlDetails().get(2).getMembershipDetails());
+        assertEquals(spec.getSensitiveDataEmail(), captured.getSensitiveDataEmail());
     }
 
     @Test
-    void createAcspProfileWithEmptyAmlDetails() throws DataException {
+    void createAcspProfileWithEmptyAmlDetailsAndSensitiveData() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
         spec.setAmlDetails(Collections.emptyList()); // Setting an empty list
+        spec.setSensitiveDataEmail("");
 
         when(randomService.getString(8)).thenReturn("randomId");
         AcspProfile savedProfile = createSavedProfile();
@@ -179,6 +183,7 @@ class AcspProfileServiceImplTest {
 
         assertNotNull(captured);
         assertNotNull(captured.getAmlDetails());
+        assertNotNull(captured.getSensitiveDataEmail());
         assertTrue(captured.getAmlDetails().isEmpty()); // Ensure the list is empty
         assertEquals("randomId", captured.getId());
         assertEquals("randomId", captured.getAcspNumber());
