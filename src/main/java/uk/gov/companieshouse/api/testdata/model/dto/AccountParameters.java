@@ -1,13 +1,12 @@
 package uk.gov.companieshouse.api.testdata.model.dto;
 
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import org.springframework.util.StringUtils;
-
 import java.time.LocalDate;
+import org.springframework.util.StringUtils;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 public class AccountParameters {
 
-    private String accountsDueStatus;
+    private final String accountsDueStatus;
     private LocalDate accountingReferenceDate;
 
     public AccountParameters(String accountsDueStatus, RandomService randomService) {

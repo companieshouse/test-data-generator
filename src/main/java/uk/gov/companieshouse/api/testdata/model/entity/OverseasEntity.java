@@ -37,7 +37,6 @@ public class OverseasEntity extends CompanyProfile {
     @Field("data.accounts")
     private Accounts accounts = new Accounts();
 
-    // Interfaces for nested objects
     public static interface IUpdated {
         void setAt(Instant at);
 
@@ -102,7 +101,6 @@ public class OverseasEntity extends CompanyProfile {
         void setLastAccounts(LastAccounts lastAccounts);
     }
 
-    // Factory methods for creating nested objects
     public static IForeignCompanyDetails createForeignCompanyDetails() {
         return new ForeignCompanyDetails();
     }
@@ -131,7 +129,6 @@ public class OverseasEntity extends CompanyProfile {
         return new Accounts();
     }
 
-    // Setters for the main fields
     public void setVersion(Long version) {
         this.version = version;
     }
@@ -172,7 +169,6 @@ public class OverseasEntity extends CompanyProfile {
         this.accounts = (Accounts) accounts;
     }
 
-    // Nested classes
     private static class Updated implements IUpdated {
         @Field("at")
         private Instant at;
@@ -315,7 +311,7 @@ public class OverseasEntity extends CompanyProfile {
         private AccountPeriod accountPeriodTo;
 
         @Field("must_file_within")
-        private MustFileWithin mustFileWithin;  // Changed to MustFileWithin
+        private MustFileWithin mustFileWithin;
 
         @Override
         public void setAccountPeriodFrom(String day, String month) {

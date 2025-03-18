@@ -1,14 +1,13 @@
-// CompanyDetailsParameters.java
 package uk.gov.companieshouse.api.testdata.model.dto;
 
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 
 public class CompanyDetailsParameters {
-    private CompanyType companyType;
-    private Boolean hasSuperSecurePscs;
-    private String companyStatus;
-    private String subType;
-    private String companyStatusDetail;
+    private final CompanyType companyType;
+    private final Boolean hasSuperSecurePscs;
+    private final String companyStatus;
+    private final String subType;
+    private final String companyStatusDetail;
 
     public CompanyDetailsParameters(CompanyType companyType, Boolean hasSuperSecurePscs, String companyStatus, String subType, String companyStatusDetail) {
         this.companyType = companyType;

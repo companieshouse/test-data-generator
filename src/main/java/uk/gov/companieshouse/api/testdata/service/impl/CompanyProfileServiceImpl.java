@@ -50,7 +50,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String BUSINESS_ACTIVITY = "Trading";
     private static final String ORIGINATING_REGISTRY_NAME = "Barbados Financial Services";
     private static final String UPDATED_TYPE = "psc_delta";
-    private static final String FOREIGN_ACCOUNT_TYPE = "ForeignAccountType1";
+    private static final String FOREIGN_ACCOUNT_TYPE = "ForeignAccountType";
     private static final String TERMS_OF_PUBLICATION = "Terms of Account Publication";
     private static final String GOVERNED_BY = "Federal Government";
     public static final String

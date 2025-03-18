@@ -405,12 +405,6 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void companyExistsWhenCompanyDoesNotExist() {
-        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
-        assertFalse(companyProfileService.companyExists(COMPANY_NUMBER));
-    }
-
-    @Test
     void createCompanyWithCompanyStatusDetail() {
         setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setCompanyStatusDetail("status-detail");

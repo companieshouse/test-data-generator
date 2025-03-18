@@ -5,24 +5,30 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 
 public class DateParameters {
-    private Instant dateOneYearAgo;
-    private Instant dateNow;
-    private Instant dateInOneYear;
-    private Instant dateInOneYearTwoWeeks;
-    private Instant dateInOneYearNineMonths;
-    private Instant dateInTwoYear;
-    private Instant dateInTwoYearTwoWeeks;
-    private LocalDate accountingReferenceDate;
+    private final Instant dateOneYearAgo;
+    private final Instant dateNow;
+    private final Instant dateInOneYear;
+    private final Instant dateInOneYearTwoWeeks;
+    private final Instant dateInOneYearNineMonths;
+    private final Instant dateInTwoYear;
+    private final Instant dateInTwoYearTwoWeeks;
+    private final LocalDate accountingReferenceDate;
 
     public DateParameters(LocalDate accountingReferenceDate) {
         this.accountingReferenceDate = accountingReferenceDate;
-        this.dateOneYearAgo = accountingReferenceDate.minusYears(1L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        this.dateOneYearAgo = accountingReferenceDate.minusYears(1L)
+                .atStartOfDay(ZoneId.of("UTC")).toInstant();
         this.dateNow = accountingReferenceDate.atStartOfDay(ZoneId.of("UTC")).toInstant();
-        this.dateInOneYear = accountingReferenceDate.plusYears(1L).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        this.dateInOneYearTwoWeeks = accountingReferenceDate.plusYears(1L).plusDays(14L).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        this.dateInOneYearNineMonths = accountingReferenceDate.plusYears(1L).plusMonths(9L).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        this.dateInTwoYear = accountingReferenceDate.plusYears(2L).atStartOfDay(ZoneId.of("UTC")).toInstant();
-        this.dateInTwoYearTwoWeeks = accountingReferenceDate.plusYears(2L).plusDays(14L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        this.dateInOneYear = accountingReferenceDate.plusYears(1L)
+                .atStartOfDay(ZoneId.of("UTC")).toInstant();
+        this.dateInOneYearTwoWeeks = accountingReferenceDate.plusYears(1L)
+                .plusDays(14L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        this.dateInOneYearNineMonths = accountingReferenceDate.plusYears(1L)
+                .plusMonths(9L).atStartOfDay(ZoneId.of("UTC")).toInstant();
+        this.dateInTwoYear = accountingReferenceDate.plusYears(2L)
+                .atStartOfDay(ZoneId.of("UTC")).toInstant();
+        this.dateInTwoYearTwoWeeks = accountingReferenceDate.plusYears(2L)
+                .plusDays(14L).atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 
     public Instant getDateOneYearAgo() {
