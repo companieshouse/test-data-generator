@@ -27,6 +27,9 @@ public class AcspProfile {
     @Field("data.type")
     private String type;
 
+    @Field("data.business_Sector")
+    private String businessSector;
+
     @Field("data.etag")
     private String etag;
 
@@ -35,6 +38,15 @@ public class AcspProfile {
 
     @Field("data.aml_details")
     private List<AmlDetails> amlDetails;
+
+    @Field("data.sole_trader_details")
+    private SoleTraderDetails soleTraderDetails;
+
+    @Field("data.registered_office_address")
+    private Address registeredOfficeAddress;
+
+    @Field("data.service_address")
+    private Address serviceAddress;
 
     public String getId() {
         return id;
@@ -106,5 +118,74 @@ public class AcspProfile {
 
     public void setAmlDetails(List<AmlDetails> amlDetails) {
         this.amlDetails = amlDetails;
+    }
+
+    public void setSoleTraderDetails(ISoleTraderDetails soleTraderDetails) {
+        this.soleTraderDetails = (SoleTraderDetails) soleTraderDetails;
+    }
+
+    public void setRegisteredOfficeAddress(Address registeredOfficeAddress) {
+        this.registeredOfficeAddress = (Address) registeredOfficeAddress;
+    }
+
+    public void setServiceAddress(Address serviceAddress) {
+        this.serviceAddress = (Address) serviceAddress;
+    }
+
+    public static ISoleTraderDetails createSoleTraderDetails() {
+        return new SoleTraderDetails();
+    }
+
+    public static Address createAddress() {
+        return new Address();
+    }
+
+    public void setBusinessSector(String businessSector) {
+        this.businessSector = businessSector;
+    }
+
+    public static interface ISoleTraderDetails {
+        void setForename(String forename);
+
+        void setSurname(String surname);
+
+        void setNationality(String nationality);
+
+        void setUsualResidentialCountry(String usualResidentialCountry);
+    }
+
+    public static interface ISensitiveData {
+        void setEmail(String email);
+    }
+
+    private static class SoleTraderDetails implements ISoleTraderDetails {
+        @Field("forename")
+        private String forename;
+        @Field("surname")
+        private String surname;
+        @Field("nationality")
+        private String nationality;
+        @Field("usual_residential_country")
+        private String usualResidentialCountry;
+
+        @Override
+        public void setForename(String forename) {
+            this.forename = forename;
+        }
+
+        @Override
+        public void setSurname(String surname) {
+            this.surname = surname;
+        }
+
+        @Override
+        public void setNationality(String nationality) {
+            this.nationality = nationality;
+        }
+
+        @Override
+        public void setUsualResidentialCountry(String usualResidentialCountry) {
+            this.usualResidentialCountry = usualResidentialCountry;
+        }
     }
 }

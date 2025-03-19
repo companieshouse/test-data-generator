@@ -16,18 +16,21 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Captor;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +38,9 @@ class AcspProfileServiceImplTest {
 
     @Mock
     private AcspProfileRepository repository;
+
+    @Mock
+    private AddressService addressService;
 
     @Mock
     private RandomService randomService;
@@ -58,6 +64,7 @@ class AcspProfileServiceImplTest {
         spec.setType("ltd");
 
         when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         AcspProfile savedProfile = createSavedProfile();
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
@@ -77,14 +84,13 @@ class AcspProfileServiceImplTest {
         assertEquals(spec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
-
-        // Validate that AML details are null
         assertNull(captured.getAmlDetails());
     }
 
     @Test
     void createAcspProfileWithDefaultValues() throws DataException {
         when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         AcspProfile savedProfile = createSavedProfile();
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
@@ -99,9 +105,8 @@ class AcspProfileServiceImplTest {
 
         assertEquals("randomId", captured.getId());
         assertEquals("randomId", captured.getAcspNumber());
-        assertEquals("active", captured.getStatus()); // Default value
-        assertEquals("limited-company", captured.getType()); //
-        // Default value
+        assertEquals("active", captured.getStatus());
+        assertEquals("limited-company", captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertEquals(0L, captured.getVersion());
@@ -127,6 +132,7 @@ class AcspProfileServiceImplTest {
         spec.setAmlDetails(List.of(amlSpec1, amlSpec2, amlSpec3));
 
         when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         AcspProfile savedProfile = createSavedProfile();
 
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
@@ -162,9 +168,10 @@ class AcspProfileServiceImplTest {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
-        spec.setAmlDetails(Collections.emptyList()); // Setting an empty list
+        spec.setAmlDetails(Collections.emptyList());
 
         when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         AcspProfile savedProfile = createSavedProfile();
 
         when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
@@ -179,7 +186,7 @@ class AcspProfileServiceImplTest {
 
         assertNotNull(captured);
         assertNotNull(captured.getAmlDetails());
-        assertTrue(captured.getAmlDetails().isEmpty()); // Ensure the list is empty
+        assertTrue(captured.getAmlDetails().isEmpty());
         assertEquals("randomId", captured.getId());
         assertEquals("randomId", captured.getAcspNumber());
         assertEquals(spec.getStatus(), captured.getStatus());
@@ -193,6 +200,7 @@ class AcspProfileServiceImplTest {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setAcspNumber("TestACSP");
 
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         AcspProfile savedProfile = new AcspProfile();
         savedProfile.setAcspNumber(spec.getAcspNumber());
 
