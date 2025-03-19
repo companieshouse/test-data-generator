@@ -17,8 +17,8 @@ public class AcspProfileSpec {
     @JsonProperty("aml_details")
     private List<AmlSpec> amlDetails;
 
-    @JsonProperty("sensitive_email")
-    private String  sensitiveDataEmail;
+    @JsonProperty("sensitive_data_email")
+    private String sensitiveDataEmail;
 
     public String getStatus() {
         return status;
