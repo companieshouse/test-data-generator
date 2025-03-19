@@ -183,7 +183,6 @@ class AcspProfileServiceImplTest {
 
         assertNotNull(captured);
         assertNotNull(captured.getAmlDetails());
-        assertNotNull(captured.getSensitiveDataEmail());
         assertTrue(captured.getAmlDetails().isEmpty()); // Ensure the list is empty
         assertEquals("randomId", captured.getId());
         assertEquals("randomId", captured.getAcspNumber());
@@ -191,6 +190,7 @@ class AcspProfileServiceImplTest {
         assertEquals(spec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+        assertEquals(captured.getSensitiveDataEmail(),"");
     }
 
     @Test
