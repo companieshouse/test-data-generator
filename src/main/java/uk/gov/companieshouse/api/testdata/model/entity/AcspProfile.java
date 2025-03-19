@@ -129,11 +129,11 @@ public class AcspProfile {
     }
 
     public void setRegisteredOfficeAddress(Address registeredOfficeAddress) {
-        this.registeredOfficeAddress = (Address) registeredOfficeAddress;
+        this.registeredOfficeAddress = registeredOfficeAddress;
     }
 
     public void setServiceAddress(Address serviceAddress) {
-        this.serviceAddress = (Address) serviceAddress;
+        this.serviceAddress = serviceAddress;
     }
 
     public static ISoleTraderDetails createSoleTraderDetails() {

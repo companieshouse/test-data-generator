@@ -31,9 +31,9 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
     private AddressService addressService;
 
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
-        final String soleTraderForename = "Forename ";
-        final String soleTraderSurname = "Surname ";
-        final String businessName = "financial-services";
+        var soleTraderForename = "Forename ";
+        var soleTraderSurname = "Surname ";
+        var businessName = "financial-services";
         var randomId = randomService.getString(8);
         var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
 
