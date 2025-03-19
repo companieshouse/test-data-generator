@@ -120,6 +120,10 @@ public class AcspProfile {
         this.amlDetails = amlDetails;
     }
 
+    public ISoleTraderDetails getSoleTraderDetails() {
+        return soleTraderDetails;
+    }
+
     public void setSoleTraderDetails(ISoleTraderDetails soleTraderDetails) {
         this.soleTraderDetails = (SoleTraderDetails) soleTraderDetails;
     }
@@ -152,6 +156,14 @@ public class AcspProfile {
         void setNationality(String nationality);
 
         void setUsualResidentialCountry(String usualResidentialCountry);
+
+        String getForename();
+
+        String getSurname();
+
+        String getNationality();
+
+        String getUsualResidentialCountry();
     }
 
     public static interface ISensitiveData {
@@ -186,6 +198,26 @@ public class AcspProfile {
         @Override
         public void setUsualResidentialCountry(String usualResidentialCountry) {
             this.usualResidentialCountry = usualResidentialCountry;
+        }
+
+        @Override
+        public String getForename() {
+            return forename;
+        }
+
+        @Override
+        public String getSurname() {
+            return surname;
+        }
+
+        @Override
+        public String getNationality() {
+            return nationality;
+        }
+
+        @Override
+        public String getUsualResidentialCountry() {
+            return usualResidentialCountry;
         }
     }
 }

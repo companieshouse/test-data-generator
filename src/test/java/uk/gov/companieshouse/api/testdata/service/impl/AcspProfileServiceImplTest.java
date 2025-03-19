@@ -1,19 +1,14 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -51,22 +46,49 @@ class AcspProfileServiceImplTest {
     @Captor
     private ArgumentCaptor<AcspProfile> profileCaptor;
 
-    private AcspProfile createSavedProfile() {
-        AcspProfile profile = new AcspProfile();
-        profile.setAcspNumber("randomId");
-        return profile;
+    private AcspProfile savedProfile;
+    private AcspProfileSpec spec;
+
+    @BeforeEach
+    void setUp() {
+        savedProfile = new AcspProfile();
+        savedProfile.setAcspNumber("randomId");
+
+        spec = new AcspProfileSpec();
+
+        lenient().when(randomService.getString(8)).thenReturn("randomId");
+        lenient().when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
+        lenient().when(addressService.getCountryOfResidence(Jurisdiction.ENGLAND)).thenReturn("England");
+        lenient().when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
+    }
+
+    private AmlSpec getAmlSpec(String supervisoryBody, String membershipDetails) {
+        AmlSpec amlSpec = new AmlSpec();
+        amlSpec.setSupervisoryBody(supervisoryBody);
+        amlSpec.setMembershipDetails(membershipDetails);
+        return amlSpec;
+    }
+
+    private void assertCommonProfileDetails(AcspProfile captured, String type, String forename, String surname) {
+        assertEquals("randomId", captured.getId());
+        assertEquals("randomId", captured.getAcspNumber());
+        assertEquals("active", captured.getStatus());
+        assertEquals(type, captured.getType());
+        assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
+        assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+        assertEquals(0L, captured.getVersion());
+
+        assertNotNull(captured.getSoleTraderDetails());
+        assertEquals(forename, captured.getSoleTraderDetails().getForename());
+        assertEquals(surname, captured.getSoleTraderDetails().getSurname());
+        assertEquals("BRITISH", captured.getSoleTraderDetails().getNationality());
+        assertEquals("England", captured.getSoleTraderDetails().getUsualResidentialCountry());
     }
 
     @Test
     void createAcspProfile() throws DataException {
-        AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
-
-        when(randomService.getString(8)).thenReturn("randomId");
-        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        AcspProfile savedProfile = createSavedProfile();
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
         AcspProfileData result = service.create(spec);
 
@@ -89,12 +111,6 @@ class AcspProfileServiceImplTest {
 
     @Test
     void createAcspProfileWithDefaultValues() throws DataException {
-        when(randomService.getString(8)).thenReturn("randomId");
-        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        AcspProfile savedProfile = createSavedProfile();
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
-
-        AcspProfileSpec spec = new AcspProfileSpec();
         AcspProfileData result = service.create(spec);
 
         assertNotNull(result);
@@ -112,16 +128,8 @@ class AcspProfileServiceImplTest {
         assertEquals(0L, captured.getVersion());
     }
 
-    private AmlSpec getAmlSpec(String SupervisoryBody, String MembershipDetails)  {
-        AmlSpec amlSpec = new AmlSpec();
-        amlSpec.setSupervisoryBody(SupervisoryBody);
-        amlSpec.setMembershipDetails(MembershipDetails);
-        return amlSpec;
-    }
-
     @Test
     void createAcspProfileWithAmlDetails() throws DataException {
-        AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
 
@@ -130,12 +138,6 @@ class AcspProfileServiceImplTest {
         AmlSpec amlSpec3 = getAmlSpec("association-of-international-accountants-aia", "Membership Id: 656767");
 
         spec.setAmlDetails(List.of(amlSpec1, amlSpec2, amlSpec3));
-
-        when(randomService.getString(8)).thenReturn("randomId");
-        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        AcspProfile savedProfile = createSavedProfile();
-
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
         AcspProfileData result = service.create(spec);
 
@@ -165,16 +167,9 @@ class AcspProfileServiceImplTest {
 
     @Test
     void createAcspProfileWithEmptyAmlDetails() throws DataException {
-        AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
         spec.setAmlDetails(Collections.emptyList());
-
-        when(randomService.getString(8)).thenReturn("randomId");
-        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        AcspProfile savedProfile = createSavedProfile();
-
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
 
         AcspProfileData result = service.create(spec);
 
@@ -197,20 +192,54 @@ class AcspProfileServiceImplTest {
 
     @Test
     void createAcspProfileWithProvidedAcspNumber() throws DataException {
-        AcspProfileSpec spec = new AcspProfileSpec();
         spec.setAcspNumber("TestACSP");
 
-        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        AcspProfile savedProfile = new AcspProfile();
-        savedProfile.setAcspNumber(spec.getAcspNumber());
-
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfile);
+        AcspProfile savedProfileWithAcsp = new AcspProfile();
+        savedProfileWithAcsp.setAcspNumber(spec.getAcspNumber());
+        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfileWithAcsp);
 
         AcspProfileData result = service.create(spec);
 
         assertNotNull(result);
         assertEquals("TestACSP", result.getAcspNumber());
         verify(repository).save(any(AcspProfile.class));
+    }
+
+    @Test
+    void createAcspProfileAsSoleTrader() throws DataException {
+        spec.setType("sole-trader");
+        AcspProfile.ISoleTraderDetails soleTraderDetails = AcspProfile.createSoleTraderDetails();
+        soleTraderDetails.setForename("Test Forename");
+        soleTraderDetails.setSurname("Test Surname");
+        soleTraderDetails.setNationality("BRITISH");
+        soleTraderDetails.setUsualResidentialCountry("England");
+
+        AcspProfileData result = service.create(spec);
+
+        assertNotNull(result);
+        assertEquals(savedProfile.getAcspNumber(), result.getAcspNumber());
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        captured.setSoleTraderDetails(soleTraderDetails);
+
+        assertCommonProfileDetails(captured, "sole-trader", "Test Forename", "Test Surname");
+    }
+
+    @Test
+    void createAcspProfileAsSoleTraderWithDefaultValues() throws DataException {
+        spec.setType("sole-trader");
+
+        AcspProfileData result = service.create(spec);
+
+        assertNotNull(result);
+        assertEquals(savedProfile.getAcspNumber(), result.getAcspNumber());
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertCommonProfileDetails(captured, "sole-trader", "Forename randomId", "Surname randomId");
     }
 
     @Test
