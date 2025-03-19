@@ -115,7 +115,7 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfileWithAmlDetailsAndSensitiveData() throws DataException {
+    void createAcspProfileWithAmlDetailsAndSensitiveDataEmail() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
