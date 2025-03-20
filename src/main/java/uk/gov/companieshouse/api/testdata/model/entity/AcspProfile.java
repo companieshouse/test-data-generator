@@ -37,7 +37,7 @@ public class AcspProfile {
     private List<AmlDetails> amlDetails;
 
     @Field("sensitive_data.email")
-    private String sensitiveDataEmail;
+    private String email;
 
     public String getId() {
         return id;
@@ -111,11 +111,11 @@ public class AcspProfile {
         this.amlDetails = amlDetails;
     }
 
-    public String getSensitiveDataEmail() {
-        return sensitiveDataEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setSensitiveDataEmail(String sensitiveDataEmail) {
-        this.sensitiveDataEmail = sensitiveDataEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

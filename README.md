@@ -97,7 +97,7 @@ In order to use the generator, there are different possible endpoints that can b
       - `aml_details`:
           - `supervisory_body`: Supervisory body of the Acsp Profile. This is optional.
           - `membership_details`: Membership details of the Acsp Profile. This is optional.
-      - `sensitive_data_email`: Sensitive data email of the AcspProfile. This is optional.
+      - `email`: Sensitive data email of the AcspProfile. This is optional.
 
   A usage example looks like this: `{"user_id": "rsf3pdwywvse5yz55mfodfx8","user_role": "test","status": "test","acsp_profile": {"type": "test","status": "test", "acsp_number": "TestACSP", "aml_details": [ {"supervisory_body": "association-of-chartered-certified-accountants-acca","membership_details": "test"} ] } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.

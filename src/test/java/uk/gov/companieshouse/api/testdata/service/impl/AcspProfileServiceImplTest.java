@@ -79,7 +79,7 @@ class AcspProfileServiceImplTest {
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
 
         assertNull(captured.getAmlDetails());
-        assertNull(captured.getSensitiveDataEmail());
+        assertNull(captured.getEmail());
     }
 
     @Test
@@ -156,11 +156,11 @@ class AcspProfileServiceImplTest {
         assertEquals(amlSpec2.getMembershipDetails(), captured.getAmlDetails().get(1).getMembershipDetails());
         assertEquals(amlSpec3.getSupervisoryBody(), captured.getAmlDetails().get(2).getSupervisoryBody());
         assertEquals(amlSpec3.getMembershipDetails(), captured.getAmlDetails().get(2).getMembershipDetails());
-        assertEquals(spec.getEmail(), captured.getSensitiveDataEmail());
+        assertEquals(spec.getEmail(), captured.getEmail());
     }
 
     @Test
-    void createAcspProfileWithEmptyAmlDetailsAndSensitiveData() throws DataException {
+    void createAcspProfileWithEmptyAmlDetailsAndSensitiveDataEmail() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
@@ -189,7 +189,7 @@ class AcspProfileServiceImplTest {
         assertEquals(spec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
-        assertEquals("",captured.getSensitiveDataEmail());
+        assertEquals("",captured.getEmail());
     }
 
     @Test
