@@ -123,7 +123,7 @@ class AcspProfileServiceImplTest {
         AmlSpec amlSpec1 = getAmlSpec("association-of-chartered-certified-accountants-acca", "Membership Id: 127678");
         AmlSpec amlSpec2 = getAmlSpec("association-of-accounting-technicians-aat", "Membership Id: 765678");
         AmlSpec amlSpec3 = getAmlSpec("association-of-international-accountants-aia", "Membership Id: 656767");
-        spec.setSensitiveDataEmail("testdatagenerator@companieshouse.gov.uk");
+        spec.setEmail("testdatagenerator@companieshouse.gov.uk");
 
         spec.setAmlDetails(List.of(amlSpec1, amlSpec2, amlSpec3));
 
@@ -156,7 +156,7 @@ class AcspProfileServiceImplTest {
         assertEquals(amlSpec2.getMembershipDetails(), captured.getAmlDetails().get(1).getMembershipDetails());
         assertEquals(amlSpec3.getSupervisoryBody(), captured.getAmlDetails().get(2).getSupervisoryBody());
         assertEquals(amlSpec3.getMembershipDetails(), captured.getAmlDetails().get(2).getMembershipDetails());
-        assertEquals(spec.getSensitiveDataEmail(), captured.getSensitiveDataEmail());
+        assertEquals(spec.getEmail(), captured.getSensitiveDataEmail());
     }
 
     @Test
@@ -165,7 +165,7 @@ class AcspProfileServiceImplTest {
         spec.setStatus("active");
         spec.setType("ltd");
         spec.setAmlDetails(Collections.emptyList()); // Setting an empty list
-        spec.setSensitiveDataEmail("");
+        spec.setEmail("");
 
         when(randomService.getString(8)).thenReturn("randomId");
         AcspProfile savedProfile = createSavedProfile();

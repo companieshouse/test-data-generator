@@ -52,11 +52,11 @@ public class AcspProfileSpec {
         this.amlDetails = amlDetails;
     }
 
-    public String getSensitiveDataEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public void setSensitiveDataEmail(String email) {
+    public void setEmail(String email) {
         this.email = email;
     }
 }
