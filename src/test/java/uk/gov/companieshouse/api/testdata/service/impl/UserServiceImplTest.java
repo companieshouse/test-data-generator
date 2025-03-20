@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,7 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
+import jakarta.validation.ConstraintViolation;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,6 +39,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
     private static final Instant DATE_NOW = Instant.now();
@@ -49,8 +57,35 @@ class UserServiceImplTest {
     @InjectMocks
     private UserServiceImpl userServiceImpl;
 
+    private Validator validator;
+
+    @BeforeEach
+    void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
+
     @Test
     void testCreateUserWithoutRoles() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("hello@hello.com");
+        userSpec.setPassword("password");
+        var generatedUserId = "randomised";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        UserData userData = userServiceImpl.create(userSpec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
+        assertNull(savedUser.getRoles(), "User should have no roles assigned");
+    }
+
+    @Test
+    void testCreateUserWithoutEmailsAndRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
         var generatedUserId = "randomised";
@@ -68,8 +103,21 @@ class UserServiceImplTest {
     }
 
     @Test
+    void testCreateUserWithInvalidEmail() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("invalid-email");
+        userSpec.setPassword("password");
+
+        Set<ConstraintViolation<UserSpec>> violations = validator.validate(userSpec);
+        assertFalse(violations.isEmpty());
+        assertEquals("email is not a valid email address", violations.iterator().next().getMessage());
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
     void testCreateUserWithRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("hello@hello.com");
         userSpec.setPassword("password");
 
         RoleSpec roleSpec = new RoleSpec();
@@ -195,10 +243,10 @@ class UserServiceImplTest {
                 savedUser.getPassword(),
                 "Password should match the one set in UserSpec");
         assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
-        assertEquals(
-                "test-data-generated" + generatedUserId + "@test.companieshouse.gov.uk",
-                savedUser.getEmail(),
-                "Email should match the generated email");
+        String expectedEmail = userSpec.getEmail() != null ? userSpec.getEmail() :
+                "test-data-generated" + generatedUserId + "@test.companieshouse.gov.uk";
+        assertEquals(expectedEmail, savedUser.getEmail(), "Email should match");
+
         assertEquals(
                 "Forename-" + generatedUserId,
                 savedUser.getForename(),
@@ -215,8 +263,8 @@ class UserServiceImplTest {
 
         assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
         assertTrue(
-                userData.getEmail().contains("test-data-generated"),
-                "Email should contain 'test-data-generated'");
+                userData.getEmail().contains(userSpec.getEmail() != null ? userSpec.getEmail() : "test-data-generated"),
+                "Email in UserData should contain the correct prefix");
         assertTrue(userData.getForename().contains("Forename"),
                 "Forename should contain 'Forename'");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
