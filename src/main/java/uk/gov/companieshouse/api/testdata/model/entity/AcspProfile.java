@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -120,12 +121,12 @@ public class AcspProfile {
         this.amlDetails = amlDetails;
     }
 
-    public ISoleTraderDetails getSoleTraderDetails() {
+    public SoleTraderDetails getSoleTraderDetails() {
         return soleTraderDetails;
     }
 
-    public void setSoleTraderDetails(ISoleTraderDetails soleTraderDetails) {
-        this.soleTraderDetails = (SoleTraderDetails) soleTraderDetails;
+    public void setSoleTraderDetails(SoleTraderDetails soleTraderDetails) {
+        this.soleTraderDetails = soleTraderDetails;
     }
 
     public void setRegisteredOfficeAddress(Address registeredOfficeAddress) {
@@ -136,88 +137,7 @@ public class AcspProfile {
         this.serviceAddress = serviceAddress;
     }
 
-    public static ISoleTraderDetails createSoleTraderDetails() {
-        return new SoleTraderDetails();
-    }
-
-    public static Address createAddress() {
-        return new Address();
-    }
-
     public void setBusinessSector(String businessSector) {
         this.businessSector = businessSector;
-    }
-
-    public static interface ISoleTraderDetails {
-        void setForename(String forename);
-
-        void setSurname(String surname);
-
-        void setNationality(String nationality);
-
-        void setUsualResidentialCountry(String usualResidentialCountry);
-
-        String getForename();
-
-        String getSurname();
-
-        String getNationality();
-
-        String getUsualResidentialCountry();
-    }
-
-    public static interface ISensitiveData {
-        void setEmail(String email);
-    }
-
-    private static class SoleTraderDetails implements ISoleTraderDetails {
-        @Field("forename")
-        private String forename;
-        @Field("surname")
-        private String surname;
-        @Field("nationality")
-        private String nationality;
-        @Field("usual_residential_country")
-        private String usualResidentialCountry;
-
-        @Override
-        public void setForename(String forename) {
-            this.forename = forename;
-        }
-
-        @Override
-        public void setSurname(String surname) {
-            this.surname = surname;
-        }
-
-        @Override
-        public void setNationality(String nationality) {
-            this.nationality = nationality;
-        }
-
-        @Override
-        public void setUsualResidentialCountry(String usualResidentialCountry) {
-            this.usualResidentialCountry = usualResidentialCountry;
-        }
-
-        @Override
-        public String getForename() {
-            return forename;
-        }
-
-        @Override
-        public String getSurname() {
-            return surname;
-        }
-
-        @Override
-        public String getNationality() {
-            return nationality;
-        }
-
-        @Override
-        public String getUsualResidentialCountry() {
-            return usualResidentialCountry;
-        }
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
+import uk.gov.companieshouse.api.testdata.model.entity.SoleTraderDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
@@ -34,6 +35,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         var soleTraderForename = "Forename ";
         var soleTraderSurname = "Surname ";
         var businessSector = "financial-services";
+        var nationality = "British";
         var randomId = randomService.getString(8);
         var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
 
@@ -58,12 +60,11 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
             }
             profile.setAmlDetails(amlDetailsList);
         }
-        if (Objects.equals(spec.getType(), "sole-trader")) {
-            AcspProfile.ISoleTraderDetails soleTraderDetails
-                    = AcspProfile.createSoleTraderDetails();
+        if ("sole-trader".equals(spec.getType())) {
+            SoleTraderDetails soleTraderDetails = new SoleTraderDetails();
             soleTraderDetails.setForename(soleTraderForename + acspNumber);
             soleTraderDetails.setSurname(soleTraderSurname + acspNumber);
-            soleTraderDetails.setNationality("BRITISH");
+            soleTraderDetails.setNationality(nationality);
             soleTraderDetails.setUsualResidentialCountry(
                     addressService.getCountryOfResidence(Jurisdiction.ENGLAND));
             profile.setSoleTraderDetails(soleTraderDetails);
