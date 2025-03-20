@@ -99,7 +99,7 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix();
+        final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
 
         do {
             // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
@@ -277,10 +277,7 @@ public class TestDataServiceImpl implements TestDataService {
 
         var acspProfileSpec = new AcspProfileSpec();
         if (spec.getAcspProfile() != null) {
-            acspProfileSpec.setStatus(spec.getAcspProfile().getStatus());
-        }
-        if (spec.getAcspProfile() != null) {
-            acspProfileSpec.setType(spec.getAcspProfile().getType());
+            acspProfileSpec = spec.getAcspProfile();
         }
 
         try {
