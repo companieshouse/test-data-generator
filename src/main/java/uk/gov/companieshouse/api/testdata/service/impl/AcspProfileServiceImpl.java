@@ -33,7 +33,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
         var soleTraderForename = "Forename ";
         var soleTraderSurname = "Surname ";
-        var businessName = "financial-services";
+        var businessSector = "financial-services";
         var randomId = randomService.getString(8);
         var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
 
@@ -43,7 +43,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
         profile.setType(Objects.requireNonNullElse(spec.getType(), "limited-company"));
         profile.setAcspNumber(acspNumber);
-        profile.setBusinessSector(businessName);
+        profile.setBusinessSector(businessSector);
         profile.setRegisteredOfficeAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
         profile.setServiceAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
         profile.setName("Test Data Generator " + acspNumber + " Company Ltd");

@@ -27,7 +27,7 @@ public class AcspProfile {
     @Field("data.type")
     private String type;
 
-    @Field("data.business_Sector")
+    @Field("data.business_sector")
     private String businessSector;
 
     @Field("data.etag")
