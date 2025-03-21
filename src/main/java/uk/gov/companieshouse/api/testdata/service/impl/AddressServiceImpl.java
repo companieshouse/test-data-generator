@@ -71,6 +71,10 @@ public class AddressServiceImpl implements AddressService {
             "123125"
     );
 
+    public Address getOverseasAddress() {
+        return OVERSEAS_ADDRESS;
+    }
+
     @Override
     public Address getAddress(Jurisdiction jurisdiction) {
         return switch (jurisdiction) {

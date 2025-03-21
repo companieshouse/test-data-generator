@@ -216,8 +216,6 @@ class TestDataServiceImplTest {
         return testDataService.deleteAcspMembersData(acspMemberId);
     }
 
-    // ===== Helper Method for Company Deletion Tests =====
-
     private void verifyDeleteCompanyData(String companyNumber) {
         verify(companyProfileService).delete(companyNumber);
         verify(filingHistoryService).delete(companyNumber);

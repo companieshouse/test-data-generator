@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
@@ -44,7 +45,7 @@ class CompanyProfileServiceImplTest {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String OVERSEAS_COMPANY_NUMBER = "OE001234";
+    private static final String REGISTERED_OVERSEAS_ENTITY_NUMBER = "OE123456";
     private static final String ETAG = "ETAG";
     private static final String COMPANY_STATUS_DISSOLVED = "dissolved";
     private static final String COMPANY_STATUS_ACTIVE = "active";
@@ -52,12 +53,14 @@ class CompanyProfileServiceImplTest {
     private static final CompanyType OVERSEAS_ENTITY_TYPE = CompanyType.REGISTERED_OVERSEAS_ENTITY;
     private static final String COMPANY_STATUS_ADMINISTRATION = "administration";
     private static final CompanyType COMPANY_TYPE_LTD = CompanyType.LTD;
-    private static final CompanyType COMPANY_TYPE_PLC = CompanyType.PLC;
     private static final CompanyType COMPANY_TYPE_ROYAL_CHARTER = CompanyType.ROYAL_CHARTER;
     private static final CompanyType COMPANY_TYPE_INDUSTRIAL_AND_PROVIDENT_SOCIETY = CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY;
     public static final String FULL_DATA_AVAILABLE_FROM_THE_COMPANY = "full-data-available-from-the-company";
     public static final String FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY = "full-data-available-from-department-of-the-economy";
     public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
+    private static final String OVERSEA_COMPANY_NUMBER = "FC001234";
+    private static final CompanyType OVERSEA_COMPANY_TYPE = CompanyType.OVERSEA_COMPANY;
+
 
 
     @Mock
@@ -73,13 +76,16 @@ class CompanyProfileServiceImplTest {
     private CompanySpec spec;
     private CompanyProfile savedProfile;
     private CompanySpec overseasSpec;
+    private CompanySpec overseaCompanySpec;
 
     @BeforeEach
     void setUp() {
         spec = new CompanySpec();
         overseasSpec = new CompanySpec();
-        overseasSpec.setCompanyNumber(OVERSEAS_COMPANY_NUMBER);
+        overseaCompanySpec = new CompanySpec();
+        overseasSpec.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
         overseasSpec.setCompanyType(OVERSEAS_ENTITY_TYPE);
+        overseaCompanySpec.setCompanyType(OVERSEA_COMPANY_TYPE);
         overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
         overseasSpec.setHasSuperSecurePscs(Boolean.TRUE);
@@ -89,9 +95,9 @@ class CompanyProfileServiceImplTest {
 
     // Helper method to set up common mocks for create tests.
     private void setupCommonMocks(CompanySpec spec, Address mockAddress) {
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
-        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
+        Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
+        Mockito.lenient().when(repository.save(any())).thenReturn(savedProfile);
+        Mockito.lenient().when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
     }
 
     // Helper method that performs create() and captures the saved CompanyProfile.
@@ -354,8 +360,14 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void testCreate_overseasEntity() {
-        when(addressService.getAddress(overseasSpec.getJurisdiction()))
-                .thenReturn(new Address("", "", "", "", "", ""));
+        overseasSpec = new CompanySpec();
+        overseasSpec.setCompanyNumber(REGISTERED_OVERSEAS_ENTITY_NUMBER);
+        overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        overseasSpec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
+
+        Address overseasAddress = new Address("1", "Gordon Cummins Hwy", "Grantley Adams International Airport", "Barbados", "Christ Church", "123125");
+        when(addressService.getOverseasAddress()).thenReturn(overseasAddress);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
 
@@ -364,13 +376,32 @@ class CompanyProfileServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyProfile savedEntity = captor.getValue();
         assertTrue(savedEntity instanceof OverseasEntity, "Expected an instance of OverseasEntity");
-        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getId());
-        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(REGISTERED_OVERSEAS_ENTITY_NUMBER, result.getId());
+        assertEquals(REGISTERED_OVERSEAS_ENTITY_NUMBER, result.getCompanyNumber());
         assertEquals(OVERSEAS_STATUS_REGISTERED, result.getCompanyStatus());
         assertEquals(OVERSEAS_ENTITY_TYPE.getValue(), savedEntity.getType());
         assertNotNull(result.getConfirmationStatement().getNextDue());
         assertNotNull(result.getConfirmationStatement().getNextMadeUpTo());
         assertNotNull(result.getRegisteredOfficeAddress());
+    }
+
+    @Test
+    void createCompanyWithOverseaCompanyType() {
+        setCompanyJurisdictionAndType(Jurisdiction.UNITED_KINGDOM, CompanyType.OVERSEA_COMPANY);
+        CompanyProfile profile = createAndCapture(spec);
+        System.out.println(profile);
+        assertEquals(OVERSEAS_STATUS_REGISTERED, profile.getCompanyStatus());
+        assertNotNull(profile.getLinks().getSelf());
+        assertNull(profile.getLinks().getFilingHistory());
+        assertNull(profile.getLinks().getOfficers());
+        assertNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+    }
+
+    @Test
+    void deleteCompanyProfileNotExists() {
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertFalse(companyProfileService.delete(COMPANY_NUMBER));
+        verify(repository, never()).delete(any());
     }
 
     @Test
@@ -576,9 +607,9 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void testCreateOverseasEntityWithOutType() {
-        when(addressService.getAddress(overseasSpec.getJurisdiction()))
+        Mockito.lenient().when(addressService.getAddress(overseasSpec.getJurisdiction()))
                 .thenReturn(new Address("", "", "", "", "", ""));
-        when(randomService.getEtag()).thenReturn(ETAG);
+        Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
 
         CompanyProfile result = companyProfileService.create(overseasSpec);
@@ -587,8 +618,8 @@ class CompanyProfileServiceImplTest {
         CompanyProfile savedEntity = captor.getValue();
 
         assertInstanceOf(OverseasEntity.class, savedEntity, "Expected an instance of OverseasEntity");
-        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getId());
-        assertEquals(OVERSEAS_COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(OVERSEA_COMPANY_NUMBER, result.getId());
+        assertEquals(OVERSEA_COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals("registered", result.getCompanyStatus());
         assertEquals(OVERSEAS_ENTITY_TYPE.getValue(), savedEntity.getType());
     }

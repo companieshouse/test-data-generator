@@ -42,8 +42,14 @@ public enum Jurisdiction {
         if (spec == null) {
             return "";
         }
-        String companyType = spec.getCompanyType() != null ? spec.getCompanyType().getValue() : "ltd";
+        String companyType = spec.getCompanyType()
+                != null ? spec.getCompanyType().getValue() : "ltd";
         var jurisdiction = spec.getJurisdiction() != null ? spec.getJurisdiction() : ENGLAND_WALES;
+        if (CompanyType.OVERSEA_COMPANY.getValue().equals(companyType)
+                || CompanyType.REGISTERED_OVERSEAS_ENTITY.getValue().equals(companyType)) {
+            jurisdiction = UNITED_KINGDOM;
+            spec.setJurisdiction(UNITED_KINGDOM);
+        }
         if (CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue().equals(companyType)) {
             return Prefix.RS.value;
         }
