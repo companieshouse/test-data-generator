@@ -61,7 +61,8 @@ In order to use the generator, there are different possible endpoints that can b
     - `original_description`: The original description of the filing (e.g., `First gazette notice for voluntary strike-off`). Defaults to `Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association`.
     }
 
-  - An usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
+  - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
+  - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
   - An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "persons-with-significant-control", "register_type: "directors"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
