@@ -49,6 +49,9 @@ public class AcspProfile {
     @Field("data.service_address")
     private Address serviceAddress;
 
+    @Field("sensitive_data.email")
+    private String email;
+
     public String getId() {
         return id;
     }
@@ -119,6 +122,14 @@ public class AcspProfile {
 
     public void setAmlDetails(List<AmlDetails> amlDetails) {
         this.amlDetails = amlDetails;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public SoleTraderDetails getSoleTraderDetails() {

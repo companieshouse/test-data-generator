@@ -17,6 +17,9 @@ public class AcspProfileSpec {
     @JsonProperty("aml_details")
     private List<AmlSpec> amlDetails;
 
+    @JsonProperty("email")
+    private String email;
+
     public String getStatus() {
         return status;
     }
@@ -47,5 +50,13 @@ public class AcspProfileSpec {
 
     public void setAmlDetails(List<AmlSpec> amlDetails) {
         this.amlDetails = amlDetails;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
