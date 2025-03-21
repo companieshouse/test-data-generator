@@ -61,7 +61,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
             profile.setAmlDetails(amlDetailsList);
         }
         if (Objects.equals("sole-trader", spec.getType())) {
-            SoleTraderDetails soleTraderDetails = new SoleTraderDetails();
+            var soleTraderDetails = new SoleTraderDetails();
             soleTraderDetails.setForename(soleTraderForename + acspNumber);
             soleTraderDetails.setSurname(soleTraderSurname + acspNumber);
             soleTraderDetails.setNationality(nationality);
