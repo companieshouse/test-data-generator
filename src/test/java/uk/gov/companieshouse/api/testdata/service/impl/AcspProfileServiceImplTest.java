@@ -115,7 +115,7 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfileWithAmlDetailsAndSensitiveDataEmail() throws DataException {
+    void createAcspProfileWithAmlDetails() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
@@ -160,7 +160,7 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfileWithEmptyAmlDetailsAndSensitiveDataEmail() throws DataException {
+    void createAcspProfileWithEmptyAmlDetails() throws DataException {
         AcspProfileSpec spec = new AcspProfileSpec();
         spec.setStatus("active");
         spec.setType("ltd");
@@ -189,7 +189,7 @@ class AcspProfileServiceImplTest {
         assertEquals(spec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
-        assertEquals("",captured.getEmail());
+        assertEquals(spec.getEmail(),captured.getEmail());
     }
 
     @Test
