@@ -87,14 +87,17 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         var register = new Register();
         register.setRegisterType(registerSpec.getRegisterType());
         register.setItems(Collections.singletonList(registerItem));
-        Map<String, String> registerLinks = generateRegisterLinks(registerSpec.getRegisterType(), companyNumber);
+        Map<String, String> registerLinks = generateRegisterLinks(registerSpec.getRegisterType(), companyNumber, registerSpec.getRegisterMovedTo());
         if (!registerLinks.isEmpty()) {
             register.setLinks(registerLinks);
         }
         return register;
     }
 
-    private Map<String, String> generateRegisterLinks(String registerType, String companyNumber) {
+    private Map<String, String> generateRegisterLinks(String registerType, String companyNumber, String registerMovedTo) {
+        if ("unspecified-location".equals(registerMovedTo)) {
+            return Collections.emptyMap();
+        }
         return switch (registerType) {
             case DIRECTORS_TEXT -> Map.of("directors_register", DIRECTORS_LINK.formatted(companyNumber));
             case SECRETARIES_TEXT -> Map.of("secretaries_register", SECRETARIES_LINK.formatted(companyNumber));

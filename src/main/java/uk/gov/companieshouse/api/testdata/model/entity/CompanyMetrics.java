@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.util.Map;
+
 @Document(collection = "company_metrics")
 public class CompanyMetrics {
 
@@ -73,6 +75,9 @@ public class CompanyMetrics {
 
     @Field("data.etag")
     private String etag;
+
+    @Field("data.registers")
+    private Map<String, RegisterItem> registers;
 
     public String getId() {
         return id;
@@ -180,5 +185,13 @@ public class CompanyMetrics {
 
     public int getActiveOfficersCount() {
         return this.officer.activeCount;
+    }
+
+    public Map<String, RegisterItem> getRegisters() {
+        return registers;
+    }
+
+    public void setRegisters(Map<String, RegisterItem> registers) {
+        this.registers = registers;
     }
 }
