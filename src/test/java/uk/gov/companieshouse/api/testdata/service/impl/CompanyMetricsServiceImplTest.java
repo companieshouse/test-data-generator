@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -19,7 +21,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -52,7 +56,8 @@ class CompanyMetricsServiceImplTest {
 
         assertEquals(savedMetrics, returnedMetrics);
         
-        ArgumentCaptor<CompanyMetrics> metricsCaptor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        ArgumentCaptor<CompanyMetrics> metricsCaptor
+                = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(metricsCaptor.capture());
         CompanyMetrics metrics = metricsCaptor.getValue();
 
@@ -96,5 +101,42 @@ class CompanyMetricsServiceImplTest {
         
         assertFalse(this.metricsService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void createWithRegisters() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        RegistersSpec registersSpec = new RegistersSpec();
+        registersSpec.setRegisterType("directors");
+        registersSpec.setRegisterMovedTo("public-register");
+        spec.setRegisters(List.of(registersSpec));
+
+        final String etag = "ETAG";
+        when(randomService.getEtag()).thenReturn(etag);
+
+        CompanyMetrics savedMetrics = new CompanyMetrics();
+        when(repository.save(any())).thenReturn(savedMetrics);
+
+        CompanyMetrics returnedMetrics = this.metricsService.create(spec);
+
+        assertEquals(savedMetrics, returnedMetrics);
+
+        ArgumentCaptor<CompanyMetrics> metricsCaptor
+                = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(metricsCaptor.capture());
+        CompanyMetrics metrics = metricsCaptor.getValue();
+
+        assertNotNull(metrics);
+        assertEquals(COMPANY_NUMBER, metrics.getId());
+        assertEquals(etag, metrics.getEtag());
+
+        assertNotNull(metrics.getRegisters());
+        assertEquals(1, metrics.getRegisters().size());
+        RegisterItem registerItem = metrics.getRegisters().get("directors");
+        assertNotNull(registerItem);
+        assertEquals("public-register", registerItem.getRegisterMovedTo());
+        assertEquals(LocalDate.now(), registerItem.getMovedOn());
     }
 }

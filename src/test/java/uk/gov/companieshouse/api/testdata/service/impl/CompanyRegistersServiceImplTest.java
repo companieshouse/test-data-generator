@@ -208,6 +208,18 @@ class CompanyRegistersServiceImplTest {
         verify(repository, times(1)).deleteByCompanyNumber("12345678");
     }
 
+    @Test
+    void testGenerateRegisterLinksForUnspecifiedLocation() throws DataException {
+        setCompanySpec("directors", "unspecified-location");
+        when(randomService.getEtag()).thenReturn("dummy-etag");
+        when(repository.save(any(CompanyRegisters.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        CompanyRegisters createdRegisters = service.create(companySpec);
+        Map<String, String> links = createdRegisters.getRegisters()
+                .get("directors").getLinks();
+        assertNull(links);
+    }
+
     private void setRegister(String registerType) {
         setCompanySpec(registerType, "Companies House");
         when(randomService.getEtag()).thenReturn("dummy-etag");
