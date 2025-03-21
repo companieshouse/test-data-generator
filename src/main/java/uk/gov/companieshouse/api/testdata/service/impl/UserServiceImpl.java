@@ -38,7 +38,9 @@ public class UserServiceImpl implements UserService {
             user.setRoles(userSpec.getRoles()
                     .stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
-        String email = "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
+        String email = userSpec.getEmail() != null ? userSpec.getEmail() :
+                "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
+
         user.setId(randomId);
         user.setEmail(email);
         user.setForename("Forename-" + randomId);

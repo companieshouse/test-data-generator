@@ -70,6 +70,7 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating test users
 - POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/user` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
+    - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.
     - `password`: The password of the user. This is mandatory.
     - `roles`: The roles of the user along with `permissions`. Roles is optional. If we provide the roles, we need to provide the `id` of the role and the `permissions` associated with the role. permissions are mandatory if we provide role id and vice versa.
     - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
