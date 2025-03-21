@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.util.List;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -27,6 +28,9 @@ public class AcspProfile {
     @Field("data.type")
     private String type;
 
+    @Field("data.business_sector")
+    private String businessSector;
+
     @Field("data.etag")
     private String etag;
 
@@ -35,6 +39,15 @@ public class AcspProfile {
 
     @Field("data.aml_details")
     private List<AmlDetails> amlDetails;
+
+    @Field("data.sole_trader_details")
+    private SoleTraderDetails soleTraderDetails;
+
+    @Field("data.registered_office_address")
+    private Address registeredOfficeAddress;
+
+    @Field("data.service_address")
+    private Address serviceAddress;
 
     public String getId() {
         return id;
@@ -106,5 +119,25 @@ public class AcspProfile {
 
     public void setAmlDetails(List<AmlDetails> amlDetails) {
         this.amlDetails = amlDetails;
+    }
+
+    public SoleTraderDetails getSoleTraderDetails() {
+        return soleTraderDetails;
+    }
+
+    public void setSoleTraderDetails(SoleTraderDetails soleTraderDetails) {
+        this.soleTraderDetails = soleTraderDetails;
+    }
+
+    public void setRegisteredOfficeAddress(Address registeredOfficeAddress) {
+        this.registeredOfficeAddress = registeredOfficeAddress;
+    }
+
+    public void setServiceAddress(Address serviceAddress) {
+        this.serviceAddress = serviceAddress;
+    }
+
+    public void setBusinessSector(String businessSector) {
+        this.businessSector = businessSector;
     }
 }
