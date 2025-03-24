@@ -23,7 +23,6 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class AcspProfileServiceImpl implements DataService<AcspProfileData, AcspProfileSpec> {
     private static final String LINK_STEM = "/authorised-corporate-service-providers/";
 
-
     @Autowired
     private AcspProfileRepository repository;
     @Autowired
@@ -59,6 +58,9 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
                 amlDetailsList.add(amlDetails);
             }
             profile.setAmlDetails(amlDetailsList);
+        }
+        if (spec.getEmail() != null) {
+            profile.setEmail(spec.getEmail());
         }
         if (Objects.equals("sole-trader", spec.getType())) {
             var soleTraderDetails = new SoleTraderDetails();

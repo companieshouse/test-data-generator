@@ -112,6 +112,7 @@ class AcspProfileServiceImplTest {
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertNull(captured.getAmlDetails());
+        assertNull(captured.getEmail());
     }
 
     @Test
@@ -145,6 +146,7 @@ class AcspProfileServiceImplTest {
         AmlSpec amlSpec1 = getAmlSpec("association-of-chartered-certified-accountants-acca", "Membership Id: 127678");
         AmlSpec amlSpec2 = getAmlSpec("association-of-accounting-technicians-aat", "Membership Id: 765678");
         AmlSpec amlSpec3 = getAmlSpec("association-of-international-accountants-aia", "Membership Id: 656767");
+        acspProfileSpec.setEmail("testdatagenerator@companieshouse.gov.uk");
 
         acspProfileSpec.setAmlDetails(List.of(amlSpec1, amlSpec2, amlSpec3));
 
@@ -176,6 +178,7 @@ class AcspProfileServiceImplTest {
         assertEquals(amlSpec2.getMembershipDetails(), captured.getAmlDetails().get(1).getMembershipDetails());
         assertEquals(amlSpec3.getSupervisoryBody(), captured.getAmlDetails().get(2).getSupervisoryBody());
         assertEquals(amlSpec3.getMembershipDetails(), captured.getAmlDetails().get(2).getMembershipDetails());
+        assertEquals(acspProfileSpec.getEmail(), captured.getEmail());
     }
 
     @Test
@@ -183,6 +186,7 @@ class AcspProfileServiceImplTest {
         acspProfileSpec.setStatus("active");
         acspProfileSpec.setType("ltd");
         acspProfileSpec.setAmlDetails(Collections.emptyList());
+        acspProfileSpec.setEmail("");
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
@@ -205,6 +209,7 @@ class AcspProfileServiceImplTest {
         assertEquals(acspProfileSpec.getType(), captured.getType());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+        assertEquals(acspProfileSpec.getEmail(),captured.getEmail());
     }
 
     @Test
