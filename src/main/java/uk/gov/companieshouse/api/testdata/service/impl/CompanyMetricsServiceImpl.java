@@ -9,9 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
-import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
@@ -52,7 +50,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         return registers.stream().collect(Collectors.toMap(
                 RegistersSpec::getRegisterType,
                 reg -> {
-                    RegisterItem item = new RegisterItem();
+                    var item = new RegisterItem();
                     item.setRegisterMovedTo(reg.getRegisterMovedTo());
                     item.setMovedOn(LocalDate.now());
                     return item;
