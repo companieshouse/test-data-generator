@@ -90,6 +90,7 @@ class AcspProfileServiceImplTest {
     void createAcspProfile() throws DataException {
         acspProfileSpec.setStatus("active");
         acspProfileSpec.setType("ltd");
+        acspProfileSpec.setBusinessSector("financial-institutions");
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
@@ -109,6 +110,7 @@ class AcspProfileServiceImplTest {
         assertEquals("randomId", captured.getAcspNumber());
         assertEquals(acspProfileSpec.getStatus(), captured.getStatus());
         assertEquals(acspProfileSpec.getType(), captured.getType());
+        assertEquals(acspProfileSpec.getBusinessSector(), captured.getBusinessSector());
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertNull(captured.getAmlDetails());
@@ -187,6 +189,7 @@ class AcspProfileServiceImplTest {
         acspProfileSpec.setType("ltd");
         acspProfileSpec.setAmlDetails(Collections.emptyList());
         acspProfileSpec.setEmail("");
+        acspProfileSpec.setBusinessSector("");
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
@@ -210,6 +213,7 @@ class AcspProfileServiceImplTest {
         assertEquals("Test Data Generator randomId Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertEquals(acspProfileSpec.getEmail(),captured.getEmail());
+        assertEquals(acspProfileSpec.getBusinessSector(),captured.getBusinessSector());
     }
 
     @Test

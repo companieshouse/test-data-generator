@@ -151,4 +151,8 @@ public class AcspProfile {
     public void setBusinessSector(String businessSector) {
         this.businessSector = businessSector;
     }
+
+    public String getBusinessSector() {
+        return businessSector;
+    }
 }
