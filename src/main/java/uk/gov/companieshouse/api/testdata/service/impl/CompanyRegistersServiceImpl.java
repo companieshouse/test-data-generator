@@ -37,6 +37,13 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String PSC_TEXT = "persons-with-significant-control";
     private static final String MEMBERS_TEXT = "members";
     private static final String REGISTER_STEM = "/registers";
+    private static final String UNSPECIFIED_LOCATION = "unspecified-location";
+    private static final String LLP_MEMBERS_TEXT = "llp-members";
+    private static final String LLP_USUAL_RESIDENTIAL_ADDRESS_TEXT = "llp-usual-residential-address";
+    private static final String USUAL_RESIDENTIAL_ADDRESS_TEXT = "usual-residential-address";
+    private static final String USUAL_RESIDENTIAL_ADDRESS_REGISTER_TYPE = "usual_residential_address";
+    private static final String PSC_REGISTER_TYPE = "persons_with_significant_control";
+
 
     @Override
     public CompanyRegisters create(CompanySpec companySpec) throws DataException {
@@ -95,7 +102,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     }
 
     private Map<String, String> generateRegisterLinks(String registerType, String companyNumber, String registerMovedTo) {
-        if ("unspecified-location".equals(registerMovedTo)) {
+        if (UNSPECIFIED_LOCATION.equals(registerMovedTo)) {
             return Collections.emptyMap();
         }
         return switch (registerType) {
@@ -109,11 +116,11 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private enum RegisterType {
         DIRECTORS(DIRECTORS_TEXT, DIRECTORS_TEXT),
         SECRETARIES(SECRETARIES_TEXT, SECRETARIES_TEXT),
-        PSC(PSC_TEXT, "persons_with_significant_control"),
-        USUAL_RESIDENTIAL_ADDRESS("usual-residential-address", "usual_residential_address"),
+        PSC(PSC_TEXT, PSC_REGISTER_TYPE),
+        USUAL_RESIDENTIAL_ADDRESS(USUAL_RESIDENTIAL_ADDRESS_TEXT, USUAL_RESIDENTIAL_ADDRESS_REGISTER_TYPE),
         MEMBERS(MEMBERS_TEXT, MEMBERS_TEXT),
-        LLP_MEMBERS("llp-members", MEMBERS_TEXT),
-        LLP_USUAL_RESIDENTIAL_ADDRESS("llp-usual-residential-address", "usual_residential_address");
+        LLP_MEMBERS(LLP_MEMBERS_TEXT, MEMBERS_TEXT),
+        LLP_USUAL_RESIDENTIAL_ADDRESS(LLP_USUAL_RESIDENTIAL_ADDRESS_TEXT, USUAL_RESIDENTIAL_ADDRESS_REGISTER_TYPE);
 
         private static final Map<String, String> TYPE_MAP = Arrays.stream(values())
                 .collect(Collectors.toUnmodifiableMap(rt -> rt.originalType, rt -> rt.mappedType));
