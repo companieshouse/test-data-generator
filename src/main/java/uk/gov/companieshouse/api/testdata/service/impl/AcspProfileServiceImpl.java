@@ -9,10 +9,13 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
+import uk.gov.companieshouse.api.testdata.model.entity.SoleTraderDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -24,8 +27,14 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
     private AcspProfileRepository repository;
     @Autowired
     private RandomService randomService;
+    @Autowired
+    private AddressService addressService;
 
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
+        var soleTraderForename = "Forename ";
+        var soleTraderSurname = "Surname ";
+        var businessSector = "financial-services";
+        var nationality = "British";
         var randomId = randomService.getString(8);
         var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
 
@@ -35,6 +44,9 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
         profile.setType(Objects.requireNonNullElse(spec.getType(), "limited-company"));
         profile.setAcspNumber(acspNumber);
+        profile.setBusinessSector(businessSector);
+        profile.setRegisteredOfficeAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
+        profile.setServiceAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
         profile.setName("Test Data Generator " + acspNumber + " Company Ltd");
         profile.setLinksSelf(LINK_STEM + acspNumber);
         if (spec.getAmlDetails() != null) {
@@ -46,6 +58,18 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
                 amlDetailsList.add(amlDetails);
             }
             profile.setAmlDetails(amlDetailsList);
+        }
+        if (spec.getEmail() != null) {
+            profile.setEmail(spec.getEmail());
+        }
+        if (Objects.equals("sole-trader", spec.getType())) {
+            var soleTraderDetails = new SoleTraderDetails();
+            soleTraderDetails.setForename(soleTraderForename + acspNumber);
+            soleTraderDetails.setSurname(soleTraderSurname + acspNumber);
+            soleTraderDetails.setNationality(nationality);
+            soleTraderDetails.setUsualResidentialCountry(
+                    addressService.getCountryOfResidence(Jurisdiction.ENGLAND));
+            profile.setSoleTraderDetails(soleTraderDetails);
         }
         AcspProfile savedProfile = repository.save(profile);
         return new AcspProfileData(savedProfile.getAcspNumber());

@@ -61,7 +61,8 @@ In order to use the generator, there are different possible endpoints that can b
     - `original_description`: The original description of the filing (e.g., `First gazette notice for voluntary strike-off`). Defaults to `Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association`.
     }
 
-  - An usage example for creating `overseas-entity` looks like this: `{"jurisdiction": "united-kingdom}`, this will create an overseas entity with hardcoded values
+  - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
+  - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
   - An usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "persons-with-significant-control", "register_type: "directors"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
@@ -69,6 +70,7 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating test users
 - POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/user` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
+    - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.
     - `password`: The password of the user. This is mandatory.
     - `roles`: The roles of the user along with `permissions`. Roles is optional. If we provide the roles, we need to provide the `id` of the role and the `permissions` associated with the role. permissions are mandatory if we provide role id and vice versa.
     - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
@@ -97,6 +99,7 @@ In order to use the generator, there are different possible endpoints that can b
       - `aml_details`:
           - `supervisory_body`: Supervisory body of the Acsp Profile. This is optional.
           - `membership_details`: Membership details of the Acsp Profile. This is optional.
+      - `email`: The email of the AcspProfile. This is optional.
 
   A usage example looks like this: `{"user_id": "rsf3pdwywvse5yz55mfodfx8","user_role": "test","status": "test","acsp_profile": {"type": "test","status": "test", "acsp_number": "TestACSP", "aml_details": [ {"supervisory_body": "association-of-chartered-certified-accountants-acca","membership_details": "test"} ] } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/acsp-members/{acspMemberId}` will delete the test `Acsp Member` and associated `Acsp Profile`. `acspMemberId` is required to delete the Acsp Member.
