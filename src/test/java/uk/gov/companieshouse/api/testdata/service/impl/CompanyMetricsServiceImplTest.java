@@ -105,12 +105,14 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithRegisters() {
+        var directorsText = "directors";
+        var publicRegisterText = "public-register";
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         RegistersSpec registersSpec = new RegistersSpec();
-        registersSpec.setRegisterType("directors");
-        registersSpec.setRegisterMovedTo("public-register");
+        registersSpec.setRegisterType(directorsText);
+        registersSpec.setRegisterMovedTo(publicRegisterText);
         spec.setRegisters(List.of(registersSpec));
 
         final String etag = "ETAG";
@@ -134,9 +136,9 @@ class CompanyMetricsServiceImplTest {
 
         assertNotNull(metrics.getRegisters());
         assertEquals(1, metrics.getRegisters().size());
-        RegisterItem registerItem = metrics.getRegisters().get("directors");
+        RegisterItem registerItem = metrics.getRegisters().get(directorsText);
         assertNotNull(registerItem);
-        assertEquals("public-register", registerItem.getRegisterMovedTo());
+        assertEquals(publicRegisterText, registerItem.getRegisterMovedTo());
         assertEquals(LocalDate.now(), registerItem.getMovedOn());
     }
 }
