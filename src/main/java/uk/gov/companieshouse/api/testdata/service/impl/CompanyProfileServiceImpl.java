@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +32,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanyProfileServiceImpl.class));
-    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String LINK_STEM = "/company/";
     private static final String FILLING_HISTORY_STEM = "/filing-history";
     private static final String OFFICERS_STEM = "/officers";
@@ -193,7 +191,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             overseasEntity.setHasMortgages(true);
             overseasEntity.setTestData(true);
         }
-        overseasEntity.setCompanyStatus(COMPANY_STATUS_REGISTERED);
+        setCompanyStatus(overseasEntity, spec.getCompanyStatus(), entityType);
         overseasEntity.setType(entityType);
         overseasEntity.setHasCharges(false);
         overseasEntity.setHasInsolvencyHistory(false);
