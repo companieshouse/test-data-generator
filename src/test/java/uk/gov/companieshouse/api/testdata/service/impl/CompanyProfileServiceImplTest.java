@@ -664,6 +664,22 @@ class CompanyProfileServiceImplTest {
         assertEquals("active", profile.getCompanyStatus());
     }
 
+    @Test
+    void createCompanyWithCompanyTypeHasNoFilingHistory() {
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.ASSURANCE_COMPANY);
+        CompanyProfile profile = createAndCapture(spec);
+        assertNull(profile.getLinks().getFilingHistory());
+    }
+
+    @Test
+    void createCompanyWithCompanyTypeHasFilingHistory() {
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.PLC);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals("/company/" + spec.getCompanyNumber() + "/filing-history",profile.getLinks().getFilingHistory());
+    }
+
     private void setCompanyJurisdictionAndType(Jurisdiction jurisdiction, CompanyType companyType) {
         spec.setJurisdiction(jurisdiction);
         spec.setCompanyType(companyType);

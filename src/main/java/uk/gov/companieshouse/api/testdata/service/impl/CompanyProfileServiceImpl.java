@@ -76,6 +76,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private boolean hasCompanyRegisters = false;
 
+    private boolean isCompanyTypeHasFilingHistory = true;
+
     @Override
     public CompanyProfile create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
@@ -114,6 +116,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);
+        isCompanyTypeHasFilingHistory = hasNoFilingHistory(companyParams.getCompanyType());
         String companyTypeValue = companyParams.getCompanyType()
                 != null ? companyParams.getCompanyType().getValue() : "ltd";
         checkAndSetCompanyRegisters(spec);
@@ -344,7 +347,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private Links createLinks(String companyNumber) {
         Links links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
-        links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+        if (!isCompanyTypeHasFilingHistory) {
+            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+        }
         links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
         links.setPersonsWithSignificantControlStatement(
                 LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
@@ -433,5 +438,26 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         } else {
             profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
         }
+    }
+
+    private boolean hasNoFilingHistory(CompanyType companyType) {
+        if (companyType == null) {
+            return false;
+        }
+
+        Set<String> noFilingHistoryCompanyTypes = Set.of(
+                CompanyType.ASSURANCE_COMPANY.getValue(),
+                CompanyType.CHARITABLE_INCORPORATED_ORGANISATION.getValue(),
+                CompanyType.ICVC_SECURITIES.getValue(),
+                CompanyType.ICVC_UMBRELLA.getValue(),
+                CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY.getValue(),
+                CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL.getValue(),
+                CompanyType.PROTECTED_CELL_COMPANY.getValue(),
+                CompanyType.ROYAL_CHARTER.getValue(),
+                CompanyType.SCOTTISH_CHARITABLE_INCORPORATED_ORGANISATION.getValue(),
+                CompanyType.UK_ESTABLISHMENT.getValue()
+        );
+
+        return noFilingHistoryCompanyTypes.contains(companyType.getValue());
     }
 }
