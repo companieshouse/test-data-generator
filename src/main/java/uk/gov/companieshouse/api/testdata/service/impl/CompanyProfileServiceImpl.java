@@ -74,7 +74,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private boolean hasCompanyRegisters = false;
 
-    private boolean isCompanyTypeHasFilingHistory = true;
+    private boolean isCompanyTypeHasNoFilingHistory = true;
 
     @Override
     public CompanyProfile create(CompanySpec spec) {
@@ -114,7 +114,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);
-        isCompanyTypeHasFilingHistory = hasNoFilingHistory(companyParams.getCompanyType());
+        isCompanyTypeHasNoFilingHistory = hasNoFilingHistory(companyParams.getCompanyType());
         String companyTypeValue = companyParams.getCompanyType()
                 != null ? companyParams.getCompanyType().getValue() : "ltd";
         setCompanyHasRegisters(spec);
@@ -345,7 +345,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private Links createLinks(String companyNumber) {
         Links links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
-        if (!isCompanyTypeHasFilingHistory) {
+        if (!isCompanyTypeHasNoFilingHistory) {
             links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
         }
         links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
