@@ -40,6 +40,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     public static final String REGISTRATION_NUMBER = "12345678";
     public static final String LEGAL_FORM = "Legal Form";
     public static final String LEGAL_AUTHORITY = "Legal Authority";
+    public static final String SUPER_SECURE_BO = "super-secure-beneficial-owner";
+    public static final String URL_PREFIX = "/company/";
+    public static final String PSC_SUFFIX = "/persons-with-significant-control/";
 
     private final RandomService randomService;
     private final CompanyPscsRepository repository;
@@ -61,7 +64,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         CORPORATE_BENEFICIAL_OWNER(
                 "corporate-entity-beneficial-owner", "corporate-entity-beneficial-owner"),
         SUPER_SECURE_BENEFICIAL_OWNER(
-                "super-secure-beneficial-owner", "super-secure-beneficial-owner"),
+                SUPER_SECURE_BO, SUPER_SECURE_BO),
         SUPER_SECURE_PSC("super-secure-person-with-significant-control", "super-secure");
 
         private final String kind;
@@ -121,12 +124,12 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     private void buildSuperSecureBeneficialOwner(CompanyPscs companyPscs) {
         companyPscs.setKind(PscType.SUPER_SECURE_BENEFICIAL_OWNER.getKind());
-        companyPscs.setDescription("super-secure-beneficial-owner");
+        companyPscs.setDescription(SUPER_SECURE_BO);
         companyPscs.setCeased(false);
 
-        Links links = new Links();
-        links.setSelf("/company/" + companyPscs.getCompanyNumber()
-                + "/persons-with-significant-control/"
+        var links = new Links();
+        links.setSelf(URL_PREFIX + companyPscs.getCompanyNumber()
+                + PSC_SUFFIX
                 + PscType.SUPER_SECURE_BENEFICIAL_OWNER.getLinkType() + "/" + companyPscs.getId());
         companyPscs.setLinks(links);
     }
@@ -136,10 +139,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         companyPscs.setDescription("super-secure-persons-with-significant-control");
         companyPscs.setCeased(false);
 
-        Links links = new Links();
-        links.setSelf("/company/" + companyPscs.getCompanyNumber()
-                + "/persons-with-significant-control/"
-                + PscType.SUPER_SECURE_PSC.getLinkType() + "/" + companyPscs.getId());
+        var links = new Links();
+        links.setSelf(URL_PREFIX + companyPscs.getCompanyNumber()
+                + PSC_SUFFIX + PscType.SUPER_SECURE_PSC.getLinkType() + "/" + companyPscs.getId());
         companyPscs.setLinks(links);
     }
 
@@ -149,8 +151,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
             case INDIVIDUAL:
                 buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
                 break;
-            case LEGAL_PERSON:
-            case CORPORATE_ENTITY:
+            case LEGAL_PERSON, CORPORATE_ENTITY:
                 buildWithIdentificationPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
                 break;
 
@@ -219,10 +220,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         beneficialOwner.setSanctioned(false);
         beneficialOwner.setIsSanctioned(false);
 
-        Links links = new Links();
-        links.setSelf("/company/" + beneficialOwner.getCompanyNumber()
-                + "/persons-with-significant-control/"
-                + PscType.INDIVIDUAL_BENEFICIAL_OWNER.getLinkType()
+        var links = new Links();
+        links.setSelf(URL_PREFIX + beneficialOwner.getCompanyNumber()
+                + PSC_SUFFIX + PscType.INDIVIDUAL_BENEFICIAL_OWNER.getLinkType()
                 + "/" + beneficialOwner.getId());
 
         beneficialOwner.setUsualResidentialAddress(addressService.getAddress(Jurisdiction.NON_EU));
@@ -233,17 +233,17 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         beneficialOwner.setKind(PscType.CORPORATE_BENEFICIAL_OWNER.getKind());
         beneficialOwner.setName("James Bond");
 
-        Links links = new Links();
-        links.setSelf("/company/" + beneficialOwner.getCompanyNumber()
-                + "/persons-with-significant-control/"
-                + PscType.CORPORATE_BENEFICIAL_OWNER.getLinkType() + "/" + beneficialOwner.getId());
+        var links = new Links();
+        links.setSelf(URL_PREFIX + beneficialOwner.getCompanyNumber()
+                + PSC_SUFFIX + PscType.CORPORATE_BENEFICIAL_OWNER.getLinkType()
+                + "/" + beneficialOwner.getId());
 
         beneficialOwner.setSanctioned(false);
         beneficialOwner.setIsSanctioned(false);
 
         beneficialOwner.setPrincipalOfficeAddress(addressService.getAddress(Jurisdiction.NON_EU));
 
-        Identification identification = new Identification();
+        var identification = new Identification();
         identification.setLegalAuthority(LEGAL_AUTHORITY);
         identification.setLegalForm(LEGAL_FORM);
         beneficialOwner.setIdentification(identification);
@@ -279,8 +279,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
                 + " " + nameElements.getOtherForenames() + " " + nameElements.getSurname());
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber()
-                + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
+        links.setSelf(URL_PREFIX + companyPsc.getCompanyNumber()
+                + PSC_SUFFIX + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
     }
 
@@ -300,8 +300,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         companyPsc.setName("Mr A Jones");
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber()
-                + "/persons-with-significant-control/"
+        links.setSelf(URL_PREFIX + companyPsc.getCompanyNumber()
+                + PSC_SUFFIX
                 + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
     }
