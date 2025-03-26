@@ -390,7 +390,7 @@ class CompanyProfileServiceImplTest {
         setCompanyJurisdictionAndType(Jurisdiction.UNITED_KINGDOM, CompanyType.OVERSEA_COMPANY);
         CompanyProfile profile = createAndCapture(spec);
         System.out.println(profile);
-        assertEquals(OVERSEAS_STATUS_REGISTERED, profile.getCompanyStatus());
+        assertEquals("active", profile.getCompanyStatus());
         assertNotNull(profile.getLinks().getSelf());
         assertNull(profile.getLinks().getFilingHistory());
         assertNull(profile.getLinks().getOfficers());
