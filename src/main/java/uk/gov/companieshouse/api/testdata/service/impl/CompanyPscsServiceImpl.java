@@ -19,83 +19,241 @@ import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.NameElements;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanySpec> {
 
-    static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent", "ownership-of-shares-50-to-75-percent",
-            "ownership-of-shares-75-to-100-percent", "ownership-of-shares-25-to-50-percent-as-trust", "ownership-of-shares-50-to-75-percent-as-trust"};
+    static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent",
+            "ownership-of-shares-50-to-75-percent",
+            "ownership-of-shares-75-to-100-percent",
+            "ownership-of-shares-25-to-50-percent-as-trust",
+            "ownership-of-shares-50-to-75-percent-as-trust"};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
-    public static final String WALES = "Wales";
+    public static final String NATIONALITY = "BRITISH";
+    public static final String REGISTRATION_NUMBER = "12345678";
+    public static final String LEGAL_FORM = "Legal Form";
+    public static final String LEGAL_AUTHORITY = "Legal Authority";
 
-    private RandomService randomService;
-
-    private CompanyPscsRepository repository;
+    private final RandomService randomService;
+    private final CompanyPscsRepository repository;
+    private final AddressService addressService;
 
     @Autowired
-    public CompanyPscsServiceImpl(RandomService randomService, CompanyPscsRepository repository) {
+    public CompanyPscsServiceImpl(RandomService randomService,
+                                  CompanyPscsRepository repository, AddressService addressService) {
         this.randomService = randomService;
         this.repository = repository;
+        this.addressService = addressService;
+    }
+
+    private enum PscType {
+        INDIVIDUAL("individual-person-with-significant-control", "individual"),
+        LEGAL_PERSON("legal-person-person-with-significant-control", "legal-person"),
+        CORPORATE_ENTITY("corporate-entity-person-with-significant-control", "corporate-entity"),
+        INDIVIDUAL_BENEFICIAL_OWNER("individual-beneficial-owner", "individual-beneficial-owner"),
+        CORPORATE_BENEFICIAL_OWNER(
+                "corporate-entity-beneficial-owner", "corporate-entity-beneficial-owner"),
+        SUPER_SECURE_BENEFICIAL_OWNER(
+                "super-secure-beneficial-owner", "super-secure-beneficial-owner"),
+        SUPER_SECURE_PSC("super-secure-person-with-significant-control", "super-secure");
+
+        private final String kind;
+        private final String linkType;
+
+        PscType(String kind, String linkType) {
+            this.kind = kind;
+            this.linkType = linkType;
+        }
+
+        public String getKind() {
+            return kind;
+        }
+
+        public String getLinkType() {
+            return linkType;
+        }
     }
 
     @Override
     public CompanyPscs create(CompanySpec spec) throws DataException {
-
-        CompanyPscs companyPsc = new CompanyPscs();
-        final String companyNumber = spec.getCompanyNumber();
-        final String accountsDueStatus = spec.getAccountsDueStatus();
-        companyPsc.setCompanyNumber(companyNumber);
-
-        Instant createdUpdatedAt = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-        if (StringUtils.hasText(accountsDueStatus)) {
-            var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
-            createdUpdatedAt = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
+            return null;
         }
 
-        String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
-        companyPsc.setId(id);
+        Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
+        if (Boolean.TRUE.equals(hasSuperSecurePscs)) {
+            if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
+                return createSuperSecureBeneficialOwner(spec);
+            } else {
+                return createSuperSecurePsc(spec);
+            }
+        } else if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
+            CompanyPscs individualBeneficialOwner = createBeneficialOwner(spec,
+                    PscType.INDIVIDUAL_BENEFICIAL_OWNER);
+            createBeneficialOwner(spec, PscType.CORPORATE_BENEFICIAL_OWNER);
+            return individualBeneficialOwner;
+        } else {
+            CompanyPscs individualPsc = createPsc(spec, PscType.INDIVIDUAL);
+            createPsc(spec, PscType.LEGAL_PERSON);
+            createPsc(spec, PscType.CORPORATE_ENTITY);
+            return individualPsc;
+        }
+    }
 
-        companyPsc.setAddressLine1("34 Silver Street");
-        companyPsc.setAddressLine2("Silverstone");
-        companyPsc.setCareOf("Care of");
-        companyPsc.setCountry(WALES);
-        companyPsc.setLocality("Cardiff");
-        companyPsc.setPoBox("Po Box");
-        companyPsc.setPostalCode("CF14 3UZ");
-        companyPsc.setPremises("1");
-        companyPsc.setRegion("UK");
-        companyPsc.setAddressSameAsRegisteredOfficeAddress(true);
+    private CompanyPscs createSuperSecureBeneficialOwner(CompanySpec spec) {
+        CompanyPscs superSecureBo = createBasePsc(spec);
+        buildSuperSecureBeneficialOwner(superSecureBo);
+        return repository.save(superSecureBo);
+    }
 
-        companyPsc.setCeasedOn(createdUpdatedAt);
+    private CompanyPscs createSuperSecurePsc(CompanySpec spec) {
+        CompanyPscs superSecurePsc = createBasePsc(spec);
+        buildSuperSecurePsc(superSecurePsc);
+        return repository.save(superSecurePsc);
+    }
+
+    private void buildSuperSecureBeneficialOwner(CompanyPscs companyPscs) {
+        companyPscs.setKind(PscType.SUPER_SECURE_BENEFICIAL_OWNER.getKind());
+        companyPscs.setDescription("super-secure-beneficial-owner");
+        companyPscs.setCeased(false);
+
+        Links links = new Links();
+        links.setSelf("/company/" + companyPscs.getCompanyNumber()
+                + "/persons-with-significant-control/"
+                + PscType.SUPER_SECURE_BENEFICIAL_OWNER.getLinkType() + "/" + companyPscs.getId());
+        companyPscs.setLinks(links);
+    }
+
+    private void buildSuperSecurePsc(CompanyPscs companyPscs) {
+        companyPscs.setKind(PscType.SUPER_SECURE_PSC.getKind());
+        companyPscs.setDescription("super-secure-persons-with-significant-control");
+        companyPscs.setCeased(false);
+
+        Links links = new Links();
+        links.setSelf("/company/" + companyPscs.getCompanyNumber()
+                + "/persons-with-significant-control/"
+                + PscType.SUPER_SECURE_PSC.getLinkType() + "/" + companyPscs.getId());
+        companyPscs.setLinks(links);
+    }
+
+    private CompanyPscs createPsc(CompanySpec spec, PscType pscType) {
+        var companyPscs = createBasePsc(spec);
+        switch (pscType) {
+            case INDIVIDUAL:
+                buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
+                break;
+            case LEGAL_PERSON:
+            case CORPORATE_ENTITY:
+                buildWithIdentificationPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unsupported PSC type: " + pscType);
+        }
+        return repository.save(companyPscs);
+    }
+
+    private CompanyPscs createBeneficialOwner(CompanySpec spec, PscType pscType) {
+        var beneficialOwner = createBasePsc(spec);
+        switch (pscType) {
+            case INDIVIDUAL_BENEFICIAL_OWNER:
+                buildIndividualBeneficialOwner(beneficialOwner);
+                break;
+            case CORPORATE_BENEFICIAL_OWNER:
+                buildCorporateBeneficialOwner(beneficialOwner);
+                break;
+            default:
+                throw new IllegalArgumentException("Unsupported beneficial owner type: " + pscType);
+        }
+        return repository.save(beneficialOwner);
+    }
+
+    private CompanyPscs createBasePsc(CompanySpec spec) {
+        var companyPsc = new CompanyPscs();
+        companyPsc.setCompanyNumber(spec.getCompanyNumber());
+
+        Instant createdUpdatedAt = getCreatedUpdatedAt(spec);
         companyPsc.setCreatedAt(createdUpdatedAt);
-
-        String etag = this.randomService.getEtag();
-        companyPsc.setEtag(etag);
-
-        final List<String> nocList = Arrays.asList(NATURES_OF_CONTROL);
-
-        Collections.shuffle(nocList);
-
-        final long num = randomService.getNumberInRange(0, NATURES_OF_CONTROL.length).orElse(0);
-
-        final List<String> naturesOfControl = new ArrayList<>(nocList.subList(0, ((int) num + 1)));
-
-        companyPsc.setNaturesOfControl(naturesOfControl);
-
-        companyPsc.setNotifiedOn(createdUpdatedAt);
-        companyPsc.setReferenceEtag("reference etag");
-        companyPsc.setReferencePscId("reference psc id");
-        companyPsc.setRegisterEntryDate(createdUpdatedAt);
         companyPsc.setUpdatedAt(createdUpdatedAt);
+        companyPsc.setNotifiedOn(createdUpdatedAt);
+        companyPsc.setRegisterEntryDate(createdUpdatedAt);
 
-        companyPsc.setStatementActionDate(createdUpdatedAt);
+        companyPsc.setId(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+        companyPsc.setEtag(this.randomService.getEtag());
         companyPsc.setStatementType("statement type");
+        companyPsc.setAddress(addressService.getAddress(Jurisdiction.ENGLAND_WALES));
 
-        return repository.save(differentiatePsc(companyPsc));
+        setNaturesOfControl(companyPsc);
+
+        return companyPsc;
+    }
+
+    private Instant getCreatedUpdatedAt(CompanySpec spec) {
+        if (StringUtils.hasText(spec.getAccountsDueStatus())) {
+            LocalDate dueDateNow = randomService.generateAccountsDueDateByStatus(
+                    spec.getAccountsDueStatus());
+            return dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
+        }
+        return LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+    }
+
+    private void buildIndividualBeneficialOwner(CompanyPscs beneficialOwner) {
+        beneficialOwner.setKind(PscType.INDIVIDUAL_BENEFICIAL_OWNER.getKind());
+        beneficialOwner.setCountryOfResidence(addressService.getCountryOfResidence(
+                Jurisdiction.WALES));
+        beneficialOwner.setNationality(NATIONALITY);
+        beneficialOwner.setDateOfBirth(new DateOfBirth(20, 9, 1975));
+
+        beneficialOwner.setNameTitle("Dr.");
+        beneficialOwner.setNameForename("Dray");
+        beneficialOwner.setNameSurname("Day");
+        beneficialOwner.setName("Dr. Dray Day");
+
+        beneficialOwner.setSanctioned(false);
+        beneficialOwner.setIsSanctioned(false);
+
+        Links links = new Links();
+        links.setSelf("/company/" + beneficialOwner.getCompanyNumber()
+                + "/persons-with-significant-control/"
+                + PscType.INDIVIDUAL_BENEFICIAL_OWNER.getLinkType()
+                + "/" + beneficialOwner.getId());
+
+        beneficialOwner.setUsualResidentialAddress(addressService.getAddress(Jurisdiction.NON_EU));
+        beneficialOwner.setResidentialAddressSameAsServiceAddress(false);
+    }
+
+    private void buildCorporateBeneficialOwner(CompanyPscs beneficialOwner) {
+        beneficialOwner.setKind(PscType.CORPORATE_BENEFICIAL_OWNER.getKind());
+        beneficialOwner.setName("James Bond");
+
+        Links links = new Links();
+        links.setSelf("/company/" + beneficialOwner.getCompanyNumber()
+                + "/persons-with-significant-control/"
+                + PscType.CORPORATE_BENEFICIAL_OWNER.getLinkType() + "/" + beneficialOwner.getId());
+
+        beneficialOwner.setSanctioned(false);
+        beneficialOwner.setIsSanctioned(false);
+
+        beneficialOwner.setPrincipalOfficeAddress(addressService.getAddress(Jurisdiction.NON_EU));
+
+        Identification identification = new Identification();
+        identification.setLegalAuthority(LEGAL_AUTHORITY);
+        identification.setLegalForm(LEGAL_FORM);
+        beneficialOwner.setIdentification(identification);
+    }
+
+    private void setNaturesOfControl(CompanyPscs companyPsc) {
+        List<String> nocList = Arrays.asList(NATURES_OF_CONTROL);
+        Collections.shuffle(nocList);
+        long num = randomService.getNumberInRange(0, NATURES_OF_CONTROL.length).orElse(0);
+        companyPsc.setNaturesOfControl(new ArrayList<>(nocList.subList(0, ((int) num + 1))));
     }
 
     @Override
@@ -105,79 +263,46 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         return existingPscs.isPresent();
     }
 
-    private CompanyPscs differentiatePsc(CompanyPscs companyPsc) {
-
-        String pscType;
-        String linkType;
-        Optional<List<CompanyPscs>> existingPscs = repository.findByCompanyNumber(companyPsc.getCompanyNumber());
-
-        switch (existingPscs.orElse(new ArrayList<>()).size()) {
-            case 0:
-                pscType = "individual-person-with-significant-control";
-                linkType = "individual";
-                buildIndividualPsc(companyPsc, pscType, linkType);
-                break;
-            case 1:
-                pscType = "legal-person-person-with-significant-control";
-                linkType = "legal-person";
-                buildWithIdentificationPsc(companyPsc, pscType, linkType);
-                break;
-            default:
-                pscType = "corporate-entity-person-with-significant-control";
-                linkType = "corporate-entity";
-                buildWithIdentificationPsc(companyPsc, pscType, linkType);
-        }
-
-        return companyPsc;
-    }
-
-    private CompanyPscs buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType) {
-
+    private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType) {
         companyPsc.setKind(pscType);
-
-        companyPsc.setCountryOfResidence(WALES);
-        companyPsc.setNationality("British");
-        DateOfBirth dateOfBirth = new DateOfBirth(20, 9, 1975);
-        companyPsc.setDateOfBirth(dateOfBirth);
+        companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(Jurisdiction.WALES));
+        companyPsc.setNationality(NATIONALITY);
+        companyPsc.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 
         NameElements nameElements = new NameElements();
-
         nameElements.setTitle("Mr");
         nameElements.setForename("Test");
         nameElements.setOtherForenames("Tester");
         nameElements.setSurname("Testington");
         companyPsc.setNameElements(nameElements);
-
         companyPsc.setName(nameElements.getTitle() + " " + nameElements.getForename()
                 + " " + nameElements.getOtherForenames() + " " + nameElements.getSurname());
 
-        companyPsc.setKind(pscType);
-
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
+        links.setSelf("/company/" + companyPsc.getCompanyNumber()
+                + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
-
-        return companyPsc;
     }
 
-    private CompanyPscs buildWithIdentificationPsc(CompanyPscs companyPsc, String pscType, String linkType) {
-
+    private void buildWithIdentificationPsc(
+            CompanyPscs companyPsc, String pscType, String linkType) {
         companyPsc.setKind(pscType);
 
         Identification identification = new Identification();
-        identification.setCountryRegistered("UK");
-        identification.setLegalAuthority("Legal Authority");
-        identification.setLegalForm("Legal Form");
-        identification.setPlaceRegistered(WALES);
-        identification.setRegistrationNumber("123456");
+        identification.setCountryRegistered(addressService.getCountryOfResidence(
+                Jurisdiction.UNITED_KINGDOM));
+        identification.setLegalAuthority(LEGAL_AUTHORITY);
+        identification.setLegalForm(LEGAL_FORM);
+        identification.setPlaceRegistered(addressService.getCountryOfResidence(Jurisdiction.WALES));
+        identification.setRegistrationNumber(REGISTRATION_NUMBER);
         companyPsc.setIdentification(identification);
 
         companyPsc.setName("Mr A Jones");
 
         Links links = new Links();
-        links.setSelf("/company/" + companyPsc.getCompanyNumber() + "/persons-with-significant-control/" + linkType + "/" + companyPsc.getId());
+        links.setSelf("/company/" + companyPsc.getCompanyNumber()
+                + "/persons-with-significant-control/"
+                + linkType + "/" + companyPsc.getId());
         companyPsc.setLinks(links);
-
-        return companyPsc;
     }
 }

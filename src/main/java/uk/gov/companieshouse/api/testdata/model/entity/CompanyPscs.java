@@ -1,56 +1,81 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
+import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-import java.time.Instant;
-import java.util.List;
-
 @Document(collection = "delta_company_pscs")
-public class CompanyPscs{
+public class CompanyPscs {
 
     @Id
     @Field("_id")
     private String id;
+    @Field("psc_id")
+    private String pscId;
     @Field("delta_at")
     private String deltaAt;
-    @Field("data.natures_of_control")
-    private List<String> naturesOfControl;
-    @Field("data.kind")
-    private String kind;
+    @Field("notification_id")
+    private String notificationId;
+    @Field("company_number")
+    private String companyNumber;
+    @Field("created.at")
+    private Instant createdAt;
+    @Field("updated.at")
+    private Instant updatedAt;
+    @Field("data.sanctioned")
+    private Boolean sanctioned;
+    @Field("data.etag")
+    private String etag;
     @Field("data.name_elements")
     private NameElements nameElements;
     @Field("data.name")
     private String name;
+    @Field("data.kind")
+    private String kind;
     @Field("data.notified_on")
     private Instant notifiedOn;
+    @Field("data.service_address_is_same_as_registered_office_address")
+    private Boolean serviceAddressSameAsRegisteredOfficeAddress;
+    @Field("data.is_sanctioned")
+    private Boolean isSanctioned;
+    @Field("data.natures_of_control")
+    private List<String> naturesOfControl;
+    @Field("data.links")
+    private Links links;
+    @Field("data.description")
+    private String description;
     @Field("data.nationality")
     private String nationality;
-    @Field("data.address.postal_code")
-    private String postalCode;
-    @Field("data.address.premises")
-    private String premises;
-    @Field("data.address.locality")
-    private String locality;
-    @Field("data.address.country")
-    private String country;
-    @Field("data.address.address_line_1")
-    private String addressLine1;
-    @Field("data.address.address_line_2")
-    private String addressLine2;
-    @Field("data.address.care_of")
-    private String careOf;
-    @Field("data.address.poBox")
-    private String poBox;
-    @Field("data.address.region")
-    private String region;
+    @Field("data.name_elements.title")
+    private String nameTitle;
+    @Field("data.name_elements.forename")
+    private String nameForename;
+    @Field("data.name_elements.other_forenames")
+    private String nameOtherForenames;
+    @Field("data.name_elements.surname")
+    private String nameSurname;
     @Field("data.country_of_residence")
     private String countryOfResidence;
+    @Field("data.principal_office_address")
+    private Address principalOfficeAddress;
+    @Field("data.address")
+    private Address address;
+    @Field("data.identification")
+    private Identification identification;
+    @Field("sensitive_data.usual_residential_address")
+    private Address usualResidentialAddress;
+    @Field("sensitive_data.date_of_birth")
+    private DateOfBirth dateOfBirth;
+    @Field("sensitive_data.residential_address_is_same_as_service_address")
+    private Boolean residentialAddressSameAsServiceAddress;
     @Field("data.address_same_as_registered_office_address")
     private Boolean addressSameAsRegisteredOfficeAddress;
     @Field("data.ceased_on")
     private Instant ceasedOn;
+    @Field("data.cesed")
+    private Boolean ceased;
     @Field("data.reference_etag")
     private String referenceEtag;
     @Field("data.reference_psc_id")
@@ -61,42 +86,78 @@ public class CompanyPscs{
     private Instant statementActionDate;
     @Field("data.statement_type")
     private String statementType;
-    @Field("sensitive_data.date_of_birth")
-    private DateOfBirth dateOfBirth;
-    @Field("data.links")
-    private Links links;
-    @Field("data.etag")
-    private String etag;
-    @Field("company_number")
-    private String companyNumber;
-    @Field("psc_id")
-    private String pscId;
-    @Field("updated.at")
-    private Instant updatedAt;
-    @Field("notification_id")
-    private String notificationId;
-    @Field("created.at")
-    private Instant createdAt;
-    @Field("data.identification")
-    private Identification identification;
 
     public String getId() {
         return id;
     }
 
-    public void setId(String id) { this.id = id; }
+    public void setId(String id) {
+        this.id = id;
+    }
 
-    public String getDeltaAt() { return deltaAt; }
+    public String getPscId() {
+        return pscId;
+    }
 
-    public void setDeltaAt(String deltaAt) {this.deltaAt = deltaAt; }
+    public void setPscId(String pscId) {
+        this.pscId = pscId;
+    }
 
-    public List<String> getNaturesOfControl() { return naturesOfControl; }
+    public String getDeltaAt() {
+        return deltaAt;
+    }
 
-    public void setNaturesOfControl(List<String> naturesOfControl) { this.naturesOfControl = naturesOfControl; }
+    public void setDeltaAt(String deltaAt) {
+        this.deltaAt = deltaAt;
+    }
 
-    public String getKind() { return kind; }
+    public String getNotificationId() {
+        return notificationId;
+    }
 
-    public void setKind(String kind) { this.kind = kind; }
+    public void setNotificationId(String notificationId) {
+        this.notificationId = notificationId;
+    }
+
+    public String getCompanyNumber() {
+        return companyNumber;
+    }
+
+    public void setCompanyNumber(String companyNumber) {
+        this.companyNumber = companyNumber;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Boolean getSanctioned() {
+        return sanctioned;
+    }
+
+    public void setSanctioned(Boolean sanctioned) {
+        this.sanctioned = sanctioned;
+    }
+
+    public String getEtag() {
+        return etag;
+    }
+
+    public void setEtag(String etag) {
+        this.etag = etag;
+    }
 
     public NameElements getNameElements() {
         return nameElements;
@@ -106,75 +167,167 @@ public class CompanyPscs{
         this.nameElements = nameElements;
     }
 
-    public String getName() { return name; }
-
-    public void setName(String name) { this.name = name; }
-
-    public Instant getNotifiedOn() { return notifiedOn; }
-
-    public void setNotifiedOn(Instant notifiedOn) { this.notifiedOn = notifiedOn; }
-
-    public String getNationality() { return nationality; }
-
-    public void setNationality(String nationality) { this.nationality = nationality; }
-
-    public String getPostalCode() { return postalCode; }
-
-    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
-
-    public String getPremises() { return premises; }
-
-    public void setPremises(String premises) { this.premises = premises; }
-
-    public String getLocality() { return locality; }
-
-    public void setLocality(String locality) { this.locality = locality; }
-
-    public String getCountry() { return country; }
-
-    public void setCountry(String country) { this.country = country; }
-
-    public String getAddressLine1() { return addressLine1; }
-
-    public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }
-
-    public String getAddressLine2() {
-        return addressLine2;
+    public String getName() {
+        return name;
     }
 
-    public void setAddressLine2(String addressLine2) {
-        this.addressLine2 = addressLine2;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getCareOf() {
-        return careOf;
+    public String getKind() {
+        return kind;
     }
 
-    public void setCareOf(String careOf) {
-        this.careOf = careOf;
+    public void setKind(String kind) {
+        this.kind = kind;
     }
 
-    public String getPoBox() {
-        return poBox;
+    public Instant getNotifiedOn() {
+        return notifiedOn;
     }
 
-    public void setPoBox(String poBox) {
-        this.poBox = poBox;
+    public void setNotifiedOn(Instant notifiedOn) {
+        this.notifiedOn = notifiedOn;
     }
 
-    public String getRegion() {
-        return region;
+    public Boolean getServiceAddressSameAsRegisteredOfficeAddress() {
+        return serviceAddressSameAsRegisteredOfficeAddress;
     }
 
-    public void setRegion(String region) {
-        this.region = region;
+    public void setServiceAddressSameAsRegisteredOfficeAddress(
+            Boolean serviceAddressSameAsRegisteredOfficeAddress) {
+        this.serviceAddressSameAsRegisteredOfficeAddress =
+                serviceAddressSameAsRegisteredOfficeAddress;
+    }
+
+    public Boolean getIsSanctioned() {
+        return isSanctioned;
+    }
+
+    public void setIsSanctioned(Boolean isSanctioned) {
+        this.isSanctioned = isSanctioned;
+    }
+
+    public List<String> getNaturesOfControl() {
+        return naturesOfControl;
+    }
+
+    public void setNaturesOfControl(List<String> naturesOfControl) {
+        this.naturesOfControl = naturesOfControl;
+    }
+
+    public Links getLinks() {
+        return links;
+    }
+
+    public void setLinks(Links links) {
+        this.links = links;
+    }
+
+    public Address getPrincipalOfficeAddress() {
+        return principalOfficeAddress;
+    }
+
+    public void setPrincipalOfficeAddress(Address principalOfficeAddress) {
+        this.principalOfficeAddress = principalOfficeAddress;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+    public Address getUsualResidentialAddress() {
+        return usualResidentialAddress;
+    }
+
+    public void setUsualResidentialAddress(Address usualResidentialAddress) {
+        this.usualResidentialAddress = usualResidentialAddress;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public void setNationality(String nationality) {
+        this.nationality = nationality;
+    }
+
+    public String getNameTitle() {
+        return nameTitle;
+    }
+
+    public void setNameTitle(String nameTitle) {
+        this.nameTitle = nameTitle;
+    }
+
+    public String getNameForename() {
+        return nameForename;
+    }
+
+    public void setNameForename(String nameForename) {
+        this.nameForename = nameForename;
+    }
+
+    public String getNameOtherForenames() {
+        return nameOtherForenames;
+    }
+
+    public void setNameOtherForenames(String nameOtherForenames) {
+        this.nameOtherForenames = nameOtherForenames;
+    }
+
+    public String getNameSurname() {
+        return nameSurname;
+    }
+
+    public void setNameSurname(String nameSurname) {
+        this.nameSurname = nameSurname;
+    }
+
+    public String getCountryOfResidence() {
+        return countryOfResidence;
+    }
+
+    public void setCountryOfResidence(String countryOfResidence) {
+        this.countryOfResidence = countryOfResidence;
+    }
+
+    public Identification getIdentification() {
+        return identification;
+    }
+
+    public void setIdentification(Identification identification) {
+        this.identification = identification;
+    }
+
+    public DateOfBirth getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(DateOfBirth dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public Boolean getResidentialAddressSameAsServiceAddress() {
+        return residentialAddressSameAsServiceAddress;
+    }
+
+    public void setResidentialAddressSameAsServiceAddress(
+            Boolean residentialAddressSameAsServiceAddress) {
+        this.residentialAddressSameAsServiceAddress = residentialAddressSameAsServiceAddress;
     }
 
     public Boolean getAddressSameAsRegisteredOfficeAddress() {
         return addressSameAsRegisteredOfficeAddress;
     }
 
-    public void setAddressSameAsRegisteredOfficeAddress(Boolean addressSameAsRegisteredOfficeAddress) {
+    public void setAddressSameAsRegisteredOfficeAddress(
+            Boolean addressSameAsRegisteredOfficeAddress) {
         this.addressSameAsRegisteredOfficeAddress = addressSameAsRegisteredOfficeAddress;
     }
 
@@ -226,47 +379,19 @@ public class CompanyPscs{
         this.statementType = statementType;
     }
 
-    public String getCountryOfResidence() { return countryOfResidence; }
-
-    public void setCountryOfResidence(String countryOfResidence) { this.countryOfResidence = countryOfResidence; }
-
-    public DateOfBirth getDateOfBirth() { return dateOfBirth; }
-
-    public void setDateOfBirth(DateOfBirth dateOfBirth) { this.dateOfBirth = dateOfBirth; }
-
-    public Links getLinks() { return links; }
-
-    public void setLinks(Links links) { this.links = links; }
-
-    public String getEtag() { return etag; }
-
-    public void setEtag(String etag) { this.etag = etag; }
-
-    public String getCompanyNumber() { return companyNumber; }
-
-    public void setCompanyNumber(String companyNumber) { this.companyNumber = companyNumber; }
-
-    public String getPscId() { return pscId; }
-
-    public void setPscId(String pscId) { this.pscId = pscId; }
-
-    public Instant getUpdatedAt() { return updatedAt; }
-
-    public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
-
-    public String getNotificationId() { return notificationId; }
-
-    public void setNotificationId(String notificationId) { this.notificationId = notificationId; }
-
-    public Instant getCreatedAt() { return createdAt; }
-
-    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
-
-    public Identification getIdentification() {
-        return identification;
+    public Boolean getCeased() {
+        return ceased;
     }
 
-    public void setIdentification(Identification identification) {
-        this.identification = identification;
+    public void setCeased(Boolean ceased) {
+        this.ceased = ceased;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

@@ -140,9 +140,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
-        if (companyParams.getHasSuperSecurePscs() != null) {
-            profile.setHasSuperSecurePscs(companyParams.getHasSuperSecurePscs());
-        }
+        Boolean hasSuperSecurePscs = companyParams.getHasSuperSecurePscs();
+        profile.setHasSuperSecurePscs(hasSuperSecurePscs != null ? hasSuperSecurePscs : false);
         setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
 
@@ -295,7 +294,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setAccounts(accounts);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            overseasEntity.setHasSuperSecurePscs(spec.getHasSuperSecurePscs());
+            Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
+            overseasEntity.setHasSuperSecurePscs(hasSuperSecurePscs != null ? hasSuperSecurePscs : false);
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setDeltaAt(Instant.now());
             OverseasEntity.IUpdated updated = OverseasEntity.createUpdated();
