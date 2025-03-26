@@ -20,6 +20,9 @@ public class AcspProfileSpec {
     @JsonProperty("email")
     private String email;
 
+    @JsonProperty("business_sector")
+    private String businessSector;
+
     public String getStatus() {
         return status;
     }
@@ -58,5 +61,11 @@ public class AcspProfileSpec {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getBusinessSector() { return businessSector; }
+
+    public void setBusinessSector(String businessSector) {
+        this.businessSector = businessSector;
     }
 }

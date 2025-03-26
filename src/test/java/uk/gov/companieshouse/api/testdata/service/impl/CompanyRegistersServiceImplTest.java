@@ -45,17 +45,29 @@ class CompanyRegistersServiceImplTest {
 
     private CompanySpec companySpec;
 
+    private static final String DIRECTORS_TEXT = "directors";
+    private static final String DIRECTORS_REGISTER_TYPE = "directors_register";
+    private static final String SECRETARIES_TEXT = "secretaries";
+    private static final String SECRETARIES_REGISTER_TYPE = "secretaries_register";
+    private static final String PSC_TEXT = "persons-with-significant-control";
+    private static final String MEMBERS_TEXT = "members";
+    private static final String PSC_REGISTER_TYPE = "persons_with_significant_control_register";
+    private static final String PSC_REGISTER_STRING = "persons_with_significant_control";
+    private static final String REGISTERS_TEXT = "registers";
+    private static final String REGISTERS_MOVE_TO_PUBLIC_REGISTER = "public_register";
+    private static final String UNSPECIFIED_LOCATION = "unspecified-location";
+    private static final String COMPANY_NUMBER = "12345678";
 
     @Test
     void testCreateCompanyRegisters() throws DataException {
-        setRegister("directors");
+        setRegister(DIRECTORS_TEXT);
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
-        assertEquals("12345678", createdRegisters.getId());
-        assertEquals("12345678", createdRegisters.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, createdRegisters.getId());
+        assertEquals(COMPANY_NUMBER, createdRegisters.getCompanyNumber());
         assertEquals("dummy-etag", createdRegisters.getEtag());
-        assertEquals("/company/12345678/registers", createdRegisters.getSelfLink());
-        assertEquals("registers", createdRegisters.getKind());
+        assertEquals("/company/" + COMPANY_NUMBER + "/registers", createdRegisters.getSelfLink());
+        assertEquals(REGISTERS_TEXT, createdRegisters.getKind());
         var now = LocalDate.now();
         assertEquals(now, createdRegisters.getCreatedAt());
         assertEquals(now, createdRegisters.getDeltaAt());
@@ -63,15 +75,16 @@ class CompanyRegistersServiceImplTest {
         Map<String, Register> registers = createdRegisters.getRegisters();
         assertNotNull(registers);
         assertEquals(1, registers.size());
-        assertEquals("directors", registers.get("directors").getRegisterType());
-        assertEquals("/company/12345678/officers?register_view=true&register_type=directors",
-                registers.get("directors").getLinks().get("directors_register"));
+        assertEquals(DIRECTORS_TEXT, registers.get(DIRECTORS_TEXT).getRegisterType());
+        assertEquals("/company/" + COMPANY_NUMBER
+                        + "/officers?register_view=true&register_type=directors",
+                registers.get(DIRECTORS_TEXT).getLinks().get(DIRECTORS_REGISTER_TYPE));
         verify(repository, times(1)).save(any(CompanyRegisters.class));
     }
 
     @Test
     void testCreateCompanyRegistersWithMultipleRegisters() throws DataException {
-        setRegister("directors");
+        setRegister(DIRECTORS_TEXT);
         RegistersSpec secretariesRegister = new RegistersSpec();
         secretariesRegister.setRegisterType("secretaries");
         secretariesRegister.setRegisterMovedTo("Companies House");
@@ -83,61 +96,64 @@ class CompanyRegistersServiceImplTest {
 
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertEquals(2, createdRegisters.getRegisters().size());
-        assertNotNull(createdRegisters.getRegisters().get("directors"));
-        assertNotNull(createdRegisters.getRegisters().get("secretaries"));
+        assertNotNull(createdRegisters.getRegisters().get(DIRECTORS_TEXT));
+        assertNotNull(createdRegisters.getRegisters().get(SECRETARIES_TEXT));
     }
 
     @Test
     void testGenerateRegisterLinksForDirectors() throws DataException {
-        setRegister("directors");
+        setRegister(DIRECTORS_TEXT);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
-                .get("directors").getLinks();
+                .get(DIRECTORS_TEXT).getLinks();
 
         assertNotNull(links);
         assertEquals(1, links.size());
-        assertEquals("/company/12345678/officers?register_view=true&register_type=directors",
-                links.get("directors_register"));
+        assertEquals("/company/" + COMPANY_NUMBER
+                        + "/officers?register_view=true&register_type=directors",
+                links.get(DIRECTORS_REGISTER_TYPE));
     }
 
     @Test
     void testGenerateRegisterLinksForSecretaries() throws DataException {
-        setRegister("secretaries");
+        setRegister(SECRETARIES_TEXT);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
-                .get("secretaries").getLinks();
+                .get(SECRETARIES_TEXT).getLinks();
 
         assertNotNull(links);
         assertEquals(1, links.size());
-        assertEquals("/company/12345678/officers?register_view=true&register_type=secretaries",
-                links.get("secretaries_register"));
+        assertEquals("/company/" + COMPANY_NUMBER
+                        + "/officers?register_view=true&register_type=secretaries",
+                links.get(SECRETARIES_REGISTER_TYPE));
     }
 
     @Test
     void testGenerateRegisterLinksForPsc() throws DataException {
-        setRegister("persons-with-significant-control");
+        setRegister(PSC_TEXT);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
-                .get("persons_with_significant_control").getLinks();
+                .get(PSC_REGISTER_STRING).getLinks();
 
         assertNotNull(links);
         assertEquals(1, links.size());
-        assertEquals("/company/12345678/persons-with-significant-control?register_view=true",
-                links.get("persons_with_significant_control_register"));
+        assertEquals("/company/" + COMPANY_NUMBER
+                        + "/persons-with-significant-control?register_view=true",
+                links.get(PSC_REGISTER_TYPE));
     }
 
     @Test
     void testGenerateRegisterLinksForNull() throws DataException {
-        setRegister("members");
+        setRegister(MEMBERS_TEXT);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
-                .get("members").getLinks();
+                .get(MEMBERS_TEXT).getLinks();
         assertNull(links);
     }
 
     @Test
     void testCreateWithNoRegisters() throws DataException {
-        setRegister("directors");
+        setRegister(DIRECTORS_TEXT);
         companySpec.setRegisters(Collections.emptyList());
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
@@ -155,7 +171,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testCreateCompanyRegistersWithBlankRegisterType() {
-        setCompanySpec("", "public_register");
+        setCompanySpec("", REGISTERS_MOVE_TO_PUBLIC_REGISTER);
         DataException exception = assertThrows(
                 DataException.class, () -> service.create(companySpec));
         assertEquals("Register type must be provided", exception.getMessage());
@@ -163,7 +179,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testCreateCompanyRegistersWithNullRegisterMovedTo() {
-        setCompanySpec("directors", null);
+        setCompanySpec(DIRECTORS_TEXT, null);
         DataException exception = assertThrows(
                 DataException.class, () -> service.create(companySpec));
         assertEquals("Register moved to must be provided", exception.getMessage());
@@ -171,7 +187,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testCreateCompanyRegistersWithBlankRegisterMovedTo() {
-        setCompanySpec("members", "");
+        setCompanySpec(MEMBERS_TEXT, "");
         DataException exception = assertThrows(
                 DataException.class, () -> service.create(companySpec));
         assertEquals("Register moved to must be provided", exception.getMessage());
@@ -180,32 +196,43 @@ class CompanyRegistersServiceImplTest {
     @Test
     void testDeletedCompanyRegistersExists() {
         CompanyRegisters mockRegister = new CompanyRegisters();
-        mockRegister.setCompanyNumber("12345678");
-        when(repository.deleteByCompanyNumber("12345678")).thenReturn(Optional.of(mockRegister));
-
-        boolean deleted = service.delete("12345678");
-
+        mockRegister.setCompanyNumber(COMPANY_NUMBER);
+        when(repository.deleteByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(mockRegister));
+        boolean deleted = service.delete(COMPANY_NUMBER);
         assertTrue(deleted);
-        verify(repository, times(1)).deleteByCompanyNumber("12345678");
+        verify(repository, times(1)).deleteByCompanyNumber(COMPANY_NUMBER);
     }
 
     @Test
     void testDeletedCompanyRegistersNotExists() {
-        when(repository.deleteByCompanyNumber("99999999")).thenReturn(Optional.empty());
-        boolean deleted = service.delete("99999999");
+        when(repository.deleteByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        boolean deleted = service.delete(COMPANY_NUMBER);
         assertFalse(deleted);
-        verify(repository, times(1)).deleteByCompanyNumber("99999999");
+        verify(repository, times(1)).deleteByCompanyNumber(COMPANY_NUMBER);
     }
 
     @Test
     void testDeletedCompanyRegistersThrowsException() {
-        when(repository.deleteByCompanyNumber("12345678"))
+        when(repository.deleteByCompanyNumber(COMPANY_NUMBER))
                 .thenThrow(new RuntimeException("Database error"));
 
         RuntimeException exception = assertThrows(
-                RuntimeException.class, () -> service.delete("12345678"));
+                RuntimeException.class, () -> service.delete(COMPANY_NUMBER));
         assertEquals("Database error", exception.getMessage());
-        verify(repository, times(1)).deleteByCompanyNumber("12345678");
+        verify(repository, times(1)).deleteByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void testGenerateRegisterLinksForUnspecifiedLocation() throws DataException {
+        setCompanySpec(DIRECTORS_TEXT, UNSPECIFIED_LOCATION);
+        when(randomService.getEtag()).thenReturn("dummy-etag");
+        when(repository.save(any(CompanyRegisters.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        CompanyRegisters createdRegisters = service.create(companySpec);
+        Map<String, String> links = createdRegisters.getRegisters()
+                .get(DIRECTORS_TEXT).getLinks();
+        assertNull(links);
     }
 
     private void setRegister(String registerType) {
@@ -217,7 +244,7 @@ class CompanyRegistersServiceImplTest {
 
     private void setCompanySpec(String registerType, String registerMovedTo) {
         companySpec = new CompanySpec();
-        companySpec.setCompanyNumber("12345678");
+        companySpec.setCompanyNumber(COMPANY_NUMBER);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);

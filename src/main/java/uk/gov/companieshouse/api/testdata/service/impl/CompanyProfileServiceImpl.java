@@ -117,7 +117,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         isCompanyTypeHasFilingHistory = hasNoFilingHistory(companyParams.getCompanyType());
         String companyTypeValue = companyParams.getCompanyType()
                 != null ? companyParams.getCompanyType().getValue() : "ltd";
-        checkAndSetCompanyRegisters(spec);
+        setCompanyHasRegisters(spec);
         profile.setCompanyNumber(companyNumber);
         String nonJurisdictionType = (jurisdiction != null)
                 ? checkNonJurisdictionTypes(jurisdiction, companyTypeValue) : "";
@@ -412,10 +412,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void checkAndSetCompanyRegisters(CompanySpec spec) {
-        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-            hasCompanyRegisters = true;
-        }
+    private void setCompanyHasRegisters(CompanySpec spec) {
+        hasCompanyRegisters = spec.getRegisters() != null && !spec.getRegisters().isEmpty();
     }
 
     private void setCompanyStatus(
