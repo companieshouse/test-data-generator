@@ -266,6 +266,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType) {
         companyPsc.setKind(pscType);
         companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(Jurisdiction.WALES));
+        companyPsc.setAddress(addressService.getAddress(Jurisdiction.SCOTLAND));
+        companyPsc.setUsualResidentialAddress(addressService.getAddress(Jurisdiction.WALES));
+        companyPsc.setResidentialAddressSameAsServiceAddress(false);
         companyPsc.setNationality(NATIONALITY);
         companyPsc.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 

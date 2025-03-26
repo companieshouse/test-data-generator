@@ -74,7 +74,7 @@ public class CompanyPscs {
     private Boolean addressSameAsRegisteredOfficeAddress;
     @Field("data.ceased_on")
     private Instant ceasedOn;
-    @Field("data.cesed")
+    @Field("data.ceased")
     private Boolean ceased;
     @Field("data.reference_etag")
     private String referenceEtag;
@@ -183,16 +183,8 @@ public class CompanyPscs {
         this.kind = kind;
     }
 
-    public Instant getNotifiedOn() {
-        return notifiedOn;
-    }
-
     public void setNotifiedOn(Instant notifiedOn) {
         this.notifiedOn = notifiedOn;
-    }
-
-    public Boolean getServiceAddressSameAsRegisteredOfficeAddress() {
-        return serviceAddressSameAsRegisteredOfficeAddress;
     }
 
     public void setServiceAddressSameAsRegisteredOfficeAddress(
@@ -201,16 +193,8 @@ public class CompanyPscs {
                 serviceAddressSameAsRegisteredOfficeAddress;
     }
 
-    public Boolean getIsSanctioned() {
-        return isSanctioned;
-    }
-
     public void setIsSanctioned(Boolean isSanctioned) {
         this.isSanctioned = isSanctioned;
-    }
-
-    public List<String> getNaturesOfControl() {
-        return naturesOfControl;
     }
 
     public void setNaturesOfControl(List<String> naturesOfControl) {
@@ -225,10 +209,6 @@ public class CompanyPscs {
         this.links = links;
     }
 
-    public Address getPrincipalOfficeAddress() {
-        return principalOfficeAddress;
-    }
-
     public void setPrincipalOfficeAddress(Address principalOfficeAddress) {
         this.principalOfficeAddress = principalOfficeAddress;
     }
@@ -241,48 +221,20 @@ public class CompanyPscs {
         this.address = address;
     }
 
-    public Address getUsualResidentialAddress() {
-        return usualResidentialAddress;
-    }
-
     public void setUsualResidentialAddress(Address usualResidentialAddress) {
         this.usualResidentialAddress = usualResidentialAddress;
-    }
-
-    public String getNationality() {
-        return nationality;
     }
 
     public void setNationality(String nationality) {
         this.nationality = nationality;
     }
 
-    public String getNameTitle() {
-        return nameTitle;
-    }
-
     public void setNameTitle(String nameTitle) {
         this.nameTitle = nameTitle;
     }
 
-    public String getNameForename() {
-        return nameForename;
-    }
-
     public void setNameForename(String nameForename) {
         this.nameForename = nameForename;
-    }
-
-    public String getNameOtherForenames() {
-        return nameOtherForenames;
-    }
-
-    public void setNameOtherForenames(String nameOtherForenames) {
-        this.nameOtherForenames = nameOtherForenames;
-    }
-
-    public String getNameSurname() {
-        return nameSurname;
     }
 
     public void setNameSurname(String nameSurname) {
@@ -297,33 +249,17 @@ public class CompanyPscs {
         this.countryOfResidence = countryOfResidence;
     }
 
-    public Identification getIdentification() {
-        return identification;
-    }
-
     public void setIdentification(Identification identification) {
         this.identification = identification;
-    }
-
-    public DateOfBirth getDateOfBirth() {
-        return dateOfBirth;
     }
 
     public void setDateOfBirth(DateOfBirth dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public Boolean getResidentialAddressSameAsServiceAddress() {
-        return residentialAddressSameAsServiceAddress;
-    }
-
     public void setResidentialAddressSameAsServiceAddress(
             Boolean residentialAddressSameAsServiceAddress) {
         this.residentialAddressSameAsServiceAddress = residentialAddressSameAsServiceAddress;
-    }
-
-    public Boolean getAddressSameAsRegisteredOfficeAddress() {
-        return addressSameAsRegisteredOfficeAddress;
     }
 
     public void setAddressSameAsRegisteredOfficeAddress(
@@ -363,10 +299,6 @@ public class CompanyPscs {
         this.registerEntryDate = registerEntryDate;
     }
 
-    public Instant getStatementActionDate() {
-        return statementActionDate;
-    }
-
     public void setStatementActionDate(Instant statementActionDate) {
         this.statementActionDate = statementActionDate;
     }
@@ -377,10 +309,6 @@ public class CompanyPscs {
 
     public void setStatementType(String statementType) {
         this.statementType = statementType;
-    }
-
-    public Boolean getCeased() {
-        return ceased;
     }
 
     public void setCeased(Boolean ceased) {
