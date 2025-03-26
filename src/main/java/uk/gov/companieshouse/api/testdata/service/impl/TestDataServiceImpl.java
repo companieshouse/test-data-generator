@@ -115,17 +115,7 @@ public class TestDataServiceImpl implements TestDataService {
             var authCode = companyAuthCodeService.create(spec);
             companyMetricsService.create(spec);
             companyPscStatementService.create(spec);
-
-            // Logic for creating PSCs checks the repository for existing PSCs
-            // before proceeding to create a PSC. This creates a default of 3 PSCs
-            // Personal, Legal and Corporate PSCs.
-            if (Jurisdiction.UNITED_KINGDOM.equals(spec.getJurisdiction())) {
-                companyPscsService.create(spec);
-            } else {
-                companyPscsService.create(spec);
-                companyPscsService.create(spec);
-                companyPscsService.create(spec);
-            }
+            companyPscsService.create(spec);
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 this.companyRegistersService.create(spec);

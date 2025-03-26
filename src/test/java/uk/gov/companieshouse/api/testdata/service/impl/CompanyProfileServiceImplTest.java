@@ -93,14 +93,12 @@ class CompanyProfileServiceImplTest {
         savedProfile = new CompanyProfile();
     }
 
-    // Helper method to set up common mocks for create tests.
     private void setupCommonMocks(CompanySpec spec, Address mockAddress) {
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
         Mockito.lenient().when(repository.save(any())).thenReturn(savedProfile);
         Mockito.lenient().when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
     }
 
-    // Helper method that performs create() and captures the saved CompanyProfile.
     private CompanyProfile createAndCapture(CompanySpec spec) {
         Address mockAddress = new Address("", "", "", "", "", "");
         setupCommonMocks(spec, mockAddress);
@@ -110,7 +108,6 @@ class CompanyProfileServiceImplTest {
         return captor.getValue();
     }
 
-    // Common assertions for a created CompanyProfile.
     private void assertCreatedProfile(CompanyProfile profile, String companyStatus, String jurisdiction,
                                       String companyType, Boolean hasInsolvencyHistory) {
         assertEquals(COMPANY_NUMBER, profile.getId());
@@ -271,7 +268,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithSuperSecurePscsNull() {
         spec.setHasSuperSecurePscs(null);
         CompanyProfile profile = createAndCapture(spec);
-        assertNull(profile.getHasSuperSecurePscs());
+        assertFalse(profile.getHasSuperSecurePscs());
     }
 
     @Test
