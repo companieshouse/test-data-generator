@@ -161,7 +161,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(capturedSpec);
         verify(companyPscStatementService, times(1)).create(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
-        verify(companyPscsService, times(3)).create(capturedSpec);
+        verify(companyPscsService, times(1)).create(capturedSpec);
 
         assertEquals(expectedFullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + expectedFullCompanyNumber, createdCompany.getCompanyUri());
