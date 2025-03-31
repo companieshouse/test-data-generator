@@ -294,7 +294,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setAccounts(accounts);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            overseasEntity.setHasSuperSecurePscs(Boolean.TRUE.equals(spec.getHasSuperSecurePscs()));
+            overseasEntity.setHasSuperSecurePscs(BooleanUtils.isTrue(spec.getHasSuperSecurePscs()));
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setDeltaAt(Instant.now());
             OverseasEntity.IUpdated updated = OverseasEntity.createUpdated();
