@@ -46,7 +46,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
   - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
   - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
-  - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to no value, field not present in the database.
+  - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to false, `true` value will create a Psc entry of `super-secure-person-with-significant-control` or `super-secure-beneficial-owner` depending on CompanyType.
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
   - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1.
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.

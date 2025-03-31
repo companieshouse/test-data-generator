@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -140,9 +141,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
-        if (companyParams.getHasSuperSecurePscs() != null) {
-            profile.setHasSuperSecurePscs(companyParams.getHasSuperSecurePscs());
-        }
+        profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
         setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
 
@@ -295,7 +294,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setAccounts(accounts);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            overseasEntity.setHasSuperSecurePscs(spec.getHasSuperSecurePscs());
+            overseasEntity.setHasSuperSecurePscs(BooleanUtils.isTrue(spec.getHasSuperSecurePscs()));
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setDeltaAt(Instant.now());
             OverseasEntity.IUpdated updated = OverseasEntity.createUpdated();
