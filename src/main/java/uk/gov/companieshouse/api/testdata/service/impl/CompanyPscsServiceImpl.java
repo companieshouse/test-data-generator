@@ -43,6 +43,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     public static final String SUPER_SECURE_BO = "super-secure-beneficial-owner";
     public static final String URL_PREFIX = "/company/";
     public static final String PSC_SUFFIX = "/persons-with-significant-control/";
+    public static final String TITLE = "Dr.";
+    public static final String FIRST_NAME = "First";
+    public static final String LAST_NAME = "Last";
 
     private final RandomService randomService;
     private final CompanyPscsRepository repository;
@@ -212,10 +215,10 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         beneficialOwner.setNationality(NATIONALITY);
         beneficialOwner.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 
-        beneficialOwner.setNameTitle("Dr.");
-        beneficialOwner.setNameForename("Dray");
-        beneficialOwner.setNameSurname("Day");
-        beneficialOwner.setName("Dr. Dray Day");
+        beneficialOwner.setNameTitle(TITLE);
+        beneficialOwner.setNameForename(FIRST_NAME);
+        beneficialOwner.setNameSurname(LAST_NAME);
+        beneficialOwner.setName(TITLE + " " + FIRST_NAME + " " + LAST_NAME);
 
         beneficialOwner.setSanctioned(false);
         beneficialOwner.setIsSanctioned(false);
@@ -231,7 +234,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     private void buildCorporateBeneficialOwner(CompanyPscs beneficialOwner) {
         beneficialOwner.setKind(PscType.CORPORATE_BENEFICIAL_OWNER.getKind());
-        beneficialOwner.setName("James Bond");
+        beneficialOwner.setName(FIRST_NAME + " " + LAST_NAME);
 
         var links = new Links();
         links.setSelf(URL_PREFIX + beneficialOwner.getCompanyNumber()

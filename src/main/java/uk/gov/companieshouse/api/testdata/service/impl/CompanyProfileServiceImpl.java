@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -141,6 +142,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         profile.setHasSuperSecurePscs(Boolean.TRUE.equals(companyParams.getHasSuperSecurePscs()));
+        profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
         setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
 
