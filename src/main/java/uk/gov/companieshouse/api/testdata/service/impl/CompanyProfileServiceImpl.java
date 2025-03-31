@@ -141,7 +141,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
-        profile.setHasSuperSecurePscs(Boolean.TRUE.equals(companyParams.getHasSuperSecurePscs()));
         profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
         setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
