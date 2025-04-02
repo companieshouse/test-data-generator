@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -43,7 +42,6 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String PSC_TEXT = "persons-with-significant-control";
     private static final String MEMBERS_TEXT = "members";
     private static final String REGISTER_STEM = "/registers";
-    private static final String UNSPECIFIED_LOCATION = "unspecified-location";
     private static final String LLP_MEMBERS_TEXT = "llp-members";
     private static final String LLP_USUAL_RESIDENTIAL_ADDRESS_TEXT = "llp-usual-residential-address";
     private static final String USUAL_RESIDENTIAL_ADDRESS_TEXT = "usual-residential-address";

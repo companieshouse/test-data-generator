@@ -25,7 +25,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
+import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
@@ -66,6 +68,10 @@ class CompanyRegistersServiceImplTest {
     @Test
     void testCreateCompanyRegisters() throws DataException {
         setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
+        FilingHistory filingHistory = new FilingHistory();
+        filingHistory.setId("filing-history-id");
+        when(filingHistoryRepository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(filingHistory));
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
         assertEquals(COMPANY_NUMBER, createdRegisters.getId());
@@ -85,6 +91,9 @@ class CompanyRegistersServiceImplTest {
                         + "/officers?register_view=true&register_type=directors",
                 registers.get(DIRECTORS_TEXT).getLinks().get(DIRECTORS_REGISTER_TYPE));
         verify(repository, times(1)).save(any(CompanyRegisters.class));
+        assertEquals("/company/" + COMPANY_NUMBER + "/filing-history/filing-history-id",
+                registers.get(DIRECTORS_TEXT).getItems().getFirst().getFilingLink());
+        verify(filingHistoryRepository, times(1)).findByCompanyNumber(COMPANY_NUMBER);
     }
 
     @Test
@@ -248,6 +257,22 @@ class CompanyRegistersServiceImplTest {
         Map<String, String> links = createdRegisters.getRegisters()
                 .get(DIRECTORS_TEXT).getLinks();
         assertNull(links);
+    }
+
+    @Test
+    void testFilingHistoryLinkIsSet() throws DataException {
+        setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
+        FilingHistory filingHistory = new FilingHistory();
+        filingHistory.setId("filing-history-id");
+        when(filingHistoryRepository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(filingHistory));
+        CompanyRegisters createdRegisters = service.create(companySpec);
+        RegisterItem registerItem = createdRegisters.getRegisters()
+                .get(DIRECTORS_TEXT).getItems().getFirst();
+        assertNotNull(registerItem.getFilingLink());
+        assertEquals("/company/" + COMPANY_NUMBER + "/filing-history/filing-history-id",
+                registerItem.getFilingLink());
+        verify(filingHistoryRepository, times(1)).findByCompanyNumber(COMPANY_NUMBER);
     }
 
     private void setRegister(String registerType, String registerMovedTo) {
