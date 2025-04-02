@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class AppointmentsServiceImpl implements DataService<List<Appointment>,CompanySpec> {
+public class AppointmentsServiceImpl implements DataService<List<Appointment>, CompanySpec> {
 
     private static final int SALT_LENGTH = 8;
     private static final int ID_LENGTH = 10;
@@ -35,7 +35,6 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
     private static final String COMPANY_LINK = "/company/";
     private static final String OFFICERS_LINK = "/officers/";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
-    private static String roleName = "Director";
 
     @Autowired
     private AddressService addressService;
@@ -78,8 +77,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
                 throw new IllegalArgumentException("Invalid officer role: " + currentRole);
             }
 
-            roleName = currentRole.toLowerCase().replace(currentRole.substring(0,1),
-                    currentRole.substring(0,1).toUpperCase());
+            String roleName = setRoleName(currentRole);
 
             Appointment appointment = new Appointment();
             String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
@@ -151,7 +149,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
 
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-
+        String roleName = setRoleName(role);
         officerAppointment.setId(officerId);
         officerAppointment.setCreatedAt(dayTimeNow);
         officerAppointment.setUpdatedAt(dayTimeNow);
@@ -189,7 +187,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
 
         String companyNumber = companySpec.getCompanyNumber();
         Jurisdiction jurisdiction = companySpec.getJurisdiction();
-
+        String roleName = setRoleName(role);
         OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
         officerAppointmentItem.setOccupation(roleName);
         officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
@@ -235,6 +233,11 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         links.setCompany(COMPANY_LINK + companyNumber);
 
         return links;
+    }
+
+    private String setRoleName(String role) {
+        return role.toLowerCase().replace(role.substring(0, 1),
+                role.substring(0, 1).toUpperCase());
     }
 
 }
