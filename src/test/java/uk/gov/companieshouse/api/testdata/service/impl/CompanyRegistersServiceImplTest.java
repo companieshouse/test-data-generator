@@ -29,6 +29,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
+import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +40,9 @@ class CompanyRegistersServiceImplTest {
 
     @Mock
     private CompanyRegistersRepository repository;
+
+    @Mock
+    private FilingHistoryRepository filingHistoryRepository;
 
     @InjectMocks
     private CompanyRegistersServiceImpl service;
@@ -57,10 +61,11 @@ class CompanyRegistersServiceImplTest {
     private static final String REGISTERS_MOVE_TO_PUBLIC_REGISTER = "public_register";
     private static final String UNSPECIFIED_LOCATION = "unspecified-location";
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String PUBLIC_REGISTER = "public-register";
 
     @Test
     void testCreateCompanyRegisters() throws DataException {
-        setRegister(DIRECTORS_TEXT);
+        setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
         assertEquals(COMPANY_NUMBER, createdRegisters.getId());
@@ -84,7 +89,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testCreateCompanyRegistersWithMultipleRegisters() throws DataException {
-        setRegister(DIRECTORS_TEXT);
+        setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
         RegistersSpec secretariesRegister = new RegistersSpec();
         secretariesRegister.setRegisterType("secretaries");
         secretariesRegister.setRegisterMovedTo("Companies House");
@@ -102,7 +107,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testGenerateRegisterLinksForDirectors() throws DataException {
-        setRegister(DIRECTORS_TEXT);
+        setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
                 .get(DIRECTORS_TEXT).getLinks();
@@ -116,7 +121,17 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testGenerateRegisterLinksForSecretaries() throws DataException {
-        setRegister(SECRETARIES_TEXT);
+        setRegister(SECRETARIES_TEXT, "unspecified-location");
+        CompanyRegisters createdRegisters = service.create(companySpec);
+        Map<String, String> links = createdRegisters.getRegisters()
+                .get(SECRETARIES_TEXT).getLinks();
+
+        assertNull(links);
+    }
+
+    @Test
+    void testGenerateRegisterLinksForSecretariesWithLinkExists() throws DataException {
+        setRegister(SECRETARIES_TEXT, PUBLIC_REGISTER);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
                 .get(SECRETARIES_TEXT).getLinks();
@@ -130,7 +145,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testGenerateRegisterLinksForPsc() throws DataException {
-        setRegister(PSC_TEXT);
+        setRegister(PSC_TEXT, PUBLIC_REGISTER);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
                 .get(PSC_REGISTER_STRING).getLinks();
@@ -144,7 +159,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testGenerateRegisterLinksForNull() throws DataException {
-        setRegister(MEMBERS_TEXT);
+        setRegister(MEMBERS_TEXT, PUBLIC_REGISTER);
         CompanyRegisters createdRegisters = service.create(companySpec);
         Map<String, String> links = createdRegisters.getRegisters()
                 .get(MEMBERS_TEXT).getLinks();
@@ -153,7 +168,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void testCreateWithNoRegisters() throws DataException {
-        setRegister(DIRECTORS_TEXT);
+        setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
         companySpec.setRegisters(Collections.emptyList());
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
@@ -235,8 +250,8 @@ class CompanyRegistersServiceImplTest {
         assertNull(links);
     }
 
-    private void setRegister(String registerType) {
-        setCompanySpec(registerType, "Companies House");
+    private void setRegister(String registerType, String registerMovedTo) {
+        setCompanySpec(registerType, registerMovedTo);
         when(randomService.getEtag()).thenReturn("dummy-etag");
         when(repository.save(any(CompanyRegisters.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));

@@ -29,13 +29,12 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
     private static final int ID_LENGTH = 10;
     private static final int INTERNAL_ID_LENGTH = 9;
     private static final String NATIONALITY = "British";
-    private static final String SURNAME = "DIRECTOR";
+    private static String ROLE_NAME = "Director";
     private static final String FORENAME = "Test ";
     private static final String COMPANY_STATUS = "active";
     private static final String INTERNAL_ID_PREFIX = "8";
     private static final String COMPANY_LINK = "/company/";
     private static final String OFFICERS_LINK = "/officers/";
-    private static final String OCCUPATION = "Director";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
 
     @Autowired
@@ -79,6 +78,9 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
                 throw new IllegalArgumentException("Invalid officer role: " + currentRole);
             }
 
+            ROLE_NAME = currentRole.toLowerCase().replace(currentRole.substring(0,1),
+                    currentRole.substring(0,1).toUpperCase());
+
             Appointment appointment = new Appointment();
             String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
             String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
@@ -94,7 +96,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             appointment.setInternalId(internalId);
             appointment.setAppointmentId(appointmentId);
             appointment.setNationality(NATIONALITY);
-            appointment.setOccupation(OCCUPATION);
+            appointment.setOccupation(ROLE_NAME);
             appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
             appointment.setCountryOfResidence(countryOfResidence);
             appointment.setUpdatedAt(dateTimeNow);
@@ -111,7 +113,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
             links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
             appointment.setLinks(links);
 
-            appointment.setSurname(SURNAME);
+            appointment.setSurname(ROLE_NAME);
             appointment.setDateOfBirth(dob);
             appointment.setCompanyName("Company " + companyNumber);
             appointment.setCompanyStatus(COMPANY_STATUS);
@@ -158,7 +160,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         officerAppointment.setInactiveCount(0);
         officerAppointment.setResignedCount(1);
         officerAppointment.setCorporateOfficer(false);
-        officerAppointment.setName(FORENAME + " " + SURNAME);
+        officerAppointment.setName(FORENAME + " " + ROLE_NAME);
 
         Links links = new Links();
         links.setSelf(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
@@ -189,10 +191,10 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         Jurisdiction jurisdiction = companySpec.getJurisdiction();
 
         OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
-        officerAppointmentItem.setOccupation(OCCUPATION);
+        officerAppointmentItem.setOccupation(ROLE_NAME);
         officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
         officerAppointmentItem.setForename(FORENAME);
-        officerAppointmentItem.setSurname(OCCUPATION);
+        officerAppointmentItem.setSurname(ROLE_NAME);
         officerAppointmentItem.setOfficerRole(role);
         officerAppointmentItem.setLinks(
                 createOfficerAppointmentItemLinks(companyNumber, appointmentId));
@@ -201,22 +203,22 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>,Co
         officerAppointmentItem.setAppointedOn(dayNow);
         officerAppointmentItem.setNationality(NATIONALITY);
         officerAppointmentItem.setUpdatedAt(dayTimeNow);
-        officerAppointmentItem.setName(SURNAME + " " + FORENAME);
+        officerAppointmentItem.setName(ROLE_NAME + " " + FORENAME);
         officerAppointmentItem.setCompanyName("Company " + companyNumber);
         officerAppointmentItem.setCompanyNumber(companyNumber);
         officerAppointmentItem.setCompanyStatus(COMPANY_STATUS);
         OfficerAppointmentItem item = new OfficerAppointmentItem();
-        item.setOccupation(OCCUPATION);
+        item.setOccupation(ROLE_NAME);
         item.setAddress(addressService.getAddress(jurisdiction));
         item.setForename(FORENAME);
-        item.setSurname(OCCUPATION);
+        item.setSurname(ROLE_NAME);
         item.setOfficerRole(role);
         item.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
         item.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
         item.setAppointedOn(dayNow);
         item.setNationality(NATIONALITY);
         item.setUpdatedAt(dayTimeNow);
-        item.setName(FORENAME + " " + SURNAME);
+        item.setName(FORENAME + " " + ROLE_NAME);
         item.setCompanyName("Company " + companyNumber);
         item.setCompanyNumber(companyNumber);
         item.setCompanyStatus(COMPANY_STATUS);
