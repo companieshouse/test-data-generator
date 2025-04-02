@@ -113,7 +113,7 @@ class AppointmentsServiceImplTest {
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
 
-        assertEquals("DIRECTOR", appointment.getSurname());
+        assertEquals("Director", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
     }
 
@@ -172,7 +172,7 @@ class AppointmentsServiceImplTest {
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
 
-        assertEquals("DIRECTOR", appointment.getSurname());
+        assertEquals("Director", appointment.getSurname());
         assertNotNull(appointment.getDateOfBirth());
     }
 
