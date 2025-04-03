@@ -13,6 +13,7 @@ import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -70,7 +71,13 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         companyPscStatement.setEtag(etag);
 
         companyPscStatement.setKind("persons-with-significant-control-statement");
-        companyPscStatement.setStatement("no-individual-or-entity-with-signficant-control");
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
+            companyPscStatement.setStatement("all-beneficial-owners-identified");
+        } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
+            companyPscStatement.setStatement("no-individual-or-entity-with-signficant-control");
+        } else {
+            companyPscStatement.setStatement("psc-exists-but-not-identified");
+        }
 
         companyPscStatement.setCreatedAt(dateTimeNow);
 
