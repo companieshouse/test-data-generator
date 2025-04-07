@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.commons.lang.BooleanUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -33,6 +32,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 class CompanyMetricsServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String ETAG = "etag";
 
     @Mock
     private RandomService randomService;
@@ -55,8 +55,7 @@ class CompanyMetricsServiceImplTest {
         registersSpec.setRegisterMovedTo(publicRegisterText);
         spec.setRegisters(List.of(registersSpec));
 
-        final String etag = "ETAG";
-        when(randomService.getEtag()).thenReturn(etag);
+        when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
@@ -72,7 +71,7 @@ class CompanyMetricsServiceImplTest {
 
         assertNotNull(metrics);
         assertEquals(COMPANY_NUMBER, metrics.getId());
-        assertEquals(etag, metrics.getEtag());
+        assertEquals(ETAG, metrics.getEtag());
 
         assertNotNull(metrics.getRegisters());
         assertEquals(1, metrics.getRegisters().size());
@@ -107,8 +106,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
 
-        final String etag = "ETAG";
-        when(randomService.getEtag()).thenReturn(etag);
+        when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
@@ -128,8 +126,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setHasSuperSecurePscs(Boolean.TRUE);
 
-        final String etag = "ETAG";
-        when(randomService.getEtag()).thenReturn(etag);
+        when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
@@ -148,8 +145,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
-        final String etag = "ETAG";
-        when(randomService.getEtag()).thenReturn(etag);
+        when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);

@@ -32,6 +32,8 @@ class CompanyPscStatementServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";
     private static final String ETAG = "ETAG";
+    private static final String PSC_STATEMENT_KIND = "persons-with-significant-control-statement";
+    private static final String PSC_STATEMENT = "psc-exists-but-not-identified";
 
     @Mock
     private CompanyPscStatementRepository repository;
@@ -68,8 +70,8 @@ class CompanyPscStatementServiceImplTest {
                 + ENCODED_VALUE, links.getSelf());
         assertNotNull(statement.getNotifiedOn());
         assertEquals(ETAG, statement.getEtag());
-        assertEquals("persons-with-significant-control-statement", statement.getKind());
-        assertEquals("psc-exists-but-not-identified", statement.getStatement()); // Default case
+        assertEquals(PSC_STATEMENT_KIND, statement.getKind());
+        assertEquals(PSC_STATEMENT, statement.getStatement());
 
         assertNotNull(statement.getCreatedAt());
 
@@ -122,8 +124,8 @@ class CompanyPscStatementServiceImplTest {
                 + ENCODED_VALUE, links.getSelf());
         assertNotNull(capturedStatement.getNotifiedOn());
         assertEquals(ETAG, capturedStatement.getEtag());
-        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("psc-exists-but-not-identified",
+        assertEquals(PSC_STATEMENT_KIND, capturedStatement.getKind());
+        assertEquals(PSC_STATEMENT,
                 capturedStatement.getStatement());
         assertNotNull(capturedStatement.getCreatedAt());
     }
@@ -159,8 +161,8 @@ class CompanyPscStatementServiceImplTest {
                 + ENCODED_VALUE, links.getSelf());
         assertNotNull(capturedStatement.getNotifiedOn());
         assertEquals(ETAG, capturedStatement.getEtag());
-        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("psc-exists-but-not-identified",
+        assertEquals(PSC_STATEMENT_KIND, capturedStatement.getKind());
+        assertEquals(PSC_STATEMENT,
                 capturedStatement.getStatement());
         assertNotNull(capturedStatement.getCreatedAt());
     }
@@ -196,8 +198,8 @@ class CompanyPscStatementServiceImplTest {
                 + ENCODED_VALUE, links.getSelf());
         assertNotNull(capturedStatement.getNotifiedOn());
         assertEquals(ETAG, capturedStatement.getEtag());
-        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("psc-exists-but-not-identified",
+        assertEquals(PSC_STATEMENT_KIND, capturedStatement.getKind());
+        assertEquals(PSC_STATEMENT,
                 capturedStatement.getStatement());
         assertNotNull(capturedStatement.getCreatedAt());
     }
@@ -259,6 +261,6 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals("psc-exists-but-not-identified", capturedStatement.getStatement());
+        assertEquals(PSC_STATEMENT, capturedStatement.getStatement());
     }
 }

@@ -24,6 +24,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
+    private static final String PSC_SUFFIX = "/persons-with-significant-control-statements/";
 
     @Autowired
     private RandomService randomService;
@@ -32,9 +33,11 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
     private CompanyPscStatementRepository repository;
 
     /**
-     * creates PSC statement deliberately misspelt as 'signficant' to match api-enumeration and live data
+     * creates PSC statement deliberately misspelt as 'signficant'
+     * to match api-enumeration and live data
      * can be corrected when api-enumeration is fixed.
-     * psc-statement-data-api java services utilises the enum values and correct spelling will cause failures in environments that run the java service
+     * psc-statement-data-api java services utilises the enum values and
+     * correct spelling will cause failures in environments that run the java service
      *
      * @param spec
      * @return
@@ -62,7 +65,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         companyPscStatement.setPscStatementId(id);
 
         Links links = new Links();
-        links.setSelf("/company/" + companyNumber + "/persons-with-significant-control-statements/" + id);
+        links.setSelf("/company/" + companyNumber + PSC_SUFFIX + id);
 
         companyPscStatement.setLinks(links);
         companyPscStatement.setNotifiedOn(dateNow);
@@ -71,12 +74,16 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
         companyPscStatement.setEtag(etag);
 
         companyPscStatement.setKind("persons-with-significant-control-statement");
+
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-            companyPscStatement.setStatement("all-beneficial-owners-identified");
+            companyPscStatement.setStatement(
+                    PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
         } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
-            companyPscStatement.setStatement("no-individual-or-entity-with-signficant-control");
+            companyPscStatement.setStatement(
+                    PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         } else {
-            companyPscStatement.setStatement("psc-exists-but-not-identified");
+            companyPscStatement.setStatement(
+                    PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
         }
 
         companyPscStatement.setCreatedAt(dateTimeNow);
@@ -86,8 +93,26 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
 
     @Override
     public boolean delete(String companyNumber) {
-        Optional<CompanyPscStatement> existingStatement = repository.findByCompanyNumber(companyNumber);
+        Optional<CompanyPscStatement> existingStatement
+                = repository.findByCompanyNumber(companyNumber);
         existingStatement.ifPresent(repository::delete);
         return existingStatement.isPresent();
+    }
+
+    public enum PscStatement {
+        ALL_BENEFICIAL_OWNERS_IDENTIFIED("all-beneficial-owners-identified"),
+        NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL(
+                "no-individual-or-entity-with-signficant-control"),
+        PSC_EXISTS_BUT_NOT_IDENTIFIED("psc-exists-but-not-identified");
+
+        private final String statement;
+
+        PscStatement(String statement) {
+            this.statement = statement;
+        }
+
+        public String getStatement() {
+            return statement;
+        }
     }
 }
