@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -54,13 +55,12 @@ class AcspMembersServiceImplTest {
         final var createdDate = Instant.now();
         doReturn(createdDate).when(service).getCurrentDateTime();
 
-        when(randomService.getString(12)).thenReturn("randomId");
         when(randomService.getEtag()).thenReturn("etag");
 
         AcspMembersData result = service.create(spec);
 
         assertNotNull(result);
-        assertEquals("randomId", result.getAcspMemberId());
+        assertNotNull(result.getAcspMemberId());
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
@@ -70,7 +70,7 @@ class AcspMembersServiceImplTest {
         verify(repository).save(captor.capture());
 
         AcspMembers captured = captor.getValue();
-        assertEquals("randomId", captured.getAcspMemberId());
+        assertNotNull(captured.getAcspMemberId());
         assertEquals("acspNumber", captured.getAcspNumber());
         assertEquals("userId", captured.getUserId());
         assertEquals("active", captured.getStatus());
@@ -90,13 +90,12 @@ class AcspMembersServiceImplTest {
         final var createdDate = Instant.now();
         doReturn(createdDate).when(service).getCurrentDateTime();
 
-        when(randomService.getString(12)).thenReturn("randomId");
         when(randomService.getEtag()).thenReturn("etag");
 
         AcspMembersData result = service.create(spec);
 
         assertNotNull(result);
-        assertEquals("randomId", result.getAcspMemberId());
+        assertNotNull(result.getAcspMemberId());
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
@@ -106,7 +105,7 @@ class AcspMembersServiceImplTest {
         verify(repository).save(captor.capture());
 
         AcspMembers captured = captor.getValue();
-        assertEquals("randomId", captured.getAcspMemberId());
+        assertNotNull(captured.getAcspMemberId());
         assertEquals("acspNumber", captured.getAcspNumber());
         assertEquals("userId", captured.getUserId());
         assertEquals("active", captured.getStatus());
@@ -119,20 +118,24 @@ class AcspMembersServiceImplTest {
 
     @Test
     void deleteAcspMemberException() {
+        var id = new ObjectId();
         AcspMembers acspMember = new AcspMembers();
-        when(repository.findById("memberId")).thenReturn(Optional.of(acspMember));
+        when(repository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
         doThrow(new RuntimeException("Deletion error")).when(repository).delete(acspMember);
 
-        RuntimeException exception = assertThrows(RuntimeException.class, () -> service.delete("memberId"));
+        RuntimeException exception =
+                assertThrows(RuntimeException.class,
+                        () -> service.delete(String.valueOf(id)));
         assertEquals("Deletion error", exception.getMessage());
     }
 
     @Test
     void deleteAcspMember() {
+        var id = new ObjectId();
         AcspMembers acspMember = new AcspMembers();
-        when(repository.findById("memberId")).thenReturn(Optional.of(acspMember));
+        when(repository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
 
-        boolean result = service.delete("memberId");
+        boolean result = service.delete(String.valueOf(id));
 
         assertTrue(result);
         verify(repository).delete(acspMember);
@@ -140,9 +143,11 @@ class AcspMembersServiceImplTest {
 
     @Test
     void deleteAcspMemberNotFound() {
-        when(repository.findById("memberId")).thenReturn(Optional.empty());
+        var id = new ObjectId();
+        when(repository.findByAcspMemberId(id)).thenReturn(Optional.empty());
 
-        boolean result = service.delete("memberId");
+        boolean result =
+                service.delete(String.valueOf(id));
 
         assertFalse(result);
         verify(repository, never()).delete(any(AcspMembers.class));

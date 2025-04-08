@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -277,7 +278,7 @@ public class TestDataServiceImpl implements TestDataService {
             AcspMembersData createdMember = createAcspMember(spec);
 
             return new AcspMembersData(
-                    createdMember.getAcspMemberId(),
+                    new ObjectId(createdMember.getAcspMemberId()),
                     createdMember.getAcspNumber(),
                     createdMember.getUserId(),
                     createdMember.getStatus(),

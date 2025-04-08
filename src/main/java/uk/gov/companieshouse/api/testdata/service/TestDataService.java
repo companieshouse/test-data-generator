@@ -72,9 +72,9 @@ public interface TestDataService {
     AcspMembersData createAcspMembersData(AcspMembersSpec acspMembersSpec) throws DataException;
 
     /**
-     * Deletes an acsp members' test data by their user id.
+     * Deletes an acsp members' test data by their membership id.
      *
-     * @param acspMemberId the ID of the profile to delete
+     * @param acspMemberId the ID of the membership to delete
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteAcspMembersData(String acspMemberId) throws DataException;
