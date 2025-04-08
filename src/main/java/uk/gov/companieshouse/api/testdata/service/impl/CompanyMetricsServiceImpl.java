@@ -6,12 +6,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -31,6 +33,15 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
         metrics.setActivePscStatementsCount(1);
+
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
+            metrics.setActivePscCount(2);
+        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            metrics.setActivePscCount(1);
+        } else {
+            metrics.setActivePscCount(3);
+        }
+
         metrics.setActiveDirectorsCount(1);
         if (spec.getRegisters() != null) {
             metrics.setRegisters(createRegisters(spec.getRegisters()));
