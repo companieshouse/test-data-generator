@@ -1284,7 +1284,6 @@ class TestDataServiceImplTest {
 
     @Test
     void testUpdateUserWithOneLoginCalled() throws DataException {
-        // Arrange
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("userId");
         identitySpec.setEmail("email@example.com");
@@ -1292,18 +1291,14 @@ class TestDataServiceImplTest {
 
         IdentityData mockIdentityData = new IdentityData("identityId");
         when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
-
-        // Act
         IdentityData result = testDataService.createIdentityData(identitySpec);
 
-        // Assert
         assertEquals(mockIdentityData, result);
         verify(userService, times(1)).updateUserWithOneLogin("userId");
     }
 
     @Test
     void testUpdateUserWithOneLoginNotCalledOnException() throws DataException {
-        // Arrange
         IdentitySpec identitySpec = new IdentitySpec();
         identitySpec.setUserId("userId");
         identitySpec.setEmail("email@example.com");
@@ -1311,7 +1306,6 @@ class TestDataServiceImplTest {
 
         when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
 
-        // Act & Assert
         DataException exception = assertThrows(DataException.class, () -> testDataService.createIdentityData(identitySpec));
         assertEquals("Error creating identity", exception.getMessage());
         verify(userService, never()).updateUserWithOneLogin(anyString());
