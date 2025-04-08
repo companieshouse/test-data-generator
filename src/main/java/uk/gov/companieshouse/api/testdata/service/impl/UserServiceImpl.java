@@ -60,6 +60,15 @@ public class UserServiceImpl implements UserService {
         return user.isPresent();
     }
 
+    public void updateUserWithOneLogin(String userId) {
+        var user = repository.findById(userId);
+        if (user.isPresent()) {
+            var existingUser = user.get();
+            existingUser.setOneLoginUserId(userId);
+            repository.save(existingUser);
+        }
+    }
+
     @Override
     public Optional<User> getUserById(String userId) {
         return repository.findById(userId);

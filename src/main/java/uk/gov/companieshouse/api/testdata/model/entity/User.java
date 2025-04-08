@@ -38,6 +38,9 @@ public class User {
     @Field("direct_login_privilege")
     private Boolean directLoginPrivilege;
 
+    @Field("one_login_data.user_id")
+    private String oneLoginUserId;
+
     public String getId() {
         return id;
     }
@@ -108,5 +111,13 @@ public class User {
 
     public void setDirectLoginPrivilege(Boolean directLoginPrivilege) {
         this.directLoginPrivilege = directLoginPrivilege;
+    }
+
+    public String getOneLoginUserId() {
+        return oneLoginUserId;
+    }
+
+    public void setOneLoginUserId(String oneLoginUserId) {
+        this.oneLoginUserId = oneLoginUserId;
     }
 }

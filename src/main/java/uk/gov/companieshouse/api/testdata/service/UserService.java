@@ -14,4 +14,6 @@ public interface UserService extends DataService<UserData, UserSpec> {
      * @return an Optional containing the user if found, or empty if not found
      */
     Optional<User> getUserById(String userId);
+
+    void updateUserWithOneLogin(String userId);
 }

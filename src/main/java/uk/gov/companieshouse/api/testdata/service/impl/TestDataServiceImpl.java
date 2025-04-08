@@ -244,7 +244,9 @@ public class TestDataServiceImpl implements TestDataService {
             throw new DataException("Verification source is required to create an identity");
         }
         try {
-            return identityService.create(identitySpec);
+            var identityData = identityService.create(identitySpec);
+            userService.updateUserWithOneLogin(identitySpec.getUserId());
+            return identityData;
         } catch (Exception ex) {
             throw new DataException("Error creating identity", ex);
         }
