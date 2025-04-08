@@ -34,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AcspMembersService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -71,7 +72,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private UserService userService;
     @Autowired
-    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    private AcspMembersService acspMembersService;
     @Autowired
     private AcspMembersRepository acspMembersRepository;
     @Autowired
@@ -356,6 +357,21 @@ public class TestDataServiceImpl implements TestDataService {
             this.acspProfileService.delete(acspNumber);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
+        }
+    }
+
+    @Override
+    public boolean deleteAcspMemberDataByUserId(String userId) throws DataException {
+        try {
+            var acspMembership =
+                    acspMembersService.findAllByUserId(userId);
+            if (!acspMembership.isEmpty()) {
+                return acspMembersService.deleteByUserId(userId);
+            }
+            return false;
+        } catch (Exception ex) {
+            throw new DataException("Error deleting acsp membership with user-id " + userId,
+                    ex);
         }
     }
 }

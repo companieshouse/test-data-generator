@@ -60,6 +60,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AcspMembersService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -90,7 +91,7 @@ class TestDataServiceImplTest {
     @Mock private RandomService randomService;
     @Mock private UserService userService;
     @Mock private DataService<RoleData, RoleSpec> roleService;
-    @Mock private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    @Mock private AcspMembersService acspMembersService;
     @InjectMocks private TestDataServiceImpl testDataService;
     @Mock private AcspMembersRepository acspMembersRepository;
     @Mock private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
@@ -1280,5 +1281,49 @@ class TestDataServiceImplTest {
         CompanyData createdCompany = createCompanyDataWithRegisters(spec);
         CompanySpec capturedSpec = captureCreatedSpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER, Jurisdiction.ENGLAND_WALES);
+    }
+
+    @Test
+    void deleteAcspMemberDataByUserId() throws DataException {
+        String userId = "TestUserId";
+        AcspMembers acspMember = new AcspMembers();
+
+        when(acspMembersService.findAllByUserId(userId))
+                .thenReturn(Collections.singletonList(acspMember));
+        when(acspMembersService.deleteByUserId(userId)).thenReturn(true);
+
+        boolean result =
+                testDataService.deleteAcspMemberDataByUserId(userId);
+
+        assertTrue(result);
+        verify(acspMembersService).deleteByUserId(userId);
+    }
+
+    @Test
+    void deleteAcspMemberDataByUserIdNotFound() throws DataException {
+        String userId = "TestUserId";
+
+        when(acspMembersService.findAllByUserId(userId)).thenReturn(Collections.emptyList());
+        boolean result =
+                testDataService.deleteAcspMemberDataByUserId(userId);
+
+        assertFalse(result);
+        verify(acspMembersService, never()).deleteByUserId(anyString());
+    }
+
+    @Test
+    void deleteAcspMemberDataByUserIdException() {
+        String userId = "TestUserId";
+        AcspMembers acspMember = new AcspMembers();
+
+        when(acspMembersService.findAllByUserId(userId))
+                .thenReturn(Collections.singletonList(acspMember));
+        doThrow(new RuntimeException(new DataException("Error")))
+                .when(acspMembersService).deleteByUserId(userId);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.deleteAcspMemberDataByUserId(userId));
+        assertEquals("Error deleting acsp membership with user-id "
+                + userId, exception.getMessage());
     }
 }

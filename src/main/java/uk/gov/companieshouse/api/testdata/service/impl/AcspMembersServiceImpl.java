@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,11 +12,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.AcspMembersService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class AcspMembersServiceImpl implements DataService<AcspMembersData, AcspMembersSpec> {
+public class AcspMembersServiceImpl implements AcspMembersService {
 
     @Autowired
     private AcspMembersRepository repository;
@@ -62,5 +63,20 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
 
     protected Instant getCurrentDateTime() {
         return Instant.now().atZone(ZoneOffset.UTC).toInstant();
+    }
+
+    @Override
+    public List<AcspMembers> findAllByUserId(String userId) {
+        return repository.findAllByUserId(userId);
+    }
+
+    @Override
+    public boolean deleteByUserId(String userId) {
+        var acspMemberships = repository.findAllByUserId(userId);
+        if (!acspMemberships.isEmpty()) {
+            repository.deleteAll(acspMemberships);
+            return true;
+        }
+        return false;
     }
 }

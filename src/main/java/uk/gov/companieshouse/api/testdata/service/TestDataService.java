@@ -72,7 +72,7 @@ public interface TestDataService {
     AcspMembersData createAcspMembersData(AcspMembersSpec acspMembersSpec) throws DataException;
 
     /**
-     * Deletes an acsp members' test data by their user id.
+     * Deletes an acsp members' test data by their acsp membership id.
      *
      * @param acspMemberId the ID of the profile to delete
      * @throws DataException if there is an error during user deletion
@@ -88,4 +88,13 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAppealsData(String companyNumber, String penaltyReference) throws DataException;
+
+    /**
+     * Deletes acsp memberships by their user_id.
+     *
+     * @param userId user_id of the acsp membership to delete
+     * @return true if acsp membership was deleted, false otherwise
+     * @throws DataException if there is an error during deletion
+     */
+    boolean deleteAcspMemberDataByUserId(String userId) throws DataException;
 }

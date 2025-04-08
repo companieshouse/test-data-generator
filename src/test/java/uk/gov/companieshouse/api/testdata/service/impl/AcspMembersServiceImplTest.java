@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -146,5 +147,44 @@ class AcspMembersServiceImplTest {
 
         assertFalse(result);
         verify(repository, never()).delete(any(AcspMembers.class));
+    }
+
+    @Test
+    void deleteAcspMemberByUserId() {
+        AcspMembers acspMember = new AcspMembers();
+
+        when(repository.findAllByUserId("TestUserId"))
+                .thenReturn(Collections.singletonList(acspMember));
+
+        boolean result = service.deleteByUserId("TestUserId");
+
+        assertTrue(result);
+        verify(repository).deleteAll(Collections.singletonList(acspMember));
+    }
+
+    @Test
+    void deleteAcspMemberByUserIdNotFound() {
+        when(repository.findAllByUserId("TestUserId")).thenReturn(Collections.emptyList());
+
+        boolean result = service.deleteByUserId("TestUserId");
+
+        assertFalse(result);
+        verify(repository, never()).deleteAll(Collections.singleton(any(AcspMembers.class)));
+    }
+
+    @Test
+    void deleteAcspMemberByUserIdException() {
+        AcspMembers acspMember = new AcspMembers();
+
+        when(repository.findAllByUserId("TestUserId"))
+                .thenReturn(Collections.singletonList(acspMember));
+        doThrow(new RuntimeException("Deletion error")).when(repository)
+                .deleteAll(Collections.singletonList(acspMember));
+
+        RuntimeException exception =
+                assertThrows(RuntimeException.class,
+                        () -> service.deleteByUserId("TestUserId"));
+
+        assertEquals("Deletion error", exception.getMessage());
     }
 }

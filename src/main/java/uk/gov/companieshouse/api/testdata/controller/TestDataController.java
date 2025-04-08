@@ -189,4 +189,25 @@ public class TestDataController {
             return  new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
+
+    @DeleteMapping("/acsp-members/user-id/{userId}")
+    public ResponseEntity<Map<String, Object>> deleteAcspMemberByUserId(@PathVariable("userId")
+                                                                        String userId)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("user-id", userId);
+        boolean deleteAcspMember = testDataService.deleteAcspMemberDataByUserId(userId);
+        if (deleteAcspMember) {
+            LOG.info("Acsp membership with user-id " + userId
+                            + " has been deleted",
+                    response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Acsp membership with user-id " + userId
+                            + " was not found",
+                    response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
 }

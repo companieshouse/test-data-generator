@@ -440,4 +440,50 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(testDataService, times(0)).deleteAppealsData(anyString(), anyString());
     }
+
+    @Test
+    void deleteAcspMemberByUserId() throws Exception {
+        final String userId = "TestUserId";
+
+        when(this.testDataService.deleteAcspMemberDataByUserId(userId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+                =
+                this.testDataController.deleteAcspMemberByUserId(userId);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteAcspMemberDataByUserId(userId);
+    }
+
+    @Test
+    void deleteAcspMemberByUserIdNotFound() throws Exception {
+        final String userId = "TestUserId";
+
+        when(this.testDataService.deleteAcspMemberDataByUserId(userId)).thenReturn(false);
+        ResponseEntity<Map<String, Object>> response
+                =
+                this.testDataController.deleteAcspMemberByUserId(userId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("TestUserId",
+                Objects.requireNonNull(response.getBody()).get(
+                        "user-id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService).deleteAcspMemberDataByUserId(userId);
+    }
+
+    @Test
+    void deleteAcspMemberByUserIdException() throws Exception {
+        final String userId = "TestUserId";
+        Throwable exception = new DataException("Error message");
+
+        when(this.testDataService.deleteAcspMemberDataByUserId(userId)).thenThrow(exception);
+
+        DataException thrown = assertThrows(
+                DataException.class,
+                () -> this.testDataController
+                        .deleteAcspMemberByUserId(userId));
+        assertEquals(exception, thrown);
+    }
 }
