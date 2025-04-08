@@ -119,13 +119,14 @@ class AcspMembersServiceImplTest {
     @Test
     void deleteAcspMemberException() {
         var id = new ObjectId();
+        var stringId = id.toString();
         AcspMembers acspMember = new AcspMembers();
         when(repository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
         doThrow(new RuntimeException("Deletion error")).when(repository).delete(acspMember);
 
         RuntimeException exception =
                 assertThrows(RuntimeException.class,
-                        () -> service.delete(String.valueOf(id)));
+                        () -> service.delete(stringId));
         assertEquals("Deletion error", exception.getMessage());
     }
 
