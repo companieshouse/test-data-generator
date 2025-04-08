@@ -9,11 +9,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -186,5 +188,31 @@ class AcspMembersServiceImplTest {
                         () -> service.deleteByUserId("TestUserId"));
 
         assertEquals("Deletion error", exception.getMessage());
+    }
+
+    @Test
+    void findAllByUserId() {
+        String userId = "userId";
+        AcspMembers acspMember = new AcspMembers();
+        acspMember.setUserId(userId);
+
+        when(repository.findAllByUserId(userId))
+                .thenReturn(Collections.singletonList(acspMember));
+
+        List<AcspMembers> result = service.findAllByUserId(userId);
+
+        assertTrue(result.contains(acspMember));
+        assertEquals(1, result.size());
+        assertEquals(userId, result.getFirst().getUserId());
+        verify(repository, times(1)).findAllByUserId(userId);
+    }
+
+    @Test
+    void findAllByUserIdNotFound() {
+        when(repository.findAllByUserId("userId")).thenReturn(Collections.emptyList());
+
+        List<AcspMembers> result = service.findAllByUserId("userId");
+
+        assertTrue(result.isEmpty());
     }
 }
