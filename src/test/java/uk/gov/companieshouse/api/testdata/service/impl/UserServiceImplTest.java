@@ -14,6 +14,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +26,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import jakarta.validation.ConstraintViolation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,10 +42,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -110,7 +110,8 @@ class UserServiceImplTest {
 
         Set<ConstraintViolation<UserSpec>> violations = validator.validate(userSpec);
         assertFalse(violations.isEmpty());
-        assertEquals("email is not a valid email address", violations.iterator().next().getMessage());
+        assertEquals("email is not a valid email address",
+                violations.iterator().next().getMessage());
         verify(userRepository, never()).save(any());
     }
 
@@ -263,10 +264,41 @@ class UserServiceImplTest {
 
         assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
         assertTrue(
-                userData.getEmail().contains(userSpec.getEmail() != null ? userSpec.getEmail() : "test-data-generated"),
+                userData.getEmail().contains(userSpec.getEmail() != null ? userSpec.getEmail()
+                        : "test-data-generated"),
                 "Email in UserData should contain the correct prefix");
         assertTrue(userData.getForename().contains("Forename"),
                 "Forename should contain 'Forename'");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+    }
+
+    @Test
+    void testUpdateUserWithOneLogin() {
+        String userId = "userId";
+        User user = new User();
+        user.setId(userId);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        userServiceImpl.updateUserWithOneLogin(userId);
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+        User updatedUser = userCaptor.getValue();
+
+        assertEquals(userId, updatedUser.getOneLoginUserId(), "OneLoginUserId should be updated");
+    }
+
+    @Test
+    void testUpdateUserWithOneLoginUserNotFound() {
+        String userId = "nonExistentUserId";
+
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        userServiceImpl.updateUserWithOneLogin(userId);
+
+        verify(userRepository, times(1)).findById(userId);
+        verify(userRepository, never()).save(any(User.class));
     }
 }
