@@ -55,12 +55,15 @@ class AcspMembersServiceImplTest {
         final var createdDate = Instant.now();
         doReturn(createdDate).when(service).getCurrentDateTime();
 
+        var id = new ObjectId();
+        when(randomService.generateId()).thenReturn(id);
         when(randomService.getEtag()).thenReturn("etag");
 
+        var stringId = id.toString();
         AcspMembersData result = service.create(spec);
 
         assertNotNull(result);
-        assertNotNull(result.getAcspMemberId());
+        assertEquals(stringId, result.getAcspMemberId());
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
@@ -70,7 +73,7 @@ class AcspMembersServiceImplTest {
         verify(repository).save(captor.capture());
 
         AcspMembers captured = captor.getValue();
-        assertNotNull(captured.getAcspMemberId());
+        assertEquals(id, captured.getAcspMemberId());
         assertEquals("acspNumber", captured.getAcspNumber());
         assertEquals("userId", captured.getUserId());
         assertEquals("active", captured.getStatus());
@@ -90,12 +93,15 @@ class AcspMembersServiceImplTest {
         final var createdDate = Instant.now();
         doReturn(createdDate).when(service).getCurrentDateTime();
 
+        var id = new ObjectId();
+        when(randomService.generateId()).thenReturn(id);
         when(randomService.getEtag()).thenReturn("etag");
 
+        var stringId = id.toString();
         AcspMembersData result = service.create(spec);
 
         assertNotNull(result);
-        assertNotNull(result.getAcspMemberId());
+        assertEquals(stringId, result.getAcspMemberId());
         assertEquals("acspNumber", result.getAcspNumber());
         assertEquals("userId", result.getUserId());
         assertEquals("active", result.getStatus());
@@ -105,7 +111,7 @@ class AcspMembersServiceImplTest {
         verify(repository).save(captor.capture());
 
         AcspMembers captured = captor.getValue();
-        assertNotNull(captured.getAcspMemberId());
+        assertEquals(id, captured.getAcspMemberId());
         assertEquals("acspNumber", captured.getAcspNumber());
         assertEquals("userId", captured.getUserId());
         assertEquals("active", captured.getStatus());

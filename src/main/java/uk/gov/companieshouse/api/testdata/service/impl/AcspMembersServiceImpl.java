@@ -27,10 +27,11 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
 
     @Override
     public AcspMembersData create(AcspMembersSpec acspMembersSpec) throws DataException {
+        var randomId = randomService.generateId();
         var acspMembers = new AcspMembers();
         var currentDate = getCurrentDateTime();
 
-        acspMembers.setAcspMemberId(new ObjectId());
+        acspMembers.setAcspMemberId(randomId);
         acspMembers.setAcspNumber(acspMembersSpec.getAcspNumber());
         acspMembers.setUserId(acspMembersSpec.getUserId());
         acspMembers.setUserRole(Objects.requireNonNullElse(acspMembersSpec.getUserRole(),
