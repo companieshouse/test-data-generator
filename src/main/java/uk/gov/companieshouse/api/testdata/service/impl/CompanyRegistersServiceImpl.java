@@ -17,6 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
+import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -28,21 +29,25 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     @Autowired
     private CompanyRegistersRepository repository;
 
+    @Autowired
+    private FilingHistoryRepository filingHistoryRepository;
+
     private static final String LINK_STEM = "/company/";
     private static final String DIRECTORS_LINK = "/company/%s/officers?register_view=true&register_type=directors";
     private static final String SECRETARIES_LINK = "/company/%s/officers?register_view=true&register_type=secretaries";
     private static final String PSC_LINK = "/company/%s/persons-with-significant-control?register_view=true";
+    private static final String FILING_HISTORY_LINK = "/company/%s/filing-history/%s";
     private static final String DIRECTORS_TEXT = "directors";
     private static final String SECRETARIES_TEXT = "secretaries";
     private static final String PSC_TEXT = "persons-with-significant-control";
     private static final String MEMBERS_TEXT = "members";
     private static final String REGISTER_STEM = "/registers";
-    private static final String UNSPECIFIED_LOCATION = "unspecified-location";
     private static final String LLP_MEMBERS_TEXT = "llp-members";
     private static final String LLP_USUAL_RESIDENTIAL_ADDRESS_TEXT = "llp-usual-residential-address";
     private static final String USUAL_RESIDENTIAL_ADDRESS_TEXT = "usual-residential-address";
     private static final String USUAL_RESIDENTIAL_ADDRESS_REGISTER_TYPE = "usual_residential_address";
     private static final String PSC_REGISTER_TYPE = "persons_with_significant_control";
+    private static final String PUBLIC_REGISTER = "public-register";
 
 
     @Override
@@ -91,6 +96,11 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         var registerItem = new RegisterItem();
         registerItem.setRegisterMovedTo(registerSpec.getRegisterMovedTo());
         registerItem.setMovedOn(LocalDate.now());
+        if (PUBLIC_REGISTER.equals(registerSpec.getRegisterMovedTo())) {
+            filingHistoryRepository.findByCompanyNumber(companyNumber).ifPresent(filingHistory ->
+                    registerItem.setFilingLink(FILING_HISTORY_LINK.formatted(companyNumber, filingHistory.getId()))
+            );
+        }
         var register = new Register();
         register.setRegisterType(registerSpec.getRegisterType());
         register.setItems(Collections.singletonList(registerItem));
@@ -102,15 +112,17 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     }
 
     private Map<String, String> generateRegisterLinks(String registerType, String companyNumber, String registerMovedTo) {
-        if (UNSPECIFIED_LOCATION.equals(registerMovedTo)) {
+        if (PUBLIC_REGISTER.equals(registerMovedTo)) {
+            return switch (registerType) {
+                case DIRECTORS_TEXT -> Map.of("directors_register", DIRECTORS_LINK.formatted(companyNumber));
+                case SECRETARIES_TEXT -> Map.of("secretaries_register", SECRETARIES_LINK.formatted(companyNumber));
+                case PSC_TEXT -> Map.of("persons_with_significant_control_register", PSC_LINK.formatted(companyNumber));
+                default -> Collections.emptyMap();
+            };
+        }
+        else {
             return Collections.emptyMap();
         }
-        return switch (registerType) {
-            case DIRECTORS_TEXT -> Map.of("directors_register", DIRECTORS_LINK.formatted(companyNumber));
-            case SECRETARIES_TEXT -> Map.of("secretaries_register", SECRETARIES_LINK.formatted(companyNumber));
-            case PSC_TEXT -> Map.of("persons_with_significant_control_register", PSC_LINK.formatted(companyNumber));
-            default -> Collections.emptyMap();
-        };
     }
 
     private enum RegisterType {
