@@ -4,9 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -52,10 +54,12 @@ class CompanyPscsServiceImplTest {
     private CompanyPscsServiceImpl companyPscsService;
 
     @Test
-    void create_StandardCompany_CreatesThreePscs() throws DataException {
+    void create_OverseasEntity_CreatesBeneficialOwners() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
+        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        spec.setNumberOfPsc(3);  // Added required field
+        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));  // Added required field
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -68,27 +72,13 @@ class CompanyPscsServiceImplTest {
     }
 
     @Test
-    void create_OverseasEntity_CreatesBeneficialOwners() throws DataException {
-        CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-
-        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
-        when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(new CompanyPscs());
-
-        CompanyPscs result = companyPscsService.create(spec);
-
-        assertNotNull(result);
-        verify(repository, times(2)).save(any(CompanyPscs.class));
-    }
-
-    @Test
     void create_SuperSecurePsc_CreatesSuperSecurePsc() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setHasSuperSecurePscs(true);
+        spec.setPscType(null);
+        spec.setNumberOfPsc(null);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -146,6 +136,8 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
+        spec.setNumberOfPsc(1);
+        spec.setPscType(List.of(PscType.INDIVIDUAL));
         LocalDate dueDate = LocalDate.now().plusDays(10);
 
         when(randomService.generateAccountsDueDateByStatus("due-soon")).thenReturn(dueDate);
@@ -189,6 +181,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(3);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -197,14 +190,93 @@ class CompanyPscsServiceImplTest {
         companyPscsService.create(spec);
 
         ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
-        verify(repository, atLeastOnce()).save(captor.capture());
+        verify(repository, times(3)).save(captor.capture());
 
-        CompanyPscs savedPsc = captor.getValue();
+
+        CompanyPscs savedPsc = captor.getAllValues().get(0);
         assertEquals(COMPANY_NUMBER, savedPsc.getCompanyNumber());
         assertEquals(ENCODED_ID, savedPsc.getId());
         assertEquals(ETAG, savedPsc.getEtag());
         assertEquals("statement type", savedPsc.getStatementType());
         assertNotNull(savedPsc.getCreatedAt());
         assertNotNull(savedPsc.getUpdatedAt());
+    }
+
+    @Test
+    void create_PscTypeWithoutNumber_ThrowsException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setPscType(List.of(PscType.INDIVIDUAL));
+
+        DataException exception = assertThrows(DataException.class,
+                () -> companyPscsService.create(spec));
+
+        assertEquals("psc_type must be accompanied by number_of_psc", exception.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_BeneficialOwnerTypeWithNonOverseas_ThrowsException() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(2);
+        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+
+        DataException exception = assertThrows(DataException.class,
+                () -> companyPscsService.create(spec));
+
+        assertEquals("Beneficial owner type is not allowed for this company type",
+                exception.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_ValidPscTypeWithNumber_CreatesPscs() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(2);
+        spec.setPscType(List.of(PscType.INDIVIDUAL));
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        CompanyPscs result = companyPscsService.create(spec);
+
+        assertNotNull(result);
+        verify(repository, times(2)).save(any(CompanyPscs.class));
+    }
+
+    @Test
+    void create_ValidBeneficialOwnerType_CreatesBeneficialOwners() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        spec.setNumberOfPsc(2);
+        spec.setPscType(List.of(PscType.CORPORATE_BENEFICIAL_OWNER));
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        CompanyPscs result = companyPscsService.create(spec);
+
+        assertNotNull(result);
+        verify(repository, times(2)).save(any(CompanyPscs.class));
+    }
+
+    @Test
+    void create_NumberZeroWithPscType_ReturnsNull() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(0);
+        spec.setPscType(List.of(PscType.INDIVIDUAL));
+
+        assertThrows(DataException.class, () -> companyPscsService.create(spec));
+        verify(repository, never()).save(any());
     }
 }
