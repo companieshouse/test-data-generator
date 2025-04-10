@@ -132,7 +132,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         CompanyPscs firstPsc = null;
         boolean isOverseasEntity = CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
 
-        for (int i = 0; i < numberOfPsc; i++) {
+        for (var i = 0; i < numberOfPsc; i++) {
             CompanyPscs psc = isOverseasEntity
                     ? createBeneficialOwner(spec, getBeneficialOwnerType(spec.getPscType(), i))
                     : createPsc(spec, getRegularPscType(spec.getPscType(), i));
@@ -162,7 +162,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     }
 
     private PscType getRandomPscType() {
-        PscType[] regularTypes = {
+        var regularTypes = new PscType[] {
                 PscType.INDIVIDUAL,
                 PscType.LEGAL_PERSON,
                 PscType.CORPORATE_ENTITY
