@@ -67,62 +67,84 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     @Override
     public CompanyPscs create(CompanySpec spec) throws DataException {
-        if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
+        if (shouldReturnNullForOverseaCompany(spec)) {
             return null;
         }
 
-        Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
-        if (Boolean.TRUE.equals(hasSuperSecurePscs)) {
-            if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-                return createSuperSecureBeneficialOwner(spec);
-            } else {
-                return createSuperSecurePsc(spec);
-            }
+        if (shouldCreateSuperSecurePsc(spec)) {
+            return createAppropriateSuperSecurePsc(spec);
         }
 
-        if (spec.getPscType() != null && !spec.getPscType().isEmpty()) {
-            if (spec.getNumberOfPsc() == null || spec.getNumberOfPsc() <= 0) {
-                throw new DataException(PSC_ERROR_MESSAGE);
-            }
+        validatePscTypeAndCount(spec);
 
-            boolean hasBeneficialOwnerType = spec.getPscType().stream()
-                    .anyMatch(type -> type == PscType.INDIVIDUAL_BENEFICIAL_OWNER
-                            || type == PscType.CORPORATE_BENEFICIAL_OWNER);
-
-            if (hasBeneficialOwnerType
-                    && !CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-                throw new DataException(BENEFICIAL_OWNER_ERROR);
-            }
-        }
-
-        int numberOfPsc = Optional.ofNullable(spec.getNumberOfPsc()).orElse(DEFAULT_NUMBER_OF_PSC);
-        List<PscType> requestedPscTypes = spec.getPscType();
-        CompanyPscs firstPsc = null;
-
+        int numberOfPsc = getNumberOfPsc(spec);
         if (numberOfPsc <= 0) {
             return null;
         }
 
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-            for (int i = 0; i < numberOfPsc; i++) {
-                PscType pscType = getBeneficialOwnerType(requestedPscTypes, i);
-                CompanyPscs psc = createBeneficialOwner(spec, pscType);
-                if (firstPsc == null) {
-                    firstPsc = psc;
-                }
-            }
-        } else {
-            for (int i = 0; i < numberOfPsc; i++) {
-                PscType pscType = getRegularPscType(requestedPscTypes, i);
-                CompanyPscs psc = createPsc(spec, pscType);
-                if (firstPsc == null) {
-                    firstPsc = psc;
-                }
+        return createPscsBasedOnCompanyType(spec, numberOfPsc);
+    }
+
+    private boolean shouldReturnNullForOverseaCompany(CompanySpec spec) {
+        return CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType());
+    }
+
+    private boolean shouldCreateSuperSecurePsc(CompanySpec spec) {
+        return Boolean.TRUE.equals(spec.getHasSuperSecurePscs());
+    }
+
+    private CompanyPscs createAppropriateSuperSecurePsc(CompanySpec spec) {
+        return CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())
+                ? createSuperSecureBeneficialOwner(spec)
+                : createSuperSecurePsc(spec);
+    }
+
+    private void validatePscTypeAndCount(CompanySpec spec) throws DataException {
+        if (hasPscTypesWithoutCount(spec)) {
+            throw new DataException(PSC_ERROR_MESSAGE);
+        }
+        if (hasInvalidBeneficialOwnerType(spec)) {
+            throw new DataException(BENEFICIAL_OWNER_ERROR);
+        }
+    }
+
+    private boolean hasPscTypesWithoutCount(CompanySpec spec) {
+        return spec.getPscType() != null
+                && !spec.getPscType().isEmpty()
+                && (spec.getNumberOfPsc() == null || spec.getNumberOfPsc() <= 0);
+    }
+
+    private boolean hasInvalidBeneficialOwnerType(CompanySpec spec) {
+        return spec.getPscType() != null
+                && spec.getPscType().stream().anyMatch(this::isBeneficialOwnerType)
+                && !CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
+    }
+
+    private boolean isBeneficialOwnerType(PscType type) {
+        return type == PscType.INDIVIDUAL_BENEFICIAL_OWNER || type == PscType.CORPORATE_BENEFICIAL_OWNER;
+    }
+
+    private int getNumberOfPsc(CompanySpec spec) {
+        return Optional.ofNullable(spec.getNumberOfPsc()).orElse(DEFAULT_NUMBER_OF_PSC);
+    }
+
+    private CompanyPscs createPscsBasedOnCompanyType(CompanySpec spec, int numberOfPsc) {
+        CompanyPscs firstPsc = null;
+        boolean isOverseasEntity = CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
+
+        for (int i = 0; i < numberOfPsc; i++) {
+            CompanyPscs psc = isOverseasEntity
+                    ? createBeneficialOwner(spec, getBeneficialOwnerType(spec.getPscType(), i))
+                    : createPsc(spec, getRegularPscType(spec.getPscType(), i));
+
+            if (firstPsc == null) {
+                firstPsc = psc;
             }
         }
 
         return firstPsc;
     }
+
 
     private PscType getBeneficialOwnerType(List<PscType> requestedPscTypes, int index) {
         if (requestedPscTypes != null && !requestedPscTypes.isEmpty()) {
@@ -226,8 +248,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
             case INDIVIDUAL:
                 buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
                 break;
-            case LEGAL_PERSON:
-            case CORPORATE_ENTITY:
+            case LEGAL_PERSON, CORPORATE_ENTITY:
                 buildWithIdentificationPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
                 break;
             default:
