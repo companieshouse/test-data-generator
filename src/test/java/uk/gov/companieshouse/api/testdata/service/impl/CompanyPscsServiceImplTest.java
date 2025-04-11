@@ -279,4 +279,35 @@ class CompanyPscsServiceImplTest {
         assertThrows(DataException.class, () -> companyPscsService.create(spec));
         verify(repository, never()).save(any());
     }
+
+    @Test
+    void create_WithNullNumberOfPsc_ReturnsNull() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(null);
+
+        CompanyPscs result = companyPscsService.create(spec);
+
+        assertNull(result);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_WithMultiplePscTypes_CreatesCorrectNumber() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(3);
+        spec.setPscType(List.of(PscType.INDIVIDUAL, PscType.LEGAL_PERSON));
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        CompanyPscs result = companyPscsService.create(spec);
+
+        assertNotNull(result);
+        verify(repository, times(3)).save(any(CompanyPscs.class));
+    }
 }

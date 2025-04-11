@@ -91,7 +91,7 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
                         PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
             }
         } else {
-            companyPscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+            companyPscStatement.setStatement(PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         }
 
         companyPscStatement.setCreatedAt(dateTimeNow);
