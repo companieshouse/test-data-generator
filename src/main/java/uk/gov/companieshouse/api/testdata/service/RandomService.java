@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service;
 
 import java.time.LocalDate;
 import java.util.OptionalLong;
+import org.bson.types.ObjectId;
 
 public interface RandomService {
 
@@ -61,4 +62,10 @@ public interface RandomService {
      * @return A date generated based on the accounts due status
      */
     LocalDate generateAccountsDueDateByStatus(String accountsDueStatus);
+
+    /**
+     * Generate a random ObjectId.
+     * @return A random ObjectId.
+     */
+    ObjectId generateId();
 }

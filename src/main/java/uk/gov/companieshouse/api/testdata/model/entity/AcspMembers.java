@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.time.Instant;
+
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -10,7 +12,7 @@ public class AcspMembers {
 
     @Id
     @Field("_id")
-    private String acspMemberId;
+    private ObjectId acspMemberId;
 
     @Field("acsp_number")
     private String acspNumber;
@@ -36,7 +38,7 @@ public class AcspMembers {
     @Field("version")
     private long version;
 
-    public String getAcspMemberId() {
+    public ObjectId getAcspMemberId() {
         return acspMemberId;
     }
 
@@ -72,7 +74,7 @@ public class AcspMembers {
         return version;
     }
 
-    public void setAcspMemberId(String acspMemberId) {
+    public void setAcspMemberId(ObjectId acspMemberId) {
         this.acspMemberId = acspMemberId;
     }
 

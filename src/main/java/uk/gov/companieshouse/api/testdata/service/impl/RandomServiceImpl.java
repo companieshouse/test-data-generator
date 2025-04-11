@@ -8,6 +8,7 @@ import java.util.Base64;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
 
 import org.springframework.util.StringUtils;
@@ -79,5 +80,10 @@ public class RandomServiceImpl implements RandomService {
             }
         }
         return result;
+    }
+
+    @Override
+    public ObjectId generateId() {
+        return new ObjectId();
     }
 }
