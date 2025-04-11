@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
                     .stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
         String email = userSpec.getEmail() != null ? userSpec.getEmail() :
-                "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
+                "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
 
         user.setId(randomId);
         user.setEmail(email);

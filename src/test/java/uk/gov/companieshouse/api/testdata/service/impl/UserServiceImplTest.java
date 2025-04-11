@@ -245,7 +245,7 @@ class UserServiceImplTest {
                 "Password should match the one set in UserSpec");
         assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
         String expectedEmail = userSpec.getEmail() != null ? userSpec.getEmail() :
-                "test-data-generated" + generatedUserId + "@test.companieshouse.gov.uk";
+                "test-data-generated" + generatedUserId + "@chtesttdg.mailosaur.net";
         assertEquals(expectedEmail, savedUser.getEmail(), "Email should match");
 
         assertEquals(
