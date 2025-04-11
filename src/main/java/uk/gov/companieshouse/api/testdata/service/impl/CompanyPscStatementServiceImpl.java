@@ -75,15 +75,23 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
 
         companyPscStatement.setKind("persons-with-significant-control-statement");
 
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-            companyPscStatement.setStatement(
-                    PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
-        } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
+        if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())
+                && (spec.getNumberOfPsc() == null || spec.getNumberOfPsc() == 0)) {
             companyPscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
+        } else if (spec.getNumberOfPsc() != null && spec.getNumberOfPsc() > 0) {
+            if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
+                companyPscStatement.setStatement(
+                        PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
+            } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
+                companyPscStatement.setStatement(
+                        PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
+            } else {
+                companyPscStatement.setStatement(
+                        PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+            }
         } else {
-            companyPscStatement.setStatement(
-                    PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+            companyPscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
         }
 
         companyPscStatement.setCreatedAt(dateTimeNow);
