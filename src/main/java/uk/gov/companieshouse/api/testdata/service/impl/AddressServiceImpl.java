@@ -55,6 +55,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address NON_EU_ADDRESS = new Address(
+            "1",
             "Edificio Salduba Tercer Piso",
             "Calle 53 Este",
             "Panama",
