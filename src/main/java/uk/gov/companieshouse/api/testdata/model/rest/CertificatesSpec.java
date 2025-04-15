@@ -103,8 +103,8 @@ public class CertificatesSpec {
         return itemOptionsCertificateType;
     }
 
-    public void setItemOptionsCertificateType(String descriptionCertificate) {
-        this.descriptionCertificate = descriptionCertificate;
+    public void setItemOptionsCertificateType(String itemOptionsCertificateType) {
+        this.itemOptionsCertificateType = itemOptionsCertificateType;
     }
 
     public String getItemOptionsCompanyType() {
