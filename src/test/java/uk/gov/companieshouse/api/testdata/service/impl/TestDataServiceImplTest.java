@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
 
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -161,7 +171,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).create(capturedSpec);
         verify(companyPscStatementService, times(1)).create(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
-        verify(companyPscsService, times(3)).create(capturedSpec);
+        verify(companyPscsService, times(1)).create(capturedSpec);
 
         assertEquals(expectedFullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + expectedFullCompanyNumber, createdCompany.getCompanyUri());
@@ -888,12 +898,15 @@ class TestDataServiceImplTest {
         AcspProfileData acspProfileData =
                 new AcspProfileData(profileSpec.getAcspNumber());
         AcspMembersData expectedMembersData =
-                new AcspMembersData("memberId", profileSpec.getAcspNumber(), "userId", "active", "role");
+                new AcspMembersData(new ObjectId(),
+                        profileSpec.getAcspNumber(), "userId", "active", "role");
 
         AcspMembersData result = createAcspMembersDataHelper(
                 "userId", acspProfileData, expectedMembersData, profileSpec);
 
-        verifyAcspMembersData(result, expectedMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), expectedMembersData.getUserId(), expectedMembersData.getStatus(), expectedMembersData.getUserRole());
+        verifyAcspMembersData(result,
+                String.valueOf(expectedMembersData.getAcspMemberId()),
+                acspProfileData.getAcspNumber(), expectedMembersData.getUserId(), expectedMembersData.getStatus(), expectedMembersData.getUserRole());
         verify(acspMembersService).create(any(AcspMembersSpec.class));
         verify(acspProfileService).create(argThat(profile -> profile.getAmlDetails() == null));
     }
@@ -927,7 +940,8 @@ class TestDataServiceImplTest {
         spec.setUserId("userId");
 
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData acspMembersData = new AcspMembersData("memberId", acspProfileData.getAcspNumber(), "userId", "active", "role");
+        AcspMembersData acspMembersData =
+                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(), "userId", "active", "role");
         var acspStatus = "active";
         var acspType = "ltd";
         var supervisoryBody = "financial-conduct-authority-fca";
@@ -949,7 +963,9 @@ class TestDataServiceImplTest {
 
         AcspMembersData result = testDataService.createAcspMembersData(spec);
 
-        verifyAcspMembersData(result, acspMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
+        verifyAcspMembersData(result,
+                String.valueOf(acspMembersData.getAcspMemberId()),
+                acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
 
         verify(acspProfileService).create(acspProfile);
 
@@ -965,7 +981,8 @@ class TestDataServiceImplTest {
         spec.setUserId("userId");
 
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
-        AcspMembersData acspMembersData = new AcspMembersData("memberId", "acspNumber", "userId", "active", "role");
+        AcspMembersData acspMembersData = new AcspMembersData(new ObjectId(),
+                "acspNumber", "userId", "active", "role");
 
         spec.setAcspProfile(null);
 
@@ -974,7 +991,9 @@ class TestDataServiceImplTest {
 
         AcspMembersData result = testDataService.createAcspMembersData(spec);
 
-        verifyAcspMembersData(result, acspMembersData.getAcspMemberId(), acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
+        verifyAcspMembersData(result,
+                String.valueOf(acspMembersData.getAcspMemberId()),
+                acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
                 profile.getStatus() == null
@@ -1367,5 +1386,34 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting certificates", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(certificatesService, times(1)).delete(CERTIFICATES_ID);
+    }
+
+    @Test
+    void testUpdateUserWithOneLoginCalled() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("userId");
+        identitySpec.setEmail("email@example.com");
+        identitySpec.setVerificationSource("source");
+
+        IdentityData mockIdentityData = new IdentityData("identityId");
+        when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
+        IdentityData result = testDataService.createIdentityData(identitySpec);
+
+        assertEquals(mockIdentityData, result);
+        verify(userService, times(1)).updateUserWithOneLogin("userId");
+    }
+
+    @Test
+    void testUpdateUserWithOneLoginNotCalledOnException() throws DataException {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("userId");
+        identitySpec.setEmail("email@example.com");
+        identitySpec.setVerificationSource("source");
+
+        when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.createIdentityData(identitySpec));
+        assertEquals("Error creating identity", exception.getMessage());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
     }
 }

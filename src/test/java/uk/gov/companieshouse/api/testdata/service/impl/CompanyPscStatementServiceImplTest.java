@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -31,6 +32,8 @@ class CompanyPscStatementServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "ENCODED";
     private static final String ETAG = "ETAG";
+    private static final String PSC_STATEMENT_KIND = "persons-with-significant-control-statement";
+    private static final String PSC_STATEMENT = "psc-exists-but-not-identified";
 
     @Mock
     private CompanyPscStatementRepository repository;
@@ -44,7 +47,6 @@ class CompanyPscStatementServiceImplTest {
     void create() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscStatement savedStatement = new CompanyPscStatement();
@@ -53,11 +55,9 @@ class CompanyPscStatementServiceImplTest {
         CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
 
         assertEquals(savedStatement, returnedStatement);
-
         ArgumentCaptor<CompanyPscStatement> statementCaptor
                 = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
-
         CompanyPscStatement statement = statementCaptor.getValue();
         assertNotNull(statement);
         assertEquals(ENCODED_VALUE, statement.getId());
@@ -70,8 +70,8 @@ class CompanyPscStatementServiceImplTest {
                 + ENCODED_VALUE, links.getSelf());
         assertNotNull(statement.getNotifiedOn());
         assertEquals(ETAG, statement.getEtag());
-        assertEquals("persons-with-significant-control-statement", statement.getKind());
-        assertEquals("no-individual-or-entity-with-signficant-control", statement.getStatement());
+        assertEquals(PSC_STATEMENT_KIND, statement.getKind());
+        assertEquals(PSC_STATEMENT, statement.getStatement());
 
         assertNotNull(statement.getCreatedAt());
 
@@ -90,7 +90,6 @@ class CompanyPscStatementServiceImplTest {
     void deleteNoDataException() {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
-
         assertFalse(this.companyPscStatementService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
     }
@@ -110,11 +109,9 @@ class CompanyPscStatementServiceImplTest {
         CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
 
         assertEquals(savedStatement, returnedStatement);
-
         ArgumentCaptor<CompanyPscStatement> statementCaptor
                 = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
-
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
         assertNotNull(capturedStatement);
         assertEquals(ENCODED_VALUE, capturedStatement.getId());
@@ -124,11 +121,11 @@ class CompanyPscStatementServiceImplTest {
 
         Links links = capturedStatement.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
-                        + ENCODED_VALUE, links.getSelf());
+                + ENCODED_VALUE, links.getSelf());
         assertNotNull(capturedStatement.getNotifiedOn());
         assertEquals(ETAG, capturedStatement.getEtag());
-        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("no-individual-or-entity-with-signficant-control",
+        assertEquals(PSC_STATEMENT_KIND, capturedStatement.getKind());
+        assertEquals(PSC_STATEMENT,
                 capturedStatement.getStatement());
         assertNotNull(capturedStatement.getCreatedAt());
     }
@@ -149,11 +146,9 @@ class CompanyPscStatementServiceImplTest {
         CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
 
         assertEquals(savedStatement, returnedStatement);
-
         ArgumentCaptor<CompanyPscStatement> statementCaptor
                 = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
-
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
         assertNotNull(capturedStatement);
         assertEquals(ENCODED_VALUE, capturedStatement.getId());
@@ -163,11 +158,11 @@ class CompanyPscStatementServiceImplTest {
 
         Links links = capturedStatement.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
-                        + ENCODED_VALUE, links.getSelf());
+                + ENCODED_VALUE, links.getSelf());
         assertNotNull(capturedStatement.getNotifiedOn());
         assertEquals(ETAG, capturedStatement.getEtag());
-        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("no-individual-or-entity-with-signficant-control",
+        assertEquals(PSC_STATEMENT_KIND, capturedStatement.getKind());
+        assertEquals(PSC_STATEMENT,
                 capturedStatement.getStatement());
         assertNotNull(capturedStatement.getCreatedAt());
     }
@@ -188,11 +183,9 @@ class CompanyPscStatementServiceImplTest {
         CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
 
         assertEquals(savedStatement, returnedStatement);
-
         ArgumentCaptor<CompanyPscStatement> statementCaptor
                 = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
-
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
         assertNotNull(capturedStatement);
         assertEquals(ENCODED_VALUE, capturedStatement.getId());
@@ -202,12 +195,72 @@ class CompanyPscStatementServiceImplTest {
 
         Links links = capturedStatement.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/"
-                        + ENCODED_VALUE, links.getSelf());
+                + ENCODED_VALUE, links.getSelf());
         assertNotNull(capturedStatement.getNotifiedOn());
         assertEquals(ETAG, capturedStatement.getEtag());
-        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("no-individual-or-entity-with-signficant-control",
+        assertEquals(PSC_STATEMENT_KIND, capturedStatement.getKind());
+        assertEquals(PSC_STATEMENT,
                 capturedStatement.getStatement());
         assertNotNull(capturedStatement.getCreatedAt());
+    }
+
+    @Test
+    void createWhenCompanyTypeIsRegisteredOverseasEntity() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+        ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertEquals("all-beneficial-owners-identified", capturedStatement.getStatement());
+    }
+
+    @Test
+    void createWhenCompanyTypeIsOverseaCompany() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+        ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertEquals("no-individual-or-entity-with-signficant-control", capturedStatement.getStatement());
+    }
+
+    @Test
+    void createWhenCompanyTypeIsOther() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+        ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertEquals(PSC_STATEMENT, capturedStatement.getStatement());
     }
 }

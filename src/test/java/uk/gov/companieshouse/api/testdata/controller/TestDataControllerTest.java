@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Objects;
 
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -336,7 +337,7 @@ class TestDataControllerTest {
         request.setAcspProfile(new AcspProfileSpec());
 
         AcspMembersData acspMember = new AcspMembersData(
-                "memberId", "acspNumber", "userId", "active", "role");
+                new ObjectId(), "acspNumber", "userId", "active", "role");
 
         when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);
         ResponseEntity<AcspMembersData> response

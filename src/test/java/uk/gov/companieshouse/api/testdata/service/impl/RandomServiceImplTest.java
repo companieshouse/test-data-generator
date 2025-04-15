@@ -1,12 +1,14 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.OptionalLong;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 
 class RandomServiceImplTest {
@@ -102,5 +104,14 @@ class RandomServiceImplTest {
         LocalDate expectedDate = LocalDate.now();
         LocalDate result = randomService.generateAccountsDueDateByStatus(status);
         assertEquals(expectedDate, result, "Unknown status should return default date.");
+    }
+
+    @Test
+    void generateObjectId() {
+        ObjectId firstId = randomService.generateId();
+        ObjectId secondId = randomService.generateId();
+        assertNotNull(firstId);
+        assertNotNull(secondId);
+        assertNotEquals(firstId, secondId);
     }
 }

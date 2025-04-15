@@ -39,7 +39,7 @@ public class UserServiceImpl implements UserService {
                     .stream().map(RoleSpec::getId).collect(Collectors.toList()));
         }
         String email = userSpec.getEmail() != null ? userSpec.getEmail() :
-                "test-data-generated" + randomId + "@test.companieshouse.gov.uk";
+                "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
 
         user.setId(randomId);
         user.setEmail(email);
@@ -58,6 +58,15 @@ public class UserServiceImpl implements UserService {
         var user = repository.findById(userId);
         user.ifPresent(repository::delete);
         return user.isPresent();
+    }
+
+    public void updateUserWithOneLogin(String userId) {
+        var user = repository.findById(userId);
+        if (user.isPresent()) {
+            var existingUser = user.get();
+            existingUser.setOneLoginUserId(userId);
+            repository.save(existingUser);
+        }
     }
 
     @Override

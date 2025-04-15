@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Objects;
 
+import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -26,7 +27,7 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
 
     @Override
     public AcspMembersData create(AcspMembersSpec acspMembersSpec) throws DataException {
-        var randomId = randomService.getString(12);
+        var randomId = randomService.generateId();
         var acspMembers = new AcspMembers();
         var currentDate = getCurrentDateTime();
 
@@ -55,7 +56,8 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
 
     @Override
     public boolean delete(String acspMemberId) {
-        var acspMembers = repository.findById(acspMemberId);
+        var acspMembers =
+                repository.findByAcspMemberId(new ObjectId(acspMemberId));
         acspMembers.ifPresent(repository::delete);
         return acspMembers.isPresent();
     }

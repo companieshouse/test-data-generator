@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanyProfileServiceImpl.class));
-    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final String LINK_STEM = "/company/";
     private static final String FILLING_HISTORY_STEM = "/filing-history";
     private static final String OFFICERS_STEM = "/officers";
@@ -76,6 +75,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private boolean hasCompanyRegisters = false;
 
+    private boolean isCompanyTypeHasNoFilingHistory = true;
+
     @Override
     public CompanyProfile create(CompanySpec spec) {
         final String companyNumber = spec.getCompanyNumber();
@@ -114,9 +115,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);
+        isCompanyTypeHasNoFilingHistory = hasNoFilingHistory(companyParams.getCompanyType());
         String companyTypeValue = companyParams.getCompanyType()
                 != null ? companyParams.getCompanyType().getValue() : "ltd";
-        checkAndSetCompanyRegisters(spec);
+        setCompanyHasRegisters(spec);
         profile.setCompanyNumber(companyNumber);
         String nonJurisdictionType = (jurisdiction != null)
                 ? checkNonJurisdictionTypes(jurisdiction, companyTypeValue) : "";
@@ -139,9 +141,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
-        if (companyParams.getHasSuperSecurePscs() != null) {
-            profile.setHasSuperSecurePscs(companyParams.getHasSuperSecurePscs());
-        }
+        profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
         setCompanyName(profile, companyNumber, companyTypeValue);
         profile.setSicCodes(Collections.singletonList("71200"));
 
@@ -190,7 +190,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             overseasEntity.setHasMortgages(true);
             overseasEntity.setTestData(true);
         }
-        overseasEntity.setCompanyStatus(COMPANY_STATUS_REGISTERED);
+        setCompanyStatus(overseasEntity, spec.getCompanyStatus(), entityType);
         overseasEntity.setType(entityType);
         overseasEntity.setHasCharges(false);
         overseasEntity.setHasInsolvencyHistory(false);
@@ -294,7 +294,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setAccounts(accounts);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            overseasEntity.setHasSuperSecurePscs(spec.getHasSuperSecurePscs());
+            overseasEntity.setHasSuperSecurePscs(BooleanUtils.isTrue(spec.getHasSuperSecurePscs()));
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setDeltaAt(Instant.now());
             OverseasEntity.IUpdated updated = OverseasEntity.createUpdated();
@@ -344,7 +344,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private Links createLinks(String companyNumber) {
         Links links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
-        links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+        if (!isCompanyTypeHasNoFilingHistory) {
+            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+        }
         links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
         links.setPersonsWithSignificantControlStatement(
                 LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
@@ -409,10 +411,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void checkAndSetCompanyRegisters(CompanySpec spec) {
-        if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-            hasCompanyRegisters = true;
-        }
+    private void setCompanyHasRegisters(CompanySpec spec) {
+        hasCompanyRegisters = spec.getRegisters() != null && !spec.getRegisters().isEmpty();
     }
 
     private void setCompanyStatus(
@@ -433,5 +433,26 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         } else {
             profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
         }
+    }
+
+    private boolean hasNoFilingHistory(CompanyType companyType) {
+        if (companyType == null) {
+            return false;
+        }
+
+        Set<String> noFilingHistoryCompanyTypes = Set.of(
+                CompanyType.ASSURANCE_COMPANY.getValue(),
+                CompanyType.CHARITABLE_INCORPORATED_ORGANISATION.getValue(),
+                CompanyType.ICVC_SECURITIES.getValue(),
+                CompanyType.ICVC_UMBRELLA.getValue(),
+                CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY.getValue(),
+                CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL.getValue(),
+                CompanyType.PROTECTED_CELL_COMPANY.getValue(),
+                CompanyType.ROYAL_CHARTER.getValue(),
+                CompanyType.SCOTTISH_CHARITABLE_INCORPORATED_ORGANISATION.getValue(),
+                CompanyType.UK_ESTABLISHMENT.getValue()
+        );
+
+        return noFilingHistoryCompanyTypes.contains(companyType.getValue());
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.bson.types.ObjectId;
 
 public class AcspMembersData {
 
@@ -19,12 +20,12 @@ public class AcspMembersData {
     @JsonProperty("user_role")
     private final String userRole;
 
-    public AcspMembersData(String acspMemberId,
+    public AcspMembersData(ObjectId acspMemberId,
                            String acspNumber,
                            String userId,
                            String status,
                            String userRole) {
-        this.acspMemberId = acspMemberId;
+        this.acspMemberId = acspMemberId.toString();
         this.acspNumber = acspNumber;
         this.userId = userId;
         this.status = status;
