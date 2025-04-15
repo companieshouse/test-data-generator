@@ -1,100 +1,55 @@
-package uk.gov.companieshouse.api.testdata.model.entity;
+package uk.gov.companieshouse.api.testdata.model.rest;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotNull;
 
-@Document(collection = "certificates")
-public class Certificates {
-    @Id
-    @Field("_id")
-    private String id;
+public class CertificatesSpec {
 
-    @Field("created_at")
-    private String createdAt;
-
-    @Field("updated_at")
-    private String updatedAt;
-
-    @Field("data.id")
-    private String dataId;
-
-    @Field("data.company_name")
+    @JsonProperty("company_name")
     private String companyName;
 
-    @Field("data.company_number")
+    @JsonProperty("company_number")
     private String companyNumber;
 
-    @Field("data.description")
+    @JsonProperty("description")
     private String description;
 
-    @Field("data.description_identifier")
+    @JsonProperty("description_identifier")
     private String descriptionIdentifier;
 
-    @Field("data.description_values.company_number")
+    @JsonProperty("description_company_number")
     private String descriptionCompanyNumber;
 
-    @Field("data.description_values.certificate")
+    @JsonProperty("description_certificate")
     private String descriptionCertificate;
 
-    @Field("data.item_options.certificate_type")
+    @JsonProperty("item_options_certificate_type")
     private String itemOptionsCertificateType;
 
-    @Field("data.item_options.company_type")
+    @JsonProperty("item_options_company_type")
     private String itemOptionsCompanyType;
 
-    @Field("data.item_options.company_status")
+    @JsonProperty("item_options_company_status")
     private String itemOptionsCompanyStatus;
 
-    @Field("data.etag")
+    @JsonProperty("etag")
     private String etag;
 
-    @Field("data.kind")
+    @JsonProperty("kind")
     private String kind;
 
-    @Field("data.links.self")
+    @JsonProperty("links_self")
     private String linksSelf;
 
-    @Field("data.postal_delivery")
+    @JsonProperty("postal_delivery")
     private boolean postalDelivery;
 
-    @Field("data.quantity")
+    @JsonProperty("quantity")
     private int quantity;
 
-    @Field("user_id")
+    @JsonProperty("user_id")
+    @NotNull(message = "User ID cannot be null")
     private String userId;
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(String createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(String updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getDataId() {
-        return dataId;
-    }
-
-    public void setDataId(String dataId) {
-        this.dataId = dataId;
-    }
 
     public String getCompanyName() {
         return companyName;
@@ -148,8 +103,8 @@ public class Certificates {
         return itemOptionsCertificateType;
     }
 
-    public void setItemOptionsCertificateType(String itemOptionsCertificateType) {
-        this.itemOptionsCertificateType = itemOptionsCertificateType;
+    public void setItemOptionsCertificateType(String descriptionCertificate) {
+        this.descriptionCertificate = descriptionCertificate;
     }
 
     public String getItemOptionsCompanyType() {

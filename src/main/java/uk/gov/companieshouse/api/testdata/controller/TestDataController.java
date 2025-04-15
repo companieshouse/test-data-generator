@@ -23,6 +23,8 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -150,6 +152,18 @@ public class TestDataController {
         return new ResponseEntity<>(createdAcspMember, HttpStatus.CREATED);
     }
 
+    @PostMapping("/certificates")
+    public ResponseEntity<CertificatesData> createCertificates(
+            @Valid @RequestBody CertificatesSpec request) throws DataException {
+
+        var createdCertificates = testDataService.createCertificatesData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("certificated-id", createdCertificates.getId());
+        LOG.info("New certificates added", data);
+        return new ResponseEntity<>(createdCertificates, HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
                                                                     String acspMemberId)
@@ -164,6 +178,24 @@ public class TestDataController {
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Acsp Member Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/certificates/{id}")
+    public ResponseEntity<Map<String, Object>> deleteCertificates(@PathVariable("id")
+                                                                      String id)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        boolean deleteCertificates = testDataService.deleteCertificatesData(id);
+
+        if (deleteCertificates) {
+            LOG.info("Certificate is Deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Certificate Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

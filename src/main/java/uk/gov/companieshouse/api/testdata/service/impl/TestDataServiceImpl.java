@@ -18,22 +18,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -73,7 +61,11 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
+    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Autowired
     private AcspMembersRepository acspMembersRepository;
+    @Autowired
+    private CertificatesRepository certificatesRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
@@ -341,6 +333,51 @@ public class TestDataServiceImpl implements TestDataService {
             throw ex;
         }
         return true;
+    }
+
+    @Override
+    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create a certificates");
+        }
+
+        try {
+            CertificatesData createdCertificates = certificatesService.create(spec);
+
+            return new CertificatesData(
+                    createdCertificates.getId(),
+                    createdCertificates.getCreatedAt(),
+                    createdCertificates.getUpdatedAt(),
+                    createdCertificates.getDataId(),
+                    createdCertificates.getCompanyName(),
+                    createdCertificates.getCompanyNumber(),
+                    createdCertificates.getDescription(),
+                    createdCertificates.getDescriptionIdentifier(),
+                    createdCertificates.getDescriptionCompanyNumber(),
+                    createdCertificates.getDescriptionCertificate(),
+                    createdCertificates.getItemOptionsCertificateType(),
+                    createdCertificates.getItemOptionsCompanyType(),
+                    createdCertificates.getItemOptionsCompanyStatus(),
+                    createdCertificates.getEtag(),
+                    createdCertificates.getKind(),
+                    createdCertificates.getLinksSelf(),
+                    createdCertificates.isPostalDelivery(),
+                    createdCertificates.getQuantity(),
+                    createdCertificates.getUserId()
+            );
+
+        } catch (Exception ex) {
+            throw new DataException(ex);
+        }
+    }
+
+    @Override
+    public boolean deleteCertificatesData(String id) throws DataException {
+        try {
+            return certificatesService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting certificates", ex);
+        }
     }
 
     @Override
