@@ -14,8 +14,6 @@ import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
-
 @Service
 public class CertificatesServiceImpl implements DataService<CertificatesData, CertificatesSpec> {
 
