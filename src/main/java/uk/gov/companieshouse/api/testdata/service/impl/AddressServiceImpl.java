@@ -11,7 +11,7 @@ public class AddressServiceImpl implements AddressService {
     private static final String UNITED_KINGDOM = "United Kingdom";
 
     private static final Address ENGLAND_WALES_ADDRESS = new Address(
-            "1",
+            "House Name",
             "Companies House",
             "Crownway",
             UNITED_KINGDOM,
@@ -20,7 +20,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address SCOTLAND_ADDRESS = new Address(
-            "1",
+            "The Centre",
             "4th Floor Edinburgh Quay 2",
             "139 Fountain Bridge",
             UNITED_KINGDOM,
@@ -29,7 +29,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address NI_ADDRESS = new Address(
-            "1",
+            "The Place",
             "Second Floor The Linenhall",
             "32 - 38 Linenhall Street",
             UNITED_KINGDOM,
@@ -38,7 +38,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address ENGLAND_ADDRESS = new Address(
-            "1",
+            "Business Centre",
             "Companies House,4th Floor, The Linen Hall",
             "162-168 Regent Street",
             UNITED_KINGDOM,
@@ -47,6 +47,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address EUROPEAN_UNION_ADDRESS = new Address(
+            "Business Place",
             "Schiphol Boulevard Tower 403 Tower C-4",
             "1118bk Schiphol",
             "Netherlands",
@@ -55,7 +56,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address NON_EU_ADDRESS = new Address(
-            "1",
+            "Business House",
             "Edificio Salduba Tercer Piso",
             "Calle 53 Este",
             "Panama",
@@ -64,7 +65,7 @@ public class AddressServiceImpl implements AddressService {
     );
 
     private static final Address OVERSEAS_ADDRESS = new Address(
-            "1",
+            "Gordon's Centre",
             "Gordon Cummins Hwy",
             "Grantley Adams International Airport",
             "Barbados",
