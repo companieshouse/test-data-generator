@@ -119,10 +119,13 @@ In order to use the generator, there are different possible endpoints that can b
   - `description_values`: 
     - `company_number`: The description values which has number of the company matching with company name.
     - `certificate`: The description values with the company Number
-  - `item_options`:
+  - `item_options`: {
     - `certificate_type`: The certificates types for the item
+    - `delivery_timescale`: The delivery time scale (e.g. `standard`, `express`)
+    - `inclue_email_copy`: The boolean value for sending email copy. Default value is false
     - `company_type`: The type of the company (e.g., `ltd`, `plc`).
     - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
+    }
   - `kind`: The kind of the certificate
   - `links_self`: The links for the certificate
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.

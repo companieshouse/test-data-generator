@@ -87,6 +87,9 @@ class CertificatesServiceImplTest {
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
 
+        ItemOptions capturedOptions = captured.getItemOptions();
+        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions();
+
         assertEquals("CRT-123456-789012", captured.getId());
         assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
         assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
@@ -94,7 +97,11 @@ class CertificatesServiceImplTest {
         assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
         assertEquals(certificatesSpec.getDescriptionCompanyNumber(), captured.getDescriptionCompanyNumber());
         assertEquals(certificatesSpec.getDescriptionCertificate(), captured.getDescriptionCertificate());
-        assertEquals(certificatesSpec.getItemOptions(), captured.getItemOptions());
+        assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
+        assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
+        assertEquals(expectedOptions.getIncludeEmailCopy(), capturedOptions.getIncludeEmailCopy());
+        assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
+        assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
         assertEquals("etag123", captured.getEtag());
         assertEquals(certificatesSpec.getKind(), captured.getKind());
         assertEquals(certificatesSpec.getLinksSelf(), captured.getLinksSelf());
