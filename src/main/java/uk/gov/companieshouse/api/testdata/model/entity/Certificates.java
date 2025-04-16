@@ -37,14 +37,8 @@ public class Certificates {
     @Field("data.description_values.certificate")
     private String descriptionCertificate;
 
-    @Field("data.item_options.certificate_type")
-    private String itemOptionsCertificateType;
-
-    @Field("data.item_options.company_type")
-    private String itemOptionsCompanyType;
-
-    @Field("data.item_options.company_status")
-    private String itemOptionsCompanyStatus;
+    @Field("data.item_options")
+    private ItemOptions itemOptions;
 
     @Field("data.etag")
     private String etag;
@@ -144,28 +138,12 @@ public class Certificates {
         this.descriptionCertificate = descriptionCertificate;
     }
 
-    public String getItemOptionsCertificateType() {
-        return itemOptionsCertificateType;
+    public ItemOptions getItemOptions() {
+        return itemOptions;
     }
 
-    public void setItemOptionsCertificateType(String itemOptionsCertificateType) {
-        this.itemOptionsCertificateType = itemOptionsCertificateType;
-    }
-
-    public String getItemOptionsCompanyType() {
-        return itemOptionsCompanyType;
-    }
-
-    public void setItemOptionsCompanyType(String itemOptionsCompanyType) {
-        this.itemOptionsCompanyType = itemOptionsCompanyType;
-    }
-
-    public String getItemOptionsCompanyStatus() {
-        return itemOptionsCompanyStatus;
-    }
-
-    public void setItemOptionsCompanyStatus(String itemOptionsCompanyStatus) {
-        this.itemOptionsCompanyStatus = itemOptionsCompanyStatus;
+    public void setItemOptions(ItemOptions itemOptions) {
+        this.itemOptions = itemOptions;
     }
 
     public String getEtag() {

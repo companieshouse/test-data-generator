@@ -344,18 +344,6 @@ public class TestDataServiceImpl implements TestDataService {
                     createdCertificates.getDataId(),
                     createdCertificates.getCompanyName(),
                     createdCertificates.getCompanyNumber(),
-                    createdCertificates.getDescription(),
-                    createdCertificates.getDescriptionIdentifier(),
-                    createdCertificates.getDescriptionCompanyNumber(),
-                    createdCertificates.getDescriptionCertificate(),
-                    createdCertificates.getItemOptionsCertificateType(),
-                    createdCertificates.getItemOptionsCompanyType(),
-                    createdCertificates.getItemOptionsCompanyStatus(),
-                    createdCertificates.getEtag(),
-                    createdCertificates.getKind(),
-                    createdCertificates.getLinksSelf(),
-                    createdCertificates.isPostalDelivery(),
-                    createdCertificates.getQuantity(),
                     createdCertificates.getUserId()
             );
 

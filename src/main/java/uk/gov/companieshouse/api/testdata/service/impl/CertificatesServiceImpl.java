@@ -7,11 +7,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 
 @Service
 public class CertificatesServiceImpl implements DataService<CertificatesData, CertificatesSpec> {
@@ -38,18 +41,6 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
                 certificates.getDataId(),
                 certificates.getCompanyName(),
                 certificates.getCompanyNumber(),
-                certificates.getDescription(),
-                certificates.getDescriptionIdentifier(),
-                certificates.getDescriptionCompanyNumber(),
-                certificates.getDescriptionCertificate(),
-                certificates.getItemOptionsCertificateType(),
-                certificates.getItemOptionsCompanyType(),
-                certificates.getItemOptionsCompanyStatus(),
-                certificates.getEtag(),
-                certificates.getKind(),
-                certificates.getLinksSelf(),
-                certificates.isPostalDelivery(),
-                certificates.getQuantity(),
                 certificates.getUserId()
         );
     }
@@ -57,6 +48,16 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     private Certificates getCertificates(CertificatesSpec certificatesSpec, String randomId) {
         var certificates = new Certificates();
         var currentDate = getCurrentDateTime().toString();
+
+        ItemOptionsSpec itemOptionsSpec = certificatesSpec.getItemOptions();
+
+        ItemOptions itemOptions = new ItemOptions();
+        itemOptions.setCertificateType(itemOptionsSpec.getCertificateType());
+        itemOptions.setDeliveryTimescale(itemOptionsSpec.getDeliveryTimescale());
+        itemOptions.setIncludeEmailCopy(itemOptionsSpec.getIncludeEmailCopy());
+        itemOptions.setCompanyType(itemOptionsSpec.getCompanyType());
+        itemOptions.setCompanyStatus(itemOptionsSpec.getCompanyStatus());
+
 
         certificates.setId(randomId);
         certificates.setCreatedAt(currentDate);
@@ -68,9 +69,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         certificates.setDescriptionIdentifier(certificatesSpec.getDescriptionIdentifier());
         certificates.setDescriptionCompanyNumber(certificatesSpec.getDescriptionCompanyNumber());
         certificates.setDescriptionCertificate(certificatesSpec.getDescriptionCertificate());
-        certificates.setItemOptionsCertificateType(certificatesSpec.getItemOptionsCertificateType());
-        certificates.setItemOptionsCompanyType(certificatesSpec.getItemOptionsCompanyType());
-        certificates.setItemOptionsCompanyStatus(certificatesSpec.getItemOptionsCompanyStatus());
+        certificates.setItemOptions(itemOptions);
         certificates.setEtag(randomService.getEtag());
         certificates.setKind(certificatesSpec.getKind());
         certificates.setLinksSelf(certificatesSpec.getLinksSelf());

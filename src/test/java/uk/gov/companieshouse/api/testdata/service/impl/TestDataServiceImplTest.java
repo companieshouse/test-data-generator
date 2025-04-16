@@ -1309,10 +1309,7 @@ class TestDataServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         CertificatesData expectedCertificatesData = new CertificatesData(
-                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z", "dataId", COMPANY_NAME, COMPANY_NUMBER,
-                "certificate for company " + COMPANY_NUMBER, "descriptionId", "descriptionCompanyNumber",
-                "descriptionCertificate", "type", "limited", "active",
-                "etag", "kind", "linksSelf", true, 10, USER_ID
+                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z", "dataId", COMPANY_NAME, COMPANY_NUMBER, USER_ID
         );
 
         when(certificatesService.create(any(CertificatesSpec.class))).thenReturn(expectedCertificatesData);

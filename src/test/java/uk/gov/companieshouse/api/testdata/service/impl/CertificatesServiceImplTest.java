@@ -20,8 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -49,6 +51,13 @@ class CertificatesServiceImplTest {
         certificates = new Certificates();
         certificates.setId("CRT-123456-789012");
 
+        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
+        itemOptionsSpec.setCertificateType("incorporation-with-all-name-changes");
+        itemOptionsSpec.setDeliveryTimescale("standard");
+        itemOptionsSpec.setIncludeEmailCopy(false);
+        itemOptionsSpec.setCompanyType("ltd");
+        itemOptionsSpec.setCompanyStatus("active");
+
         certificatesSpec = new CertificatesSpec();
         certificatesSpec.setCompanyName("Test Company");
         certificatesSpec.setCompanyNumber(companyNumber);
@@ -56,9 +65,7 @@ class CertificatesServiceImplTest {
         certificatesSpec.setDescriptionIdentifier("certificate");
         certificatesSpec.setDescriptionCompanyNumber(companyNumber);
         certificatesSpec.setDescriptionCertificate("Test Certificate");
-        certificatesSpec.setItemOptionsCertificateType("Standard");
-        certificatesSpec.setItemOptionsCompanyType("Private");
-        certificatesSpec.setItemOptionsCompanyStatus("Active");
+        certificatesSpec.setItemOptions(itemOptionsSpec);
         certificatesSpec.setKind("certificate-kind");
         certificatesSpec.setLinksSelf("/certificates/CRT-123456-789012");
         certificatesSpec.setPostalDelivery(true);
@@ -87,9 +94,7 @@ class CertificatesServiceImplTest {
         assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
         assertEquals(certificatesSpec.getDescriptionCompanyNumber(), captured.getDescriptionCompanyNumber());
         assertEquals(certificatesSpec.getDescriptionCertificate(), captured.getDescriptionCertificate());
-        assertEquals(certificatesSpec.getItemOptionsCertificateType(), captured.getItemOptionsCertificateType());
-        assertEquals(certificatesSpec.getItemOptionsCompanyType(), captured.getItemOptionsCompanyType());
-        assertEquals(certificatesSpec.getItemOptionsCompanyStatus(), captured.getItemOptionsCompanyStatus());
+        assertEquals(certificatesSpec.getItemOptions(), captured.getItemOptions());
         assertEquals("etag123", captured.getEtag());
         assertEquals(certificatesSpec.getKind(), captured.getKind());
         assertEquals(certificatesSpec.getLinksSelf(), captured.getLinksSelf());

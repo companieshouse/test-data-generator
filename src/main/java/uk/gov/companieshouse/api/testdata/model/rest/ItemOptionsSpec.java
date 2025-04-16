@@ -1,21 +1,21 @@
-package uk.gov.companieshouse.api.testdata.model.entity;
+package uk.gov.companieshouse.api.testdata.model.rest;
 
-import org.springframework.data.mongodb.core.mapping.Field;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ItemOptions {
-    @Field("certificate_type")
+public class ItemOptionsSpec {
+    @JsonProperty("certificate_type")
     private String certificateType;
 
-    @Field("delivery_timescale")
+    @JsonProperty("delivery_timescale")
     private String deliveryTimescale;
 
-    @Field("include_email_copy")
+    @JsonProperty("include_email_copy")
     private boolean includeEmailCopy;
 
-    @Field("company_type")
+    @JsonProperty("company_type")
     private String companyType;
 
-    @Field("company_status")
+    @JsonProperty("company_status")
     private String companyStatus;
 
     public String getCertificateType() {

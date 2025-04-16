@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
+import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 
 public class CertificatesSpec {
 
@@ -23,14 +24,8 @@ public class CertificatesSpec {
     @JsonProperty("description_certificate")
     private String descriptionCertificate;
 
-    @JsonProperty("item_options_certificate_type")
-    private String itemOptionsCertificateType;
-
-    @JsonProperty("item_options_company_type")
-    private String itemOptionsCompanyType;
-
-    @JsonProperty("item_options_company_status")
-    private String itemOptionsCompanyStatus;
+    @JsonProperty("item_options")
+    private ItemOptionsSpec itemOptions;
 
     @JsonProperty("etag")
     private String etag;
@@ -99,28 +94,12 @@ public class CertificatesSpec {
         this.descriptionCertificate = descriptionCertificate;
     }
 
-    public String getItemOptionsCertificateType() {
-        return itemOptionsCertificateType;
+    public ItemOptionsSpec getItemOptions() {
+        return  itemOptions;
     }
 
-    public void setItemOptionsCertificateType(String itemOptionsCertificateType) {
-        this.itemOptionsCertificateType = itemOptionsCertificateType;
-    }
-
-    public String getItemOptionsCompanyType() {
-        return itemOptionsCompanyType;
-    }
-
-    public void setItemOptionsCompanyType(String itemOptionsCompanyType) {
-        this.itemOptionsCompanyType = itemOptionsCompanyType;
-    }
-
-    public String getItemOptionsCompanyStatus() {
-        return itemOptionsCompanyStatus;
-    }
-
-    public void setItemOptionsCompanyStatus(String itemOptionsCompanyStatus) {
-        this.itemOptionsCompanyStatus = itemOptionsCompanyStatus;
+    public void setItemOptions(ItemOptionsSpec itemOptions) {
+        this.itemOptions = itemOptions;
     }
 
     public String getEtag() {

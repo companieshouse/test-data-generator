@@ -448,9 +448,7 @@ class TestDataControllerTest {
     void createCertificateSuccess() throws Exception {
         CertificatesData certificate = new CertificatesData(
                 "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z", "data-123", "ACME Company",
-                "12345678", "Certificate for incorporation", "certificate", "12345678",
-                "incorporation","incorporation-with-all-name-changes", "ltd", "active",
-                "etag-12345", "item#certificate", "/orderable/certificate/CRT-834723-192847", true, 1, "user-12345"
+                "12345678",  "user-12345"
         );
 
         CertificatesSpec request = new CertificatesSpec();
