@@ -58,8 +58,8 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPsc(3);  // Added required field
-        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));  // Added required field
+        spec.setNumberOfPsc(3);
+        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
