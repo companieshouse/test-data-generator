@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 
 public class CertificatesSpec {
 

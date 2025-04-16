@@ -49,9 +49,9 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         var certificates = new Certificates();
         var currentDate = getCurrentDateTime().toString();
 
-        ItemOptionsSpec itemOptionsSpec = certificatesSpec.getItemOptions();
+        var itemOptionsSpec = certificatesSpec.getItemOptions();
 
-        ItemOptions itemOptions = new ItemOptions();
+        var itemOptions = new ItemOptions();
         itemOptions.setCertificateType(itemOptionsSpec.getCertificateType());
         itemOptions.setDeliveryTimescale(itemOptionsSpec.getDeliveryTimescale());
         itemOptions.setIncludeEmailCopy(itemOptionsSpec.getIncludeEmailCopy());
@@ -82,7 +82,6 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     @Override
     public boolean delete(String certificateId) {
         var certificate = repository.findById(certificateId);
-        System.out.println("Certificate not found with id: " + certificate);
         certificate.ifPresent(repository::delete);
         return certificate.isPresent();
     }
