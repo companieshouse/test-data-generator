@@ -61,13 +61,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.*;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
@@ -101,6 +95,7 @@ class TestDataServiceImplTest {
     @Mock private AppealsService appealsService;
     @Mock private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Mock private Appointment commonAppointment;
+    @Mock private CompanySearchService companySearchService;
 
     @BeforeEach
     void setUp() {

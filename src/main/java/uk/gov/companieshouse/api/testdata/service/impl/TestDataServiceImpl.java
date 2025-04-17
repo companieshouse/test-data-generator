@@ -35,14 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.*;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -87,6 +80,8 @@ public class TestDataServiceImpl implements TestDataService {
     AppealsService appealsService;
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    @Autowired
+    private CompanySearchService companySearchService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -123,7 +118,15 @@ public class TestDataServiceImpl implements TestDataService {
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-            return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
+
+            // Add company to the elastic search index
+            var companyData = new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
+            if (companySearchService == null) {
+                LOG.error("companySearchService is null");
+            } else {
+                companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+            }
+            return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
