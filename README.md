@@ -131,8 +131,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
 
-  - An usage example looks like this: `{ "company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options_certificate_type" : "incorporation-with-all-name-changes", "item_options_company_type" : "ltd", "item_options_company_status" : "administration", "kind" : "item#certificate", "links_self" : "/orderable/certificates/CRT-375217-442850", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ" }`
-
+  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
 
 ## Environment Variables
