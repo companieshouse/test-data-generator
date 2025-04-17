@@ -112,6 +112,11 @@ public class MongoConfig {
         return getMongoRepositoryBean(CompanyRegistersRepository.class, "company_registers");
     }
 
+    @Bean
+    public CertificatesRepository certificatesRepository() {
+        return getMongoRepositoryBean(CertificatesRepository.class, "items");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);

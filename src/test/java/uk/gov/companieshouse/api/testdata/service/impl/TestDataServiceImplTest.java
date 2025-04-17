@@ -36,6 +36,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
@@ -49,6 +50,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -61,6 +64,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -73,6 +77,7 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 class TestDataServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String COMPANY_NAME = "TEST DATA COMPANY";
     private static final String OVERSEAS_COMPANY_NUMBER = "OE123456";
     private static final String AUTH_CODE = "123456";
     private static final String OFFICER_ID = "OFFICER_ID";
@@ -80,6 +85,8 @@ class TestDataServiceImplTest {
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
     private static final String NI_COMPANY_PREFIX = "NI";
     private static final String API_URL = "http://localhost:4001";
+    private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
+    private static final String CERTIFICATES_ID = "CRT-123456-789012";
 
     @Mock private CompanyProfileService companyProfileService;
     @Mock private DataService<FilingHistory, CompanySpec> filingHistoryService;
@@ -94,6 +101,7 @@ class TestDataServiceImplTest {
     @Mock private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @InjectMocks private TestDataServiceImpl testDataService;
     @Mock private AcspMembersRepository acspMembersRepository;
+    @Mock private CertificatesRepository certificatesRepository;
     @Mock private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Captor private ArgumentCaptor<CompanySpec> specCaptor;
     @Mock private DataService<IdentityData, IdentitySpec> identityService;
@@ -101,6 +109,7 @@ class TestDataServiceImplTest {
     @Mock private AppealsService appealsService;
     @Mock private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Mock private Appointment commonAppointment;
+    @Mock private DataService<CertificatesData, CertificatesSpec> certificatesService;
 
     @BeforeEach
     void setUp() {
@@ -1290,6 +1299,87 @@ class TestDataServiceImplTest {
         CompanyData createdCompany = createCompanyDataWithRegisters(spec);
         CompanySpec capturedSpec = captureCreatedSpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER, Jurisdiction.ENGLAND_WALES);
+    }
+
+    @Test
+    void createCertificatesData() throws DataException {
+        CertificatesSpec spec = new CertificatesSpec();
+        spec.setUserId(USER_ID);
+
+        CertificatesData expectedCertificatesData = new CertificatesData(
+                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+
+        when(certificatesService.create(any(CertificatesSpec.class))).thenReturn(expectedCertificatesData);
+        CertificatesData result = testDataService.createCertificatesData(spec);
+
+        assertNotNull(result);
+        assertEquals(expectedCertificatesData.getId(), result.getId());
+        verify(certificatesService).create(spec);
+    }
+
+    @Test
+    void createCertificatesDataNullUserId() {
+        CertificatesSpec spec = new CertificatesSpec();
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createCertificatesData(spec));
+
+        assertEquals("User ID is required to create a certificates", exception.getMessage());
+    }
+
+    @Test
+    void createCertificatesDataException() throws DataException {
+        CertificatesSpec spec = new CertificatesSpec();
+        spec.setUserId(USER_ID);
+
+        when(certificatesService.create(any(CertificatesSpec.class)))
+                .thenThrow(new DataException("Error creating certificates"));
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createCertificatesData(spec));
+
+        assertEquals("Error creating certificates", exception.getMessage());
+    }
+
+    @Test
+    void deleteCertificatesData() throws DataException {
+        Certificates certificates = new Certificates();
+        certificates.setId(CERTIFICATES_ID);
+
+        when(certificatesService.delete(CERTIFICATES_ID)).thenReturn(true);
+        boolean result = testDataService.deleteCertificatesData(CERTIFICATES_ID);
+
+        assertTrue(result);
+        verify(certificatesService).delete("CRT-123456-789012");
+    }
+
+    @Test
+    void deleteCertificatesDataFailure() {
+        when(certificatesService.delete(CERTIFICATES_ID)).thenReturn(false);
+
+        boolean result = false;
+        try {
+            result = testDataService.deleteCertificatesData(CERTIFICATES_ID);
+        } catch (DataException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertFalse(result);
+        verify(certificatesService, times(1)).delete(CERTIFICATES_ID);
+    }
+
+    @Test
+    void deleteCertificatesThrowsException() {
+        RuntimeException ex = new RuntimeException("error");
+
+        when(certificatesService.delete(CERTIFICATES_ID)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.deleteCertificatesData(CERTIFICATES_ID));
+
+        assertEquals("Error deleting certificates", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(certificatesService, times(1)).delete(CERTIFICATES_ID);
     }
 
     @Test

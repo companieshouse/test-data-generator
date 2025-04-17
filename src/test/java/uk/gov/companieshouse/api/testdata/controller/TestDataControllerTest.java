@@ -41,6 +41,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -440,5 +442,74 @@ class TestDataControllerTest {
         assertNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(testDataService, times(0)).deleteAppealsData(anyString(), anyString());
+    }
+
+    @Test
+    void createCertificateSuccess() throws Exception {
+        CertificatesData certificate = new CertificatesData(
+                "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
+        );
+
+        CertificatesSpec request = new CertificatesSpec();
+        request.setCompanyNumber("12345678");
+        request.setDescriptionCertificate("incorporation");
+
+        when(testDataService.createCertificatesData(request)).thenReturn(certificate);
+        ResponseEntity<CertificatesData> response = testDataController.createCertificates(request);
+
+        assertEquals(certificate, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createCertificateException() throws Exception {
+        CertificatesSpec request = new CertificatesSpec();
+        request.setCompanyNumber("12345678");
+        request.setDescriptionCertificate("incorporation");
+
+        DataException exception = new DataException("Error creating certificate");
+        when(testDataService.createCertificatesData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createCertificates(request));
+        assertEquals(exception.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void deleteCertificateSuccess() throws Exception {
+        final String certificateId = "CRT-834723-192847";
+
+        when(testDataService.deleteCertificatesData(certificateId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteCertificates(certificateId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(testDataService).deleteCertificatesData(certificateId);
+    }
+
+
+    @Test
+    void deleteCertificateNotFound() throws Exception {
+        final String certificateId = String.valueOf(1234);
+
+        when(testDataService.deleteCertificatesData(certificateId)).thenReturn(false);
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteCertificates(certificateId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        verify(testDataService).deleteCertificatesData(certificateId);
+    }
+
+    @Test
+    void deleteCertificateException() throws Exception {
+        final String certificateId = "cert123";
+        DataException exception = new DataException("Failed to delete certificate");
+
+        when(testDataService.deleteCertificatesData(certificateId)).thenThrow(exception);
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.deleteCertificates(certificateId));
+
+        assertEquals(exception.getMessage(), thrown.getMessage());
     }
 }

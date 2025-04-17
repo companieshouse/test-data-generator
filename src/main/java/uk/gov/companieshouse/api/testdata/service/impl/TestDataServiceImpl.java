@@ -13,28 +13,30 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -74,7 +76,11 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
+    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Autowired
     private AcspMembersRepository acspMembersRepository;
+    @Autowired
+    private CertificatesRepository certificatesRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
@@ -334,6 +340,35 @@ public class TestDataServiceImpl implements TestDataService {
             throw ex;
         }
         return true;
+    }
+
+    @Override
+    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create a certificates");
+        }
+
+        try {
+            CertificatesData createdCertificates = certificatesService.create(spec);
+
+            return new CertificatesData(
+                    createdCertificates.getId(),
+                    createdCertificates.getCreatedAt(),
+                    createdCertificates.getUpdatedAt()
+            );
+
+        } catch (Exception ex) {
+            throw new DataException("Error creating certificates", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteCertificatesData(String id) throws DataException {
+        try {
+            return certificatesService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting certificates", ex);
+        }
     }
 
     @Override
