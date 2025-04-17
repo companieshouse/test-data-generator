@@ -191,7 +191,7 @@ public class TestDataController {
         boolean deleteCertificates = testDataService.deleteCertificatesData(id);
 
         if (deleteCertificates) {
-            LOG.info("Certificate is Deleted", response);
+            LOG.info("Certificate is deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);

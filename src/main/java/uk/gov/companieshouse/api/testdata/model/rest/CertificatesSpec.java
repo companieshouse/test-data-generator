@@ -26,14 +26,8 @@ public class CertificatesSpec {
     @JsonProperty("item_options")
     private ItemOptionsSpec itemOptions;
 
-    @JsonProperty("etag")
-    private String etag;
-
     @JsonProperty("kind")
     private String kind;
-
-    @JsonProperty("links_self")
-    private String linksSelf;
 
     @JsonProperty("postal_delivery")
     private boolean postalDelivery;
@@ -101,28 +95,12 @@ public class CertificatesSpec {
         this.itemOptions = itemOptions;
     }
 
-    public String getEtag() {
-        return etag;
-    }
-
-    public void setEtag(String etag) {
-        this.etag = etag;
-    }
-
     public String getKind() {
         return kind;
     }
 
     public void setKind(String kind) {
         this.kind = kind;
-    }
-
-    public String getLinksSelf() {
-        return linksSelf;
-    }
-
-    public void setLinksSelf(String linksSelf) {
-        this.linksSelf = linksSelf;
     }
 
     public boolean isPostalDelivery() {

@@ -1305,11 +1305,9 @@ class TestDataServiceImplTest {
     void createCertificatesData() throws DataException {
         CertificatesSpec spec = new CertificatesSpec();
         spec.setUserId(USER_ID);
-        spec.setCompanyName(COMPANY_NAME);
-        spec.setCompanyNumber(COMPANY_NUMBER);
 
         CertificatesData expectedCertificatesData = new CertificatesData(
-                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z", "dataId", COMPANY_NAME, COMPANY_NUMBER, USER_ID
+                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         when(certificatesService.create(any(CertificatesSpec.class))).thenReturn(expectedCertificatesData);
@@ -1317,7 +1315,6 @@ class TestDataServiceImplTest {
 
         assertNotNull(result);
         assertEquals(expectedCertificatesData.getId(), result.getId());
-        assertEquals(expectedCertificatesData.getCompanyName(), result.getCompanyName());
         verify(certificatesService).create(spec);
     }
 
@@ -1341,7 +1338,7 @@ class TestDataServiceImplTest {
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createCertificatesData(spec));
 
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating certificates", exception.getMessage());
+        assertEquals("Error creating certificates", exception.getMessage());
     }
 
     @Test

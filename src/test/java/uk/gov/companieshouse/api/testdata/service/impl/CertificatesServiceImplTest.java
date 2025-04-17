@@ -67,7 +67,6 @@ class CertificatesServiceImplTest {
         certificatesSpec.setDescriptionCertificate("Test Certificate");
         certificatesSpec.setItemOptions(itemOptionsSpec);
         certificatesSpec.setKind("certificate-kind");
-        certificatesSpec.setLinksSelf("/certificates/CRT-123456-789012");
         certificatesSpec.setPostalDelivery(true);
         certificatesSpec.setQuantity(1);
         certificatesSpec.setUserId("user123");
@@ -104,7 +103,7 @@ class CertificatesServiceImplTest {
         assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
         assertEquals("etag123", captured.getEtag());
         assertEquals(certificatesSpec.getKind(), captured.getKind());
-        assertEquals(certificatesSpec.getLinksSelf(), captured.getLinksSelf());
+        assertEquals("/orderable/certificates/CRT-123456-789012", captured.getLinksSelf());
         assertTrue(captured.isPostalDelivery());
         assertEquals(certificatesSpec.getQuantity(), captured.getQuantity());
         assertEquals(certificatesSpec.getUserId(), captured.getUserId());

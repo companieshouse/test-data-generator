@@ -13,27 +13,10 @@ public class CertificatesData {
     @JsonProperty("updated_at")
     private final String updatedAt;
 
-    @JsonProperty("data_id")
-    private final String dataId;
-
-    @JsonProperty("company_name")
-    private final String companyName;
-
-    @JsonProperty("company_number")
-    private final String companyNumber;
-
-    @JsonProperty("user_id")
-    private final String userId;
-
-    public CertificatesData(String id, String createdAt, String updatedAt, String dataId, String companyName,
-                            String companyNumber, String userId) {
+    public CertificatesData(String id, String createdAt, String updatedAt ) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
-        this.dataId = dataId;
-        this.companyName = companyName;
-        this.companyNumber = companyNumber;
-        this.userId = userId;
     }
 
     public String getId() {
@@ -48,19 +31,4 @@ public class CertificatesData {
         return updatedAt;
     }
 
-    public String getDataId() {
-        return dataId;
-    }
-
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public String getUserId() {
-        return userId;
-    }
 }

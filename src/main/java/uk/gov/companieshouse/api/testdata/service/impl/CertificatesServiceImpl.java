@@ -35,27 +35,22 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return new CertificatesData(
                 certificates.getId(),
                 certificates.getCreatedAt(),
-                certificates.getUpdatedAt(),
-                certificates.getDataId(),
-                certificates.getCompanyName(),
-                certificates.getCompanyNumber(),
-                certificates.getUserId()
+                certificates.getUpdatedAt()
         );
     }
 
     private Certificates getCertificates(CertificatesSpec certificatesSpec, String randomId) {
-        var certificates = new Certificates();
-        var currentDate = getCurrentDateTime().toString();
-
         var itemOptionsSpec = certificatesSpec.getItemOptions();
-
         var itemOptions = new ItemOptions();
+
         itemOptions.setCertificateType(itemOptionsSpec.getCertificateType());
         itemOptions.setDeliveryTimescale(itemOptionsSpec.getDeliveryTimescale());
         itemOptions.setIncludeEmailCopy(itemOptionsSpec.getIncludeEmailCopy());
         itemOptions.setCompanyType(itemOptionsSpec.getCompanyType());
         itemOptions.setCompanyStatus(itemOptionsSpec.getCompanyStatus());
 
+        var certificates = new Certificates();
+        var currentDate = getCurrentDateTime().toString();
 
         certificates.setId(randomId);
         certificates.setCreatedAt(currentDate);
@@ -70,7 +65,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         certificates.setItemOptions(itemOptions);
         certificates.setEtag(randomService.getEtag());
         certificates.setKind(certificatesSpec.getKind());
-        certificates.setLinksSelf(certificatesSpec.getLinksSelf());
+        certificates.setLinksSelf("/orderable/certificates/" + randomId);
         certificates.setPostalDelivery(certificatesSpec.isPostalDelivery());
         certificates.setQuantity(certificatesSpec.getQuantity());
         certificates.setUserId(certificatesSpec.getUserId());
