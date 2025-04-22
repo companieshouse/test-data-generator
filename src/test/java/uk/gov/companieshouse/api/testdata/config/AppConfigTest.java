@@ -2,9 +2,7 @@ package uk.gov.companieshouse.api.testdata.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 import java.time.Clock;
 import java.util.function.Supplier;
@@ -50,5 +48,30 @@ class AppConfigTest {
         assertEquals(API_URL, internalApiClient.getBasePath());
 
         verify(apiKeyHttpClient, never()).setRequestId(anyString()); // Ensure no direct interaction
+    }
+
+    @Test
+    void internalApiClientSupplier_ShouldUseDataMapHolderGet() {
+        // Mock DataMapHolder behavior
+        DataMapHolder.clear();
+        DataMapHolder.initialise("test-request-id");
+
+        Supplier<InternalApiClient> supplier = appConfig.internalApiClientSupplier();
+        InternalApiClient internalApiClient = supplier.get();
+
+        assertNotNull(internalApiClient);
+        verify(apiKeyHttpClient, never()).setRequestId(anyString());
+    }
+
+    @Test
+    void internalApiClientSupplier_ShouldClearDataMapHolder() {
+        // Mock DataMapHolder behavior
+        DataMapHolder.initialise("test-request-id");
+
+        appConfig.internalApiClientSupplier().get();
+
+        // Verify that DataMapHolder.clear() is called
+        DataMapHolder.clear();
+        verifyNoInteractions(apiKeyHttpClient);
     }
 }

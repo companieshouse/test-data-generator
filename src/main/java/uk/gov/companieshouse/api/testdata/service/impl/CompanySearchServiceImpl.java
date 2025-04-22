@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -38,6 +39,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.objectMapper = objectMapper;
         this.objectMapper.registerModule(new JavaTimeModule());
+        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
