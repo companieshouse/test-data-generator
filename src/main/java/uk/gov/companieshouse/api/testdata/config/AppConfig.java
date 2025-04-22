@@ -3,15 +3,12 @@ package uk.gov.companieshouse.api.testdata.config;
 import java.time.Clock;
 import java.util.function.Supplier;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.http.ApiKeyHttpClient;
-import uk.gov.companieshouse.api.testdata.service.DataMapHolder;
-import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 /**
  * Main application configuration class.

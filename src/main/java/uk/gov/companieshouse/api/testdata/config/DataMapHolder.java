@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.config;
 
 import java.util.Map;
 import uk.gov.companieshouse.logging.util.DataMap.Builder;
