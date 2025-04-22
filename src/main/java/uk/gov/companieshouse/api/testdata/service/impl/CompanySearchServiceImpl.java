@@ -44,10 +44,10 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     public void addCompanyIntoElasticSearchIndex(CompanyData data)
             throws DataException, ApiErrorResponseException, URIValidationException {
         String formattedUri = formatUri(COMPANY_SEARCH_URI, data.getCompanyNumber());
-        CompanyProfileApi companyProfileApi = getCompanyProfile(data.getCompanyNumber());
+        var companyProfileApi = getCompanyProfile(data.getCompanyNumber());
         String companyProfileJson = serializeCompanyProfile(companyProfileApi);
 
-        Data companyProfileData = deserializeCompanyProfile(companyProfileJson);
+        var companyProfileData = deserializeCompanyProfile(companyProfileJson);
         try {
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()

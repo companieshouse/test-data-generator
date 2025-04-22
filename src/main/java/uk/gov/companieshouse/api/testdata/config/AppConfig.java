@@ -37,10 +37,10 @@ public class AppConfig implements WebMvcConfigurer {
     @Bean
     public Supplier<InternalApiClient> internalApiClientSupplier() {
         return () -> {
-            ApiKeyHttpClient apiKeyHttpClient = new ApiKeyHttpClient(chsApiKey);
+            var apiKeyHttpClient = new ApiKeyHttpClient(chsApiKey);
             apiKeyHttpClient.setRequestId(DataMapHolder.getRequestId());
 
-            InternalApiClient internalApiClient = new InternalApiClient(apiKeyHttpClient);
+            var internalApiClient = new InternalApiClient(apiKeyHttpClient);
             internalApiClient.setBasePath(apiUrl);
 
             return internalApiClient;
