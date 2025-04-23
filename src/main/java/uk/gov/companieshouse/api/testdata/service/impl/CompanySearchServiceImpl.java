@@ -80,9 +80,9 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     private CompanyProfileApi getCompanyProfile(String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
         String uri = formatUri(COMPANY_PROFILE_URI, companyNumber);
-        var companyProfileApiApiResponse
+        var companyProfileApiResponse
                 = internalApiClientSupplier.get().company().get(uri).execute();
-        return companyProfileApiApiResponse.getData();
+        return companyProfileApiResponse.getData();
     }
 
     private Data deserializeCompanyProfile(String data) throws DataException {

@@ -38,7 +38,7 @@ class AppConfigTest {
 
     @Test
     void internalApiClientSupplier_ShouldReturnInternalApiClient() {
-        // Mock DataMapHolder behavior
+        // Mock DataMapHolder behaviour
         DataMapHolder.initialise("test-request-id");
 
         Supplier<InternalApiClient> supplier = appConfig.internalApiClientSupplier();
@@ -52,7 +52,7 @@ class AppConfigTest {
 
     @Test
     void internalApiClientSupplier_ShouldUseDataMapHolderGet() {
-        // Mock DataMapHolder behavior
+        // Mock DataMapHolder behaviour
         DataMapHolder.clear();
         DataMapHolder.initialise("test-request-id");
 
@@ -65,7 +65,7 @@ class AppConfigTest {
 
     @Test
     void internalApiClientSupplier_ShouldClearDataMapHolder() {
-        // Mock DataMapHolder behavior
+        // Mock DataMapHolder behaviour
         DataMapHolder.initialise("test-request-id");
 
         appConfig.internalApiClientSupplier().get();
