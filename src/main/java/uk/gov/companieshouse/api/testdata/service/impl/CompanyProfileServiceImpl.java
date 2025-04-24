@@ -87,18 +87,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String companyStatusDetail = spec.getCompanyStatusDetail();
         final String companyStatus = spec.getCompanyStatus();
         final String accountsDueStatus = spec.getAccountsDueStatus();
+        final Boolean registeredOfficeIsInDispute = spec.getRegisteredOfficeIsInDispute();
 
         var accountParams = new AccountParameters(accountsDueStatus, randomService);
         var dateParams = new DateParameters(accountParams.getAccountingReferenceDate());
         var companyParams = new CompanyDetailsParameters(
-                companyType, hasSuperSecurePscs, companyStatus, subType, companyStatusDetail);
+                companyType, hasSuperSecurePscs, companyStatus, subType, companyStatusDetail, registeredOfficeIsInDispute);
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
             return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
-                    OVERSEAS_ENTITY_TYPE, companyType);
+                    OVERSEAS_ENTITY_TYPE, companyType, registeredOfficeIsInDispute);
         } else if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
             return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
-                    OVERSEA_COMPANY_TYPE, companyType);
+                    OVERSEA_COMPANY_TYPE, companyType, registeredOfficeIsInDispute);
         } else {
             return createNormalCompanyProfile(companyNumber, jurisdiction,
                     spec, dateParams, companyParams, accountParams);
@@ -155,13 +156,15 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             confirmationStatement.setNextMadeUpTo(dateParams.getDateInOneYear());
             confirmationStatement.setOverdue(false);
             confirmationStatement.setNextDue(dateParams.getDateInOneYearTwoWeeks());
-            profile.setRegisteredOfficeIsInDispute(false);
+            setRegisteredOfficeAddressIsInDispute(profile,
+                    companyParams.getRegisteredOfficeIsInDispute());
         }
         confirmationStatement.setNextMadeUpTo(dateParams.getDateInOneYear());
         confirmationStatement.setOverdue(false);
         confirmationStatement.setNextDue(dateParams.getDateInOneYearTwoWeeks());
 
-        profile.setRegisteredOfficeIsInDispute(false);
+        setRegisteredOfficeAddressIsInDispute(profile,
+                companyParams.getRegisteredOfficeIsInDispute());
         setCompanyStatus(profile, companyParams.getCompanyStatus(), companyTypeValue);
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(
@@ -180,7 +183,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private OverseasEntity createOverseasEntity(String companyNumber,
                                                 Jurisdiction jurisdiction, CompanySpec spec,
                                                 DateParameters dateParams,
-                                                String entityType, CompanyType companyType) {
+                                                String entityType, CompanyType companyType, Boolean IsRegisteredOfficeIsInDispute) {
         LOG.info("Creating " + entityType + " for " + companyNumber);
 
         var overseasEntity = new OverseasEntity();
@@ -207,6 +210,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
         overseasEntity.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
         overseasEntity.setRegisteredOfficeIsInDispute(false);
+        setRegisteredOfficeAddressIsInDispute(overseasEntity, IsRegisteredOfficeIsInDispute);
         overseasEntity.setEtag(randomService.getEtag());
         overseasEntity.setSuperSecureManagingOfficerCount(0);
 
@@ -454,5 +458,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         );
 
         return noFilingHistoryCompanyTypes.contains(companyType.getValue());
+    }
+
+    private void setRegisteredOfficeAddressIsInDispute(
+            CompanyProfile profile, Boolean registeredOfficeIsInDispute) {
+        profile.setRegisteredOfficeIsInDispute(Objects.requireNonNullElse(registeredOfficeIsInDispute, false));
     }
 }
