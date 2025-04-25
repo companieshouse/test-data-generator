@@ -41,6 +41,7 @@ import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -93,12 +94,21 @@ public class TestDataServiceImpl implements TestDataService {
     AppealsService appealsService;
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    @Autowired
+    private CompanySearchService companySearchService;
 
     @Value("${api.url}")
     private String apiUrl;
 
+    @Value("${elastic.search.deployed}")
+    private boolean isElasticSearchDeployed;
+
     void setAPIUrl(String apiUrl) {
         this.apiUrl = apiUrl;
+    }
+
+    void setElasticSearchDeployed(Boolean isElasticSearchDeployed) {
+        this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
     @Override
@@ -129,7 +139,15 @@ public class TestDataServiceImpl implements TestDataService {
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-            return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
+
+            var companyData = new CompanyData(spec.getCompanyNumber(),
+                    authCode.getAuthCode(), companyUri);
+
+            // Add company to the elastic search index
+            if (isElasticSearchDeployed) {
+                this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+            }
+            return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
@@ -184,6 +202,14 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
+        }
+
+        if (isElasticSearchDeployed) {
+            try {
+                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+            } catch (Exception de) {
+                suppressedExceptions.add(de);
+            }
         }
 
         if (!suppressedExceptions.isEmpty()) {

@@ -229,6 +229,10 @@ public class CompanyPscs {
         this.nationality = nationality;
     }
 
+    public String getNameTitle() {
+        return nameTitle;
+    }
+
     public void setNameTitle(String nameTitle) {
         this.nameTitle = nameTitle;
     }
@@ -322,4 +326,5 @@ public class CompanyPscs {
     public void setDescription(String description) {
         this.description = description;
     }
+
 }
