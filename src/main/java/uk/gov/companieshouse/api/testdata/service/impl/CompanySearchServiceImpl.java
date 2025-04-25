@@ -1,20 +1,11 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.util.function.Supplier;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
-import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 
-import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
@@ -28,33 +19,27 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     private static final String COMPANY_PROFILE_URI = "/company/%s";
     private final Supplier<InternalApiClient> internalApiClientSupplier;
 
-    @Autowired
-    private final ObjectMapper objectMapper;
-
     private static final Logger LOG =
-            LoggerFactory.getLogger(String.valueOf(CompanyProfileServiceImpl.class));
+            LoggerFactory.getLogger(String.valueOf(CompanySearchServiceImpl.class));
 
-    public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier,
-                                    ObjectMapper objectMapper) {
+    public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
         this.internalApiClientSupplier = internalApiClientSupplier;
-        this.objectMapper = objectMapper;
-        this.objectMapper.registerModule(new JavaTimeModule());
-        this.objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
 
     @Override
     public void addCompanyIntoElasticSearchIndex(CompanyData data)
             throws DataException, ApiErrorResponseException, URIValidationException {
-        String formattedUri = formatUri(COMPANY_SEARCH_URI, data.getCompanyNumber());
-        var companyProfileApi = getCompanyProfile(data.getCompanyNumber());
-        String companyProfileJson = serializeCompanyProfile(companyProfileApi);
+        String formattedCompanySearchUri = formatUri(COMPANY_SEARCH_URI, data.getCompanyNumber());
+        String formattedCompanyProfileUri = formatUri(COMPANY_PROFILE_URI, data.getCompanyNumber());
+        var companyProfileData = internalApiClientSupplier.get()
+                .privateCompanyResourceHandler()
+                .getCompanyFullProfile(formattedCompanyProfileUri).execute().getData();
 
-        var companyProfileData = deserializeCompanyProfile(companyProfileJson);
         try {
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()
                     .companySearch()
-                    .upsertCompanyProfile(formattedUri, companyProfileData)
+                    .upsertCompanyProfile(formattedCompanySearchUri, companyProfileData)
                     .execute();
             LOG.info("Company profile upsert is successful with company number: "
                     + data.getCompanyNumber());
@@ -74,30 +59,6 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .execute();
         } catch (ApiErrorResponseException | URIValidationException ex) {
             throw new DataException("Failed to upsert company profile: " + ex.getMessage());
-        }
-    }
-
-    private CompanyProfileApi getCompanyProfile(String companyNumber)
-            throws ApiErrorResponseException, URIValidationException {
-        String uri = formatUri(COMPANY_PROFILE_URI, companyNumber);
-        var companyProfileApiResponse
-                = internalApiClientSupplier.get().company().get(uri).execute();
-        return companyProfileApiResponse.getData();
-    }
-
-    private Data deserializeCompanyProfile(String data) throws DataException {
-        try {
-            return objectMapper.readValue(data, Data.class);
-        } catch (JsonProcessingException exception) {
-            throw new DataException("Unable to parse message payload data", exception);
-        }
-    }
-
-    private String serializeCompanyProfile(CompanyProfileApi companyProfileApi) throws DataException {
-        try {
-            return objectMapper.writeValueAsString(companyProfileApi);
-        } catch (JsonProcessingException ex) {
-            throw new DataException("Failed to serialize CompanyProfileApi to JSON", ex);
         }
     }
 
