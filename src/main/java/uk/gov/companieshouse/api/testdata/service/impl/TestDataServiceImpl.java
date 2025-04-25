@@ -13,7 +13,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -28,7 +27,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -39,6 +37,7 @@ import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -87,12 +86,21 @@ public class TestDataServiceImpl implements TestDataService {
     AppealsService appealsService;
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    @Autowired
+    private CompanySearchService companySearchService;
 
     @Value("${api.url}")
     private String apiUrl;
 
+    @Value("${elastic.search.deployed}")
+    private boolean isElasticSearchDeployed;
+
     void setAPIUrl(String apiUrl) {
         this.apiUrl = apiUrl;
+    }
+
+    void setElasticSearchDeployed(Boolean isElasticSearchDeployed) {
+        this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
     @Override
@@ -123,7 +131,15 @@ public class TestDataServiceImpl implements TestDataService {
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-            return new CompanyData(spec.getCompanyNumber(), authCode.getAuthCode(), companyUri);
+
+            var companyData = new CompanyData(spec.getCompanyNumber(),
+                    authCode.getAuthCode(), companyUri);
+
+            // Add company to the elastic search index
+            if (isElasticSearchDeployed) {
+                this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+            }
+            return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
@@ -178,6 +194,14 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
+        }
+
+        if (isElasticSearchDeployed) {
+            try {
+                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+            } catch (Exception de) {
+                suppressedExceptions.add(de);
+            }
         }
 
         if (!suppressedExceptions.isEmpty()) {
