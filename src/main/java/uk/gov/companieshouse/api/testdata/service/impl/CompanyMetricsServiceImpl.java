@@ -44,12 +44,22 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         LOG.debug("Initialized CompanyMetrics with ID: "
                 + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
 
+        Integer numberOfPsc = spec.getNumberOfPsc();
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
             metrics.setActivePscCount(2);
             LOG.debug("Company type is REGISTERED_OVERSEAS_ENTITY. Set active PSC count to 2.");
         } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
+        } else if (numberOfPsc != null) {
+            metrics.setActivePscCount(numberOfPsc);
+        }
+
+        var numberOfAppointments = spec.getNumberOfAppointments();
+        if (spec.getOfficerRoles() != null && spec.getOfficerRoles().stream()
+                .anyMatch(role -> "director".equalsIgnoreCase(role.toString()))) {
+            metrics.setActiveDirectorsCount(numberOfAppointments);
         } else {
             metrics.setActivePscCount(3);
             LOG.debug("Default case. Set active PSC count to 3.");
@@ -58,10 +68,15 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setActiveDirectorsCount(1);
         LOG.debug("Set active directors count to 1.");
 
+            metrics.setActiveDirectorsCount(1);
+        }
+
         if (spec.getRegisters() != null) {
             LOG.debug("Registers are provided. Creating registers for the company.");
             metrics.setRegisters(createRegisters(spec.getRegisters()));
         }
+
+        return repository.save(metrics);
 
         CompanyMetrics savedMetrics = repository.save(metrics);
         LOG.info(
