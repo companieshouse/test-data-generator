@@ -101,6 +101,10 @@ public class Links {
         this.registers = registers;
     }
 
+    public String getOverseas() {
+        return overseas;
+    }
+
     public void setOverseas(String overseas) {
         this.overseas = overseas;
     }

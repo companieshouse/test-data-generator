@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.PscType;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
@@ -231,6 +232,47 @@ class CompanyMetricsServiceImplTest {
         RegisterItem item = registers.get("directors");
         assertEquals("public-register", item.getRegisterMovedTo());
         assertEquals(LocalDate.now(), item.getMovedOn());
+    }
+
+    @Test
+    void testSetActiveDirectorsCountAndRegisters() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfAppointments(5);
+        spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR));
+        RegistersSpec register = new RegistersSpec();
+        register.setRegisterType("directors");
+        register.setRegisterMovedTo("public-register");
+        spec.setRegisters(List.of(register));
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics savedMetrics = captor.getValue();
+
+        assertEquals(5, savedMetrics.getActiveDirectorsCount());
+
+        assertNotNull(savedMetrics.getRegisters());
+        assertEquals(1, savedMetrics.getRegisters().size());
+        RegisterItem item = savedMetrics.getRegisters().get("directors");
+        assertNotNull(item);
+        assertEquals("public-register", item.getRegisterMovedTo());
+        assertEquals(LocalDate.now(), item.getMovedOn());
+    }
+
+    @Test
+    void testSetActiveDirectorsCountWithoutDirectorRole() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfAppointments(5);
+        spec.setOfficerRoles(List.of(OfficerRoles.CIC_MANAGER));
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics savedMetrics = captor.getValue();
+
+        assertEquals(1, savedMetrics.getActiveDirectorsCount());
     }
 
     @Test
