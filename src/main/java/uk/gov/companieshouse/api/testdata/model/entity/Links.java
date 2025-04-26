@@ -23,6 +23,10 @@ public class Links {
     private String company;
     @Field("registers")
     private String registers;
+    @Field("overseas")
+    private String overseas;
+    @Field("uk_establishment")
+    private String ukEstablishment;
 
     public String getFilingHistory() {
         return filingHistory;
@@ -95,5 +99,17 @@ public class Links {
 
     public void setRegisters(String registers) {
         this.registers = registers;
+    }
+
+    public void setOverseas(String overseas) {
+        this.overseas = overseas;
+    }
+
+    public String getUkEstablishment() {
+        return ukEstablishment;
+    }
+
+    public void setUkEstablishment(String ukEstablishment) {
+        this.ukEstablishment = ukEstablishment;
     }
 }

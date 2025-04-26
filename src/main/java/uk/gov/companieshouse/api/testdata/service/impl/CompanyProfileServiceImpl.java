@@ -256,19 +256,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         overseasEntity.setForeignCompanyDetails(foreignCompanyDetails);
 
-        // Links
-        var links = new Links();
-        links.setSelf(LINK_STEM + companyNumber);
-
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
-            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
-            links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
-            links.setPersonsWithSignificantControlStatement(
-                    LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
-        }
-
-        overseasEntity.setLinks(links);
-
         // Accounts
         OverseasEntity.IAccounts accounts = OverseasEntity.createAccounts();
         accounts.setOverdue(false);
@@ -310,9 +297,70 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             overseasEntity.setUpdated(updated);
         }
 
+        var links = new Links();
+        links.setSelf(LINK_STEM + companyNumber);
+
+        if (CompanyType.OVERSEA_COMPANY.equals(companyType)
+                && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
+            String ukEstablishmentNumber =
+                    createUkEstablishment(companyNumber, jurisdiction, spec, dateParams);
+            links.setUkEstablishment(LINK_STEM + ukEstablishmentNumber);
+        }
+
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
+            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+            links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
+            links.setPersonsWithSignificantControlStatement(
+                    LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
+        }
+
+        overseasEntity.setLinks(links);
+
         repository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);
         return overseasEntity;
+    }
+
+    private String createUkEstablishment(String parentCompanyNumber,
+                                         Jurisdiction jurisdiction,
+                                         CompanySpec spec,
+                                         DateParameters dateParams) {
+        String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
+        LOG.info("Creating UK establishment for parent company " + parentCompanyNumber);
+
+        CompanyProfile ukEstablishment = new CompanyProfile();
+        ukEstablishment.setId(ukEstablishmentNumber);
+        ukEstablishment.setCompanyNumber(ukEstablishmentNumber);
+
+        ukEstablishment.setType(CompanyType.UK_ESTABLISHMENT.getValue());
+
+        CompanyProfile.BranchCompanyDetails branchDetails = new
+                CompanyProfile.BranchCompanyDetails();
+        branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
+        branchDetails.setParentCompanyName(COMPANY_NAME_PREFIX
+                + parentCompanyNumber + COMPANY_NAME_SUFFIX);
+        branchDetails.setParentCompanyNumber(parentCompanyNumber);
+        ukEstablishment.setBranchCompanyDetails(branchDetails);
+
+        ukEstablishment.setCompanyName(COMPANY_NAME_PREFIX
+                + ukEstablishmentNumber + COMPANY_NAME_SUFFIX);
+        ukEstablishment.setDateOfCreation(dateParams.getDateNow());
+        ukEstablishment.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+
+        ukEstablishment.setCompanyStatus("open");
+        ukEstablishment.setEtag(this.randomService.getEtag());
+        ukEstablishment.setHasCharges(false);
+        ukEstablishment.setHasSuperSecurePscs(false);
+
+        var links = new Links();
+        links.setSelf(LINK_STEM + ukEstablishmentNumber);
+        links.setOverseas(LINK_STEM + parentCompanyNumber);
+        ukEstablishment.setLinks(links);
+
+        repository.save(ukEstablishment);
+        LOG.info("Created UK establishment " + ukEstablishmentNumber);
+
+        return ukEstablishmentNumber;
     }
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
