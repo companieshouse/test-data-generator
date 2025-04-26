@@ -54,6 +54,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
         } else if (numberOfPsc != null) {
             metrics.setActivePscCount(numberOfPsc);
+        } else {
+            metrics.setActivePscCount(0);
         }
 
         var numberOfAppointments = spec.getNumberOfAppointments();
