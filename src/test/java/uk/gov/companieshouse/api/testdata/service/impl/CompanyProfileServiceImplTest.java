@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.companieshouse.api.testdata.model.dto.DateParameters;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
@@ -168,7 +169,7 @@ class CompanyProfileServiceImplTest {
         LocalDateTime t1 = LocalDateTime.ofInstant(dateOfCreation, ZONE_ID_UTC);
         LocalDateTime t2 = LocalDateTime.ofInstant(now, ZONE_ID_UTC);
         long days = Duration.between(t1, t2).toDays();
-        assertTrue(days == 365 || days == 366); // cater for leap years
+        assertTrue(days == 365 || days == 366);
     }
 
     @Test
@@ -704,5 +705,65 @@ class CompanyProfileServiceImplTest {
     private void setCompanyJurisdictionAndType(Jurisdiction jurisdiction, CompanyType companyType) {
         spec.setJurisdiction(jurisdiction);
         spec.setCompanyType(companyType);
+    }
+
+    @Test
+    void createUkEstablishment() {
+        String parentCompanyNumber = "12345678";
+        Jurisdiction jurisdiction = Jurisdiction.ENGLAND_WALES;
+        DateParameters dateParams = new DateParameters(LocalDate.now());
+        String expectedUkEstablishmentNumber = "BR123456";
+
+        Address mockAddress = new Address("Line1", "Line2", "City", "Region", "Country", "Postcode");
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(jurisdiction)).thenReturn(mockAddress);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String ukEstablishmentNumber = companyProfileService.createUkEstablishment(
+                parentCompanyNumber, jurisdiction, dateParams);
+
+        assertEquals(expectedUkEstablishmentNumber, ukEstablishmentNumber);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile savedProfile = captor.getValue();
+
+        assertEquals(expectedUkEstablishmentNumber, savedProfile.getCompanyNumber());
+        assertEquals("COMPANY BR123456 LIMITED", savedProfile.getCompanyName());
+        assertEquals("open", savedProfile.getCompanyStatus());
+        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), savedProfile.getType());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
+        assertEquals(mockAddress, savedProfile.getRegisteredOfficeAddress());
+        assertFalse(savedProfile.getHasCharges());
+        assertFalse(savedProfile.getHasSuperSecurePscs());
+        assertEquals(ETAG, savedProfile.getEtag());
+    }
+
+    @Test
+    void createOverseaCompanyWithUkEstablishment() {
+        String parentCompanyNumber = "FC123456";
+        String expectedUkEstablishmentNumber = "BR654321";
+        Jurisdiction jurisdiction = Jurisdiction.UNITED_KINGDOM;
+        DateParameters dateParams = new DateParameters(LocalDate.now());
+
+        Address mockAddress = new Address("Line1", "Line2", "City", "Region", "Country", "Postcode");
+        when(randomService.getNumber(6)).thenReturn(654321L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(jurisdiction)).thenReturn(mockAddress);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String ukEstablishmentNumber = companyProfileService.createUkEstablishment(
+                parentCompanyNumber, jurisdiction, dateParams);
+
+        assertEquals(expectedUkEstablishmentNumber, ukEstablishmentNumber);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile savedProfile = captor.getValue();
+
+        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
     }
 }

@@ -303,7 +303,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)
                 && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
             String ukEstablishmentNumber =
-                    createUkEstablishment(companyNumber, jurisdiction, spec, dateParams);
+                    createUkEstablishment(companyNumber, jurisdiction, dateParams);
             links.setUkEstablishment(LINK_STEM + ukEstablishmentNumber);
         }
 
@@ -321,21 +321,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return overseasEntity;
     }
 
-    private String createUkEstablishment(String parentCompanyNumber,
+    protected String createUkEstablishment(String parentCompanyNumber,
                                          Jurisdiction jurisdiction,
-                                         CompanySpec spec,
                                          DateParameters dateParams) {
         String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
         LOG.info("Creating UK establishment for parent company " + parentCompanyNumber);
 
-        CompanyProfile ukEstablishment = new CompanyProfile();
+        var ukEstablishment = new CompanyProfile();
         ukEstablishment.setId(ukEstablishmentNumber);
         ukEstablishment.setCompanyNumber(ukEstablishmentNumber);
 
         ukEstablishment.setType(CompanyType.UK_ESTABLISHMENT.getValue());
 
-        CompanyProfile.BranchCompanyDetails branchDetails = new
-                CompanyProfile.BranchCompanyDetails();
+        var branchDetails = new CompanyProfile.BranchCompanyDetails();
         branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
         branchDetails.setParentCompanyName(COMPANY_NAME_PREFIX
                 + parentCompanyNumber + COMPANY_NAME_SUFFIX);
