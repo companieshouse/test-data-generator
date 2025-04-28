@@ -170,34 +170,41 @@ public class TestDataServiceImpl implements TestDataService {
     public void deleteCompanyData(String companyId) throws DataException {
         List<Exception> suppressedExceptions = new ArrayList<>();
 
-        try {
-            Optional<CompanyProfile> companyProfile =
-                    companyProfileService.getCompanyProfile(companyId);
-            if (companyProfile.isPresent()
-                    && CompanyType.OVERSEA_COMPANY.getValue()
-                    .equals(companyProfile.get().getType())) {
-
-                List<String> ukEstablishments =
-                        companyProfileService.findUkEstablishmentsByParent(companyId);
-
-                for (String ukEstablishmentNumber : ukEstablishments) {
-                    try {
-                        deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
-                    } catch (Exception de) {
-                        suppressedExceptions.add(de);
-                    }
-                }
-            }
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
+        deleteUkEstablishmentsIfOverseaCompany(companyId, suppressedExceptions);
 
         deleteSingleCompanyData(companyId, suppressedExceptions);
 
         if (!suppressedExceptions.isEmpty()) {
-            DataException ex = new DataException("Error deleting company data");
+            var ex = new DataException("Error deleting company data");
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
+        }
+    }
+
+    private void deleteUkEstablishmentsIfOverseaCompany(String companyId, List<Exception> suppressedExceptions) {
+        try {
+            Optional<CompanyProfile> companyProfile = companyProfileService.getCompanyProfile(companyId);
+            if (isOverseaCompany(companyProfile)) {
+                deleteUkEstablishmentsForParent(companyId, suppressedExceptions);
+            }
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+    }
+
+    private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
+        return companyProfile.isPresent() &&
+                CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
+    }
+
+    private void deleteUkEstablishmentsForParent(String companyId, List<Exception> suppressedExceptions) {
+        List<String> ukEstablishments = companyProfileService.findUkEstablishmentsByParent(companyId);
+        for (String ukEstablishmentNumber : ukEstablishments) {
+            try {
+                deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
+            } catch (Exception de) {
+                suppressedExceptions.add(de);
+            }
         }
     }
 
@@ -241,20 +248,6 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
-        }
-
-        if (isElasticSearchDeployed) {
-            try {
-                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-            } catch (Exception de) {
-                suppressedExceptions.add(de);
-            }
-        }
-
-        if (!suppressedExceptions.isEmpty()) {
-            DataException ex = new DataException("Error deleting company data");
-            suppressedExceptions.forEach(ex::addSuppressed);
-            throw ex;
         }
     }
 

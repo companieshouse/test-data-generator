@@ -274,6 +274,24 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
+    void testCreateOverseaLinks() throws Exception {
+        CompanyType companyType = CompanyType.OVERSEA_COMPANY;
+        CompanySpec spec = new CompanySpec();
+        spec.setHasUkEstablishment(true);
+        Jurisdiction jurisdiction = Jurisdiction.UNITED_KINGDOM;
+        DateParameters dateParams = new DateParameters(LocalDate.now());
+
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "createOverseaLinks", String.class, CompanyType.class, CompanySpec.class, Jurisdiction.class, DateParameters.class);
+        method.setAccessible(true);
+
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, spec, jurisdiction, dateParams);
+
+        assertNotNull(links);
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
+    }
+
+    @Test
     void createCompanyWithAccountsDueSoon() {
         setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setAccountsDueStatus("due-soon");
