@@ -3,10 +3,12 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -297,24 +299,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             overseasEntity.setUpdated(updated);
         }
 
-        var links = new Links();
-        links.setSelf(LINK_STEM + companyNumber);
-
-        if (CompanyType.OVERSEA_COMPANY.equals(companyType)
-                && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
-            String ukEstablishmentNumber =
-                    createUkEstablishment(companyNumber, jurisdiction, dateParams);
-            links.setUkEstablishment(LINK_STEM + ukEstablishmentNumber);
-        }
-
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
-            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
-            links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
-            links.setPersonsWithSignificantControlStatement(
-                    LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
-        }
-
-        overseasEntity.setLinks(links);
+        overseasEntity.setLinks(createOverseaLinks(
+                companyNumber, companyType, spec, jurisdiction, dateParams));
 
         repository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);
@@ -414,6 +400,29 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return links;
     }
 
+    private Links createOverseaLinks(String companyNumber,
+                                     CompanyType companyType, CompanySpec spec,
+                                     Jurisdiction jurisdiction, DateParameters dateParams) {
+        var links = new Links();
+        links.setSelf(LINK_STEM + companyNumber);
+
+        if (CompanyType.OVERSEA_COMPANY.equals(companyType)
+                && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
+            String ukEstablishmentNumber =
+                    createUkEstablishment(companyNumber, jurisdiction, dateParams);
+            links.setUkEstablishment(LINK_STEM + ukEstablishmentNumber);
+        }
+
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
+            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+            links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
+            links.setPersonsWithSignificantControlStatement(
+                    LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
+        }
+
+        return links;
+    }
+
     private String checkNonJurisdictionTypes(Jurisdiction jurisdiction, String companyType) {
         Set<String> noJurisdictionTypes = Set.of(
                 CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue(),
@@ -506,6 +515,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         );
 
         return noFilingHistoryCompanyTypes.contains(companyType.getValue());
+    }
+
+    @Override
+    public List<String> findUkEstablishmentsByParent(String parentCompanyNumber) {
+        return repository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
+                .stream()
+                .map(CompanyProfile::getCompanyNumber)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<CompanyProfile> getCompanyProfile(String companyNumber) {
+        return repository.findByCompanyNumber(companyNumber);
     }
 
     private void setRegisteredOfficeAddressIsInDispute(

@@ -40,11 +40,14 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
+
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -80,6 +83,9 @@ class TestDataServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String OVERSEAS_COMPANY_NUMBER = "OE123456";
+    private static final String OVERSEA_COMPANY = "FC123456";
+    private static final String UK_ESTABLISHMENT_NUMBER = "BR123456";
+    private static final String UK_ESTABLISHMENT_NUMBER_2 = "BR654321";
     private static final String AUTH_CODE = "123456";
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
@@ -561,6 +567,55 @@ class TestDataServiceImplTest {
         // Expect 4 suppressed exceptions in order.
         assertDeleteCompanyDataException(profileException, authCodeException, pscStatementException,
                 companyRegistersException);
+    }
+
+    @Test
+    void deleteCompanyDataWithUkEstablishments() throws DataException {
+        List<String> ukEstablishments = List.of("BR123456", "BR654321");
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue());
+        when(companyProfileService.getCompanyProfile(OVERSEA_COMPANY))
+                .thenReturn(Optional.of(companyProfile));
+        when(companyProfileService.findUkEstablishmentsByParent(OVERSEA_COMPANY)).thenReturn(ukEstablishments);
+
+        testDataService.deleteCompanyData(OVERSEA_COMPANY);
+
+        for (String ukEstablishment : ukEstablishments) {
+            verify(companyProfileService).delete(ukEstablishment);
+        }
+        verify(companyProfileService).delete(OVERSEA_COMPANY);
+    }
+
+    @Test
+    void deleteCompanyDataWithoutUkEstablishments() throws DataException {
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setType(CompanyType.LTD.getValue()); // Set the type explicitly
+        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
+                .thenReturn(Optional.of(companyProfile));
+
+        testDataService.deleteCompanyData(COMPANY_NUMBER);
+
+        verify(companyProfileService).delete(COMPANY_NUMBER);
+        verify(companyProfileService, never()).findUkEstablishmentsByParent(anyString());
+    }
+
+    @Test
+    void deleteCompanyDataWithSuppressedExceptions() {
+        List<String> ukEstablishments = List.of(UK_ESTABLISHMENT_NUMBER, UK_ESTABLISHMENT_NUMBER_2);
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue()); // Set the type explicitly
+        when(companyProfileService.getCompanyProfile(OVERSEA_COMPANY))
+                .thenReturn(Optional.of(companyProfile));
+        when(companyProfileService.findUkEstablishmentsByParent(OVERSEA_COMPANY)).thenReturn(ukEstablishments);
+        doThrow(new RuntimeException("Deletion error")).when(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteCompanyData(OVERSEA_COMPANY));
+        assertEquals("Error deleting company data", exception.getMessage());
+        assertEquals(1, exception.getSuppressed().length);
+        assertEquals("Deletion error", exception.getSuppressed()[0].getMessage());
+        verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
+        verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER_2);
+        verify(companyProfileService).delete(OVERSEA_COMPANY);
     }
 
     @Test
