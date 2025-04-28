@@ -611,7 +611,7 @@ class TestDataServiceImplTest {
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.deleteCompanyData(OVERSEA_COMPANY));
         assertEquals("Error deleting company data", exception.getMessage());
-        assertEquals(1, exception.getSuppressed().length);
+        assertEquals(3, exception.getSuppressed().length);
         assertEquals("Deletion error", exception.getSuppressed()[0].getMessage());
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER_2);
