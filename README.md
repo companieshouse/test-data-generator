@@ -110,7 +110,7 @@ In order to use the generator, there are different possible endpoints that can b
   
   An usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
 
-#### Adding Certificates
+#### Adding Certificates and Basket
 - POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company.
   - `company_name`: The name of the company.
   - `company_number`: The number of the company matching with company name.
@@ -126,12 +126,19 @@ In order to use the generator, there are different possible endpoints that can b
     - `company_type`: The type of the company (e.g., `ltd`, `plc`).
     - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
     }
+  - `basket`: {
+    - `forename`: The forename for basket delivery details.
+    - `surname`: The surname for basket delivery details.
+    - `enrolled`: The boolean value for enrolled. Default value is true.
+    - `company_type`: The type of the company (e.g., `ltd`, `plc`).
+    - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
+      }
   - `kind`: The kind of the certificate.
   - `links_self`: The links for the certificate.
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
 
-  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ"}`
+  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
 
 ## Environment Variables
