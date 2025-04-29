@@ -111,7 +111,7 @@ In order to use the generator, there are different possible endpoints that can b
   An usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
 
 #### Adding Certificates and Basket
-- POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company.
+- POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company and add the basket details.
   - `company_name`: The name of the company.
   - `company_number`: The number of the company matching with company name.
   - `description`: The description of the certificate being added to the company.
