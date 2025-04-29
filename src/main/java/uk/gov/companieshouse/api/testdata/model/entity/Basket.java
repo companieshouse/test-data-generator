@@ -99,7 +99,6 @@ public class Basket {
         return surname;
     }
 
-    // Separate class (not inner class)
     public static class Item {
         @Field("item_uri")
         private String itemUri;
