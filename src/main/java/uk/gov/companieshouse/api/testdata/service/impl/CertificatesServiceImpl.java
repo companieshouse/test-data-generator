@@ -93,12 +93,12 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     }
 
     private Basket createBasket(CertificatesSpec spec, Certificates certificates) {
-        Address address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
+        var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
 
-        Item item = new Item();
+        var item = new Item();
         item.setItemUri(certificates.getLinksSelf());
 
-        Basket basket = new Basket();
+        var basket = new Basket();
         Instant now = getCurrentDateTime();
 
         basket.setId(spec.getUserId()); // Basket ID = User ID
@@ -116,12 +116,10 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
 
     public void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
-                .map(basket -> {
+                .ifPresent(basket -> {
                     if (basket.getId() != null) {
                         basketRepository.delete(basket);
-                        return true;
                     }
-                    return false;
                 });
     }
 
