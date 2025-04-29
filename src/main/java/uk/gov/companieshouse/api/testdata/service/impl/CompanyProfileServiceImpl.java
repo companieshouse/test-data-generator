@@ -92,7 +92,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         var accountParams = new AccountParameters(accountsDueStatus, randomService);
         var dateParams = new DateParameters(accountParams.getAccountingReferenceDate());
         var companyParams = new CompanyDetailsParameters(
-                companyType, hasSuperSecurePscs, companyStatus, subType, companyStatusDetail, registeredOfficeIsInDispute);
+                companyType, hasSuperSecurePscs, companyStatus, subType,
+                companyStatusDetail, registeredOfficeIsInDispute);
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
             return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
@@ -183,7 +184,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private OverseasEntity createOverseasEntity(String companyNumber,
                                                 Jurisdiction jurisdiction, CompanySpec spec,
                                                 DateParameters dateParams,
-                                                String entityType, CompanyType companyType, Boolean IsRegisteredOfficeIsInDispute) {
+                                                String entityType, CompanyType companyType,
+                                                Boolean isRegisteredOfficeIsInDispute) {
         LOG.info("Creating " + entityType + " for " + companyNumber);
 
         var overseasEntity = new OverseasEntity();
@@ -210,7 +212,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
         overseasEntity.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
         overseasEntity.setRegisteredOfficeIsInDispute(false);
-        setRegisteredOfficeAddressIsInDispute(overseasEntity, IsRegisteredOfficeIsInDispute);
+        setRegisteredOfficeAddressIsInDispute(overseasEntity, isRegisteredOfficeIsInDispute);
         overseasEntity.setEtag(randomService.getEtag());
         overseasEntity.setSuperSecureManagingOfficerCount(0);
 
@@ -462,6 +464,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private void setRegisteredOfficeAddressIsInDispute(
             CompanyProfile profile, Boolean registeredOfficeIsInDispute) {
-        profile.setRegisteredOfficeIsInDispute(Objects.requireNonNullElse(registeredOfficeIsInDispute, false));
+        profile.setRegisteredOfficeIsInDispute(Objects.requireNonNullElse(
+                registeredOfficeIsInDispute, false));
     }
 }
