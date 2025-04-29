@@ -19,12 +19,16 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
+import uk.gov.companieshouse.api.testdata.model.rest.BasketSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
+import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,6 +36,12 @@ class CertificatesServiceImplTest {
 
     @Mock
     private CertificatesRepository repository;
+
+    @Mock
+    private BasketRepository basketRepository;
+
+    @Mock
+    private AddressService addressService;
 
     @Mock
     private RandomService randomService;
@@ -44,6 +54,8 @@ class CertificatesServiceImplTest {
 
     private Certificates certificates;
     private CertificatesSpec certificatesSpec;
+
+    private Basket basket;
 
     @BeforeEach
     void setUp() {
@@ -70,6 +82,9 @@ class CertificatesServiceImplTest {
         certificatesSpec.setPostalDelivery(true);
         certificatesSpec.setQuantity(1);
         certificatesSpec.setUserId("user123");
+
+        basket = new Basket();
+        basket.setId(certificatesSpec.getUserId()); // Set basket ID to user ID
     }
 
     @Test
@@ -110,13 +125,66 @@ class CertificatesServiceImplTest {
     }
 
     @Test
+    void createCertificatesWithBasket() throws DataException {
+        when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
+        when(randomService.getEtag()).thenReturn("etag123");
+
+        BasketSpec basketSpec = new BasketSpec();
+        basketSpec.setForename("John");
+        basketSpec.setSurname("Doe");
+        basketSpec.setEnrolled(true);
+        certificatesSpec.setBasketSpec(basketSpec);
+
+        when(repository.save(any(Certificates.class))).thenReturn(certificates);
+        when(basketRepository.save(any(Basket.class))).thenReturn(basket);
+
+        CertificatesData result = service.create(certificatesSpec);
+
+        assertNotNull(result);
+        assertEquals(certificates.getId(), result.getId());
+
+        verify(repository).save(certificatesCaptor.capture());
+        Certificates captured = certificatesCaptor.getValue();
+
+        ItemOptions capturedOptions = captured.getItemOptions();
+        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions();
+
+        assertEquals("CRT-123456-789012", captured.getId());
+        assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
+        assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescription());
+        assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
+        assertEquals(certificatesSpec.getDescriptionCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals(certificatesSpec.getDescriptionCertificate(), captured.getDescriptionCertificate());
+        assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
+        assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
+        assertEquals(expectedOptions.getIncludeEmailCopy(), capturedOptions.getIncludeEmailCopy());
+        assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
+        assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
+        assertEquals("etag123", captured.getEtag());
+        assertEquals(certificatesSpec.getKind(), captured.getKind());
+        assertEquals("/orderable/certificates/CRT-123456-789012", captured.getLinksSelf());
+        assertTrue(captured.isPostalDelivery());
+        assertEquals(certificatesSpec.getQuantity(), captured.getQuantity());
+        assertEquals(certificatesSpec.getUserId(), captured.getUserId());
+
+        assertNotNull(captured.getBasket());
+        Basket capturedBasket = captured.getBasket();
+
+        assertEquals(basketSpec.getForename(), capturedBasket.getForeName());
+        assertEquals(basketSpec.getSurname(), capturedBasket.getSurName());
+        assertTrue(capturedBasket.isEnrolled());
+    }
+
+    @Test
     void deleteCertificates() {
         when(repository.findById("CRT-123456-789012")).thenReturn(java.util.Optional.of(certificates));
-        boolean result = service.delete("CRT-123456-789012");
 
+        boolean result = service.delete("CRT-123456-789012");
         assertTrue(result);
-        verify(repository).delete(certificates);
+        verify(repository).delete(certificates); // Verify the certificate was deleted
     }
+
 
     @Test
     void createCertificatesWithDefaultValues() throws DataException {
@@ -138,7 +206,7 @@ class CertificatesServiceImplTest {
     }
 
     @Test
-    void deleteCertificatesNotFound() {
+    void deleteCertificatesBasketNotFound() {
         String certificateId = "CRT-123456-789012";
 
         when(repository.findById(certificateId)).thenReturn(java.util.Optional.empty());
@@ -146,5 +214,23 @@ class CertificatesServiceImplTest {
 
         assertFalse(result);  // Should return false when not found
         verify(repository, never()).delete(any(Certificates.class));
+        verify(basketRepository, never()).delete(any(Basket.class));
+    }
+
+    @Test
+    void deleteCertificatesBasket() {
+        String certificateId = "CRT-123456-789012";
+        certificates.setUserId("user123");
+        basket.setId(certificates.getUserId());
+
+        when(repository.findById(certificateId)).thenReturn(java.util.Optional.of(certificates));
+        when(basketRepository.findById(certificates.getUserId())).thenReturn(java.util.Optional.of(basket));
+
+        boolean result = service.delete(certificateId);
+
+        assertTrue(result);
+
+        verify(repository).delete(certificates);
+        verify(basketRepository).delete(basket);
     }
 }
