@@ -130,8 +130,6 @@ In order to use the generator, there are different possible endpoints that can b
     - `forename`: The forename for basket delivery details.
     - `surname`: The surname for basket delivery details.
     - `enrolled`: The boolean value for enrolled. Default value is true.
-    - `company_type`: The type of the company (e.g., `ltd`, `plc`).
-    - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
       }
   - `kind`: The kind of the certificate.
   - `links_self`: The links for the certificate.
