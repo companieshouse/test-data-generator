@@ -8,16 +8,18 @@ import java.util.Map;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -32,10 +34,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -46,12 +49,12 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
-
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
+
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private static final int COMPANY_NUMBER_LENGTH = 8;
@@ -96,6 +99,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Autowired
     private CompanySearchService companySearchService;
+    @Autowired
+    private AccountPenaltiesService accountPenaltiesService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -404,6 +409,52 @@ public class TestDataServiceImpl implements TestDataService {
             return appealsService.delete(companyNumber, penaltyReference);
         } catch (Exception ex) {
             throw new DataException("Error deleting appeals data", ex);
+        }
+    }
+
+    @Override
+    public AccountPenaltiesData getAccountPenaltyData(String companyCode, String customerCode,
+            String penaltyReference) throws NoDataFoundException {
+        try {
+            return accountPenaltiesService.getAccountPenalty(companyCode, customerCode,
+                    penaltyReference);
+        } catch (NoDataFoundException ex) {
+            throw new NoDataFoundException("Error retrieving account penalty - not found");
+        }
+    }
+
+    @Override
+    public AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
+            throws NoDataFoundException {
+        try {
+            return accountPenaltiesService.getAccountPenalties(companyCode, customerCode);
+        } catch (NoDataFoundException ex) {
+            throw new NoDataFoundException("Error retrieving account penalties - not found");
+        }
+    }
+
+    @Override
+    public AccountPenaltiesData updateAccountPenaltiesData(String penaltyRef,
+            UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException {
+        try {
+            return accountPenaltiesService.updateAccountPenalties(penaltyRef, request);
+        }   catch (NoDataFoundException ex) {
+                throw new NoDataFoundException("Error updating account penalties - not found");
+        } catch (Exception ex) {
+                throw new DataException("Error updating account penalties", ex);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteAccountPenaltiesData(String companyCode, String customerCode)
+            throws NoDataFoundException, DataException {
+        try {
+            return accountPenaltiesService.deleteAccountPenalties(companyCode, customerCode);
+        }  catch (NoDataFoundException ex) {
+            throw new NoDataFoundException("Error deleting account penalties - not found");
+        }
+        catch (Exception ex) {
+            throw new DataException("Error deleting account penalties", ex);
         }
     }
 
