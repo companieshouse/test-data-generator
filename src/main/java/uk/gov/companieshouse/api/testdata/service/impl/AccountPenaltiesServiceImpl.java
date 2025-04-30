@@ -120,10 +120,11 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         accountPenaltiesData.setCreatedAt(accountPenalties.getCreatedAt());
         accountPenaltiesData.setClosedAt(accountPenalties.getClosedAt());
 
-        List<PenaltyData> apd = accountPenalties.getPenalties().stream()
-                .map(this::mapToAccountPenaltyData).toList();
+        List<PenaltyData> penalties = accountPenalties.getPenalties().stream()
+                .map(this::mapToAccountPenaltyData)
+                .toList();
 
-        accountPenaltiesData.setPenalties(apd);
+        accountPenaltiesData.setPenalties(penalties);
 
         return accountPenaltiesData;
     }
