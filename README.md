@@ -66,7 +66,7 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
 
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. An usage example looks like this: `{"auth_code":"222222"}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
 #### Creating test users
@@ -76,7 +76,7 @@ In order to use the generator, there are different possible endpoints that can b
     - `roles`: The roles of the user along with `permissions`. Roles is optional. If we provide the roles, we need to provide the `id` of the role and the `permissions` associated with the role. permissions are mandatory if we provide role id and vice versa.
     - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
     
-    An usage example looks like this: `{ "password": "password", "roles": [ { "id": "roleId1", "permissions": [ "permission1", "permission2" ] }, { "id": "roleId2", "permissions": [ "permission3", "permission4" ] }, { "id": "roleId3", "permissions": [ "permission5", "permission6" ] } ], "is_company_auth_allow_list": true }`
+    A usage example looks like this: `{ "password": "password", "roles": [ { "id": "roleId1", "permissions": [ "permission1", "permission2" ] }, { "id": "roleId2", "permissions": [ "permission3", "permission4" ] }, { "id": "roleId3", "permissions": [ "permission5", "permission6" ] } ], "is_company_auth_allow_list": true }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
 
 #### Validating user Identity
@@ -85,7 +85,7 @@ In order to use the generator, there are different possible endpoints that can b
     - `user_id`: The user id of the user. This is mandatory.
     - `verification_source`: The verification source of the user. This is mandatory.'
     
-    An usage example looks like this: `{ "email": "test@test.com", "user_id": "userid", "verification_source": "TEST" }`
+    A usage example looks like this: `{ "email": "test@test.com", "user_id": "userid", "verification_source": "TEST" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/identity/{identityId}` will delete the test user identity. `identityId` is required to delete the user identity.
 
 #### Creating Acsp Members and Acsp Profiles
@@ -111,7 +111,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `company_number`: The company number of the company. This is mandatory.
   - `penalty_reference`: The penalty reference of the appeal. This is mandatory.
   
-  An usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
+  A usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
 
 #### Adding Certificates
 - POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company.
@@ -134,8 +134,37 @@ In order to use the generator, there are different possible endpoints that can b
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
 
-  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ"}`
+  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
+
+#### Retrieving, Updating and Deleting Account Penalties
+
+- GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties`. The request body must include mandatory `companyCode` and `customer_code`.
+  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+
+  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
+- GET: Sending a GET request to retrieve the Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will get an Account Penalties entry with only the requested penalty being returned in the data object. The request body must include mandatory `companyCode` and `customer_code`.
+  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+
+  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
+- PUT: Sending a PUT request to update Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will update an Account Penalties entry. The request body must include mandatory `companyCode` and `customer_code`, and optional `createdAt`, `closedAt`, `isPaid`, `amount` and `outstandingAMount` parameters.
+  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - `created_at`: The Created At date of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This cannot be set to null. This is optional.
+  - `closed_at`: The Closed At date of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
+  - `is_paid`: The Is Paid flag of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
+  - `amount`: The Amount of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
+  - `outstanding_amount`: The Amount of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
+
+  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties` will delete the `Account Penalties`. `companyCode` and `companyCode` are required.
+  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+
+  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
+
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
