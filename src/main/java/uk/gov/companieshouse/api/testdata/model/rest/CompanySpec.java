@@ -62,6 +62,9 @@ public class CompanySpec {
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
+    @JsonProperty("registered_office_is_in_dispute")
+    private Boolean registeredOfficeIsInDispute;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -176,6 +179,14 @@ public class CompanySpec {
 
     public void setPscType(List<PscType> pscType) {
         this.pscType = pscType;
+    }
+
+    public Boolean getRegisteredOfficeIsInDispute() {
+        return registeredOfficeIsInDispute;
+    }
+
+    public void setRegisteredOfficeIsInDispute(Boolean registeredOfficeIsInDispute) {
+        this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
     }
 }
 
