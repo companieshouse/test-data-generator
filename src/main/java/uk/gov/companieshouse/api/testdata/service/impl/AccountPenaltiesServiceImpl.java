@@ -50,7 +50,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     public AccountPenaltiesData updateAccountPenalties(String penaltyRef,
             UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException {
 
-        AccountPenalties accountPenalties =
+        var accountPenalties =
                 repository.findPenalty(
                                 request.getCompanyCode(), request.getCustomerCode(), penaltyRef)
                         .orElseThrow(() -> PENALTY_NOT_FOUND_EX);
@@ -64,7 +64,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             accountPenalties.setCreatedAt(request.getCreatedAt());
         }
 
-        for (int i = 0; i < accountPenalties.getPenalties().size(); i++) {
+        for (var i = 0; i < accountPenalties.getPenalties().size(); i++) {
             if (accountPenalties.getPenalties().get(i)
                     .getTransactionReference().equals(penaltyRef)) {
                 accountPenalties.getPenalties().set(i, updatedPenalty);
@@ -97,7 +97,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     private AccountPenalty createPenaltyUpdate(AccountPenalty accountPenalty, Boolean isPaid,
             Double amount, Double outStandingAmount) {
-        AccountPenalty updatedPenalty = new AccountPenalty();
+        var updatedPenalty = new AccountPenalty();
         updatedPenalty.setIsPaid(isPaid != null ? isPaid : accountPenalty.isPaid());
         updatedPenalty.setAmount(amount != null ? amount : accountPenalty.getAmount());
         updatedPenalty.setOutstandingAmount(outStandingAmount != null ? outStandingAmount
@@ -119,7 +119,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private AccountPenaltiesData mapToAccountPenaltiesData(AccountPenalties accountPenalties) {
-        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
+        var accountPenaltiesData = new AccountPenaltiesData();
         accountPenaltiesData.setCompanyCode(accountPenalties.getCompanyCode());
         accountPenaltiesData.setCustomerCode(accountPenalties.getCustomerCode());
         accountPenaltiesData.setCreatedAt(accountPenalties.getCreatedAt());
@@ -135,7 +135,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private PenaltyData mapToAccountPenaltyData(AccountPenalty penalty) {
-        PenaltyData penaltyData = new PenaltyData();
+        var penaltyData = new PenaltyData();
         penaltyData.setCompanyCode(penalty.getCompanyCode());
         penaltyData.setCustomerCode(penalty.getCustomerCode());
         penaltyData.setTransactionReference(penalty.getTransactionReference());

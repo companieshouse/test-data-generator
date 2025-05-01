@@ -242,7 +242,7 @@ public class TestDataController {
     public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
             @Valid @RequestBody AccountPenaltyRequest request) throws NoDataFoundException {
 
-        AccountPenaltiesData accountPenaltiesData = testDataService.getAccountPenaltiesData(
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(
                 request.getCompanyCode(), request.getCustomerCode());
 
         return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);
@@ -255,7 +255,7 @@ public class TestDataController {
             @Valid @RequestBody UpdateAccountPenaltiesRequest request)
             throws NoDataFoundException, DataException {
 
-        AccountPenaltiesData accountPenaltiesData = testDataService.updateAccountPenaltiesData(
+        var accountPenaltiesData = testDataService.updateAccountPenaltiesData(
                 penaltyRef, request);
 
         return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
-import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
@@ -124,17 +123,17 @@ public class MongoConfig {
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
-        SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
+        var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
-        MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(
+        var mappingMongoConverter = getMappingMongoConverter(
                 simpleMongoDbFactory);
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
     }
 
     private MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory factory) {
-        DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-        MongoMappingContext mappingContext = new MongoMappingContext();
-        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver,
+        var dbRefResolver = new DefaultDbRefResolver(factory);
+        var mappingContext = new MongoMappingContext();
+        var mappingConverter = new MappingMongoConverter(dbRefResolver,
                 mappingContext);
         mappingContext.setSimpleTypeHolder(
                 mappingConverter.getCustomConversions().getSimpleTypeHolder());
@@ -150,7 +149,7 @@ public class MongoConfig {
     private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(
             Class<T> repositoryClass,
             String database) {
-        MongoRepositoryFactoryBean<T, S, I> mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(
+        var mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(
                 repositoryClass);
         mongoDbFactoryBean.setMongoOperations(createMongoTemplate(database));
         mongoDbFactoryBean.afterPropertiesSet();
