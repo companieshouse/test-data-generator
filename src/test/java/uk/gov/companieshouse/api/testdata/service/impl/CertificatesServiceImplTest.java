@@ -171,8 +171,8 @@ class CertificatesServiceImplTest {
         assertNotNull(captured.getBasket());
         Basket capturedBasket = captured.getBasket();
 
-        assertEquals(basketSpec.getForename(), capturedBasket.getForeName());
-        assertEquals(basketSpec.getSurname(), capturedBasket.getSurName());
+        assertEquals(basketSpec.getForename(), capturedBasket.getForename());
+        assertEquals(basketSpec.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
     }
 
@@ -182,7 +182,7 @@ class CertificatesServiceImplTest {
 
         boolean result = service.delete("CRT-123456-789012");
         assertTrue(result);
-        verify(repository).delete(certificates); // Verify the certificate was deleted
+        verify(repository).delete(certificates);
     }
 
 

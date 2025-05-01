@@ -59,16 +59,8 @@ public class Basket {
         this.updatedAt = updatedAt;
     }
 
-    public Address getDeliveryDetails() {
-        return deliveryDetails;
-    }
-
     public void setDeliveryDetails(Address deliveryDetails) {
         this.deliveryDetails = deliveryDetails;
-    }
-
-    public List<Item> getItems() {
-        return items;
     }
 
     public void setItems(List<Item> items) {
@@ -83,19 +75,19 @@ public class Basket {
         this.enrolled = enrolled;
     }
 
-    public void setForeName(String forename) {
+    public void setForename(String forename) {
         this.forename = forename;
     }
 
-    public String getForeName() {
+    public String getForename() {
         return forename;
     }
 
-    public void setSurName(String surname) {
+    public void setSurname(String surname) {
         this.surname = surname;
     }
 
-    public String getSurName() {
+    public String getSurname() {
         return surname;
     }
 

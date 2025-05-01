@@ -25,7 +25,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class CertificatesServiceImpl implements DataService<CertificatesData, CertificatesSpec> {
 
     @Autowired
-    public CertificatesRepository repository;
+    public CertificatesRepository certificatesRepository;
 
     @Autowired
     public BasketRepository basketRepository;
@@ -43,7 +43,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         var randomId = "CRT-" + firstPart + "-" + secondPart;
         var certificates = getCertificates(certificatesSpec, randomId);
 
-        repository.save(certificates);
+        certificatesRepository.save(certificates);
 
         if (certificatesSpec.getBasketSpec() != null) {
             var basket = createBasket(certificatesSpec, certificates);
@@ -100,12 +100,12 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         var basket = new Basket();
         Instant now = getCurrentDateTime();
 
-        basket.setId(spec.getUserId()); // Basket ID = User ID
+        basket.setId(spec.getUserId());
         basket.setCreatedAt(now);
         basket.setUpdatedAt(now);
         basket.setDeliveryDetails(address);
-        basket.setForeName(spec.getBasketSpec().getForename());
-        basket.setSurName(spec.getBasketSpec().getSurname());
+        basket.setForename(spec.getBasketSpec().getForename());
+        basket.setSurname(spec.getBasketSpec().getSurname());
         basket.setEnrolled(spec.getBasketSpec().getEnrolled());
         basket.setItems(List.of(item));
         basket.setEnrolled(spec.getBasketSpec().getEnrolled());
@@ -113,7 +113,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return basket;
     }
 
-    public void deleteBasket(String basketId) {
+    private void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
                 .ifPresent(basket -> {
                     if (basket.getId() != null) {
@@ -124,21 +124,20 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
 
     @Override
     public boolean delete(String certificateId) {
-        var certificate = repository.findById(certificateId);
+        var certificate = certificatesRepository.findById(certificateId);
         if (certificate.isPresent()) {
-            repository.delete(certificate.get());
-            var basket = basketRepository.findById(certificate.get().getUserId());
+            var userId = certificate.get().getUserId();
+            var basket = basketRepository.findById(userId);
 
             if (basket.isPresent()) {
-                deleteBasket(certificate.get().getUserId());
+                deleteBasket(userId);
             }
+
+            certificatesRepository.delete(certificate.get());
             return true;
         }
         return false;
     }
-
-
-
 
     protected Instant getCurrentDateTime() {
         return Instant.now().atZone(ZoneOffset.UTC).toInstant();
