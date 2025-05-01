@@ -39,6 +39,9 @@ public class CertificatesSpec {
     @NotNull(message = "User ID cannot be null")
     private String userId;
 
+    @JsonProperty("basket")
+    private BasketSpec basketSpec;
+
     public String getCompanyName() {
         return companyName;
     }
@@ -125,5 +128,13 @@ public class CertificatesSpec {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public BasketSpec getBasketSpec() {
+        return basketSpec;
+    }
+
+    public void setBasketSpec(BasketSpec basketSpec) {
+        this.basketSpec = basketSpec;
     }
 }

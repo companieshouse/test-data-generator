@@ -90,6 +90,10 @@ public class MongoConfig {
         return getMongoRepositoryBean(AcspMembersRepository.class, "acsp_members");
     }
 
+    @Bean
+    public BasketRepository basketRepository() {
+        return getMongoRepositoryBean(BasketRepository.class, "orders");
+    }
 
     @Bean
     public IdentityRepository identityRepository() {
