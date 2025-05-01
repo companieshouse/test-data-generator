@@ -3,10 +3,12 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.validation.ConstraintViolationException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -128,13 +130,6 @@ class AccountPenaltiesServiceImplTest {
         assertEquals("no account penalties", exception.getMessage());
     }
 
-    public static Stream<Arguments> updateArguments() {
-        return Stream.of(
-                Arguments.of(NOW.minusSeconds(10), NOW.minusSeconds(10), true, 0.0, 0.0),
-                Arguments.of(null, NOW.minusSeconds(10), null, null, null)
-        );
-    }
-
     @ParameterizedTest
     @MethodSource("updateArguments")
     void testUpdateAccountPenaltiesSuccess(Instant createdAt, Instant closedAt, Boolean isPaid,
@@ -175,6 +170,49 @@ class AccountPenaltiesServiceImplTest {
                 .save(accountPenalties);
     }
 
+    @Test
+    void testUpdateAccountPenaltiesNotFound() {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+
+        when(repository.findPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
+                .thenReturn(Optional.empty());
+
+        NoDataFoundException exception =
+                assertThrows(NoDataFoundException.class,
+                        () -> service.updateAccountPenalties(PENALTY_REF, request));
+
+        assertEquals("penalty not found", exception.getMessage());
+    }
+
+    @Test
+    void testUpdateAccountPenaltiesErrorOnSave() {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+
+        AccountPenalties accountPenalties = createAccountPenalties();
+
+        when(repository.findPenalty(
+                COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
+                .thenReturn(Optional.of(accountPenalties));
+
+        doThrow(ConstraintViolationException.class)
+                .when(repository).save(accountPenalties);
+
+        DataException exception =
+                assertThrows(DataException.class,
+                        () -> service.updateAccountPenalties(PENALTY_REF, request));
+
+        verify(repository, times(1))
+                .findPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+        verify(repository, times(1))
+                .save(accountPenalties);
+
+        assertEquals("failed to update the account penalties", exception.getMessage());
+    }
+
     private static AccountPenalties createAccountPenalties() {
         AccountPenalty penalty = getAccountPenalty();
         List<AccountPenalty> penalties = new ArrayList<>();
@@ -212,4 +250,11 @@ class AccountPenaltiesServiceImplTest {
         return penalty;
     }
 
+    public static Stream<Arguments> updateArguments() {
+        return Stream.of(
+                Arguments.of(NOW.minusSeconds(10), NOW.minusSeconds(10), true, 0.0, 0.0),
+                Arguments.of(null, NOW.minusSeconds(10), null, null, null),
+                Arguments.of(null, NOW.minusSeconds(10), true, null, null)
+        );
+    }
 }
