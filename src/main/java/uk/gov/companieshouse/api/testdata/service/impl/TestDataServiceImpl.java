@@ -273,6 +273,15 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
+
+        if (isElasticSearchDeployed) {
+            try {
+                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+            } catch (Exception ex) {
+                suppressedExceptions.add(
+                        new DataException("Error deleting company from Elasticsearch", ex));
+            }
+        }
     }
 
     @Override
