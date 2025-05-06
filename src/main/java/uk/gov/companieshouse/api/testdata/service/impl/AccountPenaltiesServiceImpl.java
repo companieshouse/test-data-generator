@@ -33,7 +33,16 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
                 repository.findPenalty(companyCode, customerCode, penaltyRef)
                         .orElseThrow(() -> PENALTY_NOT_FOUND_EX);
 
+        accountPenalties.setPenalties(filterByPenaltyRef(penaltyRef, accountPenalties));
+
         return mapToAccountPenaltiesData(accountPenalties);
+    }
+
+    private static List<AccountPenalty> filterByPenaltyRef(String penaltyRef,
+            AccountPenalties accountPenalties) {
+        return accountPenalties.getPenalties().stream()
+                .filter(p -> p.getTransactionReference().equals(penaltyRef))
+                .collect(Collectors.toList());
     }
 
     @Override
