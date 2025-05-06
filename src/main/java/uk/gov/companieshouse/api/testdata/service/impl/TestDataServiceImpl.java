@@ -181,9 +181,11 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-    private void deleteUkEstablishmentsIfOverseaCompany(String companyId, List<Exception> suppressedExceptions) {
+    private void deleteUkEstablishmentsIfOverseaCompany(
+            String companyId, List<Exception> suppressedExceptions) {
         try {
-            Optional<CompanyProfile> companyProfile = companyProfileService.getCompanyProfile(companyId);
+            Optional<CompanyProfile> companyProfile =
+                    companyProfileService.getCompanyProfile(companyId);
             if (isOverseaCompany(companyProfile)) {
                 deleteUkEstablishmentsForParent(companyId, suppressedExceptions);
             }
@@ -193,12 +195,14 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
-        return companyProfile.isPresent() &&
-                CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
+        return companyProfile.isPresent()
+                && CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
     }
 
-    private void deleteUkEstablishmentsForParent(String companyId, List<Exception> suppressedExceptions) {
-        List<String> ukEstablishments = companyProfileService.findUkEstablishmentsByParent(companyId);
+    private void deleteUkEstablishmentsForParent(String companyId,
+                                                 List<Exception> suppressedExceptions) {
+        List<String> ukEstablishments =
+                companyProfileService.findUkEstablishmentsByParent(companyId);
         for (String ukEstablishmentNumber : ukEstablishments) {
             try {
                 deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
@@ -401,7 +405,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(
+            final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create a certificates");
         }
