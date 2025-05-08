@@ -369,9 +369,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Override
     public boolean delete(String companyId) {
-        Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
-        profile.ifPresent(repository::delete);
-        return profile.isPresent();
+        Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId)
+                .or(() -> repository.findById(companyId));
+
+        if (profile.isPresent()) {
+            repository.delete(profile.get());
+            return true;
+        }
+        return false;
     }
 
     @Override

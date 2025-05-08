@@ -234,54 +234,106 @@ public class TestDataServiceImpl implements TestDataService {
 
     private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
         try {
-            this.companyProfileService.delete(companyId);
+            LOG.info("Attempting to delete company profile for: " + companyId);
+            boolean deleted = this.companyProfileService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company profile not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete company profile for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.filingHistoryService.delete(companyId);
+            LOG.info("Attempting to delete filing history for: " + companyId);
+            boolean deleted = this.filingHistoryService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Filing history not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete filing history for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.companyAuthCodeService.delete(companyId);
+            LOG.info("Attempting to delete company auth code for: " + companyId);
+            boolean deleted = this.companyAuthCodeService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company auth code not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete company auth code for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.appointmentService.delete(companyId);
+            LOG.info("Attempting to delete appointment for: " + companyId);
+            boolean deleted = this.appointmentService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Appointment not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete appointment for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.companyPscStatementService.delete(companyId);
+            LOG.info("Attempting to delete company PSC statement for: " + companyId);
+            boolean deleted = this.companyPscStatementService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company PSC statement not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete company PSC statement for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.companyPscsService.delete(companyId);
+            LOG.info("Attempting to delete company PSCs for: " + companyId);
+            boolean deleted = this.companyPscsService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company PSCs not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete company PSCs for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.companyMetricsService.delete(companyId);
+            LOG.info("Attempting to delete company metrics for: " + companyId);
+            boolean deleted = this.companyMetricsService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company metrics not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete company metrics for: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
-            this.companyRegistersService.delete(companyId);
+            LOG.info("Attempting to delete company auth allow list for: " + companyId);
+            boolean deleted = this.companyAuthAllowListService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company auth allow list not found for: " + companyId);
+            }
         } catch (Exception de) {
+            LOG.error("Failed to delete company auth allow list for: " + companyId, de);
+            suppressedExceptions.add(de);
+        }
+        try {
+            LOG.info("Attempting to delete company registers for: " + companyId);
+            boolean deleted = this.companyRegistersService.delete(companyId);
+            if (!deleted) {
+                LOG.info("Company registers not found for: " + companyId);
+            }
+        } catch (Exception de) {
+            LOG.error("Failed to delete company registers for: " + companyId, de);
             suppressedExceptions.add(de);
         }
 
-        if (isElasticSearchDeployed) {
-            try {
-                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-            } catch (Exception ex) {
-                suppressedExceptions.add(
-                        new DataException("Error deleting company from Elasticsearch", ex));
-            }
-        }
+//        if (isElasticSearchDeployed) {
+//            try {
+//                LOG.info("Attempting to delete company from elastic search index for: " + companyId);
+//                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+//            } catch (Exception ex) {
+//                LOG.info("Failed to delete company from elastic search index for: " + ex);
+//                suppressedExceptions.add(
+//                        new DataException("Error deleting company from Elasticsearch", ex));
+//            }
+//        }
     }
 
     @Override
