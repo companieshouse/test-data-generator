@@ -127,14 +127,13 @@ public class TestDataServiceImpl implements TestDataService {
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
 
         do {
-            // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            companyProfileService.create(spec);
+            CompanyProfile profile = companyProfileService.create(spec);
             filingHistoryService.create(spec);
             appointmentService.create(spec);
             var authCode = companyAuthCodeService.create(spec);
@@ -147,20 +146,32 @@ public class TestDataServiceImpl implements TestDataService {
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
 
-            // Add company to the elastic search index
             if (isElasticSearchDeployed) {
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+
+                if (CompanyType.OVERSEA_COMPANY.getValue().equals(profile.getType())
+                        && Boolean.TRUE.equals(spec.getHasUkEstablishment())) {
+                    List<String> ukEstablishments = companyProfileService
+                            .findUkEstablishmentsByParent(spec.getCompanyNumber());
+
+                    for (String ukEstablishmentNumber : ukEstablishments) {
+                        CompanyData ukEstablishmentData = new CompanyData(
+                                ukEstablishmentNumber,
+                                null,
+                                this.apiUrl + "/company/" + ukEstablishmentNumber
+                        );
+                        this.companySearchService.addCompanyIntoElasticSearchIndex(ukEstablishmentData);
+                    }
+                }
             }
             return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
             LOG.error("Rolling back creation of company", data);
-            // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
             throw new DataException(ex);
         }
@@ -304,16 +315,14 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
 
-//        if (isElasticSearchDeployed) {
-//            try {
-//                LOG.info("Attempting to delete company from elastic search index for: " + companyId);
-//                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-//            } catch (Exception ex) {
-//                LOG.info("Failed to delete company from elastic search index for: " + ex);
-//                suppressedExceptions.add(
-//                        new DataException("Error deleting company from Elasticsearch", ex));
-//            }
-//        }
+        if (isElasticSearchDeployed) {
+        try {
+            LOG.info("Attempting to delete company from elastic search index for: " + companyId);
+            this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete company from elastic search index for: " + companyId, ex);
+            }
+        }
     }
 
     @Override
