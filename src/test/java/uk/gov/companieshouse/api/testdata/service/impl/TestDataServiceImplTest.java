@@ -589,7 +589,7 @@ class TestDataServiceImplTest {
     @Test
     void deleteCompanyDataWithoutUkEstablishments() throws DataException {
         CompanyProfile companyProfile = new CompanyProfile();
-        companyProfile.setType(CompanyType.LTD.getValue()); // Set the type explicitly
+        companyProfile.setType(CompanyType.LTD.getValue());
         when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
                 .thenReturn(Optional.of(companyProfile));
 
@@ -603,7 +603,7 @@ class TestDataServiceImplTest {
     void deleteCompanyDataWithSuppressedExceptions() {
         List<String> ukEstablishments = List.of(UK_ESTABLISHMENT_NUMBER, UK_ESTABLISHMENT_NUMBER_2);
         CompanyProfile companyProfile = new CompanyProfile();
-        companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue()); // Set the type explicitly
+        companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue());
         when(companyProfileService.getCompanyProfile(OVERSEA_COMPANY))
                 .thenReturn(Optional.of(companyProfile));
         when(companyProfileService.findUkEstablishmentsByParent(OVERSEA_COMPANY)).thenReturn(ukEstablishments);
@@ -1541,7 +1541,13 @@ class TestDataServiceImplTest {
     @Test
     void testCreateCompanyWithElasticSearchDeployed()
             throws DataException, ApiErrorResponseException, URIValidationException {
+        CompanyProfile mockProfile = new CompanyProfile();
+        mockProfile.setType(CompanyType.LTD.getValue());
+        when(companyProfileService.create(any(CompanySpec.class))).thenReturn(mockProfile);
+
         testCreateCompanyWithElasticSearch(true, 1);
+
+        verify(companySearchService, times(1)).addCompanyIntoElasticSearchIndex(any(CompanyData.class));
     }
 
     @Test

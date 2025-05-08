@@ -133,6 +133,7 @@ public class TestDataServiceImpl implements TestDataService {
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
+            CompanyProfile profile = companyProfileService.create(spec);
             companyProfileService.create(spec);
             LOG.info("Successfully created company profile");
 
@@ -167,6 +168,21 @@ public class TestDataServiceImpl implements TestDataService {
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+
+                if (CompanyType.OVERSEA_COMPANY.getValue().equals(profile.getType())
+                        && Boolean.TRUE.equals(spec.getHasUkEstablishment())) {
+                    List<String> ukEstablishments = companyProfileService
+                            .findUkEstablishmentsByParent(spec.getCompanyNumber());
+
+                    for (String ukEstablishmentNumber : ukEstablishments) {
+                        CompanyData ukEstablishmentData = new CompanyData(
+                                ukEstablishmentNumber,
+                                null,
+                                this.apiUrl + "/company/" + ukEstablishmentNumber
+                        );
+                        this.companySearchService.addCompanyIntoElasticSearchIndex(ukEstablishmentData);
+                    }
+                }
                 LOG.info("Successfully added company to ElasticSearch index");
             }
 
@@ -175,6 +191,7 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
+            LOG.error("Rolling back creation of company", data);
             data.put("error message", ex.getMessage());
             LOG.error("Failed to create company data for company number: "
                     + spec.getCompanyNumber(), ex, data);
@@ -324,16 +341,14 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
 
-//        if (isElasticSearchDeployed) {
-//            try {
-//                LOG.info("Attempting to delete company from elastic search index for: " + companyId);
-//                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-//            } catch (Exception ex) {
-//                LOG.info("Failed to delete company from elastic search index for: " + ex);
-//                suppressedExceptions.add(
-//                        new DataException("Error deleting company from Elasticsearch", ex));
-//            }
-//        }
+        if (isElasticSearchDeployed) {
+        try {
+            LOG.info("Attempting to delete company from elastic search index for: " + companyId);
+            this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete company from elastic search index for: " + companyId, ex);
+            }
+        }
     }
 
     @Override

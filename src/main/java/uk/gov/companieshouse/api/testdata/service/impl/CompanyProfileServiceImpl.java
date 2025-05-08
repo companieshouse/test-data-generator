@@ -308,15 +308,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     protected String createUkEstablishment(String parentCompanyNumber,
-                                         Jurisdiction jurisdiction,
-                                         DateParameters dateParams) {
+                                           Jurisdiction jurisdiction,
+                                           DateParameters dateParams) {
         String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
         LOG.info("Creating UK establishment for parent company " + parentCompanyNumber);
 
         var ukEstablishment = new CompanyProfile();
         ukEstablishment.setId(ukEstablishmentNumber);
         ukEstablishment.setCompanyNumber(ukEstablishmentNumber);
-
         ukEstablishment.setType(CompanyType.UK_ESTABLISHMENT.getValue());
 
         var branchDetails = new CompanyProfile.BranchCompanyDetails();
