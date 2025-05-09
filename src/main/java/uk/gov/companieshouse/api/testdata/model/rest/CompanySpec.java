@@ -62,6 +62,9 @@ public class CompanySpec {
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
+    @JsonProperty("has_uk_establishment")
+    private Boolean hasUkEstablishment;
+
     @JsonProperty("registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
 
@@ -179,6 +182,14 @@ public class CompanySpec {
 
     public void setPscType(List<PscType> pscType) {
         this.pscType = pscType;
+    }
+
+    public Boolean getHasUkEstablishment() {
+        return hasUkEstablishment;
+    }
+
+    public void setHasUkEstablishment(Boolean hasUkEstablishment) {
+        this.hasUkEstablishment = hasUkEstablishment;
     }
 
     public Boolean getRegisteredOfficeIsInDispute() {

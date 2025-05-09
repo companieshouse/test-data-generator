@@ -45,6 +45,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`, `united-kingdom`). Defaults to `england_wales`.
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
   - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
+  - `has_uk_establishment`: Boolean value to determine if the oversea company has a UK establishment. Defaults to false, `true` value will create an oversea company with a UK establishment. Used alongside `oversea-company` company type.
   - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to false, `true` value will create a Psc entry of `super-secure-person-with-significant-control` or `super-secure-beneficial-owner` depending on CompanyType.
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
@@ -64,6 +65,7 @@ In order to use the generator, there are different possible endpoints that can b
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
+  - A usage example for creating `oversea-company` with `has_uk_establishment` looks like this: `{"overseas-company", "has_uk_establishment": true}`, this will create an oversea company with hardcoded values and a UK establishment
   - A usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`

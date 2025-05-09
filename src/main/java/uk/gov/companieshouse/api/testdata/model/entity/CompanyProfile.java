@@ -184,6 +184,8 @@ public class CompanyProfile {
     private String companyStatusDetail;
     @Field("data.partial_data_available")
     private String partialDataAvailable;
+    @Field("data.branch_company_details")
+    private BranchCompanyDetails branchCompanyDetails;
 
     public String getId() {
         return id;
@@ -354,9 +356,52 @@ public class CompanyProfile {
         this.companyStatusDetail = companyStatusDetail;
     }
 
-    public String getPartialDataAvailable() {return this.partialDataAvailable; }
+    public String getPartialDataAvailable() {
+        return this.partialDataAvailable;
+    }
 
     public void setPartialDataAvailable(String partialDataAvailable) {
         this.partialDataAvailable = partialDataAvailable;
+    }
+
+    public BranchCompanyDetails getBranchCompanyDetails() {
+        return branchCompanyDetails;
+    }
+
+    public void setBranchCompanyDetails(BranchCompanyDetails branchCompanyDetails) {
+        this.branchCompanyDetails = branchCompanyDetails;
+    }
+
+    public static class BranchCompanyDetails {
+        @Field("parent_company_number")
+        private String parentCompanyNumber;
+        @Field("parent_company_name")
+        private String parentCompanyName;
+        @Field("business_activity")
+        private String businessActivity;
+
+        public String getParentCompanyNumber() {
+            return parentCompanyNumber;
+        }
+
+        public void setParentCompanyNumber(String parentCompanyNumber) {
+            this.parentCompanyNumber = parentCompanyNumber;
+        }
+
+        public String getParentCompanyName() {
+            return parentCompanyName;
+        }
+
+        public void setParentCompanyName(String parentCompanyName) {
+            this.parentCompanyName = parentCompanyName;
+        }
+
+        public String getBusinessActivity() {
+            return businessActivity;
+        }
+
+        public void setBusinessActivity(String businessActivity) {
+            this.businessActivity = businessActivity;
+        }
     }
 }

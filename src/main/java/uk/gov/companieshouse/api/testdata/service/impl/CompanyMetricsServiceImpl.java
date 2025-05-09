@@ -34,18 +34,27 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setEtag(randomService.getEtag());
         metrics.setActivePscStatementsCount(1);
 
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-            metrics.setActivePscCount(2);
-        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+        Integer numberOfPsc = spec.getNumberOfPsc();
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
+        } else if (numberOfPsc != null) {
+            metrics.setActivePscCount(numberOfPsc);
         } else {
-            metrics.setActivePscCount(3);
+            metrics.setActivePscCount(0);
         }
 
-        metrics.setActiveDirectorsCount(1);
+        var numberOfAppointments = spec.getNumberOfAppointments();
+        if (spec.getOfficerRoles() != null && spec.getOfficerRoles().stream()
+                .anyMatch(role -> "director".equalsIgnoreCase(role.toString()))) {
+            metrics.setActiveDirectorsCount(numberOfAppointments);
+        } else {
+            metrics.setActiveDirectorsCount(1);
+        }
+
         if (spec.getRegisters() != null) {
             metrics.setRegisters(createRegisters(spec.getRegisters()));
         }
+
         return repository.save(metrics);
     }
 

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
@@ -30,6 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
@@ -167,6 +170,49 @@ public class TestDataServiceImpl implements TestDataService {
     public void deleteCompanyData(String companyId) throws DataException {
         List<Exception> suppressedExceptions = new ArrayList<>();
 
+        deleteUkEstablishmentsIfOverseaCompany(companyId, suppressedExceptions);
+
+        deleteSingleCompanyData(companyId, suppressedExceptions);
+
+        if (!suppressedExceptions.isEmpty()) {
+            var ex = new DataException("Error deleting company data");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
+        }
+    }
+
+    private void deleteUkEstablishmentsIfOverseaCompany(
+            String companyId, List<Exception> suppressedExceptions) {
+        try {
+            Optional<CompanyProfile> companyProfile =
+                    companyProfileService.getCompanyProfile(companyId);
+            if (isOverseaCompany(companyProfile)) {
+                deleteUkEstablishmentsForParent(companyId, suppressedExceptions);
+            }
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+    }
+
+    private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
+        return companyProfile.isPresent()
+                && CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
+    }
+
+    private void deleteUkEstablishmentsForParent(String companyId,
+                                                 List<Exception> suppressedExceptions) {
+        List<String> ukEstablishments =
+                companyProfileService.findUkEstablishmentsByParent(companyId);
+        for (String ukEstablishmentNumber : ukEstablishments) {
+            try {
+                deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
+            } catch (Exception de) {
+                suppressedExceptions.add(de);
+            }
+        }
+    }
+
+    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
         try {
             this.companyProfileService.delete(companyId);
         } catch (Exception de) {
@@ -202,7 +248,11 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
-
+        try {
+            this.companyAuthAllowListService.delete(companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
         try {
             this.companyRegistersService.delete(companyId);
         } catch (Exception de) {
@@ -211,16 +261,13 @@ public class TestDataServiceImpl implements TestDataService {
 
         if (isElasticSearchDeployed) {
             try {
+                LOG.info(
+                        "Attempting to delete company from elastic search index for: " + companyId);
                 this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-            } catch (Exception de) {
-                suppressedExceptions.add(de);
+            } catch (Exception ex) {
+                LOG.error(
+                        "Failed to delete company from elastic search index for: " + companyId, ex);
             }
-        }
-
-        if (!suppressedExceptions.isEmpty()) {
-            DataException ex = new DataException("Error deleting company data");
-            suppressedExceptions.forEach(ex::addSuppressed);
-            throw ex;
         }
     }
 
@@ -374,7 +421,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(
+            final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create a certificates");
         }
