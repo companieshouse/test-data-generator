@@ -1042,8 +1042,7 @@ class TestDataServiceImplTest {
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersData.getAcspMemberId()),
                 acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
-                acspProfileData.getAcspNumber(), acspMembersData.getUserId(),
-                acspMembersData.getStatus(), acspMembersData.getUserRole());
+                acspProfileData.getAcspNumber();
 
         verify(acspProfileService).create(acspProfile);
 
@@ -1071,8 +1070,6 @@ class TestDataServiceImplTest {
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersData.getAcspMemberId()),
                 acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
-                acspProfileData.getAcspNumber(), acspMembersData.getUserId(),
-                acspMembersData.getStatus(), acspMembersData.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
                 profile.getStatus() == null
