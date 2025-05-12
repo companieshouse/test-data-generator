@@ -56,6 +56,15 @@ public class CompanySpec {
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
     private String accountsDueStatus;
 
+    @JsonProperty("number_of_psc")
+    private Integer numberOfPsc;
+
+    @JsonProperty("psc_type")
+    private List<PscType> pscType;
+
+    @JsonProperty("registered_office_is_in_dispute")
+    private Boolean registeredOfficeIsInDispute;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -154,6 +163,30 @@ public class CompanySpec {
 
     public void setAccountsDueStatus(String accountsDueStatus) {
         this.accountsDueStatus = accountsDueStatus;
+    }
+
+    public Integer getNumberOfPsc() {
+        return numberOfPsc;
+    }
+
+    public void setNumberOfPsc(Integer numberOfPsc) {
+        this.numberOfPsc = numberOfPsc;
+    }
+
+    public List<PscType> getPscType() {
+        return pscType;
+    }
+
+    public void setPscType(List<PscType> pscType) {
+        this.pscType = pscType;
+    }
+
+    public Boolean getRegisteredOfficeIsInDispute() {
+        return registeredOfficeIsInDispute;
+    }
+
+    public void setRegisteredOfficeIsInDispute(Boolean registeredOfficeIsInDispute) {
+        this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
     }
 }
 

@@ -13,6 +13,7 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String IDENTITY_ENDPOINTS = "/test-data/identity/**";
     private static final String ACSP_ENDPOINTS = "/test-data/acsp-members/**";
     private static final String APPEALS_ENDPOINTS = "/test-data/appeals/**";
+    private static final String ACCOUNT_PENALTIES_ENDPOINTS = "/test-data/penalties/**";
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -20,7 +21,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(USERS_ENDPOINTS)
                 .addPathPatterns(IDENTITY_ENDPOINTS)
                 .addPathPatterns(ACSP_ENDPOINTS)
-                .addPathPatterns(APPEALS_ENDPOINTS);
+                .addPathPatterns(APPEALS_ENDPOINTS)
+                .addPathPatterns(ACCOUNT_PENALTIES_ENDPOINTS);
     }
 
     @Bean

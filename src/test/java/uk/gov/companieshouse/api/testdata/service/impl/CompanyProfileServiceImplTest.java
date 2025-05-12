@@ -677,6 +677,30 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/" + spec.getCompanyNumber() + "/filing-history",profile.getLinks().getFilingHistory());
     }
 
+    @Test
+    void setRegisteredOfficeAddressIsInDisputeTrue() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
+        spec.setRegisteredOfficeIsInDispute(true);
+        CompanyProfile profile = createAndCapture(spec);
+        assertTrue(profile.getRegisteredOfficeIsInDispute());
+    }
+
+    @Test
+    void setRegisteredOfficeAddressIsInDisputeFalse() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND,CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        spec.setRegisteredOfficeIsInDispute(false);
+        CompanyProfile profile = createAndCapture(spec);
+        assertFalse(profile.getRegisteredOfficeIsInDispute());
+    }
+
+    @Test
+    void setRegisteredOfficeAddressIsInDisputeNull() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND,CompanyType.OVERSEA_COMPANY);
+        spec.setRegisteredOfficeIsInDispute(null);
+        CompanyProfile profile = createAndCapture(spec);
+        assertFalse(profile.getRegisteredOfficeIsInDispute());
+    }
+
     private void setCompanyJurisdictionAndType(Jurisdiction jurisdiction, CompanyType companyType) {
         spec.setJurisdiction(jurisdiction);
         spec.setCompanyType(companyType);

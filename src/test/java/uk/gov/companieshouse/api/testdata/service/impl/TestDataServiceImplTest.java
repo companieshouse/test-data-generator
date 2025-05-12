@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,23 +16,25 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import jakarta.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
@@ -44,7 +45,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -61,14 +61,16 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -77,39 +79,65 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 class TestDataServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
-    private static final String COMPANY_NAME = "TEST DATA COMPANY";
     private static final String OVERSEAS_COMPANY_NUMBER = "OE123456";
     private static final String AUTH_CODE = "123456";
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
     private static final String NI_COMPANY_PREFIX = "NI";
+    private static final String COMPANY_CODE = "LP";
+    private static final String CUSTOMER_CODE = "12345678";
+    private static final String PENALTY_REF = "A1234567";
     private static final String API_URL = "http://localhost:4001";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
     private static final String CERTIFICATES_ID = "CRT-123456-789012";
 
-    @Mock private CompanyProfileService companyProfileService;
-    @Mock private DataService<FilingHistory, CompanySpec> filingHistoryService;
-    @Mock private CompanyAuthCodeService companyAuthCodeService;
-    @Mock private DataService<List<Appointment>, CompanySpec> appointmentService;
-    @Mock private DataService<CompanyMetrics, CompanySpec> metricsService;
-    @Mock private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
-    @Mock private DataService<CompanyPscs, CompanySpec> companyPscsService;
-    @Mock private RandomService randomService;
-    @Mock private UserService userService;
-    @Mock private DataService<RoleData, RoleSpec> roleService;
-    @Mock private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
-    @InjectMocks private TestDataServiceImpl testDataService;
-    @Mock private AcspMembersRepository acspMembersRepository;
-    @Mock private CertificatesRepository certificatesRepository;
-    @Mock private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
-    @Captor private ArgumentCaptor<CompanySpec> specCaptor;
-    @Mock private DataService<IdentityData, IdentitySpec> identityService;
-    @Mock private CompanyAuthAllowListService companyAuthAllowListService;
-    @Mock private AppealsService appealsService;
-    @Mock private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
-    @Mock private Appointment commonAppointment;
-    @Mock private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Mock
+    private CompanyProfileService companyProfileService;
+    @Mock
+    private DataService<FilingHistory, CompanySpec> filingHistoryService;
+    @Mock
+    private CompanyAuthCodeService companyAuthCodeService;
+    @Mock
+    private DataService<List<Appointment>, CompanySpec> appointmentService;
+    @Mock
+    private DataService<CompanyMetrics, CompanySpec> metricsService;
+    @Mock
+    private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
+    @Mock
+    private DataService<CompanyPscs, CompanySpec> companyPscsService;
+    @Mock
+    private RandomService randomService;
+    @Mock
+    private UserService userService;
+    @Mock
+    private DataService<RoleData, RoleSpec> roleService;
+    @Mock
+    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    @Mock
+    private AcspMembersRepository acspMembersRepository;
+    @Mock
+    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    @Captor
+    private ArgumentCaptor<CompanySpec> specCaptor;
+    @Mock
+    private DataService<IdentityData, IdentitySpec> identityService;
+    @Mock
+    private CompanyAuthAllowListService companyAuthAllowListService;
+    @Mock
+    private AppealsService appealsService;
+    @Mock
+    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    @Mock
+    private Appointment commonAppointment;
+    @Mock
+    private CompanySearchService companySearchService;
+    @Mock
+    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Mock
+    private AccountPenaltiesService accountPenaltiesService;
+    @InjectMocks
+    private TestDataServiceImpl testDataService;
 
     @BeforeEach
     void setUp() {
@@ -118,12 +146,15 @@ class TestDataServiceImplTest {
 
     /**
      * Sets up common mocks for creating a company.
-     * @param spec the CompanySpec to be created.
-     * @param companyNumber the raw company number (as string) to be returned by randomService.
-     * @param numberDigits the number of digits to request from randomService.
+     *
+     * @param spec                      the CompanySpec to be created.
+     * @param companyNumber             the raw company number (as string) to be returned by
+     *                                  randomService.
+     * @param numberDigits              the number of digits to request from randomService.
      * @param expectedFullCompanyNumber the full company number expected in the created spec.
      */
-    private void setupCompanyCreationMocks(CompanySpec spec, String companyNumber, int numberDigits, String expectedFullCompanyNumber) throws DataException {
+    private void setupCompanyCreationMocks(CompanySpec spec, String companyNumber, int numberDigits,
+            String expectedFullCompanyNumber) throws DataException {
         when(randomService.getNumber(numberDigits)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -145,7 +176,8 @@ class TestDataServiceImplTest {
 
         when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(appointmentService.create(any())).thenReturn(Collections.singletonList(commonAppointment));
+        when(appointmentService.create(any())).thenReturn(
+                Collections.singletonList(commonAppointment));
 
         return testDataService.createCompanyData(spec);
     }
@@ -163,7 +195,8 @@ class TestDataServiceImplTest {
     }
 
     private void verifyCommonCompanyCreation(CompanySpec capturedSpec, CompanyData createdCompany,
-                                             String expectedFullCompanyNumber, Jurisdiction expectedJurisdiction) throws DataException {
+            String expectedFullCompanyNumber, Jurisdiction expectedJurisdiction)
+            throws DataException {
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(expectedJurisdiction, capturedSpec.getJurisdiction());
         verify(filingHistoryService, times(1)).create(capturedSpec);
@@ -174,22 +207,23 @@ class TestDataServiceImplTest {
         verify(companyPscsService, times(1)).create(capturedSpec);
 
         assertEquals(expectedFullCompanyNumber, createdCompany.getCompanyNumber());
-        assertEquals(API_URL + "/company/" + expectedFullCompanyNumber, createdCompany.getCompanyUri());
+        assertEquals(API_URL + "/company/" + expectedFullCompanyNumber,
+                createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
     }
 
     /**
      * Helper to create ACSP members data.
      *
-     * @param userId the user id to set on the spec
+     * @param userId      the user id to set on the spec
      * @param profileData the ACSP profile data to be returned by the profile service
      * @param membersData the ACSP members data to be returned by the members service
      * @return the result of testDataService.createAcspMembersData(...)
      * @throws DataException if creation fails
      */
     private AcspMembersData createAcspMembersDataHelper(String userId,
-                                                        AcspProfileData profileData,
-                                                        AcspMembersData membersData, AcspProfileSpec profileSpec) throws DataException {
+            AcspProfileData profileData,
+            AcspMembersData membersData, AcspProfileSpec profileSpec) throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId(userId);
         spec.setAcspProfile(profileSpec);
@@ -199,11 +233,11 @@ class TestDataServiceImplTest {
     }
 
     private void verifyAcspMembersData(AcspMembersData data,
-                                       String expectedMemberId,
-                                       String expectedAcspNumber,
-                                       String expectedUserId,
-                                       String expectedStatus,
-                                       String expectedUserRole) {
+            String expectedMemberId,
+            String expectedAcspNumber,
+            String expectedUserId,
+            String expectedStatus,
+            String expectedUserRole) {
         assertNotNull(data);
         assertEquals(expectedMemberId, data.getAcspMemberId());
         assertEquals(expectedAcspNumber, data.getAcspNumber());
@@ -215,12 +249,13 @@ class TestDataServiceImplTest {
     /**
      * Helper to perform deletion of ACSP member data.
      *
-     * @param acspMemberId the member id to delete
+     * @param acspMemberId   the member id to delete
      * @param memberOptional an Optional containing the AcspMembers if found
      * @return the result of testDataService.deleteAcspMembersData(...)
      * @throws DataException if deletion fails
      */
-    private boolean deleteAcspMembersDataHelper(String acspMemberId, Optional<AcspMembers> memberOptional)
+    private boolean deleteAcspMembersDataHelper(String acspMemberId,
+            Optional<AcspMembers> memberOptional)
             throws DataException {
         when(acspMembersRepository.findById(acspMemberId)).thenReturn(memberOptional);
         return testDataService.deleteAcspMembersData(acspMemberId);
@@ -238,16 +273,20 @@ class TestDataServiceImplTest {
     }
 
     /**
-     * Helper method to assert that deleting company data results in a DataException with the expected suppressed exceptions.
-     * Also verifies that every deletion service was called exactly once.
+     * Helper method to assert that deleting company data results in a DataException with the
+     * expected suppressed exceptions. Also verifies that every deletion service was called exactly
+     * once.
      *
      * @param expectedExceptions varargs array of the expected suppressed RuntimeExceptions.
      */
     private void assertDeleteCompanyDataException(RuntimeException... expectedExceptions) {
-        DataException thrown = assertThrows(DataException.class, () -> testDataService.deleteCompanyData(COMPANY_NUMBER));
-        assertEquals(expectedExceptions.length, thrown.getSuppressed().length, "Unexpected number of suppressed exceptions");
+        DataException thrown = assertThrows(DataException.class,
+                () -> testDataService.deleteCompanyData(COMPANY_NUMBER));
+        assertEquals(expectedExceptions.length, thrown.getSuppressed().length,
+                "Unexpected number of suppressed exceptions");
         for (int i = 0; i < expectedExceptions.length; i++) {
-            assertEquals(expectedExceptions[i], thrown.getSuppressed()[i], "Mismatch in suppressed exception at index " + i);
+            assertEquals(expectedExceptions[i], thrown.getSuppressed()[i],
+                    "Mismatch in suppressed exception at index " + i);
         }
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
@@ -270,7 +309,8 @@ class TestDataServiceImplTest {
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.ENGLAND_WALES);
     }
 
     @Test
@@ -282,7 +322,8 @@ class TestDataServiceImplTest {
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber, Jurisdiction.SCOTLAND);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.SCOTLAND);
     }
 
     @Test
@@ -294,7 +335,8 @@ class TestDataServiceImplTest {
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber, Jurisdiction.NI);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.NI);
     }
 
     @Test
@@ -315,7 +357,8 @@ class TestDataServiceImplTest {
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(companyNumber, capturedSpec.getCompanyNumber());
         assertEquals(Jurisdiction.ENGLAND_WALES, capturedSpec.getJurisdiction());
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber, Jurisdiction.ENGLAND_WALES);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber,
+                Jurisdiction.ENGLAND_WALES);
     }
 
     @Test
@@ -327,7 +370,8 @@ class TestDataServiceImplTest {
         when(randomService.getNumber(anyInt()))
                 .thenReturn(Long.valueOf(existingCompanyNumber))
                 .thenReturn(Long.valueOf(COMPANY_NUMBER));
-        when(companyProfileService.companyExists(SCOTTISH_COMPANY_PREFIX + existingCompanyNumber)).thenReturn(true);
+        when(companyProfileService.companyExists(
+                SCOTTISH_COMPANY_PREFIX + existingCompanyNumber)).thenReturn(true);
         when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
 
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -342,7 +386,8 @@ class TestDataServiceImplTest {
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber, Jurisdiction.SCOTLAND);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.SCOTLAND);
     }
 
     @Test
@@ -356,7 +401,8 @@ class TestDataServiceImplTest {
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER, Jurisdiction.ENGLAND_WALES);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
+                Jurisdiction.ENGLAND_WALES);
         verify(companyRegistersService, times(1)).create(capturedSpec);
     }
 
@@ -364,7 +410,8 @@ class TestDataServiceImplTest {
     void createCompanyDataRollBack() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
-        final String fullCompanyNumber = spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
+        final String fullCompanyNumber =
+                spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
         DataException pscStatementException = new DataException("error");
         when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
@@ -388,7 +435,8 @@ class TestDataServiceImplTest {
     void createCompanyDataOverseasSpec() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
-        when(randomService.getNumber(6)).thenReturn(Long.valueOf(OVERSEAS_COMPANY_NUMBER.substring(2)));
+        when(randomService.getNumber(6)).thenReturn(
+                Long.valueOf(OVERSEAS_COMPANY_NUMBER.substring(2)));
         final String fullCompanyNumber = OVERSEAS_COMPANY_NUMBER;
         when(companyProfileService.companyExists(fullCompanyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -499,7 +547,8 @@ class TestDataServiceImplTest {
         when(companyRegistersService.delete(COMPANY_NUMBER)).thenThrow(companyRegistersException);
 
         // Expect 4 suppressed exceptions in order.
-        assertDeleteCompanyDataException(profileException, authCodeException, pscStatementException, companyRegistersException);
+        assertDeleteCompanyDataException(profileException, authCodeException, pscStatementException,
+                companyRegistersException);
     }
 
     @Test
@@ -881,7 +930,8 @@ class TestDataServiceImplTest {
 
         when(identityService.delete(identityId)).thenThrow(ex);
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.deleteIdentityData(identityId));
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.deleteIdentityData(identityId));
 
         assertEquals("Error deleting identity", exception.getMessage());
         assertEquals(ex, exception.getCause());
@@ -906,7 +956,8 @@ class TestDataServiceImplTest {
 
         verifyAcspMembersData(result,
                 String.valueOf(expectedMembersData.getAcspMemberId()),
-                acspProfileData.getAcspNumber(), expectedMembersData.getUserId(), expectedMembersData.getStatus(), expectedMembersData.getUserRole());
+                acspProfileData.getAcspNumber(), expectedMembersData.getUserId(),
+                expectedMembersData.getStatus(), expectedMembersData.getUserRole());
         verify(acspMembersService).create(any(AcspMembersSpec.class));
         verify(acspProfileService).create(argThat(profile -> profile.getAmlDetails() == null));
     }
@@ -930,7 +981,8 @@ class TestDataServiceImplTest {
 
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
+        assertEquals(
+                "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
     }
 
@@ -941,7 +993,8 @@ class TestDataServiceImplTest {
 
         AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
         AcspMembersData acspMembersData =
-                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(), "userId", "active", "role");
+                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(), "userId",
+                        "active", "role");
         var acspStatus = "active";
         var acspType = "ltd";
         var supervisoryBody = "financial-conduct-authority-fca";
@@ -965,13 +1018,14 @@ class TestDataServiceImplTest {
 
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersData.getAcspMemberId()),
-                acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
+                acspProfileData.getAcspNumber(), acspMembersData.getUserId(),
+                acspMembersData.getStatus(), acspMembersData.getUserRole());
 
         verify(acspProfileService).create(acspProfile);
 
         verify(acspMembersService).create(argThat(membersSpec ->
                 acspMembersData.getUserId().equals(membersSpec.getUserId())
-                && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
+                        && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
@@ -993,7 +1047,8 @@ class TestDataServiceImplTest {
 
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersData.getAcspMemberId()),
-                acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
+                acspProfileData.getAcspNumber(), acspMembersData.getUserId(),
+                acspMembersData.getStatus(), acspMembersData.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
                 profile.getStatus() == null
@@ -1002,7 +1057,7 @@ class TestDataServiceImplTest {
 
         verify(acspMembersService).create(argThat(membersSpec ->
                 acspMembersData.getUserId().equals(membersSpec.getUserId())
-                && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
+                        && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
@@ -1016,7 +1071,8 @@ class TestDataServiceImplTest {
 
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
+        assertEquals(
+                "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
     }
 
@@ -1032,7 +1088,8 @@ class TestDataServiceImplTest {
 
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
-        assertEquals("uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP member",
+        assertEquals(
+                "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP member",
                 exception.getMessage());
     }
 
@@ -1285,7 +1342,8 @@ class TestDataServiceImplTest {
 
         CompanyData createdCompany = createCompanyDataWithRegisters(spec);
         CompanySpec capturedSpec = captureCreatedSpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER, Jurisdiction.ENGLAND_WALES);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
+                Jurisdiction.ENGLAND_WALES);
 
         assertEquals(OFFICER_ID, commonAppointment.getOfficerId());
         assertEquals(APPOINTMENT_ID, commonAppointment.getAppointmentId());
@@ -1298,7 +1356,8 @@ class TestDataServiceImplTest {
 
         CompanyData createdCompany = createCompanyDataWithRegisters(spec);
         CompanySpec capturedSpec = captureCreatedSpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER, Jurisdiction.ENGLAND_WALES);
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
+                Jurisdiction.ENGLAND_WALES);
     }
 
     @Test
@@ -1406,8 +1465,167 @@ class TestDataServiceImplTest {
 
         when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
 
-        DataException exception = assertThrows(DataException.class, () -> testDataService.createIdentityData(identitySpec));
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityData(identitySpec));
         assertEquals("Error creating identity", exception.getMessage());
         verify(userService, never()).updateUserWithOneLogin(anyString());
     }
+
+    @Test
+    void testCreateCompanyWithElasticSearchDeployed()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testCreateCompanyWithElasticSearch(true, 1);
+    }
+
+    @Test
+    void testCreateCompanyWithElasticSearchNotDeployed()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testCreateCompanyWithElasticSearch(false, 0);
+    }
+
+    private void testCreateCompanyWithElasticSearch(boolean isElasticSearchDeployed,
+                                                    int expectedInvocationCount)
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(isElasticSearchDeployed);
+
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+
+        verify(companySearchService, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
+    @Test
+    void deleteCompanyDataWithElasticSearchDeployed()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+
+        testDataService.deleteCompanyData(COMPANY_NUMBER);
+
+        verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyDataWithElasticSearchNotDeployed()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(false);
+
+        testDataService.deleteCompanyData(COMPANY_NUMBER);
+
+        verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+    }
+
+    @Test
+    void getAccountPenaltiesData() throws Exception {
+        testDataService.getAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE);
+        verify(accountPenaltiesService).getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+    }
+
+    @Test
+    void getAccountPenaltiesDataNotFoundException() throws NoDataFoundException {
+        NoDataFoundException ex = new NoDataFoundException(
+                "Error retrieving account penalties - not found");
+        when(accountPenaltiesService.getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+                .thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataService.getAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void getAccountPenaltyData() throws Exception {
+        testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+        verify(accountPenaltiesService).getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+    }
+
+    @Test
+    void getAccountPenaltyDataNotFoundException() throws NoDataFoundException {
+        NoDataFoundException ex = new NoDataFoundException(
+                "Error retrieving account penalty - not found");
+        when(accountPenaltiesService.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
+                .thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void updateAccountPenaltiesData() throws Exception {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+        testDataService.updateAccountPenaltiesData(PENALTY_REF, request);
+        verify(accountPenaltiesService).updateAccountPenalties(PENALTY_REF, request);
+    }
+
+    @Test
+    void updateAccountPenaltiesDataNotFoundException() throws NoDataFoundException, DataException {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+
+        NoDataFoundException ex = new NoDataFoundException(
+                "Error updating account penalties - not found");
+        when(accountPenaltiesService.updateAccountPenalties(PENALTY_REF, request))
+                .thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataService.updateAccountPenaltiesData(PENALTY_REF, request));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void updateAccountPenaltiesDataDataException() throws NoDataFoundException, DataException {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+
+        DataException ex = new DataException("Error updating account penalties");
+        when(accountPenaltiesService.updateAccountPenalties(PENALTY_REF, request))
+                .thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.updateAccountPenaltiesData(PENALTY_REF, request));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void deleteAccountPenaltiesData() throws Exception {
+        testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE);
+        verify(accountPenaltiesService).deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+    }
+
+    @Test
+    void deleteAccountPenaltiesDataNotFoundException() throws NoDataFoundException {
+        NoDataFoundException ex = new NoDataFoundException(
+                "Error deleting account penalties - not found");
+        when(accountPenaltiesService.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+                .thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void deleteAccountPenaltiesDataException() throws NoDataFoundException {
+        DataException ex = new DataException("Error deleting account penalties");
+        when(accountPenaltiesService.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+                .thenThrow(ConstraintViolationException.class);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
 }

@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.SimpleMongoClientDatabaseFactory;
-import org.springframework.data.mongodb.core.convert.DbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultDbRefResolver;
 import org.springframework.data.mongodb.core.convert.DefaultMongoTypeMapper;
 import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
@@ -22,6 +21,7 @@ import uk.gov.companieshouse.api.testdata.repository.*;
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
 public class MongoConfig {
+
     private static final String ACCOUNT_DATABASE = "account";
     private final MongoProperties mongoProperties;
 
@@ -54,7 +54,7 @@ public class MongoConfig {
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
     }
-    
+
     @Bean
     public CompanyMetricsRepository companyMetricsRepository() {
         return getMongoRepositoryBean(CompanyMetricsRepository.class, "company_metrics");
@@ -62,7 +62,8 @@ public class MongoConfig {
 
     @Bean
     public CompanyPscStatementRepository companyPscStatement() {
-        return getMongoRepositoryBean(CompanyPscStatementRepository.class, "company_psc_statements");
+        return getMongoRepositoryBean(CompanyPscStatementRepository.class,
+                "company_psc_statements");
     }
 
     @Bean
@@ -121,18 +122,26 @@ public class MongoConfig {
         return getMongoRepositoryBean(CertificatesRepository.class, "items");
     }
 
+    @Bean
+    public AccountPenaltiesRepository accountPenaltiesRepository() {
+        return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
-        SimpleMongoClientDatabaseFactory simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
+        var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);
-        MappingMongoConverter mappingMongoConverter = getMappingMongoConverter(simpleMongoDbFactory);
+        var mappingMongoConverter = getMappingMongoConverter(
+                simpleMongoDbFactory);
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
     }
 
     private MappingMongoConverter getMappingMongoConverter(MongoDatabaseFactory factory) {
-        DbRefResolver dbRefResolver = new DefaultDbRefResolver(factory);
-        MongoMappingContext mappingContext = new MongoMappingContext();
-        MappingMongoConverter mappingConverter = new MappingMongoConverter(dbRefResolver, mappingContext);
-        mappingContext.setSimpleTypeHolder(mappingConverter.getCustomConversions().getSimpleTypeHolder());
+        var dbRefResolver = new DefaultDbRefResolver(factory);
+        var mappingContext = new MongoMappingContext();
+        var mappingConverter = new MappingMongoConverter(dbRefResolver,
+                mappingContext);
+        mappingContext.setSimpleTypeHolder(
+                mappingConverter.getCustomConversions().getSimpleTypeHolder());
         mappingContext.afterPropertiesSet();
         mappingConverter.afterPropertiesSet();
 
@@ -142,9 +151,11 @@ public class MongoConfig {
         return mappingConverter;
     }
 
-    private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(Class<T> repositoryClass,
-                                                                                             String database) {
-        MongoRepositoryFactoryBean<T, S, I> mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(repositoryClass);
+    private <T extends Repository<S, I>, S, I extends Serializable> T getMongoRepositoryBean(
+            Class<T> repositoryClass,
+            String database) {
+        var mongoDbFactoryBean = new MongoRepositoryFactoryBean<>(
+                repositoryClass);
         mongoDbFactoryBean.setMongoOperations(createMongoTemplate(database));
         mongoDbFactoryBean.afterPropertiesSet();
         return mongoDbFactoryBean.getObject();

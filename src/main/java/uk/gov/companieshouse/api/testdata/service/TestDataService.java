@@ -1,6 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -9,10 +13,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 public interface TestDataService {
+
     /**
      * Create company data with given {@code companySpec}.
      *
@@ -101,10 +107,59 @@ public interface TestDataService {
     /**
      * Deletes all appeals data for a given penalty reference and company number.
      *
-     * @param companyNumber the company number
+     * @param companyNumber    the company number
      * @param penaltyReference the penalty reference
      * @return true if the entity was deleted, false otherwise
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAppealsData(String companyNumber, String penaltyReference) throws DataException;
+
+    /**
+     * Gets the account penalty data for a given company code, customer code and penalty reference.
+     *
+     * @param companyCode      the company code
+     * @param customerCode     the customer code
+     * @param penaltyReference the penalty reference
+     * @return the {@link AccountPenaltiesData} with only the requested penalty reference in the
+     * {@link PenaltyData} list
+     * @throws NoDataFoundException if the penalty cannot be found
+     */
+    AccountPenaltiesData getAccountPenaltyData(String companyCode, String customerCode,
+            String penaltyReference) throws NoDataFoundException;
+
+    /**
+     * Gets the account penalties data for a given company code and customer code.
+     *
+     * @param companyCode  the company code
+     * @param customerCode the customer code
+     * @return @return the {@link AccountPenaltiesData}
+     * @throws NoDataFoundException if the penalty cannot be found
+     */
+    AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
+            throws NoDataFoundException;
+
+    /**
+     * Updates the account penalties data for a given penalty reference and
+     * {@link UpdateAccountPenaltiesRequest}
+     *
+     * @param penaltyRef the penalty reference
+     * @param request    the update request
+     * @return the {@link AccountPenaltiesData}
+     * @throws NoDataFoundException if the requested penalty reference cannot be found
+     * @throws DataException if the account penalties cannot be updated
+     */
+    AccountPenaltiesData updateAccountPenaltiesData(String penaltyRef,
+            UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
+
+    /**
+     * Deletes all account penalties data for a given company code and customer code
+     *
+     * @param companyCode  the company code
+     * @param customerCode the customer code
+     * @return the {@link ResponseEntity} with the HTTP status
+     * @throws NoDataFoundException if the account penalties cannot be found
+     * @throws DataException        if the account penalties failed to be deleted
+     */
+    ResponseEntity<Void> deleteAccountPenaltiesData(String companyCode, String customerCode)
+            throws NoDataFoundException, DataException;
 }
