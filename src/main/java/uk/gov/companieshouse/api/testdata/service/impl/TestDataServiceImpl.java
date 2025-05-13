@@ -173,6 +173,7 @@ public class TestDataServiceImpl implements TestDataService {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
             LOG.info("Failed to create company data for: " + spec.getCompanyNumber(), data);
+            LOG.error("Exception details: ", ex);
 
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
