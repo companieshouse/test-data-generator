@@ -10,22 +10,24 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CompanySearchServiceImpl implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
-    private static final String ERROR_MSG_ADD_COMPANY = "Failed to insert company profile: ";
-    private static final String ERROR_MSG_DELETE_COMPANY = "Failed to remove company profile: ";
-
+    private static final String ERROR_MSG_ADD_COMPANY =
+            "Error occurred while adding company into ElasticSearch index: ";
+    private static final String ERROR_MSG_DELETE_COMPANY =
+            "Error occurred while deleting company from ElasticSearch index: ";
     private final Supplier<InternalApiClient> internalApiClientSupplier;
-    private final Logger logger;
 
-    public CompanySearchServiceImpl(
-            Supplier<InternalApiClient> internalApiClientSupplier, Logger logger) {
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(CompanySearchServiceImpl.class));
+
+    public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
         this.internalApiClientSupplier = internalApiClientSupplier;
-        this.logger = logger;
     }
 
     @Override
@@ -43,15 +45,15 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .companySearch()
                     .upsertCompanyProfile(formattedCompanySearchUri, companyProfileData)
                     .execute();
-            logger.info(
+            LOG.info(
                     "Company profile upsert is successful with company number: "
                             + data.getCompanyNumber());
         } catch (ApiErrorResponseException ex) {
-            logger.error("API error occurred while upserting company profile for company number: "
+            LOG.error("API error occurred while upserting company profile for company number: "
                     + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
             throw new DataException(ERROR_MSG_ADD_COMPANY + ex.getMessage(), ex);
         } catch (URIValidationException ex) {
-            logger.error(
+            LOG.error(
                     "URI validation error occurred while upserting profile for company number: "
                     + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
             throw new DataException(ERROR_MSG_ADD_COMPANY + ex.getMessage(), ex);

@@ -60,7 +60,7 @@ class CompanySearchServiceImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
-        service = new CompanySearchServiceImpl(internalApiClientSupplier, logger);
+        service = new CompanySearchServiceImpl(internalApiClientSupplier);
     }
 
     @Test
