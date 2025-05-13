@@ -137,7 +137,7 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.info("Successfully created filing history");
 
             appointmentService.create(spec);
-            LOG.info("Successfully created appointments");
+            LOG.info("Successfully created appointments ");
 
             var authCode = companyAuthCodeService.create(spec);
             LOG.info("Successfully created auth code: " + authCode.getAuthCode());
@@ -172,8 +172,9 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
-            LOG.info("Failed to create company data for: " + spec.getCompanyNumber(), data);
-            LOG.error("Exception details: ", ex);
+            data.put("error message", ex.getMessage());
+            LOG.error("Failed to create company data for company number: "
+                    + spec.getCompanyNumber(), ex, data);
 
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
