@@ -16,7 +16,8 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
-    private static final String ERROR_MSG = "Failed to upsert company profile: ";
+    private static final String ERROR_MSG_ADD_COMPANY = "Failed to insert company profile: ";
+    private static final String ERROR_MSG_DELETE_COMPANY = "Failed to remove company profile: ";
 
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private final Logger logger;
@@ -48,12 +49,12 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         } catch (ApiErrorResponseException ex) {
             logger.error("API error occurred while upserting company profile for company number: "
                     + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
-            throw new DataException(ERROR_MSG + ex.getMessage(), ex);
+            throw new DataException(ERROR_MSG_ADD_COMPANY + ex.getMessage(), ex);
         } catch (URIValidationException ex) {
             logger.error(
                     "URI validation error occurred while upserting profile for company number: "
                     + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
-            throw new DataException(ERROR_MSG + ex.getMessage(), ex);
+            throw new DataException(ERROR_MSG_ADD_COMPANY + ex.getMessage(), ex);
         }
     }
 
@@ -67,7 +68,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .deleteCompanyProfile(formattedUri)
                     .execute();
         } catch (ApiErrorResponseException | URIValidationException ex) {
-            throw new DataException(ERROR_MSG + ex.getMessage());
+            throw new DataException(ERROR_MSG_DELETE_COMPANY + ex.getMessage());
         }
     }
 
