@@ -1,11 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.util.function.Supplier;
 
@@ -14,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -28,6 +26,7 @@ import uk.gov.companieshouse.api.handler.search.company.request.PrivateCompanySe
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class CompanySearchServiceImplTest {
@@ -51,7 +50,10 @@ class CompanySearchServiceImplTest {
     @Mock
     private ApiResponse<Data> apiResponse;
     @Mock
-    PrivateCompanyResourceHandler privateCompanyResourceHandler;
+    private PrivateCompanyResourceHandler privateCompanyResourceHandler;
+    @Mock
+    private Logger logger;
+
     private CompanySearchServiceImpl service;
 
     @BeforeEach

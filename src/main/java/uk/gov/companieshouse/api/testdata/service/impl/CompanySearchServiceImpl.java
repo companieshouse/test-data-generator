@@ -17,6 +17,10 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
+    private static final String ERROR_MSG_ADD_COMPANY =
+            "Error occurred while adding company into ElasticSearch index: ";
+    private static final String ERROR_MSG_DELETE_COMPANY =
+            "Error occurred while deleting company from ElasticSearch index: ";
     private final Supplier<InternalApiClient> internalApiClientSupplier;
 
     private static final Logger LOG =
@@ -41,10 +45,18 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .companySearch()
                     .upsertCompanyProfile(formattedCompanySearchUri, companyProfileData)
                     .execute();
-            LOG.info("Company profile upsert is successful with company number: "
-                    + data.getCompanyNumber());
-        } catch (ApiErrorResponseException | URIValidationException ex) {
-            throw new DataException("Failed to upsert company profile: " + ex.getMessage());
+            LOG.info(
+                    "Company profile upsert is successful with company number: "
+                            + data.getCompanyNumber());
+        } catch (ApiErrorResponseException ex) {
+            LOG.error("API error occurred while upserting company profile for company number: "
+                    + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
+            throw new DataException(ERROR_MSG_ADD_COMPANY + ex.getMessage(), ex);
+        } catch (URIValidationException ex) {
+            LOG.error(
+                    "URI validation error occurred while upserting profile for company number: "
+                    + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
+            throw new DataException(ERROR_MSG_ADD_COMPANY + ex.getMessage(), ex);
         }
     }
 
@@ -58,7 +70,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .deleteCompanyProfile(formattedUri)
                     .execute();
         } catch (ApiErrorResponseException | URIValidationException ex) {
-            throw new DataException("Failed to upsert company profile: " + ex.getMessage());
+            throw new DataException(ERROR_MSG_DELETE_COMPANY + ex.getMessage());
         }
     }
 

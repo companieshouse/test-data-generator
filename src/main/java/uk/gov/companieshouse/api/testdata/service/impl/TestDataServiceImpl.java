@@ -124,7 +124,6 @@ public class TestDataServiceImpl implements TestDataService {
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
 
         do {
-            // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
@@ -132,34 +131,55 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             companyProfileService.create(spec);
+            LOG.info("Successfully created company profile");
+
             filingHistoryService.create(spec);
+            LOG.info("Successfully created filing history");
+
             appointmentService.create(spec);
+            LOG.info("Successfully created appointments ");
+
             var authCode = companyAuthCodeService.create(spec);
+            LOG.info("Successfully created auth code: " + authCode.getAuthCode());
+
             companyMetricsService.create(spec);
+            LOG.info("Successfully created company metrics");
+
             companyPscStatementService.create(spec);
+            LOG.info("Successfully created PSC statement");
+
             companyPscsService.create(spec);
+            LOG.info("Successfully created PSCs");
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
+                LOG.info("Successfully created company registers");
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
 
-            // Add company to the elastic search index
             if (isElasticSearchDeployed) {
+                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+                LOG.info("Successfully added company to ElasticSearch index");
             }
+
+            LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
             return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
-            LOG.error("Rolling back creation of company", data);
+            data.put("error message", ex.getMessage());
+            LOG.error("Failed to create company data for company number: "
+                    + spec.getCompanyNumber(), ex, data);
+
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
-            throw new DataException(ex);
+
+            throw new DataException("Failed to create company data in service", ex);
         }
     }
 
@@ -374,7 +394,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(
+            final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create a certificates");
         }
@@ -413,7 +434,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltyData(String companyCode, String customerCode,
+    public AccountPenaltiesData getAccountPenaltyData(
+            String companyCode, String customerCode,
             String penaltyReference) throws NoDataFoundException {
         try {
             return accountPenaltiesService.getAccountPenalty(companyCode, customerCode,
@@ -434,14 +456,15 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData updateAccountPenaltiesData(String penaltyRef,
-            UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException {
+    public AccountPenaltiesData updateAccountPenaltiesData(
+            String penaltyRef, UpdateAccountPenaltiesRequest request)
+            throws NoDataFoundException, DataException {
         try {
             return accountPenaltiesService.updateAccountPenalties(penaltyRef, request);
-        }   catch (NoDataFoundException ex) {
-                throw new NoDataFoundException("Error updating account penalties - not found");
+        } catch (NoDataFoundException ex) {
+            throw new NoDataFoundException("Error updating account penalties - not found");
         } catch (Exception ex) {
-                throw new DataException("Error updating account penalties", ex);
+            throw new DataException("Error updating account penalties", ex);
         }
     }
 
@@ -450,10 +473,9 @@ public class TestDataServiceImpl implements TestDataService {
             throws NoDataFoundException, DataException {
         try {
             return accountPenaltiesService.deleteAccountPenalties(companyCode, customerCode);
-        }  catch (NoDataFoundException ex) {
+        } catch (NoDataFoundException ex) {
             throw new NoDataFoundException("Error deleting account penalties - not found");
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             throw new DataException("Error deleting account penalties", ex);
         }
     }
