@@ -1,11 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import java.util.function.Supplier;
 
@@ -14,8 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -28,6 +27,7 @@ import uk.gov.companieshouse.api.handler.search.company.request.PrivateCompanySe
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.logging.Logger;
 
 @ExtendWith(MockitoExtension.class)
 class CompanySearchServiceImplTest {
@@ -51,14 +51,17 @@ class CompanySearchServiceImplTest {
     @Mock
     private ApiResponse<Data> apiResponse;
     @Mock
-    PrivateCompanyResourceHandler privateCompanyResourceHandler;
+    private PrivateCompanyResourceHandler privateCompanyResourceHandler;
+    @Mock
+    private Logger logger;
+
     private CompanySearchServiceImpl service;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
-        service = new CompanySearchServiceImpl(internalApiClientSupplier);
+        service = new CompanySearchServiceImpl(internalApiClientSupplier, logger);
     }
 
     @Test
@@ -156,5 +159,36 @@ class CompanySearchServiceImplTest {
         // then
         assertThrows(DataException.class, () ->
                 service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER));
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldLogSuccess() throws Exception {
+        when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
+        when(privateSearchResourceHandler.companySearch()).thenReturn(privateCompanySearchHandler);
+        when(privateCompanySearchHandler.deleteCompanyProfile(URI)).thenReturn(privateCompanySearchDelete);
+        when(privateCompanySearchDelete.execute()).thenReturn(SUCCESS_RESPONSE);
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+
+        verify(logger).info(eq("Attempting to delete company from ElasticSearch index"), any());
+        verify(logger).info(eq("Successfully deleted company from ElasticSearch index"), any());
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldLogApiError() throws Exception {
+        ApiErrorResponseException exception = mock(ApiErrorResponseException.class);
+        when(exception.getStatusCode()).thenReturn(500);
+        when(exception.getMessage()).thenReturn("Internal Server Error");
+
+        when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
+        when(privateSearchResourceHandler.companySearch()).thenReturn(privateCompanySearchHandler);
+        when(privateCompanySearchHandler.deleteCompanyProfile(URI)).thenReturn(privateCompanySearchDelete);
+        when(privateCompanySearchDelete.execute()).thenThrow(exception);
+
+        assertThrows(DataException.class, () ->
+                service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER));
+
+        verify(logger).error(eq("Failed to delete company from ElasticSearch index - API error response"),
+                eq(exception), any());
     }
 }

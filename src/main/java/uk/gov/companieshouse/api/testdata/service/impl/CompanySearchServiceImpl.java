@@ -12,20 +12,19 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CompanySearchServiceImpl implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
+
     private final Supplier<InternalApiClient> internalApiClientSupplier;
+    private final Logger logger;
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(String.valueOf(CompanySearchServiceImpl.class));
-
-    public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
+    public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier, Logger logger) {
         this.internalApiClientSupplier = internalApiClientSupplier;
+        this.logger = logger;
     }
 
     @Override
@@ -43,8 +42,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .companySearch()
                     .upsertCompanyProfile(formattedCompanySearchUri, companyProfileData)
                     .execute();
-            LOG.info("Company profile upsert is successful with company number: "
-                    + data.getCompanyNumber());
+            logger.info("Company profile upsert is successful with company number: " + data.getCompanyNumber());
         } catch (ApiErrorResponseException | URIValidationException ex) {
             throw new DataException("Failed to upsert company profile: " + ex.getMessage());
         }
@@ -59,7 +57,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         logData.put("elasticsearch_uri", formattedUri);
 
         try {
-            LOG.info("Attempting to delete company from ElasticSearch index", logData);
+            logger.info("Attempting to delete company from ElasticSearch index", logData);
 
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()
@@ -67,13 +65,13 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .deleteCompanyProfile(formattedUri)
                     .execute();
 
-            LOG.info("Successfully deleted company from ElasticSearch index", logData);
+            logger.info("Successfully deleted company from ElasticSearch index", logData);
 
         } catch (ApiErrorResponseException ex) {
             logData.put("error_type", "ApiErrorResponseException");
             logData.put("status_code", ex.getStatusCode());
             logData.put("error_message", ex.getMessage());
-            LOG.error("Failed to delete company from ElasticSearch index - API error response",
+            logger.error("Failed to delete company from ElasticSearch index - API error response",
                     ex, logData);
             throw new DataException("Failed to delete company profile due to API error: "
                     + ex.getMessage(), ex);
@@ -81,7 +79,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         } catch (URIValidationException ex) {
             logData.put("error_type", "URIValidationException");
             logData.put("error_message", ex.getMessage());
-            LOG.error("Failed to delete company from ElasticSearch index - URI validation error",
+            logger.error("Failed to delete company from ElasticSearch index - URI validation error",
                     ex, logData);
             throw new DataException("Failed to delete company profile due to invalid URI: "
                     + ex.getMessage(), ex);
@@ -89,13 +87,12 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         } catch (Exception ex) {
             logData.put("error_type", "UnexpectedException");
             logData.put("error_message", ex.getMessage());
-            LOG.error("Failed to delete company from ElasticSearch index - unexpected error",
+            logger.error("Failed to delete company from ElasticSearch index - unexpected error",
                     ex, logData);
             throw new DataException("Failed to delete company profile due to unexpected error: "
                     + ex.getMessage(), ex);
         }
     }
-
 
     private String formatUri(String template, String value) {
         return String.format(template, value);
