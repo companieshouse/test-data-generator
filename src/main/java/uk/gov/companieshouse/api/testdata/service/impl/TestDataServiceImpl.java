@@ -140,7 +140,7 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.info("Successfully created appointments");
 
             var authCode = companyAuthCodeService.create(spec);
-            LOG.info("Successfully created auth code");
+            LOG.info("Successfully created auth code: " + authCode.getAuthCode());
 
             companyMetricsService.create(spec);
             LOG.info("Successfully created company metrics");
