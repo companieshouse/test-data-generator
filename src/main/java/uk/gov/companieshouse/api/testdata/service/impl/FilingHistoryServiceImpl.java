@@ -23,6 +23,8 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
@@ -33,7 +35,11 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private static final String CATEGORY = "incorporation";
     private static final String DESCRIPTION = "incorporation-company";
     private static final String TYPE = "NEWINC";
-    private static final String ORIGINAL_DESCRIPTION = "Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association";
+    private static final String ORIGINAL_DESCRIPTION =
+            "Certificate of incorporation general company details & statements of; "
+                    + "officers, capital & shareholdings, guarantee, "
+                    + "compliance memorandum of association";
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
@@ -44,11 +50,19 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
 
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
+        LOG.info("Starting creation of FilingHistory for company number: "
+                + spec.getCompanyNumber());
+
         String barcode;
         final String accountsDueStatus = spec.getAccountsDueStatus();
         try {
+            LOG.debug("Attempting to retrieve barcode for company number: "
+                    + spec.getCompanyNumber());
             barcode = barcodeService.getBarcode();
+            LOG.debug("Successfully retrieved barcode: " + barcode);
         } catch (BarcodeServiceException ex) {
+            LOG.error("Failed to retrieve barcode for company number: "
+                    + spec.getCompanyNumber(), ex);
             throw new DataException(ex.getMessage(), ex);
         }
 
@@ -57,12 +71,14 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         if (StringUtils.hasText(accountsDueStatus)) {
+            LOG.debug("Generating accounts due date for status: " + accountsDueStatus);
             var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
             dayTimeNow = dueDateNow.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
             dayNow = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
         }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
+        LOG.debug("Generated entity ID: " + entityId);
 
         var hasFilingHistory = spec.getFilingHistory() != null;
 
@@ -70,20 +86,30 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(filingHistory));
         filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
-        filingHistory.setCategory(hasFilingHistory ? spec.getFilingHistory().getCategory() : CATEGORY);
-        filingHistory.setDescription(hasFilingHistory ? spec.getFilingHistory().getDescription() : DESCRIPTION);
+        filingHistory.setCategory(hasFilingHistory
+                ? spec.getFilingHistory().getCategory() : CATEGORY);
+        filingHistory.setDescription(hasFilingHistory
+                ? spec.getFilingHistory().getDescription() : DESCRIPTION);
         filingHistory.setDate(dayTimeNow);
         filingHistory.setType(hasFilingHistory ? spec.getFilingHistory().getType() : TYPE);
         filingHistory.setPages(10);
         filingHistory.setEntityId(entityId);
-        filingHistory.setOriginalDescription(hasFilingHistory ? spec.getFilingHistory().getOriginalDescription() : ORIGINAL_DESCRIPTION);
+        filingHistory.setOriginalDescription(hasFilingHistory
+                ? spec.getFilingHistory().getOriginalDescription() : ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
-        return filingHistoryRepository.save(filingHistory);
+
+        LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
+
+        FilingHistory savedFilingHistory = filingHistoryRepository.save(filingHistory);
+        LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());
+
+        return savedFilingHistory;
     }
 
     @Override
     public boolean delete(String companyId) {
-        Optional<FilingHistory> filingHistory = filingHistoryRepository.findByCompanyNumber(companyId);
+        Optional<FilingHistory> filingHistory
+                = filingHistoryRepository.findByCompanyNumber(companyId);
 
         filingHistory.ifPresent(filingHistoryRepository::delete);
         return filingHistory.isPresent();
@@ -130,7 +156,8 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private Links createLinks(FilingHistory filingHistory) {
 
         Links links = new Links();
-        links.setSelf("/company/" + filingHistory.getCompanyNumber() + "/filing-history/" + filingHistory.getId());
+        links.setSelf("/company/"
+                + filingHistory.getCompanyNumber() + "/filing-history/" + filingHistory.getId());
 
         return links;
     }
