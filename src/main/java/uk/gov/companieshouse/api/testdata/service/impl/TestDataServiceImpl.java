@@ -177,11 +177,7 @@ public class TestDataServiceImpl implements TestDataService {
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
 
-            if (ex instanceof DataException) {
-                throw (DataException) ex;
-            } else {
-                throw new DataException("Failed to create company data in service", ex);
-            }
+            throw new DataException("Failed to create company data in service", ex);
         }
     }
 

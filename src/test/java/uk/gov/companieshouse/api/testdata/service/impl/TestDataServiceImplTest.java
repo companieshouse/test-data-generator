@@ -418,13 +418,19 @@ class TestDataServiceImplTest {
         DataException pscStatementException = new DataException("error");
         when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
 
+        // Mock a valid CompanyAuthCode
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(spec)).thenReturn(mockAuthCode);
+
         // Act
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataService.createCompanyData(spec));
 
         // Assert
         assertNotNull(thrown, "Expected DataException to be thrown but was null");
-        //assertEquals(pscStatementException, thrown.getCause(), "Unexpected cause of DataException");
+        assertEquals("Failed to create company data in service", thrown.getMessage());
+        assertEquals(pscStatementException, thrown.getCause(), "Unexpected cause of DataException");
 
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
@@ -432,7 +438,6 @@ class TestDataServiceImplTest {
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).create(capturedSpec);
-        verify(metricsService).create(capturedSpec);
 
         // Verify rollback
         verifyDeleteCompanyData(fullCompanyNumber);
