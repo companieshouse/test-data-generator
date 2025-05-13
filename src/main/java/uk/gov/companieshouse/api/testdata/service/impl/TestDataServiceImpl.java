@@ -129,45 +129,29 @@ public class TestDataServiceImpl implements TestDataService {
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
-        String currentService = null;
         try {
-            currentService = "Company Profile";
-            LOG.info("Creating company profile for company: " + spec.getCompanyNumber());
             companyProfileService.create(spec);
             LOG.info("Successfully created company profile");
 
-            currentService = "Filing History";
-            LOG.info("Creating filing history for company: " + spec.getCompanyNumber());
             filingHistoryService.create(spec);
             LOG.info("Successfully created filing history");
 
-            currentService = "Appointments";
-            LOG.info("Creating appointments for company: " + spec.getCompanyNumber());
             appointmentService.create(spec);
             LOG.info("Successfully created appointments");
 
-            currentService = "Auth Code";
-            LOG.info("Creating auth code for company: " + spec.getCompanyNumber());
             var authCode = companyAuthCodeService.create(spec);
             LOG.info("Successfully created auth code");
 
-            currentService = "Company Metrics";
-            LOG.info("Creating company metrics for company: " + spec.getCompanyNumber());
             companyMetricsService.create(spec);
             LOG.info("Successfully created company metrics");
 
-            currentService = "PSC Statement";
-            LOG.info("Creating PSC statement for company: " + spec.getCompanyNumber());
             companyPscStatementService.create(spec);
             LOG.info("Successfully created PSC statement");
 
-            currentService = "PSCs";
-            LOG.info("Creating PSCs for company: " + spec.getCompanyNumber());
             companyPscsService.create(spec);
             LOG.info("Successfully created PSCs");
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-                currentService = "Company Registers";
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
                 LOG.info("Successfully created company registers");
@@ -178,7 +162,6 @@ public class TestDataServiceImpl implements TestDataService {
                     authCode.getAuthCode(), companyUri);
 
             if (isElasticSearchDeployed) {
-                currentService = "ElasticSearch Index";
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
                 LOG.info("Successfully added company to ElasticSearch index");
@@ -189,14 +172,16 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
-            data.put("failed service", currentService);
-            LOG.error("Failed to create company data - error occurred in service: "
-                    + currentService, ex, data);
+            LOG.info("Failed to create company data for: " + spec.getCompanyNumber(), data);
 
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
-            throw new DataException("Failed to create company data in service: "
-                    + currentService, ex);
+
+            if (ex instanceof DataException) {
+                throw (DataException) ex;
+            } else {
+                throw new DataException("Failed to create company data in service", ex);
+            }
         }
     }
 

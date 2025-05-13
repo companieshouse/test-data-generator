@@ -22,7 +22,8 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private final Logger logger;
 
-    public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier, Logger logger) {
+    public CompanySearchServiceImpl(
+            Supplier<InternalApiClient> internalApiClientSupplier, Logger logger) {
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.logger = logger;
     }
@@ -42,55 +43,32 @@ public class CompanySearchServiceImpl implements CompanySearchService {
                     .companySearch()
                     .upsertCompanyProfile(formattedCompanySearchUri, companyProfileData)
                     .execute();
-            logger.info("Company profile upsert is successful with company number: " + data.getCompanyNumber());
-        } catch (ApiErrorResponseException | URIValidationException ex) {
-            throw new DataException("Failed to upsert company profile: " + ex.getMessage());
+            logger.info(
+                    "Company profile upsert is successful with company number: "
+                            + data.getCompanyNumber());
+        } catch (ApiErrorResponseException ex) {
+            logger.error("API error occurred while upserting company profile for company number: "
+                    + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
+            throw new DataException("Failed to upsert company profile: " + ex.getMessage(), ex);
+        } catch (URIValidationException ex) {
+            logger.error(
+                    "URI validation error occurred while upserting profile for company number: "
+                    + data.getCompanyNumber() + ". Error: " + ex.getMessage(), ex);
+            throw new DataException("Failed to upsert company profile: " + ex.getMessage(), ex);
         }
     }
 
     @Override
     public void deleteCompanyFromElasticSearchIndex(String companyNumber) throws DataException {
         String formattedUri = formatUri(COMPANY_SEARCH_URI, companyNumber);
-
-        Map<String, Object> logData = new HashMap<>();
-        logData.put("company_number", companyNumber);
-        logData.put("elasticsearch_uri", formattedUri);
-
         try {
-            logger.info("Attempting to delete company from ElasticSearch index", logData);
-
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()
                     .companySearch()
                     .deleteCompanyProfile(formattedUri)
                     .execute();
-
-            logger.info("Successfully deleted company from ElasticSearch index", logData);
-
-        } catch (ApiErrorResponseException ex) {
-            logData.put("error_type", "ApiErrorResponseException");
-            logData.put("status_code", ex.getStatusCode());
-            logData.put("error_message", ex.getMessage());
-            logger.error("Failed to delete company from ElasticSearch index - API error response",
-                    ex, logData);
-            throw new DataException("Failed to delete company profile due to API error: "
-                    + ex.getMessage(), ex);
-
-        } catch (URIValidationException ex) {
-            logData.put("error_type", "URIValidationException");
-            logData.put("error_message", ex.getMessage());
-            logger.error("Failed to delete company from ElasticSearch index - URI validation error",
-                    ex, logData);
-            throw new DataException("Failed to delete company profile due to invalid URI: "
-                    + ex.getMessage(), ex);
-
-        } catch (Exception ex) {
-            logData.put("error_type", "UnexpectedException");
-            logData.put("error_message", ex.getMessage());
-            logger.error("Failed to delete company from ElasticSearch index - unexpected error",
-                    ex, logData);
-            throw new DataException("Failed to delete company profile due to unexpected error: "
-                    + ex.getMessage(), ex);
+        } catch (ApiErrorResponseException | URIValidationException ex) {
+            throw new DataException("Failed to upsert company profile: " + ex.getMessage());
         }
     }
 

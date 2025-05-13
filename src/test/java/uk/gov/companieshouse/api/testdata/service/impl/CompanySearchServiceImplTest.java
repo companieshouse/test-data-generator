@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 import java.util.function.Supplier;
@@ -159,36 +158,5 @@ class CompanySearchServiceImplTest {
         // then
         assertThrows(DataException.class, () ->
                 service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER));
-    }
-
-    @Test
-    void deleteCompanyFromElasticSearchIndex_ShouldLogSuccess() throws Exception {
-        when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
-        when(privateSearchResourceHandler.companySearch()).thenReturn(privateCompanySearchHandler);
-        when(privateCompanySearchHandler.deleteCompanyProfile(URI)).thenReturn(privateCompanySearchDelete);
-        when(privateCompanySearchDelete.execute()).thenReturn(SUCCESS_RESPONSE);
-
-        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
-
-        verify(logger).info(eq("Attempting to delete company from ElasticSearch index"), any());
-        verify(logger).info(eq("Successfully deleted company from ElasticSearch index"), any());
-    }
-
-    @Test
-    void deleteCompanyFromElasticSearchIndex_ShouldLogApiError() throws Exception {
-        ApiErrorResponseException exception = mock(ApiErrorResponseException.class);
-        when(exception.getStatusCode()).thenReturn(500);
-        when(exception.getMessage()).thenReturn("Internal Server Error");
-
-        when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
-        when(privateSearchResourceHandler.companySearch()).thenReturn(privateCompanySearchHandler);
-        when(privateCompanySearchHandler.deleteCompanyProfile(URI)).thenReturn(privateCompanySearchDelete);
-        when(privateCompanySearchDelete.execute()).thenThrow(exception);
-
-        assertThrows(DataException.class, () ->
-                service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER));
-
-        verify(logger).error(eq("Failed to delete company from ElasticSearch index - API error response"),
-                eq(exception), any());
     }
 }
