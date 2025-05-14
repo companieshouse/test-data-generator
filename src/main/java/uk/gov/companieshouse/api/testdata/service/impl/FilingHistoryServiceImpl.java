@@ -100,7 +100,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
 
         LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
 
-        FilingHistory savedFilingHistory = filingHistoryRepository.save(filingHistory);
+        var savedFilingHistory = filingHistoryRepository.save(filingHistory);
         LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());
 
         return savedFilingHistory;
