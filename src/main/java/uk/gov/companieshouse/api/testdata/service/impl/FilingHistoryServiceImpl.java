@@ -39,7 +39,8 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
             "Certificate of incorporation general company details & statements of; "
                     + "officers, capital & shareholdings, guarantee, "
                     + "compliance memorandum of association";
-    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
@@ -108,11 +109,21 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
 
     @Override
     public boolean delete(String companyId) {
-        Optional<FilingHistory> filingHistory
-                = filingHistoryRepository.findByCompanyNumber(companyId);
+        LOG.info("Attempting to delete FilingHistory for company number: " + companyId);
 
-        filingHistory.ifPresent(filingHistoryRepository::delete);
-        return filingHistory.isPresent();
+        Optional<FilingHistory> filingHistory =
+                filingHistoryRepository.findByCompanyNumber(companyId);
+
+        if (filingHistory.isPresent()) {
+            LOG.info("FilingHistory found for company number: "
+                    + companyId + ". Proceeding with deletion.");
+            filingHistoryRepository.delete(filingHistory.get());
+            LOG.info("Successfully deleted FilingHistory for company number: " + companyId);
+            return true;
+        } else {
+            LOG.info("No FilingHistory found for company number: " + companyId);
+            return false;
+        }
     }
 
     private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow) {
