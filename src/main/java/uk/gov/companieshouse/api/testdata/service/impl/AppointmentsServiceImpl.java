@@ -21,9 +21,13 @@ import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class AppointmentsServiceImpl implements DataService<List<Appointment>, CompanySpec> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(AppointmentsServiceImpl.class));
 
     private static final int SALT_LENGTH = 8;
     private static final int ID_LENGTH = 10;
@@ -35,6 +39,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
     private static final String COMPANY_LINK = "/company/";
     private static final String OFFICERS_LINK = "/officers/";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
+    private static final String APPOINTMENT_MSG = " appointments for company number: ";
 
     @Autowired
     private AddressService addressService;
@@ -47,42 +52,52 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
 
     @Override
     public List<Appointment> create(CompanySpec spec) {
-        final String companyNumber = spec.getCompanyNumber();
-        final String countryOfResidence =
-                addressService.getCountryOfResidence(spec.getJurisdiction());
+        LOG.info("Starting creation of" + APPOINTMENT_MSG + spec.getCompanyNumber());
+
+        final var companyNumber = spec.getCompanyNumber();
+        final String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
         int numberOfAppointments = spec.getNumberOfAppointments();
         if (numberOfAppointments <= 0) {
+            LOG.info("Number of appointments is less than or equal to 0. Defaulting to 1.");
             numberOfAppointments = 1;
         }
 
         List<OfficerRoles> officerRoleList = new ArrayList<>();
         if (spec.getOfficerRoles() != null) {
             officerRoleList.addAll(spec.getOfficerRoles());
+            LOG.debug("Officer roles provided: " + spec.getOfficerRoles());
         }
         while (officerRoleList.size() < numberOfAppointments) {
             officerRoleList.add(OfficerRoles.DIRECTOR);
         }
+
+        LOG.info("Creating " + numberOfAppointments + APPOINTMENT_MSG + companyNumber);
 
         List<Appointment> createdAppointments = new ArrayList<>();
 
         for (int i = 0; i < numberOfAppointments; i++) {
             OfficerRoles currentRoleEnum = officerRoleList.get(i);
             if (currentRoleEnum == null) {
+                LOG.error("Invalid officer role: null at index " + i);
                 throw new IllegalArgumentException("Invalid officer role: null");
             }
             String currentRole = currentRoleEnum.getValue();
             try {
                 OfficerRoles.valueOf(currentRole.toUpperCase().replace("-", "_"));
             } catch (IllegalArgumentException ex) {
+                LOG.error("Invalid officer role: " + currentRole + ex);
                 throw new IllegalArgumentException("Invalid officer role: " + currentRole);
             }
 
             String roleName = setRoleName(currentRole);
+            LOG.debug("Processing appointment {} with role: " + (i + 1) + currentRole);
 
             Appointment appointment = new Appointment();
             String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
             String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
             String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+
+            LOG.debug("Generated IDs - Appointment ID: " + appointmentId + ", Internal ID: " + internalId + ", Officer ID: " + officerId);
 
             LocalDate officerDob = LocalDate.of(1990, 3, 6);
             Instant dateTimeNow = Instant.now();
@@ -119,32 +134,46 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
             appointment.setCompanyNumber(companyNumber);
             appointment.setUpdated(dateTimeNow);
 
+            LOG.debug("Creating officer appointment for officer ID: " + officerId);
             this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
 
             Appointment savedAppointment = appointmentsRepository.save(appointment);
+            LOG.info("Appointment saved with ID: " + savedAppointment.getId());
             createdAppointments.add(savedAppointment);
         }
+
+        LOG.info("Successfully created " + createdAppointments.size() + APPOINTMENT_MSG + companyNumber);
         return createdAppointments;
     }
 
     @Override
     public boolean delete(String companyNumber) {
-        List<Appointment> foundAppointments =
-                appointmentsRepository.findAllByCompanyNumber(companyNumber);
+        LOG.info("Starting deletion of" + APPOINTMENT_MSG + companyNumber);
+
+        List<Appointment> foundAppointments = appointmentsRepository.findAllByCompanyNumber(companyNumber);
 
         if (!foundAppointments.isEmpty()) {
+            LOG.info("Found " + foundAppointments.size() + APPOINTMENT_MSG + companyNumber);
+
             for (Appointment ap : foundAppointments) {
                 String officerId = ap.getOfficerId();
-                officerRepository.findById(officerId).ifPresent(officerRepository::delete);
+                officerRepository.findById(officerId).ifPresent(officer -> {
+                    LOG.debug("Deleting officer with ID: " + officerId);
+                    officerRepository.delete(officer);
+                });
             }
+
+            LOG.info("Deleting all" + APPOINTMENT_MSG + companyNumber);
             appointmentsRepository.deleteAll(foundAppointments);
+            LOG.info("Successfully deleted all " + APPOINTMENT_MSG + companyNumber);
             return true;
         }
+
+        LOG.info("No appointments found for company number: " + companyNumber);
         return false;
     }
 
-    private void createOfficerAppointment(CompanySpec spec,
-                                          String officerId, String appointmentId, String role) {
+    private void createOfficerAppointment(CompanySpec spec, String officerId, String appointmentId, String role) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
@@ -175,7 +204,6 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
         officerRepository.save(officerAppointment);
     }
 
-
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(
             CompanySpec companySpec,
             String appointmentId,
@@ -185,7 +213,7 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
     ) {
         List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
 
-        String companyNumber = companySpec.getCompanyNumber();
+        var companyNumber = companySpec.getCompanyNumber();
         Jurisdiction jurisdiction = companySpec.getJurisdiction();
         String roleName = setRoleName(role);
         OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();

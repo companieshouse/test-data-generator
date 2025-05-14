@@ -113,7 +113,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                                                       DateParameters dateParams,
                                                       CompanyDetailsParameters companyParams,
                                                       AccountParameters accountParams) {
-        LOG.info("Creating a normal CompanyProfile. " + companyNumber);
+        LOG.info("Creating a default CompanyProfile. " + companyNumber);
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);

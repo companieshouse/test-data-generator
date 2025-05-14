@@ -26,9 +26,13 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanySpec> {
+
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(CompanyPscsServiceImpl.class));
 
     static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent",
             "ownership-of-shares-50-to-75-percent",
@@ -67,11 +71,15 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     @Override
     public CompanyPscs create(CompanySpec spec) throws DataException {
+        LOG.info("Starting creation of PSCs for company number: " + spec.getCompanyNumber());
+
         if (shouldReturnNullForOverseaCompany(spec)) {
+            LOG.info("Company type is OVERSEA_COMPANY. No PSCs will be created.");
             return null;
         }
 
         if (shouldCreateSuperSecurePsc(spec)) {
+            LOG.info("Company has super secure PSCs. Creating super secure PSC.");
             return createAppropriateSuperSecurePsc(spec);
         }
 
@@ -79,18 +87,24 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
         int numberOfPsc = getNumberOfPsc(spec);
         if (numberOfPsc <= 0) {
+            LOG.info("Number of PSCs is less than or equal to 0. No PSCs will be created.");
             return null;
         }
 
+        LOG.info("Creating " + numberOfPsc + " PSCs for company number: " + spec.getCompanyNumber());
         return createPscsBasedOnCompanyType(spec, numberOfPsc);
     }
 
     private boolean shouldReturnNullForOverseaCompany(CompanySpec spec) {
-        return CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType());
+        boolean result = CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType());
+        LOG.debug("shouldReturnNullForOverseaCompany: " + result);
+        return result;
     }
 
     private boolean shouldCreateSuperSecurePsc(CompanySpec spec) {
-        return Boolean.TRUE.equals(spec.getHasSuperSecurePscs());
+        boolean result = Boolean.TRUE.equals(spec.getHasSuperSecurePscs());
+        LOG.debug("shouldCreateSuperSecurePsc: " + result);
+        return result;
     }
 
     private CompanyPscs createAppropriateSuperSecurePsc(CompanySpec spec) {
@@ -101,11 +115,14 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     private void validatePscTypeAndCount(CompanySpec spec) throws DataException {
         if (hasPscTypesWithoutCount(spec)) {
+            LOG.error("Validation failed: " +  PSC_ERROR_MESSAGE);
             throw new DataException(PSC_ERROR_MESSAGE);
         }
         if (hasInvalidBeneficialOwnerType(spec)) {
+            LOG.error("Validation failed: " + BENEFICIAL_OWNER_ERROR);
             throw new DataException(BENEFICIAL_OWNER_ERROR);
         }
+        LOG.debug("Validation passed for PSC type and count.");
     }
 
     private boolean hasPscTypesWithoutCount(CompanySpec spec) {
@@ -125,14 +142,18 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     }
 
     private int getNumberOfPsc(CompanySpec spec) {
-        return Optional.ofNullable(spec.getNumberOfPsc()).orElse(DEFAULT_NUMBER_OF_PSC);
+        int numberOfPsc = Optional.ofNullable(spec.getNumberOfPsc()).orElse(DEFAULT_NUMBER_OF_PSC);
+        LOG.debug("Number of PSCs determined: " + numberOfPsc);
+        return numberOfPsc;
     }
 
     private CompanyPscs createPscsBasedOnCompanyType(CompanySpec spec, int numberOfPsc) {
+        LOG.info("Creating PSCs based on company type: " + spec.getCompanyType());
         CompanyPscs firstPsc = null;
         boolean isOverseasEntity = CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
 
         for (var i = 0; i < numberOfPsc; i++) {
+            LOG.debug("Creating PSC " + (i + 1) + " of " + numberOfPsc);
             CompanyPscs psc = isOverseasEntity
                     ? createBeneficialOwner(spec, getBeneficialOwnerType(spec.getPscType(), i))
                     : createPsc(spec, getRegularPscType(spec.getPscType(), i));
@@ -142,6 +163,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
             }
         }
 
+        LOG.info("Successfully created PSCs for company number: " + spec.getCompanyNumber());
         return firstPsc;
     }
 
@@ -364,8 +386,17 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     @Override
     public boolean delete(String companyNumber) {
+        LOG.info("Attempting to delete PSCs for company number: " + companyNumber);
+
         Optional<List<CompanyPscs>> existingPscs = repository.findByCompanyNumber(companyNumber);
-        existingPscs.ifPresent(repository::deleteAll);
-        return existingPscs.isPresent();
+        if (existingPscs.isPresent()) {
+            LOG.info("Found " + existingPscs.get().size() + " PSCs for company number: "+ companyNumber + ". Proceeding with deletion.");
+            repository.deleteAll(existingPscs.get());
+            LOG.info("Successfully deleted all PSCs for company number: "+  companyNumber);
+            return true;
+        } else {
+            LOG.info("No PSCs found for company number: " + companyNumber);
+            return false;
+        }
     }
 }
