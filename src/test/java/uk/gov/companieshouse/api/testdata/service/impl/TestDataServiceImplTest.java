@@ -160,7 +160,7 @@ class TestDataServiceImplTest {
      * @param expectedFullCompanyNumber the full company number expected in the created spec.
      */
     private void setupCompanyCreationMocks(CompanySpec spec, String companyNumber, int numberDigits,
-            String expectedFullCompanyNumber) throws DataException {
+                                           String expectedFullCompanyNumber) throws DataException {
         when(randomService.getNumber(numberDigits)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -201,7 +201,7 @@ class TestDataServiceImplTest {
     }
 
     private void verifyCommonCompanyCreation(CompanySpec capturedSpec, CompanyData createdCompany,
-            String expectedFullCompanyNumber, Jurisdiction expectedJurisdiction)
+                                             String expectedFullCompanyNumber, Jurisdiction expectedJurisdiction)
             throws DataException {
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(expectedJurisdiction, capturedSpec.getJurisdiction());
@@ -228,8 +228,8 @@ class TestDataServiceImplTest {
      * @throws DataException if creation fails
      */
     private AcspMembersData createAcspMembersDataHelper(String userId,
-            AcspProfileData profileData,
-            AcspMembersData membersData, AcspProfileSpec profileSpec) throws DataException {
+                                                        AcspProfileData profileData,
+                                                        AcspMembersData membersData, AcspProfileSpec profileSpec) throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId(userId);
         spec.setAcspProfile(profileSpec);
@@ -239,11 +239,11 @@ class TestDataServiceImplTest {
     }
 
     private void verifyAcspMembersData(AcspMembersData data,
-            String expectedMemberId,
-            String expectedAcspNumber,
-            String expectedUserId,
-            String expectedStatus,
-            String expectedUserRole) {
+                                       String expectedMemberId,
+                                       String expectedAcspNumber,
+                                       String expectedUserId,
+                                       String expectedStatus,
+                                       String expectedUserRole) {
         assertNotNull(data);
         assertEquals(expectedMemberId, data.getAcspMemberId());
         assertEquals(expectedAcspNumber, data.getAcspNumber());
@@ -261,7 +261,7 @@ class TestDataServiceImplTest {
      * @throws DataException if deletion fails
      */
     private boolean deleteAcspMembersDataHelper(String acspMemberId,
-            Optional<AcspMembers> memberOptional)
+                                                Optional<AcspMembers> memberOptional)
             throws DataException {
         when(acspMembersRepository.findById(acspMemberId)).thenReturn(memberOptional);
         return testDataService.deleteAcspMembersData(acspMemberId);
@@ -413,29 +413,16 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataRollBack() throws DataException {
-        // Arrange
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
         final String fullCompanyNumber =
                 spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
-
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
         DataException pscStatementException = new DataException("error");
         when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
-
-        // Mock a valid CompanyAuthCode
-        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
-        mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(spec)).thenReturn(mockAuthCode);
-
-        // Act
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataService.createCompanyData(spec));
-
-        // Assert
-        assertNotNull(thrown, "Expected DataException to be thrown but was null");
-        assertEquals("Failed to create company data in service", thrown.getMessage());
-        assertEquals(pscStatementException, thrown.getCause(), "Unexpected cause of DataException");
+        assertEquals(pscStatementException, thrown.getCause());
 
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
@@ -443,8 +430,8 @@ class TestDataServiceImplTest {
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).create(capturedSpec);
-
-        // Verify rollback
+        verify(metricsService).create(capturedSpec);
+        // Verify we roll back data
         verifyDeleteCompanyData(fullCompanyNumber);
     }
 
@@ -1055,7 +1042,7 @@ class TestDataServiceImplTest {
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersData.getAcspMemberId()),
                 acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
-                acspProfileData.getAcspNumber();
+        acspProfileData.getAcspNumber();
 
         verify(acspProfileService).create(acspProfile);
 
@@ -1494,13 +1481,7 @@ class TestDataServiceImplTest {
     @Test
     void testCreateCompanyWithElasticSearchDeployed()
             throws DataException, ApiErrorResponseException, URIValidationException {
-        CompanyProfile mockProfile = new CompanyProfile();
-        mockProfile.setType(CompanyType.LTD.getValue());
-        when(companyProfileService.create(any(CompanySpec.class))).thenReturn(mockProfile);
-
         testCreateCompanyWithElasticSearch(true, 1);
-
-        verify(companySearchService, times(1)).addCompanyIntoElasticSearchIndex(any(CompanyData.class));
     }
 
     @Test

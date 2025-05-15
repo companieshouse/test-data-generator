@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -20,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -35,7 +31,6 @@ import uk.gov.companieshouse.api.handler.search.company.request.PrivateCompanySe
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 
 @ExtendWith(MockitoExtension.class)
@@ -70,10 +65,6 @@ class CompanySearchServiceImplTest {
     private CompanyProfileService companyProfileService;
 
     @InjectMocks
-    private PrivateCompanyResourceHandler privateCompanyResourceHandler;
-    @Mock
-    private Logger logger;
-
     private CompanySearchServiceImpl service;
 
     @BeforeEach

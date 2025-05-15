@@ -41,8 +41,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesReque
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -122,94 +122,58 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
         if (spec == null) {
+            LOG.error("CompanySpec is null. Cannot create company data.");
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
+        LOG.info("Generating company number for the provided CompanySpec.");
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
 
         do {
-            // company number format: PP+123456 (Prefix either 0 or 2 chars, example uses 2 chars)
             spec.setCompanyNumber(companyNumberPrefix
-                    + randomService
-                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+                    + randomService.getNumber(
+                            COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+            LOG.debug("Generated company number: " + spec.getCompanyNumber());
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            CompanyProfile profile = companyProfileService.create(spec);
-            companyProfileService.create(spec);
-            LOG.info("Successfully created company profile");
-
+            LOG.info("Creating company profile for company number: " + spec.getCompanyNumber());
             companyProfileService.create(spec);
             filingHistoryService.create(spec);
-            LOG.info("Successfully created filing history");
-
             appointmentService.create(spec);
-            LOG.info("Successfully created appointments ");
-
             var authCode = companyAuthCodeService.create(spec);
-            LOG.info("Successfully created auth code: " + authCode.getAuthCode());
-
             companyMetricsService.create(spec);
-            LOG.info("Successfully created company metrics");
-
             companyPscStatementService.create(spec);
-            LOG.info("Successfully created PSC statement");
-
             companyPscsService.create(spec);
-            LOG.info("Successfully created PSCs");
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-                LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
+                LOG.info("Creating registers for company number: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
-                LOG.info("Successfully created company registers");
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
+            LOG.info("Generated company URI: " + companyUri);
 
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
 
-            // Add company to the elastic search index
             if (isElasticSearchDeployed) {
-                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
+                LOG.info("Adding company to ElasticSearch index for company number: "
+                        + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
-
-                if (CompanyType.OVERSEA_COMPANY.getValue().equals(profile.getType())
-                        && Boolean.TRUE.equals(spec.getHasUkEstablishment())) {
-                    List<String> ukEstablishments = companyProfileService
-                            .findUkEstablishmentsByParent(spec.getCompanyNumber());
-
-                    for (String ukEstablishmentNumber : ukEstablishments) {
-                        CompanyData ukEstablishmentData = new CompanyData(
-                                ukEstablishmentNumber,
-                                null,
-                                this.apiUrl + "/company/" + ukEstablishmentNumber
-                        );
-                        this.companySearchService.addCompanyIntoElasticSearchIndex(ukEstablishmentData);
-                    }
-                }
-                LOG.info("Successfully added company to ElasticSearch index");
             }
-
-            LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
             return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
-            LOG.error("Rolling back creation of company", data);
-            // Rollback all successful insertions
-            data.put("error message", ex.getMessage());
-            LOG.error("Failed to create company data for company number: "
-                    + spec.getCompanyNumber(), ex, data);
-
-            // Rollback all successful insertions
+            LOG.error("Rolling back creation of company due to an error." + data, ex);
             deleteCompanyData(spec.getCompanyNumber());
-
-            throw new DataException("Failed to create company data in service", ex);
+            throw new DataException(ex);
         }
     }
 
     @Override
     public void deleteCompanyData(String companyId) throws DataException {
+        LOG.info("Deleting company data for company number: " + companyId);
         List<Exception> suppressedExceptions = new ArrayList<>();
 
         deleteUkEstablishmentsIfOverseaCompany(companyId, suppressedExceptions);
@@ -217,6 +181,8 @@ public class TestDataServiceImpl implements TestDataService {
         deleteSingleCompanyData(companyId, suppressedExceptions);
 
         if (!suppressedExceptions.isEmpty()) {
+            LOG.error("Errors occurred while deleting company data for company number: "
+                    + companyId);
             var ex = new DataException("Error deleting company data");
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
@@ -226,98 +192,130 @@ public class TestDataServiceImpl implements TestDataService {
     private void deleteUkEstablishmentsIfOverseaCompany(
             String companyId, List<Exception> suppressedExceptions) {
         try {
+            LOG.info("Checking if company number " + companyId + " is an oversea company.");
             Optional<CompanyProfile> companyProfile =
                     companyProfileService.getCompanyProfile(companyId);
             if (isOverseaCompany(companyProfile)) {
+                LOG.info("Company number " + companyId
+                        + " is an oversea company. Deleting UK establishments.");
                 deleteUkEstablishmentsForParent(companyId, suppressedExceptions);
+            } else {
+                LOG.info("Company number " + companyId
+                        + " is not an oversea company. Skipping UK establishments deletion.");
             }
         } catch (Exception de) {
+            LOG.error("Error while checking or deleting UK establishments for company number: "
+                    + companyId, de);
             suppressedExceptions.add(de);
         }
     }
 
     private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
-        return companyProfile.isPresent()
+        boolean isOversea = companyProfile.isPresent()
                 && CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
+        LOG.debug("Is company oversea: " + isOversea);
+        return isOversea;
     }
 
     private void deleteUkEstablishmentsForParent(String companyId,
                                                  List<Exception> suppressedExceptions) {
+        LOG.info("Fetching UK establishments for parent company number: " + companyId);
         List<String> ukEstablishments =
                 companyProfileService.findUkEstablishmentsByParent(companyId);
-        for (String ukEstablishmentNumber : ukEstablishments) {
-            try {
-                deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
-            } catch (Exception de) {
-                suppressedExceptions.add(de);
+        if (ukEstablishments.isEmpty()) {
+            LOG.info("No UK establishments found for company number: " + companyId);
+        } else {
+            for (String ukEstablishmentNumber : ukEstablishments) {
+                try {
+                    LOG.info("Deleting UK establishment with company number: "
+                            + ukEstablishmentNumber);
+                    deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
+                } catch (Exception de) {
+                    LOG.error("Error while deleting UK establishment with company number: "
+                            + ukEstablishmentNumber, de);
+                    suppressedExceptions.add(de);
+                }
             }
         }
     }
 
     private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
+        LOG.info("Deleting single company data for company number: " + companyId);
         try {
             this.companyProfileService.delete(companyId);
+            LOG.info("Deleted company profile for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company profile for: " + companyId, de);
+            LOG.error("Error deleting company profile for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.filingHistoryService.delete(companyId);
+            LOG.info("Deleted filing history for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete filing history for: " + companyId, de);
+            LOG.error("Error deleting filing history for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthCodeService.delete(companyId);
+            LOG.info("Deleted company auth code for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company auth code for: " + companyId, de);
+            LOG.error("Error deleting company auth code for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.appointmentService.delete(companyId);
+            LOG.info("Deleted appointments for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete appointment for: " + companyId, de);
+            LOG.error("Error deleting appointments for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscStatementService.delete(companyId);
+            LOG.info("Deleted PSC statements for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company PSC statement for: " + companyId, de);
+            LOG.error("Error deleting PSC statements for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscsService.delete(companyId);
+            LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company PSCs for: " + companyId, de);
+            LOG.error("Error deleting PSCs for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyMetricsService.delete(companyId);
+            LOG.info("Deleted company metrics for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company metrics for: " + companyId, de);
+            LOG.error("Error deleting company metrics for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthAllowListService.delete(companyId);
+            LOG.info("Deleted company auth allow list for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company auth allow list for: " + companyId, de);
+            LOG.error("Error deleting company auth allow list for company number: "
+                    + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyRegistersService.delete(companyId);
+            LOG.info("Deleted company registers for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Failed to delete company registers for: " + companyId, de);
+            LOG.error("Error deleting company registers for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
 
         if (isElasticSearchDeployed) {
             try {
-                LOG.info(
-                        "Attempting to delete company from elastic search index for: " + companyId);
+                LOG.info("Attempting to delete "
+                        + "company from ElasticSearch index for company number: " + companyId);
                 this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+                LOG.info("Deleted company from ElasticSearch index for company number: "
+                        + companyId);
             } catch (Exception ex) {
-                LOG.error(
-                        "Failed to delete company from elastic search index for: " + companyId, ex);
+                LOG.error("Failed to delete company from ElasticSearch index for company number: "
+                        + companyId, ex);
             }
         }
     }
@@ -513,8 +511,8 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public AccountPenaltiesData getAccountPenaltyData(
-            String companyCode, String customerCode,
-            String penaltyReference) throws NoDataFoundException {
+            String companyCode, String customerCode, String penaltyReference)
+            throws NoDataFoundException {
         try {
             return accountPenaltiesService.getAccountPenalty(companyCode, customerCode,
                     penaltyReference);
