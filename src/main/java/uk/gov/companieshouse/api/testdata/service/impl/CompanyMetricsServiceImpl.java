@@ -69,7 +69,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     }
 
     private CompanyMetrics initializeMetrics(CompanySpec spec) {
-        CompanyMetrics metrics = new CompanyMetrics();
+        var metrics = new CompanyMetrics();
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
         metrics.setActivePscStatementsCount(1);
