@@ -19,7 +19,8 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyPscStatementServiceImpl implements DataService<CompanyPscStatement, CompanySpec> {
+public class CompanyPscStatementServiceImpl implements
+        DataService<CompanyPscStatement, CompanySpec> {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
@@ -85,13 +86,15 @@ public class CompanyPscStatementServiceImpl implements DataService<CompanyPscSta
                         PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
             } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
                 companyPscStatement.setStatement(
-                        PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
+                        PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL
+                                .getStatement());
             } else {
                 companyPscStatement.setStatement(
                         PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
             }
         } else {
-            companyPscStatement.setStatement(PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
+            companyPscStatement.setStatement(
+                    PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         }
 
         companyPscStatement.setCreatedAt(dateTimeNow);

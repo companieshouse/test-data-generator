@@ -417,9 +417,15 @@ class TestDataServiceImplTest {
         spec.setJurisdiction(Jurisdiction.NI);
         final String fullCompanyNumber =
                 spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
+
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(spec)).thenReturn(mockAuthCode);
+
         DataException pscStatementException = new DataException("error");
         when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
+
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataService.createCompanyData(spec));
         assertEquals(pscStatementException, thrown.getCause());
@@ -431,7 +437,8 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).create(capturedSpec);
         verify(metricsService).create(capturedSpec);
-        // Verify we roll back data
+
+        // Verify rollback
         verifyDeleteCompanyData(fullCompanyNumber);
     }
 

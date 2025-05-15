@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -14,9 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.logging.Logger;
@@ -26,7 +26,8 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class BarcodeServiceImpl implements BarcodeService {
 
     private RestTemplate template;
-    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(BarcodeServiceImpl.class));
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(BarcodeServiceImpl.class));
 
 
     @Value("${barcode.url}")
@@ -61,7 +62,8 @@ public class BarcodeServiceImpl implements BarcodeService {
             LOG.debug("Request payload: " + jsonRequestString);
 
             HttpEntity<String> requestEntity = new HttpEntity<>(jsonRequestString, headers);
-            ResponseEntity<String> response = template.exchange(barcodeUrl, HttpMethod.POST, requestEntity, String.class);
+            ResponseEntity<String> response = template.exchange(barcodeUrl,
+                    HttpMethod.POST, requestEntity, String.class);
 
             LOG.debug("Response received: " + response.getBody());
 

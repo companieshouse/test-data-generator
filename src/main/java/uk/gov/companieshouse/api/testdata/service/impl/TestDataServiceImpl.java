@@ -122,52 +122,67 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
         if (spec == null) {
-            LOG.error("CompanySpec is null. Cannot create company data.");
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        LOG.info("Generating company number for the provided CompanySpec.");
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
 
         do {
             spec.setCompanyNumber(companyNumberPrefix
-                    + randomService.getNumber(
-                            COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
-            LOG.debug("Generated company number: " + spec.getCompanyNumber());
+                    + randomService
+                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            LOG.info("Creating company profile for company number: " + spec.getCompanyNumber());
             companyProfileService.create(spec);
+            LOG.info("Successfully created company profile");
+
             filingHistoryService.create(spec);
+            LOG.info("Successfully created filing history");
+
             appointmentService.create(spec);
+            LOG.info("Successfully created appointments ");
+
             var authCode = companyAuthCodeService.create(spec);
+            LOG.info("Successfully created auth code: " + authCode.getAuthCode());
+
             companyMetricsService.create(spec);
+            LOG.info("Successfully created company metrics");
+
             companyPscStatementService.create(spec);
+            LOG.info("Successfully created PSC statement");
+
             companyPscsService.create(spec);
+            LOG.info("Successfully created PSCs");
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-                LOG.info("Creating registers for company number: " + spec.getCompanyNumber());
+                LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
+                LOG.info("Successfully created company registers");
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-            LOG.info("Generated company URI: " + companyUri);
-
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
 
             if (isElasticSearchDeployed) {
-                LOG.info("Adding company to ElasticSearch index for company number: "
-                        + spec.getCompanyNumber());
+                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+                LOG.info("Successfully added company to ElasticSearch index");
             }
+
+            LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
             return companyData;
         } catch (Exception ex) {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
-            LOG.error("Rolling back creation of company due to an error." + data, ex);
+            data.put("error message", ex.getMessage());
+            LOG.error("Failed to create company data for company number: "
+                    + spec.getCompanyNumber(), ex, data);
+
+            // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
-            throw new DataException(ex);
+
+            throw new DataException("Failed to create company data in service", ex);
         }
     }
 

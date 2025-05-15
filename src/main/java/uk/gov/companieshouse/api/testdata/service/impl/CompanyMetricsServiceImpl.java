@@ -33,7 +33,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
 
     @Override
     public CompanyMetrics create(CompanySpec spec) {
-        LOG.info("Starting creation of CompanyMetrics for company number: " + spec.getCompanyNumber());
+        LOG.info("Starting creation of CompanyMetrics for company number: "
+                + spec.getCompanyNumber());
 
         CompanyMetrics metrics = initializeMetrics(spec);
 
@@ -46,7 +47,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
 
         CompanyMetrics savedMetrics = repository.save(metrics);
-        LOG.info("Successfully created and saved CompanyMetrics for company number: " + spec.getCompanyNumber());
+        LOG.info("Successfully created and saved CompanyMetrics for company number: "
+                + spec.getCompanyNumber());
 
         return savedMetrics;
     }
@@ -58,7 +60,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         Optional<CompanyMetrics> existingMetric = repository.findById(companyNumber);
 
         if (existingMetric.isPresent()) {
-            LOG.info("CompanyMetrics found for company number: " + companyNumber + ". Proceeding with deletion.");
+            LOG.info("CompanyMetrics found for company number: "
+                    + companyNumber + ". Proceeding with deletion.");
             repository.delete(existingMetric.get());
             LOG.info("Successfully deleted CompanyMetrics for company number: " + companyNumber);
             return true;
@@ -73,7 +76,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
         metrics.setActivePscStatementsCount(1);
-        LOG.debug("Initialized CompanyMetrics with ID: " + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
+        LOG.debug("Initialized CompanyMetrics with ID: "
+                + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
         return metrics;
     }
 
@@ -113,7 +117,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
                     var item = new RegisterItem();
                     item.setRegisterMovedTo(reg.getRegisterMovedTo());
                     item.setMovedOn(LocalDate.now());
-                    LOG.debug("Created RegisterItem for type: " + reg.getRegisterType() + " with movedTo: " + reg.getRegisterMovedTo());
+                    LOG.debug("Created RegisterItem for type: "
+                            + reg.getRegisterType() + " with movedTo: " + reg.getRegisterMovedTo());
                     return item;
                 }
         ));
