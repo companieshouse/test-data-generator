@@ -92,6 +92,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public BasketRepository basketRepository() {
+        return getMongoRepositoryBean(BasketRepository.class, "orders");
+    }
+
+    @Bean
     public IdentityRepository identityRepository() {
         return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
     }
