@@ -80,13 +80,6 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         certificates.setDescriptionIdentifier(spec.getDescriptionIdentifier());
         certificates.setDescriptionCompanyNumber(spec.getDescriptionCompanyNumber());
         certificates.setDescriptionCertificate(spec.getDescriptionCertificate());
-        certificates.setCompanyName(certificatesSpec.getCompanyName());
-        certificates.setCompanyNumber(certificatesSpec.getCompanyNumber());
-        certificates.setDescription("certificate for company "
-                + certificatesSpec.getCompanyNumber());
-        certificates.setDescriptionIdentifier(certificatesSpec.getDescriptionIdentifier());
-        certificates.setDescriptionCompanyNumber(certificatesSpec.getDescriptionCompanyNumber());
-        certificates.setDescriptionCertificate(certificatesSpec.getDescriptionCertificate());
         certificates.setItemOptions(itemOptions);
         certificates.setEtag(randomService.getEtag());
         certificates.setKind(spec.getKind());
