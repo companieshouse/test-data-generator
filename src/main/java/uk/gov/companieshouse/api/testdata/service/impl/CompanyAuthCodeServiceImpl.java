@@ -66,9 +66,11 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     }
 
     @Override
-    public boolean verifyAuthCode(String companyNumber, String plainAuthCode) throws NoDataFoundException {
+    public boolean verifyAuthCode(
+            String companyNumber, String plainAuthCode) throws NoDataFoundException {
         String encryptedAuthCode = repository.findById(companyNumber)
-                .orElseThrow(() -> new NoDataFoundException(COMPANY_AUTH_DATA_NOT_FOUND)).getEncryptedAuthCode();
+                .orElseThrow(() -> new NoDataFoundException(
+                        COMPANY_AUTH_DATA_NOT_FOUND)).getEncryptedAuthCode();
 
         return BCrypt.checkpw(sha256(plainAuthCode), encryptedAuthCode);
     }

@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -37,26 +36,10 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         LOG.info("Starting creation of CompanyMetrics for company number: "
                 + spec.getCompanyNumber());
 
-        CompanyMetrics metrics = new CompanyMetrics();
-        metrics.setId(spec.getCompanyNumber());
-        metrics.setEtag(randomService.getEtag());
-        metrics.setActivePscStatementsCount(1);
-        LOG.debug("Initialized CompanyMetrics with ID: "
-                + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
+        CompanyMetrics metrics = initializeMetrics(spec);
 
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-            metrics.setActivePscCount(2);
-            LOG.debug("Company type is REGISTERED_OVERSEAS_ENTITY. Set active PSC count to 2.");
-        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
-            metrics.setActivePscCount(1);
-            LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
-        } else {
-            metrics.setActivePscCount(3);
-            LOG.debug("Default case. Set active PSC count to 3.");
-        }
-
-        metrics.setActiveDirectorsCount(1);
-        LOG.debug("Set active directors count to 1.");
+        setActivePscCount(metrics, spec);
+        setActiveDirectorsCount(metrics, spec);
 
         if (spec.getRegisters() != null) {
             LOG.debug("Registers are provided. Creating registers for the company.");
@@ -64,9 +47,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
 
         CompanyMetrics savedMetrics = repository.save(metrics);
-        LOG.info(
-                "Successfully created and saved CompanyMetrics for company number: "
-                        + spec.getCompanyNumber());
+        LOG.info("Successfully created and saved CompanyMetrics for company number: "
+                + spec.getCompanyNumber());
 
         return savedMetrics;
     }
@@ -86,6 +68,42 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         } else {
             LOG.info("No CompanyMetrics found for company number: " + companyNumber);
             return false;
+        }
+    }
+
+    private CompanyMetrics initializeMetrics(CompanySpec spec) {
+        var metrics = new CompanyMetrics();
+        metrics.setId(spec.getCompanyNumber());
+        metrics.setEtag(randomService.getEtag());
+        metrics.setActivePscStatementsCount(1);
+        LOG.debug("Initialized CompanyMetrics with ID: "
+                + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
+        return metrics;
+    }
+
+    private void setActivePscCount(CompanyMetrics metrics, CompanySpec spec) {
+        Integer numberOfPsc = spec.getNumberOfPsc();
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            metrics.setActivePscCount(1);
+            LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
+        } else if (numberOfPsc != null) {
+            metrics.setActivePscCount(numberOfPsc);
+            LOG.debug("Set active PSC count to " + numberOfPsc);
+        } else {
+            metrics.setActivePscCount(0);
+            LOG.debug("No PSC count provided. Set active PSC count to 0.");
+        }
+    }
+
+    private void setActiveDirectorsCount(CompanyMetrics metrics, CompanySpec spec) {
+        var numberOfAppointments = spec.getNumberOfAppointments();
+        if (spec.getOfficerRoles() != null && spec.getOfficerRoles().stream()
+                .anyMatch(role -> "director".equalsIgnoreCase(role.toString()))) {
+            metrics.setActiveDirectorsCount(numberOfAppointments);
+            LOG.debug("Set active directors count to " + numberOfAppointments);
+        } else {
+            metrics.setActiveDirectorsCount(1);
+            LOG.debug("No specific officer roles provided. Set active directors count to 1.");
         }
     }
 

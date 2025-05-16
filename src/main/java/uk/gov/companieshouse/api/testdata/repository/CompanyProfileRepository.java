@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,4 +12,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 public interface CompanyProfileRepository extends MongoRepository<CompanyProfile, String> {
 
     Optional<CompanyProfile> findByCompanyNumber(String companyNumber);
+
+    List<CompanyProfile> findByBranchCompanyDetailsParentCompanyNumber(String parentCompanyNumber);
 }

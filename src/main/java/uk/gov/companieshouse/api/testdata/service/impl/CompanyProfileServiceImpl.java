@@ -3,10 +3,12 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -256,19 +258,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         overseasEntity.setForeignCompanyDetails(foreignCompanyDetails);
 
-        // Links
-        var links = new Links();
-        links.setSelf(LINK_STEM + companyNumber);
-
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
-            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
-            links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
-            links.setPersonsWithSignificantControlStatement(
-                    LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
-        }
-
-        overseasEntity.setLinks(links);
-
         // Accounts
         OverseasEntity.IAccounts accounts = OverseasEntity.createAccounts();
         accounts.setOverdue(false);
@@ -310,9 +299,51 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             overseasEntity.setUpdated(updated);
         }
 
+        overseasEntity.setLinks(createOverseaLinks(
+                companyNumber, companyType, spec, jurisdiction, dateParams));
+
         repository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);
         return overseasEntity;
+    }
+
+    protected String createUkEstablishment(String parentCompanyNumber,
+                                           Jurisdiction jurisdiction,
+                                           DateParameters dateParams) {
+        String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
+        LOG.info("Creating UK establishment for parent company " + parentCompanyNumber);
+
+        var ukEstablishment = new CompanyProfile();
+        ukEstablishment.setId(ukEstablishmentNumber);
+        ukEstablishment.setCompanyNumber(ukEstablishmentNumber);
+        ukEstablishment.setType(CompanyType.UK_ESTABLISHMENT.getValue());
+
+        var branchDetails = new CompanyProfile.BranchCompanyDetails();
+        branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
+        branchDetails.setParentCompanyName(COMPANY_NAME_PREFIX
+                + parentCompanyNumber + COMPANY_NAME_SUFFIX);
+        branchDetails.setParentCompanyNumber(parentCompanyNumber);
+        ukEstablishment.setBranchCompanyDetails(branchDetails);
+
+        ukEstablishment.setCompanyName(COMPANY_NAME_PREFIX
+                + ukEstablishmentNumber + COMPANY_NAME_SUFFIX);
+        ukEstablishment.setDateOfCreation(dateParams.getDateNow());
+        ukEstablishment.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+
+        ukEstablishment.setCompanyStatus("open");
+        ukEstablishment.setEtag(this.randomService.getEtag());
+        ukEstablishment.setHasCharges(false);
+        ukEstablishment.setHasSuperSecurePscs(false);
+
+        var links = new Links();
+        links.setSelf(LINK_STEM + ukEstablishmentNumber);
+        links.setOverseas(LINK_STEM + parentCompanyNumber);
+        ukEstablishment.setLinks(links);
+
+        repository.save(ukEstablishment);
+        LOG.info("Created UK establishment " + ukEstablishmentNumber);
+
+        return ukEstablishmentNumber;
     }
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
@@ -337,9 +368,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Override
     public boolean delete(String companyId) {
-        Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId);
-        profile.ifPresent(repository::delete);
-        return profile.isPresent();
+        Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId)
+                .or(() -> repository.findById(companyId));
+
+        if (profile.isPresent()) {
+            repository.delete(profile.get());
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -365,6 +401,29 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private Links createLinkForSelf(String companyNumber) {
         var links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
+        return links;
+    }
+
+    private Links createOverseaLinks(String companyNumber,
+                                     CompanyType companyType, CompanySpec spec,
+                                     Jurisdiction jurisdiction, DateParameters dateParams) {
+        var links = new Links();
+        links.setSelf(LINK_STEM + companyNumber);
+
+        if (CompanyType.OVERSEA_COMPANY.equals(companyType)
+                && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
+            String ukEstablishmentNumber =
+                    createUkEstablishment(companyNumber, jurisdiction, dateParams);
+            links.setUkEstablishment(LINK_STEM + ukEstablishmentNumber);
+        }
+
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
+            links.setFilingHistory(LINK_STEM + companyNumber + FILLING_HISTORY_STEM);
+            links.setOfficers(LINK_STEM + companyNumber + OFFICERS_STEM);
+            links.setPersonsWithSignificantControlStatement(
+                    LINK_STEM + companyNumber + PSC_STATEMENT_STEM);
+        }
+
         return links;
     }
 
@@ -460,6 +519,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         );
 
         return noFilingHistoryCompanyTypes.contains(companyType.getValue());
+    }
+
+    @Override
+    public List<String> findUkEstablishmentsByParent(String parentCompanyNumber) {
+        return repository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
+                .stream()
+                .map(CompanyProfile::getCompanyNumber)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<CompanyProfile> getCompanyProfile(String companyNumber) {
+        return repository.findByCompanyNumber(companyNumber);
     }
 
     private void setRegisteredOfficeAddressIsInDispute(
