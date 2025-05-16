@@ -258,7 +258,7 @@ public class TestDataController {
         var accountPenaltiesData = testDataService.updateAccountPenaltiesData(
                 penaltyRef, request);
 
-        return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);
+        return new ResponseEntity<>(accountPenaltiesData, HttpStatus.CREATED);
 
     }
 
