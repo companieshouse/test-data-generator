@@ -109,7 +109,7 @@ class AppointmentsServiceImplTest {
         assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
 
         Links links = appointment.getLinks();
-        assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_INTERNAL_ID, links.getSelf());
+        assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_VALUE, links.getSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
 
@@ -168,7 +168,7 @@ class AppointmentsServiceImplTest {
         assertEquals(COMPANY_NUMBER, appointment.getDataCompanyNumber());
 
         Links links = appointment.getLinks();
-        assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_INTERNAL_ID, links.getSelf());
+        assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_VALUE, links.getSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
 
