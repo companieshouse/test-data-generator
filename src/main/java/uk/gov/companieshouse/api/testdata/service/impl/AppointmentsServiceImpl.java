@@ -125,7 +125,8 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
             appointment.setDataCompanyNumber(companyNumber);
 
             Links links = new Links();
-            links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + officerId);
+            links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/"
+                    + appointmentId);
             links.setOfficerSelf(OFFICERS_LINK + officerId);
             links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
             appointment.setLinks(links);
