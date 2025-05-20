@@ -417,7 +417,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)
                 && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
             createUkEstablishment(companyNumber, jurisdiction, dateParams);
-            links.setUkEstablishments("/company/" + companyNumber + "/uk-establishments");
+            links.setUkEstablishments(LINK_STEM + companyNumber + "/uk-establishments");
         }
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
