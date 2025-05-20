@@ -25,8 +25,8 @@ public class Links {
     private String registers;
     @Field("overseas")
     private String overseas;
-    @Field("uk_establishment")
-    private String ukEstablishment;
+    @Field("uk_establishments")
+    private String ukEstablishments;
 
     public String getFilingHistory() {
         return filingHistory;
@@ -109,11 +109,11 @@ public class Links {
         this.overseas = overseas;
     }
 
-    public String getUkEstablishment() {
-        return ukEstablishment;
+    public String getUkEstablishments() {
+        return ukEstablishments;
     }
 
-    public void setUkEstablishment(String ukEstablishment) {
-        this.ukEstablishment = ukEstablishment;
+    public void setUkEstablishments(String ukEstablishment) {
+        this.ukEstablishments = ukEstablishment;
     }
 }
