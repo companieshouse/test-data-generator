@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
@@ -45,10 +46,10 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
         try {
             var companyProfileData = fetchCompanyProfile(formattedCompanyProfileUri, companyNumber);
-
             upsertCompanyProfile(formattedCompanySearchUri, companyProfileData, companyNumber);
-
-            handleUkEstablishments(companyNumber, true);
+            if (OVERSEA_COMPANY_TYPE.equals(companyProfileData.getType())) {
+                handleUkEstablishments(companyNumber, true);
+            }
 
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to upsert company profile for company number: " + companyNumber, ex);
@@ -72,31 +73,22 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
     private void handleUkEstablishments(String companyNumber, boolean isAddOperation)
             throws ApiErrorResponseException, URIValidationException {
-        Optional<CompanyProfile> companyProfile =
-                companyProfileService.getCompanyProfile(companyNumber);
-        if (isOverseaCompany(companyProfile)) {
-            List<String> ukEstablishments =
-                    companyProfileService.findUkEstablishmentsByParent(companyNumber);
-            if (ukEstablishments.isEmpty()) {
-                LOG.info("No UK establishments found for oversea company number: " + companyNumber);
-            } else {
-                for (String establishmentNumber : ukEstablishments) {
-                    if (isAddOperation) {
-                        addSingleCompanyToIndex(establishmentNumber);
-                    } else {
-                        deleteSingleCompanyFromIndex(establishmentNumber);
-                    }
+
+        List<String> ukEstablishments =
+                companyProfileService.findUkEstablishmentsByParent(companyNumber);
+        if (ukEstablishments.isEmpty()) {
+            LOG.info("No UK establishments found for oversea company number: " + companyNumber);
+        } else {
+            LOG.info("Found " + ukEstablishments.size()
+                    + " UK establishments for oversea company number: " + companyNumber);
+            for (String establishmentNumber : ukEstablishments) {
+                if (isAddOperation) {
+                    addSingleCompanyToIndex(establishmentNumber);
+                } else {
+                    deleteSingleCompanyFromIndex(establishmentNumber);
                 }
             }
-        } else {
-            LOG.info("Company number " + companyNumber
-                    + " is not an oversea company. Skipping UK establishments.");
         }
-    }
-
-    private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
-        return companyProfile.isPresent()
-                && OVERSEA_COMPANY_TYPE.equals(companyProfile.get().getType());
     }
 
     private void addSingleCompanyToIndex(String companyNumber)
@@ -139,7 +131,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         LOG.info("Company profile deleted successfully for company number: " + companyNumber);
     }
 
-    private Object fetchCompanyProfile(String uri, String companyNumber)
+    private Data fetchCompanyProfile(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
         LOG.info("Fetching company profile for company number: " + companyNumber);
         return internalApiClientSupplier.get()
