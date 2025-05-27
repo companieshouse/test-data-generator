@@ -29,7 +29,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     public void addCompanyIntoElasticSearchIndex(CompanyData data) throws
             ApiErrorResponseException, URIValidationException {
         String companyNumber = data.getCompanyNumber();
-        String formattedAlphabeticalSearchUri = String.format(ALPHABETICAL_SEARCH_URI,
+        var formattedAlphabeticalSearchUri = String.format(ALPHABETICAL_SEARCH_URI,
                 companyNumber);
         LOG.info("Adding company into alphabetical search index for company number: "
                 + companyNumber);
@@ -42,7 +42,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     @Override
     public void deleteCompanyFromElasticSearchIndex(String companyNumber) throws
             ApiErrorResponseException, URIValidationException {
-        String uri =  String.format(ALPHABETICAL_SEARCH_URI,
+        var uri =  String.format(ALPHABETICAL_SEARCH_URI,
                 companyNumber);
         LOG.info("Deleting company profile from alphabetical search for company number: "
                 + companyNumber);
@@ -71,7 +71,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
 
     CompanyProfileApi getCompanyProfile(String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
-        String uri = String.format(COMPANY_PROFILE_URI, companyNumber);
+        var uri = String.format(COMPANY_PROFILE_URI, companyNumber);
         var companyProfileApiResponse
                 = internalApiClientSupplier.get().company().get(uri).execute();
         return companyProfileApiResponse.getData();
