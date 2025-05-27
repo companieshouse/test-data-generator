@@ -101,9 +101,13 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Autowired
-    private CompanySearchService companySearchService;
+    private CompanySearchServiceImpl companySearchService;
     @Autowired
     private AccountPenaltiesService accountPenaltiesService;
+    @Autowired
+    private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Autowired
+    private AdvancedCompanySearchImpl advancedCompanySearch;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -167,6 +171,8 @@ public class TestDataServiceImpl implements TestDataService {
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+                this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+                this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
                 LOG.info("Successfully added company to ElasticSearch index");
             }
 
@@ -326,6 +332,8 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("Attempting to delete "
                         + "company from ElasticSearch index for company number: " + companyId);
                 this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+                this.alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyId);
+                this.advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyId);
                 LOG.info("Deleted company from ElasticSearch index for company number: "
                         + companyId);
             } catch (Exception ex) {
