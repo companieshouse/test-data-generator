@@ -18,7 +18,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service
+@Service("companySearchService")
 public class CompanySearchServiceImpl implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
