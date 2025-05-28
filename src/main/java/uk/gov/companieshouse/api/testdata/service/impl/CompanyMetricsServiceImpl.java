@@ -25,7 +25,6 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanyMetricsServiceImpl.class));
-
     @Autowired
     private CompanyMetricsRepository repository;
     @Autowired
@@ -35,10 +34,10 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     public CompanyMetrics create(CompanySpec spec) {
         LOG.info("Starting creation of CompanyMetrics for company number: "
                 + spec.getCompanyNumber());
-
         CompanyMetrics metrics = initializeMetrics(spec);
 
         setActivePscCount(metrics, spec);
+
         setActiveDirectorsCount(metrics, spec);
 
         if (spec.getRegisters() != null) {
@@ -49,14 +48,12 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         CompanyMetrics savedMetrics = repository.save(metrics);
         LOG.info("Successfully created and saved CompanyMetrics for company number: "
                 + spec.getCompanyNumber());
-
         return savedMetrics;
     }
 
     @Override
     public boolean delete(String companyNumber) {
         LOG.info("Attempting to delete CompanyMetrics for company number: " + companyNumber);
-
         Optional<CompanyMetrics> existingMetric = repository.findById(companyNumber);
 
         if (existingMetric.isPresent()) {
@@ -75,7 +72,19 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         var metrics = new CompanyMetrics();
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
-        metrics.setActivePscStatementsCount(1);
+
+        if (spec.getActivePscStatements() != null) {
+            metrics.setActivePscStatementsCount(spec.getActivePscStatements());
+        } else if (spec.getNumberOfPsc() != null) {
+            metrics.setActivePscStatementsCount(spec.getNumberOfPsc());
+        } else {
+            metrics.setActivePscStatementsCount(1);
+        }
+
+        metrics.setWithdrawnPscStatementsCount(
+                spec.getWithdrawnPscStatements() == null ? 0 : spec.getWithdrawnPscStatements()
+        );
+
         LOG.debug("Initialized CompanyMetrics with ID: "
                 + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
         return metrics;
@@ -109,20 +118,20 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
 
     private Map<String, RegisterItem> createRegisters(List<RegistersSpec> registers) {
         LOG.info("Creating registers for the provided list of " + registers.size() + " registers.");
-
         Map<String, RegisterItem> registerMap = registers.stream().collect(Collectors.toMap(
                 RegistersSpec::getRegisterType,
                 reg -> {
                     LOG.debug("Processing register type: " + reg.getRegisterType());
                     var item = new RegisterItem();
+
                     item.setRegisterMovedTo(reg.getRegisterMovedTo());
                     item.setMovedOn(LocalDate.now());
                     LOG.debug("Created RegisterItem for type: "
                             + reg.getRegisterType() + " with movedTo: " + reg.getRegisterMovedTo());
+
                     return item;
                 }
         ));
-
         LOG.info("Successfully created " + registerMap.size() + " registers.");
         return registerMap;
     }

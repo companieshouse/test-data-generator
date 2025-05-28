@@ -4,7 +4,12 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +34,6 @@ public class CompanyPscStatementServiceImpl implements
 
     @Autowired
     private RandomService randomService;
-
     @Autowired
     private CompanyPscStatementRepository repository;
 
@@ -40,7 +44,7 @@ public class CompanyPscStatementServiceImpl implements
      * psc-statement-data-api java services utilises the enum values and
      * correct spelling will cause failures in environments that run the java service
      *
-     * @param spec
+     * @param spec the specification of the company for which the PSC statement is created
      * @return
      */
     @Override
@@ -52,7 +56,6 @@ public class CompanyPscStatementServiceImpl implements
 
         Instant dateTimeNow = Instant.now();
         Instant dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
-
         if (StringUtils.hasText(accountsDueStatus)) {
             var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
             dateTimeNow = now.atTime(LocalTime.now()).atZone(ZONE_ID_UTC).toInstant();
@@ -70,13 +73,33 @@ public class CompanyPscStatementServiceImpl implements
 
         companyPscStatement.setLinks(links);
         companyPscStatement.setNotifiedOn(dateNow);
-
         String etag = this.randomService.getEtag();
         companyPscStatement.setEtag(etag);
 
         companyPscStatement.setKind("persons-with-significant-control-statement");
 
-        if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())
+        List<PscStatement> availableStatements;
+
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
+            availableStatements = Arrays.asList(
+                    PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED,
+                    PscStatement.BENEFICIAL_ACTIVE_OR_CEASED,
+                    PscStatement.NO_ACTIVE_BENEFICIAL_OWNER,
+                    PscStatement.AT_LEAST_ONE_BENEFICIAL_OWNER);
+        } else {
+            availableStatements = Arrays.asList(PscStatement.values());
+            availableStatements = availableStatements.stream()
+                    .filter(s -> !s.getStatement().contains("beneficial-owner"))
+                    .collect(Collectors.toList());
+        }
+
+        if (spec.getWithdrawnPscStatements() != null && spec.getWithdrawnPscStatements() > 0) {
+            int randomIndex = ThreadLocalRandom.current().nextInt(availableStatements.size());
+            companyPscStatement.setStatement(availableStatements.get(randomIndex).getStatement());
+
+            LocalDate ceasedDate = LocalDate.now().minusDays(3);
+            companyPscStatement.setCeasedOn(ceasedDate.atStartOfDay(ZONE_ID_UTC).toInstant());
+        } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())
                 && (spec.getNumberOfPsc() == null || spec.getNumberOfPsc() == 0)) {
             companyPscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
@@ -102,20 +125,75 @@ public class CompanyPscStatementServiceImpl implements
         return repository.save(companyPscStatement);
     }
 
+    /**
+     * Creates multiple PSC statements based on the active
+     * and withdrawn counts specified in the CompanySpec.
+     * This method orchestrates calls to the single-statement create method.
+     *
+     * @param spec The CompanySpec containing the desired counts
+     *             for active and withdrawn PSC statements.
+     * @return A list of created CompanyPscStatement objects.
+     */
+    public List<CompanyPscStatement> createPscStatements(CompanySpec spec) {
+        List<CompanyPscStatement> createdStatements = new ArrayList<>();
+
+        Integer withdrawnPscStatements = spec.getWithdrawnPscStatements();
+        Integer activePscStatements = spec.getActivePscStatements();
+
+        boolean specificPscStatementsRequested = (withdrawnPscStatements != null
+                && withdrawnPscStatements > 0)
+                || (activePscStatements != null && activePscStatements > 0);
+
+        if (specificPscStatementsRequested) {
+            if (withdrawnPscStatements != null && withdrawnPscStatements > 0) {
+                for (int i = 0; i < withdrawnPscStatements; i++) {
+                    CompanySpec tempSpec = new CompanySpec();
+                    tempSpec.setCompanyNumber(spec.getCompanyNumber());
+                    tempSpec.setCompanyType(spec.getCompanyType());
+                    tempSpec.setAccountsDueStatus(spec.getAccountsDueStatus());
+                    tempSpec.setWithdrawnPscStatements(1);
+                    tempSpec.setNumberOfPsc(0);
+                    createdStatements.add(this.create(tempSpec));
+                }
+            }
+
+            if (activePscStatements != null && activePscStatements > 0) {
+                for (int i = 0; i < activePscStatements; i++) {
+                    CompanySpec tempSpec = new CompanySpec();
+                    tempSpec.setCompanyNumber(spec.getCompanyNumber());
+                    tempSpec.setCompanyType(spec.getCompanyType());
+                    tempSpec.setAccountsDueStatus(spec.getAccountsDueStatus());
+                    tempSpec.setWithdrawnPscStatements(0);
+                    tempSpec.setNumberOfPsc(1);
+                    createdStatements.add(this.create(tempSpec));
+                }
+            }
+        } else {
+            createdStatements.add(this.create(spec));
+        }
+        return createdStatements;
+    }
+
     @Override
     public boolean delete(String companyNumber) {
-        Optional<CompanyPscStatement> existingStatement
-                = repository.findByCompanyNumber(companyNumber);
-        existingStatement.ifPresent(repository::delete);
-        return existingStatement.isPresent();
+        List<CompanyPscStatement> statementsToDelete
+                = repository.findAllByCompanyNumber(companyNumber);
+
+        if (!statementsToDelete.isEmpty()) {
+            repository.deleteAll(statementsToDelete);
+            return true;
+        }
+        return false;
     }
 
     public enum PscStatement {
-        ALL_BENEFICIAL_OWNERS_IDENTIFIED("all-beneficial-owners-identified"),
         NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL(
                 "no-individual-or-entity-with-signficant-control"),
-        PSC_EXISTS_BUT_NOT_IDENTIFIED("psc-exists-but-not-identified");
-
+        PSC_EXISTS_BUT_NOT_IDENTIFIED("psc-exists-but-not-identified"),
+        ALL_BENEFICIAL_OWNERS_IDENTIFIED("all-beneficial-owners-identified"),
+        BENEFICIAL_ACTIVE_OR_CEASED("somebody-has-become-or-ceased-to-be-a-beneficial-owner"),
+        NO_ACTIVE_BENEFICIAL_OWNER("nobody-has-become-or-ceased-to-be-a-beneficial-owner"),
+        AT_LEAST_ONE_BENEFICIAL_OWNER("at-least-one-beneficial-owner-unidentified");
         private final String statement;
 
         PscStatement(String statement) {

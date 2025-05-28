@@ -1,10 +1,9 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
 
 @Document(collection = "company_psc_statements")
 public class CompanyPscStatement {
@@ -22,6 +21,8 @@ public class CompanyPscStatement {
     private Links links;
     @Field("data.notified_on")
     private Instant notifiedOn;
+    @Field("data.ceased_on")
+    private Instant ceasedOn;
     @Field("data.etag")
     private String etag;
     @Field("data.kind")
@@ -109,5 +110,13 @@ public class CompanyPscStatement {
 
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Instant getCeasedOn() {
+        return ceasedOn;
+    }
+
+    public void setCeasedOn(Instant ceasedOn) {
+        this.ceasedOn = ceasedOn;
     }
 }

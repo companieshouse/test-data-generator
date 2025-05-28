@@ -17,7 +17,6 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
@@ -59,7 +58,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class TestDataServiceImpl implements TestDataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
-
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
     @Autowired
@@ -73,7 +71,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
-    private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
+    private CompanyPscStatementServiceImpl companyPscStatementService;
     @Autowired
     private DataService<CompanyPscs, CompanySpec> companyPscsService;
     @Autowired
@@ -104,7 +102,6 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanySearchService companySearchService;
     @Autowired
     private AccountPenaltiesService accountPenaltiesService;
-
     @Value("${api.url}")
     private String apiUrl;
 
@@ -125,7 +122,6 @@ public class TestDataServiceImpl implements TestDataService {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
         final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
-
         do {
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
@@ -148,8 +144,8 @@ public class TestDataServiceImpl implements TestDataService {
             companyMetricsService.create(spec);
             LOG.info("Successfully created company metrics");
 
-            companyPscStatementService.create(spec);
-            LOG.info("Successfully created PSC statement");
+            companyPscStatementService.createPscStatements(spec);
+            LOG.info("Successfully created all PSC statements based on spec counts.");
 
             companyPscsService.create(spec);
             LOG.info("Successfully created PSCs");
@@ -163,7 +159,6 @@ public class TestDataServiceImpl implements TestDataService {
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
-
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
@@ -178,10 +173,8 @@ public class TestDataServiceImpl implements TestDataService {
             data.put("error message", ex.getMessage());
             LOG.error("Failed to create company data for company number: "
                     + spec.getCompanyNumber(), ex, data);
-
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
-
             throw new DataException("Failed to create company data in service", ex);
         }
     }
@@ -198,7 +191,18 @@ public class TestDataServiceImpl implements TestDataService {
         if (!suppressedExceptions.isEmpty()) {
             LOG.error("Errors occurred while deleting company data for company number: "
                     + companyId);
-            var ex = new DataException("Error deleting company data");
+            StringBuilder errorMessage = new StringBuilder(
+                    "Error deleting company data. Details: ");
+            for (int i = 0; i < suppressedExceptions.size(); i++) {
+                Exception ex = suppressedExceptions.get(i);
+                errorMessage.append(" [").append(i + 1).append("] ")
+                        .append(ex.getMessage() != null ? ex.getMessage() : "Unknown error");
+                if (ex.getCause() != null) {
+                    errorMessage.append(" Cause: ").append(ex.getCause().getMessage()
+                            != null ? ex.getCause().getMessage() : "Unknown cause");
+                }
+            }
+            var ex = new DataException(errorMessage.toString());
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
@@ -434,7 +438,6 @@ public class TestDataServiceImpl implements TestDataService {
                     createdMember.getStatus(),
                     createdMember.getUserRole()
             );
-
         } catch (Exception ex) {
             throw new DataException(ex);
         }
@@ -460,7 +463,6 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public boolean deleteAcspMembersData(String acspMemberId) throws DataException {
         List<Exception> suppressedExceptions = new ArrayList<>();
-
         try {
             var maybeMember = acspMembersRepository.findById(acspMemberId);
             if (maybeMember.isPresent()) {
@@ -493,13 +495,11 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             CertificatesData createdCertificates = certificatesService.create(spec);
-
             return new CertificatesData(
                     createdCertificates.getId(),
                     createdCertificates.getCreatedAt(),
                     createdCertificates.getUpdatedAt()
             );
-
         } catch (Exception ex) {
             throw new DataException("Error creating certificates", ex);
         }
