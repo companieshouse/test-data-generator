@@ -191,10 +191,10 @@ public class TestDataServiceImpl implements TestDataService {
         if (!suppressedExceptions.isEmpty()) {
             LOG.error("Errors occurred while deleting company data for company number: "
                     + companyId);
-            StringBuilder errorMessage = new StringBuilder(
+            var errorMessage = new StringBuilder(
                     "Error deleting company data. Details: ");
-            for (int i = 0; i < suppressedExceptions.size(); i++) {
-                Exception ex = suppressedExceptions.get(i);
+            for (var i = 0; i < suppressedExceptions.size(); i++) {
+                var ex = suppressedExceptions.get(i);
                 errorMessage.append(" [").append(i + 1).append("] ")
                         .append(ex.getMessage() != null ? ex.getMessage() : "Unknown error");
                 if (ex.getCause() != null) {
