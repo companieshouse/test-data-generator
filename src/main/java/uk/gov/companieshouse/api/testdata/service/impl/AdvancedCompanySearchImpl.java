@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service
+@Service("advancedCompanySearchService")
 public class AdvancedCompanySearchImpl implements CompanySearchService {
 
     private static final String ADVANCED_SEARCH_URI = "/advanced-search/companies/%s";

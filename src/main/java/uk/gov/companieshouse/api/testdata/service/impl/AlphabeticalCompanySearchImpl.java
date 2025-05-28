@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service
+@Service("alphabeticalCompanySearchService")
 public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private static final String ALPHABETICAL_SEARCH_URI = "/alphabetical-search/companies/%s";

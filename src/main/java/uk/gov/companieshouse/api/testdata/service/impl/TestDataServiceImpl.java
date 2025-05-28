@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -101,13 +102,16 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Autowired
-    private CompanySearchServiceImpl companySearchService;
+    @Qualifier("companySearchService")
+    private CompanySearchService companySearchService;
     @Autowired
     private AccountPenaltiesService accountPenaltiesService;
     @Autowired
-    private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Qualifier("alphabeticalCompanySearchService")
+    private CompanySearchService alphabeticalCompanySearch;
     @Autowired
-    private AdvancedCompanySearchImpl advancedCompanySearch;
+    @Qualifier("advancedCompanySearchService")
+    private CompanySearchService advancedCompanySearch;
 
     @Value("${api.url}")
     private String apiUrl;
