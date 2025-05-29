@@ -1,16 +1,16 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
-
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -273,5 +273,47 @@ class CompanyPscStatementServiceImplTest {
         assertEquals(0, capturedSpecs.get(2).getWithdrawnPscStatements());
         assertEquals(1, capturedSpecs.get(2).getNumberOfPsc());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(2).getCompanyNumber());
+    }
+
+    @Test
+    void testRegisteredOverseasEntityStatement() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+        ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
+        assertEquals("all-beneficial-owners-identified", capturedStatement.getStatement());
+    }
+
+    @Test
+    void testNumberOfPscExists() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfPsc(5);
+
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+        when(this.repository.save(any())).thenReturn(savedStatement);
+
+        CompanyPscStatement returnedStatement = this.companyPscStatementService.create(spec);
+
+        assertEquals(savedStatement, returnedStatement);
+        ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
+        verify(repository).save(statementCaptor.capture());
+        CompanyPscStatement capturedStatement = statementCaptor.getValue();
+        assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
+        assertEquals("psc-exists-but-not-identified", capturedStatement.getStatement());
     }
 }

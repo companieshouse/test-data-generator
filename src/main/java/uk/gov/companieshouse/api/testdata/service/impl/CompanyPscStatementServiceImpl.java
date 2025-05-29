@@ -35,7 +35,7 @@ public class CompanyPscStatementServiceImpl implements
 
     @Override
     public CompanyPscStatement create(CompanySpec spec) {
-        CompanyPscStatement pscStatement = new CompanyPscStatement();
+        var pscStatement = new CompanyPscStatement();
 
         String pscStatementId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         pscStatement.setId(pscStatementId);
