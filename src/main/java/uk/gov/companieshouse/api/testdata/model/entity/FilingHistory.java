@@ -19,6 +19,8 @@ public class FilingHistory {
     private Links links;
     @Field("data.associated_filings")
     private List<AssociatedFiling> associatedFilings;
+    @Field("data.resolutions")
+    private List<Resolutions> resolutions;
     @Field("data.category")
     private String category;
     @Field("data.description")
@@ -27,8 +29,18 @@ public class FilingHistory {
     private Instant date;
     @Field("data.type")
     private String type;
+    @Field("data.subcategory")
+    private String subCategory;
     @Field("data.pages")
     private Integer pages;
+    @Field ("data.action_date")
+    private Instant actionDate;
+    @Field ("data.description_values")
+    private DescriptionValues descriptionValues;
+    @Field("data.original_values")
+    private OriginalValues originalValues;
+    @Field("data.paper_filed")
+    private boolean paperFiled;
     @Field("_entity_id")
     private String entityId;
     @Field("original_description")
@@ -66,6 +78,12 @@ public class FilingHistory {
 
     public void setAssociatedFilings(List<AssociatedFiling> associatedFilings) {
         this.associatedFilings = associatedFilings;
+    }
+
+    public List<Resolutions> getResolutions() { return resolutions; }
+
+    public void setResolutions(List<Resolutions> resolutions) {
+        this.resolutions = resolutions;
     }
 
     public String getCategory() {
@@ -130,5 +148,45 @@ public class FilingHistory {
 
     public void setBarcode(String barcode) {
         this.barcode = barcode;
+    }
+
+    public String getSubCategory() {
+        return subCategory;
+    }
+
+    public void setSubCategory(String subCategory) {
+        this.subCategory = subCategory;
+    }
+
+    public Instant getActionDate() {
+        return  actionDate;
+    }
+
+    public void setActionDate(Instant actionDate) {
+        this.actionDate = actionDate;
+    }
+
+    public DescriptionValues getDescriptionValues() {
+        return descriptionValues;
+    }
+
+    public void setDescriptionValues(DescriptionValues descriptionValues) {
+        this.descriptionValues = descriptionValues;
+    }
+
+    public OriginalValues getOriginalValues() {
+        return originalValues;
+    }
+
+    public void setOriginalValues(OriginalValues originalValues) {
+        this.originalValues = originalValues;
+    }
+
+    public void setPaperFiled(boolean paperFiled) {
+        this.paperFiled = paperFiled;
+    }
+
+    public boolean isPaperFiled() {
+        return paperFiled;
     }
 }

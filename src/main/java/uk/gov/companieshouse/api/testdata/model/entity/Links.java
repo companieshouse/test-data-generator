@@ -23,6 +23,8 @@ public class Links {
     private String company;
     @Field("registers")
     private String registers;
+    @Field("document_metadata")
+    private String documentMetadata;
 
     public String getFilingHistory() {
         return filingHistory;
@@ -95,5 +97,13 @@ public class Links {
 
     public void setRegisters(String registers) {
         this.registers = registers;
+    }
+
+    public String getDocumentMetadata() {
+        return documentMetadata;
+    }
+
+    public void setDocumentMetadata(String documentMetadata) {
+        this.documentMetadata = documentMetadata;
     }
 }
