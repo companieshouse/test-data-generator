@@ -58,6 +58,9 @@ public class Certificates {
     @Field("user_id")
     private String userId;
 
+    @Field("basket")
+    private Basket basket;
+
     public String getId() {
         return id;
     }
@@ -192,5 +195,13 @@ public class Certificates {
 
     public void setUserId(String userId) {
         this.userId = userId;
+    }
+
+    public Basket getBasket() {
+        return basket;
+    }
+
+    public void setBasket(Basket basket) {
+        this.basket = basket;
     }
 }

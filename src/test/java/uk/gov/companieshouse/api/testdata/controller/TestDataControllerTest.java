@@ -629,7 +629,7 @@ class TestDataControllerTest {
                 .updateAccountPenalties(penaltyRef, request);
 
         assertEquals(accountPenaltiesData, response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     @Test

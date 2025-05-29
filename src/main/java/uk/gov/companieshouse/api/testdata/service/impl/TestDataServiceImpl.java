@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
@@ -30,6 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
@@ -38,8 +41,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesReque
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -185,62 +188,150 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public void deleteCompanyData(String companyId) throws DataException {
+        LOG.info("Deleting company data for company number: " + companyId);
         List<Exception> suppressedExceptions = new ArrayList<>();
 
+        deleteUkEstablishmentsIfOverseaCompany(companyId, suppressedExceptions);
+
+        deleteSingleCompanyData(companyId, suppressedExceptions);
+
+        if (!suppressedExceptions.isEmpty()) {
+            LOG.error("Errors occurred while deleting company data for company number: "
+                    + companyId);
+            var ex = new DataException("Error deleting company data");
+            suppressedExceptions.forEach(ex::addSuppressed);
+            throw ex;
+        }
+    }
+
+    private void deleteUkEstablishmentsIfOverseaCompany(
+            String companyId, List<Exception> suppressedExceptions) {
+        try {
+            LOG.info("Checking if company number " + companyId + " is an oversea company.");
+            Optional<CompanyProfile> companyProfile =
+                    companyProfileService.getCompanyProfile(companyId);
+            if (isOverseaCompany(companyProfile)) {
+                LOG.info("Company number " + companyId
+                        + " is an oversea company. Deleting UK establishments.");
+                deleteUkEstablishmentsForParent(companyId, suppressedExceptions);
+            } else {
+                LOG.info("Company number " + companyId
+                        + " is not an oversea company. Skipping UK establishments deletion.");
+            }
+        } catch (Exception de) {
+            LOG.error("Error while checking or deleting UK establishments for company number: "
+                    + companyId, de);
+            suppressedExceptions.add(de);
+        }
+    }
+
+    private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
+        boolean isOversea = companyProfile.isPresent()
+                && CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
+        LOG.debug("Is company oversea: " + isOversea);
+        return isOversea;
+    }
+
+    private void deleteUkEstablishmentsForParent(String companyId,
+                                                 List<Exception> suppressedExceptions) {
+        LOG.info("Fetching UK establishments for parent company number: " + companyId);
+        List<String> ukEstablishments =
+                companyProfileService.findUkEstablishmentsByParent(companyId);
+        if (ukEstablishments.isEmpty()) {
+            LOG.info("No UK establishments found for company number: " + companyId);
+        } else {
+            for (String ukEstablishmentNumber : ukEstablishments) {
+                try {
+                    LOG.info("Deleting UK establishment with company number: "
+                            + ukEstablishmentNumber);
+                    deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
+                } catch (Exception de) {
+                    LOG.error("Error while deleting UK establishment with company number: "
+                            + ukEstablishmentNumber, de);
+                    suppressedExceptions.add(de);
+                }
+            }
+        }
+    }
+
+    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
+        LOG.info("Deleting single company data for company number: " + companyId);
         try {
             this.companyProfileService.delete(companyId);
+            LOG.info("Deleted company profile for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting company profile for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.filingHistoryService.delete(companyId);
+            LOG.info("Deleted filing history for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting filing history for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthCodeService.delete(companyId);
+            LOG.info("Deleted company auth code for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting company auth code for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.appointmentService.delete(companyId);
+            LOG.info("Deleted appointments for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting appointments for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscStatementService.delete(companyId);
+            LOG.info("Deleted PSC statements for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting PSC statements for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscsService.delete(companyId);
+            LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting PSCs for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyMetricsService.delete(companyId);
+            LOG.info("Deleted company metrics for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting company metrics for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
-
+        try {
+            this.companyAuthAllowListService.delete(companyId);
+            LOG.info("Deleted company auth allow list for company number: " + companyId);
+        } catch (Exception de) {
+            LOG.error("Error deleting company auth allow list for company number: "
+                    + companyId, de);
+            suppressedExceptions.add(de);
+        }
         try {
             this.companyRegistersService.delete(companyId);
+            LOG.info("Deleted company registers for company number: " + companyId);
         } catch (Exception de) {
+            LOG.error("Error deleting company registers for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
 
         if (isElasticSearchDeployed) {
             try {
+                LOG.info("Attempting to delete "
+                        + "company from ElasticSearch index for company number: " + companyId);
                 this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-            } catch (Exception de) {
-                suppressedExceptions.add(de);
+                LOG.info("Deleted company from ElasticSearch index for company number: "
+                        + companyId);
+            } catch (Exception ex) {
+                LOG.error("Failed to delete company from ElasticSearch index for company number: "
+                        + companyId, ex);
             }
-        }
-
-        if (!suppressedExceptions.isEmpty()) {
-            DataException ex = new DataException("Error deleting company data");
-            suppressedExceptions.forEach(ex::addSuppressed);
-            throw ex;
         }
     }
 
@@ -435,8 +526,8 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public AccountPenaltiesData getAccountPenaltyData(
-            String companyCode, String customerCode,
-            String penaltyReference) throws NoDataFoundException {
+            String companyCode, String customerCode, String penaltyReference)
+            throws NoDataFoundException {
         try {
             return accountPenaltiesService.getAccountPenalty(companyCode, customerCode,
                     penaltyReference);

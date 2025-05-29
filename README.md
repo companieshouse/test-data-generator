@@ -45,6 +45,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`, `united-kingdom`). Defaults to `england_wales`.
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
   - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
+  - `has_uk_establishment`: Boolean value to determine if the oversea company has a UK establishment. Defaults to false, `true` value will create an oversea company with a UK establishment. Used alongside `oversea-company` company type.
   - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to false, `true` value will create a Psc entry of `super-secure-person-with-significant-control` or `super-secure-beneficial-owner` depending on CompanyType.
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
@@ -64,6 +65,7 @@ In order to use the generator, there are different possible endpoints that can b
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
+  - A usage example for creating `oversea-company` with `has_uk_establishment` looks like this: `{"overseas-company", "has_uk_establishment": true}`, this will create an oversea company with hardcoded values and a UK establishment
   - A usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
@@ -115,11 +117,10 @@ In order to use the generator, there are different possible endpoints that can b
   
   A usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
 
-#### Adding Certificates
-- POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company.
+#### Adding Certificates and Basket
+- POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company and add the basket details.
   - `company_name`: The name of the company.
   - `company_number`: The number of the company matching with company name.
-  - `description`: The description of the certificate being added to the company.
   - `description_identifier`: The identifier description of the certificate.
   - `description_values`: 
     - `company_number`: The description value which has number of the company matching with company name.
@@ -131,12 +132,17 @@ In order to use the generator, there are different possible endpoints that can b
     - `company_type`: The type of the company (e.g., `ltd`, `plc`).
     - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
     }
+  - `basket`: {
+    - `forename`: The forename for basket delivery details.
+    - `surname`: The surname for basket delivery details.
+    - `enrolled`: To make the multi-item basket available to all users, this should be set to true. Default value is true.
+      }
   - `kind`: The kind of the certificate.
-  - `links_self`: The links for the certificate.
+  - `quantity`: The number of the certificate.
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
-
-  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ"}`
+  
+  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
 
 #### Retrieving, Updating and Deleting Account Penalties

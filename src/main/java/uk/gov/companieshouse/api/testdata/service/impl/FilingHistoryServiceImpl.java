@@ -21,6 +21,8 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
@@ -31,8 +33,13 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private static final String CATEGORY = "incorporation";
     private static final String DESCRIPTION = "incorporation-company";
     private static final String TYPE = "NEWINC";
-    private static final String ORIGINAL_DESCRIPTION = "Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association";
     private static final Instant FIXED_MR01_DATE = LocalDate.of(2003, 2, 28).atStartOfDay(ZoneOffset.UTC).toInstant();
+    private static final String ORIGINAL_DESCRIPTION =
+            "Certificate of incorporation general company details & statements of; "
+                    + "officers, capital & shareholdings, guarantee, "
+                    + "compliance memorandum of association";
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
     @Autowired
     private FilingHistoryRepository filingHistoryRepository;
@@ -45,12 +52,27 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     public FilingHistory create(CompanySpec spec) throws DataException {
         List<FilingHistorySpec> filingHistorySpecs = spec.getFilingHistoryList(); // New array-style getter
         List<FilingHistory> savedHistories = new ArrayList<>();
+        LOG.info("Starting creation of FilingHistory for company number: "
+                + spec.getCompanyNumber());
 
-        String accountsDueStatus = spec.getAccountsDueStatus();
+        String barcode;
+        final String accountsDueStatus = spec.getAccountsDueStatus();
+        try {
+            LOG.debug("Attempting to retrieve barcode for company number: "
+                    + spec.getCompanyNumber());
+            barcode = barcodeService.getBarcode();
+            LOG.debug("Successfully retrieved barcode: " + barcode);
+        } catch (BarcodeServiceException ex) {
+            LOG.error("Failed to retrieve barcode for company number: "
+                    + spec.getCompanyNumber(), ex);
+            throw new DataException(ex.getMessage(), ex);
+        }
+
         Instant dayTimeNow = Instant.now();
         Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
         if (StringUtils.hasText(accountsDueStatus)) {
+            LOG.debug("Generating accounts due date for status: " + accountsDueStatus);
             var dueDateNow = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
             dayTimeNow = dueDateNow.atTime(LocalTime.now()).atZone(ZoneId.of("UTC")).toInstant();
             dayNow = dueDateNow.atStartOfDay(ZoneId.of("UTC")).toInstant();
@@ -67,16 +89,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return savedHistories.get(savedHistories.size() - 1);
     }
 
-    @Override
-    public boolean delete(String companyId) {
-        Optional<List<FilingHistory>> filingHistoriesOpt = filingHistoryRepository.findAllByCompanyNumber(companyId);
-        if (filingHistoriesOpt.isPresent() && !filingHistoriesOpt.get().isEmpty()) {
-            filingHistoriesOpt.get().forEach(filingHistoryRepository::delete);
-            return true;
-        }
-        return false;
-    }
-
     private FilingHistory createFilingHistoryFromSpec(CompanySpec spec, FilingHistorySpec fhSpec, Instant dayNow, Instant dayTimeNow) throws DataException {
         String barcode;
         try {
@@ -86,6 +98,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
 
         String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
+        LOG.debug("Generated entity ID: " + entityId);
 
         // Safe check for null fhSpec before getting type
         String type = TYPE;  // default type
@@ -97,7 +110,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
 
-        // Safely pass fhSpec.getType() to createLinks only if fhSpec != null
         filingHistory.setLinks(createLinks(fhSpec != null ? fhSpec.getType() : null, spec.getCompanyNumber(), entityId));
 
         switch (type) {
@@ -131,11 +143,33 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setOriginalDescription(fhSpec != null && StringUtils.hasText(fhSpec.getOriginalDescription()) ? fhSpec.getOriginalDescription() : ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
         filingHistory.setDescription(fhSpec != null && StringUtils.hasText(fhSpec.getDescription()) ? fhSpec.getDescription() : DESCRIPTION);
+        LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
 
-        return filingHistoryRepository.save(filingHistory);
+        FilingHistory savedFilingHistory = filingHistoryRepository.save(filingHistory);
+
+        LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());
+
+        return savedFilingHistory;
+    }
+
+    @Override
+    public boolean delete(String companyId) {
+        LOG.info("Attempting to delete FilingHistory for company number: " + companyId);
+
+        Optional<List<FilingHistory>> filingHistoriesOpt = filingHistoryRepository.findAllByCompanyNumber(companyId);
+        if (filingHistoriesOpt.isPresent() && !filingHistoriesOpt.get().isEmpty()) {
+            LOG.info("FilingHistory found for company number: "
+                    + companyId + ". Proceeding with deletion.");
+            filingHistoriesOpt.get().forEach(filingHistoryRepository::delete);
+            LOG.info("Successfully deleted FilingHistory for company number: " + companyId);
+            return true;
+        }
+        LOG.info("No FilingHistory found for company number: " + companyId);
+        return false;
     }
 
     private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow) {
+
         ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 
         AssociatedFiling incorporation = new AssociatedFiling();

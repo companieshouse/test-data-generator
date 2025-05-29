@@ -25,6 +25,10 @@ public class Links {
     private String registers;
     @Field("document_metadata")
     private String documentMetadata;
+    @Field("overseas")
+    private String overseas;
+    @Field("uk_establishments")
+    private String ukEstablishments;
 
     public String getFilingHistory() {
         return filingHistory;
@@ -105,5 +109,21 @@ public class Links {
 
     public void setDocumentMetadata(String documentMetadata) {
         this.documentMetadata = documentMetadata;
+    }
+
+    public String getOverseas() {
+        return overseas;
+    }
+
+    public void setOverseas(String overseas) {
+        this.overseas = overseas;
+    }
+
+    public String getUkEstablishments() {
+        return ukEstablishments;
+    }
+
+    public void setUkEstablishments(String ukEstablishment) {
+        this.ukEstablishments = ukEstablishment;
     }
 }
