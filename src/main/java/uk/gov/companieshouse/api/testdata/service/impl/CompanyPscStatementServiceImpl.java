@@ -2,19 +2,14 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -86,13 +81,8 @@ public class CompanyPscStatementServiceImpl implements
                 != null && withdrawnPscStatementsCount > 0;
 
         int effectiveActivePscCount;
-        if (activePscStatementsCount != null) {
-            effectiveActivePscCount = activePscStatementsCount;
-        } else if (numberOfPsc != null) {
-            effectiveActivePscCount = numberOfPsc;
-        } else {
-            effectiveActivePscCount = 0;
-        }
+        effectiveActivePscCount = Objects.requireNonNullElseGet(activePscStatementsCount,
+                () -> Objects.requireNonNullElse(numberOfPsc, 0));
         boolean specificActiveOrNumberOfPscRequested = effectiveActivePscCount > 0;
 
 
@@ -111,7 +101,7 @@ public class CompanyPscStatementServiceImpl implements
 
     private void addWithdrawnPscStatements(CompanySpec originalSpec,
                                            int count, List<CompanyPscStatement> createdStatements) {
-        for (int i = 0; i < count; i++) {
+        for (var i = 0; i < count; i++) {
             var tempSpec = new CompanySpec();
             tempSpec.setCompanyNumber(originalSpec.getCompanyNumber());
             tempSpec.setCompanyType(originalSpec.getCompanyType());
@@ -124,7 +114,7 @@ public class CompanyPscStatementServiceImpl implements
 
     private void addActivePscStatements(CompanySpec originalSpec,
                                         int count, List<CompanyPscStatement> createdStatements) {
-        for (int i = 0; i < count; i++) {
+        for (var i = 0; i < count; i++) {
             var tempSpec = new CompanySpec();
             tempSpec.setCompanyNumber(originalSpec.getCompanyNumber());
             tempSpec.setCompanyType(originalSpec.getCompanyType());
