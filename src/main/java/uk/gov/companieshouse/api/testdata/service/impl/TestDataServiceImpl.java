@@ -149,7 +149,6 @@ public class TestDataServiceImpl implements TestDataService {
 
             companyPscsService.create(spec);
             LOG.info("Successfully created PSCs");
-
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
@@ -223,8 +222,6 @@ public class TestDataServiceImpl implements TestDataService {
                         + " is not an oversea company. Skipping UK establishments deletion.");
             }
         } catch (Exception de) {
-            LOG.error("Error while checking or deleting UK establishments for company number: "
-                    + companyId, de);
             suppressedExceptions.add(de);
         }
     }
@@ -250,8 +247,6 @@ public class TestDataServiceImpl implements TestDataService {
                             + ukEstablishmentNumber);
                     deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
                 } catch (Exception de) {
-                    LOG.error("Error while deleting UK establishment with company number: "
-                            + ukEstablishmentNumber, de);
                     suppressedExceptions.add(de);
                 }
             }
@@ -264,64 +259,54 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyProfileService.delete(companyId);
             LOG.info("Deleted company profile for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company profile for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.filingHistoryService.delete(companyId);
             LOG.info("Deleted filing history for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting filing history for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthCodeService.delete(companyId);
             LOG.info("Deleted company auth code for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company auth code for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.appointmentService.delete(companyId);
             LOG.info("Deleted appointments for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting appointments for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscStatementService.delete(companyId);
             LOG.info("Deleted PSC statements for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting PSC statements for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscsService.delete(companyId);
             LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting PSCs for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyMetricsService.delete(companyId);
             LOG.info("Deleted company metrics for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company metrics for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthAllowListService.delete(companyId);
             LOG.info("Deleted company auth allow list for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company auth allow list for company number: "
-                    + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyRegistersService.delete(companyId);
             LOG.info("Deleted company registers for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company registers for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
 
