@@ -62,7 +62,7 @@ In order to use the generator, there are different possible endpoints that can b
     - `psc_type`: Used alongside the `number_of_psc`. The types of PSCs to create (e.g., `individual`, `corporate`, `legal-person`, `individual-bo`, `corporate-bo`).
     }
   - `withdrawn_psc_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
-  - `active_psc_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 0.
+  - `active_psc_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values

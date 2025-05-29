@@ -2,13 +2,19 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -47,6 +53,11 @@ public class CompanyPscStatementServiceImpl implements
 
         if (spec.getCompanyType() == CompanyType.REGISTERED_OVERSEAS_ENTITY) {
             pscStatement.setStatement(PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
+        } else if (spec.getWithdrawnPscStatements()
+                != null && spec.getWithdrawnPscStatements() > 0) {
+            pscStatement.setStatement(PscStatement.BENEFICIAL_ACTIVE_OR_CEASED.getStatement());
+            pscStatement.setCeasedOn(
+                    LocalDate.now().minusYears(1).atStartOfDay(ZONE_ID_UTC).toInstant());
         } else if (spec.getNumberOfPsc() != null && spec.getNumberOfPsc() > 0) {
             pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
         } else {
@@ -69,18 +80,28 @@ public class CompanyPscStatementServiceImpl implements
 
         Integer withdrawnPscStatementsCount = spec.getWithdrawnPscStatements();
         Integer activePscStatementsCount = spec.getActivePscStatements();
+        Integer numberOfPsc = spec.getNumberOfPsc();
 
         boolean specificWithdrawnRequested = withdrawnPscStatementsCount
                 != null && withdrawnPscStatementsCount > 0;
-        boolean specificActiveRequested = activePscStatementsCount
-                != null && activePscStatementsCount > 0;
 
-        if (specificWithdrawnRequested || specificActiveRequested) {
+        int effectiveActivePscCount;
+        if (activePscStatementsCount != null) {
+            effectiveActivePscCount = activePscStatementsCount;
+        } else if (numberOfPsc != null) {
+            effectiveActivePscCount = numberOfPsc;
+        } else {
+            effectiveActivePscCount = 0;
+        }
+        boolean specificActiveOrNumberOfPscRequested = effectiveActivePscCount > 0;
+
+
+        if (specificWithdrawnRequested || specificActiveOrNumberOfPscRequested) {
             if (specificWithdrawnRequested) {
                 addWithdrawnPscStatements(spec, withdrawnPscStatementsCount, createdStatements);
             }
-            if (specificActiveRequested) {
-                addActivePscStatements(spec, activePscStatementsCount, createdStatements);
+            if (specificActiveOrNumberOfPscRequested) {
+                addActivePscStatements(spec, effectiveActivePscCount, createdStatements);
             }
         } else {
             createdStatements.add(this.create(spec));
