@@ -124,8 +124,10 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
-        final String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
-
+        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        if (spec.getIsPaddingCompanyNumber() != null) {
+            companyNumberPrefix = companyNumberPrefix + "000";
+        }
         do {
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
