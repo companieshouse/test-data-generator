@@ -23,6 +23,8 @@ public class Links {
     private String company;
     @Field("registers")
     private String registers;
+    @Field("document_metadata")
+    private String documentMetadata;
     @Field("overseas")
     private String overseas;
     @Field("uk_establishments")
@@ -99,6 +101,14 @@ public class Links {
 
     public void setRegisters(String registers) {
         this.registers = registers;
+    }
+
+    public String getDocumentMetadata() {
+        return documentMetadata;
+    }
+
+    public void setDocumentMetadata(String documentMetadata) {
+        this.documentMetadata = documentMetadata;
     }
 
     public String getOverseas() {

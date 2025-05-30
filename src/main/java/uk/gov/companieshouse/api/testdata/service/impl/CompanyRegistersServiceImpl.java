@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
 @Service
 public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters, CompanySpec> {
@@ -96,10 +97,19 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         var registerItem = new RegisterItem();
         registerItem.setRegisterMovedTo(registerSpec.getRegisterMovedTo());
         registerItem.setMovedOn(LocalDate.now());
+//        if (PUBLIC_REGISTER.equals(registerSpec.getRegisterMovedTo())) {
+//            filingHistoryRepository.findAllByCompanyNumber(companyNumber).ifPresent(filingHistory ->
+//                    registerItem.setFilingLink(FILING_HISTORY_LINK.formatted(companyNumber, filingHistory.getId()))
+//            );
+//        }
         if (PUBLIC_REGISTER.equals(registerSpec.getRegisterMovedTo())) {
-            filingHistoryRepository.findByCompanyNumber(companyNumber).ifPresent(filingHistory ->
-                    registerItem.setFilingLink(FILING_HISTORY_LINK.formatted(companyNumber, filingHistory.getId()))
-            );
+            Optional<List<FilingHistory>> optionalFilingHistories = filingHistoryRepository.findAllByCompanyNumber(companyNumber);
+            optionalFilingHistories.ifPresent(filingHistories -> {
+                if (!filingHistories.isEmpty()) {
+                    FilingHistory firstFilingHistory = filingHistories.get(0);
+                    registerItem.setFilingLink(FILING_HISTORY_LINK.formatted(companyNumber, firstFilingHistory.getId()));
+                }
+            });
         }
         var register = new Register();
         register.setRegisterType(registerSpec.getRegisterType());
