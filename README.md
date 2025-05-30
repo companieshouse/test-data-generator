@@ -53,6 +53,8 @@ In order to use the generator, there are different possible endpoints that can b
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
   - `accounts_due_status`: Set the accounts and confirmation statement due dates of the company by providing accounts_due_status (e.g., `overdue`, `due-soon`). Defaults to current date. 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
+  - `company_name`: The name of the company. Defaults to a randomly generated name. Creates a company with the name provided and appended with company number.
+  - `is_company_number_padding`: Boolean value to determine if the company number should be padded with zeros. Defaults to false, `true` value will create a company number with leading zeros.
   - `filing_history`: {
     - `type`: The type of the submission (e.g., `GAZ1(A)`, `DS01`). Defaults to `NEWINC`.
     - `category`: The category of the filing (e.g., `incorporation`, `dissolution`, `gazette`). Defaults to `incorporation`.
@@ -73,6 +75,8 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_psc_statements": 3 }`
   - A usage example for creating a company with active psc statements: `{ "active_psc_statements": 5 }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
+  - A usage example for creating a company with padded company number: `{ "is_company_number_padding": true }`
+  - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.

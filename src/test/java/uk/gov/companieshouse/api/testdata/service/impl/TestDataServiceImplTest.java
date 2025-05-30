@@ -1641,4 +1641,23 @@ class TestDataServiceImplTest {
         assertEquals(ex.getMessage(), thrown.getMessage());
     }
 
+    @Test
+    void createCompanyWithCompanyNumberPadding() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setIsPaddingCompanyNumber(true);
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        String companyNumber = "123";
+        String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + "000" + companyNumber;
+
+        // Use anyInt() to allow flexibility in the argument
+        when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(companyNumber));
+
+        setupCompanyCreationMocks(spec, companyNumber, 3, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.SCOTLAND);
+    }
+
 }

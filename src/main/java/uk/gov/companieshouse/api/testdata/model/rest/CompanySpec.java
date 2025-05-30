@@ -74,6 +74,12 @@ public class CompanySpec {
     @JsonProperty("registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
 
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @JsonProperty("is_company_number_padding")
+    private Boolean isPaddingCompanyNumber;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -220,6 +226,22 @@ public class CompanySpec {
 
     public void setActivePscStatements(Integer activePscStatements) {
         this.activePscStatements = activePscStatements;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public Boolean getIsPaddingCompanyNumber() {
+        return isPaddingCompanyNumber;
+    }
+
+    public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
+        this.isPaddingCompanyNumber = isPaddingCompanyNumber;
     }
 }
 

@@ -146,7 +146,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
-        setCompanyName(profile, companyNumber, companyTypeValue);
+        if (spec.getCompanyName() != null) {
+            profile.setCompanyName(spec.getCompanyName() + " " + companyNumber);
+        } else {
+            setCompanyName(profile, companyNumber, companyTypeValue);
+        }
         profile.setSicCodes(Collections.singletonList("71200"));
 
         var confirmationStatement = profile.getConfirmationStatement();
@@ -216,7 +220,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         // Company Details
         overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
-        overseasEntity.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
+        if (spec.getCompanyName() != null) {
+            overseasEntity.setCompanyName(spec.getCompanyName() + " " + companyNumber);
+        } else {
+            setCompanyName(overseasEntity, companyNumber, companyType.getValue());
+        }
         overseasEntity.setRegisteredOfficeIsInDispute(false);
         setRegisteredOfficeAddressIsInDispute(overseasEntity, isRegisteredOfficeIsInDispute);
         overseasEntity.setEtag(randomService.getEtag());
