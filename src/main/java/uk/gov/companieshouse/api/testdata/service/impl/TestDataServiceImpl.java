@@ -17,7 +17,6 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
@@ -59,7 +58,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class TestDataServiceImpl implements TestDataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
-
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
     @Autowired
@@ -73,7 +71,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
-    private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
+    private CompanyPscStatementServiceImpl companyPscStatementService;
     @Autowired
     private DataService<CompanyPscs, CompanySpec> companyPscsService;
     @Autowired
@@ -104,7 +102,6 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanySearchService companySearchService;
     @Autowired
     private AccountPenaltiesService accountPenaltiesService;
-
     @Value("${api.url}")
     private String apiUrl;
 
@@ -150,12 +147,11 @@ public class TestDataServiceImpl implements TestDataService {
             companyMetricsService.create(spec);
             LOG.info("Successfully created company metrics");
 
-            companyPscStatementService.create(spec);
-            LOG.info("Successfully created PSC statement");
+            companyPscStatementService.createPscStatements(spec);
+            LOG.info("Successfully created all PSC statements based on spec counts.");
 
             companyPscsService.create(spec);
             LOG.info("Successfully created PSCs");
-
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
@@ -165,7 +161,6 @@ public class TestDataServiceImpl implements TestDataService {
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
-
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
@@ -180,10 +175,8 @@ public class TestDataServiceImpl implements TestDataService {
             data.put("error message", ex.getMessage());
             LOG.error("Failed to create company data for company number: "
                     + spec.getCompanyNumber(), ex, data);
-
             // Rollback all successful insertions
             deleteCompanyData(spec.getCompanyNumber());
-
             throw new DataException("Failed to create company data in service", ex);
         }
     }
@@ -200,7 +193,18 @@ public class TestDataServiceImpl implements TestDataService {
         if (!suppressedExceptions.isEmpty()) {
             LOG.error("Errors occurred while deleting company data for company number: "
                     + companyId);
-            var ex = new DataException("Error deleting company data");
+            var errorMessage = new StringBuilder(
+                    "Error deleting company data. Details: ");
+            for (var i = 0; i < suppressedExceptions.size(); i++) {
+                var ex = suppressedExceptions.get(i);
+                errorMessage.append(" [").append(i + 1).append("] ")
+                        .append(ex.getMessage() != null ? ex.getMessage() : "Unknown error");
+                if (ex.getCause() != null) {
+                    errorMessage.append(" Cause: ").append(ex.getCause().getMessage()
+                            != null ? ex.getCause().getMessage() : "Unknown cause");
+                }
+            }
+            var ex = new DataException(errorMessage.toString());
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
@@ -221,8 +225,6 @@ public class TestDataServiceImpl implements TestDataService {
                         + " is not an oversea company. Skipping UK establishments deletion.");
             }
         } catch (Exception de) {
-            LOG.error("Error while checking or deleting UK establishments for company number: "
-                    + companyId, de);
             suppressedExceptions.add(de);
         }
     }
@@ -248,8 +250,6 @@ public class TestDataServiceImpl implements TestDataService {
                             + ukEstablishmentNumber);
                     deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
                 } catch (Exception de) {
-                    LOG.error("Error while deleting UK establishment with company number: "
-                            + ukEstablishmentNumber, de);
                     suppressedExceptions.add(de);
                 }
             }
@@ -262,64 +262,54 @@ public class TestDataServiceImpl implements TestDataService {
             this.companyProfileService.delete(companyId);
             LOG.info("Deleted company profile for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company profile for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.filingHistoryService.delete(companyId);
             LOG.info("Deleted filing history for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting filing history for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthCodeService.delete(companyId);
             LOG.info("Deleted company auth code for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company auth code for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.appointmentService.delete(companyId);
             LOG.info("Deleted appointments for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting appointments for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscStatementService.delete(companyId);
             LOG.info("Deleted PSC statements for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting PSC statements for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyPscsService.delete(companyId);
             LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting PSCs for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyMetricsService.delete(companyId);
             LOG.info("Deleted company metrics for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company metrics for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyAuthAllowListService.delete(companyId);
             LOG.info("Deleted company auth allow list for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company auth allow list for company number: "
-                    + companyId, de);
             suppressedExceptions.add(de);
         }
         try {
             this.companyRegistersService.delete(companyId);
             LOG.info("Deleted company registers for company number: " + companyId);
         } catch (Exception de) {
-            LOG.error("Error deleting company registers for company number: " + companyId, de);
             suppressedExceptions.add(de);
         }
 
@@ -436,7 +426,6 @@ public class TestDataServiceImpl implements TestDataService {
                     createdMember.getStatus(),
                     createdMember.getUserRole()
             );
-
         } catch (Exception ex) {
             throw new DataException(ex);
         }
@@ -462,7 +451,6 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public boolean deleteAcspMembersData(String acspMemberId) throws DataException {
         List<Exception> suppressedExceptions = new ArrayList<>();
-
         try {
             var maybeMember = acspMembersRepository.findById(acspMemberId);
             if (maybeMember.isPresent()) {
@@ -495,13 +483,11 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             CertificatesData createdCertificates = certificatesService.create(spec);
-
             return new CertificatesData(
                     createdCertificates.getId(),
                     createdCertificates.getCreatedAt(),
                     createdCertificates.getUpdatedAt()
             );
-
         } catch (Exception ex) {
             throw new DataException("Error creating certificates", ex);
         }

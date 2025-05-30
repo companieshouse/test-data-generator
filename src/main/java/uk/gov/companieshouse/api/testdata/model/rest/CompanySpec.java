@@ -62,6 +62,12 @@ public class CompanySpec {
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
+    @JsonProperty("withdrawn_psc_statements")
+    private Integer withdrawnPscStatements;
+
+    @JsonProperty("active_psc_statements")
+    private Integer activePscStatements;
+
     @JsonProperty("has_uk_establishment")
     private Boolean hasUkEstablishment;
 
@@ -204,6 +210,22 @@ public class CompanySpec {
 
     public void setRegisteredOfficeIsInDispute(Boolean registeredOfficeIsInDispute) {
         this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
+    }
+
+    public Integer getWithdrawnPscStatements() {
+        return withdrawnPscStatements;
+    }
+
+    public void setWithdrawnPscStatements(Integer withdrawnPscStatements) {
+        this.withdrawnPscStatements = withdrawnPscStatements;
+    }
+
+    public Integer getActivePscStatements() {
+        return activePscStatements;
+    }
+
+    public void setActivePscStatements(Integer activePscStatements) {
+        this.activePscStatements = activePscStatements;
     }
 
     public String getCompanyName() {
