@@ -152,11 +152,16 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         CompanyPscs firstPsc = null;
         boolean isOverseasEntity = CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
 
+        boolean ceaseFirstPsc = spec.getPscActive() != null && !spec.getPscActive();
+
         for (var i = 0; i < numberOfPsc; i++) {
             LOG.debug("Creating PSC " + (i + 1) + " of " + numberOfPsc);
+
+            boolean isActive = !(ceaseFirstPsc && i == 0);
+
             CompanyPscs psc = isOverseasEntity
-                    ? createBeneficialOwner(spec, getBeneficialOwnerType(spec.getPscType(), i))
-                    : createPsc(spec, getRegularPscType(spec.getPscType(), i));
+                    ? createBeneficialOwner(spec, getBeneficialOwnerType(spec.getPscType(), i), isActive)
+                    : createPsc(spec, getRegularPscType(spec.getPscType(), i), isActive);
 
             if (firstPsc == null) {
                 firstPsc = psc;
@@ -166,7 +171,6 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         LOG.info("Successfully created PSCs for company number: " + spec.getCompanyNumber());
         return firstPsc;
     }
-
 
     private PscType getBeneficialOwnerType(List<PscType> requestedPscTypes, int index) {
         if (requestedPscTypes != null && !requestedPscTypes.isEmpty()) {
@@ -194,18 +198,18 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     }
 
     private CompanyPscs createSuperSecureBeneficialOwner(CompanySpec spec) {
-        CompanyPscs superSecureBo = createBasePsc(spec);
+        CompanyPscs superSecureBo = createBasePsc(spec, true);
         buildSuperSecureBeneficialOwner(superSecureBo);
         return repository.save(superSecureBo);
     }
 
     private CompanyPscs createSuperSecurePsc(CompanySpec spec) {
-        CompanyPscs superSecurePsc = createBasePsc(spec);
+        CompanyPscs superSecurePsc = createBasePsc(spec, true);
         buildSuperSecurePsc(superSecurePsc);
         return repository.save(superSecurePsc);
     }
 
-    private CompanyPscs createBasePsc(CompanySpec spec) {
+    CompanyPscs createBasePsc(CompanySpec spec, boolean isActive) {
         var companyPsc = new CompanyPscs();
         companyPsc.setCompanyNumber(spec.getCompanyNumber());
 
@@ -214,6 +218,12 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         companyPsc.setUpdatedAt(createdUpdatedAt);
         companyPsc.setNotifiedOn(createdUpdatedAt);
         companyPsc.setRegisterEntryDate(createdUpdatedAt);
+
+        companyPsc.setCeased(!isActive);
+        if (!isActive) {
+            Instant ceasedDate = LocalDate.now().minusDays(30).atStartOfDay(ZoneId.of("UTC")).toInstant();
+            companyPsc.setCeasedOn(ceasedDate);
+        }
 
         companyPsc.setId(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         companyPsc.setEtag(this.randomService.getEtag());
@@ -264,8 +274,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         companyPscs.setLinks(links);
     }
 
-    private CompanyPscs createPsc(CompanySpec spec, PscType pscType) {
-        var companyPscs = createBasePsc(spec);
+    private CompanyPscs createPsc(CompanySpec spec, PscType pscType, boolean isActive) {
+        var companyPscs = createBasePsc(spec, isActive);
         switch (pscType) {
             case INDIVIDUAL:
                 buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
@@ -279,8 +289,8 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         return repository.save(companyPscs);
     }
 
-    private CompanyPscs createBeneficialOwner(CompanySpec spec, PscType pscType) {
-        var beneficialOwner = createBasePsc(spec);
+    private CompanyPscs createBeneficialOwner(CompanySpec spec, PscType pscType, boolean isActive) {
+        var beneficialOwner = createBasePsc(spec, isActive);
         switch (pscType) {
             case INDIVIDUAL_BENEFICIAL_OWNER:
                 buildIndividualBeneficialOwner(beneficialOwner);

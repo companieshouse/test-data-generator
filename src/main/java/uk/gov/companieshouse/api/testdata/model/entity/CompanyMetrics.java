@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.util.Map;
 
 @Document(collection = "company_metrics")
 public class CompanyMetrics {
@@ -32,51 +32,15 @@ public class CompanyMetrics {
         int withdrawnStatementsCount;
 
         void updateCounts() {
-            pscCount = activePscCount + ceasedPscCount;
-            statementsCount = activeStatementsCount + withdrawnStatementsCount;
             totalCount = pscCount + statementsCount;
         }
     }
 
-    private class OfficerMetrics {
-        @Field("total_count")
-        int totalCount;
-
-        @Field("active_count")
-        int activeCount;
-
-        @Field("resigned_count")
-        int resignedCount;
-
-        @Field("active_llp_members_count")
-        int activeLlpMembersCount;
-
-        @Field("active_directors_count")
-        int activeDirectorsCount;
-
-        @Field("active_secretaries_count")
-        int activeSecretariesCount;
-
-        void updateCounts() {
-            activeCount = activeDirectorsCount + activeSecretariesCount + activeLlpMembersCount;
-            totalCount = activeCount + resignedCount;
-        }
-    }
-
-    @Id
-    @Field("id")
-    private String id;
-
-    @Field("data.counts.persons-with-significant-control")
     private PscMetrics psc = new PscMetrics();
 
-    @Field("data.counts.appointments")
-    private OfficerMetrics officer = new OfficerMetrics();
-
-    @Field("data.etag")
+    @Id
+    private String id;
     private String etag;
-
-    @Field("data.registers")
     private Map<String, RegisterItem> registers;
 
     public String getId() {
@@ -95,39 +59,8 @@ public class CompanyMetrics {
         this.etag = etag;
     }
 
-    public int getActivePscCount() {
-        return this.psc.activePscCount;
-    }
-
-    public void setActivePscCount(int count) {
-        this.psc.activePscCount = count;
-        this.psc.updateCounts();
-    }
-
-    public int getCeasedPscCount() {
-        return this.psc.ceasedPscCount;
-    }
-
-    public void setCeasedPscCount(int count) {
-        this.psc.ceasedPscCount = count;
-        this.psc.updateCounts();
-    }
-    
-    public int getActivePscStatementsCount() {
-        return this.psc.activeStatementsCount;
-    }
-
-    public void setActivePscStatementsCount(int count) {
-        this.psc.activeStatementsCount = count;
-        this.psc.updateCounts();
-    }
-
-    public int getWithdrawnStatementsCount() {
-        return this.psc.withdrawnStatementsCount;
-    }
-
-    public void setWithdrawnPscStatementsCount(int count) {
-        this.psc.withdrawnStatementsCount = count;
+    public void setPscCount(int pscCount) {
+        this.psc.pscCount = pscCount;
         this.psc.updateCounts();
     }
 
@@ -135,13 +68,63 @@ public class CompanyMetrics {
         return this.psc.pscCount;
     }
 
-    public int getPscTotalCount() {
-        return this.psc.totalCount;
+    public void setActivePscCount(int activePscCount) {
+        this.psc.activePscCount = activePscCount;
+        this.psc.updateCounts();
     }
 
-    public int getPscStatementsCount() {
-        return this.psc.statementsCount;
+    public int getActivePscCount() {
+        return this.psc.activePscCount;
     }
+
+    public int getActiveStatementsCount() {
+        return this.psc.activeStatementsCount;
+    }
+
+    public void setActiveStatementsCount(int activeStatementsCount) {
+        this.psc.activeStatementsCount = activeStatementsCount;
+        this.psc.updateCounts();
+    }
+
+    public int getCeasedPscCount() {
+        return this.psc.ceasedPscCount;
+    }
+
+    public void setCeasedPscCount(int ceasedPscCount) {
+        this.psc.ceasedPscCount = ceasedPscCount;
+        this.psc.updateCounts();
+    }
+
+    public int getWithdrawnStatementsCount() {
+        return this.psc.withdrawnStatementsCount;
+    }
+
+    public void setWithdrawnStatementsCount(int withdrawnStatementsCount) {
+        this.psc.withdrawnStatementsCount = withdrawnStatementsCount;
+        this.psc.updateCounts();
+    }
+
+    private class OfficerMetrics {
+        @Field("total_count")
+        int totalCount;
+        @Field("active_count")
+        int activeCount;
+        @Field("resigned_count")
+        int resignedCount;
+        @Field("active_llp_members_count")
+        int activeLlpMembersCount;
+        @Field("active_directors_count")
+        int activeDirectorsCount;
+        @Field("active_secretaries_count")
+        int activeSecretariesCount;
+
+        void updateCounts() {
+            activeCount = activeLlpMembersCount + activeDirectorsCount + activeSecretariesCount;
+            totalCount = activeCount + resignedCount;
+        }
+    }
+
+    private OfficerMetrics officer = new OfficerMetrics();
 
     public int getActiveDirectorsCount() {
         return this.officer.activeDirectorsCount;
