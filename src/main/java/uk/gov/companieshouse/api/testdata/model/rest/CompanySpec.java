@@ -65,11 +65,11 @@ public class CompanySpec {
     @JsonProperty("psc_active")
     private Boolean pscActive;
 
-    @JsonProperty("withdrawn_psc_statements")
-    private Integer withdrawnPscStatements;
+    @JsonProperty("withdrawn_statements")
+    private Integer withdrawnStatements;
 
-    @JsonProperty("active_psc_statements")
-    private Integer activePscStatements;
+    @JsonProperty("active_statements")
+    private Integer activeStatements;
 
     @JsonProperty("has_uk_establishment")
     private Boolean hasUkEstablishment;
@@ -223,20 +223,20 @@ public class CompanySpec {
         this.pscActive = pscActive;
     }
 
-    public Integer getWithdrawnPscStatements() {
-        return withdrawnPscStatements;
+    public Integer getWithdrawnStatements() {
+        return withdrawnStatements;
     }
 
-    public void setWithdrawnPscStatements(Integer withdrawnPscStatements) {
-        this.withdrawnPscStatements = withdrawnPscStatements;
+    public void setWithdrawnStatements(Integer withdrawnStatements) {
+        this.withdrawnStatements = withdrawnStatements;
     }
 
-    public Integer getActivePscStatements() {
-        return activePscStatements;
+    public Integer getActiveStatements() {
+        return activeStatements;
     }
 
-    public void setActivePscStatements(Integer activePscStatements) {
-        this.activePscStatements = activePscStatements;
+    public void setActiveStatements(Integer activeStatements) {
+        this.activeStatements = activeStatements;
     }
 
     public String getCompanyName() {

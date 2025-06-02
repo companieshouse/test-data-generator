@@ -32,6 +32,8 @@ public class CompanyMetrics {
         int withdrawnStatementsCount;
 
         void updateCounts() {
+            pscCount = activePscCount + ceasedPscCount;
+            statementsCount = activeStatementsCount + withdrawnStatementsCount;
             totalCount = pscCount + statementsCount;
         }
     }
@@ -61,7 +63,6 @@ public class CompanyMetrics {
 
     public void setPscCount(int pscCount) {
         this.psc.pscCount = pscCount;
-        this.psc.updateCounts();
     }
 
     public int getPscCount() {

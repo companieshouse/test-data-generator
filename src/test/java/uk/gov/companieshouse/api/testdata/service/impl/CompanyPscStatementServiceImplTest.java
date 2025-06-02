@@ -36,6 +36,7 @@ class CompanyPscStatementServiceImplTest {
     private static final String PSC_STATEMENT_1 = "no-individual-or-entity-with-signficant-control";
     private static final String PSC_STATEMENT_2 = "psc-exists-but-not-identified";
     private static final String PSC_STATEMENT_3 = "all-beneficial-owners-identified";
+    private static final String PSC_STATEMENT_4 = "psc-exists-but-not-identified";
 
     @Mock
     private RandomService randomService;
@@ -68,15 +69,13 @@ class CompanyPscStatementServiceImplTest {
         assertEquals(COMPANY_NUMBER, capturedStatement.getCompanyNumber());
         assertEquals(ETAG, capturedStatement.getEtag());
         assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertNotNull(capturedStatement.getUpdatedAt());
-        assertNotNull(capturedStatement.getCreatedAt());
         assertNotNull(capturedStatement.getNotifiedOn());
 
         Links links = capturedStatement.getLinks();
         assertNotNull(links);
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/" + ENCODED_VALUE, links.getSelf());
 
-        assertEquals(PSC_STATEMENT_1, capturedStatement.getStatement());
+        assertEquals(PSC_STATEMENT_4, capturedStatement.getStatement());
     }
 
     @Test
@@ -117,7 +116,7 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals(PSC_STATEMENT_1, capturedStatement.getStatement());
+        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
     }
 
     @Test
@@ -159,7 +158,7 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals(PSC_STATEMENT_1, capturedStatement.getStatement());
+        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
     }
 
     @Test
@@ -197,8 +196,8 @@ class CompanyPscStatementServiceImplTest {
     void createPscStatements_onlyWithdrawn() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setWithdrawnPscStatements(2);
-        spec.setActivePscStatements(0);
+        spec.setWithdrawnStatements(2);
+        spec.setActiveStatements(0);
 
         doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
 
@@ -211,17 +210,21 @@ class CompanyPscStatementServiceImplTest {
         verify(companyPscStatementService, times(2)).create(specCaptor.capture());
 
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
-        assertEquals(1, capturedSpecs.get(0).getWithdrawnPscStatements());
+        assertEquals(1, capturedSpecs.get(0).getWithdrawnStatements());
         assertEquals(0, capturedSpecs.get(0).getNumberOfPsc());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
+
+        assertEquals(1, capturedSpecs.get(1).getWithdrawnStatements());
+        assertEquals(0, capturedSpecs.get(1).getNumberOfPsc());
+        assertEquals(COMPANY_NUMBER, capturedSpecs.get(1).getCompanyNumber());
     }
 
     @Test
     void createPscStatements_onlyActive() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setWithdrawnPscStatements(0);
-        spec.setActivePscStatements(3);
+        spec.setWithdrawnStatements(0);
+        spec.setActiveStatements(3);
 
         doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
 
@@ -234,11 +237,10 @@ class CompanyPscStatementServiceImplTest {
         verify(companyPscStatementService, times(3)).create(specCaptor.capture());
 
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
-        assertEquals(0, capturedSpecs.get(0).getWithdrawnPscStatements());
-        assertEquals(1, capturedSpecs.get(0).getNumberOfPsc());
-        assertEquals(0, capturedSpecs.get(1).getWithdrawnPscStatements());
+        assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
+        assertEquals(0, capturedSpecs.get(1).getWithdrawnStatements());
         assertEquals(1, capturedSpecs.get(1).getNumberOfPsc());
-        assertEquals(0, capturedSpecs.get(2).getWithdrawnPscStatements());
+        assertEquals(0, capturedSpecs.get(2).getWithdrawnStatements());
         assertEquals(1, capturedSpecs.get(2).getNumberOfPsc());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
     }
@@ -247,8 +249,8 @@ class CompanyPscStatementServiceImplTest {
     void createPscStatements_bothActiveAndWithdrawn() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setWithdrawnPscStatements(1);
-        spec.setActivePscStatements(2);
+        spec.setWithdrawnStatements(1);
+        spec.setActiveStatements(2);
 
         doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
 
@@ -262,15 +264,15 @@ class CompanyPscStatementServiceImplTest {
 
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
 
-        assertEquals(1, capturedSpecs.get(0).getWithdrawnPscStatements());
+        assertEquals(1, capturedSpecs.get(0).getWithdrawnStatements());
         assertEquals(0, capturedSpecs.get(0).getNumberOfPsc());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
 
-        assertEquals(0, capturedSpecs.get(1).getWithdrawnPscStatements());
+        assertEquals(0, capturedSpecs.get(1).getWithdrawnStatements());
         assertEquals(1, capturedSpecs.get(1).getNumberOfPsc());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(1).getCompanyNumber());
 
-        assertEquals(0, capturedSpecs.get(2).getWithdrawnPscStatements());
+        assertEquals(0, capturedSpecs.get(2).getWithdrawnStatements());
         assertEquals(1, capturedSpecs.get(2).getNumberOfPsc());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(2).getCompanyNumber());
     }

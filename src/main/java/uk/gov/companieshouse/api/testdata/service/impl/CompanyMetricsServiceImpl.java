@@ -73,18 +73,18 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         var metrics = new CompanyMetrics();
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
-        metrics.setActiveStatementsCount(1);
 
-        if (spec.getActiveStatementsCount() != null) {
-            metrics.setActiveStatementsCount(spec.getActivePscStatements());
-        } else if (spec.getNumberOfPsc() != null) {
-            metrics.setActiveStatementsCount(spec.getNumberOfPsc());
-        } else {
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActiveStatementsCount(1);
+        } else if (spec.getActiveStatements() == null) {
+            metrics.setActiveStatementsCount(spec.getNumberOfPsc()
+                    == null ? 0 : spec.getNumberOfPsc());
+        } else {
+            metrics.setActiveStatementsCount(spec.getActiveStatements());
         }
 
         metrics.setWithdrawnStatementsCount(
-                spec.getWithdrawnPscStatements() == null ? 0 : spec.getWithdrawnPscStatements()
+                spec.getWithdrawnStatements() == null ? 0 : spec.getWithdrawnStatements()
         );
 
         LOG.debug("Initialized CompanyMetrics with ID: "
@@ -135,20 +135,17 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     }
 
     public void setCeasedPscCount(CompanyMetrics metrics, CompanySpec spec) {
-        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
-            metrics.setCeasedPscCount(0);
+        int ceasedCount = 0;
+
+        if (Boolean.FALSE.equals(spec.getPscActive())) {
+            ceasedCount = 1;
+            LOG.debug("PSC active is false in spec. Set ceased PSC count to 1.");
+        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            ceasedCount = 0;
             LOG.debug("Company has super secure PSCs. Set ceased PSC count to 0.");
-        } else if (spec.getNumberOfPsc() != null) {
-            int ceasedCount = spec.getNumberOfPsc();
-            if (Boolean.FALSE.equals(spec.getPscActive())) {
-                ceasedCount = Math.max(0, spec.getNumberOfPsc() - metrics.getActivePscCount());
-            }
-            metrics.setCeasedPscCount(ceasedCount);
-            LOG.debug("Set ceased PSC count to " + ceasedCount);
-        } else {
-            metrics.setCeasedPscCount(0);
-            LOG.debug("No PSC count provided. Set ceased PSC count to 0.");
         }
+
+        metrics.setCeasedPscCount(ceasedCount);
     }
 
     private Map<String, RegisterItem> createRegisters(List<RegistersSpec> registers) {

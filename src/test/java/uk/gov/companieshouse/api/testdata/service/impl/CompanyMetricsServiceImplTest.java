@@ -300,7 +300,7 @@ class CompanyMetricsServiceImplTest {
     void createWithActivePscStatementsCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setActivePscStatements(3); // Directly set active PSC statements
+        spec.setActiveStatements(3);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics()); // Return a dummy for verification
@@ -311,7 +311,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(3, metrics.getActivePscStatementsCount());
+        assertEquals(3, metrics.getActiveStatementsCount());
     }
 
     @Test
@@ -329,7 +329,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(2, metrics.getActivePscStatementsCount());
+        assertEquals(2, metrics.getActiveStatementsCount());
     }
 
     @Test
@@ -346,14 +346,14 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(1, metrics.getActivePscStatementsCount());
+        assertEquals(0, metrics.getActiveStatementsCount());
     }
 
     @Test
     void createWithGivenWithdrawnPscStatementsCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setWithdrawnPscStatements(4);
+        spec.setWithdrawnStatements(4);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
