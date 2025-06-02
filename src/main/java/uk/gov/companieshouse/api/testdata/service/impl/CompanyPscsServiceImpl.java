@@ -221,7 +221,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
         companyPsc.setCeased(!isActive);
         if (!isActive) {
-            Instant ceasedDate = LocalDate.now().minusDays(30).atStartOfDay(ZoneId.of("UTC")).toInstant();
+            var ceasedDate = LocalDate.now().minusDays(30).atStartOfDay(ZoneId.of("UTC")).toInstant();
             companyPsc.setCeasedOn(ceasedDate);
         }
 

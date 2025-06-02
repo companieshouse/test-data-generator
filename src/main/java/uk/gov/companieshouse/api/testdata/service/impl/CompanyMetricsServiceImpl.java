@@ -135,7 +135,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     }
 
     public void setCeasedPscCount(CompanyMetrics metrics, CompanySpec spec) {
-        int ceasedCount = 0;
+        var ceasedCount = 0;
 
         if (Boolean.FALSE.equals(spec.getPscActive())) {
             ceasedCount = 1;

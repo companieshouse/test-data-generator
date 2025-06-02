@@ -1,22 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -51,7 +44,7 @@ public class CompanyPscStatementServiceImpl implements
         pscStatement.setEtag(randomService.getEtag());
 
         pscStatement.setKind("persons-with-significant-control-statement");
-        Links links = new Links();
+        var links = new Links();
         links.setSelf(URL_PREFIX + pscStatement.getCompanyNumber()
                 + PSC_SUFFIX
                 + pscStatement.getId());
@@ -112,8 +105,8 @@ public class CompanyPscStatementServiceImpl implements
 
     private void addWithdrawnPscStatements(
             CompanySpec spec, Integer count, List<CompanyPscStatement> statements) {
-        for (int i = 0; i < count; i++) {
-            CompanySpec tempSpec = new CompanySpec();
+        for (var i = 0; i < count; i++) {
+            var tempSpec = new CompanySpec();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(1);
@@ -125,8 +118,8 @@ public class CompanyPscStatementServiceImpl implements
 
     private void addActivePscStatements(
             CompanySpec spec, Integer count, List<CompanyPscStatement> statements) {
-        for (int i = 0; i < count; i++) {
-            CompanySpec tempSpec = new CompanySpec();
+        for (var i = 0; i < count; i++) {
+            var tempSpec = new CompanySpec();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(0);
