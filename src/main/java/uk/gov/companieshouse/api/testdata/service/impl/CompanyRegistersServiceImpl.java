@@ -97,16 +97,11 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         var registerItem = new RegisterItem();
         registerItem.setRegisterMovedTo(registerSpec.getRegisterMovedTo());
         registerItem.setMovedOn(LocalDate.now());
-//        if (PUBLIC_REGISTER.equals(registerSpec.getRegisterMovedTo())) {
-//            filingHistoryRepository.findAllByCompanyNumber(companyNumber).ifPresent(filingHistory ->
-//                    registerItem.setFilingLink(FILING_HISTORY_LINK.formatted(companyNumber, filingHistory.getId()))
-//            );
-//        }
         if (PUBLIC_REGISTER.equals(registerSpec.getRegisterMovedTo())) {
             Optional<List<FilingHistory>> optionalFilingHistories = filingHistoryRepository.findAllByCompanyNumber(companyNumber);
             optionalFilingHistories.ifPresent(filingHistories -> {
                 if (!filingHistories.isEmpty()) {
-                    FilingHistory firstFilingHistory = filingHistories.get(0);
+                    var firstFilingHistory = filingHistories.get(0);
                     registerItem.setFilingLink(FILING_HISTORY_LINK.formatted(companyNumber, firstFilingHistory.getId()));
                 }
             });

@@ -1,11 +1,17 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +19,12 @@ import org.springframework.util.StringUtils;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
+import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
+import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
+import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
@@ -90,28 +101,52 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     }
 
     private FilingHistory createFilingHistoryFromSpec(CompanySpec spec, FilingHistorySpec fhSpec, Instant dayNow, Instant dayTimeNow) throws DataException {
-        String barcode;
-        try {
-            barcode = barcodeService.getBarcode();
-        } catch (BarcodeServiceException ex) {
-            throw new DataException(ex.getMessage(), ex);
-        }
-
-        String entityId = ENTITY_ID_PREFIX + this.randomService.getNumber(ENTITY_ID_LENGTH);
+        String barcode = getBarcode();
+        String entityId = ENTITY_ID_PREFIX + randomService.getNumber(ENTITY_ID_LENGTH);
         LOG.debug("Generated entity ID: " + entityId);
 
-        // Safe check for null fhSpec before getting type
-        String type = TYPE;  // default type
-        if (fhSpec != null && fhSpec.getType() != null) {
-            type = fhSpec.getType();
-        }
+        String type = (fhSpec != null && fhSpec.getType() != null) ? fhSpec.getType() : TYPE;
 
         FilingHistory filingHistory = new FilingHistory();
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
+        filingHistory.setLinks(createLinks(type, spec.getCompanyNumber(), entityId));
+        filingHistory.setEntityId(entityId);
+        filingHistory.setCategory(getOrDefault(fhSpec, FilingHistorySpec::getCategory, CATEGORY));
+        filingHistory.setType(type);
+        filingHistory.setSubCategory(getOrDefault(fhSpec, FilingHistorySpec::getSubCategory, null));
+        filingHistory.setOriginalDescription(getOrDefault(fhSpec, FilingHistorySpec::getOriginalDescription, ORIGINAL_DESCRIPTION));
+        filingHistory.setBarcode(barcode);
+        filingHistory.setDescription(getOrDefault(fhSpec, FilingHistorySpec::getDescription, DESCRIPTION));
 
-        filingHistory.setLinks(createLinks(fhSpec != null ? fhSpec.getType() : null, spec.getCompanyNumber(), entityId));
+        applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow);
 
+        if (!"MR01".equals(type)) {
+            filingHistory.setActionDate(dayTimeNow);
+            filingHistory.setPages(10);
+            filingHistory.setDate(dayTimeNow);
+        }
+
+        LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
+        FilingHistory savedFilingHistory = filingHistoryRepository.save(filingHistory);
+        LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());
+
+        return savedFilingHistory;
+    }
+
+    private String getBarcode() throws DataException {
+        try {
+            return barcodeService.getBarcode();
+        } catch (BarcodeServiceException ex) {
+            throw new DataException(ex.getMessage(), ex);
+        }
+    }
+
+    private <T> String getOrDefault(FilingHistorySpec spec, Function<FilingHistorySpec, String> getter, String defaultValue) {
+        return (spec != null && StringUtils.hasText(getter.apply(spec))) ? getter.apply(spec) : defaultValue;
+    }
+
+    private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow) {
         switch (type) {
             case "AP01" -> {
                 filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
@@ -125,31 +160,10 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
             case "RESOLUTIONS" -> {
                 filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow) : null);
             }
-            default -> filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
+            default -> {
+                filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
+            }
         }
-
-        if (!"MR01".equals(type)) {
-            filingHistory.setActionDate(dayTimeNow);
-            filingHistory.setPages(10);
-            filingHistory.setDate(dayTimeNow);
-        }
-
-        filingHistory.setCategory(fhSpec != null && StringUtils.hasText(fhSpec.getCategory()) ? fhSpec.getCategory() : CATEGORY);
-        filingHistory.setType(type);
-        if (fhSpec != null && StringUtils.hasText(fhSpec.getSubCategory())) {
-            filingHistory.setSubCategory(fhSpec.getSubCategory());
-        }
-        filingHistory.setEntityId(entityId);
-        filingHistory.setOriginalDescription(fhSpec != null && StringUtils.hasText(fhSpec.getOriginalDescription()) ? fhSpec.getOriginalDescription() : ORIGINAL_DESCRIPTION);
-        filingHistory.setBarcode(barcode);
-        filingHistory.setDescription(fhSpec != null && StringUtils.hasText(fhSpec.getDescription()) ? fhSpec.getDescription() : DESCRIPTION);
-        LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
-
-        FilingHistory savedFilingHistory = filingHistoryRepository.save(filingHistory);
-
-        LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());
-
-        return savedFilingHistory;
     }
 
     @Override
@@ -206,14 +220,14 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private Links createLinks(String fhType, String companyNumber, String id) {
         Links links = new Links();
         links.setSelf("/company/" + companyNumber + "/filing-history/" + id);
-        if ("AP01".equals(fhType) || "NEWINC".equals(fhType)) {
+        if ("AP01".equals(fhType) || TYPE.equals(fhType)) {
             links.setDocumentMetadata("document/" + id);
         }
         return links;
     }
 
     private DescriptionValues createDescriptionValues(String type , Instant dayNow) {
-        DescriptionValues descriptionValues = new DescriptionValues();
+        var descriptionValues = new DescriptionValues();
         if("AP01".equals(type)) {
             descriptionValues.setAppointmentDate(dayNow);
             descriptionValues.setOfficerName("Mr John Test");
@@ -224,19 +238,19 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     }
 
     private OriginalValues createOriginalValues( Instant dayNow) {
-        OriginalValues originalValues = new OriginalValues();
+        var originalValues = new OriginalValues();
         originalValues.setAppointmentDate(dayNow);
         originalValues.setOfficerName("John Test");
         return originalValues;
     }
 
     public static String convertInstantToDeltaAt(Instant instant) {
-        LocalDateTime dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
+        var dateTime = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        var formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String base = dateTime.format(formatter);
 
-        String microseconds = String.format("%09d", dateTime.getNano()).substring(0, 6);
+        var microseconds = String.format("%09d", dateTime.getNano()).substring(0, 6);
 
         return base + microseconds;
     }
@@ -246,7 +260,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
 
         if (fhSpec.getResolutions() != null) {
             for (ResolutionsSpec resSpec : fhSpec.getResolutions()) {
-                Resolutions resolution = new Resolutions();
+                var resolution = new Resolutions();
                 resolution.setBarcode(resSpec.getBarcode());
                 resolution.setCategory(resSpec.getCategory());
                 resolution.setDescription(resSpec.getDescription());
