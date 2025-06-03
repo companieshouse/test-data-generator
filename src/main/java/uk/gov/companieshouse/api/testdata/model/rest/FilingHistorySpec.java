@@ -2,9 +2,14 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 public class FilingHistorySpec {
     @JsonProperty("type")
     private String type;
+
+    @JsonProperty("subcategory")
+    private String subCategory;
 
     @JsonProperty("category")
     private String category;
@@ -14,6 +19,9 @@ public class FilingHistorySpec {
 
     @JsonProperty("original_description")
     private String originalDescription;
+
+    @JsonProperty("resolutions")
+    private List<ResolutionsSpec> resolutions;
 
     public String getType() {
         return type;
@@ -45,5 +53,17 @@ public class FilingHistorySpec {
 
     public void setOriginalDescription(String originalDescription) {
         this.originalDescription = originalDescription;
+    }
+
+    public String getSubCategory() { return subCategory; }
+
+    public void setSubCategory(String subCategory) { this.subCategory = subCategory; }
+
+    public List<ResolutionsSpec> getResolutions() {
+        return resolutions;
+    }
+
+    public void setResolutions(List<ResolutionsSpec> resolutions) {
+        this.resolutions = resolutions;
     }
 }

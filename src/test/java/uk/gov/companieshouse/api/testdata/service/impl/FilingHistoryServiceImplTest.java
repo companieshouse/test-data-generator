@@ -6,14 +6,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import io.swagger.v3.core.util.Json;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,8 +31,10 @@ import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -57,10 +64,23 @@ class FilingHistoryServiceImplTest {
             = "Certificate of incorporation general company details & statements of; "
             + "officers, capital & shareholdings, guarantee, compliance memorandum of association";
 
+    private ResolutionsSpec buildResolution(String barcode, String category, String description, String subCategory, String type) {
+        ResolutionsSpec res = new ResolutionsSpec();
+        res.setBarcode(barcode);
+        res.setCategory(category);
+        res.setDescription(description);
+        res.setSubCategory(subCategory);
+        res.setType(type);
+        return res;
+    }
+
     @Test
     void create() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+
+        FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
+        spec.setFilingHistoryList(List.of(filingHistorySpec));
 
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
@@ -74,10 +94,11 @@ class FilingHistoryServiceImplTest {
 
         assertEquals(returnedHistory, savedHistory);
 
-        ArgumentCaptor<FilingHistory> filingHistoryCaptor
-                = ArgumentCaptor.forClass(FilingHistory.class);
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
         verify(repository).save(filingHistoryCaptor.capture());
+
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
+
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
@@ -92,6 +113,7 @@ class FilingHistoryServiceImplTest {
 
         List<AssociatedFiling> associatedFilings = filingHistory.getAssociatedFilings();
         assertEquals(2, associatedFilings.size());
+
         AssociatedFiling incorporation = associatedFilings.getFirst();
         assertEquals("incorporation", incorporation.getCategory());
         assertNotNull(incorporation.getDate());
@@ -124,18 +146,21 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void delete() {
-        FilingHistory filingHistory = new FilingHistory();
+        FilingHistory filingHistory1 = new FilingHistory();
+        FilingHistory filingHistory2 = new FilingHistory();
+        List<FilingHistory> filingHistories = List.of(filingHistory1, filingHistory2);
 
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistory));
+        when(repository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistories));
 
         assertTrue(filingHistoryService.delete(COMPANY_NUMBER));
 
-        verify(repository).delete(filingHistory);
+        verify(repository).delete(filingHistory1);
+        verify(repository).delete(filingHistory2);
     }
 
     @Test
     void deleteNoCompany() {
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        when(repository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
         assertFalse(this.filingHistoryService.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
@@ -150,7 +175,7 @@ class FilingHistoryServiceImplTest {
         filingHistorySpec.setDescription("test-description");
         filingHistorySpec.setType("test-type");
         filingHistorySpec.setOriginalDescription("test-original-description");
-        spec.setFilingHistory(filingHistorySpec);
+        spec.setFilingHistoryList(List.of(filingHistorySpec));
 
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
@@ -197,10 +222,67 @@ class FilingHistoryServiceImplTest {
     }
 
     @Test
+    void createWithMultipleFilingHistory() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        FilingHistorySpec filingHistorySpec1 = new FilingHistorySpec();
+        filingHistorySpec1.setCategory("test-category-1");
+        filingHistorySpec1.setDescription("test-description-1");
+        filingHistorySpec1.setType("test-type-1");
+        filingHistorySpec1.setOriginalDescription("test-original-description-1");
+
+        FilingHistorySpec filingHistorySpec2 = new FilingHistorySpec();
+        filingHistorySpec2.setCategory("test-category-2");
+        filingHistorySpec2.setDescription("test-description-2");
+        filingHistorySpec2.setType("test-type-2");
+        filingHistorySpec2.setOriginalDescription("test-original-description-2");
+
+        spec.setFilingHistoryList(List.of(filingHistorySpec1, filingHistorySpec2));
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID, UNENCODED_ID + 1);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID + "_1");
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + (UNENCODED_ID + 1), 8)).thenReturn(TEST_ID + "_2");
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+
+        FilingHistory savedHistory = new FilingHistory();
+        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+
+        FilingHistory returnedHistory = this.filingHistoryService.create(spec);
+
+        assertEquals(savedHistory, returnedHistory);
+
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
+        verify(repository, Mockito.times(2)).save(filingHistoryCaptor.capture());
+
+        List<FilingHistory> capturedHistories = filingHistoryCaptor.getAllValues();
+        assertEquals(2, capturedHistories.size());
+
+        FilingHistory first = capturedHistories.get(0);
+        assertEquals(TEST_ID + "_1", first.getId());
+        assertEquals("test-category-1", first.getCategory());
+        assertEquals("test-description-1", first.getDescription());
+        assertEquals("test-type-1", first.getType());
+        assertEquals("test-original-description-1", first.getOriginalDescription());
+        assertEquals(COMPANY_NUMBER, first.getCompanyNumber());
+        assertEquals(BARCODE, first.getBarcode());
+
+        FilingHistory second = capturedHistories.get(1);
+        assertEquals(TEST_ID + "_2", second.getId());
+        assertEquals("test-category-2", second.getCategory());
+        assertEquals("test-description-2", second.getDescription());
+        assertEquals("test-type-2", second.getType());
+        assertEquals("test-original-description-2", second.getOriginalDescription());
+        assertEquals(COMPANY_NUMBER, second.getCompanyNumber());
+        assertEquals(BARCODE, second.getBarcode());
+    }
+
+    @Test
     void createWithNullFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setFilingHistory(null);
+
+        spec.setFilingHistoryList(Collections.emptyList());
 
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8)).thenReturn(TEST_ID);
@@ -211,10 +293,11 @@ class FilingHistoryServiceImplTest {
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
-        assertEquals(returnedHistory, savedHistory);
+        assertEquals(savedHistory, returnedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
         verify(repository).save(filingHistoryCaptor.capture());
+
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
@@ -225,12 +308,12 @@ class FilingHistoryServiceImplTest {
         assertEquals("NEWINC", filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
         assertEquals(ENTITY_ID_PREFIX + UNENCODED_ID, filingHistory.getEntityId());
-        assertEquals("Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association",
-                filingHistory.getOriginalDescription());
+        assertEquals(CERTIFICATE_DESCRIPTION, filingHistory.getOriginalDescription());
         assertEquals(BARCODE, filingHistory.getBarcode());
 
         List<AssociatedFiling> associatedFilings = filingHistory.getAssociatedFilings();
         assertEquals(2, associatedFilings.size());
+
         AssociatedFiling incorporation = associatedFilings.get(0);
         assertEquals("incorporation", incorporation.getCategory());
         assertNotNull(incorporation.getDate());
@@ -288,6 +371,9 @@ class FilingHistoryServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
 
+        FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
+        spec.setFilingHistoryList(List.of(filingHistorySpec));
+
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
                 .thenReturn(TEST_ID);
@@ -299,11 +385,11 @@ class FilingHistoryServiceImplTest {
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
-        assertEquals(returnedHistory, savedHistory);
+        assertEquals(savedHistory, returnedHistory);
 
-        ArgumentCaptor<FilingHistory> filingHistoryCaptor
-                = ArgumentCaptor.forClass(FilingHistory.class);
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
         verify(repository).save(filingHistoryCaptor.capture());
+
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
@@ -324,6 +410,9 @@ class FilingHistoryServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("overdue");
 
+        FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
+        spec.setFilingHistoryList(List.of(filingHistorySpec));
+
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UNENCODED_ID, 8))
                 .thenReturn(TEST_ID);
@@ -335,11 +424,11 @@ class FilingHistoryServiceImplTest {
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
-        assertEquals(returnedHistory, savedHistory);
+        assertEquals(savedHistory, returnedHistory);
 
-        ArgumentCaptor<FilingHistory> filingHistoryCaptor
-                = ArgumentCaptor.forClass(FilingHistory.class);
+        ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
         verify(repository).save(filingHistoryCaptor.capture());
+
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
@@ -354,4 +443,84 @@ class FilingHistoryServiceImplTest {
         assertEquals(BARCODE, filingHistory.getBarcode());
     }
 
+    @Test
+    void createWithMultipleFilingHistoryTypes() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        FilingHistorySpec ap01Spec = new FilingHistorySpec();
+        ap01Spec.setType("AP01");
+        ap01Spec.setCategory("appointment");
+        ap01Spec.setDescription("appointment-description");
+
+        FilingHistorySpec mr01Spec = new FilingHistorySpec();
+        mr01Spec.setType("MR01");
+        mr01Spec.setCategory("mortgage");
+        mr01Spec.setDescription("mortgage-description");
+
+        FilingHistorySpec resolutionsSpec = new FilingHistorySpec();
+        resolutionsSpec.setType("RESOLUTIONS");
+        resolutionsSpec.setCategory("resolution-category");
+
+        resolutionsSpec.setResolutions(List.of(
+                buildResolution("res-barcode-1", "resolution-cat-1", "resolution-desc-1", "sub-cat-1", "RES1"),
+                buildResolution("res-barcode-2", "resolution-cat-2", "resolution-desc-2", "sub-cat-2", "RES2")
+        ));
+
+        spec.setFilingHistoryList(List.of(ap01Spec, mr01Spec, resolutionsSpec));
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
+        when(randomService.addSaltAndEncode(Mockito.anyString(), eq(8))).thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+        when(repository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        List<FilingHistory> createdHistories = new ArrayList<>();
+        for (FilingHistorySpec fhSpec : spec.getFilingHistoryList()) {
+            createdHistories.add(filingHistoryService.create(new CompanySpec() {{
+                setCompanyNumber(COMPANY_NUMBER);
+                setFilingHistoryList(List.of(fhSpec));
+            }}));
+        }
+
+        validateAp01Filing(createdHistories.get(0));
+        validateMr01Filing(createdHistories.get(1));
+        validateResolutionsFiling(createdHistories.get(2));
+    }
+
+    private void validateAp01Filing(FilingHistory ap01) {
+        assertEquals("AP01", ap01.getType());
+        assertEquals("appointment-description", ap01.getDescription());
+        assertEquals("appointment", ap01.getCategory());
+        assertNotNull(ap01.getDescriptionValues());
+        assertNotNull(ap01.getOriginalValues());
+        assertNotNull(ap01.getLinks().getDocumentMetadata());
+    }
+
+    private void validateMr01Filing(FilingHistory mr01) {
+        assertEquals("MR01", mr01.getType());
+        assertEquals("mortgage-description", mr01.getDescription());
+        assertEquals("mortgage", mr01.getCategory());
+        assertTrue(mr01.isPaperFiled());
+        assertEquals(LocalDate.of(2003, 2, 28).atStartOfDay(ZoneOffset.UTC).toInstant(), mr01.getDate());
+        assertNotNull(mr01.getDescriptionValues());
+    }
+
+    private void validateResolutionsFiling(FilingHistory res) {
+        assertEquals("RESOLUTIONS", res.getType());
+        assertEquals("resolution-category", res.getCategory());
+        assertNotNull(res.getResolutions());
+        assertEquals(2, res.getResolutions().size());
+
+        validateResolution(res.getResolutions().get(0), "res-barcode-1", "resolution-cat-1", "resolution-desc-1", "sub-cat-1", "RES1");
+        validateResolution(res.getResolutions().get(1), "res-barcode-2", "resolution-cat-2", "resolution-desc-2", "sub-cat-2", "RES2");
+    }
+
+    private void validateResolution(Resolutions r, String barcode, String cat, String desc, String subCat, String type) {
+        assertEquals(barcode, r.getBarcode());
+        assertEquals(cat, r.getCategory());
+        assertEquals(desc, r.getDescription());
+        assertEquals(subCat, r.getSubCategory());
+        assertEquals(type, r.getType());
+        assertNotNull(r.getDeltaAt());
+    }
 }
