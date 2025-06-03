@@ -57,11 +57,19 @@ In order to use the generator, there are different possible endpoints that can b
   - `is_company_number_padding`: Boolean value to determine if the company number should be padded with zeros. Defaults to false, `true` value will create a company number with leading zeros.
   - `filing_history`: {
     - `type`: The type of the submission (e.g., `GAZ1(A)`, `DS01`). Defaults to `NEWINC`.
-    - `category`: The category of the filing (e.g., `incorporation`, `dissolution`, `gazette`). Defaults to `incorporation`.
+    - `category`: The category of the filing (e.g., `incorporation`, `dissolution`, `gazette`, `resolution`). Defaults to `incorporation`.
+    - `subcategory`: The sub category of the filing (e.g., `appointments`, `resolution`)
     - `description`: The description of the filing (e.g., `incorporation-company`, `gazette-notice-voluntary`). Defaults to `incorporation-company`.
     - `original_description`: The original description of the filing (e.g., `First gazette notice for voluntary strike-off`). Defaults to `Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association`.
     - `number_of_psc`: The number of PSCs to create. Defaults to 0. Can be used to create multiple PSCs.
     - `psc_type`: Used alongside the `number_of_psc`. The types of PSCs to create (e.g., `individual`, `corporate`, `legal-person`, `individual-bo`, `corporate-bo`).
+    - `resolutions`: This is optional, mandatory only when type is `RESOLUTIONS`
+      - `barcode`: Barcode value for resolutions type. By default, it's an empty string.
+      - `category`: Resolutions category for resolutions type (e.g., `incorporation`, `resolutions`)
+      - `delta_at`: Convert date for delta at format and stores as string.
+      - `description`: Description for resolutions type (e.g., `resolution-re-registraion`, `incorporation-company`)
+      - `subcategory`: Sub category for resolutions type (e.g., `resolution`, `incorporation`)
+      - `type`: Type for the resolutions type (e.g., `RES02`, `NEWINC`)
     }
   - `withdrawn_psc_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
   - `active_psc_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
@@ -70,7 +78,8 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` with `has_uk_establishment` looks like this: `{"overseas-company", "has_uk_establishment": true}`, this will create an oversea company with hardcoded values and a UK establishment
-  - A usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
+  - A usage example for creating with single filing history: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": [{"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}], "number_of_appointments": 2, "officer_roles": ["director"]}`
+  - A usage example for creating with multiple filing history: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": [{"type": "AP01", "category": "officers", "subcategory": "appointments", "description": "appoint-person-director-company-with-name-date", "original_description": "Appointment of Mr John Test as a director on 10 November 2020"}, {"type": "RESOLUTIONS", "category": "resolution", "subcategory": "resolution", "description": "resolution", "original_description": "RESOLUTIONS", "resolutions" : [{"barcode" : "", "category" : "incorporation", "delta_at" : "20180723091906627635", "description" : "resolution-re-registration", "subcategory" : "resolution", "type" : "RES02" } ]}], "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
   - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_psc_statements": 3 }`
   - A usage example for creating a company with active psc statements: `{ "active_psc_statements": 5 }`

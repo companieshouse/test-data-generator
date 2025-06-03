@@ -44,7 +44,7 @@ public class CompanySpec {
     private String companyStatusDetail;
 
     @JsonProperty("filing_history")
-    private FilingHistorySpec filingHistory;
+    private List<FilingHistorySpec> filingHistoryList;
 
     @JsonProperty("number_of_appointments")
     private int numberOfAppointments = 1;
@@ -164,12 +164,11 @@ public class CompanySpec {
         this.companyStatusDetail = companyStatusDetail;
     }
 
-    public FilingHistorySpec getFilingHistory() {
-        return filingHistory;
+    public List<FilingHistorySpec> getFilingHistoryList() {
+        return filingHistoryList;
     }
-
-    public void setFilingHistory(FilingHistorySpec filingHistory) {
-        this.filingHistory = filingHistory;
+    public void setFilingHistoryList(List<FilingHistorySpec> filingHistoryList) {
+        this.filingHistoryList = filingHistoryList;
     }
 
     public String getAccountsDueStatus() {
