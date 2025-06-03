@@ -107,7 +107,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
 
         String type = (fhSpec != null && fhSpec.getType() != null) ? fhSpec.getType() : TYPE;
 
-        FilingHistory filingHistory = new FilingHistory();
+        var filingHistory = new FilingHistory();
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(type, spec.getCompanyNumber(), entityId));
@@ -128,7 +128,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
 
         LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
-        FilingHistory savedFilingHistory = filingHistoryRepository.save(filingHistory);
+        var savedFilingHistory = filingHistoryRepository.save(filingHistory);
         LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());
 
         return savedFilingHistory;
@@ -142,7 +142,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
     }
 
-    private <T> String getOrDefault(FilingHistorySpec spec, Function<FilingHistorySpec, String> getter, String defaultValue) {
+    private String getOrDefault(FilingHistorySpec spec, Function<FilingHistorySpec, String> getter, String defaultValue) {
         return (spec != null && StringUtils.hasText(getter.apply(spec))) ? getter.apply(spec) : defaultValue;
     }
 
@@ -157,12 +157,10 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 filingHistory.setPaperFiled(true);
                 filingHistory.setDate(FIXED_MR01_DATE);
             }
-            case "RESOLUTIONS" -> {
+            case "RESOLUTIONS" ->
                 filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow) : null);
-            }
-            default -> {
+            default ->
                 filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
-            }
         }
     }
 

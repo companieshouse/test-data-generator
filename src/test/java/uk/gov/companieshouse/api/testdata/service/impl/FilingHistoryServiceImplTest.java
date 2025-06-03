@@ -64,6 +64,16 @@ class FilingHistoryServiceImplTest {
             = "Certificate of incorporation general company details & statements of; "
             + "officers, capital & shareholdings, guarantee, compliance memorandum of association";
 
+    private ResolutionsSpec buildResolution(String barcode, String category, String description, String subCategory, String type) {
+        ResolutionsSpec res = new ResolutionsSpec();
+        res.setBarcode(barcode);
+        res.setCategory(category);
+        res.setDescription(description);
+        res.setSubCategory(subCategory);
+        res.setType(type);
+        return res;
+    }
+
     @Test
     void create() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
@@ -452,28 +462,16 @@ class FilingHistoryServiceImplTest {
         resolutionsSpec.setType("RESOLUTIONS");
         resolutionsSpec.setCategory("resolution-category");
 
-        ResolutionsSpec resolution1 = new ResolutionsSpec();
-        resolution1.setBarcode("res-barcode-1");
-        resolution1.setCategory("resolution-cat-1");
-        resolution1.setDescription("resolution-desc-1");
-        resolution1.setSubCategory("sub-cat-1");
-        resolution1.setType("RES1");
-
-        ResolutionsSpec resolution2 = new ResolutionsSpec();
-        resolution2.setBarcode("res-barcode-2");
-        resolution2.setCategory("resolution-cat-2");
-        resolution2.setDescription("resolution-desc-2");
-        resolution2.setSubCategory("sub-cat-2");
-        resolution2.setType("RES2");
-
-        resolutionsSpec.setResolutions(List.of(resolution1, resolution2));
+        resolutionsSpec.setResolutions(List.of(
+                buildResolution("res-barcode-1", "resolution-cat-1", "resolution-desc-1", "sub-cat-1", "RES1"),
+                buildResolution("res-barcode-2", "resolution-cat-2", "resolution-desc-2", "sub-cat-2", "RES2")
+        ));
 
         spec.setFilingHistoryList(List.of(ap01Spec, mr01Spec, resolutionsSpec));
 
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(Mockito.anyString(), eq(8))).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
-
         when(repository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<FilingHistory> createdHistories = new ArrayList<>();
@@ -484,45 +482,45 @@ class FilingHistoryServiceImplTest {
             }}));
         }
 
-        // Validate AP01 filing history
-        FilingHistory ap01History = createdHistories.get(0);
-        assertEquals("AP01", ap01History.getType());
-        assertEquals("appointment-description", ap01History.getDescription());
-        assertNotNull(ap01History.getDescriptionValues());
-        assertNotNull(ap01History.getOriginalValues());
-        assertEquals("appointment", ap01History.getCategory());
-        assertNotNull(ap01History.getLinks().getDocumentMetadata());
+        validateAp01Filing(createdHistories.get(0));
+        validateMr01Filing(createdHistories.get(1));
+        validateResolutionsFiling(createdHistories.get(2));
+    }
 
-        // Validate MR01 filing history
-        FilingHistory mr01History = createdHistories.get(1);
-        assertEquals("MR01", mr01History.getType());
-        assertEquals("mortgage-description", mr01History.getDescription());
-        assertNotNull(mr01History.getDescriptionValues());
-        assertTrue(mr01History.isPaperFiled());
-        assertEquals(LocalDate.of(2003, 2, 28).atStartOfDay(ZoneOffset.UTC).toInstant(), mr01History.getDate());
-        assertEquals("mortgage", mr01History.getCategory());
+    private void validateAp01Filing(FilingHistory ap01) {
+        assertEquals("AP01", ap01.getType());
+        assertEquals("appointment-description", ap01.getDescription());
+        assertEquals("appointment", ap01.getCategory());
+        assertNotNull(ap01.getDescriptionValues());
+        assertNotNull(ap01.getOriginalValues());
+        assertNotNull(ap01.getLinks().getDocumentMetadata());
+    }
 
-        // Validate RESOLUTIONS filing history
-        FilingHistory resHistory = createdHistories.get(2);
-        assertEquals("RESOLUTIONS", resHistory.getType());
-        assertEquals("resolution-category", resHistory.getCategory());
-        assertNotNull(resHistory.getResolutions());
-        assertEquals(2, resHistory.getResolutions().size());
+    private void validateMr01Filing(FilingHistory mr01) {
+        assertEquals("MR01", mr01.getType());
+        assertEquals("mortgage-description", mr01.getDescription());
+        assertEquals("mortgage", mr01.getCategory());
+        assertTrue(mr01.isPaperFiled());
+        assertEquals(LocalDate.of(2003, 2, 28).atStartOfDay(ZoneOffset.UTC).toInstant(), mr01.getDate());
+        assertNotNull(mr01.getDescriptionValues());
+    }
 
-        Resolutions firstResolution = resHistory.getResolutions().get(0);
-        assertEquals("res-barcode-1", firstResolution.getBarcode());
-        assertEquals("resolution-cat-1", firstResolution.getCategory());
-        assertEquals("resolution-desc-1", firstResolution.getDescription());
-        assertEquals("sub-cat-1", firstResolution.getSubCategory());
-        assertEquals("RES1", firstResolution.getType());
-        assertNotNull(firstResolution.getDeltaAt());
+    private void validateResolutionsFiling(FilingHistory res) {
+        assertEquals("RESOLUTIONS", res.getType());
+        assertEquals("resolution-category", res.getCategory());
+        assertNotNull(res.getResolutions());
+        assertEquals(2, res.getResolutions().size());
 
-        Resolutions secondResolution = resHistory.getResolutions().get(1);
-        assertEquals("res-barcode-2", secondResolution.getBarcode());
-        assertEquals("resolution-cat-2", secondResolution.getCategory());
-        assertEquals("resolution-desc-2", secondResolution.getDescription());
-        assertEquals("sub-cat-2", secondResolution.getSubCategory());
-        assertEquals("RES2", secondResolution.getType());
-        assertNotNull(secondResolution.getDeltaAt());
+        validateResolution(res.getResolutions().get(0), "res-barcode-1", "resolution-cat-1", "resolution-desc-1", "sub-cat-1", "RES1");
+        validateResolution(res.getResolutions().get(1), "res-barcode-2", "resolution-cat-2", "resolution-desc-2", "sub-cat-2", "RES2");
+    }
+
+    private void validateResolution(Resolutions r, String barcode, String cat, String desc, String subCat, String type) {
+        assertEquals(barcode, r.getBarcode());
+        assertEquals(cat, r.getCategory());
+        assertEquals(desc, r.getDescription());
+        assertEquals(subCat, r.getSubCategory());
+        assertEquals(type, r.getType());
+        assertNotNull(r.getDeltaAt());
     }
 }
