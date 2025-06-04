@@ -17,15 +17,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CompanyPscStatementServiceImpl implements
         DataService<CompanyPscStatement, CompanySpec> {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(String.valueOf(CompanyPscStatementServiceImpl.class));
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
@@ -115,7 +111,7 @@ public class CompanyPscStatementServiceImpl implements
         return generatedStatements;
     }
 
-    private List<CompanyPscStatement> generateWithdrawnPscStatements(
+    protected List<CompanyPscStatement> generateWithdrawnPscStatements(
             CompanySpec spec, Integer count) {
 
         List<CompanyPscStatement> generatedList = new ArrayList<>();
@@ -136,7 +132,7 @@ public class CompanyPscStatementServiceImpl implements
         return generatedList;
     }
 
-    private List<CompanyPscStatement> generateActivePscStatements(
+    protected List<CompanyPscStatement> generateActivePscStatements(
             CompanySpec spec, Integer count) {
 
         List<CompanyPscStatement> generatedList = new ArrayList<>();
