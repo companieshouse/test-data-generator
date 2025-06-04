@@ -136,13 +136,11 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
 
     public void setCeasedPscCount(CompanyMetrics metrics, CompanySpec spec) {
         var ceasedCount = 0;
-
-        if (Boolean.FALSE.equals(spec.getPscActive())) {
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            LOG.debug("Company has super secure PSCs. Ceased PSC count remains 0.");
+        } else if (Boolean.FALSE.equals(spec.getPscActive())) {
             ceasedCount = 1;
             LOG.debug("PSC active is false in spec. Set ceased PSC count to 1.");
-        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
-            ceasedCount = 0;
-            LOG.debug("Company has super secure PSCs. Set ceased PSC count to 0.");
         }
 
         metrics.setCeasedPscCount(ceasedCount);

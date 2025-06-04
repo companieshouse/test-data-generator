@@ -17,15 +17,20 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CompanyPscStatementServiceImpl implements
         DataService<CompanyPscStatement, CompanySpec> {
 
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(CompanyPscStatementServiceImpl.class));
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
     private static final String PSC_SUFFIX = "/persons-with-significant-control-statements/";
+    private static final String URL_PREFIX = "/company/";
 
     @Autowired
     private CompanyPscStatementRepository repository;
@@ -68,9 +73,8 @@ public class CompanyPscStatementServiceImpl implements
         return repository.save(pscStatement);
     }
 
-
     public List<CompanyPscStatement> createPscStatements(CompanySpec spec) {
-        List<CompanyPscStatement> createdStatements = new ArrayList<>();
+        List<CompanyPscStatement> generatedStatements = new ArrayList<>();
 
         Integer withdrawnPscStatementsCount = spec.getWithdrawnStatements();
         Integer activePscStatementsCount = spec.getActiveStatements();
@@ -89,22 +93,37 @@ public class CompanyPscStatementServiceImpl implements
 
         boolean specificActiveOrNumberOfPscRequested = effectiveActivePscCount > 0;
 
+        List<CompanyPscStatement> withdrawn = new ArrayList<>();
+        List<CompanyPscStatement> active = new ArrayList<>();
+        List<CompanyPscStatement> singleDefault = new ArrayList<>();
 
         if (specificWithdrawnRequested || specificActiveOrNumberOfPscRequested) {
             if (specificWithdrawnRequested) {
-                addWithdrawnPscStatements(spec, withdrawnPscStatementsCount, createdStatements);
+                withdrawn = generateWithdrawnPscStatements(spec, withdrawnPscStatementsCount);
             }
             if (specificActiveOrNumberOfPscRequested) {
-                addActivePscStatements(spec, effectiveActivePscCount, createdStatements);
+                active = generateActivePscStatements(spec, effectiveActivePscCount);
             }
         } else {
-            createdStatements.add(this.create(spec));
+            singleDefault.add(this.create(spec));
         }
-        return createdStatements;
+
+        generatedStatements.addAll(withdrawn);
+        generatedStatements.addAll(active);
+        generatedStatements.addAll(singleDefault);
+
+        return generatedStatements;
     }
 
-    private void addWithdrawnPscStatements(
-            CompanySpec spec, Integer count, List<CompanyPscStatement> statements) {
+    private List<CompanyPscStatement> generateWithdrawnPscStatements(
+            CompanySpec spec, Integer count) {
+
+        List<CompanyPscStatement> generatedList = new ArrayList<>();
+
+        if (count == null || count <= 0) {
+            return generatedList;
+        }
+
         for (var i = 0; i < count; i++) {
             var tempSpec = new CompanySpec();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
@@ -112,12 +131,20 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setWithdrawnStatements(1);
             tempSpec.setNumberOfPsc(0);
             tempSpec.setPscActive(false);
-            statements.add(this.create(tempSpec));
+            generatedList.add(this.create(tempSpec));
         }
+        return generatedList;
     }
 
-    private void addActivePscStatements(
-            CompanySpec spec, Integer count, List<CompanyPscStatement> statements) {
+    private List<CompanyPscStatement> generateActivePscStatements(
+            CompanySpec spec, Integer count) {
+
+        List<CompanyPscStatement> generatedList = new ArrayList<>();
+
+        if (count == null || count <= 0) {
+            return generatedList;
+        }
+
         for (var i = 0; i < count; i++) {
             var tempSpec = new CompanySpec();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
@@ -125,8 +152,9 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setWithdrawnStatements(0);
             tempSpec.setNumberOfPsc(1);
             tempSpec.setPscActive(true);
-            statements.add(this.create(tempSpec));
+            generatedList.add(this.create(tempSpec));
         }
+        return generatedList;
     }
 
     @Override
@@ -140,8 +168,6 @@ public class CompanyPscStatementServiceImpl implements
         }
         return false;
     }
-
-    private static final String URL_PREFIX = "/company/";
 
     public enum PscStatement {
         NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL(

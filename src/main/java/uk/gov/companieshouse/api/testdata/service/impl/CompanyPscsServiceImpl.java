@@ -149,6 +149,12 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
 
     private CompanyPscs createPscsBasedOnCompanyType(CompanySpec spec, int numberOfPsc) {
         LOG.info("Creating PSCs based on company type: " + spec.getCompanyType());
+
+        if (numberOfPsc <= 0) {
+            LOG.info("No PSCs requested for company number: " + spec.getCompanyNumber() + ". Returning null.");
+            return null;
+        }
+
         CompanyPscs firstPsc = null;
         boolean isOverseasEntity = CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
 
