@@ -14,6 +14,12 @@ public class DescriptionValues {
     @Field("charge_number")
     private String chargeNumber;
 
+    @Field("capital.figure")
+    private String figure;
+
+    @Field("capital.currency")
+    private String currency;
+
     public Instant getAppointmentDate() {
         return appointmentDate;
     }
@@ -30,7 +36,23 @@ public class DescriptionValues {
         this.officerName = officerName;
     }
 
-    public String getChargeNumber() { return chargeNumber; }
+    public String getChargeNumber() {
+        return chargeNumber;
+    }
 
-    public void setChargeNumber(String chargeNumber) { this.chargeNumber = chargeNumber; }
+    public void setChargeNumber(String chargeNumber) {
+        this.chargeNumber = chargeNumber;
+    }
+
+    public String getFigure() { return figure; }
+
+    public void setFigure(String figure) {
+        this.figure = figure;
+    }
+
+    public String getCurrency() { return currency; }
+
+    public void setCurrency(String currency) {
+        this.currency = currency;
+    }
 }

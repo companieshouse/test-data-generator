@@ -152,7 +152,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
                 filingHistory.setOriginalValues(createOriginalValues(dayNow));
             }
-            case "MR01" -> {
+            case "MR01", "SH01" -> {
                 filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
                 filingHistory.setPaperFiled(true);
                 filingHistory.setDate(FIXED_MR01_DATE);
@@ -229,7 +229,11 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         if("AP01".equals(type)) {
             descriptionValues.setAppointmentDate(dayNow);
             descriptionValues.setOfficerName("Mr John Test");
-        } else {
+        } else if ("SH01".equals(type)) {
+            descriptionValues.setCurrency("GBP");
+            descriptionValues.setFigure("34,253,377");
+        }
+        else {
             descriptionValues.setChargeNumber(String.valueOf(randomService.getNumber(12)));
         }
         return descriptionValues;
