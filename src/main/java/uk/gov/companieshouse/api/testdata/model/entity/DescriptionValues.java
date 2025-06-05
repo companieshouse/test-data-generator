@@ -1,8 +1,9 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
-import org.springframework.data.mongodb.core.mapping.Field;
-
 import java.time.Instant;
+import java.util.List;
+
+import org.springframework.data.mongodb.core.mapping.Field;
 
 public class DescriptionValues {
     @Field("appointment_date")
@@ -14,11 +15,8 @@ public class DescriptionValues {
     @Field("charge_number")
     private String chargeNumber;
 
-    @Field("capital.figure")
-    private String figure;
-
-    @Field("capital.currency")
-    private String currency;
+    @Field("capital")
+    private List<Capital> capital;
 
     public Instant getAppointmentDate() {
         return appointmentDate;
@@ -44,15 +42,11 @@ public class DescriptionValues {
         this.chargeNumber = chargeNumber;
     }
 
-    public String getFigure() { return figure; }
-
-    public void setFigure(String figure) {
-        this.figure = figure;
+    public List<Capital> getCapital() {
+        return capital;
     }
 
-    public String getCurrency() { return currency; }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
+    public void setCapital(List<Capital> capital) {
+        this.capital = capital;
     }
 }

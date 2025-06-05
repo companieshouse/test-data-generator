@@ -19,12 +19,8 @@ import org.springframework.util.StringUtils;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
-import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
-import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
-import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
@@ -149,11 +145,11 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow) {
         switch (type) {
             case "AP01" -> {
-                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
+                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
                 filingHistory.setOriginalValues(createOriginalValues(dayNow));
             }
             case "MR01", "SH01" -> {
-                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
+                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
                 filingHistory.setPaperFiled(true);
                 filingHistory.setDate(FIXED_MR01_DATE);
             }
@@ -224,14 +220,20 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return links;
     }
 
-    private DescriptionValues createDescriptionValues(String type , Instant dayNow) {
+    private DescriptionValues createDescriptionValues(String type , Instant dayNow, FilingHistorySpec fhspec) {
         var descriptionValues = new DescriptionValues();
         if("AP01".equals(type)) {
             descriptionValues.setAppointmentDate(dayNow);
             descriptionValues.setOfficerName("Mr John Test");
         } else if ("SH01".equals(type)) {
-            descriptionValues.setCurrency("GBP");
-            descriptionValues.setFigure("34,253,377");
+            List<Capital> capitalList = new ArrayList<>();
+            for(CapitalSpec capitalSpec: fhspec.getDescriptionValues().getCapital() ) {
+                var capital = new Capital();
+                capital.setCurrency(capitalSpec.getCurrency());
+                capital.setFigure(capitalSpec.getFigure());
+                capitalList.add(capital);
+            }
+            descriptionValues.setCapital(capitalList);
         }
         else {
             descriptionValues.setChargeNumber(String.valueOf(randomService.getNumber(12)));

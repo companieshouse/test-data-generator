@@ -23,6 +23,9 @@ public class FilingHistorySpec {
     @JsonProperty("resolutions")
     private List<ResolutionsSpec> resolutions;
 
+    @JsonProperty("description_values")
+    private DescriptionValuesSpec descriptionValues;
+
     public String getType() {
         return type;
     }
@@ -65,5 +68,13 @@ public class FilingHistorySpec {
 
     public void setResolutions(List<ResolutionsSpec> resolutions) {
         this.resolutions = resolutions;
+    }
+
+    public DescriptionValuesSpec getDescriptionValues() {
+        return descriptionValues;
+    }
+
+    public void setDescriptionValues(DescriptionValuesSpec descriptionValues) {
+        this.descriptionValues = descriptionValues;
     }
 }
