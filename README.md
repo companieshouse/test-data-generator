@@ -63,8 +63,9 @@ In order to use the generator, there are different possible endpoints that can b
     - `number_of_psc`: The number of PSCs to create. Defaults to 0. Can be used to create multiple PSCs.
     - `psc_type`: Used alongside the `number_of_psc`. The types of PSCs to create (e.g., `individual`, `corporate`, `legal-person`, `individual-bo`, `corporate-bo`).
     }
-  - `withdrawn_psc_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
-  - `active_psc_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
+    - `psc_active`: Boolean value to determine if the PSCs are active or ceased. To be used alongside PSC requests. Where a request is creating multiple PSCs, a fasle value here will set the first PSC to inactive. Defaults to true.
+  - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
+  - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
@@ -72,8 +73,9 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating `oversea-company` with `has_uk_establishment` looks like this: `{"overseas-company", "has_uk_establishment": true}`, this will create an oversea company with hardcoded values and a UK establishment
   - A usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
-  - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_psc_statements": 3 }`
-  - A usage example for creating a company with active psc statements: `{ "active_psc_statements": 5 }`
+  - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_statements": 3 }`
+  - A usage example for creating a company with active psc statements: `{ "active_statements": 5 }`
+  - A usage example of creating a company with an inactive psc: `{ "number_of_psc": 1, "psc_active": false }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
   - A usage example for creating a company with padded company number: `{ "is_company_number_padding": true }`
   - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`

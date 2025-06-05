@@ -37,7 +37,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         CompanyMetrics metrics = initializeMetrics(spec);
 
         setActivePscCount(metrics, spec);
-
+        setPscCount(metrics, spec);
+        setCeasedPscCount(metrics, spec);
         setActiveDirectorsCount(metrics, spec);
 
         if (spec.getRegisters() != null) {
@@ -73,16 +74,17 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
 
-        if (spec.getActivePscStatements() != null) {
-            metrics.setActivePscStatementsCount(spec.getActivePscStatements());
-        } else if (spec.getNumberOfPsc() != null) {
-            metrics.setActivePscStatementsCount(spec.getNumberOfPsc());
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            metrics.setActiveStatementsCount(1);
+        } else if (spec.getActiveStatements() == null) {
+            metrics.setActiveStatementsCount(spec.getNumberOfPsc()
+                    == null ? 0 : spec.getNumberOfPsc());
         } else {
-            metrics.setActivePscStatementsCount(1);
+            metrics.setActiveStatementsCount(spec.getActiveStatements());
         }
 
-        metrics.setWithdrawnPscStatementsCount(
-                spec.getWithdrawnPscStatements() == null ? 0 : spec.getWithdrawnPscStatements()
+        metrics.setWithdrawnStatementsCount(
+                spec.getWithdrawnStatements() == null ? 0 : spec.getWithdrawnStatements()
         );
 
         LOG.debug("Initialized CompanyMetrics with ID: "
@@ -90,14 +92,17 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         return metrics;
     }
 
-    private void setActivePscCount(CompanyMetrics metrics, CompanySpec spec) {
-        Integer numberOfPsc = spec.getNumberOfPsc();
+    public void setActivePscCount(CompanyMetrics metrics, CompanySpec spec) {
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
-        } else if (numberOfPsc != null) {
-            metrics.setActivePscCount(numberOfPsc);
-            LOG.debug("Set active PSC count to " + numberOfPsc);
+        } else if (spec.getNumberOfPsc() != null) {
+            int activeCount = spec.getNumberOfPsc();
+            if (Boolean.FALSE.equals(spec.getPscActive())) {
+                activeCount = Math.max(0, spec.getNumberOfPsc() - 1);
+            }
+            metrics.setActivePscCount(activeCount);
+            LOG.debug("Set active PSC count to " + activeCount);
         } else {
             metrics.setActivePscCount(0);
             LOG.debug("No PSC count provided. Set active PSC count to 0.");
@@ -114,6 +119,31 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
             metrics.setActiveDirectorsCount(1);
             LOG.debug("No specific officer roles provided. Set active directors count to 1.");
         }
+    }
+
+    public void setPscCount(CompanyMetrics metrics, CompanySpec spec) {
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            metrics.setPscCount(1);
+            LOG.debug("Company has super secure PSCs. Set PSC count to 1.");
+        } else if (spec.getNumberOfPsc() != null) {
+            metrics.setPscCount(spec.getNumberOfPsc());
+            LOG.debug("Set PSC count to " + spec.getNumberOfPsc());
+        } else {
+            metrics.setPscCount(0);
+            LOG.debug("No PSC count provided. Set PSC count to 0.");
+        }
+    }
+
+    public void setCeasedPscCount(CompanyMetrics metrics, CompanySpec spec) {
+        var ceasedCount = 0;
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            LOG.debug("Company has super secure PSCs. Ceased PSC count remains 0.");
+        } else if (Boolean.FALSE.equals(spec.getPscActive())) {
+            ceasedCount = 1;
+            LOG.debug("PSC active is false in spec. Set ceased PSC count to 1.");
+        }
+
+        metrics.setCeasedPscCount(ceasedCount);
     }
 
     private Map<String, RegisterItem> createRegisters(List<RegistersSpec> registers) {

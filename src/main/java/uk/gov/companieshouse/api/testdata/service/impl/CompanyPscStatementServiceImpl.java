@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +26,7 @@ public class CompanyPscStatementServiceImpl implements
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
     private static final String PSC_SUFFIX = "/persons-with-significant-control-statements/";
+    private static final String URL_PREFIX = "/company/";
 
     @Autowired
     private CompanyPscStatementRepository repository;
@@ -39,90 +40,117 @@ public class CompanyPscStatementServiceImpl implements
 
         String pscStatementId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
         pscStatement.setId(pscStatementId);
-        pscStatement.setCompanyNumber(spec.getCompanyNumber());
         pscStatement.setPscStatementId(pscStatementId);
+        pscStatement.setCompanyNumber(spec.getCompanyNumber());
         pscStatement.setEtag(randomService.getEtag());
+
         pscStatement.setKind("persons-with-significant-control-statement");
+        var links = new Links();
+        links.setSelf(URL_PREFIX + pscStatement.getCompanyNumber()
+                + PSC_SUFFIX
+                + pscStatement.getId());
+        pscStatement.setLinks(links);
 
         pscStatement.setNotifiedOn(LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant());
 
         if (spec.getCompanyType() == CompanyType.REGISTERED_OVERSEAS_ENTITY) {
             pscStatement.setStatement(PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
-        } else if (spec.getWithdrawnPscStatements()
-                != null && spec.getWithdrawnPscStatements() > 0) {
-            pscStatement.setStatement(PscStatement.BENEFICIAL_ACTIVE_OR_CEASED.getStatement());
-            pscStatement.setCeasedOn(
-                    LocalDate.now().minusYears(1).atStartOfDay(ZONE_ID_UTC).toInstant());
-        } else if (spec.getNumberOfPsc() != null && spec.getNumberOfPsc() > 0) {
+        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+        } else if (spec.getPscActive() == null || Boolean.TRUE.equals(spec.getPscActive())) {
+            pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+        } else if (Boolean.FALSE.equals(spec.getPscActive())) {
+            pscStatement.setStatement(PscStatement.BENEFICIAL_ACTIVE_OR_CEASED.getStatement());
         } else {
             pscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         }
 
-        Links links = new Links();
-        links.setSelf("/company/" + spec.getCompanyNumber() + PSC_SUFFIX + pscStatementId);
-        pscStatement.setLinks(links);
-
-        pscStatement.setCreatedAt(Instant.now());
-        pscStatement.setUpdatedAt(pscStatement.getCreatedAt());
-
         return repository.save(pscStatement);
     }
 
     public List<CompanyPscStatement> createPscStatements(CompanySpec spec) {
-        List<CompanyPscStatement> createdStatements = new ArrayList<>();
+        List<CompanyPscStatement> generatedStatements = new ArrayList<>();
 
-        Integer withdrawnPscStatementsCount = spec.getWithdrawnPscStatements();
-        Integer activePscStatementsCount = spec.getActivePscStatements();
+        Integer withdrawnPscStatementsCount = spec.getWithdrawnStatements();
+        Integer activePscStatementsCount = spec.getActiveStatements();
         Integer numberOfPsc = spec.getNumberOfPsc();
 
         boolean specificWithdrawnRequested = withdrawnPscStatementsCount
                 != null && withdrawnPscStatementsCount > 0;
 
         int effectiveActivePscCount;
-        effectiveActivePscCount = Objects.requireNonNullElseGet(activePscStatementsCount,
-                () -> Objects.requireNonNullElse(numberOfPsc, 0));
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            effectiveActivePscCount = 1;
+        } else {
+            effectiveActivePscCount = Objects.requireNonNullElseGet(activePscStatementsCount,
+                    () -> Objects.requireNonNullElse(numberOfPsc, 0));
+        }
+
         boolean specificActiveOrNumberOfPscRequested = effectiveActivePscCount > 0;
 
+        List<CompanyPscStatement> withdrawn = new ArrayList<>();
+        List<CompanyPscStatement> active = new ArrayList<>();
+        List<CompanyPscStatement> singleDefault = new ArrayList<>();
 
         if (specificWithdrawnRequested || specificActiveOrNumberOfPscRequested) {
             if (specificWithdrawnRequested) {
-                addWithdrawnPscStatements(spec, withdrawnPscStatementsCount, createdStatements);
+                withdrawn = generateWithdrawnPscStatements(spec, withdrawnPscStatementsCount);
             }
             if (specificActiveOrNumberOfPscRequested) {
-                addActivePscStatements(spec, effectiveActivePscCount, createdStatements);
+                active = generateActivePscStatements(spec, effectiveActivePscCount);
             }
         } else {
-            createdStatements.add(this.create(spec));
+            singleDefault.add(this.create(spec));
         }
-        return createdStatements;
+
+        generatedStatements.addAll(withdrawn);
+        generatedStatements.addAll(active);
+        generatedStatements.addAll(singleDefault);
+
+        return generatedStatements;
     }
 
-    private void addWithdrawnPscStatements(CompanySpec originalSpec,
-                                           int count, List<CompanyPscStatement> createdStatements) {
+    protected List<CompanyPscStatement> generateWithdrawnPscStatements(
+            CompanySpec spec, Integer count) {
+
+        List<CompanyPscStatement> generatedList = new ArrayList<>();
+
+        if (count == null || count <= 0) {
+            return generatedList;
+        }
+
         for (var i = 0; i < count; i++) {
             var tempSpec = new CompanySpec();
-            tempSpec.setCompanyNumber(originalSpec.getCompanyNumber());
-            tempSpec.setCompanyType(originalSpec.getCompanyType());
-            tempSpec.setAccountsDueStatus(originalSpec.getAccountsDueStatus());
-            tempSpec.setWithdrawnPscStatements(1);
+            tempSpec.setCompanyNumber(spec.getCompanyNumber());
+            tempSpec.setCompanyType(spec.getCompanyType());
+            tempSpec.setWithdrawnStatements(1);
             tempSpec.setNumberOfPsc(0);
-            createdStatements.add(this.create(tempSpec));
+            tempSpec.setPscActive(false);
+            generatedList.add(this.create(tempSpec));
         }
+        return generatedList;
     }
 
-    private void addActivePscStatements(CompanySpec originalSpec,
-                                        int count, List<CompanyPscStatement> createdStatements) {
+    protected List<CompanyPscStatement> generateActivePscStatements(
+            CompanySpec spec, Integer count) {
+
+        List<CompanyPscStatement> generatedList = new ArrayList<>();
+
+        if (count == null || count <= 0) {
+            return generatedList;
+        }
+
         for (var i = 0; i < count; i++) {
             var tempSpec = new CompanySpec();
-            tempSpec.setCompanyNumber(originalSpec.getCompanyNumber());
-            tempSpec.setCompanyType(originalSpec.getCompanyType());
-            tempSpec.setAccountsDueStatus(originalSpec.getAccountsDueStatus());
-            tempSpec.setWithdrawnPscStatements(0);
+            tempSpec.setCompanyNumber(spec.getCompanyNumber());
+            tempSpec.setCompanyType(spec.getCompanyType());
+            tempSpec.setWithdrawnStatements(0);
             tempSpec.setNumberOfPsc(1);
-            createdStatements.add(this.create(tempSpec));
+            tempSpec.setPscActive(true);
+            generatedList.add(this.create(tempSpec));
         }
+        return generatedList;
     }
 
     @Override

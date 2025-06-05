@@ -300,7 +300,7 @@ class CompanyMetricsServiceImplTest {
     void createWithActivePscStatementsCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setActivePscStatements(3); // Directly set active PSC statements
+        spec.setActiveStatements(3);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics()); // Return a dummy for verification
@@ -311,7 +311,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(3, metrics.getActivePscStatementsCount());
+        assertEquals(3, metrics.getActiveStatementsCount());
     }
 
     @Test
@@ -329,7 +329,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(2, metrics.getActivePscStatementsCount());
+        assertEquals(2, metrics.getActiveStatementsCount());
     }
 
     @Test
@@ -346,14 +346,14 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(1, metrics.getActivePscStatementsCount());
+        assertEquals(0, metrics.getActiveStatementsCount());
     }
 
     @Test
     void createWithGivenWithdrawnPscStatementsCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setWithdrawnPscStatements(4);
+        spec.setWithdrawnStatements(4);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
@@ -382,5 +382,141 @@ class CompanyMetricsServiceImplTest {
         CompanyMetrics metrics = captor.getValue();
 
         assertEquals(0, metrics.getWithdrawnStatementsCount());
+    }
+
+    @Test
+    void setPscCount_WhenPscActiveFalse_ShouldSetCorrectCount() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(3);
+        spec.setPscActive(false);
+
+        CompanyMetrics metrics = new CompanyMetrics();
+        metricsService.setPscCount(metrics, spec);
+
+        assertEquals(3, metrics.getPscCount());
+    }
+
+    @Test
+    void setPscCount_WhenPscActiveTrue_ShouldSetCorrectCount() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(3);
+        spec.setPscActive(true);
+
+        CompanyMetrics metrics = new CompanyMetrics();
+        metricsService.setPscCount(metrics, spec);
+
+        assertEquals(3, metrics.getPscCount());
+    }
+
+    @Test
+    void setPscCount_WhenPscActiveNull_ShouldSetCorrectCount() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(3);
+        spec.setPscActive(null);
+
+        CompanyMetrics metrics = new CompanyMetrics();
+        metricsService.setPscCount(metrics, spec);
+
+        assertEquals(3, metrics.getPscCount());
+    }
+
+    @Test
+    void setPscCount_WhenSuperSecurePscs_ShouldSetCountToOne() {
+        CompanySpec spec = new CompanySpec();
+        spec.setHasSuperSecurePscs(true);
+
+        CompanyMetrics metrics = new CompanyMetrics();
+        metricsService.setPscCount(metrics, spec);
+
+        assertEquals(1, metrics.getPscCount());
+    }
+
+    @Test
+    void setPscCount_WhenNoPscCount_ShouldSetCountToZero() {
+        CompanySpec spec = new CompanySpec();
+
+        CompanyMetrics metrics = new CompanyMetrics();
+        metricsService.setPscCount(metrics, spec);
+
+        assertEquals(0, metrics.getPscCount());
+    }
+
+    @Test
+    void setPscActiveToFalse_ShouldSetCeasedPscCount() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfPsc(5);
+        spec.setPscActive(false);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyMetrics());
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics metrics = captor.getValue();
+
+        assertEquals(1, metrics.getCeasedPscCount());
+    }
+
+    @Test
+    void create_WithPscActiveFalse_ShouldSetCorrectCounts() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfPsc(4);
+        spec.setPscActive(false);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyMetrics());
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics metrics = captor.getValue();
+
+        assertEquals(3, metrics.getActivePscCount());
+        assertEquals(4, metrics.getPscCount());
+    }
+
+    @Test
+    void create_WithPscActiveTrue_ShouldSetCorrectCounts() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfPsc(4);
+        spec.setPscActive(true);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyMetrics());
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics metrics = captor.getValue();
+
+        assertEquals(4, metrics.getActivePscCount());
+        assertEquals(4, metrics.getPscCount());
+    }
+
+    @Test
+    void create_WithPscActiveNull_ShouldSetCorrectCounts() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfPsc(4);
+        spec.setPscActive(null);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyMetrics());
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics metrics = captor.getValue();
+
+        assertEquals(4, metrics.getActivePscCount());
+        assertEquals(4, metrics.getPscCount());
     }
 }
