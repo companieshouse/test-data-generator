@@ -63,7 +63,7 @@ In order to use the generator, there are different possible endpoints that can b
     - `number_of_psc`: The number of PSCs to create. Defaults to 0. Can be used to create multiple PSCs.
     - `psc_type`: Used alongside the `number_of_psc`. The types of PSCs to create (e.g., `individual`, `corporate`, `legal-person`, `individual-bo`, `corporate-bo`).
     }
-    - `psc_active`: Boolean value to determine if the PSCs are active or ceased. To be used alongside PSC requests. Where a request is creating multiple PSCs, a fasle value here will set the first PSC to inactive. Defaults to true.
+    - `psc_active`: Boolean value to determine if the PSCs are active or ceased. To be used alongside PSC requests. Where a request is creating multiple PSCs, a false value here will set the first PSC to inactive. Defaults to true.
   - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
   - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
