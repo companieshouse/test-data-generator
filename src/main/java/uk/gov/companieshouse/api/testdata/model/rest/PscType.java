@@ -16,6 +16,8 @@ public enum PscType {
             "corporate-entity-beneficial-owner", "corporate-bo"),
     SUPER_SECURE_BENEFICIAL_OWNER("super-secure-beneficial-owner",
             "super-secure-beneficial-owner", "super-secure-bo"),
+    LEGAL_PERSON_BENEFICIAL_OWNER("legal-person-beneficial-owner",
+            "legal-person-beneficial-owner", "legal-bo"),
     SUPER_SECURE_PSC("super-secure-person-with-significant-control",
             "super-secure", "super-secure-psc");
 

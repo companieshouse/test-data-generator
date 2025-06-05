@@ -62,11 +62,26 @@ public class CompanySpec {
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
+    @JsonProperty("psc_active")
+    private Boolean pscActive;
+
+    @JsonProperty("withdrawn_statements")
+    private Integer withdrawnStatements;
+
+    @JsonProperty("active_statements")
+    private Integer activeStatements;
+
     @JsonProperty("has_uk_establishment")
     private Boolean hasUkEstablishment;
 
     @JsonProperty("registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
+
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @JsonProperty("is_company_number_padding")
+    private Boolean isPaddingCompanyNumber;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -198,6 +213,46 @@ public class CompanySpec {
 
     public void setRegisteredOfficeIsInDispute(Boolean registeredOfficeIsInDispute) {
         this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
+    }
+
+    public Boolean getPscActive() {
+        return pscActive;
+    }
+
+    public void setPscActive(Boolean pscActive) {
+        this.pscActive = pscActive;
+    }
+
+    public Integer getWithdrawnStatements() {
+        return withdrawnStatements;
+    }
+
+    public void setWithdrawnStatements(Integer withdrawnStatements) {
+        this.withdrawnStatements = withdrawnStatements;
+    }
+
+    public Integer getActiveStatements() {
+        return activeStatements;
+    }
+
+    public void setActiveStatements(Integer activeStatements) {
+        this.activeStatements = activeStatements;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public Boolean getIsPaddingCompanyNumber() {
+        return isPaddingCompanyNumber;
+    }
+
+    public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
+        this.isPaddingCompanyNumber = isPaddingCompanyNumber;
     }
 }
 

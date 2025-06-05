@@ -25,7 +25,6 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanyMetricsServiceImpl.class));
-
     @Autowired
     private CompanyMetricsRepository repository;
     @Autowired
@@ -35,10 +34,11 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     public CompanyMetrics create(CompanySpec spec) {
         LOG.info("Starting creation of CompanyMetrics for company number: "
                 + spec.getCompanyNumber());
-
         CompanyMetrics metrics = initializeMetrics(spec);
 
         setActivePscCount(metrics, spec);
+        setPscCount(metrics, spec);
+        setCeasedPscCount(metrics, spec);
         setActiveDirectorsCount(metrics, spec);
 
         if (spec.getRegisters() != null) {
@@ -49,14 +49,12 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         CompanyMetrics savedMetrics = repository.save(metrics);
         LOG.info("Successfully created and saved CompanyMetrics for company number: "
                 + spec.getCompanyNumber());
-
         return savedMetrics;
     }
 
     @Override
     public boolean delete(String companyNumber) {
         LOG.info("Attempting to delete CompanyMetrics for company number: " + companyNumber);
-
         Optional<CompanyMetrics> existingMetric = repository.findById(companyNumber);
 
         if (existingMetric.isPresent()) {
@@ -75,20 +73,36 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         var metrics = new CompanyMetrics();
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
-        metrics.setActivePscStatementsCount(1);
+
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            metrics.setActiveStatementsCount(1);
+        } else if (spec.getActiveStatements() == null) {
+            metrics.setActiveStatementsCount(spec.getNumberOfPsc()
+                    == null ? 0 : spec.getNumberOfPsc());
+        } else {
+            metrics.setActiveStatementsCount(spec.getActiveStatements());
+        }
+
+        metrics.setWithdrawnStatementsCount(
+                spec.getWithdrawnStatements() == null ? 0 : spec.getWithdrawnStatements()
+        );
+
         LOG.debug("Initialized CompanyMetrics with ID: "
                 + spec.getCompanyNumber() + " and ETag: " + metrics.getEtag());
         return metrics;
     }
 
-    private void setActivePscCount(CompanyMetrics metrics, CompanySpec spec) {
-        Integer numberOfPsc = spec.getNumberOfPsc();
+    public void setActivePscCount(CompanyMetrics metrics, CompanySpec spec) {
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
-        } else if (numberOfPsc != null) {
-            metrics.setActivePscCount(numberOfPsc);
-            LOG.debug("Set active PSC count to " + numberOfPsc);
+        } else if (spec.getNumberOfPsc() != null) {
+            int activeCount = spec.getNumberOfPsc();
+            if (Boolean.FALSE.equals(spec.getPscActive())) {
+                activeCount = Math.max(0, spec.getNumberOfPsc() - 1);
+            }
+            metrics.setActivePscCount(activeCount);
+            LOG.debug("Set active PSC count to " + activeCount);
         } else {
             metrics.setActivePscCount(0);
             LOG.debug("No PSC count provided. Set active PSC count to 0.");
@@ -107,22 +121,47 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
+    public void setPscCount(CompanyMetrics metrics, CompanySpec spec) {
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            metrics.setPscCount(1);
+            LOG.debug("Company has super secure PSCs. Set PSC count to 1.");
+        } else if (spec.getNumberOfPsc() != null) {
+            metrics.setPscCount(spec.getNumberOfPsc());
+            LOG.debug("Set PSC count to " + spec.getNumberOfPsc());
+        } else {
+            metrics.setPscCount(0);
+            LOG.debug("No PSC count provided. Set PSC count to 0.");
+        }
+    }
+
+    public void setCeasedPscCount(CompanyMetrics metrics, CompanySpec spec) {
+        var ceasedCount = 0;
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            LOG.debug("Company has super secure PSCs. Ceased PSC count remains 0.");
+        } else if (Boolean.FALSE.equals(spec.getPscActive())) {
+            ceasedCount = 1;
+            LOG.debug("PSC active is false in spec. Set ceased PSC count to 1.");
+        }
+
+        metrics.setCeasedPscCount(ceasedCount);
+    }
+
     private Map<String, RegisterItem> createRegisters(List<RegistersSpec> registers) {
         LOG.info("Creating registers for the provided list of " + registers.size() + " registers.");
-
         Map<String, RegisterItem> registerMap = registers.stream().collect(Collectors.toMap(
                 RegistersSpec::getRegisterType,
                 reg -> {
                     LOG.debug("Processing register type: " + reg.getRegisterType());
                     var item = new RegisterItem();
+
                     item.setRegisterMovedTo(reg.getRegisterMovedTo());
                     item.setMovedOn(LocalDate.now());
                     LOG.debug("Created RegisterItem for type: "
                             + reg.getRegisterType() + " with movedTo: " + reg.getRegisterMovedTo());
+
                     return item;
                 }
         ));
-
         LOG.info("Successfully created " + registerMap.size() + " registers.");
         return registerMap;
     }
