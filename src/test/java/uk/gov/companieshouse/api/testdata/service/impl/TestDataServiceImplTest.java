@@ -75,7 +75,6 @@ import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -139,11 +138,15 @@ class TestDataServiceImplTest {
     @Mock
     private Appointment commonAppointment;
     @Mock
-    private CompanySearchService companySearchService;
+    private CompanySearchServiceImpl companySearchService;
     @Mock
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
+    @Mock
+    private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Mock
+    private AdvancedCompanySearchImpl advancedCompanySearch;
     @InjectMocks
     private TestDataServiceImpl testDataService;
 
@@ -1516,6 +1519,10 @@ class TestDataServiceImplTest {
                 expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
         verify(companySearchService, times(expectedInvocationCount))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
     }
 
     @Test
@@ -1525,6 +1532,10 @@ class TestDataServiceImplTest {
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
         verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(alphabeticalCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(advancedCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
 
     @Test
@@ -1532,8 +1543,11 @@ class TestDataServiceImplTest {
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
-
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(alphabeticalCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(advancedCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
 
     @Test
