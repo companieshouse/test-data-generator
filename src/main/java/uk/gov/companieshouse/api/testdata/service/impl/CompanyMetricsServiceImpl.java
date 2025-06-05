@@ -75,15 +75,15 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setEtag(randomService.getEtag());
 
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
-            metrics.setActiveStatementsCount(1);
+            metrics.setActivePscStatementsCount(1);
         } else if (spec.getActiveStatements() == null) {
-            metrics.setActiveStatementsCount(spec.getNumberOfPsc()
+            metrics.setActivePscStatementsCount(spec.getNumberOfPsc()
                     == null ? 0 : spec.getNumberOfPsc());
         } else {
-            metrics.setActiveStatementsCount(spec.getActiveStatements());
+            metrics.setActivePscStatementsCount(spec.getActiveStatements());
         }
 
-        metrics.setWithdrawnStatementsCount(
+        metrics.setWithdrawnPscStatementsCount(
                 spec.getWithdrawnStatements() == null ? 0 : spec.getWithdrawnStatements()
         );
 

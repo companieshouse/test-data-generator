@@ -303,7 +303,7 @@ class CompanyMetricsServiceImplTest {
         spec.setActiveStatements(3);
 
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(new CompanyMetrics()); // Return a dummy for verification
+        when(repository.save(any())).thenReturn(new CompanyMetrics());
 
         metricsService.create(spec);
 
@@ -311,7 +311,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(3, metrics.getActiveStatementsCount());
+        assertEquals(3, metrics.getActivePscStatementsCount());
     }
 
     @Test
@@ -329,7 +329,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(2, metrics.getActiveStatementsCount());
+        assertEquals(2, metrics.getActivePscStatementsCount());
     }
 
     @Test
@@ -346,7 +346,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(0, metrics.getActiveStatementsCount());
+        assertEquals(0, metrics.getActivePscStatementsCount());
     }
 
     @Test
