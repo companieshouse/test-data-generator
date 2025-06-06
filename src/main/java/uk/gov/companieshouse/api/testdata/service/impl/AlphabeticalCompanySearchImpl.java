@@ -51,7 +51,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
                     .alphabeticalCompanySearch()
                     .delete(uri)
                     .execute();
-            LOG.info("Company profile deleted successfully from alphabetical search for company number:"
+            LOG.info("Company profile deleted successfully from alphabetical search for company number: "
                     + companyNumber);
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile from alphabetical search "
