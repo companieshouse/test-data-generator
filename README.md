@@ -67,6 +67,8 @@ In order to use the generator, there are different possible endpoints that can b
   - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
   - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
+  - `alphabetical_search`: Boolean value to determine if the company is included in the alphabetical search. Defaults to false.
+  - `advanced_search`: Boolean value to determine if the company is included in the advanced search. Defaults to false.
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
@@ -79,6 +81,8 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
   - A usage example for creating a company with padded company number: `{ "is_company_number_padding": true }`
   - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
+  - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
+  - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.

@@ -1507,9 +1507,12 @@ class TestDataServiceImplTest {
                                                     int expectedInvocationCount)
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(isElasticSearchDeployed);
+        testDataService.setElasticSearchDeployed(isElasticSearchDeployed);
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
