@@ -173,8 +173,12 @@ public class TestDataServiceImpl implements TestDataService {
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
-                this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-                this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+                if (spec.getAlphabeticalSearch() != null) {
+                    this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+                }
+                if (spec.getAdvancedSearch() != null) {
+                    this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+                }
                 LOG.info("Successfully added company to ElasticSearch index");
             }
 

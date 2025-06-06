@@ -40,19 +40,23 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber) throws
-            ApiErrorResponseException, URIValidationException {
-        var uri =  String.format(ALPHABETICAL_SEARCH_URI,
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
+        var uri = String.format(ALPHABETICAL_SEARCH_URI,
                 companyNumber);
         LOG.info("Deleting company profile from alphabetical search for company number: "
                 + companyNumber);
-        internalApiClientSupplier.get()
-                .privateSearchResourceHandler()
-                .alphabeticalCompanySearch()
-                .delete(uri)
-                .execute();
-        LOG.info("Company profile deleted successfully from alphabetical search for company number:"
-                + companyNumber);
+        try {
+            internalApiClientSupplier.get()
+                    .privateSearchResourceHandler()
+                    .alphabeticalCompanySearch()
+                    .delete(uri)
+                    .execute();
+            LOG.info("Company profile deleted successfully from alphabetical search for company number: "
+                    + companyNumber);
+        } catch (ApiErrorResponseException | URIValidationException ex) {
+            LOG.error("Failed to delete company profile from alphabetical search "
+                    + "for company number: " + companyNumber);
+        }
     }
 
     private void upsertCompanyProfileForAlphaSearch(

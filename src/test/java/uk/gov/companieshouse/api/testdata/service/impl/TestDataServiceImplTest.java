@@ -1510,6 +1510,8 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
@@ -1673,5 +1675,52 @@ class TestDataServiceImplTest {
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 Jurisdiction.SCOTLAND);
     }
+
+    @Test
+    void testCreateCompanyWithoutAlphabeticalSearch()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        spec.setAdvancedSearch(true);
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
+    @Test
+    void testCreateCompanyWithoutAdvancedSearch()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
 
 }

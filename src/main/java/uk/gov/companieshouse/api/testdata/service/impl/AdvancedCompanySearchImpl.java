@@ -39,8 +39,7 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber)
-            throws ApiErrorResponseException, URIValidationException {
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
         deleteCompanyFromAdvancedSearch(companyNumber);
     }
 
@@ -58,18 +57,23 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
                 + companyNumber);
     }
 
-    private void deleteCompanyFromAdvancedSearch(String companyNumber)
-            throws ApiErrorResponseException, URIValidationException {
+    private void deleteCompanyFromAdvancedSearch(String companyNumber) {
         String uri = formatUri(ADVANCED_SEARCH_URI, companyNumber);
         LOG.info("Deleting company profile from advanced search for company number: "
                 + companyNumber);
-        internalApiClientSupplier.get()
-                .privateSearchResourceHandler()
-                .advancedCompanySearch()
-                .deleteCompanyProfile(uri)
-                .execute();
-        LOG.info("Company profile deleted successfully from advanced search for company number: "
-                + companyNumber);
+        try {
+            internalApiClientSupplier.get()
+                    .privateSearchResourceHandler()
+                    .advancedCompanySearch()
+                    .deleteCompanyProfile(uri)
+                    .execute();
+            LOG.info("Company profile deleted successfully from advanced search "
+                    + "for company number: " + companyNumber);
+
+        } catch (ApiErrorResponseException | URIValidationException ex) {
+            LOG.error("Failed to delete company profile from advanced search for company number: "
+                    + companyNumber);
+        }
     }
 
     private String formatUri(String template, String value) {

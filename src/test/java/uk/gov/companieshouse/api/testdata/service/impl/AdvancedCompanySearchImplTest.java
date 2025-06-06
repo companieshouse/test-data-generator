@@ -5,6 +5,9 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
+
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +18,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.company.CompanyResourceHandler;
 import uk.gov.companieshouse.api.handler.company.request.CompanyGet;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.search.PrivateSearchResourceHandler;
 import uk.gov.companieshouse.api.handler.search.advanced.PrivateAdvancedCompanySearchHandler;
 import uk.gov.companieshouse.api.handler.search.advanced.request.PrivateAdvancedCompanySearchDelete;
@@ -95,5 +100,38 @@ class AdvancedCompanySearchImplTest {
         service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
 
         verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldLogError_WhenApiErrorResponseExceptionThrown()
+            throws Exception {
+        // Mock the deleteCompanyProfile to throw ApiErrorResponseException
+        when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
+                .thenReturn(privateAdvancedCompanySearchDelete);
+        when(privateAdvancedCompanySearchDelete.execute())
+                .thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(500,
+                        "API error", new HttpHeaders())));
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+
+        verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
+        // Verify that the error is logged
+        verify(privateAdvancedCompanySearchDelete).execute();
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldLogError_WhenUriValidationExceptionThrown()
+            throws Exception {
+        // Mock the deleteCompanyProfile to throw URIValidationException
+        when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
+                .thenReturn(privateAdvancedCompanySearchDelete);
+        when(privateAdvancedCompanySearchDelete.execute())
+                .thenThrow(new URIValidationException("URI validation error"));
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+
+        verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
+        // Verify that the error is logged
+        verify(privateAdvancedCompanySearchDelete).execute();
     }
 }

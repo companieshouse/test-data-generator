@@ -83,6 +83,12 @@ public class CompanySpec {
     @JsonProperty("is_company_number_padding")
     private Boolean isPaddingCompanyNumber;
 
+    @JsonProperty("alphabetical_search")
+    private Boolean alphabeticalSearch;
+
+    @JsonProperty("advanced_search")
+    private Boolean advancedSearch;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -253,6 +259,18 @@ public class CompanySpec {
 
     public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
         this.isPaddingCompanyNumber = isPaddingCompanyNumber;
+    }
+    public Boolean getAlphabeticalSearch() {
+        return alphabeticalSearch;
+    }
+    public void setAlphabeticalSearch(Boolean alphabeticalSearch) {
+        this.alphabeticalSearch = alphabeticalSearch;
+    }
+    public Boolean getAdvancedSearch() {
+        return advancedSearch;
+    }
+    public void setAdvancedSearch(Boolean advancedSearch) {
+        this.advancedSearch = advancedSearch;
     }
 }
 
