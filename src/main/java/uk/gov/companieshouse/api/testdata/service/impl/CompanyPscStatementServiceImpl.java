@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -43,6 +44,8 @@ public class CompanyPscStatementServiceImpl implements
         pscStatement.setPscStatementId(pscStatementId);
         pscStatement.setCompanyNumber(spec.getCompanyNumber());
         pscStatement.setEtag(randomService.getEtag());
+        pscStatement.setCreatedAt(Instant.now());
+        pscStatement.setUpdatedAt(pscStatement.getCreatedAt());
 
         pscStatement.setKind("persons-with-significant-control-statement");
         var links = new Links();
@@ -59,8 +62,10 @@ public class CompanyPscStatementServiceImpl implements
             pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
         } else if (spec.getPscActive() == null || Boolean.TRUE.equals(spec.getPscActive())) {
             pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
-        } else if (Boolean.FALSE.equals(spec.getPscActive())) {
+        } else if (spec.getWithdrawnStatements() > 0) {
             pscStatement.setStatement(PscStatement.BENEFICIAL_ACTIVE_OR_CEASED.getStatement());
+            pscStatement.setCeasedOn(LocalDate.now().minusDays(30)
+                    .atStartOfDay(ZONE_ID_UTC).toInstant());
         } else {
             pscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
