@@ -39,7 +39,7 @@ class CompanyPscStatementServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "abc123def456";
     private static final String ETAG = "etag";
-    private static final String PSC_STATEMENT_2 = "psc-exists-but-not-identified";
+    private static final String PSC_STATEMENT_2 = "no-individual-or-entity-with-signficant-control";
     private static final String PSC_STATEMENT_3 = "all-beneficial-owners-identified";
     private static final String PSC_STATEMENT_4 = "psc-exists-but-not-identified";
     private static final String PSC_ID = "PSC1234567";
@@ -59,6 +59,7 @@ class CompanyPscStatementServiceImplTest {
     void create() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setWithdrawnStatements(0);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscStatement savedStatement = new CompanyPscStatement();
@@ -82,7 +83,7 @@ class CompanyPscStatementServiceImplTest {
         assertNotNull(links);
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/" + ENCODED_VALUE, links.getSelf());
 
-        assertEquals(PSC_STATEMENT_4, capturedStatement.getStatement());
+        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
     }
 
     @Test
@@ -154,6 +155,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setHasSuperSecurePscs(false);
+        spec.setWithdrawnStatements(0);
         spec.setPscActive(null);
 
         CompanyPscStatement pscStatement = companyPscStatementService.create(spec);
@@ -162,7 +164,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository, times(1)).save(captor.capture());
         CompanyPscStatement capturedStatement = captor.getValue();
 
-        assertEquals(CompanyPscStatementServiceImpl.PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement(), pscStatement.getStatement());
+        assertEquals(PSC_STATEMENT_2, pscStatement.getStatement());
         assertNull(pscStatement.getCeasedOn());
         assertEquals(pscStatement, capturedStatement);
     }
@@ -232,7 +234,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setHasSuperSecurePscs(false);
-        spec.setPscActive(false);
+        spec.setPscActive(true);
         spec.setWithdrawnStatements(0);
 
         CompanyPscStatement pscStatement = companyPscStatementService.create(spec);
@@ -241,7 +243,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository, times(1)).save(captor.capture());
         CompanyPscStatement capturedStatement = captor.getValue();
 
-        assertEquals(CompanyPscStatementServiceImpl.PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement(), pscStatement.getStatement());
+        assertEquals(PSC_STATEMENT_4, pscStatement.getStatement());
         assertNull(pscStatement.getCeasedOn());
         assertEquals(pscStatement, capturedStatement);
     }
@@ -273,6 +275,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
         spec.setNumberOfPsc(0);
+        spec.setWithdrawnStatements(0);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscStatement savedStatement = new CompanyPscStatement();
@@ -293,6 +296,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPsc(1);
+        spec.setWithdrawnStatements(0);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
@@ -314,6 +318,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPsc(0);
+        spec.setWithdrawnStatements(0);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
@@ -352,12 +357,10 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
-
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(1)).create(spec);
-        assertEquals(1, result.size());
+        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -470,6 +473,7 @@ class CompanyPscStatementServiceImplTest {
     void testNumberOfPscExists() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setWithdrawnStatements(0);
         spec.setNumberOfPsc(5);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -484,7 +488,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
         assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("psc-exists-but-not-identified", capturedStatement.getStatement());
+        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
     }
 
     @Test
@@ -563,12 +567,10 @@ class CompanyPscStatementServiceImplTest {
         spec.setActiveStatements(0);
         spec.setNumberOfPsc(0);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
-
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(1)).create(spec);
-        assertEquals(1, result.size());
+        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -579,12 +581,10 @@ class CompanyPscStatementServiceImplTest {
         spec.setActiveStatements(null);
         spec.setNumberOfPsc(null);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
-
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(1)).create(spec);
-        assertEquals(1, result.size());
+        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        assertTrue(result.isEmpty());
     }
 
     @Test
