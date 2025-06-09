@@ -26,6 +26,9 @@ public class FilingHistorySpec {
     @JsonProperty("description_values")
     private DescriptionValuesSpec descriptionValues;
 
+    @JsonProperty("document_metadata")
+    private Boolean documentMetadata;
+
     public String getType() {
         return type;
     }
@@ -76,5 +79,13 @@ public class FilingHistorySpec {
 
     public void setDescriptionValues(DescriptionValuesSpec descriptionValues) {
         this.descriptionValues = descriptionValues;
+    }
+
+    public Boolean getDocumentMetadata() {
+        return documentMetadata;
+    }
+
+    public void setDocumentMetadata(Boolean documentMetadata) {
+        this.documentMetadata = documentMetadata;
     }
 }

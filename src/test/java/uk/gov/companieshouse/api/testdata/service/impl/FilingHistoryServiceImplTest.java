@@ -452,6 +452,7 @@ class FilingHistoryServiceImplTest {
         ap01Spec.setType("AP01");
         ap01Spec.setCategory("appointment");
         ap01Spec.setDescription("appointment-description");
+        ap01Spec.setDocumentMetadata(true);
 
         FilingHistorySpec mr01Spec = new FilingHistorySpec();
         mr01Spec.setType("MR01");
@@ -461,13 +462,22 @@ class FilingHistoryServiceImplTest {
         FilingHistorySpec resolutionsSpec = new FilingHistorySpec();
         resolutionsSpec.setType("RESOLUTIONS");
         resolutionsSpec.setCategory("resolution-category");
-
         resolutionsSpec.setResolutions(List.of(
                 buildResolution("res-barcode-1", "resolution-cat-1", "resolution-desc-1", "sub-cat-1", "RES1"),
                 buildResolution("res-barcode-2", "resolution-cat-2", "resolution-desc-2", "sub-cat-2", "RES2")
         ));
 
-        spec.setFilingHistoryList(List.of(ap01Spec, mr01Spec, resolutionsSpec));
+        FilingHistorySpec aaSpec = new FilingHistorySpec();
+        aaSpec.setType("AA"); // extra spaces to test normalization
+        aaSpec.setCategory("accounts");
+        aaSpec.setDescription("annual-accounts-description");
+
+        FilingHistorySpec cs01Spec = new FilingHistorySpec();
+        cs01Spec.setType("CS01"); // lowercase to test normalization
+        cs01Spec.setCategory("confirmation-statement");
+        cs01Spec.setDescription("confirmation-description");
+
+        spec.setFilingHistoryList(List.of(ap01Spec, mr01Spec, resolutionsSpec, aaSpec, cs01Spec));
 
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(Mockito.anyString(), eq(8))).thenReturn(TEST_ID);
@@ -485,6 +495,8 @@ class FilingHistoryServiceImplTest {
         validateAp01Filing(createdHistories.get(0));
         validateMr01Filing(createdHistories.get(1));
         validateResolutionsFiling(createdHistories.get(2));
+        validateAaFiling(createdHistories.get(3));
+        validateCs01Filing(createdHistories.get(4));
     }
 
     private void validateAp01Filing(FilingHistory ap01) {
@@ -522,5 +534,21 @@ class FilingHistoryServiceImplTest {
         assertEquals(subCat, r.getSubCategory());
         assertEquals(type, r.getType());
         assertNotNull(r.getDeltaAt());
+    }
+
+    private void validateAaFiling(FilingHistory aa) {
+        assertEquals("AA", aa.getType());
+        assertEquals("annual-accounts-description", aa.getDescription());
+        assertEquals("accounts", aa.getCategory());
+        assertNotNull(aa.getDescriptionValues());
+        assertNotNull(aa.getDescriptionValues().getMadeUpDate());
+    }
+
+    private void validateCs01Filing(FilingHistory cs01) {
+        assertEquals("CS01", cs01.getType());
+        assertEquals("confirmation-description", cs01.getDescription());
+        assertEquals("confirmation-statement", cs01.getCategory());
+        assertNotNull(cs01.getDescriptionValues());
+        assertNotNull(cs01.getDescriptionValues().getMadeUpDate());
     }
 }

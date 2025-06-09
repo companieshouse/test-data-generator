@@ -18,6 +18,12 @@ public class DescriptionValues {
     @Field("capital")
     private List<Capital> capital;
 
+    @Field("date")
+    private Instant date;
+
+    @Field("made_up_date")
+    private Instant madeUpdate;
+
     public Instant getAppointmentDate() {
         return appointmentDate;
     }
@@ -48,5 +54,21 @@ public class DescriptionValues {
 
     public void setCapital(List<Capital> capital) {
         this.capital = capital;
+    }
+
+    public Instant getDate() {
+        return date;
+    }
+
+    public void setDate(Instant date) {
+        this.date = date;
+    }
+
+    public Instant getMadeUpDate() {
+        return madeUpdate;
+    }
+
+    public void setMadeUpDate(Instant madeUpdate) {
+        this.madeUpdate = madeUpdate;
     }
 }
