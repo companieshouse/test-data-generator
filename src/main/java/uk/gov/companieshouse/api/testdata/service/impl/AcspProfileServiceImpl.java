@@ -46,7 +46,7 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         profile.setBusinessSector(Objects.requireNonNullElse(spec.getBusinessSector(), "financial-institutions"));
         profile.setRegisteredOfficeAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
         profile.setServiceAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
-        profile.setName("Test Data Generator " + acspNumber + " Company Ltd");
+        profile.setName(Objects.requireNonNullElse(spec.getName(),"Test Data Generator " + acspNumber + " Company Ltd"));
         profile.setLinksSelf(LINK_STEM + acspNumber);
         if (spec.getAmlDetails() != null) {
             List<AmlDetails> amlDetailsList = new ArrayList<>();
