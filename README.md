@@ -49,7 +49,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to false, `true` value will create a Psc entry of `super-secure-person-with-significant-control` or `super-secure-beneficial-owner` depending on CompanyType.
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
-  - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1.
+  - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1. Has a maximum allowed value of 20.
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
   - `accounts_due_status`: Set the accounts and confirmation statement due dates of the company by providing accounts_due_status (e.g., `overdue`, `due-soon`). Defaults to current date. 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
@@ -60,12 +60,12 @@ In order to use the generator, there are different possible endpoints that can b
     - `category`: The category of the filing (e.g., `incorporation`, `dissolution`, `gazette`). Defaults to `incorporation`.
     - `description`: The description of the filing (e.g., `incorporation-company`, `gazette-notice-voluntary`). Defaults to `incorporation-company`.
     - `original_description`: The original description of the filing (e.g., `First gazette notice for voluntary strike-off`). Defaults to `Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association`.
-    - `number_of_psc`: The number of PSCs to create. Defaults to 0. Can be used to create multiple PSCs.
+    - `number_of_psc`: The number of PSCs to create. Defaults to 0. Can be used to create multiple PSCs. Has a maximum allowed value of 20.
     - `psc_type`: Used alongside the `number_of_psc`. The types of PSCs to create (e.g., `individual`, `corporate`, `legal-person`, `individual-bo`, `corporate-bo`).
     }
     - `psc_active`: Boolean value to determine if the PSCs are active or ceased. To be used alongside PSC requests. Where a request is creating multiple PSCs, a fasle value here will set the first PSC to inactive. Defaults to true.
-  - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
-  - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
+  - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0. has a maximum allowed value of 20.
+  - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request. Has a maximum allowed value of 20.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
   - `alphabetical_search`: Boolean value to determine if the company is included in the alphabetical search. Defaults to false.
   - `advanced_search`: Boolean value to determine if the company is included in the advanced search. Defaults to false.
