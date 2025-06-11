@@ -104,17 +104,17 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
                     OVERSEA_COMPANY_TYPE, companyType, registeredOfficeIsInDispute);
         } else {
-            return createNormalCompanyProfile(companyNumber, jurisdiction,
+            return createDefaultCompanyProfile(companyNumber, jurisdiction,
                     spec, dateParams, companyParams, accountParams);
         }
     }
 
-    private CompanyProfile createNormalCompanyProfile(String companyNumber,
-                                                      Jurisdiction jurisdiction,
-                                                      CompanySpec spec,
-                                                      DateParameters dateParams,
-                                                      CompanyDetailsParameters companyParams,
-                                                      AccountParameters accountParams) {
+    private CompanyProfile createDefaultCompanyProfile(String companyNumber,
+                                                       Jurisdiction jurisdiction,
+                                                       CompanySpec spec,
+                                                       DateParameters dateParams,
+                                                       CompanyDetailsParameters companyParams,
+                                                       AccountParameters accountParams) {
         LOG.info("Creating a default CompanyProfile. " + companyNumber);
 
         CompanyProfile profile = new CompanyProfile();
@@ -146,7 +146,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setUndeliverableRegisteredOfficeAddress(false);
 
         profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
-        setCompanyName(profile, companyNumber, companyTypeValue);
+        if (spec.getCompanyName() != null) {
+            profile.setCompanyName(spec.getCompanyName() + " " + companyNumber);
+        } else {
+            setCompanyName(profile, companyNumber, companyTypeValue);
+        }
         profile.setSicCodes(Collections.singletonList("71200"));
 
         var confirmationStatement = profile.getConfirmationStatement();
@@ -193,10 +197,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         var overseasEntity = new OverseasEntity();
         overseasEntity.setId(companyNumber);
         overseasEntity.setCompanyNumber(companyNumber);
+
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
             overseasEntity.setHasMortgages(true);
             overseasEntity.setTestData(true);
         }
+
+        overseasEntity.setHasSuperSecurePscs(BooleanUtils.isTrue(spec.getHasSuperSecurePscs()));
+
         setCompanyStatus(overseasEntity, spec.getCompanyStatus(), entityType);
         overseasEntity.setType(entityType);
         overseasEntity.setHasCharges(false);
@@ -212,7 +220,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         // Company Details
         overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
-        overseasEntity.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
+        if (spec.getCompanyName() != null) {
+            overseasEntity.setCompanyName(spec.getCompanyName() + " " + companyNumber);
+        } else {
+            setCompanyName(overseasEntity, companyNumber, companyType.getValue());
+        }
         overseasEntity.setRegisteredOfficeIsInDispute(false);
         setRegisteredOfficeAddressIsInDispute(overseasEntity, isRegisteredOfficeIsInDispute);
         overseasEntity.setEtag(randomService.getEtag());
@@ -248,7 +260,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         OverseasEntity.IAccountsDetails accountsDetails = OverseasEntity.createAccountsDetails();
         accountsDetails.setAccountPeriodFrom("1", "January");
         accountsDetails.setAccountPeriodTo("31", "December");
-
 
         OverseasEntity.IMustFileWithin mustFileWithin = OverseasEntity.createMustFileWithin();
         mustFileWithin.setMonths(12);
@@ -289,7 +300,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setAccounts(accounts);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            overseasEntity.setHasSuperSecurePscs(BooleanUtils.isTrue(spec.getHasSuperSecurePscs()));
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
             overseasEntity.setDeltaAt(Instant.now());
             OverseasEntity.IUpdated updated = OverseasEntity.createUpdated();
@@ -317,6 +327,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         ukEstablishment.setId(ukEstablishmentNumber);
         ukEstablishment.setCompanyNumber(ukEstablishmentNumber);
         ukEstablishment.setType(CompanyType.UK_ESTABLISHMENT.getValue());
+
+        ukEstablishment.setParentCompanyNumber(parentCompanyNumber);
 
         var branchDetails = new CompanyProfile.BranchCompanyDetails();
         branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
@@ -412,9 +424,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)
                 && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
-            String ukEstablishmentNumber =
-                    createUkEstablishment(companyNumber, jurisdiction, dateParams);
-            links.setUkEstablishment(LINK_STEM + ukEstablishmentNumber);
+            createUkEstablishment(companyNumber, jurisdiction, dateParams);
+            links.setUkEstablishments(LINK_STEM + companyNumber + "/uk-establishments");
         }
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {

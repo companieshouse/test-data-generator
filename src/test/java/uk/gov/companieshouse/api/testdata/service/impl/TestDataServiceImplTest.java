@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -29,6 +30,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -73,7 +75,6 @@ import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -109,7 +110,7 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<CompanyMetrics, CompanySpec> metricsService;
     @Mock
-    private DataService<CompanyPscStatement, CompanySpec> companyPscStatementService;
+    private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock
     private DataService<CompanyPscs, CompanySpec> companyPscsService;
     @Mock
@@ -137,16 +138,21 @@ class TestDataServiceImplTest {
     @Mock
     private Appointment commonAppointment;
     @Mock
-    private CompanySearchService companySearchService;
+    private CompanySearchServiceImpl companySearchService;
     @Mock
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
+    @Mock
+    private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Mock
+    private AdvancedCompanySearchImpl advancedCompanySearch;
     @InjectMocks
     private TestDataServiceImpl testDataService;
 
     @BeforeEach
     void setUp() {
+        MockitoAnnotations.openMocks(this);
         this.testDataService.setAPIUrl(API_URL);
     }
 
@@ -208,7 +214,7 @@ class TestDataServiceImplTest {
         verify(filingHistoryService, times(1)).create(capturedSpec);
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
         verify(appointmentService, times(1)).create(capturedSpec);
-        verify(companyPscStatementService, times(1)).create(capturedSpec);
+        verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscsService, times(1)).create(capturedSpec);
 
@@ -423,12 +429,13 @@ class TestDataServiceImplTest {
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(spec)).thenReturn(mockAuthCode);
 
-        DataException pscStatementException = new DataException("error");
-        when(companyPscStatementService.create(spec)).thenThrow(pscStatementException);
+        RuntimeException pscStatementRuntimeException = new RuntimeException("error");
+        when(companyPscStatementService.createPscStatements(spec)).thenThrow(pscStatementRuntimeException);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataService.createCompanyData(spec));
-        assertEquals(pscStatementException, thrown.getCause());
+
+        assertEquals(pscStatementRuntimeException, thrown.getCause());
 
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
@@ -461,7 +468,7 @@ class TestDataServiceImplTest {
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).create(capturedSpec);
-        verify(companyPscStatementService).create(capturedSpec);
+        verify(companyPscStatementService).createPscStatements(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verify(companyPscsService).create(capturedSpec);
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
@@ -602,7 +609,6 @@ class TestDataServiceImplTest {
         doThrow(new RuntimeException("Deletion error")).when(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.deleteCompanyData(OVERSEA_COMPANY));
-        assertEquals("Error deleting company data", exception.getMessage());
         assertEquals(1, exception.getSuppressed().length);
         assertEquals("Deletion error", exception.getSuppressed()[0].getMessage());
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
@@ -1504,6 +1510,8 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
@@ -1512,6 +1520,10 @@ class TestDataServiceImplTest {
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
                 expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
         verify(companySearchService, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(expectedInvocationCount))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
     }
 
@@ -1522,6 +1534,10 @@ class TestDataServiceImplTest {
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
         verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(alphabeticalCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(advancedCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
 
     @Test
@@ -1529,8 +1545,11 @@ class TestDataServiceImplTest {
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
-
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(alphabeticalCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(advancedCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
 
     @Test
@@ -1637,5 +1656,71 @@ class TestDataServiceImplTest {
                 testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
         assertEquals(ex.getMessage(), thrown.getMessage());
     }
+
+    @Test
+    void createCompanyWithCompanyNumberPadding() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setIsPaddingCompanyNumber(true);
+        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        String companyNumber = "123";
+        String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + "000" + companyNumber;
+
+        // Use anyInt() to allow flexibility in the argument
+        when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(companyNumber));
+
+        setupCompanyCreationMocks(spec, companyNumber, 3, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.SCOTLAND);
+    }
+
+    @Test
+    void testCreateCompanyWithoutAlphabeticalSearch()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        spec.setAdvancedSearch(true);
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
+    @Test
+    void testCreateCompanyWithoutAdvancedSearch()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
 
 }

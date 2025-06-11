@@ -53,22 +53,45 @@ In order to use the generator, there are different possible endpoints that can b
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
   - `accounts_due_status`: Set the accounts and confirmation statement due dates of the company by providing accounts_due_status (e.g., `overdue`, `due-soon`). Defaults to current date. 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
+  - `company_name`: The name of the company. Defaults to a randomly generated name. Creates a company with the name provided and appended with company number.
+  - `is_company_number_padding`: Boolean value to determine if the company number should be padded with zeros. Defaults to false, `true` value will create a company number with leading zeros.
   - `filing_history`: {
     - `type`: The type of the submission (e.g., `GAZ1(A)`, `DS01`). Defaults to `NEWINC`.
-    - `category`: The category of the filing (e.g., `incorporation`, `dissolution`, `gazette`). Defaults to `incorporation`.
+    - `category`: The category of the filing (e.g., `incorporation`, `dissolution`, `gazette`, `resolution`). Defaults to `incorporation`.
+    - `subcategory`: The sub category of the filing (e.g., `appointments`, `resolution`)
     - `description`: The description of the filing (e.g., `incorporation-company`, `gazette-notice-voluntary`). Defaults to `incorporation-company`.
     - `original_description`: The original description of the filing (e.g., `First gazette notice for voluntary strike-off`). Defaults to `Certificate of incorporation general company details & statements of; officers, capital & shareholdings, guarantee, compliance memorandum of association`.
     - `number_of_psc`: The number of PSCs to create. Defaults to 0. Can be used to create multiple PSCs.
     - `psc_type`: Used alongside the `number_of_psc`. The types of PSCs to create (e.g., `individual`, `corporate`, `legal-person`, `individual-bo`, `corporate-bo`).
+    - `resolutions`: This is optional, mandatory only when type is `RESOLUTIONS`
+      - `barcode`: Barcode value for resolutions type. By default, it's an empty string.
+      - `category`: Resolutions category for resolutions type (e.g., `incorporation`, `resolutions`)
+      - `delta_at`: Convert date for delta at format and stores as string.
+      - `description`: Description for resolutions type (e.g., `resolution-re-registraion`, `incorporation-company`)
+      - `subcategory`: Sub category for resolutions type (e.g., `resolution`, `incorporation`)
+      - `type`: Type for the resolutions type (e.g., `RES02`, `NEWINC`)
     }
+    - `psc_active`: Boolean value to determine if the PSCs are active or ceased. To be used alongside PSC requests. Where a request is creating multiple PSCs, a fasle value here will set the first PSC to inactive. Defaults to true.
+  - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
+  - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
+  - `alphabetical_search`: Boolean value to determine if the company is included in the alphabetical search. Defaults to false.
+  - `advanced_search`: Boolean value to determine if the company is included in the advanced search. Defaults to false.
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` with `has_uk_establishment` looks like this: `{"overseas-company", "has_uk_establishment": true}`, this will create an oversea company with hardcoded values and a UK establishment
-  - A usage example looks like this: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": {"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}, "number_of_appointments": 2, "officer_roles": ["director"]}`
+  - A usage example for creating with single filing history: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": [{"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}], "number_of_appointments": 2, "officer_roles": ["director"]}`
+  - A usage example for creating with multiple filing history: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": [{"type": "AP01", "category": "officers", "subcategory": "appointments", "description": "appoint-person-director-company-with-name-date", "original_description": "Appointment of Mr John Test as a director on 10 November 2020"}, {"type": "RESOLUTIONS", "category": "resolution", "subcategory": "resolution", "description": "resolution", "original_description": "RESOLUTIONS", "resolutions" : [{"barcode" : "", "category" : "incorporation", "delta_at" : "20180723091906627635", "description" : "resolution-re-registration", "subcategory" : "resolution", "type" : "RES02" } ]}], "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
+  - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_statements": 3 }`
+  - A usage example for creating a company with active psc statements: `{ "active_statements": 5 }`
+  - A usage example of creating a company with an inactive psc: `{ "number_of_psc": 1, "psc_active": false }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
+  - A usage example for creating a company with padded company number: `{ "is_company_number_padding": true }`
+  - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
+  - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
+  - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.

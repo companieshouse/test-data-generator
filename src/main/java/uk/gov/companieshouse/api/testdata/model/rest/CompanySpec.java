@@ -44,7 +44,7 @@ public class CompanySpec {
     private String companyStatusDetail;
 
     @JsonProperty("filing_history")
-    private FilingHistorySpec filingHistory;
+    private List<FilingHistorySpec> filingHistoryList;
 
     @JsonProperty("number_of_appointments")
     private int numberOfAppointments = 1;
@@ -62,11 +62,32 @@ public class CompanySpec {
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
+    @JsonProperty("psc_active")
+    private Boolean pscActive;
+
+    @JsonProperty("withdrawn_statements")
+    private Integer withdrawnStatements;
+
+    @JsonProperty("active_statements")
+    private Integer activeStatements;
+
     @JsonProperty("has_uk_establishment")
     private Boolean hasUkEstablishment;
 
     @JsonProperty("registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
+
+    @JsonProperty("company_name")
+    private String companyName;
+
+    @JsonProperty("is_company_number_padding")
+    private Boolean isPaddingCompanyNumber;
+
+    @JsonProperty("alphabetical_search")
+    private Boolean alphabeticalSearch;
+
+    @JsonProperty("advanced_search")
+    private Boolean advancedSearch;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -152,12 +173,11 @@ public class CompanySpec {
         this.companyStatusDetail = companyStatusDetail;
     }
 
-    public FilingHistorySpec getFilingHistory() {
-        return filingHistory;
+    public List<FilingHistorySpec> getFilingHistoryList() {
+        return filingHistoryList;
     }
-
-    public void setFilingHistory(FilingHistorySpec filingHistory) {
-        this.filingHistory = filingHistory;
+    public void setFilingHistoryList(List<FilingHistorySpec> filingHistoryList) {
+        this.filingHistoryList = filingHistoryList;
     }
 
     public String getAccountsDueStatus() {
@@ -198,6 +218,58 @@ public class CompanySpec {
 
     public void setRegisteredOfficeIsInDispute(Boolean registeredOfficeIsInDispute) {
         this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
+    }
+
+    public Boolean getPscActive() {
+        return pscActive;
+    }
+
+    public void setPscActive(Boolean pscActive) {
+        this.pscActive = pscActive;
+    }
+
+    public Integer getWithdrawnStatements() {
+        return withdrawnStatements;
+    }
+
+    public void setWithdrawnStatements(Integer withdrawnStatements) {
+        this.withdrawnStatements = withdrawnStatements;
+    }
+
+    public Integer getActiveStatements() {
+        return activeStatements;
+    }
+
+    public void setActiveStatements(Integer activeStatements) {
+        this.activeStatements = activeStatements;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public Boolean getIsPaddingCompanyNumber() {
+        return isPaddingCompanyNumber;
+    }
+
+    public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
+        this.isPaddingCompanyNumber = isPaddingCompanyNumber;
+    }
+    public Boolean getAlphabeticalSearch() {
+        return alphabeticalSearch;
+    }
+    public void setAlphabeticalSearch(Boolean alphabeticalSearch) {
+        this.alphabeticalSearch = alphabeticalSearch;
+    }
+    public Boolean getAdvancedSearch() {
+        return advancedSearch;
+    }
+    public void setAdvancedSearch(Boolean advancedSearch) {
+        this.advancedSearch = advancedSearch;
     }
 }
 

@@ -1,4 +1,3 @@
-
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.time.Instant;
@@ -186,6 +185,8 @@ public class CompanyProfile {
     private String partialDataAvailable;
     @Field("data.branch_company_details")
     private BranchCompanyDetails branchCompanyDetails;
+    @Field("parent_company_number")
+    private String parentCompanyNumber;
 
     public String getId() {
         return id;
@@ -370,6 +371,14 @@ public class CompanyProfile {
 
     public void setBranchCompanyDetails(BranchCompanyDetails branchCompanyDetails) {
         this.branchCompanyDetails = branchCompanyDetails;
+    }
+
+    public String getParentCompanyNumber() {
+        return parentCompanyNumber;
+    }
+
+    public void setParentCompanyNumber(String parentCompanyNumber) {
+        this.parentCompanyNumber = parentCompanyNumber;
     }
 
     public static class BranchCompanyDetails {

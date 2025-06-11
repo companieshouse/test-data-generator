@@ -785,4 +785,21 @@ class CompanyProfileServiceImplTest {
         assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
         assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
     }
+
+    @Test
+    void createCompanyWithProvidedCompanyName() {
+        String providedCompanyName = "Test & Company";
+        spec.setCompanyName(providedCompanyName);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals(providedCompanyName + " " + COMPANY_NUMBER, profile.getCompanyName());
+    }
+
+    @Test
+    void createCompanyWithProvidedCompanyNameIsNull() {
+        spec.setCompanyName(null);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        CompanyProfile profile = createAndCapture(spec);
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+    }
 }

@@ -2,14 +2,15 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -26,96 +27,156 @@ public class CompanyPscStatementServiceImpl implements
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
     private static final String PSC_SUFFIX = "/persons-with-significant-control-statements/";
-
-    @Autowired
-    private RandomService randomService;
+    private static final String URL_PREFIX = "/company/";
 
     @Autowired
     private CompanyPscStatementRepository repository;
 
-    /**
-     * creates PSC statement deliberately misspelt as 'signficant'
-     * to match api-enumeration and live data
-     * can be corrected when api-enumeration is fixed.
-     * psc-statement-data-api java services utilises the enum values and
-     * correct spelling will cause failures in environments that run the java service
-     *
-     * @param spec
-     * @return
-     */
+    @Autowired
+    private RandomService randomService;
+
     @Override
     public CompanyPscStatement create(CompanySpec spec) {
-        final String companyNumber = spec.getCompanyNumber();
-        final String accountsDueStatus = spec.getAccountsDueStatus();
+        var pscStatement = new CompanyPscStatement();
 
-        CompanyPscStatement companyPscStatement = new CompanyPscStatement();
+        String pscStatementId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
+        pscStatement.setId(pscStatementId);
+        pscStatement.setPscStatementId(pscStatementId);
+        pscStatement.setCompanyNumber(spec.getCompanyNumber());
+        pscStatement.setEtag(randomService.getEtag());
+        pscStatement.setCreatedAt(Instant.now());
+        pscStatement.setUpdatedAt(pscStatement.getCreatedAt());
 
-        Instant dateTimeNow = Instant.now();
-        Instant dateNow = LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant();
+        pscStatement.setKind("persons-with-significant-control-statement");
+        var links = new Links();
+        links.setSelf(URL_PREFIX + pscStatement.getCompanyNumber()
+                + PSC_SUFFIX
+                + pscStatement.getId());
+        pscStatement.setLinks(links);
 
-        if (StringUtils.hasText(accountsDueStatus)) {
-            var now = randomService.generateAccountsDueDateByStatus(accountsDueStatus);
-            dateTimeNow = now.atTime(LocalTime.now()).atZone(ZONE_ID_UTC).toInstant();
-            dateNow = now.atStartOfDay(ZONE_ID_UTC).toInstant();
-        }
+        pscStatement.setNotifiedOn(LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant());
 
-        String id = this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
-        companyPscStatement.setId(id);
-        companyPscStatement.setUpdatedAt(dateTimeNow);
-        companyPscStatement.setCompanyNumber(companyNumber);
-        companyPscStatement.setPscStatementId(id);
-
-        Links links = new Links();
-        links.setSelf("/company/" + companyNumber + PSC_SUFFIX + id);
-
-        companyPscStatement.setLinks(links);
-        companyPscStatement.setNotifiedOn(dateNow);
-
-        String etag = this.randomService.getEtag();
-        companyPscStatement.setEtag(etag);
-
-        companyPscStatement.setKind("persons-with-significant-control-statement");
-
-        if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())
-                && (spec.getNumberOfPsc() == null || spec.getNumberOfPsc() == 0)) {
-            companyPscStatement.setStatement(
-                    PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
-        } else if (spec.getNumberOfPsc() != null && spec.getNumberOfPsc() > 0) {
-            if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-                companyPscStatement.setStatement(
-                        PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
-            } else if (CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
-                companyPscStatement.setStatement(
-                        PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL
-                                .getStatement());
-            } else {
-                companyPscStatement.setStatement(
-                        PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
-            }
+        if (spec.getCompanyType() == CompanyType.REGISTERED_OVERSEAS_ENTITY) {
+            pscStatement.setStatement(PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
+        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+        } else if (Boolean.TRUE.equals(spec.getPscActive())) {
+            pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
+        } else if (spec.getWithdrawnStatements() > 0) {
+            pscStatement.setStatement(PscStatement.BENEFICIAL_ACTIVE_OR_CEASED.getStatement());
+            pscStatement.setCeasedOn(LocalDate.now().minusDays(30)
+                    .atStartOfDay(ZONE_ID_UTC).toInstant());
         } else {
-            companyPscStatement.setStatement(
+            pscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         }
 
-        companyPscStatement.setCreatedAt(dateTimeNow);
+        return repository.save(pscStatement);
+    }
 
-        return repository.save(companyPscStatement);
+    public List<CompanyPscStatement> createPscStatements(CompanySpec spec) {
+        List<CompanyPscStatement> generatedStatements = new ArrayList<>();
+
+        Integer withdrawnPscStatementsCount = spec.getWithdrawnStatements();
+        Integer activePscStatementsCount = spec.getActiveStatements();
+        Integer numberOfPsc = spec.getNumberOfPsc();
+
+        boolean specificWithdrawnRequested = withdrawnPscStatementsCount
+                != null && withdrawnPscStatementsCount > 0;
+
+        int effectiveActivePscCount;
+        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
+            effectiveActivePscCount = 1;
+        } else {
+            effectiveActivePscCount = Objects.requireNonNullElseGet(activePscStatementsCount,
+                    () -> Objects.requireNonNullElse(numberOfPsc, 0));
+        }
+
+        boolean specificActiveOrNumberOfPscRequested = effectiveActivePscCount > 0;
+
+        List<CompanyPscStatement> withdrawn = new ArrayList<>();
+        List<CompanyPscStatement> active = new ArrayList<>();
+        // No need for singleDefault list if it's no longer being conditionally added
+
+        if (specificWithdrawnRequested || specificActiveOrNumberOfPscRequested) {
+            if (specificWithdrawnRequested) {
+                withdrawn = generateWithdrawnPscStatements(spec, withdrawnPscStatementsCount);
+            }
+            if (specificActiveOrNumberOfPscRequested) {
+                active = generateActivePscStatements(spec, effectiveActivePscCount);
+            }
+        }
+        // The 'else' block that added a default statement has been removed.
+
+        generatedStatements.addAll(withdrawn);
+        generatedStatements.addAll(active);
+        // singleDefault list and its addAll call is removed.
+
+        return generatedStatements;
+    }
+
+    protected List<CompanyPscStatement> generateWithdrawnPscStatements(
+            CompanySpec spec, Integer count) {
+
+        List<CompanyPscStatement> generatedList = new ArrayList<>();
+
+        if (count == null || count <= 0) {
+            return generatedList;
+        }
+
+        for (var i = 0; i < count; i++) {
+            var tempSpec = new CompanySpec();
+            tempSpec.setCompanyNumber(spec.getCompanyNumber());
+            tempSpec.setCompanyType(spec.getCompanyType());
+            tempSpec.setWithdrawnStatements(1);
+            tempSpec.setNumberOfPsc(0);
+            tempSpec.setPscActive(false);
+            generatedList.add(this.create(tempSpec));
+        }
+        return generatedList;
+    }
+
+    protected List<CompanyPscStatement> generateActivePscStatements(
+            CompanySpec spec, Integer count) {
+
+        List<CompanyPscStatement> generatedList = new ArrayList<>();
+
+        if (count == null || count <= 0) {
+            return generatedList;
+        }
+
+        for (var i = 0; i < count; i++) {
+            var tempSpec = new CompanySpec();
+            tempSpec.setCompanyNumber(spec.getCompanyNumber());
+            tempSpec.setCompanyType(spec.getCompanyType());
+            tempSpec.setWithdrawnStatements(0);
+            tempSpec.setNumberOfPsc(1);
+            tempSpec.setPscActive(true);
+            generatedList.add(this.create(tempSpec));
+        }
+        return generatedList;
     }
 
     @Override
     public boolean delete(String companyNumber) {
-        Optional<CompanyPscStatement> existingStatement
-                = repository.findByCompanyNumber(companyNumber);
-        existingStatement.ifPresent(repository::delete);
-        return existingStatement.isPresent();
+        List<CompanyPscStatement> statementsToDelete
+                = repository.findAllByCompanyNumber(companyNumber);
+
+        if (!statementsToDelete.isEmpty()) {
+            repository.deleteAll(statementsToDelete);
+            return true;
+        }
+        return false;
     }
 
     public enum PscStatement {
-        ALL_BENEFICIAL_OWNERS_IDENTIFIED("all-beneficial-owners-identified"),
         NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL(
                 "no-individual-or-entity-with-signficant-control"),
-        PSC_EXISTS_BUT_NOT_IDENTIFIED("psc-exists-but-not-identified");
-
+        PSC_EXISTS_BUT_NOT_IDENTIFIED("psc-exists-but-not-identified"),
+        ALL_BENEFICIAL_OWNERS_IDENTIFIED("all-beneficial-owners-identified"),
+        BENEFICIAL_ACTIVE_OR_CEASED("somebody-has-become-or-ceased-to-be-a-beneficial-owner"),
+        NO_ACTIVE_BENEFICIAL_OWNER("nobody-has-become-or-ceased-to-be-a-beneficial-owner"),
+        AT_LEAST_ONE_BENEFICIAL_OWNER("at-least-one-beneficial-owner-unidentified");
         private final String statement;
 
         PscStatement(String statement) {

@@ -22,8 +22,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.company.PrivateCompanyResourceHandler;
 import uk.gov.companieshouse.api.handler.company.request.PrivateCompanyFullProfileGet;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.search.PrivateSearchResourceHandler;
 import uk.gov.companieshouse.api.handler.search.company.PrivateCompanySearchHandler;
 import uk.gov.companieshouse.api.handler.search.company.request.PrivateCompanySearchDelete;
@@ -63,18 +65,23 @@ class CompanySearchServiceImplTest {
     private PrivateCompanyFullProfileGet privateCompanyFullProfileGet;
     @Mock
     private CompanyProfileService companyProfileService;
+    @Mock
+    private Data companyProfileData;
 
     @InjectMocks
     private CompanySearchServiceImpl service;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws ApiErrorResponseException, URIValidationException {
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         Mockito.lenient().when(internalApiClient.privateCompanyResourceHandler()).thenReturn(privateCompanyResourceHandler);
         Mockito.lenient().when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
         Mockito.lenient().when(privateSearchResourceHandler.companySearch()).thenReturn(privateCompanySearchHandler);
+        Mockito.lenient().when(privateCompanyResourceHandler.getCompanyFullProfile(anyString()))
+                .thenReturn(privateCompanyFullProfileGet);
+        Mockito.lenient().when(privateCompanyFullProfileGet.execute()).thenReturn(apiResponse);
+        Mockito.lenient().when(apiResponse.getData()).thenReturn(companyProfileData);
     }
-
 
     @Test
     void addCompanyIntoElasticSearchIndex_ShouldAddUkEstablishmentsForOverseaCompany() throws Exception {
@@ -82,22 +89,18 @@ class CompanySearchServiceImplTest {
         overseaCompany.setType(OVERSEA_COMPANY_TYPE);
         List<String> ukEstablishments = List.of(UK_ESTABLISHMENT_NUMBER);
 
-        when(privateCompanyResourceHandler.getCompanyFullProfile(anyString()))
-                .thenReturn(privateCompanyFullProfileGet);
-        when(privateCompanyFullProfileGet.execute()).thenReturn(apiResponse);
+        when(companyProfileData.getType()).thenReturn(OVERSEA_COMPANY_TYPE);
         when(privateCompanySearchHandler.upsertCompanyProfile(anyString(), any()))
                 .thenReturn(privateCompanySearchUpsert);
         when(privateCompanySearchUpsert.execute()).thenReturn(SUCCESS_RESPONSE);
-        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
-                .thenReturn(Optional.of(overseaCompany));
         when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
                 .thenReturn(ukEstablishments);
 
         CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
-        verify(privateCompanySearchHandler).upsertCompanyProfile(URI, apiResponse.getData());
-        verify(privateCompanySearchHandler).upsertCompanyProfile(UK_ESTABLISHMENT_URI, apiResponse.getData());
+        verify(privateCompanySearchHandler).upsertCompanyProfile(URI, companyProfileData);
+        verify(privateCompanySearchHandler).upsertCompanyProfile(UK_ESTABLISHMENT_URI, companyProfileData);
     }
 
     @Test
@@ -105,19 +108,15 @@ class CompanySearchServiceImplTest {
         CompanyProfile nonOverseaCompany = new CompanyProfile();
         nonOverseaCompany.setType("ltd");
 
-        when(privateCompanyResourceHandler.getCompanyFullProfile(anyString()))
-                .thenReturn(privateCompanyFullProfileGet);
-        when(privateCompanyFullProfileGet.execute()).thenReturn(apiResponse);
+        when(companyProfileData.getType()).thenReturn("ltd");
         when(privateCompanySearchHandler.upsertCompanyProfile(anyString(), any()))
                 .thenReturn(privateCompanySearchUpsert);
         when(privateCompanySearchUpsert.execute()).thenReturn(SUCCESS_RESPONSE);
-        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
-                .thenReturn(Optional.of(nonOverseaCompany));
 
         CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
-        verify(privateCompanySearchHandler).upsertCompanyProfile(URI, apiResponse.getData());
+        verify(privateCompanySearchHandler).upsertCompanyProfile(URI, companyProfileData);
         verify(companyProfileService, never()).findUkEstablishmentsByParent(anyString());
     }
 
@@ -127,8 +126,6 @@ class CompanySearchServiceImplTest {
         overseaCompany.setType(OVERSEA_COMPANY_TYPE);
         List<String> ukEstablishments = List.of(UK_ESTABLISHMENT_NUMBER);
 
-        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
-                .thenReturn(Optional.of(overseaCompany));
         when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
                 .thenReturn(ukEstablishments);
         when(privateCompanySearchHandler.deleteCompanyProfile(anyString()))
@@ -146,21 +143,18 @@ class CompanySearchServiceImplTest {
         CompanyProfile overseaCompany = new CompanyProfile();
         overseaCompany.setType(OVERSEA_COMPANY_TYPE);
 
-        when(privateCompanyResourceHandler.getCompanyFullProfile(anyString()))
-                .thenReturn(privateCompanyFullProfileGet);
-        when(privateCompanyFullProfileGet.execute()).thenReturn(apiResponse);
+        when(companyProfileData.getType()).thenReturn(OVERSEA_COMPANY_TYPE);
         when(privateCompanySearchHandler.upsertCompanyProfile(anyString(), any()))
                 .thenReturn(privateCompanySearchUpsert);
         when(privateCompanySearchUpsert.execute()).thenReturn(SUCCESS_RESPONSE);
-        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
-                .thenReturn(Optional.of(overseaCompany));
+
         when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
                 .thenReturn(Collections.emptyList());
 
         CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
-        verify(privateCompanySearchHandler).upsertCompanyProfile(URI, apiResponse.getData());
+        verify(privateCompanySearchHandler).upsertCompanyProfile(URI, companyProfileData);
         verify(privateCompanySearchHandler, times(1)).upsertCompanyProfile(anyString(), any());
     }
 
@@ -169,8 +163,6 @@ class CompanySearchServiceImplTest {
         CompanyProfile overseaCompany = new CompanyProfile();
         overseaCompany.setType(OVERSEA_COMPANY_TYPE);
 
-        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
-                .thenReturn(Optional.of(overseaCompany));
         when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
                 .thenReturn(Collections.emptyList());
         when(privateCompanySearchHandler.deleteCompanyProfile(anyString()))

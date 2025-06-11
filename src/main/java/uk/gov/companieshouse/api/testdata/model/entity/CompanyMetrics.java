@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.util.Map;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.util.Map;
 
 @Document(collection = "company_metrics")
 public class CompanyMetrics {
@@ -12,19 +12,16 @@ public class CompanyMetrics {
     private class PscMetrics {
         @Field("total_count")
         int totalCount;
-
-        @Field("psc_count")
+        @Field("pscs_count")
         int pscCount;
 
         @Field("active_pscs_count")
         int activePscCount;
-
         @Field("ceased_pscs_count")
         int ceasedPscCount;
 
         @Field("statements_count")
         int statementsCount;
-
         @Field("active_statements_count")
         int activeStatementsCount;
 
@@ -32,7 +29,6 @@ public class CompanyMetrics {
         int withdrawnStatementsCount;
 
         void updateCounts() {
-            pscCount = activePscCount + ceasedPscCount;
             statementsCount = activeStatementsCount + withdrawnStatementsCount;
             totalCount = pscCount + statementsCount;
         }
@@ -112,7 +108,7 @@ public class CompanyMetrics {
         this.psc.ceasedPscCount = count;
         this.psc.updateCounts();
     }
-    
+
     public int getActivePscStatementsCount() {
         return this.psc.activeStatementsCount;
     }
@@ -133,6 +129,11 @@ public class CompanyMetrics {
 
     public int getPscCount() {
         return this.psc.pscCount;
+    }
+
+    public void setPscCount(int count) {
+        this.psc.pscCount = count;
+        this.psc.updateCounts();
     }
 
     public int getPscTotalCount() {

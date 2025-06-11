@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -309,5 +310,33 @@ class CompanyPscsServiceImplTest {
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
+    }
+
+    @Test
+    void create_WithZeroNumberOfPsc_AndNullPscType_ReturnsNull() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(0);
+        spec.setPscType(null); // PscType is null
+
+        CompanyPscs result = companyPscsService.create(spec);
+
+        assertNull(result);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_WithZeroNumberOfPsc_AndEmptyPscType_ReturnsNull() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPsc(0);
+        spec.setPscType(Collections.emptyList()); // PscType is an empty list
+
+        CompanyPscs result = companyPscsService.create(spec);
+
+        assertNull(result);
+        verify(repository, never()).save(any());
     }
 }
