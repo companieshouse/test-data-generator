@@ -70,8 +70,9 @@ class CompanyRegistersServiceImplTest {
         setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
         FilingHistory filingHistory = new FilingHistory();
         filingHistory.setId("filing-history-id");
-        when(filingHistoryRepository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.of(filingHistory));
+        List<FilingHistory> filingHistoryList = List.of(filingHistory);
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(filingHistoryList));
         CompanyRegisters createdRegisters = service.create(companySpec);
         assertNotNull(createdRegisters);
         assertEquals(COMPANY_NUMBER, createdRegisters.getId());
@@ -93,7 +94,7 @@ class CompanyRegistersServiceImplTest {
         verify(repository, times(1)).save(any(CompanyRegisters.class));
         assertEquals("/company/" + COMPANY_NUMBER + "/filing-history/filing-history-id",
                 registers.get(DIRECTORS_TEXT).getItems().getFirst().getFilingLink());
-        verify(filingHistoryRepository, times(1)).findByCompanyNumber(COMPANY_NUMBER);
+        verify(filingHistoryRepository, times(1)).findAllByCompanyNumber(COMPANY_NUMBER);
     }
 
     @Test
@@ -262,18 +263,25 @@ class CompanyRegistersServiceImplTest {
     @Test
     void testFilingHistoryLinkIsSet() throws DataException {
         setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
+
         FilingHistory filingHistory = new FilingHistory();
         filingHistory.setId("filing-history-id");
-        when(filingHistoryRepository.findByCompanyNumber(COMPANY_NUMBER))
-                .thenReturn(Optional.of(filingHistory));
+        List<FilingHistory> filingHistoryList = List.of(filingHistory);
+
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(filingHistoryList));
+
         CompanyRegisters createdRegisters = service.create(companySpec);
         RegisterItem registerItem = createdRegisters.getRegisters()
                 .get(DIRECTORS_TEXT).getItems().getFirst();
+
         assertNotNull(registerItem.getFilingLink());
         assertEquals("/company/" + COMPANY_NUMBER + "/filing-history/filing-history-id",
                 registerItem.getFilingLink());
-        verify(filingHistoryRepository, times(1)).findByCompanyNumber(COMPANY_NUMBER);
+
+        verify(filingHistoryRepository, times(1)).findAllByCompanyNumber(COMPANY_NUMBER);
     }
+
 
     private void setRegister(String registerType, String registerMovedTo) {
         setCompanySpec(registerType, registerMovedTo);
