@@ -7,10 +7,7 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +16,13 @@ import org.springframework.util.StringUtils;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
+import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
+import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
+import uk.gov.companieshouse.api.testdata.model.entity.Capital;
 import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
@@ -33,7 +36,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
-
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
@@ -130,7 +132,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return savedFilingHistory;
     }
 
-    private String getBarcode() throws DataException {
+    String getBarcode() throws DataException {
         try {
             return barcodeService.getBarcode();
         } catch (BarcodeServiceException ex) {
@@ -281,5 +283,15 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
 
         return resolutionsList;
+    }
+
+    public List<FilingHistory> getFilingHistories(String companyNumber) {
+        Optional<List<FilingHistory>> filingHistoriesOpt = filingHistoryRepository.findAllByCompanyNumber(companyNumber);
+
+        if (filingHistoriesOpt.isPresent() && !filingHistoriesOpt.get().isEmpty()) {
+            return filingHistoriesOpt.get();
+        } else {
+            return Collections.emptyList();
+        }
     }
 }

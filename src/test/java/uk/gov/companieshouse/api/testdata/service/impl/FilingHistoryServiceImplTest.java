@@ -18,7 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import io.swagger.v3.core.util.Json;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -49,7 +49,7 @@ class FilingHistoryServiceImplTest {
     private static final String ENTITY_ID_PREFIX = "8";
 
     @Mock
-    private FilingHistoryRepository repository;
+    private FilingHistoryRepository filingHistoryRepository;
 
     @Mock
     private RandomService randomService;
@@ -88,14 +88,14 @@ class FilingHistoryServiceImplTest {
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(returnedHistory, savedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository).save(filingHistoryCaptor.capture());
 
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
 
@@ -150,20 +150,20 @@ class FilingHistoryServiceImplTest {
         FilingHistory filingHistory2 = new FilingHistory();
         List<FilingHistory> filingHistories = List.of(filingHistory1, filingHistory2);
 
-        when(repository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistories));
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(filingHistories));
 
         assertTrue(filingHistoryService.delete(COMPANY_NUMBER));
 
-        verify(repository).delete(filingHistory1);
-        verify(repository).delete(filingHistory2);
+        verify(filingHistoryRepository).delete(filingHistory1);
+        verify(filingHistoryRepository).delete(filingHistory2);
     }
 
     @Test
     void deleteNoCompany() {
-        when(repository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
         assertFalse(this.filingHistoryService.delete(COMPANY_NUMBER));
-        verify(repository, never()).delete(any());
+        verify(filingHistoryRepository, never()).delete(any());
     }
 
     @Test
@@ -182,14 +182,14 @@ class FilingHistoryServiceImplTest {
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(returnedHistory, savedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository).save(filingHistoryCaptor.capture());
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
@@ -246,14 +246,14 @@ class FilingHistoryServiceImplTest {
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(savedHistory, returnedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository, Mockito.times(2)).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository, Mockito.times(2)).save(filingHistoryCaptor.capture());
 
         List<FilingHistory> capturedHistories = filingHistoryCaptor.getAllValues();
         assertEquals(2, capturedHistories.size());
@@ -289,14 +289,14 @@ class FilingHistoryServiceImplTest {
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(savedHistory, returnedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository).save(filingHistoryCaptor.capture());
 
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
@@ -331,6 +331,28 @@ class FilingHistoryServiceImplTest {
     }
 
     @Test
+    void getBarcodeReturnsValueSuccessfully() throws BarcodeServiceException, DataException {
+        String expectedBarcode = "123456789";
+        when(barcodeService.getBarcode()).thenReturn(expectedBarcode);
+
+        String actualBarcode = filingHistoryService.getBarcode();
+
+        assertEquals(expectedBarcode, actualBarcode);
+    }
+
+    @Test
+    void getBarcodeThrowsDataExceptionWhenBarcodeServiceFails() throws BarcodeServiceException {
+        when(barcodeService.getBarcode()).thenThrow(new BarcodeServiceException("Barcode error"));
+
+        DataException thrown = assertThrows(DataException.class, () -> {
+            filingHistoryService.getBarcode();
+        });
+
+        assertEquals("Barcode error", thrown.getMessage());
+        assertTrue(thrown.getCause() instanceof BarcodeServiceException);
+    }
+
+    @Test
     void createWhenAccountsDueStatusIsNull() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -342,7 +364,7 @@ class FilingHistoryServiceImplTest {
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
@@ -350,7 +372,7 @@ class FilingHistoryServiceImplTest {
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor
                 = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository).save(filingHistoryCaptor.capture());
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
@@ -381,14 +403,14 @@ class FilingHistoryServiceImplTest {
         when(randomService.generateAccountsDueDateByStatus("due-soon")).thenReturn(LocalDate.now());
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(savedHistory, returnedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository).save(filingHistoryCaptor.capture());
 
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
@@ -420,14 +442,14 @@ class FilingHistoryServiceImplTest {
         when(randomService.generateAccountsDueDateByStatus("overdue")).thenReturn(LocalDate.now());
 
         FilingHistory savedHistory = new FilingHistory();
-        when(repository.save(Mockito.any())).thenReturn(savedHistory);
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
 
         FilingHistory returnedHistory = this.filingHistoryService.create(spec);
 
         assertEquals(savedHistory, returnedHistory);
 
         ArgumentCaptor<FilingHistory> filingHistoryCaptor = ArgumentCaptor.forClass(FilingHistory.class);
-        verify(repository).save(filingHistoryCaptor.capture());
+        verify(filingHistoryRepository).save(filingHistoryCaptor.capture());
 
         FilingHistory filingHistory = filingHistoryCaptor.getValue();
         assertEquals(TEST_ID, filingHistory.getId());
@@ -468,12 +490,12 @@ class FilingHistoryServiceImplTest {
         ));
 
         FilingHistorySpec aaSpec = new FilingHistorySpec();
-        aaSpec.setType("AA"); // extra spaces to test normalization
+        aaSpec.setType("AA");
         aaSpec.setCategory("accounts");
         aaSpec.setDescription("annual-accounts-description");
 
         FilingHistorySpec cs01Spec = new FilingHistorySpec();
-        cs01Spec.setType("CS01"); // lowercase to test normalization
+        cs01Spec.setType("CS01");
         cs01Spec.setCategory("confirmation-statement");
         cs01Spec.setDescription("confirmation-description");
 
@@ -482,7 +504,7 @@ class FilingHistoryServiceImplTest {
         when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UNENCODED_ID);
         when(randomService.addSaltAndEncode(Mockito.anyString(), eq(8))).thenReturn(TEST_ID);
         when(barcodeService.getBarcode()).thenReturn(BARCODE);
-        when(repository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(filingHistoryRepository.save(Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<FilingHistory> createdHistories = new ArrayList<>();
         for (FilingHistorySpec fhSpec : spec.getFilingHistoryList()) {
@@ -497,6 +519,10 @@ class FilingHistoryServiceImplTest {
         validateResolutionsFiling(createdHistories.get(2));
         validateAaFiling(createdHistories.get(3));
         validateCs01Filing(createdHistories.get(4));
+
+        FilingHistory resolutionsFiling = createdHistories.get(2);
+        assertNotNull(resolutionsFiling.getResolutions(), "Resolutions should not be null");
+        assertEquals(2, resolutionsFiling.getResolutions().size(), "Resolutions count should match");
     }
 
     private void validateAp01Filing(FilingHistory ap01) {
@@ -550,5 +576,37 @@ class FilingHistoryServiceImplTest {
         assertEquals("confirmation-statement", cs01.getCategory());
         assertNotNull(cs01.getDescriptionValues());
         assertNotNull(cs01.getDescriptionValues().getMadeUpDate());
+    }
+
+    @Test
+    void getFilingHistories_whenPresentAndNotEmpty_returnsList() {
+        List<FilingHistory> mockList = List.of(new FilingHistory());
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(mockList));
+
+        List<FilingHistory> result = filingHistoryService.getFilingHistories(COMPANY_NUMBER);
+
+        assertFalse(result.isEmpty());
+        assertEquals(mockList, result);
+        verify(filingHistoryRepository).findAllByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void getFilingHistories_whenNotPresent_returnsEmptyList() {
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        List<FilingHistory> result = filingHistoryService.getFilingHistories(COMPANY_NUMBER);
+
+        assertTrue(result.isEmpty());
+        verify(filingHistoryRepository).findAllByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void getFilingHistories_whenPresentButEmpty_returnsEmptyList() {
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(Collections.emptyList()));
+
+        List<FilingHistory> result = filingHistoryService.getFilingHistories(COMPANY_NUMBER);
+
+        assertTrue(result.isEmpty());
+        verify(filingHistoryRepository).findAllByCompanyNumber(COMPANY_NUMBER);
     }
 }
