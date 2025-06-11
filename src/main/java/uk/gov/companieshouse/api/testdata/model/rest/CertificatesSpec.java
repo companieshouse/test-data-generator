@@ -3,6 +3,8 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.List;
+
 public class CertificatesSpec {
 
     @JsonProperty("company_name")
@@ -24,7 +26,7 @@ public class CertificatesSpec {
     private String descriptionCertificate;
 
     @JsonProperty("item_options")
-    private ItemOptionsSpec itemOptions;
+    private List<ItemOptionsSpec> itemOptions;
 
     @JsonProperty("kind")
     private String kind;
@@ -90,11 +92,11 @@ public class CertificatesSpec {
         this.descriptionCertificate = descriptionCertificate;
     }
 
-    public ItemOptionsSpec getItemOptions() {
+    public List<ItemOptionsSpec> getItemOptions() {
         return  itemOptions;
     }
 
-    public void setItemOptions(ItemOptionsSpec itemOptions) {
+    public void setItemOptions(List<ItemOptionsSpec> itemOptions) {
         this.itemOptions = itemOptions;
     }
 
