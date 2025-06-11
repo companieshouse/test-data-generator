@@ -62,11 +62,14 @@ public class CompanySpec {
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
-    @JsonProperty("withdrawn_psc_statements")
-    private Integer withdrawnPscStatements;
+    @JsonProperty("psc_active")
+    private Boolean pscActive;
 
-    @JsonProperty("active_psc_statements")
-    private Integer activePscStatements;
+    @JsonProperty("withdrawn_statements")
+    private Integer withdrawnStatements;
+
+    @JsonProperty("active_statements")
+    private Integer activeStatements;
 
     @JsonProperty("has_uk_establishment")
     private Boolean hasUkEstablishment;
@@ -79,6 +82,12 @@ public class CompanySpec {
 
     @JsonProperty("is_company_number_padding")
     private Boolean isPaddingCompanyNumber;
+
+    @JsonProperty("alphabetical_search")
+    private Boolean alphabeticalSearch;
+
+    @JsonProperty("advanced_search")
+    private Boolean advancedSearch;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -211,20 +220,28 @@ public class CompanySpec {
         this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
     }
 
-    public Integer getWithdrawnPscStatements() {
-        return withdrawnPscStatements;
+    public Boolean getPscActive() {
+        return pscActive;
     }
 
-    public void setWithdrawnPscStatements(Integer withdrawnPscStatements) {
-        this.withdrawnPscStatements = withdrawnPscStatements;
+    public void setPscActive(Boolean pscActive) {
+        this.pscActive = pscActive;
     }
 
-    public Integer getActivePscStatements() {
-        return activePscStatements;
+    public Integer getWithdrawnStatements() {
+        return withdrawnStatements;
     }
 
-    public void setActivePscStatements(Integer activePscStatements) {
-        this.activePscStatements = activePscStatements;
+    public void setWithdrawnStatements(Integer withdrawnStatements) {
+        this.withdrawnStatements = withdrawnStatements;
+    }
+
+    public Integer getActiveStatements() {
+        return activeStatements;
+    }
+
+    public void setActiveStatements(Integer activeStatements) {
+        this.activeStatements = activeStatements;
     }
 
     public String getCompanyName() {
@@ -241,6 +258,18 @@ public class CompanySpec {
 
     public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
         this.isPaddingCompanyNumber = isPaddingCompanyNumber;
+    }
+    public Boolean getAlphabeticalSearch() {
+        return alphabeticalSearch;
+    }
+    public void setAlphabeticalSearch(Boolean alphabeticalSearch) {
+        this.alphabeticalSearch = alphabeticalSearch;
+    }
+    public Boolean getAdvancedSearch() {
+        return advancedSearch;
+    }
+    public void setAdvancedSearch(Boolean advancedSearch) {
+        this.advancedSearch = advancedSearch;
     }
 }
 

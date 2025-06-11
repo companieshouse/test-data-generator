@@ -75,7 +75,6 @@ import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -139,11 +138,15 @@ class TestDataServiceImplTest {
     @Mock
     private Appointment commonAppointment;
     @Mock
-    private CompanySearchService companySearchService;
+    private CompanySearchServiceImpl companySearchService;
     @Mock
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
+    @Mock
+    private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Mock
+    private AdvancedCompanySearchImpl advancedCompanySearch;
     @InjectMocks
     private TestDataServiceImpl testDataService;
 
@@ -1507,6 +1510,8 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
@@ -1515,6 +1520,10 @@ class TestDataServiceImplTest {
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
                 expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
         verify(companySearchService, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(expectedInvocationCount))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(expectedInvocationCount))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
     }
 
@@ -1525,6 +1534,10 @@ class TestDataServiceImplTest {
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
         verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(alphabeticalCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(advancedCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
 
     @Test
@@ -1532,8 +1545,11 @@ class TestDataServiceImplTest {
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
-
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(alphabeticalCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(advancedCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
 
     @Test
@@ -1659,5 +1675,52 @@ class TestDataServiceImplTest {
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 Jurisdiction.SCOTLAND);
     }
+
+    @Test
+    void testCreateCompanyWithoutAlphabeticalSearch()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        spec.setAdvancedSearch(true);
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
+    @Test
+    void testCreateCompanyWithoutAdvancedSearch()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        spec.setAlphabeticalSearch(true);
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(1))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
 
 }

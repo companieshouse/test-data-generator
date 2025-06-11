@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -99,9 +100,17 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Autowired
+    @Qualifier("companySearchService")
     private CompanySearchService companySearchService;
     @Autowired
     private AccountPenaltiesService accountPenaltiesService;
+    @Autowired
+    @Qualifier("alphabeticalCompanySearchService")
+    private CompanySearchService alphabeticalCompanySearch;
+    @Autowired
+    @Qualifier("advancedCompanySearchService")
+    private CompanySearchService advancedCompanySearch;
+
     @Value("${api.url}")
     private String apiUrl;
 
@@ -164,6 +173,12 @@ public class TestDataServiceImpl implements TestDataService {
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+                if (spec.getAlphabeticalSearch() != null) {
+                    this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+                }
+                if (spec.getAdvancedSearch() != null) {
+                    this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+                }
                 LOG.info("Successfully added company to ElasticSearch index");
             }
 
@@ -318,6 +333,8 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("Attempting to delete "
                         + "company from ElasticSearch index for company number: " + companyId);
                 this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
+                this.alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyId);
+                this.advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyId);
                 LOG.info("Deleted company from ElasticSearch index for company number: "
                         + companyId);
             } catch (Exception ex) {

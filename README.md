@@ -72,9 +72,12 @@ In order to use the generator, there are different possible endpoints that can b
       - `type`: Type for the resolutions type (e.g., `RES02`, `NEWINC`)
     - `document_metadata`: Boolean value adds document meta data to links. By default, its false.
     }
-  - `withdrawn_psc_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
-  - `active_psc_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
+    - `psc_active`: Boolean value to determine if the PSCs are active or ceased. To be used alongside PSC requests. Where a request is creating multiple PSCs, a fasle value here will set the first PSC to inactive. Defaults to true.
+  - `withdrawn_statements`: Integer value to determine the number of withdrawn PSC statements to create. Defaults to 0.
+  - `active_statements`: Integer value to determine the number of active PSC statements to create. Defaults to 1 or `the number_of_psc` passed in the request.
   - `registered_office_is_in_dispute`: Boolean value to determine if the registered office is in dispute. Defaults to false.
+  - `alphabetical_search`: Boolean value to determine if the company is included in the alphabetical search. Defaults to false.
+  - `advanced_search`: Boolean value to determine if the company is included in the advanced search. Defaults to false.
 
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
@@ -82,11 +85,14 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating with single filing history: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "registers":["register_type": "directors", "register_moved_to": "public-register"], "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": [{"type": "GAZ1(A)", "category": "gazette", "description": "gazette-notice-voluntary", "original_description": "First gazette notice for voluntary strike-off"}], "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating with multiple filing history: `{"jurisdiction":"scotland", "company_status":"administration", "type":"plc", "sub_type":"community-interest-company", "has_super_secure_pscs":true, "accounts_due_status":"overdue", "company_status_detail":"active-proposal-to-strike-off", "filing_history": [{"type": "AP01", "category": "officers", "subcategory": "appointments", "description": "appoint-person-director-company-with-name-date", "original_description": "Appointment of Mr John Test as a director on 10 November 2020", "document_metadata": true }, {"type": "RESOLUTIONS", "category": "resolution", "subcategory": "resolution", "description": "resolution", "original_description": "RESOLUTIONS", "resolutions" : [{"barcode" : "", "category" : "incorporation", "delta_at" : "20180723091906627635", "description" : "resolution-re-registration", "subcategory" : "resolution", "type" : "RES02" } ]}], "number_of_appointments": 2, "officer_roles": ["director"]}`
   - A usage example for creating a company with psc: `{ "number_of_psc": 2, "psc_type": ["legal", "individual"] }`
-  - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_psc_statements": 3 }`
-  - A usage example for creating a company with active psc statements: `{ "active_psc_statements": 5 }`
+  - A usage example for creating a company with withdrawn psc statements: `{ "withdrawn_statements": 3 }`
+  - A usage example for creating a company with active psc statements: `{ "active_statements": 5 }`
+  - A usage example of creating a company with an inactive psc: `{ "number_of_psc": 1, "psc_active": false }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
   - A usage example for creating a company with padded company number: `{ "is_company_number_padding": true }`
   - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
+  - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
+  - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
