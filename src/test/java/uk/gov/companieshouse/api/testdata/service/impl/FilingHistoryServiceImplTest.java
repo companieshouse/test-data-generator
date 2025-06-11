@@ -11,14 +11,15 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -30,9 +31,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
+import uk.gov.companieshouse.api.testdata.model.entity.Capital;
+import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DescriptionValuesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
@@ -608,5 +613,35 @@ class FilingHistoryServiceImplTest {
 
         assertTrue(result.isEmpty());
         verify(filingHistoryRepository).findAllByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void createDescriptionValues_whenTypeIsSH01_setsCapitalAndDate() {
+        // Given
+        CapitalSpec capitalSpec = new CapitalSpec();
+        capitalSpec.setCurrency("GBP");
+        capitalSpec.setFigure("100");
+
+        DescriptionValuesSpec descriptionValuesSpec = new DescriptionValuesSpec();
+        descriptionValuesSpec.setCapital(List.of(capitalSpec));
+
+        FilingHistorySpec fhSpec = new FilingHistorySpec();
+        fhSpec.setType("SH01");
+        fhSpec.setDescriptionValues(descriptionValuesSpec);
+
+        Instant expectedDate = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        DescriptionValues result = filingHistoryService.createDescriptionValues("SH01", expectedDate, fhSpec);
+
+        assertNotNull(result);
+        assertEquals(expectedDate, result.getDate());
+
+        List<Capital> capitalList = result.getCapital();
+        assertNotNull(capitalList);
+        assertEquals(1, capitalList.size());
+
+        Capital capital = capitalList.get(0);
+        assertEquals("GBP", capital.getCurrency());
+        assertEquals("100", capital.getFigure());
     }
 }

@@ -222,7 +222,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return links;
     }
 
-    private DescriptionValues createDescriptionValues(String type , Instant dayNow, FilingHistorySpec fhspec) {
+    DescriptionValues createDescriptionValues(String type, Instant dayNow, FilingHistorySpec fhspec) {
         var descriptionValues = new DescriptionValues();
         LOG.debug("TYPE " + type);
         switch (type) {
