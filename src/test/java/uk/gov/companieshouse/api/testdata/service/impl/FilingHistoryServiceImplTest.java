@@ -617,7 +617,6 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createDescriptionValues_whenTypeIsSH01_setsCapitalAndDate() {
-        // Given
         CapitalSpec capitalSpec = new CapitalSpec();
         capitalSpec.setCurrency("GBP");
         capitalSpec.setFigure("100");
