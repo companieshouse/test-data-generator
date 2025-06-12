@@ -8,6 +8,8 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -15,6 +17,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class CompanySpecTest {
+
+    private Validator validator;
+
+    @BeforeEach
+    void setUp() {
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
+    }
 
     //Test that the CompanySpec does not accept invalid company status
     @Test
@@ -55,5 +65,122 @@ class CompanySpecTest {
         assertTrue(violations.stream().anyMatch(v ->
                 expectedViolationMessage.equals(v.getMessage())),
                 "Expected a violation message for " + expectedViolationMessage);
+    }
+
+    @Test
+    void testNumberOfAppointmentsMinValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfAppointments(1);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testNumberOfAppointmentsMaxValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfAppointments(20);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testNumberOfAppointmentsTooLow() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfAppointments(0);
+        validateCompanySpec(spec, "Number of appointments must be at least 1");
+    }
+
+    @Test
+    void testNumberOfAppointmentsTooHigh() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfAppointments(21);
+        validateCompanySpec(spec, "Number of appointments must not exceed 20");
+    }
+
+    @Test
+    void testNumberOfPscMinValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(1);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testNumberOfPscMaxValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(20);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testNumberOfPscTooLow() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(0);
+        validateCompanySpec(spec, "Number of PSCs must be at least 1");
+    }
+
+    @Test
+    void testNumberOfPscTooHigh() {
+        CompanySpec spec = new CompanySpec();
+        spec.setNumberOfPsc(21);
+        validateCompanySpec(spec, "Number of PSCs must not exceed 20");
+    }
+
+    @Test
+    void testWithdrawnStatementsMinValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setWithdrawnStatements(0);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testWithdrawnStatementsMaxValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setWithdrawnStatements(20);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testWithdrawnStatementsTooLow() {
+        CompanySpec spec = new CompanySpec();
+        spec.setWithdrawnStatements(-1);
+        validateCompanySpec(spec, "Withdrawn statements must be at least 0");
+    }
+
+    @Test
+    void testWithdrawnStatementsTooHigh() {
+        CompanySpec spec = new CompanySpec();
+        spec.setWithdrawnStatements(21);
+        validateCompanySpec(spec, "Withdrawn statements must not exceed 20");
+    }
+
+    @Test
+    void testActiveStatementsMinValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setActiveStatements(0);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testActiveStatementsMaxValid() {
+        CompanySpec spec = new CompanySpec();
+        spec.setActiveStatements(20);
+        assertNoViolations(spec);
+    }
+
+    @Test
+    void testActiveStatementsTooLow() {
+        CompanySpec spec = new CompanySpec();
+        spec.setActiveStatements(-1);
+        validateCompanySpec(spec, "Active statements must be at least 0");
+    }
+
+    @Test
+    void testActiveStatementsTooHigh() {
+        CompanySpec spec = new CompanySpec();
+        spec.setActiveStatements(21);
+        validateCompanySpec(spec, "Active statements must not exceed 20");
+    }
+
+    private void assertNoViolations(CompanySpec spec) {
+        Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
+        assertTrue(violations.isEmpty(), "Expected no violations, but found: " + violations);
     }
 }
