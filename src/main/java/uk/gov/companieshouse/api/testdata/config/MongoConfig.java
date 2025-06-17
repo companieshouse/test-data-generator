@@ -126,6 +126,10 @@ public class MongoConfig {
     public AccountPenaltiesRepository accountPenaltiesRepository() {
         return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
     }
+    @Bean
+    public UvIdRepository uvidRepository() {
+        return getMongoRepositoryBean(UvIdRepository.class, "identity_verification");
+    }
 
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(

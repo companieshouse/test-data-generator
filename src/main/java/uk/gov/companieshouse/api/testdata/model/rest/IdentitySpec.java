@@ -16,6 +16,9 @@ public class IdentitySpec {
     @NotNull(message = "verification_source is required")
     private String verificationSource;
 
+    @JsonProperty("uvid")
+    private String uvId;
+
     public String getUserId() {
         return userId;
     }
@@ -38,5 +41,13 @@ public class IdentitySpec {
 
     public void setVerificationSource(String verificationSource) {
         this.verificationSource = verificationSource;
+    }
+
+    public String getUvId() {
+        return uvId;
+    }
+
+    public void setUvId(String uvId) {
+        this.uvId = uvId;
     }
 }
