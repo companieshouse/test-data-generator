@@ -127,6 +127,11 @@ public class MongoConfig {
         return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
     }
 
+    @Bean
+    public PostCodesRepository postCodesRepository() {
+        return getMongoRepositoryBean(PostCodesRepository.class, "postcodes");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);

@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -43,13 +42,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.PostCodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-
-import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -60,9 +57,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.PostCodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
@@ -76,6 +75,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.PostCodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
@@ -147,6 +147,9 @@ class TestDataServiceImplTest {
     private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock
     private AdvancedCompanySearchImpl advancedCompanySearch;
+    @Mock
+    private PostCodeService postCodeService;
+
     @InjectMocks
     private TestDataServiceImpl testDataService;
 
@@ -1722,5 +1725,41 @@ class TestDataServiceImplTest {
                 .addCompanyIntoElasticSearchIndex(createdCompany);
     }
 
+    @Test
+    void testGetPostCodesSuccess() throws Exception {
+        String country = "England";
+        PostCodes postCode = new PostCodes();
+        postCode.setBuildingNumber(12);
+        postCode.setThoroughfareName("First Avenue");
+        postCode.setThoroughfareDescriptor("High Street");
+        postCode.setDependentLocality("Central");
+        postCode.setLocalityPostTown("London");
+        postCode.setPretty("EC1 1BB");
+        postCode.setCountry(country);
+        List<PostCodes> postCodes = new ArrayList<>();
+        postCodes.add(postCode);
+        when(postCodeService.get(country)).thenReturn(postCodes);
+        List<PostCodesData> result = testDataService.getPostCodes("England");
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(12, result.getFirst().getBuildingNumber());
+        assertEquals("First Avenue High Street", result.getFirst().getFirstLine());
+        assertEquals("Central", result.getFirst().getDependentLocality());
+        assertEquals("London", result.getFirst().getPostTown());
+        assertEquals("EC1 1BB", result.getFirst().getPostCode());
+        verify(postCodeService, times(1)).get(country);
+    }
+
+    @Test
+    void getPostCodesDataException() throws Exception {
+        String country = "ErrorCountry";
+        when(postCodeService.get(country)).thenThrow(new
+                RuntimeException("Error retrieving post codes"));
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.getPostCodes(country));
+        assertEquals("Error retrieving post codes", exception.getMessage());
+        verify(postCodeService, times(1)).get(country);
+    }
 
 }

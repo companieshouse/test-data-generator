@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,24 +29,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -727,4 +711,45 @@ class TestDataControllerTest {
         return penalty;
     }
 
+    @Test
+    void getPostCodesSuccess() throws Exception {
+        String country = "England";
+        List<PostCodesData> postCodesData = List.of(
+                new PostCodesData(12, "Thoroughfare Name", "Dependent Locality",
+                        "Locality Post Town", "ABC 123"));
+
+        when(testDataService.getPostCodes(country)).thenReturn(postCodesData);
+
+        ResponseEntity<List<PostCodesData>> response = testDataController.getPostCodes(country);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(postCodesData, response.getBody());
+        verify(testDataService, times(1)).getPostCodes(country);
+    }
+
+    @Test
+    void getPostCodesNoDataFound() throws Exception {
+        String country = "UnknownCountry";
+
+        when(testDataService.getPostCodes(country)).thenThrow(new NoDataFoundException("No postcodes found"));
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.getPostCodes(country));
+
+        assertEquals("No postcodes found", thrown.getMessage());
+        verify(testDataService, times(1)).getPostCodes(country);
+    }
+
+    @Test
+    void getPostCodesDataException() throws Exception {
+        String country = "ErrorCountry";
+
+        when(testDataService.getPostCodes(country)).thenThrow(new DataException("Error retrieving postcodes"));
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.getPostCodes(country));
+
+        assertEquals("Error retrieving postcodes", thrown.getMessage());
+        verify(testDataService, times(1)).getPostCodes(country);
+    }
 }

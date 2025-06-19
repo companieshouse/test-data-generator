@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PostCodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -271,4 +273,12 @@ public class TestDataController {
                 request.getCompanyCode(), request.getCustomerCode());
     }
 
+    @GetMapping("/postcodes/{country}")
+    public ResponseEntity<List<PostCodesData>> getPostCodes(@PathVariable("country") String country)
+            throws DataException, NoDataFoundException {
+        LOG.info("Retrieving post codes for country: " + country);
+        var postCodes = testDataService.getPostCodes(country);
+        LOG.info("Retrieved post codes for country: " + country + ", count: " + postCodes.size());
+        return new ResponseEntity<>(postCodes, HttpStatus.OK);
+    }
 }
