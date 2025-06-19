@@ -7,6 +7,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
 
 @NoRepositoryBean
-public interface PostCodesRepository extends MongoRepository<Postcodes, String> {
+public interface PostcodesRepository extends MongoRepository<Postcodes, String> {
     List<Postcodes> findByCountryContaining(String country);
 }

@@ -15,12 +15,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.repository.PostCodesRepository;
+import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class PostCodeServiceImplTest {
     @Mock
-    private PostCodesRepository postCodesRepository;
+    private PostcodesRepository postCodesRepository;
 
     @InjectMocks
     private PostcodeServiceImpl postCodeService;

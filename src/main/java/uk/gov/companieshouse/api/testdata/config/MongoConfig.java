@@ -128,8 +128,8 @@ public class MongoConfig {
     }
 
     @Bean
-    public PostCodesRepository postCodesRepository() {
-        return getMongoRepositoryBean(PostCodesRepository.class, "postcodes");
+    public PostcodesRepository postCodesRepository() {
+        return getMongoRepositoryBean(PostcodesRepository.class, "postcodes");
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
