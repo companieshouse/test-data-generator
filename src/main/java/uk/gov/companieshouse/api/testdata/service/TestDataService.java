@@ -173,5 +173,5 @@ public interface TestDataService {
      * @throws DataException if there is an error retrieving the post codes
      * @throws NoDataFoundException if no post codes are found for the specified country
      */
-    List<PostcodesData> getPostCodes(String country) throws DataException, NoDataFoundException;
+    List<PostcodesData> getPostcodes(String country) throws DataException, NoDataFoundException;
 }

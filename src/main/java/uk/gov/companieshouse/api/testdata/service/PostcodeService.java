@@ -1,10 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import java.util.List;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
-import java.util.List;
-
-public interface PostCodeService {
+public interface PostcodeService {
     /**
      * Retrieves post codes for a given country.
      *

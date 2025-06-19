@@ -732,46 +732,46 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getPostCodesSuccess() throws Exception {
+    void getPostcodesSuccess() throws Exception {
         String country = "England";
         List<PostcodesData> postCodesData = List.of(
                 new PostcodesData(12, "Thoroughfare Name", "Dependent Locality",
                         "Locality Post Town", "ABC 123"));
 
-        when(testDataService.getPostCodes(country)).thenReturn(postCodesData);
+        when(testDataService.getPostcodes(country)).thenReturn(postCodesData);
 
-        ResponseEntity<List<PostcodesData>> response = testDataController.getPostCodes(country);
+        ResponseEntity<List<PostcodesData>> response = testDataController.getPostcodes(country);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(postCodesData, response.getBody());
-        verify(testDataService, times(1)).getPostCodes(country);
+        verify(testDataService, times(1)).getPostcodes(country);
     }
 
     @Test
-    void getPostCodesNoDataFound() throws Exception {
+    void getPostcodesNoDataFound() throws Exception {
         String country = "UnknownCountry";
 
-        when(testDataService.getPostCodes(country))
+        when(testDataService.getPostcodes(country))
                 .thenThrow(new NoDataFoundException("No postcodes found"));
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.getPostCodes(country));
+                testDataController.getPostcodes(country));
 
         assertEquals("No postcodes found", thrown.getMessage());
-        verify(testDataService, times(1)).getPostCodes(country);
+        verify(testDataService, times(1)).getPostcodes(country);
     }
 
     @Test
-    void getPostCodesDataException() throws Exception {
+    void getPostcodesDataException() throws Exception {
         String country = "ErrorCountry";
 
-        when(testDataService.getPostCodes(country))
+        when(testDataService.getPostcodes(country))
                 .thenThrow(new DataException("Error retrieving postcodes"));
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.getPostCodes(country));
+                testDataController.getPostcodes(country));
 
         assertEquals("Error retrieving postcodes", thrown.getMessage());
-        verify(testDataService, times(1)).getPostCodes(country);
+        verify(testDataService, times(1)).getPostcodes(country);
     }
 }

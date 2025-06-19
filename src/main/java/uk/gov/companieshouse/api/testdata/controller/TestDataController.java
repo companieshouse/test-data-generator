@@ -274,11 +274,11 @@ public class TestDataController {
     }
 
     @GetMapping("/postcodes/{country}")
-    public ResponseEntity<List<PostcodesData>> getPostCodes(@PathVariable("country") String country)
+    public ResponseEntity<List<PostcodesData>> getPostcodes(@PathVariable("country") String country)
             throws DataException, NoDataFoundException {
         LOG.info("Retrieving post codes for country: " + country);
-        var postCodes = testDataService.getPostCodes(country);
-        LOG.info("Retrieved post codes for country: " + country + ", count: " + postCodes.size());
-        return new ResponseEntity<>(postCodes, HttpStatus.OK);
+        var postcodes = testDataService.getPostcodes(country);
+        LOG.info("Retrieved post codes for country: " + country + ", count: " + postcodes.size());
+        return new ResponseEntity<>(postcodes, HttpStatus.OK);
     }
 }

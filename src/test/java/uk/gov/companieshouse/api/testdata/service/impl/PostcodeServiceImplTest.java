@@ -18,7 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
 
 @ExtendWith(MockitoExtension.class)
-public class PostCodeServiceImplTest {
+public class PostcodeServiceImplTest {
     @Mock
     private PostcodesRepository postCodesRepository;
 

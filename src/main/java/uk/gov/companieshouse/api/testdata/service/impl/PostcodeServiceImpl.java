@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
-import uk.gov.companieshouse.api.testdata.service.PostCodeService;
+import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 
 @Service
-public class PostcodeServiceImpl implements PostCodeService {
+public class PostcodeServiceImpl implements PostcodeService {
     @Autowired
     private PostcodesRepository postCodesRepository;
 

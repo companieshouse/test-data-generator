@@ -14,15 +14,15 @@ public class PostcodesData {
     @JsonProperty("post_town")
     private final String postTown;
     @JsonProperty("postcode")
-    private final String postCode;
+    private final String postcode;
 
     public PostcodesData(Number buildingNumber, String firstLine,
-                         String dependentLocality, String postTown, String postCode) {
+                         String dependentLocality, String postTown, String postcode) {
         this.buildingNumber = buildingNumber;
         this.firstLine = firstLine;
         this.dependentLocality = dependentLocality;
         this.postTown = postTown;
-        this.postCode = postCode;
+        this.postcode = postcode;
     }
 
     public String getFirstLine() {
@@ -37,8 +37,8 @@ public class PostcodesData {
         return postTown;
     }
 
-    public String getPostCode() {
-        return postCode;
+    public String getPostcode() {
+        return postcode;
     }
 
     public Number getBuildingNumber() {

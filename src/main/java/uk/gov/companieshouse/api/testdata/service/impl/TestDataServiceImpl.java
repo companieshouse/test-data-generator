@@ -54,7 +54,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.PostCodeService;
+import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -118,7 +118,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Qualifier("advancedCompanySearchService")
     private CompanySearchService advancedCompanySearch;
     @Autowired
-    private PostCodeService postCodeService;
+    private PostcodeService postCodeService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -586,7 +586,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public List<PostcodesData> getPostCodes(String country) throws DataException {
+    public List<PostcodesData> getPostcodes(String country) throws DataException {
         try {
             List<Postcodes> postCodes = postCodeService.get(country);
             return getPostCodesData(postCodes);
