@@ -231,8 +231,10 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 descriptionValues.setOfficerName("Mr John Test");
             }
             case "SH01" -> {
-                List<Capital> capitalList = new ArrayList<>();
-                for (CapitalSpec capitalSpec : fhspec.getDescriptionValues().getCapital()) {
+                List<CapitalSpec> capitalSpecs = fhspec.getDescriptionValues().getCapital();
+                List<Capital> capitalList = new ArrayList<>(capitalSpecs.size());
+
+                for (CapitalSpec capitalSpec : capitalSpecs) {
                     var capital = new Capital();
                     capital.setCurrency(capitalSpec.getCurrency());
                     capital.setFigure(capitalSpec.getFigure());
