@@ -44,7 +44,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PostCodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -734,13 +734,13 @@ class TestDataControllerTest {
     @Test
     void getPostCodesSuccess() throws Exception {
         String country = "England";
-        List<PostCodesData> postCodesData = List.of(
-                new PostCodesData(12, "Thoroughfare Name", "Dependent Locality",
+        List<PostcodesData> postCodesData = List.of(
+                new PostcodesData(12, "Thoroughfare Name", "Dependent Locality",
                         "Locality Post Town", "ABC 123"));
 
         when(testDataService.getPostCodes(country)).thenReturn(postCodesData);
 
-        ResponseEntity<List<PostCodesData>> response = testDataController.getPostCodes(country);
+        ResponseEntity<List<PostcodesData>> response = testDataController.getPostCodes(country);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(postCodesData, response.getBody());

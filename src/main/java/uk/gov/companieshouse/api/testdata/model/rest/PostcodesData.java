@@ -3,7 +3,7 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 
-public class PostCodesData {
+public class PostcodesData {
 
     @JsonProperty("building_number")
     private final Number buildingNumber;
@@ -16,7 +16,7 @@ public class PostCodesData {
     @JsonProperty("postcode")
     private final String postCode;
 
-    public PostCodesData(Number buildingNumber, String firstLine,
+    public PostcodesData(Number buildingNumber, String firstLine,
                          String dependentLocality, String postTown, String postCode) {
         this.buildingNumber = buildingNumber;
         this.firstLine = firstLine;

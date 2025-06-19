@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "postcodes")
-public class PostCodes {
+public class Postcodes {
     @Id
     @Field("_id")
     private ObjectId id;

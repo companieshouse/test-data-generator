@@ -14,7 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PostCodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -169,9 +169,9 @@ public interface TestDataService {
      * Retrieves post codes for a given country.
      *
      * @param country the country for which to retrieve post codes
-     * @return PostCodes object containing the post codes for the specified country
+     * @return Postcodes object containing the post codes for the specified country
      * @throws DataException if there is an error retrieving the post codes
      * @throws NoDataFoundException if no post codes are found for the specified country
      */
-    List<PostCodesData> getPostCodes(String country) throws DataException, NoDataFoundException;
+    List<PostcodesData> getPostCodes(String country) throws DataException, NoDataFoundException;
 }

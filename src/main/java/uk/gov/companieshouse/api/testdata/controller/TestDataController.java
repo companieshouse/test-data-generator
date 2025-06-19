@@ -35,7 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PostCodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -274,7 +274,7 @@ public class TestDataController {
     }
 
     @GetMapping("/postcodes/{country}")
-    public ResponseEntity<List<PostCodesData>> getPostCodes(@PathVariable("country") String country)
+    public ResponseEntity<List<PostcodesData>> getPostCodes(@PathVariable("country") String country)
             throws DataException, NoDataFoundException {
         LOG.info("Retrieving post codes for country: " + country);
         var postCodes = testDataService.getPostCodes(country);
