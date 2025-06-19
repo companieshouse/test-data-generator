@@ -29,7 +29,25 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PostCodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -467,7 +485,8 @@ class TestDataControllerTest {
         final String certificateId = "CRT-834723-192847";
 
         when(testDataService.deleteCertificatesData(certificateId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteCertificates(certificateId);
+        ResponseEntity<Map<String, Object>> response
+                = testDataController.deleteCertificates(certificateId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -480,7 +499,8 @@ class TestDataControllerTest {
         final String certificateId = String.valueOf(1234);
 
         when(testDataService.deleteCertificatesData(certificateId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteCertificates(certificateId);
+        ResponseEntity<Map<String, Object>>
+                response = testDataController.deleteCertificates(certificateId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
@@ -618,7 +638,6 @@ class TestDataControllerTest {
 
     @Test
     void updateAccountPenaltiesNotFound() throws Exception {
-        String penaltyRef = "A1234567";
         Instant now = Instant.now();
 
         UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
@@ -632,6 +651,7 @@ class TestDataControllerTest {
 
         NoDataFoundException exception = new NoDataFoundException("Account penalty not found");
 
+        String penaltyRef = "A1234567";
         when(this.testDataService.updateAccountPenaltiesData(penaltyRef, request))
                 .thenThrow(exception);
 
@@ -731,7 +751,8 @@ class TestDataControllerTest {
     void getPostCodesNoDataFound() throws Exception {
         String country = "UnknownCountry";
 
-        when(testDataService.getPostCodes(country)).thenThrow(new NoDataFoundException("No postcodes found"));
+        when(testDataService.getPostCodes(country))
+                .thenThrow(new NoDataFoundException("No postcodes found"));
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
                 testDataController.getPostCodes(country));
@@ -744,7 +765,8 @@ class TestDataControllerTest {
     void getPostCodesDataException() throws Exception {
         String country = "ErrorCountry";
 
-        when(testDataService.getPostCodes(country)).thenThrow(new DataException("Error retrieving postcodes"));
+        when(testDataService.getPostCodes(country))
+                .thenThrow(new DataException("Error retrieving postcodes"));
 
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataController.getPostCodes(country));
