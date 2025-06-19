@@ -128,7 +128,7 @@ public class MongoConfig {
     }
 
     @Bean
-    public PostcodesRepository postCodesRepository() {
+    public PostcodesRepository postcodesRepository() {
         return getMongoRepositoryBean(PostcodesRepository.class, "postcodes");
     }
 
