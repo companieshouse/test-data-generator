@@ -598,7 +598,7 @@ public class TestDataServiceImpl implements TestDataService {
     private static List<PostcodesData> getPostCodesData(List<Postcodes> postCodes) {
         List<PostcodesData> postcodesDataList = new ArrayList<>();
         for (Postcodes postCode : postCodes) {
-            PostcodesData postCodeData = new PostcodesData(
+            var postCodeData = new PostcodesData(
                     postCode.getBuildingNumber() != null ? postCode
                             .getBuildingNumber().intValue() : null,
                     postCode.getThoroughfareName() + " " + postCode.getThoroughfareDescriptor(),
