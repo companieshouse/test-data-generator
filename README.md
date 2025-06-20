@@ -196,6 +196,17 @@ In order to use the generator, there are different possible endpoints that can b
 
   A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
 
+#### Retrieving Postcode
+- GET: Sending a GET request to retrieve the Postcode `{Base URL}/test-data/postcode/{countrycode}`.
+    - `countrycode`: The country code to retrieve the postcode for. This will return a random postcode for the specified country code.
+    - list of country codes:
+      - `GB-ENG`: England
+      - `GB-SCT`: Scotland
+      - `GB-WLS`: Wales
+      - `GB-NIR`: Northern Ireland
+      - `GB`: United Kingdom 
+    
+  A usage example looks like this: `{"countrycode": "GB-ENG"}`
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
