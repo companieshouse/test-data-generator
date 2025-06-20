@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -707,7 +706,7 @@ class TestDataControllerTest {
     }
 
     private static AccountPenaltiesData createAccountPenaltiesData(String companyCode,
-            PenaltyData penalty) {
+                                                                   PenaltyData penalty) {
         AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
         accountPenaltiesData.setCreatedAt(Instant.now());
         accountPenaltiesData.setCompanyCode(companyCode);
@@ -716,7 +715,7 @@ class TestDataControllerTest {
     }
 
     private PenaltyData createPenaltyData(String companyCode, String customerCode,
-            String penaltyRef, double amount, boolean paid) {
+                                          String penaltyRef, double amount, boolean paid) {
         PenaltyData penalty = new PenaltyData();
         penalty.setCompanyCode(companyCode);
         penalty.setCustomerCode(customerCode);
@@ -732,15 +731,15 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getPostcodesSuccess() throws Exception {
+    void getPostcodeSuccess() throws Exception {
         String country = "England";
-        List<PostcodesData> postcodesData = List.of(
+        PostcodesData postcodesData =
                 new PostcodesData(12, "Thoroughfare Name", "Dependent Locality",
-                        "Locality Post Town", "ABC 123"));
+                        "Locality Post Town", "ABC 123");
 
         when(testDataService.getPostcodes(country)).thenReturn(postcodesData);
 
-        ResponseEntity<List<PostcodesData>> response = testDataController.getPostcodes(country);
+        ResponseEntity<PostcodesData> response = testDataController.getPostcode(country);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(postcodesData, response.getBody());
@@ -748,28 +747,25 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getPostcodesNoDataFound() throws Exception {
+    void getPostcodeNoDataFound() throws Exception {
         String country = "UnknownCountry";
 
-        when(testDataService.getPostcodes(country))
-                .thenThrow(new NoDataFoundException("No postcodes found"));
+        when(testDataService.getPostcodes(country)).thenReturn(null);
 
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.getPostcodes(country));
-
-        assertEquals("No postcodes found", thrown.getMessage());
+        ResponseEntity<PostcodesData> response = testDataController.getPostcode(country);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(1)).getPostcodes(country);
     }
 
     @Test
-    void getPostcodesDataException() throws Exception {
+    void getPostcodeDataException() throws Exception {
         String country = "ErrorCountry";
 
         when(testDataService.getPostcodes(country))
                 .thenThrow(new DataException("Error retrieving postcodes"));
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.getPostcodes(country));
+                testDataController.getPostcode(country));
 
         assertEquals("Error retrieving postcodes", thrown.getMessage());
         verify(testDataService, times(1)).getPostcodes(country);

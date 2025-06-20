@@ -1717,38 +1717,49 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void testGetPostcodesSuccess() throws Exception {
+    void testGetPostcodesValidCountry() throws DataException {
         String country = "England";
-        Postcodes postcode = new Postcodes();
-        postcode.setBuildingNumber(12);
-        postcode.setThoroughfareName("First Avenue");
-        postcode.setThoroughfareDescriptor("High Street");
-        postcode.setDependentLocality("Central");
-        postcode.setLocalityPostTown("London");
-        postcode.setPretty("EC1 1BB");
-        postcode.setCountry(country);
-        List<Postcodes> postcodes = new ArrayList<>();
-        postcodes.add(postcode);
-        when(postcodeService.get(country)).thenReturn(postcodes);
-        List<PostcodesData> result = testDataService.getPostcodes("England");
-        assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(12, result.getFirst().getBuildingNumber());
-        assertEquals("First Avenue High Street", result.getFirst().getFirstLine());
-        assertEquals("Central", result.getFirst().getDependentLocality());
-        assertEquals("London", result.getFirst().getPostTown());
-        assertEquals("EC1 1BB", result.getFirst().getPostcode());
+        Postcodes mockPostcode = new Postcodes();
+        mockPostcode.setBuildingNumber(12);
+        mockPostcode.setThoroughfareName("First Avenue");
+        mockPostcode.setThoroughfareDescriptor("High Street");
+        mockPostcode.setDependentLocality("Central");
+        mockPostcode.setLocalityPostTown("London");
+        mockPostcode.setPretty("EC1 1BB");
+        mockPostcode.setCountry(country);
+
+        when(postcodeService.get(country)).thenReturn(List.of(mockPostcode));
+
+        PostcodesData result = testDataService.getPostcodes(country);
+
+        assertEquals(12, result.getBuildingNumber());
+        assertEquals("First Avenue High Street", result.getFirstLine());
+        assertEquals("Central", result.getDependentLocality());
+        assertEquals("London", result.getPostTown());
+        assertEquals("EC1 1BB", result.getPostcode());
         verify(postcodeService, times(1)).get(country);
     }
 
     @Test
-    void getPostcodesDataException() throws Exception {
-        String country = "ErrorCountry";
-        when(postcodeService.get(country)).thenThrow(new
-                RuntimeException("Error retrieving postcodes"));
+    void testGetPostcodesInvalidCountry() throws DataException {
+        String country = "InvalidCountry";
 
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.getPostcodes(country));
+        when(postcodeService.get(country)).thenReturn(List.of());
+
+        PostcodesData result = testDataService.getPostcodes(country);
+
+        assertNull(result);
+        verify(postcodeService, times(1)).get(country);
+    }
+
+    @Test
+    void testGetPostcodesThrowsException() {
+        String country = "ErrorCountry";
+
+        when(postcodeService.get(country)).thenThrow(new RuntimeException("Error retrieving postcodes"));
+
+        DataException exception = assertThrows(DataException.class, () -> testDataService.getPostcodes(country));
+
         assertEquals("Error retrieving postcodes", exception.getMessage());
         verify(postcodeService, times(1)).get(country);
     }

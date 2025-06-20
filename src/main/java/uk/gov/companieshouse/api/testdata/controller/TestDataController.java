@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.controller;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -273,12 +272,15 @@ public class TestDataController {
                 request.getCompanyCode(), request.getCustomerCode());
     }
 
-    @GetMapping("/postcodes/{country}")
-    public ResponseEntity<List<PostcodesData>> getPostcodes(@PathVariable("country") String country)
+    @GetMapping("/postcode/{country}")
+    public ResponseEntity<PostcodesData> getPostcode(@PathVariable("country") String country)
             throws DataException, NoDataFoundException {
-        LOG.info("Retrieving postcodes for country: " + country);
-        var postcodes = testDataService.getPostcodes(country);
-        LOG.info("Retrieved postcodes for country: " + country + ", count: " + postcodes.size());
-        return new ResponseEntity<>(postcodes, HttpStatus.OK);
+        LOG.info("Retrieving postcode for country: " + country);
+        var postcode = testDataService.getPostcodes(country);
+        if (postcode == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        LOG.info("Retrieved postcode for country: " + country + postcode.getPostcode());
+        return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
 }
