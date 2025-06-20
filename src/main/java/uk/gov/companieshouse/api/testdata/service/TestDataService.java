@@ -4,7 +4,6 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -13,6 +12,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -162,4 +163,13 @@ public interface TestDataService {
      */
     ResponseEntity<Void> deleteAccountPenaltiesData(String companyCode, String customerCode)
             throws NoDataFoundException, DataException;
+
+    /**
+     * Retrieves postcodes for a given country.
+     *
+     * @param country the country for which to retrieve postcodes
+     * @return Postcodes object containing the postcodes for the specified country
+     * @throws DataException if there is an error retrieving the postcodes
+     */
+    PostcodesData getPostcodes(String country) throws DataException;
 }
