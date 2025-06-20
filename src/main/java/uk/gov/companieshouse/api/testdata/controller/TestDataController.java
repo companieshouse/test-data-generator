@@ -274,7 +274,7 @@ public class TestDataController {
 
     @GetMapping("/postcode/{country}")
     public ResponseEntity<PostcodesData> getPostcode(@PathVariable("country") String country)
-            throws DataException, NoDataFoundException {
+            throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {

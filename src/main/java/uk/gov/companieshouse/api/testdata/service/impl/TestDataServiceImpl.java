@@ -1,11 +1,11 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ThreadLocalRandom;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -594,7 +594,8 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("No postcodes found for country: " + country);
                 return null;
             }
-            int randomPostcode = ThreadLocalRandom.current().nextInt(postcodes.size());
+            SecureRandom secureRandom = new SecureRandom();
+            var randomPostcode = secureRandom.nextInt(postcodes.size());
             return getPostCodesData(postcodes).get(randomPostcode);
         } catch (Exception ex) {
             throw new DataException("Error retrieving postcodes", ex);
