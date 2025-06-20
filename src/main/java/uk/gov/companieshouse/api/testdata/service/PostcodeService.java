@@ -5,9 +5,9 @@ import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
 public interface PostcodeService {
     /**
-     * Retrieves post codes for a given country.
+     * Retrieves postcodes for a given country.
      *
-     * @param country the country for which to retrieve post codes
+     * @param country the country name which to retrieve postcodes for
      * @return Postcodes object containing the post codes for the specified country
      */
     List<Postcodes> get(String country);

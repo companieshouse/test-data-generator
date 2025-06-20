@@ -118,7 +118,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Qualifier("advancedCompanySearchService")
     private CompanySearchService advancedCompanySearch;
     @Autowired
-    private PostcodeService postCodeService;
+    private PostcodeService postcodeService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -588,25 +588,25 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public List<PostcodesData> getPostcodes(String country) throws DataException {
         try {
-            List<Postcodes> postCodes = postCodeService.get(country);
-            return getPostCodesData(postCodes);
+            List<Postcodes> postcodes = postcodeService.get(country);
+            return getPostCodesData(postcodes);
         } catch (Exception ex) {
-            throw new DataException("Error retrieving post codes", ex);
+            throw new DataException("Error retrieving postcodes", ex);
         }
     }
 
-    private static List<PostcodesData> getPostCodesData(List<Postcodes> postCodes) {
+    private static List<PostcodesData> getPostCodesData(List<Postcodes> postcodes) {
         List<PostcodesData> postcodesDataList = new ArrayList<>();
-        for (Postcodes postCode : postCodes) {
-            var postCodeData = new PostcodesData(
-                    postCode.getBuildingNumber() != null ? postCode
+        for (Postcodes postcode : postcodes) {
+            var postcodeData = new PostcodesData(
+                    postcode.getBuildingNumber() != null ? postcode
                             .getBuildingNumber().intValue() : null,
-                    postCode.getThoroughfareName() + " " + postCode.getThoroughfareDescriptor(),
-                    postCode.getDependentLocality(),
-                    postCode.getLocalityPostTown(),
-                    postCode.getPretty()
+                    postcode.getThoroughfareName() + " " + postcode.getThoroughfareDescriptor(),
+                    postcode.getDependentLocality(),
+                    postcode.getLocalityPostTown(),
+                    postcode.getPretty()
             );
-            postcodesDataList.add(postCodeData);
+            postcodesDataList.add(postcodeData);
         }
         return postcodesDataList;
     }

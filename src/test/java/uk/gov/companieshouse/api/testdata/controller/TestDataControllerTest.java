@@ -734,16 +734,16 @@ class TestDataControllerTest {
     @Test
     void getPostcodesSuccess() throws Exception {
         String country = "England";
-        List<PostcodesData> postCodesData = List.of(
+        List<PostcodesData> postcodesData = List.of(
                 new PostcodesData(12, "Thoroughfare Name", "Dependent Locality",
                         "Locality Post Town", "ABC 123"));
 
-        when(testDataService.getPostcodes(country)).thenReturn(postCodesData);
+        when(testDataService.getPostcodes(country)).thenReturn(postcodesData);
 
         ResponseEntity<List<PostcodesData>> response = testDataController.getPostcodes(country);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(postCodesData, response.getBody());
+        assertEquals(postcodesData, response.getBody());
         verify(testDataService, times(1)).getPostcodes(country);
     }
 

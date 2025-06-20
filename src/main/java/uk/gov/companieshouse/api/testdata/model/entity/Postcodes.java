@@ -42,7 +42,7 @@ public class Postcodes {
     private String country;
 
     @Field("number_of_households")
-    private Float numberOfHouseholds;
+    private Number numberOfHouseholds;
 
     @Field("address_key")
     private String addressKey;

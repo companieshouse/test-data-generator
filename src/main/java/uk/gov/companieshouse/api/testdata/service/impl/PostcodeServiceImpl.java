@@ -12,11 +12,11 @@ import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 @Service
 public class PostcodeServiceImpl implements PostcodeService {
     @Autowired
-    private PostcodesRepository postCodesRepository;
+    private PostcodesRepository postcodesRepository;
 
     @Override
     public List<Postcodes> get(String country) {
-        List<Postcodes> postCodes = postCodesRepository.findByCountryContaining(country);
-        return postCodes.isEmpty() ? Collections.emptyList() : postCodes;
+        List<Postcodes> postcodes = postcodesRepository.findByCountryContaining(country);
+        return postcodes.isEmpty() ? Collections.emptyList() : postcodes;
     }
 }

@@ -166,12 +166,12 @@ public interface TestDataService {
             throws NoDataFoundException, DataException;
 
     /**
-     * Retrieves post codes for a given country.
+     * Retrieves postcodes for a given country.
      *
-     * @param country the country for which to retrieve post codes
-     * @return Postcodes object containing the post codes for the specified country
-     * @throws DataException if there is an error retrieving the post codes
-     * @throws NoDataFoundException if no post codes are found for the specified country
+     * @param country the country for which to retrieve postcodes
+     * @return Postcodes object containing the postcodes for the specified country
+     * @throws DataException if there is an error retrieving the postcodes
+     * @throws NoDataFoundException if no postcodes are found for the specified country
      */
     List<PostcodesData> getPostcodes(String country) throws DataException, NoDataFoundException;
 }

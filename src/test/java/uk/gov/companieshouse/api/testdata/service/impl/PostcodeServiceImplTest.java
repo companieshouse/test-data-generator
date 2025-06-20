@@ -20,10 +20,10 @@ import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
 @ExtendWith(MockitoExtension.class)
 class PostcodeServiceImplTest {
     @Mock
-    private PostcodesRepository postCodesRepository;
+    private PostcodesRepository postcodesRepository;
 
     @InjectMocks
-    private PostcodeServiceImpl postCodeService;
+    private PostcodeServiceImpl postcodeService;
 
     @Test
     void testGet_ReturnsPostCodes_WhenPostCodesExist() {
@@ -31,28 +31,28 @@ class PostcodeServiceImplTest {
         Postcodes mockPostCode = mock(Postcodes.class);
         when(mockPostCode.getCountry()).thenReturn(country);
         List<Postcodes> mockPostCodes = List.of(mockPostCode);
-        when(postCodesRepository.findByCountryContaining(country)).thenReturn(mockPostCodes);
-        List<Postcodes> result = postCodeService.get(country);
+        when(postcodesRepository.findByCountryContaining(country)).thenReturn(mockPostCodes);
+        List<Postcodes> result = postcodeService.get(country);
         assertEquals(country, result.getFirst().getCountry());
-        verify(postCodesRepository, times(1)).findByCountryContaining(country);
+        verify(postcodesRepository, times(1)).findByCountryContaining(country);
     }
 
     @Test
     void testGet_ReturnsEmptyList_WhenNoPostCodesExist() {
         String country = "Unknown";
-        when(postCodesRepository.findByCountryContaining(country))
+        when(postcodesRepository.findByCountryContaining(country))
                 .thenReturn(Collections.emptyList());
-        List<Postcodes> result = postCodeService.get(country);
+        List<Postcodes> result = postcodeService.get(country);
         assertEquals(Collections.emptyList(), result);
-        verify(postCodesRepository, times(1)).findByCountryContaining(country);
+        verify(postcodesRepository, times(1)).findByCountryContaining(country);
     }
 
     @Test
     void testGet_ReturnsEmptyList_WhenCountryIsNull() {
-        when(postCodesRepository.findByCountryContaining(null))
+        when(postcodesRepository.findByCountryContaining(null))
                 .thenReturn(Collections.emptyList());
-        List<Postcodes> result = postCodeService.get(null);
+        List<Postcodes> result = postcodeService.get(null);
         assertEquals(Collections.emptyList(), result);
-        verify(postCodesRepository, times(1)).findByCountryContaining(null);
+        verify(postcodesRepository, times(1)).findByCountryContaining(null);
     }
 }
