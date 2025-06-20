@@ -594,7 +594,7 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("No postcodes found for country: " + country);
                 return null;
             }
-            SecureRandom secureRandom = new SecureRandom();
+            var secureRandom = new SecureRandom();
             var randomPostcode = secureRandom.nextInt(postcodes.size());
             return getPostCodesData(postcodes).get(randomPostcode);
         } catch (Exception ex) {
