@@ -772,10 +772,10 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getPostcodeBadRequest() throws Exception {
+    void testGetPostcodeIsNull() throws Exception {
         ResponseEntity<PostcodesData> response = testDataController.getPostcode(null);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
     }
 }

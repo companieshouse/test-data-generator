@@ -16,7 +16,6 @@ public class PostcodeServiceImpl implements PostcodeService {
 
     @Override
     public List<Postcodes> get(String country) {
-        List<Postcodes> postcodes = postcodesRepository.findByCountryContaining(country);
-        return postcodes.isEmpty() ? Collections.emptyList() : postcodes;
+        return postcodesRepository.findByCountryContaining(country);
     }
 }
