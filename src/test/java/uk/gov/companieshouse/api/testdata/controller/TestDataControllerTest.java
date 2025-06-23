@@ -33,6 +33,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -41,11 +43,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -483,7 +484,8 @@ class TestDataControllerTest {
         final String certificateId = "CRT-834723-192847";
 
         when(testDataService.deleteCertificatesData(certificateId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteCertificates(certificateId);
+        ResponseEntity<Map<String, Object>> response
+                = testDataController.deleteCertificates(certificateId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -496,7 +498,8 @@ class TestDataControllerTest {
         final String certificateId = String.valueOf(1234);
 
         when(testDataService.deleteCertificatesData(certificateId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteCertificates(certificateId);
+        ResponseEntity<Map<String, Object>>
+                response = testDataController.deleteCertificates(certificateId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
@@ -634,7 +637,6 @@ class TestDataControllerTest {
 
     @Test
     void updateAccountPenaltiesNotFound() throws Exception {
-        String penaltyRef = "A1234567";
         Instant now = Instant.now();
 
         UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
@@ -648,6 +650,7 @@ class TestDataControllerTest {
 
         NoDataFoundException exception = new NoDataFoundException("Account penalty not found");
 
+        String penaltyRef = "A1234567";
         when(this.testDataService.updateAccountPenaltiesData(penaltyRef, request))
                 .thenThrow(exception);
 
@@ -703,7 +706,7 @@ class TestDataControllerTest {
     }
 
     private static AccountPenaltiesData createAccountPenaltiesData(String companyCode,
-            PenaltyData penalty) {
+                                                                   PenaltyData penalty) {
         AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
         accountPenaltiesData.setCreatedAt(Instant.now());
         accountPenaltiesData.setCompanyCode(companyCode);
@@ -712,7 +715,7 @@ class TestDataControllerTest {
     }
 
     private PenaltyData createPenaltyData(String companyCode, String customerCode,
-            String penaltyRef, double amount, boolean paid) {
+                                          String penaltyRef, double amount, boolean paid) {
         PenaltyData penalty = new PenaltyData();
         penalty.setCompanyCode(companyCode);
         penalty.setCustomerCode(customerCode);
@@ -727,4 +730,52 @@ class TestDataControllerTest {
         return penalty;
     }
 
+    @Test
+    void getPostcodeSuccess() throws Exception {
+        String country = "England";
+        PostcodesData postcodesData =
+                new PostcodesData(12, "Thoroughfare Name", "Dependent Locality",
+                        "Locality Post Town", "ABC 123");
+
+        when(testDataService.getPostcodes(country)).thenReturn(postcodesData);
+
+        ResponseEntity<PostcodesData> response = testDataController.getPostcode(country);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(postcodesData, response.getBody());
+        verify(testDataService, times(1)).getPostcodes(country);
+    }
+
+    @Test
+    void getPostcodeNoDataFound() throws Exception {
+        String country = "UnknownCountry";
+
+        when(testDataService.getPostcodes(country)).thenReturn(null);
+
+        ResponseEntity<PostcodesData> response = testDataController.getPostcode(country);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(testDataService, times(1)).getPostcodes(country);
+    }
+
+    @Test
+    void getPostcodeDataException() throws Exception {
+        String country = "ErrorCountry";
+
+        when(testDataService.getPostcodes(country))
+                .thenThrow(new DataException("Error retrieving postcodes"));
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.getPostcode(country));
+
+        assertEquals("Error retrieving postcodes", thrown.getMessage());
+        verify(testDataService, times(1)).getPostcodes(country);
+    }
+
+    @Test
+    void testGetPostcodeIsNull() throws Exception {
+        ResponseEntity<PostcodesData> response = testDataController.getPostcode(null);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(testDataService, times(0)).getPostcodes(anyString());
+    }
 }

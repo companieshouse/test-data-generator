@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 
 import java.util.List;
@@ -46,6 +48,8 @@ public class CompanySpec {
     @JsonProperty("filing_history")
     private List<FilingHistorySpec> filingHistoryList;
 
+    @Min(value = 1, message = "Number of appointments must be at least 1")
+    @Max(value = 20, message = "Number of appointments must not exceed 20")
     @JsonProperty("number_of_appointments")
     private int numberOfAppointments = 1;
 
@@ -56,6 +60,8 @@ public class CompanySpec {
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
     private String accountsDueStatus;
 
+    @Min(value = 1, message = "Number of PSCs must be at least 1")
+    @Max(value = 20, message = "Number of PSCs must not exceed 20")
     @JsonProperty("number_of_psc")
     private Integer numberOfPsc;
 
@@ -65,9 +71,13 @@ public class CompanySpec {
     @JsonProperty("psc_active")
     private Boolean pscActive;
 
+    @Min(value = 0, message = "Withdrawn statements must be at least 0")
+    @Max(value = 20, message = "Withdrawn statements must not exceed 20")
     @JsonProperty("withdrawn_statements")
     private Integer withdrawnStatements;
 
+    @Min(value = 0, message = "Active statements must be at least 0")
+    @Max(value = 20, message = "Active statements must not exceed 20")
     @JsonProperty("active_statements")
     private Integer activeStatements;
 
