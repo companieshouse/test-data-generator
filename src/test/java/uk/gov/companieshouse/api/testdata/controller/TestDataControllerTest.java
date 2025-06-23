@@ -770,4 +770,12 @@ class TestDataControllerTest {
         assertEquals("Error retrieving postcodes", thrown.getMessage());
         verify(testDataService, times(1)).getPostcodes(country);
     }
+
+    @Test
+    void getPostcodeBadRequest() throws Exception {
+        ResponseEntity<PostcodesData> response = testDataController.getPostcode(null);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        verify(testDataService, times(0)).getPostcodes(anyString());
+    }
 }

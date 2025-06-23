@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.companieshouse.api.testdata.Application;
@@ -272,15 +273,19 @@ public class TestDataController {
                 request.getCompanyCode(), request.getCustomerCode());
     }
 
-    @GetMapping("/postcode/{country}")
-    public ResponseEntity<PostcodesData> getPostcode(@PathVariable("country") String country)
-            throws DataException {
+    @GetMapping("/postcodes")
+    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country",
+            required = false) String country) throws DataException {
+        if (country == null || country.isEmpty()) {
+            LOG.info("Country parameter is missing or empty");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        LOG.info("Retrieved postcode for country: " + country + postcode.getPostcode());
+        LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
 }
