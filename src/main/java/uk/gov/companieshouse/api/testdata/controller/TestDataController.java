@@ -274,12 +274,7 @@ public class TestDataController {
     }
 
     @GetMapping("/postcodes")
-    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country",
-            required = false) String country) throws DataException {
-        if (country == null || country.isEmpty()) {
-            LOG.info("Country parameter is missing or empty");
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {
