@@ -41,7 +41,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     @Override
     public CertificatesData create(CertificatesSpec spec) throws DataException {
         List<ItemOptionsSpec> optionsList = spec.getItemOptions();
-        List<String> createdCertificateIds = new ArrayList<>();
+        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>();
         List<Basket.Item> basketItems = new ArrayList<>();
 
         for (ItemOptionsSpec optionSpec : optionsList) {
@@ -50,7 +50,10 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
             var randomId = "CRT-" + firstPart + "-" + secondPart;
             Certificates certificate = getCertificates(spec, optionSpec, randomId);
             certificatesRepository.save(certificate);
-            createdCertificateIds.add(certificate.getId());
+            String now = getCurrentDateTime().toString();
+            certificateEntries.add(new CertificatesData.CertificateEntry(
+                certificate.getId(), now, now
+            ));
 
             // Add to basket items
             Basket.Item item = new Basket.Item();
@@ -63,12 +66,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
             basketRepository.save(basket);
         }
 
-        // Return data of the first certificate created
-        return new CertificatesData(
-                createdCertificateIds.get(0),
-                getCurrentDateTime().toString(),
-                getCurrentDateTime().toString()
-        );
+        return new CertificatesData(certificateEntries);
     }
 
     private Certificates getCertificates(CertificatesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {

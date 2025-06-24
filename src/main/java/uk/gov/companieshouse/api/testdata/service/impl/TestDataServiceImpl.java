@@ -502,19 +502,13 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(
-            final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
-            throw new DataException("User ID is required to create a certificates");
+            throw new DataException("User ID is required to create certificates");
         }
 
         try {
-            CertificatesData createdCertificates = certificatesService.create(spec);
-            return new CertificatesData(
-                    createdCertificates.getId(),
-                    createdCertificates.getCreatedAt(),
-                    createdCertificates.getUpdatedAt()
-            );
+            return certificatesService.create(spec);
         } catch (Exception ex) {
             throw new DataException("Error creating certificates", ex);
         }

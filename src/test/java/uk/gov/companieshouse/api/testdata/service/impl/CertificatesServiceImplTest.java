@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -98,7 +99,7 @@ class CertificatesServiceImplTest {
         CertificatesData result = service.create(certificatesSpec);
 
         assertNotNull(result);
-        assertEquals(certificates.getId(), result.getId());
+        assertEquals(certificates.getId(), result.getCertificates().get(0).getId());
 
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
@@ -153,7 +154,7 @@ class CertificatesServiceImplTest {
         CertificatesData result = service.create(certificatesSpec);
 
         assertNotNull(result);
-        assertEquals(certificates.getId(), result.getId());
+        assertEquals(certificates.getId(), result.getCertificates().get(0).getId());
 
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
@@ -189,6 +190,76 @@ class CertificatesServiceImplTest {
     }
 
     @Test
+    void createMultipleCertificatesFromMultipleItemOptions() throws DataException {
+        when(randomService.getNumber(6))
+            .thenReturn(699255L, 990509L, 582923L, 900231L);
+        when(randomService.getEtag())
+            .thenReturn("etag1", "etag2");
+
+        ItemOptionsSpec itemOption1 = new ItemOptionsSpec();
+        itemOption1.setCertificateType("incorporation-with-all-name-changes");
+        itemOption1.setDeliveryTimescale("standard");
+        itemOption1.setIncludeEmailCopy(true);
+        itemOption1.setCompanyType("ltd");
+        itemOption1.setCompanyStatus("active");
+
+        ItemOptionsSpec itemOption2 = new ItemOptionsSpec();
+        itemOption2.setCertificateType("incorporation-with-all-name-changes");
+        itemOption2.setDeliveryTimescale("standard");
+        itemOption2.setIncludeEmailCopy(false);
+        itemOption2.setCompanyType("ltd");
+        itemOption2.setCompanyStatus("active");
+
+        certificatesSpec.setItemOptions(List.of(itemOption1, itemOption2));
+
+        BasketSpec basketSpec = new BasketSpec();
+        basketSpec.setForename("John");
+        basketSpec.setSurname("Doe");
+        basketSpec.setEnrolled(true);
+        certificatesSpec.setBasketSpec(basketSpec);
+
+        // Capture each certificate saved
+        when(repository.save(any(Certificates.class))).thenAnswer(invocation -> {
+            Certificates cert = invocation.getArgument(0);
+            cert.setBasket(new Basket());
+            return cert;
+        });
+
+        when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
+
+        CertificatesData results = service.create(certificatesSpec);
+
+        assertEquals(2, results.getCertificates().size());
+
+        verify(repository, times(2)).save(certificatesCaptor.capture());
+        List<Certificates> capturedCertificates = certificatesCaptor.getAllValues();
+
+        assertEquals(2, capturedCertificates.size());
+
+        for (int i = 0; i < capturedCertificates.size(); i++) {
+            Certificates cert = capturedCertificates.get(i);
+            ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().get(i);
+
+            assertEquals(certificatesSpec.getCompanyName(), cert.getCompanyName());
+            assertEquals(certificatesSpec.getCompanyNumber(), cert.getCompanyNumber());
+            assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), cert.getDescription());
+            assertEquals(certificatesSpec.getDescriptionIdentifier(), cert.getDescriptionIdentifier());
+            assertEquals(certificatesSpec.getDescriptionCompanyNumber(), cert.getDescriptionCompanyNumber());
+            assertEquals(certificatesSpec.getDescriptionCertificate(), cert.getDescriptionCertificate());
+
+            assertEquals(expectedOptions.getCertificateType(), cert.getItemOptions().getCertificateType());
+            assertEquals(expectedOptions.getDeliveryTimescale(), cert.getItemOptions().getDeliveryTimescale());
+            assertEquals(expectedOptions.getIncludeEmailCopy(), cert.getItemOptions().getIncludeEmailCopy());
+            assertEquals(expectedOptions.getCompanyType(), cert.getItemOptions().getCompanyType());
+            assertEquals(expectedOptions.getCompanyStatus(), cert.getItemOptions().getCompanyStatus());
+
+            assertEquals(certificatesSpec.getKind(), cert.getKind());
+            assertEquals(certificatesSpec.getQuantity(), cert.getQuantity());
+            assertEquals(certificatesSpec.getUserId(), cert.getUserId());
+        }
+    }
+
+    @Test
     void deleteCertificates() {
         when(repository.findById("CRT-123456-789012")).thenReturn(java.util.Optional.of(certificates));
 
@@ -196,7 +267,6 @@ class CertificatesServiceImplTest {
         assertTrue(result);
         verify(repository).delete(certificates);
     }
-
 
     @Test
     void createCertificatesWithDefaultValues() throws DataException {
@@ -207,7 +277,7 @@ class CertificatesServiceImplTest {
         CertificatesData result = service.create(certificatesSpec);
 
         assertNotNull(result);
-        assertEquals(certificates.getId(), result.getId());
+        assertEquals(certificates.getId(), result.getCertificates().get(0).getId());
 
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
