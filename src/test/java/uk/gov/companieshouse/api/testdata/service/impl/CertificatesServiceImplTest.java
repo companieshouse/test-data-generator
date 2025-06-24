@@ -9,6 +9,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,7 +79,7 @@ class CertificatesServiceImplTest {
         certificatesSpec.setDescriptionIdentifier("certificate");
         certificatesSpec.setDescriptionCompanyNumber(companyNumber);
         certificatesSpec.setDescriptionCertificate("Test Certificate");
-        certificatesSpec.setItemOptions(itemOptionsSpec);
+        certificatesSpec.setItemOptions(List.of(itemOptionsSpec));
         certificatesSpec.setKind("certificate-kind");
         certificatesSpec.setPostalDelivery(true);
         certificatesSpec.setQuantity(1);
@@ -102,7 +104,7 @@ class CertificatesServiceImplTest {
         Certificates captured = certificatesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions();
+        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().getFirst();
 
         assertEquals("CRT-123456-789012", captured.getId());
         assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
@@ -135,7 +137,17 @@ class CertificatesServiceImplTest {
         basketSpec.setEnrolled(true);
         certificatesSpec.setBasketSpec(basketSpec);
 
-        when(repository.save(any(Certificates.class))).thenReturn(certificates);
+        Basket basket = new Basket();
+        basket.setForename(basketSpec.getForename());
+        basket.setSurname(basketSpec.getSurname());
+        basket.setEnrolled(true);
+
+        when(repository.save(any(Certificates.class))).thenAnswer(invocation -> {
+            Certificates cert = invocation.getArgument(0);
+            cert.setBasket(basket);
+            return cert;
+        });
+
         when(basketRepository.save(any(Basket.class))).thenReturn(basket);
 
         CertificatesData result = service.create(certificatesSpec);
@@ -147,7 +159,7 @@ class CertificatesServiceImplTest {
         Certificates captured = certificatesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions();
+        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().getFirst();
 
         assertEquals("CRT-123456-789012", captured.getId());
         assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
@@ -171,7 +183,7 @@ class CertificatesServiceImplTest {
         assertNotNull(captured.getBasket());
         Basket capturedBasket = captured.getBasket();
 
-        assertEquals(basketSpec.getForename(), capturedBasket.getForename());
+        assertEquals(basketSpec.getForename(), capturedBasket.getForename());  // Now should pass
         assertEquals(basketSpec.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
     }
