@@ -48,21 +48,21 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
             Long firstPart = randomService.getNumber(6);
             Long secondPart = randomService.getNumber(6);
             var randomId = "CRT-" + firstPart + "-" + secondPart;
-            Certificates certificate = getCertificates(spec, optionSpec, randomId);
+            var certificate = getCertificates(spec, optionSpec, randomId);
             certificatesRepository.save(certificate);
-            String now = getCurrentDateTime().toString();
+            var now = getCurrentDateTime().toString();
             certificateEntries.add(new CertificatesData.CertificateEntry(
                 certificate.getId(), now, now
             ));
 
             // Add to basket items
-            Basket.Item item = new Basket.Item();
+            var item = new Basket.Item();
             item.setItemUri(certificate.getLinksSelf());
             basketItems.add(item);
         }
 
         if (spec.getBasketSpec() != null) {
-            Basket basket = createBasket(spec, basketItems);
+            var basket = createBasket(spec, basketItems);
             basketRepository.save(basket);
         }
 
@@ -70,7 +70,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     }
 
     private Certificates getCertificates(CertificatesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
-        ItemOptions itemOptions = new ItemOptions();
+        var itemOptions = new ItemOptions();
         itemOptions.setCertificateType(optionsSpec.getCertificateType());
         itemOptions.setDeliveryTimescale(optionsSpec.getDeliveryTimescale());
         itemOptions.setIncludeEmailCopy(optionsSpec.getIncludeEmailCopy());
@@ -78,7 +78,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         itemOptions.setCompanyStatus(optionsSpec.getCompanyStatus());
 
         Certificates certificates = new Certificates();
-        String currentDate = getCurrentDateTime().toString();
+        var currentDate = getCurrentDateTime().toString();
 
         certificates.setId(randomId);
         certificates.setCreatedAt(currentDate);
@@ -105,7 +105,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
         Instant now = getCurrentDateTime();
 
-        Basket basket = new Basket();
+        var basket = new Basket();
         basket.setId(spec.getUserId());
         basket.setCreatedAt(now);
         basket.setUpdatedAt(now);
