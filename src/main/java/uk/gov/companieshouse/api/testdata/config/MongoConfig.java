@@ -128,6 +128,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public DisqualificationsRepository disqualificationsRepository() {
+        return getMongoRepositoryBean(DisqualificationsRepository.class, "disqualifications");
+    }
+
+    @Bean
     public PostcodesRepository postcodesRepository() {
         return getMongoRepositoryBean(PostcodesRepository.class, "postcodes");
     }

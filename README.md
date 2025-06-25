@@ -166,7 +166,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
   
-  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
+  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
 
 #### Retrieving, Updating and Deleting Account Penalties
@@ -196,6 +196,15 @@ In order to use the generator, there are different possible endpoints that can b
   - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
 
   A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
+
+### Creating and Deleting Disqualified Officers
+- POST: Sending a POST request to create disqualified officers `{Base URL}/test-data/disqualified-officers` will generate a new disqualified officer. The request body must include `DisqualifiedOfficerSpec` parameter to customise the generated disqualified officer.
+  - `company_number`: The company number of the disqualified officer. This is mandatory.
+  - `disqualification_type`: The type of disqualification of the officer. This is mandatory.
+  - `is_corporate_officer`: Boolean value to determine if the disqualified officer is a corporate officer. Mandatory field which determines the link to the disqualified officer.
+  
+  A usage example looks like this: `{"disqualification_type": "court-order", "is_corporate_officer": true, "company_number": "12345678" }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/disqualified-officers/{officer_id}` will delete the disqualified officer. `officer-id` is required to delete the disqualified officer.
 
 #### Retrieving Postcode
 - GET: Sending a GET request to retrieve the Postcode `{Base URL}/test-data/postcode/{countrycode}`.

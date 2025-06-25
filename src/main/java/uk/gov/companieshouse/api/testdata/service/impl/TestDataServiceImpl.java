@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
@@ -44,6 +45,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -120,6 +123,8 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanySearchService advancedCompanySearch;
     @Autowired
     private PostcodeService postcodeService;
+    @Autowired
+    private DataService<Disqualifications, DisqualificationsSpec> disqualificationsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -631,6 +636,42 @@ public class TestDataServiceImpl implements TestDataService {
             this.acspProfileService.delete(acspNumber);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
+        }
+    }
+
+    @Override
+    public DisqualificationsData createDisqualificationsData(DisqualificationsSpec spec)
+            throws DataException {
+
+        if (spec == null) {
+            throw new IllegalArgumentException("DisqualificationsSpec cannot be null");
+        }
+
+        try {
+            Disqualifications entity = disqualificationsService.create(spec);
+            String uri = String.format("/disqualified-officers/%s/%s",
+                    spec.getIsCorporateOfficer() ? "corporate" : "natural",
+                    entity.getId()
+            );
+
+            return new DisqualificationsData(
+                    entity.getId(),
+                    entity.getDateOfBirth(),
+                    uri
+            );
+
+        } catch (Exception ex) {
+            LOG.error("Failed to create disqualifications data for spec: " +  spec + ex);
+            throw new DataException("Failed to create disqualifications data", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteDisqualificationsData(String id) throws DataException {
+        try {
+            return disqualificationsService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting disqualification", ex);
         }
     }
 }
