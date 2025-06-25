@@ -34,12 +34,13 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsData;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -172,8 +173,8 @@ public class TestDataController {
     }
 
     @DeleteMapping("/acsp-members/{acspMemberId}")
-    public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
-    String acspMemberId)
+    public ResponseEntity<Map<String, Object>> deleteAcspMember(
+            @PathVariable("acspMemberId") String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("acsp-member-id", acspMemberId);
@@ -269,13 +270,13 @@ public class TestDataController {
     public ResponseEntity<Void> deleteAccountPenalties(
             @Valid @RequestBody AccountPenaltyRequest request)
             throws DataException, NoDataFoundException {
-
-         return testDataService.deleteAccountPenaltiesData(
+        return testDataService.deleteAccountPenaltiesData(
                 request.getCompanyCode(), request.getCustomerCode());
     }
 
     @GetMapping("/postcodes")
-    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country") String country) throws DataException {
+    public ResponseEntity<PostcodesData> getPostcode(
+            @RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {
@@ -284,6 +285,7 @@ public class TestDataController {
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
+
     @PostMapping("/disqualified-officers")
     public ResponseEntity<DisqualificationsData> createDisqualification(
             @Valid @RequestBody DisqualificationsSpec request) throws DataException {
@@ -295,12 +297,8 @@ public class TestDataController {
                 officerTypePath,
                 createdDisqualification.getId()
         );
-
-        DisqualificationsData response = new DisqualificationsData(
-                createdDisqualification.getId(),
-                createdDisqualification.getDateOfBirth(),
-                disqualificationsUri
-        );
+        var response = new DisqualificationsData(createdDisqualification.getId(),
+                createdDisqualification.getDateOfBirth(), disqualificationsUri);
 
         Map<String, Object> data = new HashMap<>();
         data.put("company_number", request.getCompanyNumber());

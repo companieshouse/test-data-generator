@@ -12,9 +12,11 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
+import jakarta.validation.ConstraintViolationException;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,25 +30,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -777,5 +761,54 @@ class TestDataControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
+    }
+
+    @Test
+    void createDisqualificationSuccess() throws DataException {
+        DisqualificationsSpec request = new DisqualificationsSpec();
+        request.setCompanyNumber("12345678");
+        request.setIsCorporateOfficer(false);
+
+        DisqualificationsData mockData = new DisqualificationsData(
+                "D12345678",
+                Date.from(Instant.now()),
+                "/disqualified-officers/natural/D12345678"
+        );
+
+        when(testDataService.createDisqualificationsData(request)).thenReturn(mockData);
+
+        ResponseEntity<DisqualificationsData> response = testDataController.createDisqualification(request);
+
+        assertEquals(mockData.getId(), response.getBody().getId());
+        assertEquals(mockData.getDateOfBirth(), response.getBody().getDateOfBirth());
+        assertEquals(mockData.getDisqualificationsUri(), response.getBody().getDisqualificationsUri());
+    }
+
+    @Test
+    void deleteDisqualificationSuccess() throws DataException {
+        when(testDataService.deleteDisqualificationsData("D12345678")).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteDisqualification("D12345678");
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void deleteDisqualificationNotFound() throws DataException {
+        when(testDataService.deleteDisqualificationsData("D12345678")).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteDisqualification("D12345678");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("D12345678", response.getBody().get("disqualification_id"));
+    }
+
+    @Test
+    void deleteDisqualificationException() throws DataException {
+        when(testDataService.deleteDisqualificationsData("D12345678"))
+                .thenThrow(new DataException("Error"));
+
+        assertThrows(DataException.class, () ->
+                testDataController.deleteDisqualification("D12345678"));
     }
 }

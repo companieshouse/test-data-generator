@@ -33,11 +33,11 @@ public class DisqualificationsSpec {
         this.isCorporateOfficer = isCorporateOfficer;
     }
 
-    public @NotNull(message = "Company number is required") String getCompanyNumber() {
+    public String getCompanyNumber() {
         return companyNumber;
     }
 
-    public void setCompanyNumber(@NotNull(message = "Company number is required") String companyNumber) {
+    public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
     }
 }

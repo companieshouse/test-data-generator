@@ -2,8 +2,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,7 +25,8 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class DisqualificationsServiceImpl implements DataService<Disqualifications, DisqualificationsSpec> {
+public class DisqualificationsServiceImpl implements DataService<Disqualifications,
+        DisqualificationsSpec> {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
@@ -39,14 +40,20 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     private static final String DISQUALIFICATION_COURT_NAME = "Insolvency Service";
     private static final Instant DISQUALIFICATION_DATE = Instant.now();
 
-    private static final Instant LAST_VARIATION_VARIED_ON = LocalDate.of(2021, 2, 17).atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final Instant LAST_VARIATION_VARIED_ON
+            = LocalDate.of(2021, 2, 17)
+            .atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String LAST_VARIATION_CASE_IDENTIFIER = "1";
     private static final String LAST_VARIATION_COURT_NAME = "SWINDLERS";
 
     private static final List<String> PERM_COMPANY_NAMES = Arrays.asList("123 LTD", "321 LTD");
     private static final String PERM_COURT_NAME = "rinder";
-    private static final Instant PERM_EXPIRES_ON = LocalDate.of(2016, 4, 12).atStartOfDay(ZoneId.of("UTC")).toInstant();
-    private static final Instant PERM_GRANTED_ON = LocalDate.of(2014, 2, 3).atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final Instant PERM_EXPIRES_ON
+            = LocalDate.of(2016, 4, 12)
+            .atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final Instant PERM_GRANTED_ON
+            = LocalDate.of(2014, 2, 3)
+            .atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String PERM_PURPOSE = "ALPHABET";
 
 
@@ -61,12 +68,16 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
 
     @Override
     public Disqualifications create(DisqualificationsSpec spec) throws DataException {
+        if (spec == null) {
+            throw new IllegalArgumentException("DisqualificationsSpec cannot be null");
+        }
         Disqualifications disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
 
         disqualifications.setCompanyNumber(spec.getCompanyNumber());
         disqualifications.setPersonNumber(randomService.getNumber(10));
-        disqualifications.setCountryOfRegistration(addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES));
+        disqualifications.setCountryOfRegistration(
+                addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES));
         disqualifications.setEtag(this.randomService.getEtag());
         disqualifications.setName(DEFAULT_NAME);
         disqualifications.setOfficerDisqId(randomService.getString(10));
@@ -74,18 +85,20 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setOfficerIdRaw(randomService.getString(8));
         disqualifications.setIsCorporateOfficer(spec.getIsCorporateOfficer());
         disqualifications.setDateOfBirth(java.util.Date.from(
-                java.time.LocalDate.of(1990, 1, 1).atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
+                java.time.LocalDate.of(1990, 1, 1)
+                        .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
         disqualifications.setLinksSelf(
-                URL_DISQUALIFIED_OFFICERS_PREFIX +
-                        (spec.getIsCorporateOfficer() ? URL_CORPORATE_SUFFIX : URL_NATURAL_SUFFIX) +
-                        disqualifications.getId()
+                URL_DISQUALIFIED_OFFICERS_PREFIX
+                        + (spec.getIsCorporateOfficer() ? URL_CORPORATE_SUFFIX : URL_NATURAL_SUFFIX)
+                        + disqualifications.getId()
         );
 
         disqualifications.setAddress(addressService.getAddress(Jurisdiction.ENGLAND_WALES));
 
-        disqualifications.setDisqCaseIdentifier(DEFAULT_CASE_IDENTIFIER_PREFIX + randomService.getString(4));
+        disqualifications.setDisqCaseIdentifier(
+                DEFAULT_CASE_IDENTIFIER_PREFIX + randomService.getString(4));
         disqualifications.setDisqCompanyNames(
                 Collections.singletonList("COMPANY " + spec.getCompanyNumber() + " LIMITED")
         );
@@ -119,7 +132,8 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         setTimestamps(disqualifications);
 
         Disqualifications savedDisqualifications = repository.save(disqualifications);
-        LOG.info("Successfully created and saved Disqualifications for company: " + disqualifications.getCompanyNumber());
+        LOG.info("Successfully created and saved Disqualifications for company: "
+                + disqualifications.getCompanyNumber());
         return savedDisqualifications;
     }
 
