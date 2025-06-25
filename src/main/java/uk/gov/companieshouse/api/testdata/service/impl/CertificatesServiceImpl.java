@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
-import uk.gov.companieshouse.api.testdata.model.entity.Basket.Item;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -77,7 +76,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         itemOptions.setCompanyType(optionsSpec.getCompanyType());
         itemOptions.setCompanyStatus(optionsSpec.getCompanyStatus());
 
-        Certificates certificates = new Certificates();
+        var certificates = new Certificates();
         var currentDate = getCurrentDateTime().toString();
 
         certificates.setId(randomId);

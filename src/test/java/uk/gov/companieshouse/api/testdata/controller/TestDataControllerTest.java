@@ -449,6 +449,7 @@ class TestDataControllerTest {
         verify(testDataService, times(0)).deleteAppealsData(anyString(), anyString());
     }
 
+    @Test
     void createCertificateSuccess() throws Exception {
         CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
             "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
@@ -457,7 +458,9 @@ class TestDataControllerTest {
             "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
         );
 
-        CertificatesData certificateData = new CertificatesData(List.of(entry1, entry2));
+        // Use LinkedList to support getFirst()
+        List<CertificatesData.CertificateEntry> entries = new java.util.LinkedList<>(List.of(entry1, entry2));
+        CertificatesData certificateData = new CertificatesData(entries);
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
@@ -467,13 +470,13 @@ class TestDataControllerTest {
 
         ResponseEntity<CertificatesData> response = testDataController.createCertificates(request);
 
-        assertEquals(certificateData, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
 
-        assertEquals(2, response.getBody().getCertificates().size());
         assertEquals("CRT-834723-192847", response.getBody().getCertificates().get(0).getId());
         assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
     }
+
 
 
     @Test
