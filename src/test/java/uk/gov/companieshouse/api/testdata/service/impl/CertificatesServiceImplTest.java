@@ -99,7 +99,7 @@ class CertificatesServiceImplTest {
         CertificatesData result = service.create(certificatesSpec);
 
         assertNotNull(result);
-        assertEquals(certificates.getId(), result.getCertificates().get(0).getId());
+        assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
 
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
@@ -154,7 +154,7 @@ class CertificatesServiceImplTest {
         CertificatesData result = service.create(certificatesSpec);
 
         assertNotNull(result);
-        assertEquals(certificates.getId(), result.getCertificates().get(0).getId());
+        assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
 
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
@@ -277,7 +277,7 @@ class CertificatesServiceImplTest {
         CertificatesData result = service.create(certificatesSpec);
 
         assertNotNull(result);
-        assertEquals(certificates.getId(), result.getCertificates().get(0).getId());
+        assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
 
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
