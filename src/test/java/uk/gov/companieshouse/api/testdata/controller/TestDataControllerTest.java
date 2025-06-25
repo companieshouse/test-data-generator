@@ -473,7 +473,7 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
 
-        assertEquals("CRT-834723-192847", response.getBody().getCertificates().get(0).getId());
+        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
         assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
     }
 
