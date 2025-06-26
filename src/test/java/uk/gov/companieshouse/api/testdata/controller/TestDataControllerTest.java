@@ -459,7 +459,7 @@ class TestDataControllerTest {
         );
 
         // Use LinkedList to support getFirst()
-        List<CertificatesData.CertificateEntry> entries = new java.util.LinkedList<>(List.of(entry1, entry2));
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
         CertificatesData certificateData = new CertificatesData(entries);
 
         CertificatesSpec request = new CertificatesSpec();
