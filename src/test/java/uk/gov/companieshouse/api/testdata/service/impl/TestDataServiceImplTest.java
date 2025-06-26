@@ -124,7 +124,7 @@ class TestDataServiceImplTest {
     @Mock
     private PostcodeService postcodeService;
     @Mock
-    private DataService<DisqualificationsData, DisqualificationsSpec> disqualificationsService;
+    private DataService<Disqualifications, DisqualificationsSpec> disqualificationsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;

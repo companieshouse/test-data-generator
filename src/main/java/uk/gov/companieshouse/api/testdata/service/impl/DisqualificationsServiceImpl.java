@@ -71,7 +71,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         if (spec == null) {
             throw new IllegalArgumentException("DisqualificationsSpec cannot be null");
         }
-        Disqualifications disqualifications = new Disqualifications();
+        var disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
 
         disqualifications.setCompanyNumber(spec.getCompanyNumber());
@@ -131,7 +131,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
 
         setTimestamps(disqualifications);
 
-        Disqualifications savedDisqualifications = repository.save(disqualifications);
+        var savedDisqualifications = repository.save(disqualifications);
         LOG.info("Successfully created and saved Disqualifications for company: "
                 + disqualifications.getCompanyNumber());
         return savedDisqualifications;

@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -24,7 +25,24 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsData;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -158,7 +176,7 @@ public class TestDataController {
 
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
-    String acspMemberId)
+                                                                String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("acsp-member-id", acspMemberId);
@@ -176,7 +194,7 @@ public class TestDataController {
 
     @DeleteMapping("/certificates/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertificates(@PathVariable("id")
-                                                                      String id)
+                                                                  String id)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
@@ -255,12 +273,13 @@ public class TestDataController {
             @Valid @RequestBody AccountPenaltyRequest request)
             throws DataException, NoDataFoundException {
 
-         return testDataService.deleteAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode());
+        return testDataService.deleteAccountPenaltiesData(request.getCompanyCode(),
+                request.getCustomerCode());
     }
 
     @GetMapping("/postcodes")
-    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country") String country) throws DataException {
+    public ResponseEntity<PostcodesData> getPostcode(
+            @RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {
@@ -276,18 +295,19 @@ public class TestDataController {
 
         var createdDisqualification = testDataService.createDisqualificationsData(request);
 
-        String officerTypePath = request.getIsCorporateOfficer() ? "corporate" : "natural";
-        String disqualificationsUri = String.format("/disqualified-officers/%s/%s",
+        var officerTypePath = request.getIsCorporateOfficer() ? "corporate" : "natural";
+        var disqualificationsUri = String.format("/disqualified-officers/%s/%s",
                 officerTypePath,
                 createdDisqualification.getId()
         );
-        var response = new DisqualificationsData(createdDisqualification.getId(),
-                createdDisqualification.getDateOfBirth(), disqualificationsUri);
 
         Map<String, Object> data = new HashMap<>();
         data.put("company_number", request.getCompanyNumber());
         data.put("disqualification_id", createdDisqualification.getId());
         data.put("officer_type", officerTypePath);
+
+        var response = new DisqualificationsData(createdDisqualification.getId(),
+                createdDisqualification.getDateOfBirth(), disqualificationsUri);
         LOG.info("New disqualification created for " + officerTypePath + "officer " + data);
 
         return new ResponseEntity<>(response, HttpStatus.CREATED);
