@@ -40,7 +40,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     @Override
     public CertificatesData create(CertificatesSpec spec) throws DataException {
         List<ItemOptionsSpec> optionsList = spec.getItemOptions();
-        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>();
+        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
         List<Basket.Item> basketItems = new ArrayList<>();
 
         for (ItemOptionsSpec optionSpec : optionsList) {
