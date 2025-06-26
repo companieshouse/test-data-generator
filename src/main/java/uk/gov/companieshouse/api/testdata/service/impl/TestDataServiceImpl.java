@@ -644,10 +644,16 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             var entity = disqualificationsService.create(spec);
-            var uri = String.format("/disqualified-officers/%s/%s",
-                    spec.getIsCorporateOfficer() ? "corporate" : "natural",
-                    entity.getId()
-            );
+            String officerType;
+            if (spec.getIsCorporateOfficer()) {
+                officerType = "corporate";
+            } else {
+                officerType = "natural";
+            }
+
+            String id = entity.getId();
+
+            var uri = "/disqualified-officers/" + officerType + "/" + id;
 
             return new DisqualificationsData(
                     entity.getId(),

@@ -295,7 +295,12 @@ public class TestDataController {
 
         var createdDisqualification = testDataService.createDisqualificationsData(request);
 
-        var officerTypePath = request.getIsCorporateOfficer() ? "corporate" : "natural";
+        String officerTypePath;
+        if (request.getIsCorporateOfficer()) {
+            officerTypePath = "corporate";
+        } else {
+            officerTypePath = "natural";
+        }
         var disqualificationsUri = String.format("/disqualified-officers/%s/%s",
                 officerTypePath,
                 createdDisqualification.getId()

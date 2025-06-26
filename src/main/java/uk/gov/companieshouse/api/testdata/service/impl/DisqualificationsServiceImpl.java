@@ -89,9 +89,16 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
+        String officerSuffix;
+        if (spec.getIsCorporateOfficer()) {
+            officerSuffix = URL_CORPORATE_SUFFIX;
+        } else {
+            officerSuffix = URL_NATURAL_SUFFIX;
+        }
+
         disqualifications.setLinksSelf(
                 URL_DISQUALIFIED_OFFICERS_PREFIX
-                        + (spec.getIsCorporateOfficer() ? URL_CORPORATE_SUFFIX : URL_NATURAL_SUFFIX)
+                        + officerSuffix
                         + disqualifications.getId()
         );
 
