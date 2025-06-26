@@ -645,7 +645,7 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             var entity = disqualificationsService.create(spec);
             String officerType;
-            if (spec.getIsCorporateOfficer()) {
+            if (spec.isCorporateOfficer()) {
                 officerType = "corporate";
             } else {
                 officerType = "natural";

@@ -11,7 +11,7 @@ public class DisqualificationsSpec {
 
     @JsonProperty("is_corporate_officer")
     @NotNull(message = "Corporate officer status is required")
-    private Boolean isCorporateOfficer;
+    public Boolean isCorporateOfficer;
 
     @JsonProperty("company_number")
     @NotNull(message = "Company number is required")
@@ -25,7 +25,7 @@ public class DisqualificationsSpec {
         this.disqualificationType = disqualificationType;
     }
 
-    public Boolean getIsCorporateOfficer() {
+    public Boolean isCorporateOfficer() {
         return isCorporateOfficer;
     }
 

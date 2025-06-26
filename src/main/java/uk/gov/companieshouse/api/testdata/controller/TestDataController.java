@@ -296,7 +296,7 @@ public class TestDataController {
         var createdDisqualification = testDataService.createDisqualificationsData(request);
 
         String officerTypePath;
-        if (request.getIsCorporateOfficer()) {
+        if (request.isCorporateOfficer()) {
             officerTypePath = "corporate";
         } else {
             officerTypePath = "natural";

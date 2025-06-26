@@ -83,14 +83,14 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setOfficerDisqId(randomService.getString(10));
         disqualifications.setOfficerDetailId(randomService.getString(10));
         disqualifications.setOfficerIdRaw(randomService.getString(8));
-        disqualifications.setIsCorporateOfficer(spec.getIsCorporateOfficer());
+        disqualifications.setIsCorporateOfficer(spec.isCorporateOfficer());
         disqualifications.setDateOfBirth(java.util.Date.from(
                 java.time.LocalDate.of(1990, 1, 1)
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
         String officerSuffix;
-        if (spec.getIsCorporateOfficer()) {
+        if (spec.isCorporateOfficer()) {
             officerSuffix = URL_CORPORATE_SUFFIX;
         } else {
             officerSuffix = URL_NATURAL_SUFFIX;
