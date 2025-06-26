@@ -17,8 +17,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintViolationException;
+
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -38,27 +41,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
@@ -140,6 +123,8 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+    @Mock
+    private DataService<DisqualificationsData, DisqualificationsSpec> disqualificationsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -1774,4 +1759,84 @@ class TestDataServiceImplTest {
         verify(postcodeService, times(1)).get(country);
     }
 
+    @Test
+    void createDisqualificationsDataSuccess() throws DataException {
+        DisqualificationsSpec spec = new DisqualificationsSpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setIsCorporateOfficer(false);
+
+        Disqualifications entity = new Disqualifications();
+        entity.setId("D12345678");
+        entity.setDateOfBirth(Date.from(Instant.now()));
+
+        when(disqualificationsService.create(spec)).thenReturn(entity);
+
+        DisqualificationsData result = testDataService.createDisqualificationsData(spec);
+
+        assertNotNull(result);
+        assertEquals(entity.getId(), result.getId());
+        assertTrue(result.getDisqualificationsUri().contains("/natural/"));
+    }
+
+    @Test
+    void createDisqualificationsDataCorporateOfficer() throws DataException {
+        DisqualificationsSpec spec = new DisqualificationsSpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setIsCorporateOfficer(true);
+
+        Disqualifications entity = new Disqualifications();
+        entity.setId("D12345678");
+
+        when(disqualificationsService.create(spec)).thenReturn(entity);
+
+        DisqualificationsData result = testDataService.createDisqualificationsData(spec);
+
+        assertTrue(result.getDisqualificationsUri().contains("/corporate/"));
+    }
+
+    @Test
+    void createDisqualificationsDataNullSpec() {
+        assertThrows(IllegalArgumentException.class, () ->
+                testDataService.createDisqualificationsData(null));
+    }
+
+    @Test
+    void createDisqualificationsDataException() throws DataException {
+        var spec = new DisqualificationsSpec();
+        when(disqualificationsService.create(spec)).thenThrow(new RuntimeException("Error"));
+
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.createDisqualificationsData(spec));
+
+        assertEquals("Failed to create disqualifications data", ex.getMessage());
+    }
+
+    @Test
+    void deleteDisqualificationsDataSuccess() throws DataException {
+        when(disqualificationsService.delete("D12345678")).thenReturn(true);
+
+        boolean result = testDataService.deleteDisqualificationsData("D12345678");
+
+        assertTrue(result);
+    }
+
+    @Test
+    void deleteDisqualificationsDataNotFound() throws DataException {
+        when(disqualificationsService.delete("D12345678")).thenReturn(false);
+
+        boolean result = testDataService.deleteDisqualificationsData("D12345678");
+
+        assertFalse(result);
+    }
+
+    @Test
+    void deleteDisqualificationsDataException() throws DataException {
+        when(disqualificationsService.delete("D12345678"))
+                .thenThrow(new RuntimeException("Error"));
+
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.deleteDisqualificationsData("D12345678"));
+
+        assertEquals("Error deleting disqualification", ex.getMessage());
+    }
 }

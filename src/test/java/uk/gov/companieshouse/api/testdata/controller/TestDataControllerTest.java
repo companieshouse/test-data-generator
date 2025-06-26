@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -791,5 +792,54 @@ class TestDataControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
+    }
+
+    @Test
+    void createDisqualificationSuccess() throws DataException {
+        DisqualificationsSpec request = new DisqualificationsSpec();
+        request.setCompanyNumber("12345678");
+        request.setIsCorporateOfficer(false);
+
+        DisqualificationsData mockData = new DisqualificationsData(
+                "D12345678",
+                Date.from(Instant.now()),
+                "/disqualified-officers/natural/D12345678"
+        );
+
+        when(testDataService.createDisqualificationsData(request)).thenReturn(mockData);
+
+        ResponseEntity<DisqualificationsData> response = testDataController.createDisqualification(request);
+
+        assertEquals(mockData.getId(), response.getBody().getId());
+        assertEquals(mockData.getDateOfBirth(), response.getBody().getDateOfBirth());
+        assertEquals(mockData.getDisqualificationsUri(), response.getBody().getDisqualificationsUri());
+    }
+
+    @Test
+    void deleteDisqualificationSuccess() throws DataException {
+        when(testDataService.deleteDisqualificationsData("D12345678")).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteDisqualification("D12345678");
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    void deleteDisqualificationNotFound() throws DataException {
+        when(testDataService.deleteDisqualificationsData("D12345678")).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteDisqualification("D12345678");
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("D12345678", response.getBody().get("disqualification_id"));
+    }
+
+    @Test
+    void deleteDisqualificationException() throws DataException {
+        when(testDataService.deleteDisqualificationsData("D12345678"))
+                .thenThrow(new DataException("Error"));
+
+        assertThrows(DataException.class, () ->
+                testDataController.deleteDisqualification("D12345678"));
     }
 }
