@@ -135,6 +135,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setPtaExpiresOn(PERM_EXPIRES_ON);
         disqualifications.setPtaGrantedOn(PERM_GRANTED_ON);
         disqualifications.setPtaPurpose(PERM_PURPOSE);
+        disqualifications.setDisqDisqualificationType(spec.getDisqualificationType());
 
         setTimestamps(disqualifications);
 

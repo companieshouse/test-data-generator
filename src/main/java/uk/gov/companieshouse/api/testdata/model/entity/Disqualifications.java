@@ -130,16 +130,8 @@ public class Disqualifications {
         this.companyNumber = companyNumber;
     }
 
-    public Long getPersonNumber() {
-        return personNumber;
-    }
-
     public void setPersonNumber(Long personNumber) {
         this.personNumber = personNumber;
-    }
-
-    public String getCountryOfRegistration() {
-        return countryOfRegistration;
     }
 
     public void setCountryOfRegistration(String countryOfRegistration) {
@@ -186,168 +178,84 @@ public class Disqualifications {
         this.address = address;
     }
 
-    public String getDisqCaseIdentifier() {
-        return disqCaseIdentifier;
-    }
-
     public void setDisqCaseIdentifier(String disqCaseIdentifier) {
         this.disqCaseIdentifier = disqCaseIdentifier;
-    }
-
-    public List<String> getDisqCompanyNames() {
-        return disqCompanyNames;
     }
 
     public void setDisqCompanyNames(List<String> disqCompanyNames) {
         this.disqCompanyNames = disqCompanyNames;
     }
 
-    public String getDisqCourtName() {
-        return disqCourtName;
-    }
-
     public void setDisqCourtName(String disqCourtName) {
         this.disqCourtName = disqCourtName;
-    }
-
-    public String getDisqDisqualificationType() {
-        return disqDisqualificationType;
     }
 
     public void setDisqDisqualificationType(String disqDisqualificationType) {
         this.disqDisqualificationType = disqDisqualificationType;
     }
 
-    public Instant getDisqDisqualifiedFrom() {
-        return disqDisqualifiedFrom;
-    }
-
     public void setDisqDisqualifiedFrom(Instant disqDisqualifiedFrom) {
         this.disqDisqualifiedFrom = disqDisqualifiedFrom;
-    }
-
-    public Instant getDisqDisqualifiedUntil() {
-        return disqDisqualifiedUntil;
     }
 
     public void setDisqDisqualifiedUntil(Instant disqDisqualifiedUntil) {
         this.disqDisqualifiedUntil = disqDisqualifiedUntil;
     }
 
-    public Instant getDisqHeardOn() {
-        return disqHeardOn;
-    }
-
     public void setDisqHeardOn(Instant disqHeardOn) {
         this.disqHeardOn = disqHeardOn;
-    }
-
-    public Instant getDisqLastVariationVariedOn() {
-        return disqLastVariationVariedOn;
     }
 
     public void setDisqLastVariationVariedOn(Instant disqLastVariationVariedOn) {
         this.disqLastVariationVariedOn = disqLastVariationVariedOn;
     }
 
-    public String getDisqLastVariationCaseIdentifier() {
-        return disqLastVariationCaseIdentifier;
-    }
-
     public void setDisqLastVariationCaseIdentifier(String disqLastVariationCaseIdentifier) {
         this.disqLastVariationCaseIdentifier = disqLastVariationCaseIdentifier;
-    }
-
-    public String getDisqLastVariationCourtName() {
-        return disqLastVariationCourtName;
     }
 
     public void setDisqLastVariationCourtName(String disqLastVariationCourtName) {
         this.disqLastVariationCourtName = disqLastVariationCourtName;
     }
 
-    public String getDisqReasonAct() {
-        return disqReasonAct;
-    }
-
     public void setDisqReasonAct(String disqReasonAct) {
         this.disqReasonAct = disqReasonAct;
-    }
-
-    public String getDisqReasonDescriptionIdentifier() {
-        return disqReasonDescriptionIdentifier;
     }
 
     public void setDisqReasonDescriptionIdentifier(String disqReasonDescriptionIdentifier) {
         this.disqReasonDescriptionIdentifier = disqReasonDescriptionIdentifier;
     }
 
-    public String getDisqReasonArticle() {
-        return disqReasonArticle;
-    }
-
     public void setDisqReasonArticle(String disqReasonArticle) {
         this.disqReasonArticle = disqReasonArticle;
-    }
-
-    public List<String> getPtaCompanyNames() {
-        return ptaCompanyNames;
     }
 
     public void setPtaCompanyNames(List<String> ptaCompanyNames) {
         this.ptaCompanyNames = ptaCompanyNames;
     }
 
-    public String getPtaCourtName() {
-        return ptaCourtName;
-    }
-
     public void setPtaCourtName(String ptaCourtName) {
         this.ptaCourtName = ptaCourtName;
-    }
-
-    public Instant getPtaExpiresOn() {
-        return ptaExpiresOn;
     }
 
     public void setPtaExpiresOn(Instant ptaExpiresOn) {
         this.ptaExpiresOn = ptaExpiresOn;
     }
 
-    public Instant getPtaGrantedOn() {
-        return ptaGrantedOn;
-    }
-
     public void setPtaGrantedOn(Instant ptaGrantedOn) {
         this.ptaGrantedOn = ptaGrantedOn;
-    }
-
-    public String getPtaPurpose() {
-        return ptaPurpose;
     }
 
     public void setPtaPurpose(String ptaPurpose) {
         this.ptaPurpose = ptaPurpose;
     }
 
-    public String getOfficerDisqId() {
-        return officerDisqId;
-    }
-
     public void setOfficerDisqId(String officerDisqId) {
         this.officerDisqId = officerDisqId;
     }
 
-    public String getOfficerDetailId() {
-        return officerDetailId;
-    }
-
     public void setOfficerDetailId(String officerDetailId) {
         this.officerDetailId = officerDetailId;
-    }
-
-    public String getOfficerIdRaw() {
-        return officerIdRaw;
     }
 
     public void setOfficerIdRaw(String officerIdRaw) {
@@ -362,16 +270,8 @@ public class Disqualifications {
         this.createdAt = createdAt;
     }
 
-    public String getDeltaAt() {
-        return deltaAt;
-    }
-
     public void setDeltaAt(String deltaAt) {
         this.deltaAt = deltaAt;
-    }
-
-    public Boolean getIsCorporateOfficer() {
-        return isCorporateOfficer;
     }
 
     public void setIsCorporateOfficer(Boolean corporateOfficer) {
