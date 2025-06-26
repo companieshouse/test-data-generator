@@ -10,6 +10,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsData;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
@@ -17,6 +19,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 
 public interface TestDataService {
 
@@ -139,7 +142,7 @@ public interface TestDataService {
     AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
             throws NoDataFoundException;
 
-    /**
+    /**.
      * Updates the account penalties data for a given penalty reference and
      * {@link UpdateAccountPenaltiesRequest}
      *
@@ -152,7 +155,7 @@ public interface TestDataService {
     AccountPenaltiesData updateAccountPenaltiesData(String penaltyRef,
             UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
 
-    /**
+    /**.
      * Deletes all account penalties data for a given company code and customer code
      *
      * @param companyCode  the company code
@@ -172,4 +175,21 @@ public interface TestDataService {
      * @throws DataException if there is an error retrieving the postcodes
      */
     PostcodesData getPostcodes(String country) throws DataException;
+
+    /**
+     * Creates disqualifications data based on the provided specifications.
+     * @param disqualificationsSpec the specifications for the disqualifications
+     * @throws DataException if there is an error during creation
+     */
+    DisqualificationsData createDisqualificationsData(
+            DisqualificationsSpec disqualificationsSpec) throws DataException;
+
+    /**
+     * Deletes disqualifications data for a given id.
+     *
+     * @param id the ID generated while creating disqualifications
+     * @return true if the entity was deleted, false otherwise
+     * @throws DataException if there is an error during deletion
+     */
+    boolean deleteDisqualificationsData(String id) throws DataException;
 }
