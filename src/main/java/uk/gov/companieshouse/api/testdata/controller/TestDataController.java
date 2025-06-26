@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import uk.gov.companieshouse.api.testdata.Application;
@@ -34,6 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -271,4 +273,14 @@ public class TestDataController {
                 request.getCompanyCode(), request.getCustomerCode());
     }
 
+    @GetMapping("/postcodes")
+    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country") String country) throws DataException {
+        LOG.info("Retrieving postcode for country: " + country);
+        var postcode = testDataService.getPostcodes(country);
+        if (postcode == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
+        return new ResponseEntity<>(postcode, HttpStatus.OK);
+    }
 }

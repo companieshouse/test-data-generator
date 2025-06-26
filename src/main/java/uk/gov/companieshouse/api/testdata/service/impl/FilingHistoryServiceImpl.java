@@ -8,6 +8,7 @@ import java.time.ZoneOffset;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
@@ -23,8 +24,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
 import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
-import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
+import uk.gov.companieshouse.api.testdata.model.entity.Capital;
+import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
@@ -37,7 +40,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
-
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
@@ -110,7 +112,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         var filingHistory = new FilingHistory();
         filingHistory.setId(randomService.addSaltAndEncode(entityId, SALT_LENGTH));
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
-        filingHistory.setLinks(createLinks(type, spec.getCompanyNumber(), entityId));
+        filingHistory.setLinks(createLinks(spec.getCompanyNumber(), entityId, fhSpec != null && Boolean.TRUE.equals(fhSpec.getDocumentMetadata())));
         filingHistory.setEntityId(entityId);
         filingHistory.setCategory(getOrDefault(fhSpec, FilingHistorySpec::getCategory, CATEGORY));
         filingHistory.setType(type);
@@ -134,7 +136,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return savedFilingHistory;
     }
 
-    private String getBarcode() throws DataException {
+    String getBarcode() throws DataException {
         try {
             return barcodeService.getBarcode();
         } catch (BarcodeServiceException ex) {
@@ -149,18 +151,18 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow) {
         switch (type) {
             case "AP01" -> {
-                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
+                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
                 filingHistory.setOriginalValues(createOriginalValues(dayNow));
             }
-            case "MR01" -> {
-                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow));
+            case "MR01", "SH01" -> {
+                filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
                 filingHistory.setPaperFiled(true);
                 filingHistory.setDate(FIXED_MR01_DATE);
             }
             case "RESOLUTIONS" ->
                 filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow) : null);
-            default ->
-                filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
+            case "CS01", "AA" -> filingHistory.setDescriptionValues(createDescriptionValues(type,dayNow,fhSpec));
+            default -> filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
         }
     }
 
@@ -215,22 +217,38 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return associatedFilings;
     }
 
-    private Links createLinks(String fhType, String companyNumber, String id) {
+    private Links createLinks(String companyNumber, String id, boolean includeMetaData) {
         Links links = new Links();
         links.setSelf("/company/" + companyNumber + "/filing-history/" + id);
-        if ("AP01".equals(fhType) || TYPE.equals(fhType)) {
+        if (includeMetaData) {
             links.setDocumentMetadata("document/" + id);
         }
         return links;
     }
 
-    private DescriptionValues createDescriptionValues(String type , Instant dayNow) {
+    DescriptionValues createDescriptionValues(String type, Instant dayNow, FilingHistorySpec fhspec) {
         var descriptionValues = new DescriptionValues();
-        if("AP01".equals(type)) {
-            descriptionValues.setAppointmentDate(dayNow);
-            descriptionValues.setOfficerName("Mr John Test");
-        } else {
-            descriptionValues.setChargeNumber(String.valueOf(randomService.getNumber(12)));
+        LOG.debug("TYPE " + type);
+        switch (type) {
+            case "AP01" -> {
+                descriptionValues.setAppointmentDate(dayNow);
+                descriptionValues.setOfficerName("Mr John Test");
+            }
+            case "SH01" -> {
+                List<CapitalSpec> capitalSpecs = fhspec.getDescriptionValues().getCapital();
+                List<Capital> capitalList = new ArrayList<>(capitalSpecs.size());
+
+                for (CapitalSpec capitalSpec : capitalSpecs) {
+                    var capital = new Capital();
+                    capital.setCurrency(capitalSpec.getCurrency());
+                    capital.setFigure(capitalSpec.getFigure());
+                    capitalList.add(capital);
+                }
+                descriptionValues.setCapital(capitalList);
+                descriptionValues.setDate(dayNow);
+            }
+            case "CS01", "AA" -> descriptionValues.setMadeUpDate(dayNow);
+            case null, default -> descriptionValues.setChargeNumber(String.valueOf(randomService.getNumber(12)));
         }
         return descriptionValues;
     }
@@ -271,5 +289,15 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
 
         return resolutionsList;
+    }
+
+    public List<FilingHistory> getFilingHistories(String companyNumber) {
+        Optional<List<FilingHistory>> filingHistoriesOpt = filingHistoryRepository.findAllByCompanyNumber(companyNumber);
+
+        if (filingHistoriesOpt.isPresent() && !filingHistoriesOpt.get().isEmpty()) {
+            return filingHistoriesOpt.get();
+        } else {
+            return Collections.emptyList();
+        }
     }
 }
