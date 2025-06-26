@@ -1386,14 +1386,24 @@ class TestDataServiceImplTest {
         CertificatesSpec spec = new CertificatesSpec();
         spec.setUserId(USER_ID);
 
-        CertificatesData expectedCertificatesData = new CertificatesData(
-                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+
         when(certificatesService.create(any(CertificatesSpec.class))).thenReturn(expectedCertificatesData);
         CertificatesData result = testDataService.createCertificatesData(spec);
 
         assertNotNull(result);
-        assertEquals(expectedCertificatesData.getId(), result.getId());
+        assertEquals(2, result.getCertificates().size());
+        assertEquals("CRT-111111-222222", result.getCertificates().get(0).getId());
+        assertEquals("CRT-333333-444444", result.getCertificates().get(1).getId());
+
         verify(certificatesService).create(spec);
     }
 
@@ -1402,7 +1412,7 @@ class TestDataServiceImplTest {
         CertificatesSpec spec = new CertificatesSpec();
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createCertificatesData(spec));
-        assertEquals("User ID is required to create a certificates", exception.getMessage());
+        assertEquals("User ID is required to create certificates", exception.getMessage());
     }
 
     @Test

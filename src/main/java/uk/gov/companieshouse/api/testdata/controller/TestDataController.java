@@ -165,7 +165,7 @@ public class TestDataController {
         var createdCertificates = testDataService.createCertificatesData(request);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("certificated-id", createdCertificates.getId());
+        data.put("certificated-id", createdCertificates.getCertificates().getFirst().getId());
         LOG.info("New certificates added", data);
         return new ResponseEntity<>(createdCertificates, HttpStatus.CREATED);
     }

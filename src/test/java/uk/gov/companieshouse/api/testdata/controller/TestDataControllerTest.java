@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -450,20 +451,33 @@ class TestDataControllerTest {
 
     @Test
     void createCertificateSuccess() throws Exception {
-        CertificatesData certificate = new CertificatesData(
-                "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
         );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
+        );
+
+        // Use LinkedList to support getFirst()
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData certificateData = new CertificatesData(entries);
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
         request.setDescriptionCertificate("incorporation");
 
-        when(testDataService.createCertificatesData(request)).thenReturn(certificate);
+        when(testDataService.createCertificatesData(request)).thenReturn(certificateData);
+
         ResponseEntity<CertificatesData> response = testDataController.createCertificates(request);
 
-        assertEquals(certificate, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
+
+        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
+        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
     }
+
+
 
     @Test
     void createCertificateException() throws Exception {

@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +10,11 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
-import uk.gov.companieshouse.api.testdata.model.entity.Basket.Item;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -37,29 +38,37 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     public RandomService randomService;
 
     @Override
-    public CertificatesData create(CertificatesSpec certificatesSpec) throws DataException {
-        Long firstPart = randomService.getNumber(6);
-        Long secondPart = randomService.getNumber(6);
-        var randomId = "CRT-" + firstPart + "-" + secondPart;
-        var certificates = getCertificates(certificatesSpec, randomId);
+    public CertificatesData create(CertificatesSpec spec) throws DataException {
+        List<ItemOptionsSpec> optionsList = spec.getItemOptions();
+        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
+        List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
 
-        certificatesRepository.save(certificates);
+        for (ItemOptionsSpec optionSpec : optionsList) {
+            Long firstPart = randomService.getNumber(6);
+            Long secondPart = randomService.getNumber(6);
+            var randomId = "CRT-" + firstPart + "-" + secondPart;
+            var certificate = getCertificates(spec, optionSpec, randomId);
+            certificatesRepository.save(certificate);
+            var now = getCurrentDateTime().toString();
+            certificateEntries.add(new CertificatesData.CertificateEntry(
+                certificate.getId(), now, now
+            ));
 
-        if (certificatesSpec.getBasketSpec() != null) {
-            var basket = createBasket(certificatesSpec, certificates);
-            basketRepository.save(basket);
-            certificates.setBasket(basket);
+            // Add to basket items
+            var item = new Basket.Item();
+            item.setItemUri(certificate.getLinksSelf());
+            basketItems.add(item);
         }
 
-        return new CertificatesData(
-                certificates.getId(),
-                certificates.getCreatedAt(),
-                certificates.getUpdatedAt()
-        );
+        if (spec.getBasketSpec() != null) {
+            var basket = createBasket(spec, basketItems);
+            basketRepository.save(basket);
+        }
+
+        return new CertificatesData(certificateEntries);
     }
 
-    private Certificates getCertificates(CertificatesSpec spec, String randomId) {
-        var optionsSpec = spec.getItemOptions();
+    private Certificates getCertificates(CertificatesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
         itemOptions.setCertificateType(optionsSpec.getCertificateType());
         itemOptions.setDeliveryTimescale(optionsSpec.getDeliveryTimescale());
@@ -76,7 +85,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         certificates.setDataId(randomId);
         certificates.setCompanyName(spec.getCompanyName());
         certificates.setCompanyNumber(spec.getCompanyNumber());
-        certificates.setDescription("certificate for company " + spec.getCompanyNumber());
+        certificates.setDescription(spec.getDescription());
         certificates.setDescriptionIdentifier(spec.getDescriptionIdentifier());
         certificates.setDescriptionCompanyNumber(spec.getDescriptionCompanyNumber());
         certificates.setDescriptionCertificate(spec.getDescriptionCertificate());
@@ -91,15 +100,11 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return certificates;
     }
 
-    private Basket createBasket(CertificatesSpec spec, Certificates certificates) {
+    private Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
         var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
-
-        var item = new Item();
-        item.setItemUri(certificates.getLinksSelf());
-
-        var basket = new Basket();
         Instant now = getCurrentDateTime();
 
+        var basket = new Basket();
         basket.setId(spec.getUserId());
         basket.setCreatedAt(now);
         basket.setUpdatedAt(now);
@@ -107,8 +112,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         basket.setForename(spec.getBasketSpec().getForename());
         basket.setSurname(spec.getBasketSpec().getSurname());
         basket.setEnrolled(spec.getBasketSpec().getEnrolled());
-        basket.setItems(List.of(item));
-        basket.setEnrolled(spec.getBasketSpec().getEnrolled());
+        basket.setItems(items);
 
         return basket;
     }
