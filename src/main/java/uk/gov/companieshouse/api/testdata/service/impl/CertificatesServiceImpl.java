@@ -41,7 +41,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     public CertificatesData create(CertificatesSpec spec) throws DataException {
         List<ItemOptionsSpec> optionsList = spec.getItemOptions();
         List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
-        List<Basket.Item> basketItems = new ArrayList<>();
+        List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
 
         for (ItemOptionsSpec optionSpec : optionsList) {
             Long firstPart = randomService.getNumber(6);
