@@ -8,7 +8,7 @@ public class DisqualificationsSpec {
     private String disqualificationType;
 
     @JsonProperty("is_corporate_officer")
-    public Boolean isCorporateOfficer;
+    private Boolean isCorporateOfficer;
 
     public String getDisqualificationType() {
         return disqualificationType;
@@ -18,12 +18,12 @@ public class DisqualificationsSpec {
         this.disqualificationType = disqualificationType;
     }
 
-    public Boolean isCorporateOfficer() {
+    public Boolean getCorporateOfficer() {
         return isCorporateOfficer;
     }
 
-    public void setIsCorporateOfficer(Boolean isCorporateOfficer) {
-        this.isCorporateOfficer = isCorporateOfficer;
+    public void setCorporateOfficer(Boolean corporateOfficer) {
+        isCorporateOfficer = corporateOfficer;
     }
 
 }

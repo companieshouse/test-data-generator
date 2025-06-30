@@ -75,7 +75,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         } else {
             var defaultSpec = new DisqualificationsSpec();
             defaultSpec.setDisqualificationType("default-type");
-            defaultSpec.setIsCorporateOfficer(false);
+            defaultSpec.setCorporateOfficer(false);
             savedDisqualifications.add(createDisqualificationFromSpec(spec, defaultSpec));
         }
 
@@ -95,13 +95,13 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setOfficerDisqId(randomService.getString(10));
         disqualifications.setOfficerDetailId(randomService.getString(10));
         disqualifications.setOfficerIdRaw(randomService.getString(8));
-        disqualifications.setIsCorporateOfficer(spec.isCorporateOfficer());
+        disqualifications.setIsCorporateOfficer(spec.getCorporateOfficer());
         disqualifications.setDateOfBirth(java.util.Date.from(
                 java.time.LocalDate.of(1990, 1, 1)
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
-        String officerSuffix = spec.isCorporateOfficer()
+        String officerSuffix = spec.getCorporateOfficer()
                 ? URL_CORPORATE_SUFFIX
                 : URL_NATURAL_SUFFIX;
 

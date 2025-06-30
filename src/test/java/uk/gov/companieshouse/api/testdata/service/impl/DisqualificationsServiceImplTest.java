@@ -46,7 +46,7 @@ class DisqualificationsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
-        disqSpec.setIsCorporateOfficer(false);
+        disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
         Disqualifications savedEntity = new Disqualifications();
@@ -71,9 +71,9 @@ class DisqualificationsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         DisqualificationsSpec disqSpec1 = new DisqualificationsSpec();
-        disqSpec1.setIsCorporateOfficer(false);
+        disqSpec1.setCorporateOfficer(false);
         DisqualificationsSpec disqSpec2 = new DisqualificationsSpec();
-        disqSpec2.setIsCorporateOfficer(true);
+        disqSpec2.setCorporateOfficer(true);
         spec.setDisqualifiedOfficers(List.of(disqSpec1, disqSpec2));
 
         Disqualifications savedEntity1 = new Disqualifications();
@@ -98,7 +98,7 @@ class DisqualificationsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
-        disqSpec.setIsCorporateOfficer(true);
+        disqSpec.setCorporateOfficer(true);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
         Disqualifications savedEntity = new Disqualifications();

@@ -800,7 +800,7 @@ class TestDataControllerTest {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
-        disqSpec.setIsCorporateOfficer(false);
+        disqSpec.setCorporateOfficer(false);
         request.setDisqualifiedOfficers(List.of(disqSpec));
 
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");

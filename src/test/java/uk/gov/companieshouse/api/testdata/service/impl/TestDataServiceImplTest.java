@@ -1763,7 +1763,7 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
-        disqSpec.setIsCorporateOfficer(false);
+        disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
