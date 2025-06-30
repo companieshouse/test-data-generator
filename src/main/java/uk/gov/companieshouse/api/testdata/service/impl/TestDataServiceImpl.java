@@ -38,8 +38,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsData;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
@@ -125,7 +123,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private PostcodeService postcodeService;
     @Autowired
-    private DataService<Disqualifications, DisqualificationsSpec> disqualificationsService;
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -181,6 +179,10 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
                 LOG.info("Successfully created company registers");
+            }
+            if (spec.getDisqualifiedOfficers() != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+                disqualificationsService.create(spec);
+                LOG.info("Successfully created disqualifications");
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
@@ -340,6 +342,12 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             this.companyRegistersService.delete(companyId);
             LOG.info("Deleted company registers for company number: " + companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+        try {
+            this.disqualificationsService.delete(companyId);
+            LOG.info("Deleted disqualifications for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
@@ -631,48 +639,6 @@ public class TestDataServiceImpl implements TestDataService {
             this.acspProfileService.delete(acspNumber);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
-        }
-    }
-
-    @Override
-    public DisqualificationsData createDisqualificationsData(DisqualificationsSpec spec)
-            throws DataException {
-
-        if (spec == null) {
-            throw new IllegalArgumentException("DisqualificationsSpec cannot be null");
-        }
-
-        try {
-            var entity = disqualificationsService.create(spec);
-            String officerType;
-            if (spec.isCorporateOfficer()) {
-                officerType = "corporate";
-            } else {
-                officerType = "natural";
-            }
-
-            String id = entity.getId();
-
-            var uri = "/disqualified-officers/" + officerType + "/" + id;
-
-            return new DisqualificationsData(
-                    entity.getId(),
-                    entity.getDateOfBirth(),
-                    uri
-            );
-
-        } catch (Exception ex) {
-            LOG.error("Failed to create disqualifications data for spec: " +  spec + ex);
-            throw new DataException("Failed to create disqualifications data", ex);
-        }
-    }
-
-    @Override
-    public boolean deleteDisqualificationsData(String id) throws DataException {
-        try {
-            return disqualificationsService.delete(id);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting disqualification", ex);
         }
     }
 }

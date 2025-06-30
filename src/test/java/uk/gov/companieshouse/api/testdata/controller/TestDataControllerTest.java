@@ -41,7 +41,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsData;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
@@ -797,51 +796,19 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createDisqualificationSuccess() throws DataException {
-        DisqualificationsSpec request = new DisqualificationsSpec();
-        request.setCompanyNumber("12345678");
-        request.setIsCorporateOfficer(false);
+    void createCompanyWithDisqualifications() throws Exception {
+        CompanySpec request = new CompanySpec();
+        request.setJurisdiction(Jurisdiction.SCOTLAND);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setIsCorporateOfficer(false);
+        request.setDisqualifiedOfficers(List.of(disqSpec));
 
-        DisqualificationsData mockData = new DisqualificationsData(
-                "D12345678",
-                Date.from(Instant.now()),
-                "/disqualified-officers/natural/D12345678"
-        );
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
-        when(testDataService.createDisqualificationsData(request)).thenReturn(mockData);
+        when(testDataService.createCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = testDataController.createCompany(request);
 
-        ResponseEntity<DisqualificationsData> response = testDataController.createDisqualification(request);
-
-        assertEquals(mockData.getId(), response.getBody().getId());
-        assertEquals(mockData.getDateOfBirth(), response.getBody().getDateOfBirth());
-        assertEquals(mockData.getDisqualificationsUri(), response.getBody().getDisqualificationsUri());
-    }
-
-    @Test
-    void deleteDisqualificationSuccess() throws DataException {
-        when(testDataService.deleteDisqualificationsData("D12345678")).thenReturn(true);
-
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteDisqualification("D12345678");
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-
-    @Test
-    void deleteDisqualificationNotFound() throws DataException {
-        when(testDataService.deleteDisqualificationsData("D12345678")).thenReturn(false);
-
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteDisqualification("D12345678");
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("D12345678", response.getBody().get("disqualification_id"));
-    }
-
-    @Test
-    void deleteDisqualificationException() throws DataException {
-        when(testDataService.deleteDisqualificationsData("D12345678"))
-                .thenThrow(new DataException("Error"));
-
-        assertThrows(DataException.class, () ->
-                testDataController.deleteDisqualification("D12345678"));
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 }

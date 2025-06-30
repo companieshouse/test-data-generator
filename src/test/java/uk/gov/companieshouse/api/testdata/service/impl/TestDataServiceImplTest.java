@@ -18,10 +18,8 @@ import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintViolationException;
 
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
@@ -124,7 +122,7 @@ class TestDataServiceImplTest {
     @Mock
     private PostcodeService postcodeService;
     @Mock
-    private DataService<Disqualifications, DisqualificationsSpec> disqualificationsService;
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -287,6 +285,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
+        verify(disqualificationsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -1760,83 +1759,22 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createDisqualificationsDataSuccess() throws DataException {
-        DisqualificationsSpec spec = new DisqualificationsSpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setIsCorporateOfficer(false);
+    void createCompanyDataWithDisqualifications() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setIsCorporateOfficer(false);
+        spec.setDisqualifiedOfficers(List.of(disqSpec));
 
-        Disqualifications entity = new Disqualifications();
-        entity.setId("D12345678");
-        entity.setDateOfBirth(Date.from(Instant.now()));
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
-        when(disqualificationsService.create(spec)).thenReturn(entity);
+        Disqualifications disqEntity = new Disqualifications();
+        disqEntity.setId("D123");
+        when(disqualificationsService.create(spec)).thenReturn(disqEntity);
 
-        DisqualificationsData result = testDataService.createDisqualificationsData(spec);
+        CompanyData result = testDataService.createCompanyData(spec);
 
         assertNotNull(result);
-        assertEquals(entity.getId(), result.getId());
-        assertTrue(result.getDisqualificationsUri().contains("/natural/"));
-    }
-
-    @Test
-    void createDisqualificationsDataCorporateOfficer() throws DataException {
-        DisqualificationsSpec spec = new DisqualificationsSpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setIsCorporateOfficer(true);
-
-        Disqualifications entity = new Disqualifications();
-        entity.setId("D12345678");
-
-        when(disqualificationsService.create(spec)).thenReturn(entity);
-
-        DisqualificationsData result = testDataService.createDisqualificationsData(spec);
-
-        assertTrue(result.getDisqualificationsUri().contains("/corporate/"));
-    }
-
-    @Test
-    void createDisqualificationsDataNullSpec() {
-        assertThrows(IllegalArgumentException.class, () ->
-                testDataService.createDisqualificationsData(null));
-    }
-
-    @Test
-    void createDisqualificationsDataException() throws DataException {
-        var spec = new DisqualificationsSpec();
-        when(disqualificationsService.create(spec)).thenThrow(new RuntimeException("Error"));
-
-        DataException ex = assertThrows(DataException.class, () ->
-                testDataService.createDisqualificationsData(spec));
-
-        assertEquals("Failed to create disqualifications data", ex.getMessage());
-    }
-
-    @Test
-    void deleteDisqualificationsDataSuccess() throws DataException {
-        when(disqualificationsService.delete("D12345678")).thenReturn(true);
-
-        boolean result = testDataService.deleteDisqualificationsData("D12345678");
-
-        assertTrue(result);
-    }
-
-    @Test
-    void deleteDisqualificationsDataNotFound() throws DataException {
-        when(disqualificationsService.delete("D12345678")).thenReturn(false);
-
-        boolean result = testDataService.deleteDisqualificationsData("D12345678");
-
-        assertFalse(result);
-    }
-
-    @Test
-    void deleteDisqualificationsDataException() throws DataException {
-        when(disqualificationsService.delete("D12345678"))
-                .thenThrow(new RuntimeException("Error"));
-
-        DataException ex = assertThrows(DataException.class, () ->
-                testDataService.deleteDisqualificationsData("D12345678"));
-
-        assertEquals("Error deleting disqualification", ex.getMessage());
+        verify(disqualificationsService).create(spec);
     }
 }

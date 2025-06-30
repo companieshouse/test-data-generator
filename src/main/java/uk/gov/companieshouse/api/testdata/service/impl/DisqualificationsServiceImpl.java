@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
@@ -25,59 +27,68 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class DisqualificationsServiceImpl implements DataService<Disqualifications,
-        DisqualificationsSpec> {
+public class DisqualificationsServiceImpl implements DataService<Disqualifications, CompanySpec> {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
-
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
     private static final String DEFAULT_NAME = "FIRSTNAME SURNAME";
     private static final String URL_DISQUALIFIED_OFFICERS_PREFIX = "/disqualified-officers/";
     private static final String URL_CORPORATE_SUFFIX = "corporate/";
     private static final String URL_NATURAL_SUFFIX = "natural/";
-
     private static final String DEFAULT_CASE_IDENTIFIER_PREFIX = "INV";
     private static final String DISQUALIFICATION_COURT_NAME = "Insolvency Service";
     private static final Instant DISQUALIFICATION_DATE = Instant.now();
-
-    private static final Instant LAST_VARIATION_VARIED_ON
-            = LocalDate.of(2021, 2, 17)
+    private static final Instant LAST_VARIATION_VARIED_ON = LocalDate.of(2021, 2, 17)
             .atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String LAST_VARIATION_CASE_IDENTIFIER = "1";
     private static final String LAST_VARIATION_COURT_NAME = "SWINDLERS";
-
     private static final List<String> PERM_COMPANY_NAMES = Arrays.asList("123 LTD", "321 LTD");
     private static final String PERM_COURT_NAME = "rinder";
-    private static final Instant PERM_EXPIRES_ON
-            = LocalDate.of(2016, 4, 12)
+    private static final Instant PERM_EXPIRES_ON = LocalDate.of(2016, 4, 12)
             .atStartOfDay(ZoneId.of("UTC")).toInstant();
-    private static final Instant PERM_GRANTED_ON
-            = LocalDate.of(2014, 2, 3)
+    private static final Instant PERM_GRANTED_ON = LocalDate.of(2014, 2, 3)
             .atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String PERM_PURPOSE = "ALPHABET";
 
-
     @Autowired
     private DisqualificationsRepository repository;
-
     @Autowired
     private RandomService randomService;
-
     @Autowired
     private AddressService addressService;
 
     @Override
-    public Disqualifications create(DisqualificationsSpec spec) throws DataException {
+    public Disqualifications create(CompanySpec spec) throws DataException {
         if (spec == null) {
-            throw new IllegalArgumentException("DisqualificationsSpec cannot be null");
+            throw new IllegalArgumentException("CompanySpec cannot be null");
         }
+
+        List<DisqualificationsSpec> disqualificationsSpecs = spec.getDisqualifiedOfficers();
+        List<Disqualifications> savedDisqualifications = new ArrayList<>();
+
+        LOG.info("Starting creation of Disqualifications for company number: " + spec.getCompanyNumber());
+
+        if (disqualificationsSpecs != null && !disqualificationsSpecs.isEmpty()) {
+            for (DisqualificationsSpec disqSpec : disqualificationsSpecs) {
+                savedDisqualifications.add(createDisqualificationFromSpec(spec, disqSpec));
+            }
+        } else {
+            // Create default disqualification if none specified
+            DisqualificationsSpec defaultSpec = new DisqualificationsSpec();
+            defaultSpec.setDisqualificationType("default-type");
+            defaultSpec.setIsCorporateOfficer(false);
+            savedDisqualifications.add(createDisqualificationFromSpec(spec, defaultSpec));
+        }
+
+        return savedDisqualifications.get(savedDisqualifications.size() - 1);
+    }
+
+    private Disqualifications createDisqualificationFromSpec(CompanySpec companySpec, DisqualificationsSpec spec) {
         var disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
-
-        disqualifications.setCompanyNumber(spec.getCompanyNumber());
+        disqualifications.setCompanyNumber(companySpec.getCompanyNumber());
         disqualifications.setPersonNumber(randomService.getNumber(10));
         disqualifications.setCountryOfRegistration(
-                addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES));
+                addressService.getCountryOfResidence(companySpec.getJurisdiction()));
         disqualifications.setEtag(this.randomService.getEtag());
         disqualifications.setName(DEFAULT_NAME);
         disqualifications.setOfficerDisqId(randomService.getString(10));
@@ -89,25 +100,16 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
-        String officerSuffix;
-        if (spec.isCorporateOfficer()) {
-            officerSuffix = URL_CORPORATE_SUFFIX;
-        } else {
-            officerSuffix = URL_NATURAL_SUFFIX;
-        }
-
+        String officerSuffix = spec.isCorporateOfficer() ? URL_CORPORATE_SUFFIX : URL_NATURAL_SUFFIX;
         disqualifications.setLinksSelf(
-                URL_DISQUALIFIED_OFFICERS_PREFIX
-                        + officerSuffix
-                        + disqualifications.getId()
+                URL_DISQUALIFIED_OFFICERS_PREFIX + officerSuffix + disqualifications.getId()
         );
 
-        disqualifications.setAddress(addressService.getAddress(Jurisdiction.ENGLAND_WALES));
+        disqualifications.setAddress(addressService.getAddress(companySpec.getJurisdiction()));
 
-        disqualifications.setDisqCaseIdentifier(
-                DEFAULT_CASE_IDENTIFIER_PREFIX + randomService.getString(4));
+        disqualifications.setDisqCaseIdentifier(DEFAULT_CASE_IDENTIFIER_PREFIX + randomService.getString(4));
         disqualifications.setDisqCompanyNames(
-                Collections.singletonList("COMPANY " + spec.getCompanyNumber() + " LIMITED")
+                Collections.singletonList("COMPANY " + companySpec.getCompanyNumber() + " LIMITED")
         );
         disqualifications.setDisqCourtName(DISQUALIFICATION_COURT_NAME);
         disqualifications.setDisqDisqualificationType(spec.getDisqualificationType());
@@ -140,8 +142,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         setTimestamps(disqualifications);
 
         var savedDisqualifications = repository.save(disqualifications);
-        LOG.info("Successfully created and saved Disqualifications for company: "
-                + disqualifications.getCompanyNumber());
+        LOG.info("Successfully created and saved Disqualifications for company: " + companySpec.getCompanyNumber());
         return savedDisqualifications;
     }
 
@@ -164,16 +165,18 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
 
     private void setTimestamps(Disqualifications disqualifications) {
         var now = LocalDateTime.now();
-
         disqualifications.setCreatedAt(now.toInstant(ZoneOffset.UTC));
         disqualifications.setUpdatedAt(now.toInstant(ZoneOffset.UTC));
-
         disqualifications.setDeltaAt(String.valueOf(System.currentTimeMillis()));
-
         LOG.debug("Set timestamps for disqualification record");
     }
 
     private String generateId() {
         return randomService.getString(24);
+    }
+
+    public List<Disqualifications> getDisqualifications(String companyNumber) {
+        return repository.findByCompanyNumber(companyNumber)
+                .orElse(Collections.emptyList());
     }
 }

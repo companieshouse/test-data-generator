@@ -35,8 +35,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsData;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -287,51 +285,5 @@ public class TestDataController {
         }
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
-    }
-
-    @PostMapping("/disqualified-officers")
-    public ResponseEntity<DisqualificationsData> createDisqualification(
-            @Valid @RequestBody DisqualificationsSpec request) throws DataException {
-
-        var createdDisqualification = testDataService.createDisqualificationsData(request);
-
-        String officerTypePath;
-        if (request.isCorporateOfficer()) {
-            officerTypePath = "corporate";
-        } else {
-            officerTypePath = "natural";
-        }
-        var disqualificationsUri = String.format("/disqualified-officers/%s/%s",
-                officerTypePath,
-                createdDisqualification.getId()
-        );
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("company_number", request.getCompanyNumber());
-        data.put("disqualification_id", createdDisqualification.getId());
-        data.put("officer_type", officerTypePath);
-
-        var response = new DisqualificationsData(createdDisqualification.getId(),
-                createdDisqualification.getDateOfBirth(), disqualificationsUri);
-        LOG.info("New disqualification created for " + officerTypePath + "officer " + data);
-
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/disqualified-officers/{id}")
-    public ResponseEntity<Map<String, Object>> deleteDisqualification(
-            @PathVariable("id") String id) throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("disqualification_id", id);
-        boolean deleteDisqualification = testDataService.deleteDisqualificationsData(id);
-
-        if (deleteDisqualification) {
-            LOG.info("Disqualification deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Disqualification not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
     }
 }

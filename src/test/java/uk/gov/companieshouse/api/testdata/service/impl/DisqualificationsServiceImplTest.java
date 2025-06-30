@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -30,10 +33,8 @@ class DisqualificationsServiceImplTest {
 
     @Mock
     private DisqualificationsRepository repository;
-
     @Mock
     private RandomService randomService;
-
     @Mock
     private AddressService addressService;
 
@@ -42,9 +43,11 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationSuccess() throws DataException {
-        DisqualificationsSpec spec = new DisqualificationsSpec();
+        CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setIsCorporateOfficer(false);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setIsCorporateOfficer(false);
+        spec.setDisqualifiedOfficers(List.of(disqSpec));
 
         Disqualifications savedEntity = new Disqualifications();
         savedEntity.setId(ID);
@@ -64,10 +67,39 @@ class DisqualificationsServiceImplTest {
     }
 
     @Test
-    void createDisqualificationCorporateOfficer() throws DataException {
-        DisqualificationsSpec spec = new DisqualificationsSpec();
+    void createMultipleDisqualifications() throws DataException {
+        CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setIsCorporateOfficer(true);
+        DisqualificationsSpec disqSpec1 = new DisqualificationsSpec();
+        disqSpec1.setIsCorporateOfficer(false);
+        DisqualificationsSpec disqSpec2 = new DisqualificationsSpec();
+        disqSpec2.setIsCorporateOfficer(true);
+        spec.setDisqualifiedOfficers(List.of(disqSpec1, disqSpec2));
+
+        Disqualifications savedEntity1 = new Disqualifications();
+        savedEntity1.setId("D1");
+        savedEntity1.setLinksSelf("/disqualified-officers/natural/D1");
+        Disqualifications savedEntity2 = new Disqualifications();
+        savedEntity2.setId("D2");
+        savedEntity2.setLinksSelf("/disqualified-officers/corporate/D2");
+
+        when(repository.save(any(Disqualifications.class)))
+                .thenReturn(savedEntity1)
+                .thenReturn(savedEntity2);
+
+        Disqualifications result = service.create(spec);
+
+        assertNotNull(result);
+        verify(repository, times(2)).save(any(Disqualifications.class));
+    }
+
+    @Test
+    void createDisqualificationCorporateOfficer() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setIsCorporateOfficer(true);
+        spec.setDisqualifiedOfficers(List.of(disqSpec));
 
         Disqualifications savedEntity = new Disqualifications();
         savedEntity.setId(ID);
@@ -84,6 +116,45 @@ class DisqualificationsServiceImplTest {
     @Test
     void createDisqualificationNullSpec() {
         assertThrows(IllegalArgumentException.class, () -> service.create(null));
+    }
+
+    @Test
+    void createDisqualificationNoSpecCreatesDefault() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        Disqualifications savedEntity = new Disqualifications();
+        savedEntity.setId(ID);
+
+        when(repository.save(any(Disqualifications.class))).thenReturn(savedEntity);
+
+        Disqualifications result = service.create(spec);
+
+        assertNotNull(result);
+        verify(repository).save(any(Disqualifications.class));
+    }
+
+    @Test
+    void getDisqualificationsSuccess() {
+        Disqualifications disq = new Disqualifications();
+        disq.setId(ID);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(List.of(disq)));
+
+        List<Disqualifications> result = service.getDisqualifications(COMPANY_NUMBER);
+
+        assertEquals(1, result.size());
+        assertEquals(ID, result.get(0).getId());
+    }
+
+    @Test
+    void getDisqualificationsEmpty() {
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.empty());
+
+        List<Disqualifications> result = service.getDisqualifications(COMPANY_NUMBER);
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -105,16 +176,6 @@ class DisqualificationsServiceImplTest {
         boolean result = service.delete(ID);
 
         assertFalse(result);
-        verify(repository, never()).deleteById(ID);
-    }
-
-    @Test
-    void deleteDisqualificationException() {
-        Disqualifications disq = new Disqualifications();
-        disq.setId(ID);
-        when(repository.findById(ID)).thenReturn(Optional.of(disq));
-        doThrow(new RuntimeException("DB error")).when(repository).delete(disq);
-
-        assertThrows(RuntimeException.class, () -> service.delete(ID));
+        verify(repository, never()).delete(any());
     }
 }
