@@ -18,7 +18,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -29,7 +28,8 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class DisqualificationsServiceImpl implements DataService<Disqualifications, CompanySpec> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
+    private static final Logger LOG
+            = LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
     private static final String DEFAULT_NAME = "FIRSTNAME SURNAME";
     private static final String URL_DISQUALIFIED_OFFICERS_PREFIX = "/disqualified-officers/";
     private static final String URL_CORPORATE_SUFFIX = "corporate/";
@@ -65,15 +65,15 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         List<DisqualificationsSpec> disqualificationsSpecs = spec.getDisqualifiedOfficers();
         List<Disqualifications> savedDisqualifications = new ArrayList<>();
 
-        LOG.info("Starting creation of Disqualifications for company number: " + spec.getCompanyNumber());
+        LOG.info("Starting creation of Disqualifications for company number: "
+                + spec.getCompanyNumber());
 
         if (disqualificationsSpecs != null && !disqualificationsSpecs.isEmpty()) {
             for (DisqualificationsSpec disqSpec : disqualificationsSpecs) {
                 savedDisqualifications.add(createDisqualificationFromSpec(spec, disqSpec));
             }
         } else {
-            // Create default disqualification if none specified
-            DisqualificationsSpec defaultSpec = new DisqualificationsSpec();
+            var defaultSpec = new DisqualificationsSpec();
             defaultSpec.setDisqualificationType("default-type");
             defaultSpec.setIsCorporateOfficer(false);
             savedDisqualifications.add(createDisqualificationFromSpec(spec, defaultSpec));
@@ -82,7 +82,8 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         return savedDisqualifications.get(savedDisqualifications.size() - 1);
     }
 
-    private Disqualifications createDisqualificationFromSpec(CompanySpec companySpec, DisqualificationsSpec spec) {
+    private Disqualifications createDisqualificationFromSpec(
+            CompanySpec companySpec, DisqualificationsSpec spec) {
         var disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
         disqualifications.setCompanyNumber(companySpec.getCompanyNumber());
@@ -100,14 +101,20 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
-        String officerSuffix = spec.isCorporateOfficer() ? URL_CORPORATE_SUFFIX : URL_NATURAL_SUFFIX;
+        String officerSuffix;
+        if (spec.isCorporateOfficer()) {
+            officerSuffix = URL_CORPORATE_SUFFIX;
+        } else {
+            officerSuffix = URL_NATURAL_SUFFIX;
+        }
         disqualifications.setLinksSelf(
                 URL_DISQUALIFIED_OFFICERS_PREFIX + officerSuffix + disqualifications.getId()
         );
 
         disqualifications.setAddress(addressService.getAddress(companySpec.getJurisdiction()));
 
-        disqualifications.setDisqCaseIdentifier(DEFAULT_CASE_IDENTIFIER_PREFIX + randomService.getString(4));
+        disqualifications.setDisqCaseIdentifier(DEFAULT_CASE_IDENTIFIER_PREFIX
+                + randomService.getString(4));
         disqualifications.setDisqCompanyNames(
                 Collections.singletonList("COMPANY " + companySpec.getCompanyNumber() + " LIMITED")
         );
@@ -142,7 +149,8 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         setTimestamps(disqualifications);
 
         var savedDisqualifications = repository.save(disqualifications);
-        LOG.info("Successfully created and saved Disqualifications for company: " + companySpec.getCompanyNumber());
+        LOG.info("Successfully created and saved Disqualifications for company: "
+                + companySpec.getCompanyNumber());
         return savedDisqualifications;
     }
 

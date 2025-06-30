@@ -180,7 +180,8 @@ public class TestDataServiceImpl implements TestDataService {
                 this.companyRegistersService.create(spec);
                 LOG.info("Successfully created company registers");
             }
-            if (spec.getDisqualifiedOfficers() != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+            if (spec.getDisqualifiedOfficers()
+                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
                 disqualificationsService.create(spec);
                 LOG.info("Successfully created disqualifications");
             }
@@ -516,7 +517,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(
+            final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certificates");
         }
