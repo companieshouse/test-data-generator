@@ -160,10 +160,10 @@ class DisqualificationsServiceImplTest {
     @Test
     void deleteDisqualificationSuccess() {
         Disqualifications disq = new Disqualifications();
-        disq.setId(ID);
-        when(repository.findById(ID)).thenReturn(Optional.of(disq));
+        disq.setId(COMPANY_NUMBER);
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(List.of(disq)));
 
-        boolean result = service.delete(ID);
+        boolean result = service.delete(COMPANY_NUMBER);
 
         assertTrue(result);
         verify(repository).delete(disq);
@@ -171,9 +171,9 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void deleteDisqualificationNotFound() {
-        when(repository.findById(ID)).thenReturn(Optional.empty());
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
-        boolean result = service.delete(ID);
+        boolean result = service.delete(COMPANY_NUMBER);
 
         assertFalse(result);
         verify(repository, never()).delete(any());

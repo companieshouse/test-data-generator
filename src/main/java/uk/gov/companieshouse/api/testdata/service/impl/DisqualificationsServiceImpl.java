@@ -101,7 +101,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
-        String officerSuffix = spec.getCorporateOfficer()
+        String officerSuffix = Boolean.TRUE.equals(spec.getCorporateOfficer())
                 ? URL_CORPORATE_SUFFIX
                 : URL_NATURAL_SUFFIX;
 
@@ -153,18 +153,25 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     }
 
     @Override
-    public boolean delete(String id) {
-        LOG.info("Attempting to delete Disqualifications with ID: " + id);
+    public boolean delete(String companyNumber) {
+        LOG.info("Attempting to delete Disqualifications with ID: " + companyNumber);
 
-        Optional<Disqualifications> existingDisqualifications = repository.findById(id);
+        Optional<List<Disqualifications>> existingDisqualifications
+                = repository.findByCompanyNumber(companyNumber);
 
-        if (existingDisqualifications.isPresent()) {
-            LOG.info("Disqualifications found with ID: " + id + ". Proceeding with deletion.");
-            repository.delete(existingDisqualifications.get());
-            LOG.info("Successfully deleted Disqualifications with ID: " + id);
+        if (existingDisqualifications.isPresent() && !existingDisqualifications.get().isEmpty()) {
+            LOG.info("Found : " + existingDisqualifications.get().size()
+                    + " disqualifications for company: "
+                    + companyNumber + ". proceeding with deletion.");
+
+            for (Disqualifications disqualifications : existingDisqualifications.get()) {
+                repository.delete(disqualifications);
+            }
+            ;
+            LOG.info("Successfully deleted Disqualifications for company: " + companyNumber);
             return true;
         } else {
-            LOG.info("No Disqualifications found with ID: " + id);
+            LOG.info("No Disqualifications found with ID: " + companyNumber);
             return false;
         }
     }
