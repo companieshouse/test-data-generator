@@ -167,7 +167,6 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
             for (Disqualifications disqualifications : existingDisqualifications.get()) {
                 repository.delete(disqualifications);
             }
-            ;
             LOG.info("Successfully deleted Disqualifications for company: " + companyNumber);
             return true;
         } else {
