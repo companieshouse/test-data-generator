@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -176,6 +177,25 @@ class DisqualificationsServiceImplTest {
         boolean result = service.delete(COMPANY_NUMBER);
 
         assertFalse(result);
+        verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void deleteDisqualificationReturnsFalseWhenNoneExist() {
+        // Case 1: Optional is empty
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        boolean resultEmpty = service.delete(COMPANY_NUMBER);
+
+        assertFalse(resultEmpty);
+        verify(repository, never()).delete(any());
+
+        // Case 2: Optional contains empty list
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(Collections.emptyList()));
+
+        boolean resultEmptyList = service.delete(COMPANY_NUMBER);
+
+        assertFalse(resultEmptyList);
         verify(repository, never()).delete(any());
     }
 }
