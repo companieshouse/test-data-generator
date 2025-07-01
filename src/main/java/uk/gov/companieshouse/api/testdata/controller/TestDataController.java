@@ -283,4 +283,10 @@ public class TestDataController {
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
+
+    @GetMapping("/health-check")
+    public ResponseEntity<String> healthCheck() {
+        LOG.info("Health check passed");
+        return new ResponseEntity<>("test-data-generator is alive", HttpStatus.OK);
+    }
 }
