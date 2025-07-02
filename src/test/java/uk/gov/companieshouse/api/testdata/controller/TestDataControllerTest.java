@@ -792,4 +792,11 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
     }
+
+    @Test
+    void testHealthCheck() {
+        var response = testDataController.healthCheck();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("test-data-generator is alive",response.getBody());
+    }
 }
