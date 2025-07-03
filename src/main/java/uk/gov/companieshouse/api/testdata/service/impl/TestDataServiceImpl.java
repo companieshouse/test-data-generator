@@ -40,6 +40,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
@@ -562,10 +563,10 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
+    public AccountPenaltiesData getAccountPenaltiesData(String id)
             throws NoDataFoundException {
         try {
-            return accountPenaltiesService.getAccountPenalties(companyCode, customerCode);
+            return accountPenaltiesService.getAccountPenalties(id);
         } catch (NoDataFoundException ex) {
             throw new NoDataFoundException("Error retrieving account penalties - not found");
         }
@@ -585,14 +586,27 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public ResponseEntity<Void> deleteAccountPenaltiesData(String companyCode, String customerCode)
+    public ResponseEntity<Void> deleteAccountPenaltiesData(String id)
             throws NoDataFoundException, DataException {
         try {
-            return accountPenaltiesService.deleteAccountPenalties(companyCode, customerCode);
+            return accountPenaltiesService.deleteAccountPenalties(id);
         } catch (NoDataFoundException ex) {
             throw new NoDataFoundException("Error deleting account penalties - not found");
         } catch (Exception ex) {
             throw new DataException("Error deleting account penalties", ex);
+        }
+    }
+
+    @Override
+    public AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException {
+        try {
+            LOG.info("Creating account penalties for company code: " + penaltySpec.getCompanyCode()
+                    + " and customer code: " + penaltySpec.getCustomerCode());
+            return accountPenaltiesService.createAccountPenalties(penaltySpec);
+        } catch (Exception ex) {
+            LOG.error("Failed to create account penalties for company code: " + penaltySpec.getCompanyCode()
+                    + " and customer code: " + penaltySpec.getCustomerCode(), ex);
+            throw new DataException("Error creating account penalties", ex);
         }
     }
 

@@ -99,6 +99,7 @@ class TestDataServiceImplTest {
     private static final String NI_COMPANY_PREFIX = "NI";
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "12345678";
+    private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final String PENALTY_REF = "A1234567";
     private static final String API_URL = "http://localhost:4001";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
@@ -1575,19 +1576,19 @@ class TestDataServiceImplTest {
 
     @Test
     void getAccountPenaltiesData() throws Exception {
-        testDataService.getAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE);
-        verify(accountPenaltiesService).getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+        testDataService.getAccountPenaltiesData(PENALTY_ID);
+        verify(accountPenaltiesService).getAccountPenalties(PENALTY_ID);
     }
 
     @Test
     void getAccountPenaltiesDataNotFoundException() throws NoDataFoundException {
         NoDataFoundException ex = new NoDataFoundException(
                 "Error retrieving account penalties - not found");
-        when(accountPenaltiesService.getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+        when(accountPenaltiesService.getAccountPenalties(PENALTY_ID))
                 .thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.getAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+                testDataService.getAccountPenaltiesData(PENALTY_ID));
         assertEquals(ex.getMessage(), thrown.getMessage());
     }
 
@@ -1651,31 +1652,65 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteAccountPenaltiesData() throws Exception {
-        testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE);
-        verify(accountPenaltiesService).deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+        testDataService.deleteAccountPenaltiesData(PENALTY_ID);
+        verify(accountPenaltiesService).deleteAccountPenalties(PENALTY_ID);
     }
 
     @Test
     void deleteAccountPenaltiesDataNotFoundException() throws NoDataFoundException {
         NoDataFoundException ex = new NoDataFoundException(
                 "Error deleting account penalties - not found");
-        when(accountPenaltiesService.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
                 .thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+                testDataService.deleteAccountPenaltiesData(PENALTY_ID));
         assertEquals(ex.getMessage(), thrown.getMessage());
     }
 
     @Test
     void deleteAccountPenaltiesDataException() throws NoDataFoundException {
         DataException ex = new DataException("Error deleting account penalties");
-        when(accountPenaltiesService.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
                 .thenThrow(ConstraintViolationException.class);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+                testDataService.deleteAccountPenaltiesData(PENALTY_ID));
         assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void createPenaltyDataSuccess() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("NI23456");
+
+        AccountPenaltiesData expectedData = new AccountPenaltiesData();
+        expectedData.setCompanyCode("LP");
+        expectedData.setCustomerCode("NI23456");
+
+        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenReturn(expectedData);
+
+        AccountPenaltiesData result = testDataService.createPenaltyData(penaltySpec);
+
+        assertEquals(expectedData, result);
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+    }
+
+    @Test
+    void createPenaltyDataThrowsException() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("NI23456");
+
+        DataException ex = new DataException("creation failed");
+        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.createPenaltyData(penaltySpec));
+        assertEquals("Error creating account penalties", thrown.getMessage());
+        assertEquals(ex, thrown.getCause());
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
     }
 
     @Test

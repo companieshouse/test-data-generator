@@ -3,20 +3,7 @@ package uk.gov.companieshouse.api.testdata.service;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 
 public interface TestDataService {
@@ -132,12 +119,11 @@ public interface TestDataService {
     /**
      * Gets the account penalties data for a given company code and customer code.
      *
-     * @param companyCode  the company code
-     * @param customerCode the customer code
+     * @param id  the company code
      * @return @return the {@link AccountPenaltiesData}
      * @throws NoDataFoundException if the penalty cannot be found
      */
-    AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
+    AccountPenaltiesData getAccountPenaltiesData(String id)
             throws NoDataFoundException;
 
     /**
@@ -156,14 +142,15 @@ public interface TestDataService {
     /**.
      * Deletes all account penalties data for a given company code and customer code
      *
-     * @param companyCode  the company code
-     * @param customerCode the customer code
+     * @param id  the penalty id
      * @return the {@link ResponseEntity} with the HTTP status
      * @throws NoDataFoundException if the account penalties cannot be found
      * @throws DataException        if the account penalties failed to be deleted
      */
-    ResponseEntity<Void> deleteAccountPenaltiesData(String companyCode, String customerCode)
+    ResponseEntity<Void> deleteAccountPenaltiesData(String id)
             throws NoDataFoundException, DataException;
+
+    AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException;
 
     /**
      * Retrieves postcodes for a given country.
