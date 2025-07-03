@@ -5,6 +5,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 
 public interface AccountPenaltiesService {
@@ -25,12 +26,11 @@ public interface AccountPenaltiesService {
     /**
      * Gets an account penalties entity by its company code and customer code.
      *
-     * @param companyCode  the company code
-     * @param customerCode the customer code
+     * @param id  the company code
      * @return the {@link AccountPenaltiesData} with all penalties the {@link PenaltyData} list
      * @throws NoDataFoundException if the account penalties cannot be found
      */
-    AccountPenaltiesData getAccountPenalties(String companyCode, String customerCode)
+    AccountPenaltiesData getAccountPenalties(String id)
             throws NoDataFoundException;
 
     /**
@@ -49,11 +49,12 @@ public interface AccountPenaltiesService {
     /**
      * Deletes an account penalties entity by its company code and customer code
      *
-     * @param companyCode  the company code
-     * @param customerCode the customer code
+     * @param id the penalty Id
      * @return the {@link ResponseEntity} with the HTTP status
      * @throws NoDataFoundException if the account penalties cannot be found
      */
-    ResponseEntity<Void> deleteAccountPenalties(String companyCode, String customerCode)
+    ResponseEntity<Void> deleteAccountPenalties(String id)
             throws NoDataFoundException;
+
+    AccountPenaltiesData createAccountPenalties(PenaltySpec penaltySpec) throws DataException;
 }
