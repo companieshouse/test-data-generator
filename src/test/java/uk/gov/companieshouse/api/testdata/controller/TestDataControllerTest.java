@@ -670,46 +670,34 @@ class TestDataControllerTest {
         assertEquals(exception, thrown);
     }
 
-
     @Test
     void deleteAccountPenaltiesSuccess() throws Exception {
-        DeletePenaltyRequest request = new DeletePenaltyRequest();
-        request.setId(PENALTY_ID);
-
-        when(this.testDataService.deleteAccountPenaltiesData(
-                request.getId()))
+        when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID))
                 .thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(request);
+        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService, times(1)).deleteAccountPenaltiesData(
-                request.getId());
+        verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
     }
 
     @Test
     void deleteAccountPenaltiesNotFound() throws Exception {
-        DeletePenaltyRequest request = new DeletePenaltyRequest();
-        request.setId(PENALTY_ID);
-
         NoDataFoundException exception = new NoDataFoundException("penalty not found");
-        when(this.testDataController.deleteAccountPenalties(request)).thenThrow(exception);
+        when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.deleteAccountPenalties(request));
+                this.testDataController.deleteAccountPenalties(PENALTY_ID));
         assertEquals(exception, thrown);
     }
 
     @Test
     void deleteAccountPenaltiesOtherError() throws Exception {
-        DeletePenaltyRequest request = new DeletePenaltyRequest();
-        request.setId(PENALTY_ID);
-
         DataException exception = new DataException("error during deletion");
-        when(this.testDataController.deleteAccountPenalties(request)).thenThrow(exception);
+        when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.deleteAccountPenalties(request));
+                this.testDataController.deleteAccountPenalties(PENALTY_ID));
         assertEquals(exception, thrown);
     }
 

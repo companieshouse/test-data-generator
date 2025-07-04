@@ -35,7 +35,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DeletePenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
@@ -275,12 +277,12 @@ public class TestDataController {
 
     }
 
-    @DeleteMapping("/penalties")
+    @DeleteMapping("/penalties/{id}")
     public ResponseEntity<Void> deleteAccountPenalties(
-            @Valid @RequestBody DeletePenaltyRequest request)
+            @PathVariable("id") String id)
             throws DataException, NoDataFoundException {
 
-         return testDataService.deleteAccountPenaltiesData(request.getId());
+        return testDataService.deleteAccountPenaltiesData(id);
     }
 
     @GetMapping("/postcodes")

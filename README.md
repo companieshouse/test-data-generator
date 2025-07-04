@@ -212,10 +212,7 @@ In order to use the generator, there are different possible endpoints that can b
 
   A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
 
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties` will delete the `Account Penalties`. `id`  is required.
-  - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory.
-  
-  - A usage example looks like this: `{"id": "6866ede288dccd2eb534b5bf"}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties/{id}` will delete the `Account Penalties`. `id`  is required.
 
 #### Retrieving Postcode
 - GET: Sending a GET request to retrieve the Postcode `{Base URL}/test-data/postcode/{countrycode}`.
