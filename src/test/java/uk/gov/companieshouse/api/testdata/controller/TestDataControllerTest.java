@@ -811,4 +811,11 @@ class TestDataControllerTest {
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
+
+    @Test
+    void testHealthCheck() {
+        var response = testDataController.healthCheck();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("test-data-generator is alive",response.getBody());
+    }
 }
