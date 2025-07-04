@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +37,19 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
+
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -49,6 +61,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
@@ -59,6 +72,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
@@ -140,6 +154,8 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+    @Mock
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -302,6 +318,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
+        verify(disqualificationsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -1774,4 +1791,23 @@ class TestDataServiceImplTest {
         verify(postcodeService, times(1)).get(country);
     }
 
+    @Test
+    void createCompanyDataWithDisqualifications() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setCorporateOfficer(false);
+        spec.setDisqualifiedOfficers(List.of(disqSpec));
+
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        Disqualifications disqEntity = new Disqualifications();
+        disqEntity.setId("D123");
+        when(disqualificationsService.create(spec)).thenReturn(disqEntity);
+
+        CompanyData result = testDataService.createCompanyData(spec);
+
+        assertNotNull(result);
+        verify(disqualificationsService).create(spec);
+    }
 }

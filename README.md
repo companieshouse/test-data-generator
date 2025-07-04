@@ -51,6 +51,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
   - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1. Has a maximum allowed value of 20.
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
+  - `disqualified_officers`: This takes a list to create a company with disqualified officers. Defaults a company without a disqualified offiecrs list.
   - `accounts_due_status`: Set the accounts and confirmation statement due dates of the company by providing accounts_due_status (e.g., `overdue`, `due-soon`). Defaults to current date. 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
   - `company_name`: The name of the company. Defaults to a randomly generated name. Creates a company with the name provided and appended with company number.
@@ -93,6 +94,7 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
   - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
   - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
+  - A usage example for creating a company with disqualified officers: `{ "disqualified_officers": [ { "disqualification_type": "court-order", "is_corporate_officer": false }]}`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
