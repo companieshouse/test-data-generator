@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
  * Body for a delete penalty request
  *
  */
-public class DeletePenaltyRequest {
+public class GetPenaltyRequest {
 
     @JsonProperty("id")
     @NotNull(message="id required")
