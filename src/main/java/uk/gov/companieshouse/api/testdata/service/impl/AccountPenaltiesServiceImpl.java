@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,8 +232,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private String generateTransactionReference() {
-        var random = new Random();
-        return "A" + String.format("%07d", random.nextInt(10000000));
+        SecureRandom secureRandom = new SecureRandom();
+        return "A" + String.format("%07d", secureRandom.nextInt(10000000));
     }
 
     private String getFormattedDate(int yearsAgo) {
@@ -243,13 +245,16 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
                 .format(DateTimeFormatter.ISO_DATE);
     }
 
+    private double roundToTwoDecimals(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
     private double calculatePenaltyAmount(double baseAmount, int penaltyIndex) {
         if (penaltyIndex == 0) {
             return baseAmount;
         }
-        var random = new Random();
-        double multiplier = 0.5 + 0.5 * random.nextInt(5);
-        return Math.round(baseAmount * multiplier * 100.0) / 100.0;
+        double multiplier = 0.5 + 0.5 * ThreadLocalRandom.current().nextInt(5);
+        return roundToTwoDecimals(baseAmount * multiplier);
     }
 
     private String getDefaultIfBlank(String value, String defaultValue) {
