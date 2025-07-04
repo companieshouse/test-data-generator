@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,8 +119,9 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return ResponseEntity.noContent().build();
     }
 
-    public AccountPenaltiesData createAccountPenalties(PenaltySpec penaltySpec) throws DataException {
-        AccountPenalties accountPenalties = new AccountPenalties();
+    public AccountPenaltiesData createAccountPenalties(
+            PenaltySpec penaltySpec) throws DataException {
+        var accountPenalties = new AccountPenalties();
         accountPenalties.setId(ObjectId.get());
         LOG.info("Creating account penalties with ID: " + accountPenalties.getId());
 
@@ -144,8 +146,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
         List<AccountPenalty> penalties = new ArrayList<>();
 
-        for (int i = 0; i < numberOfPenalties; i++) {
-            AccountPenalty penalty = new AccountPenalty();
+        for (var i = 0; i < numberOfPenalties; i++) {
+            var penalty = new AccountPenalty();
 
             // Set common penalty properties
             penalty.setCompanyCode(penaltySpec.getCompanyCode());
@@ -158,8 +160,10 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             penalty.setIsPaid(isPaid);
             penalty.setOutstandingAmount(isPaid ? 0.0 : penalty.getAmount());
             penalty.setTransactionType(getDefaultIfNull(penaltySpec.getTransactionType(), "1"));
-            penalty.setTransactionSubType(getDefaultIfBlank(penaltySpec.getTransactionSubType(), "NH"));
-            penalty.setTypeDescription(getDefaultIfBlank(penaltySpec.getTypeDescription(), "Penalty"));
+            penalty.setTransactionSubType(getDefaultIfBlank(
+                    penaltySpec.getTransactionSubType(), "NH"));
+            penalty.setTypeDescription(getDefaultIfBlank(
+                    penaltySpec.getTypeDescription(), "Penalty"));
             penalty.setDueDate(getFormattedDate(0, 6));
             penalty.setAccountStatus(getDefaultIfBlank(penaltySpec.getAccountStatus(), "CHS"));
             penalty.setDunningStatus(getDefaultIfBlank(penaltySpec.getDunningStatus(), "PEN3"));
@@ -226,7 +230,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private String generateTransactionReference() {
-        return "A" + String.format("%07d", (int) (Math.random() * 10000000));
+        var random = new Random();
+        return "A" + String.format("%07d", random.nextInt(10000000));
     }
 
     private String getFormattedDate(int yearsAgo) {
@@ -234,14 +239,16 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private String getFormattedDate(int years, int months) {
-        return LocalDate.now().minusYears(years).minusMonths(months).format(DateTimeFormatter.ISO_DATE);
+        return LocalDate.now().minusYears(years).minusMonths(months)
+                .format(DateTimeFormatter.ISO_DATE);
     }
 
     private double calculatePenaltyAmount(double baseAmount, int penaltyIndex) {
         if (penaltyIndex == 0) {
             return baseAmount;
         }
-        double multiplier = 0.5 + 0.5 * (int)(Math.random() * 5);
+        var random = new Random();
+        double multiplier = 0.5 + 0.5 * random.nextInt(5);
         return Math.round(baseAmount * multiplier * 100.0) / 100.0;
     }
 

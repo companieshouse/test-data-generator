@@ -503,7 +503,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(
+            final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certificates");
         }
@@ -588,7 +589,8 @@ public class TestDataServiceImpl implements TestDataService {
                     + " and customer code: " + penaltySpec.getCustomerCode());
             return accountPenaltiesService.createAccountPenalties(penaltySpec);
         } catch (Exception ex) {
-            LOG.error("Failed to create account penalties for company code: " + penaltySpec.getCompanyCode()
+            LOG.error("Failed to create account penalties for company code: "
+                    + penaltySpec.getCompanyCode()
                     + " and customer code: " + penaltySpec.getCustomerCode(), ex);
             throw new DataException("Error creating account penalties", ex);
         }

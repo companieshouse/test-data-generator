@@ -31,10 +31,10 @@ public class PenaltySpec {
     private String ledgerCode;
 
     @JsonProperty("dunning_status")
-    private String DunningStatus;
+    private String dunningStatus;
 
     @JsonProperty("closed_at")
-    private Instant ClosedAt;
+    private Instant closedAt;
 
     @JsonProperty("amount")
     @NotNull(message = "Amount must not be blank")
@@ -45,13 +45,13 @@ public class PenaltySpec {
     private Boolean isPaid;
 
     @JsonProperty("transaction_type")
-    private String TransactionType;
+    private String transactionType;
 
     @JsonProperty("transaction_sub_type")
-    private String TransactionSubType;
+    private String transactionSubType;
 
     @JsonProperty("account_status")
-    private String AccountStatus;
+    private String accountStatus;
 
     public Integer getNumberOfPenalties() {
         return numberOfPenalties;
@@ -94,11 +94,11 @@ public class PenaltySpec {
     }
 
     public String getDunningStatus() {
-        return DunningStatus;
+        return dunningStatus;
     }
 
     public void setDunningStatus(String dunningStatus) {
-        DunningStatus = dunningStatus;
+        this.dunningStatus = dunningStatus;
     }
 
     public Instant getClosedAt() {
@@ -130,11 +130,11 @@ public class PenaltySpec {
     }
 
     public String getAccountStatus() {
-        return AccountStatus;
+        return accountStatus;
     }
 
     public void setAccountStatus(String accountStatus) {
-        AccountStatus = accountStatus;
+        this.accountStatus = accountStatus;
     }
 
 }

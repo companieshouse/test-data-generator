@@ -17,7 +17,7 @@ public interface AccountPenaltiesService {
      * @param customerCode the customer code
      * @param penaltyRef   the penalty reference
      * @return the {@link AccountPenaltiesData} with only the penalty reference that has been
-     * requested in the {@link PenaltyData} list
+     requested in the {@link PenaltyData} list
      * @throws NoDataFoundException if the account penalty cannot be found
      */
     AccountPenaltiesData getAccountPenalty(String companyCode, String customerCode,
@@ -36,8 +36,8 @@ public interface AccountPenaltiesService {
     /**
      * Updates an account penalties entity for the requested penalty reference.
      *
-     * @param penaltyRef the penalty reference
-     * @param request    the update request
+     * @param penaltyRef the penalty reference.
+     * @param request    the update request.
      * @return the {@link AccountPenaltiesData} with the updated penalty in the {@link PenaltyData}
      * list
      * @throws NoDataFoundException if the account penalty cannot be found
@@ -46,7 +46,7 @@ public interface AccountPenaltiesService {
     AccountPenaltiesData updateAccountPenalties(String penaltyRef,
             UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
 
-    /**
+    /** .
      * Deletes an account penalties entity by its company code and customer code
      *
      * @param id the penalty Id
