@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -232,7 +230,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private String generateTransactionReference() {
-        SecureRandom secureRandom = new SecureRandom();
+        var secureRandom = new SecureRandom();
         return "A" + String.format("%07d", secureRandom.nextInt(10000000));
     }
 
@@ -249,12 +247,26 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return Math.round(value * 100.0) / 100.0;
     }
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     private double calculatePenaltyAmount(double baseAmount, int penaltyIndex) {
-        if (penaltyIndex == 0) {
+        if (isFirstPenalty(penaltyIndex)) {
             return baseAmount;
         }
-        double multiplier = 0.5 + 0.5 * ThreadLocalRandom.current().nextInt(5);
-        return roundToTwoDecimals(baseAmount * multiplier);
+        return calculateMultipliedAmount(baseAmount);
+    }
+
+    private boolean isFirstPenalty(int penaltyIndex) {
+        return penaltyIndex == 0;
+    }
+
+    private double calculateMultipliedAmount(double baseAmount) {
+        double secureMultiplier = generateSecureMultiplier();
+        return roundToTwoDecimals(baseAmount * secureMultiplier);
+    }
+
+    private double generateSecureMultiplier() {
+        return 0.5 + 0.5 * SECURE_RANDOM.nextInt(5);
     }
 
     private String getDefaultIfBlank(String value, String defaultValue) {
