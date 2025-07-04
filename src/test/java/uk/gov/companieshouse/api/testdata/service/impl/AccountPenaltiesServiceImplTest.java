@@ -2,7 +2,10 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -29,6 +32,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
 
@@ -45,6 +49,7 @@ class AccountPenaltiesServiceImplTest {
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "12345678";
     private static final String PENALTY_REF = "A1234567";
+    private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final Instant NOW = Instant.now();
 
     @Test
@@ -82,50 +87,46 @@ class AccountPenaltiesServiceImplTest {
     void testGetAccountPenaltiesSuccess() throws NoDataFoundException {
         AccountPenalties accountPenalties = createAccountPenalties();
 
-        when(repository.findAllByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE))
+        when(repository.findAllById(PENALTY_ID))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+        AccountPenaltiesData result = service.getAccountPenalties(PENALTY_ID);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
         assertFalse(accountPenalties.getPenalties().isEmpty());
         verify(repository, times(1))
-                .findAllByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE);
+                .findAllById(PENALTY_ID);
     }
 
     @Test
     void testGetAccountPenaltiesNotFound() {
-        when(repository.findAllByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE))
+        when(repository.findAllById(PENALTY_ID))
                 .thenReturn(Optional.empty());
 
         NoDataFoundException exception =
                 assertThrows(NoDataFoundException.class,
-                        () -> service.getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE));
+                        () -> service.getAccountPenalties(PENALTY_ID));
         assertEquals("no account penalties", exception.getMessage());
     }
 
     @Test
     void testDeleteAccountPenaltiesSuccess() throws NoDataFoundException {
-        when(repository.findAllByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE))
-                .thenReturn(Optional.of(ACCOUNT_PENALTIES));
-        when(repository.deleteByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE))
-                .thenReturn(Optional.of(ACCOUNT_PENALTIES));
+        when(repository.findAllById(PENALTY_ID)).thenReturn(Optional.of(ACCOUNT_PENALTIES));
 
-        service.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+        service.deleteAccountPenalties(PENALTY_ID);
 
-        verify(repository, times(1))
-                .deleteByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE);
+        verify(repository, times(1)).deleteById(PENALTY_ID);
     }
 
     @Test
     void testDeleteAccountPenaltiesNotFound() {
-        when(repository.findAllByCompanyCodeAndCustomerCode(COMPANY_CODE, CUSTOMER_CODE))
+        when(repository.findAllById(PENALTY_ID))
                 .thenReturn(Optional.empty());
 
         NoDataFoundException exception =
                 assertThrows(NoDataFoundException.class,
-                        () -> service.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE));
+                        () -> service.deleteAccountPenalties(PENALTY_ID));
 
         assertEquals("no account penalties", exception.getMessage());
     }
@@ -211,6 +212,40 @@ class AccountPenaltiesServiceImplTest {
                 .save(accountPenalties);
 
         assertEquals("failed to update the account penalties", exception.getMessage());
+    }
+
+    @Test
+    void createAccountPenalties_success() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("NI23456");
+        penaltySpec.setNumberOfPenalties(2);
+        penaltySpec.setAmount(100.0);
+        penaltySpec.setIsPaid(false);
+
+        AccountPenalties savedEntity = createAccountPenalties();
+
+        when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
+
+        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+
+        assertNotNull(result);
+        assertEquals(savedEntity.getCompanyCode(), result.getCompanyCode());
+        assertEquals(savedEntity.getCustomerCode(), result.getCustomerCode());
+        verify(repository, times(1)).save(any(AccountPenalties.class));
+    }
+
+    @Test
+    void createAccountPenalties_repositoryThrowsException() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("NI23456");
+
+        when(repository.save(any(AccountPenalties.class))).thenThrow(new RuntimeException("DB error"));
+
+        DataException ex = assertThrows(DataException.class, () -> service.createAccountPenalties(penaltySpec));
+        assertTrue(ex.getMessage().contains("Failed to create account penalties"));
+        verify(repository, times(1)).save(any(AccountPenalties.class));
     }
 
     private static AccountPenalties createAccountPenalties() {

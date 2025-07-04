@@ -6,6 +6,9 @@ import java.util.List;
 
 public class AccountPenaltiesData {
 
+    @JsonProperty("_id")
+    private String id;
+
     @JsonProperty("company_code")
     private String companyCode;
 
@@ -55,6 +58,14 @@ public class AccountPenaltiesData {
 
     public List<PenaltyData> getPenalties() {
         return penalties;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public void setPenalties(
