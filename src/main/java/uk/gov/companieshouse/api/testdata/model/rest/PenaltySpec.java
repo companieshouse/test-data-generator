@@ -102,7 +102,7 @@ public class PenaltySpec {
     }
 
     public Instant getClosedAt() {
-        return ClosedAt;
+        return closedAt;
     }
 
     public Double getAmount() {
@@ -122,11 +122,11 @@ public class PenaltySpec {
     }
 
     public String getTransactionType() {
-        return TransactionType;
+        return transactionType;
     }
 
     public String getTransactionSubType() {
-        return TransactionSubType;
+        return transactionSubType;
     }
 
     public String getAccountStatus() {
