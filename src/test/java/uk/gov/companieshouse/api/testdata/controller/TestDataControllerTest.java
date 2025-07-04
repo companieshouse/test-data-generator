@@ -583,7 +583,7 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenalties() throws Exception {
-        DeletePenaltyRequest request = new DeletePenaltyRequest();
+        GetPenaltyRequest request = new GetPenaltyRequest();
         request.setId(PENALTY_ID);
 
         AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
@@ -600,7 +600,7 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenaltiesNotFound() throws Exception {
-        DeletePenaltyRequest request = new DeletePenaltyRequest();
+        GetPenaltyRequest request = new GetPenaltyRequest();
         request.setId(PENALTY_ID);
 
         Throwable exception = new NoDataFoundException("Account penalties not found");

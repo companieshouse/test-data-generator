@@ -256,7 +256,7 @@ public class TestDataController {
 
     @GetMapping("/penalties")
     public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
-            @Valid @RequestBody DeletePenaltyRequest request) throws NoDataFoundException {
+            @Valid @RequestBody GetPenaltyRequest request) throws NoDataFoundException {
 
         var accountPenaltiesData = testDataService.getAccountPenaltiesData(request.getId());
 
