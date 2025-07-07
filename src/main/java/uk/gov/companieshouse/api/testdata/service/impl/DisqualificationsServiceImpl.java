@@ -177,8 +177,8 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
 
     private void setTimestamps(Disqualifications disqualifications) {
         var now = LocalDateTime.now();
-        disqualifications.setCreatedAt(now.toInstant(ZoneOffset.UTC));
-        disqualifications.setUpdatedAt(now.toInstant(ZoneOffset.UTC));
+        disqualifications.setCreatedAt(Instant.now());
+        disqualifications.setUpdatedAt(Instant.now());
         disqualifications.setDeltaAt(String.valueOf(System.currentTimeMillis()));
         LOG.debug("Set timestamps for disqualification record");
     }

@@ -1,8 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -20,7 +27,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;

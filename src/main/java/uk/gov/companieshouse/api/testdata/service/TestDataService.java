@@ -140,7 +140,7 @@ public interface TestDataService {
     AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
             throws NoDataFoundException;
 
-    /**.
+    /**
      * Updates the account penalties data for a given penalty reference and
      * {@link UpdateAccountPenaltiesRequest}
      *
