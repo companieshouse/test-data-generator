@@ -4,7 +4,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -176,7 +175,6 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     }
 
     private void setTimestamps(Disqualifications disqualifications) {
-        var now = LocalDateTime.now();
         disqualifications.setCreatedAt(Instant.now());
         disqualifications.setUpdatedAt(Instant.now());
         disqualifications.setDeltaAt(String.valueOf(System.currentTimeMillis()));
