@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
@@ -30,6 +31,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
@@ -120,6 +122,8 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanySearchService advancedCompanySearch;
     @Autowired
     private PostcodeService postcodeService;
+    @Autowired
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -175,6 +179,11 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
                 LOG.info("Successfully created company registers");
+            }
+            if (spec.getDisqualifiedOfficers()
+                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+                disqualificationsService.create(spec);
+                LOG.info("Successfully created disqualifications");
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
@@ -334,6 +343,12 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             this.companyRegistersService.delete(companyId);
             LOG.info("Deleted company registers for company number: " + companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
+        try {
+            this.disqualificationsService.delete(companyId);
+            LOG.info("Deleted disqualifications for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
@@ -502,7 +517,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(final CertificatesSpec spec) throws DataException {
+    public CertificatesData createCertificatesData(
+            final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certificates");
         }

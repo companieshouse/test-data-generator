@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +40,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -172,7 +174,7 @@ public class TestDataController {
 
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
-    String acspMemberId)
+                                                                String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("acsp-member-id", acspMemberId);
@@ -190,7 +192,7 @@ public class TestDataController {
 
     @DeleteMapping("/certificates/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertificates(@PathVariable("id")
-                                                                      String id)
+                                                                  String id)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
@@ -269,12 +271,13 @@ public class TestDataController {
             @Valid @RequestBody AccountPenaltyRequest request)
             throws DataException, NoDataFoundException {
 
-         return testDataService.deleteAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode());
+        return testDataService.deleteAccountPenaltiesData(request.getCompanyCode(),
+                request.getCustomerCode());
     }
 
     @GetMapping("/postcodes")
-    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country") String country) throws DataException {
+    public ResponseEntity<PostcodesData> getPostcode(
+            @RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {

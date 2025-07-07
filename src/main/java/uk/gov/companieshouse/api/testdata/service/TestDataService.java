@@ -18,6 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesReque
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+
 public interface TestDataService {
 
     /**
@@ -152,7 +153,7 @@ public interface TestDataService {
     AccountPenaltiesData updateAccountPenaltiesData(String penaltyRef,
             UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
 
-    /**
+    /**.
      * Deletes all account penalties data for a given company code and customer code
      *
      * @param companyCode  the company code

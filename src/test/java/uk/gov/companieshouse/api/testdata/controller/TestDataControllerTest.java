@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -40,6 +41,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
@@ -791,6 +793,23 @@ class TestDataControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
+    }
+
+    @Test
+    void createCompanyWithDisqualifications() throws Exception {
+        CompanySpec request = new CompanySpec();
+        request.setJurisdiction(Jurisdiction.SCOTLAND);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setCorporateOfficer(false);
+        request.setDisqualifiedOfficers(List.of(disqSpec));
+
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+
+        when(testDataService.createCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = testDataController.createCompany(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     @Test
