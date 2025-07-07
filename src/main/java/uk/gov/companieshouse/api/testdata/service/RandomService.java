@@ -68,4 +68,6 @@ public interface RandomService {
      * @return A random ObjectId.
      */
     ObjectId generateId();
+
+    String getTransactionId();
 }

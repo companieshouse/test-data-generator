@@ -39,8 +39,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
+
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -53,6 +57,9 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
+
+    @Autowired
+    private TransactionService transactionService;
 
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
@@ -282,5 +289,21 @@ public class TestDataController {
         }
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
+    }
+
+    @PostMapping("/transactions")
+    public ResponseEntity<TransactionsData> createTransaction(
+            @Valid @RequestBody(required = false) TransactionsSpec request) throws DataException {
+
+        Optional<TransactionsSpec> optionalRequest = Optional.ofNullable(request);
+        TransactionsSpec spec = optionalRequest.orElse(new TransactionsSpec());
+
+        TransactionsData createdTransaction = transactionService.create(spec);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("_id", createdTransaction.getId());
+        data.put("description", spec.getDescription());
+        LOG.info("Transaction created", data);
+        return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
 }

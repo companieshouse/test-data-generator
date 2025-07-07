@@ -302,7 +302,7 @@ class AcspProfileServiceImplTest {
         assertEquals("randomId", captured.getAcspNumber());
         assertEquals(acspProfileSpec.getStatus(), captured.getStatus());
         assertEquals(acspProfileSpec.getType(), captured.getType());
-        assertEquals(captured.getName());
+        assertEquals(acspProfileSpec.getName(),captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
         assertEquals(acspProfileSpec.getEmail(),captured.getEmail());
         assertEquals(acspProfileSpec.getBusinessSector(),captured.getBusinessSector());

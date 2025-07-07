@@ -44,6 +44,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -59,6 +61,7 @@ import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -87,6 +90,8 @@ public class TestDataServiceImpl implements TestDataService {
     private RandomService randomService;
     @Autowired
     private UserService userService;
+      @Autowired
+    private TransactionService transactionService;
     @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
@@ -443,6 +448,8 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             var acspProfileData = createAcspProfile(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
+            spec.setName(acspProfileData.getName());
+
 
             AcspMembersData createdMember = createAcspMember(spec);
 
@@ -631,6 +638,28 @@ public class TestDataServiceImpl implements TestDataService {
             this.acspProfileService.delete(acspNumber);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
+        }
+    }
+
+
+    public TransactionsData create(final TransactionsSpec spec) throws DataException {
+        if (spec.getId() == null) {
+            throw new DataException("ID is required to create a transaction");
+        }
+
+        try {
+            TransactionsData createdTxn = transactionService.create(spec);
+            return new TransactionsData(
+                    createdTxn.getId(),
+                    createdTxn.getUserId(),
+                    createdTxn.getForename(),
+                    createdTxn.getSurname(),
+                    createdTxn.getEmail(),
+                    createdTxn.getDescription(),
+                    createdTxn.getReference()
+            );
+        } catch (Exception ex) {
+            throw new DataException("Error creating transaction", ex);
         }
     }
 }

@@ -982,7 +982,7 @@ class TestDataServiceImplTest {
         profileSpec.setType("limited-company");
 
         AcspProfileData acspProfileData =
-                new AcspProfileData(profileSpec.getAcspNumber());
+                new AcspProfileData(profileSpec.getAcspNumber(),profileSpec.getName());
         AcspMembersData expectedMembersData =
                 new AcspMembersData(new ObjectId(),
                         profileSpec.getAcspNumber(), "userId", "active", "role");
@@ -1023,9 +1023,9 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         AcspMembersData acspMembersData =
-                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(), "userId",
+                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(),"userId",
                         "active", "role");
         var acspStatus = "active";
         var acspType = "ltd";
@@ -1064,7 +1064,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         AcspMembersData acspMembersData = new AcspMembersData(new ObjectId(),
                 "acspNumber", "userId", "active", "role");
         spec.setAcspProfile(null);
@@ -1107,7 +1107,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
