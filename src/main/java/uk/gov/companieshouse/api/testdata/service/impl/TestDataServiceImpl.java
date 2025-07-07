@@ -448,9 +448,6 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             var acspProfileData = createAcspProfile(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
-            spec.setName(acspProfileData.getName());
-
-
             AcspMembersData createdMember = createAcspMember(spec);
 
             return new AcspMembersData(
@@ -656,7 +653,9 @@ public class TestDataServiceImpl implements TestDataService {
                     createdTxn.getSurname(),
                     createdTxn.getEmail(),
                     createdTxn.getDescription(),
-                    createdTxn.getReference()
+                    createdTxn.getReference(),
+                    createdTxn.getResume_uri(),
+                    createdTxn.getStatus()
             );
         } catch (Exception ex) {
             throw new DataException("Error creating transaction", ex);

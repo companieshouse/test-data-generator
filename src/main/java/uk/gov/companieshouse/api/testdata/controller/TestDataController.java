@@ -302,7 +302,7 @@ public class TestDataController {
 
         Map<String, Object> data = new HashMap<>();
         data.put("_id", createdTransaction.getId());
-        data.put("description", spec.getDescription());
+        data.put("reference", spec.getReference());
         LOG.info("Transaction created", data);
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }

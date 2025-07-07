@@ -25,7 +25,13 @@ public class TransactionsData {
        @JsonProperty("reference")
     private final String reference;
 
-    public TransactionsData(String id, String email, String forename, String surname,String user_id, String description , String reference) {
+    @JsonProperty("resume_journey_uri")
+    private final String resume_uri;
+
+    @JsonProperty("status")
+    private final String status;
+
+    public TransactionsData(String id, String email,String forename, String surname,String user_id, String description , String reference, String resume_uri, String status) {
         this.id = id;
         this.email = email;
         this.forename = forename;
@@ -33,6 +39,8 @@ public class TransactionsData {
         this.user_id = user_id;
         this.description = description;
         this.reference = reference;
+        this.resume_uri=resume_uri;
+        this.status = status;
     }
 
    public String getId() {
@@ -64,5 +72,8 @@ public class TransactionsData {
         return reference;
     }
 
+    public String getResume_uri(){return resume_uri;}
+
+    public String getStatus(){return status;}
    
 }

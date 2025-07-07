@@ -32,6 +32,14 @@ public class Transactions {
     @Field("reference")
     private String reference;
 
+    @Field("resume_journey_uri")
+    private String resume_uri;
+
+    @Field("status")
+    private String status;
+
+
+
 
     public String getId() {
         return id;
@@ -62,6 +70,10 @@ public class Transactions {
         return reference;
     }
 
+    public String getResume_uri(){ return resume_uri;}
+
+    public String getStatus(){ return status;}
+
    
     public void setId(String id) {
         this.id = id;
@@ -91,5 +103,9 @@ public class Transactions {
  public void setReference(String reference) {
         this.reference = reference;
     }
+
+    public void setResume_uri(String resume_uri){this.resume_uri=resume_uri;}
+
+    public void setStatus(String status){this.status=status;}
     
 }

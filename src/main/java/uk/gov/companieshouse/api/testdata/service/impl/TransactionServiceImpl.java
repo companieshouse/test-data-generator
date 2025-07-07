@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -35,15 +36,19 @@ public class TransactionServiceImpl implements TransactionService {
         final var txn = new Transactions();
         String email = txnSpec.getEmail() != null ? txnSpec.getEmail() :
                 "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
+        var acspApplicationId = randomService.getTransactionId();
 
         txn.setId(randomId);
         txn.setEmail(email);
+        txn.setUserId(Objects.requireNonNullElse(txnSpec.getUserId(),"12345678911"));
         txn.setForename("Forename-TestData");
         txn.setSurname("Surname-TestData");
         txn.setDescription("Create an ACSP registration transaction");
         txn.setReference("ACSP Registration");
+        txn.setResume_uri( "/register-as-companies-house-authorised-agent/resume?transactionId="+randomId+"&acspId="+acspApplicationId);
+        txn.setStatus("open");
         repository.save(txn);
-        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getForename(), txn.getSurname(),txn.getUserId(),txn.getDescription(),txn.getReference());
+        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getForename(), txn.getSurname(),txn.getUserId(),txn.getDescription(),txn.getReference(),txn.getResume_uri(),txn.getStatus());
     }
 
 }

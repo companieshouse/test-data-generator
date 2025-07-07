@@ -14,12 +14,14 @@ public class TransactionsSpec {
     private String email;
 
     @JsonProperty
-    @NotEmpty(message = "description is required")
-    private String description;
+    @NotEmpty(message = "reference is required")
+    private String reference;
 
        @JsonProperty
-    @NotEmpty(message = "id is required")
     private String id;
+
+    @JsonProperty
+    private String user_id;
 
 
     public String getEmail() {
@@ -30,12 +32,12 @@ public class TransactionsSpec {
         this.email = email;
     }
 
-    public String getDescription(){
-        return description;
+    public String getReference(){
+        return reference;
     }
 
-    public void setDescription(String desription){
-        this.description = description;
+    public void setReference(String reference){
+        this.reference = reference;
     }
 
     public String getId() {
@@ -44,6 +46,14 @@ public class TransactionsSpec {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public String getUserId() {
+        return user_id;
+    }
+
+    public void setUserId(String user_id) {
+        this.user_id = user_id;
     }
 
 }
