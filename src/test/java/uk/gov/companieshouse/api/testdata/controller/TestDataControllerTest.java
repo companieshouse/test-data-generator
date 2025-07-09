@@ -28,34 +28,20 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
 
     @Mock
     private TestDataService testDataService;
+
+    @Mock
+    private TransactionService transactionService;
 
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
@@ -778,4 +764,47 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
     }
+
+    @Test
+    void createTransaction() throws Exception {
+        TransactionsSpec request = new TransactionsSpec();
+        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
+        request.setReference("ACSP Registration");
+
+        TransactionsData txn = new TransactionsData("id","user_id","reference" ,"forename","surname","email","description","resume_uri","status");
+
+        ResponseEntity<TransactionsData> response
+                = this.testDataController.createTransaction(request);
+
+        assertEquals(txn, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createTransactionException() throws Exception {
+        TransactionsSpec request = new TransactionsSpec();
+        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
+        request.setReference("ACSP Registration");
+        Throwable exception = new DataException("Error message");
+
+        when(this.transactionService.create(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createTransaction(request));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createTransactionWithoutReference() throws Exception {
+        TransactionsSpec request = new TransactionsSpec();
+        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
+        //request.setReference("ACSP Registration");
+        ///TransactionsData txn = new TransactionsData("id","user_id","reference" ,"forename","surname","email","description","resume_uri","status");
+
+       // when(this.transactionService.create(request)).thenReturn(txn);
+     ResponseEntity<TransactionsData> response = this.testDataController.createTransaction(request);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
+    }
+
 }

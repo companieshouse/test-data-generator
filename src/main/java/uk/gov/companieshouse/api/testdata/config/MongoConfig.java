@@ -137,6 +137,12 @@ public class MongoConfig {
         return getMongoRepositoryBean(TransactionsRepository.class, "transactions");
     }
 
+    @Bean
+    public AcspApplicationRepository acspapplicationRepository() {
+        return getMongoRepositoryBean(AcspApplicationRepository.class, "acsp_application");
+    }
+
+
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);

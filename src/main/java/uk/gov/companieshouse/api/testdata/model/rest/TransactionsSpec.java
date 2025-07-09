@@ -21,6 +21,7 @@ public class TransactionsSpec {
     private String id;
 
     @JsonProperty
+    @NotEmpty(message = "user id is required")
     private String user_id;
 
 

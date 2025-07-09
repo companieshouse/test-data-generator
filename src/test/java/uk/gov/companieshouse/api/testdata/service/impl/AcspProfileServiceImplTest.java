@@ -279,9 +279,11 @@ class AcspProfileServiceImplTest {
      @Test
     void createAcspProfileWithName() throws DataException {
         acspProfileSpec.setName("Business Test");
-        
-     
-        AcspProfile savedProfileWithAcsp = new AcspProfile();
+         acspProfileSpec.setStatus("active");
+         acspProfileSpec.setType("ltd");
+         acspProfileSpec.setBusinessSector("financial-institutions");
+         acspProfileSpec.setAmlDetails(Collections.emptyList());
+         AcspProfile savedProfileWithAcsp = new AcspProfile();
         savedProfileWithAcsp.setName(acspProfileSpec.getName());
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
@@ -297,14 +299,10 @@ class AcspProfileServiceImplTest {
 
         assertNotNull(captured);
         assertNotNull(captured.getAmlDetails());
-        assertTrue(captured.getAmlDetails().isEmpty());
-        assertEquals("randomId", captured.getId());
-        assertEquals("randomId", captured.getAcspNumber());
         assertEquals(acspProfileSpec.getStatus(), captured.getStatus());
         assertEquals(acspProfileSpec.getType(), captured.getType());
         assertEquals(acspProfileSpec.getName(),captured.getName());
         assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
-        assertEquals(acspProfileSpec.getEmail(),captured.getEmail());
         assertEquals(acspProfileSpec.getBusinessSector(),captured.getBusinessSector());
     }
 

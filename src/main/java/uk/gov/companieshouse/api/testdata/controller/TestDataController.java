@@ -293,7 +293,7 @@ public class TestDataController {
 
     @PostMapping("/transactions")
     public ResponseEntity<TransactionsData> createTransaction(
-            @Valid @RequestBody(required = false) TransactionsSpec request) throws DataException {
+            @Valid @RequestBody TransactionsSpec request) throws DataException {
 
         Optional<TransactionsSpec> optionalRequest = Optional.ofNullable(request);
         TransactionsSpec spec = optionalRequest.orElse(new TransactionsSpec());
