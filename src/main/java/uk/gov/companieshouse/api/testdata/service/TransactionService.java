@@ -1,8 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import java.util.Optional;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.exception.DataException;

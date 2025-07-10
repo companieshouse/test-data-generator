@@ -36,8 +36,6 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         var nationality = "British";
         var randomId = randomService.getString(8);
         var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
-       // var name = Objects.requireNonNullElse(spec.getName(),"Test Data Generator " + acspNumber + " Company Ltd");
-
         var profile = new AcspProfile();
         profile.setId(acspNumber);
         profile.setVersion(0L);

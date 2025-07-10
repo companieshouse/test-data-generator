@@ -38,9 +38,6 @@ public class Transactions {
     @Field("status")
     private String status;
 
-
-
-
     public String getId() {
         return id;
     }

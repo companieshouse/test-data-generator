@@ -17,7 +17,6 @@ public class AcspMembers {
     @Field("acsp_number")
     private String acspNumber;
 
-
     @Field("user_id")
     private String userId;
 

@@ -27,11 +27,6 @@ public class TransactionServiceImplTest {
     @Mock
     private AcspApplicationRepository acspApplicationRepository;
 
-    @Mock
-    private RandomService randomService;
-    @InjectMocks
-    private TestDataController testDataController;
-
     @Spy
     @InjectMocks
     private TransactionServiceImpl transactionServiceImpl;
