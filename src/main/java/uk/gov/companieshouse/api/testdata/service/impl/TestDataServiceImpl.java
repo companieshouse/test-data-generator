@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
@@ -30,6 +31,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
@@ -38,6 +40,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
@@ -125,6 +128,8 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanySearchService advancedCompanySearch;
     @Autowired
     private PostcodeService postcodeService;
+    @Autowired
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -180,6 +185,11 @@ public class TestDataServiceImpl implements TestDataService {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
                 this.companyRegistersService.create(spec);
                 LOG.info("Successfully created company registers");
+            }
+            if (spec.getDisqualifiedOfficers()
+                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+                disqualificationsService.create(spec);
+                LOG.info("Successfully created disqualifications");
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
@@ -342,6 +352,12 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
+        try {
+            this.disqualificationsService.delete(companyId);
+            LOG.info("Deleted disqualifications for company number: " + companyId);
+        } catch (Exception de) {
+            suppressedExceptions.add(de);
+        }
 
         if (isElasticSearchDeployed) {
             try {
@@ -448,6 +464,7 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             var acspProfileData = createAcspProfile(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
+
             AcspMembersData createdMember = createAcspMember(spec);
 
             return new AcspMembersData(
@@ -509,16 +526,11 @@ public class TestDataServiceImpl implements TestDataService {
     public CertificatesData createCertificatesData(
             final CertificatesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
-            throw new DataException("User ID is required to create a certificates");
+            throw new DataException("User ID is required to create certificates");
         }
 
         try {
-            CertificatesData createdCertificates = certificatesService.create(spec);
-            return new CertificatesData(
-                    createdCertificates.getId(),
-                    createdCertificates.getCreatedAt(),
-                    createdCertificates.getUpdatedAt()
-            );
+            return certificatesService.create(spec);
         } catch (Exception ex) {
             throw new DataException("Error creating certificates", ex);
         }
@@ -556,10 +568,10 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltiesData(String companyCode, String customerCode)
+    public AccountPenaltiesData getAccountPenaltiesData(String id)
             throws NoDataFoundException {
         try {
-            return accountPenaltiesService.getAccountPenalties(companyCode, customerCode);
+            return accountPenaltiesService.getAccountPenalties(id);
         } catch (NoDataFoundException ex) {
             throw new NoDataFoundException("Error retrieving account penalties - not found");
         }
@@ -579,14 +591,28 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public ResponseEntity<Void> deleteAccountPenaltiesData(String companyCode, String customerCode)
+    public ResponseEntity<Void> deleteAccountPenaltiesData(String id)
             throws NoDataFoundException, DataException {
         try {
-            return accountPenaltiesService.deleteAccountPenalties(companyCode, customerCode);
+            return accountPenaltiesService.deleteAccountPenalties(id);
         } catch (NoDataFoundException ex) {
             throw new NoDataFoundException("Error deleting account penalties - not found");
         } catch (Exception ex) {
             throw new DataException("Error deleting account penalties", ex);
+        }
+    }
+
+    @Override
+    public AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException {
+        try {
+            LOG.info("Creating account penalties for company code: " + penaltySpec.getCompanyCode()
+                    + " and customer code: " + penaltySpec.getCustomerCode());
+            return accountPenaltiesService.createAccountPenalties(penaltySpec);
+        } catch (Exception ex) {
+            LOG.error("Failed to create account penalties for company code: "
+                    + penaltySpec.getCompanyCode()
+                    + " and customer code: " + penaltySpec.getCustomerCode(), ex);
+            throw new DataException("Error creating account penalties", ex);
         }
     }
 

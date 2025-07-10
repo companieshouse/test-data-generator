@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintViolationException;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +37,20 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
+
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
@@ -49,9 +62,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
@@ -59,6 +74,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
@@ -85,6 +101,7 @@ class TestDataServiceImplTest {
     private static final String NI_COMPANY_PREFIX = "NI";
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "12345678";
+    private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final String PENALTY_REF = "A1234567";
     private static final String API_URL = "http://localhost:4001";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
@@ -140,6 +157,8 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+    @Mock
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -302,6 +321,7 @@ class TestDataServiceImplTest {
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
+        verify(disqualificationsService, times(1)).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -1386,14 +1406,24 @@ class TestDataServiceImplTest {
         CertificatesSpec spec = new CertificatesSpec();
         spec.setUserId(USER_ID);
 
-        CertificatesData expectedCertificatesData = new CertificatesData(
-                CERTIFICATES_ID, "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+
         when(certificatesService.create(any(CertificatesSpec.class))).thenReturn(expectedCertificatesData);
         CertificatesData result = testDataService.createCertificatesData(spec);
 
         assertNotNull(result);
-        assertEquals(expectedCertificatesData.getId(), result.getId());
+        assertEquals(2, result.getCertificates().size());
+        assertEquals("CRT-111111-222222", result.getCertificates().get(0).getId());
+        assertEquals("CRT-333333-444444", result.getCertificates().get(1).getId());
+
         verify(certificatesService).create(spec);
     }
 
@@ -1402,7 +1432,7 @@ class TestDataServiceImplTest {
         CertificatesSpec spec = new CertificatesSpec();
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createCertificatesData(spec));
-        assertEquals("User ID is required to create a certificates", exception.getMessage());
+        assertEquals("User ID is required to create certificates", exception.getMessage());
     }
 
     @Test
@@ -1548,19 +1578,19 @@ class TestDataServiceImplTest {
 
     @Test
     void getAccountPenaltiesData() throws Exception {
-        testDataService.getAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE);
-        verify(accountPenaltiesService).getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+        testDataService.getAccountPenaltiesData(PENALTY_ID);
+        verify(accountPenaltiesService).getAccountPenalties(PENALTY_ID);
     }
 
     @Test
     void getAccountPenaltiesDataNotFoundException() throws NoDataFoundException {
         NoDataFoundException ex = new NoDataFoundException(
                 "Error retrieving account penalties - not found");
-        when(accountPenaltiesService.getAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+        when(accountPenaltiesService.getAccountPenalties(PENALTY_ID))
                 .thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.getAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+                testDataService.getAccountPenaltiesData(PENALTY_ID));
         assertEquals(ex.getMessage(), thrown.getMessage());
     }
 
@@ -1624,31 +1654,65 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteAccountPenaltiesData() throws Exception {
-        testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE);
-        verify(accountPenaltiesService).deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE);
+        testDataService.deleteAccountPenaltiesData(PENALTY_ID);
+        verify(accountPenaltiesService).deleteAccountPenalties(PENALTY_ID);
     }
 
     @Test
     void deleteAccountPenaltiesDataNotFoundException() throws NoDataFoundException {
         NoDataFoundException ex = new NoDataFoundException(
                 "Error deleting account penalties - not found");
-        when(accountPenaltiesService.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
                 .thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+                testDataService.deleteAccountPenaltiesData(PENALTY_ID));
         assertEquals(ex.getMessage(), thrown.getMessage());
     }
 
     @Test
     void deleteAccountPenaltiesDataException() throws NoDataFoundException {
         DataException ex = new DataException("Error deleting account penalties");
-        when(accountPenaltiesService.deleteAccountPenalties(COMPANY_CODE, CUSTOMER_CODE))
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
                 .thenThrow(ConstraintViolationException.class);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.deleteAccountPenaltiesData(COMPANY_CODE, CUSTOMER_CODE));
+                testDataService.deleteAccountPenaltiesData(PENALTY_ID));
         assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void createPenaltyDataSuccess() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("NI23456");
+
+        AccountPenaltiesData expectedData = new AccountPenaltiesData();
+        expectedData.setCompanyCode("LP");
+        expectedData.setCustomerCode("NI23456");
+
+        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenReturn(expectedData);
+
+        AccountPenaltiesData result = testDataService.createPenaltyData(penaltySpec);
+
+        assertEquals(expectedData, result);
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+    }
+
+    @Test
+    void createPenaltyDataThrowsException() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("NI23456");
+
+        DataException ex = new DataException("creation failed");
+        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.createPenaltyData(penaltySpec));
+        assertEquals("Error creating account penalties", thrown.getMessage());
+        assertEquals(ex, thrown.getCause());
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
     }
 
     @Test
@@ -1764,4 +1828,23 @@ class TestDataServiceImplTest {
         verify(postcodeService, times(1)).get(country);
     }
 
+    @Test
+    void createCompanyDataWithDisqualifications() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setCorporateOfficer(false);
+        spec.setDisqualifiedOfficers(List.of(disqSpec));
+
+        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        Disqualifications disqEntity = new Disqualifications();
+        disqEntity.setId("D123");
+        when(disqualificationsService.create(spec)).thenReturn(disqEntity);
+
+        CompanyData result = testDataService.createCompanyData(spec);
+
+        assertNotNull(result);
+        verify(disqualificationsService).create(spec);
+    }
 }

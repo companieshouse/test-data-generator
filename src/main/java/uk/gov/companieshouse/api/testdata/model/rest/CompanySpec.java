@@ -56,6 +56,9 @@ public class CompanySpec {
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
 
+    @JsonProperty("disqualified_officers")
+    private List<DisqualificationsSpec> disqualifiedOfficers;
+
     @JsonProperty("accounts_due_status")
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
     private String accountsDueStatus;
@@ -167,6 +170,14 @@ public class CompanySpec {
         this.officerRoles = officerRoles;
     }
 
+    public List<DisqualificationsSpec> getDisqualifiedOfficers() {
+        return disqualifiedOfficers;
+    }
+
+    public void setDisqualifiedOfficers(List<DisqualificationsSpec> disqualifiedOfficers) {
+        this.disqualifiedOfficers = disqualifiedOfficers;
+    }
+
     public List<RegistersSpec> getRegisters() {
         return registers;
     }
@@ -186,6 +197,7 @@ public class CompanySpec {
     public List<FilingHistorySpec> getFilingHistoryList() {
         return filingHistoryList;
     }
+
     public void setFilingHistoryList(List<FilingHistorySpec> filingHistoryList) {
         this.filingHistoryList = filingHistoryList;
     }
@@ -269,15 +281,19 @@ public class CompanySpec {
     public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
         this.isPaddingCompanyNumber = isPaddingCompanyNumber;
     }
+
     public Boolean getAlphabeticalSearch() {
         return alphabeticalSearch;
     }
+
     public void setAlphabeticalSearch(Boolean alphabeticalSearch) {
         this.alphabeticalSearch = alphabeticalSearch;
     }
+
     public Boolean getAdvancedSearch() {
         return advancedSearch;
     }
+
     public void setAdvancedSearch(Boolean advancedSearch) {
         this.advancedSearch = advancedSearch;
     }

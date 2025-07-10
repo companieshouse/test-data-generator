@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -28,6 +29,27 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.GetPenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -36,6 +58,10 @@ import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
+
+    private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
+    private static final String COMPANY_CODE = "LP";
+    private static final String CUSTOMER_CODE = "NI23456";
 
     @Mock
     private TestDataService testDataService;
@@ -327,7 +353,7 @@ class TestDataControllerTest {
         request.setAcspProfile(new AcspProfileSpec());
 
         AcspMembersData acspMember = new AcspMembersData(
-                new ObjectId(), "acspNumber","userId", "active", "role");
+                new ObjectId(), "acspNumber", "userId", "active", "role");
 
         when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);
         ResponseEntity<AcspMembersData> response
@@ -436,20 +462,33 @@ class TestDataControllerTest {
 
     @Test
     void createCertificateSuccess() throws Exception {
-        CertificatesData certificate = new CertificatesData(
-                "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
         );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
+        );
+
+        // Use LinkedList to support getFirst()
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData certificateData = new CertificatesData(entries);
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
         request.setDescriptionCertificate("incorporation");
 
-        when(testDataService.createCertificatesData(request)).thenReturn(certificate);
+        when(testDataService.createCertificatesData(request)).thenReturn(certificateData);
+
         ResponseEntity<CertificatesData> response = testDataController.createCertificates(request);
 
-        assertEquals(certificate, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
+
+        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
+        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
     }
+
+
 
     @Test
     void createCertificateException() throws Exception {
@@ -508,9 +547,9 @@ class TestDataControllerTest {
     @Test
     void getAccountPenalty() throws Exception {
         String penaltyRef = "A1234567";
-        String companyCode = "LP";
-        String customerCode = "NI23456";
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
+        String companyCode = COMPANY_CODE;
+        String customerCode = CUSTOMER_CODE;
+        PenaltySpec request = new PenaltySpec();
         request.setCompanyCode(companyCode);
         request.setCustomerCode(customerCode);
 
@@ -532,8 +571,8 @@ class TestDataControllerTest {
     @Test
     void getAccountPenaltyNotFound() throws Exception {
         String penaltyRef = "A1234567";
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
-        request.setCompanyCode("LP");
+        PenaltySpec request = new PenaltySpec();
+        request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode("A1234567");
 
         Throwable exception = new NoDataFoundException("penalty not found");
@@ -549,20 +588,14 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenalties() throws Exception {
-        String companyCode = "LP";
-        String customerCode = "NI23456";
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
-        request.setCompanyCode(companyCode);
-        request.setCustomerCode(customerCode);
+        GetPenaltyRequest request = new GetPenaltyRequest();
+        request.setId(PENALTY_ID);
 
-        PenaltyData penalty = createPenaltyData(companyCode,
-                customerCode, "A1234567", 250.0, false);
+        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
 
-        AccountPenaltiesData accountPenaltiesData = createAccountPenaltiesData(
-                companyCode, penalty);
-
-        when(this.testDataService.getAccountPenaltiesData(companyCode, customerCode))
+        when(this.testDataService.getAccountPenaltiesData(request.getId()))
                 .thenReturn(accountPenaltiesData);
+
         ResponseEntity<AccountPenaltiesData> response = this.testDataController
                 .getAccountPenalties(request);
 
@@ -570,17 +603,14 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
-
     @Test
     void getAccountPenaltiesNotFound() throws Exception {
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
-        request.setCompanyCode("LP");
-        request.setCustomerCode("NI23456");
+        GetPenaltyRequest request = new GetPenaltyRequest();
+        request.setId(PENALTY_ID);
 
         Throwable exception = new NoDataFoundException("Account penalties not found");
 
-        when(this.testDataService.getAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode())).thenThrow(exception);
+        when(this.testDataService.getAccountPenaltiesData(request.getId())).thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
                 this.testDataController.getAccountPenalties(request));
@@ -590,8 +620,8 @@ class TestDataControllerTest {
     @Test
     void updateAccountPenalties() throws Exception {
         String penaltyRef = "A1234567";
-        String companyCode = "LP";
-        String customerCode = "NI23456";
+        String companyCode = COMPANY_CODE;
+        String customerCode = CUSTOMER_CODE;
         Instant now = Instant.now();
 
         UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
@@ -626,8 +656,8 @@ class TestDataControllerTest {
         Instant now = Instant.now();
 
         UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
-        request.setCompanyCode("LP");
-        request.setCustomerCode("NI23456");
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
         request.setCreatedAt(now);
         request.setClosedAt(now);
         request.setAmount(0.0);
@@ -645,49 +675,34 @@ class TestDataControllerTest {
         assertEquals(exception, thrown);
     }
 
-
     @Test
     void deleteAccountPenaltiesSuccess() throws Exception {
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
-        request.setCompanyCode("LP");
-        request.setCustomerCode("NI23456");
-
-        when(this.testDataService.deleteAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode()))
+        when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID))
                 .thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(request);
+        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService, times(1)).deleteAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode());
+        verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
     }
 
     @Test
     void deleteAccountPenaltiesNotFound() throws Exception {
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
-        request.setCompanyCode("NI23456");
-        request.setCustomerCode("LP");
-
         NoDataFoundException exception = new NoDataFoundException("penalty not found");
-        when(this.testDataController.deleteAccountPenalties(request)).thenThrow(exception);
+        when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.deleteAccountPenalties(request));
+                this.testDataController.deleteAccountPenalties(PENALTY_ID));
         assertEquals(exception, thrown);
     }
 
     @Test
     void deleteAccountPenaltiesOtherError() throws Exception {
-        AccountPenaltyRequest request = new AccountPenaltyRequest();
-        request.setCompanyCode("NI23456");
-        request.setCustomerCode("LP");
-
         DataException exception = new DataException("error during deletion");
-        when(this.testDataController.deleteAccountPenalties(request)).thenThrow(exception);
+        when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.deleteAccountPenalties(request));
+                this.testDataController.deleteAccountPenalties(PENALTY_ID));
         assertEquals(exception, thrown);
     }
 
@@ -714,6 +729,40 @@ class TestDataControllerTest {
         penalty.setAccountStatus("CHS");
         penalty.setDunningStatus("PEN1");
         return penalty;
+    }
+
+    @Test
+    void createPenaltySuccess() throws Exception {
+        PenaltySpec request = new PenaltySpec();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+
+        AccountPenaltiesData createdPenalties = new AccountPenaltiesData();
+        createdPenalties.setCompanyCode(COMPANY_CODE);
+        createdPenalties.setCustomerCode(CUSTOMER_CODE);
+
+        when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
+
+        ResponseEntity<AccountPenaltiesData> response = testDataController.createPenalty(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(createdPenalties, response.getBody());
+        verify(testDataService, times(1)).createPenaltyData(request);
+    }
+
+    @Test
+    void createPenaltyThrowsDataException() throws Exception {
+        PenaltySpec request = new PenaltySpec();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+
+        DataException exception = new DataException("Failed to create penalty");
+        when(testDataService.createPenaltyData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createPenalty(request));
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).createPenaltyData(request);
     }
 
     @Test
@@ -763,6 +812,30 @@ class TestDataControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
+    }
+
+    @Test
+    void createCompanyWithDisqualifications() throws Exception {
+        CompanySpec request = new CompanySpec();
+        request.setJurisdiction(Jurisdiction.SCOTLAND);
+        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        disqSpec.setCorporateOfficer(false);
+        request.setDisqualifiedOfficers(List.of(disqSpec));
+
+        CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+
+        when(testDataService.createCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = testDataController.createCompany(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void testHealthCheck() {
+        var response = testDataController.healthCheck();
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("test-data-generator is alive",response.getBody());
     }
 
     @Test
