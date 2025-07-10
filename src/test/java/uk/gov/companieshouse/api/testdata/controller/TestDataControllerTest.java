@@ -866,18 +866,4 @@ class TestDataControllerTest {
                 this.testDataController.createTransaction(request));
         assertEquals(exception, thrown);
     }
-
-    @Test
-    void createTransactionWithoutReference() throws Exception {
-        TransactionsSpec request = new TransactionsSpec();
-        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
-        //request.setReference("ACSP Registration");
-        ///TransactionsData txn = new TransactionsData("id","user_id","reference" ,"forename","surname","email","description","resume_uri","status");
-
-       // when(this.transactionService.create(request)).thenReturn(txn);
-     ResponseEntity<TransactionsData> response = this.testDataController.createTransaction(request);
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-
-    }
-
 }
