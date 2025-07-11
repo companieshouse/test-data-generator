@@ -86,4 +86,11 @@ public class RandomServiceImpl implements RandomService {
     public ObjectId generateId() {
         return new ObjectId();
     }
+
+     @Override
+    public String getTransactionId() {
+        int randomNumber = 100000 + RND.nextInt(900000);
+        var value = String.valueOf(randomNumber);
+        return String.join("-", value, value, value);
+    }
 }

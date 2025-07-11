@@ -42,6 +42,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesReque
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -56,7 +58,6 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
-
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
 
@@ -300,5 +301,21 @@ public class TestDataController {
     public ResponseEntity<String> healthCheck() {
         LOG.info("Health check passed");
         return new ResponseEntity<>("test-data-generator is alive", HttpStatus.OK);
+    }
+
+    @PostMapping("/transactions")
+    public ResponseEntity<TransactionsData> createTransaction(
+            @Valid @RequestBody TransactionsSpec request) throws DataException {
+
+        Optional<TransactionsSpec> optionalRequest = Optional.ofNullable(request);
+        TransactionsSpec spec = optionalRequest.orElse(new TransactionsSpec());
+
+        TransactionsData createdTransaction = testDataService.createTransactionData(spec);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("_id", createdTransaction.getId());
+        data.put("reference", spec.getReference());
+        LOG.info("Transaction created", data);
+        return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
 }

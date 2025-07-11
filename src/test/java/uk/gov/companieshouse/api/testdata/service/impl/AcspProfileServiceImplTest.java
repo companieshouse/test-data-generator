@@ -276,6 +276,35 @@ class AcspProfileServiceImplTest {
         assertCommonProfileDetails(captured, "sole-trader", "Forename randomId",
                 "Surname randomId");
     }
+     @Test
+    void createAcspProfileWithName() throws DataException {
+        acspProfileSpec.setName("Business Test");
+         acspProfileSpec.setStatus("active");
+         acspProfileSpec.setType("ltd");
+         acspProfileSpec.setBusinessSector("financial-institutions");
+         acspProfileSpec.setAmlDetails(Collections.emptyList());
+         AcspProfile savedProfileWithAcsp = new AcspProfile();
+        savedProfileWithAcsp.setName(acspProfileSpec.getName());
+        when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+
+        AcspProfileData result = service.create(acspProfileSpec);
+
+        assertNotNull(result);
+        assertEquals(acspProfile.getAcspNumber(), result.getAcspNumber());
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNotNull(captured);
+        assertNotNull(captured.getAmlDetails());
+        assertEquals(acspProfileSpec.getStatus(), captured.getStatus());
+        assertEquals(acspProfileSpec.getType(), captured.getType());
+        assertEquals(acspProfileSpec.getName(),captured.getName());
+        assertEquals("/authorised-corporate-service-providers/randomId", captured.getLinksSelf());
+        assertEquals(acspProfileSpec.getBusinessSector(),captured.getBusinessSector());
+    }
 
     @Test
     void deleteAcspProfile() {
