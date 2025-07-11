@@ -4,14 +4,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TransactionsData {
 
-    @JsonProperty("_id")
-    private final String id;
+  @JsonProperty("_id")
+  private final String id;
 
-    @JsonProperty("created_by.forname")
-    private final String forename;
+    //@JsonProperty("created_by.forname")
+    //private final String forename;
 
-    @JsonProperty("created_by.surname")
-    private final String surname;
+   // @JsonProperty("created_by.surname")
+    //private final String surname;
 
  @JsonProperty("created_by.id")
     private final String userId;
@@ -26,36 +26,22 @@ public class TransactionsData {
     private final String reference;
 
     @JsonProperty("resume_journey_uri")
-    private final String resume_uri;
+   private final String resumeUri;
 
     @JsonProperty("status")
     private final String status;
 
-    public TransactionsData(String id, String email,String forename, String surname,String userId, String description , String reference, String resume_uri, String status) {
-        this.id = id;
+    public TransactionsData(String id,String email,String userId, String description , String reference,String resumeUri, String status) {
+       this.id=id;
         this.email = email;
-        this.forename = forename;
-        this.surname = surname;
         this.userId = userId;
         this.description = description;
         this.reference = reference;
-        this.resume_uri=resume_uri;
+        this.resumeUri = resumeUri;
         this.status = status;
     }
 
-   public String getId() {
-        return id;
-    }
-
-
-    public String getForename() {
-        return forename;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
+public String getId(){ return id;}
      public String getUserId() {
         return userId;
     }
@@ -72,7 +58,7 @@ public class TransactionsData {
         return reference;
     }
 
-    public String getResume_uri(){return resume_uri;}
+    public String getResumeUri(){ return resumeUri;}
 
     public String getStatus(){return status;}
    

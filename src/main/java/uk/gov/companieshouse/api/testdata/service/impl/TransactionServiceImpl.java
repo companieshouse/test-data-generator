@@ -57,7 +57,7 @@ public class TransactionServiceImpl implements TransactionService {
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);
         acsprepository.save(acspApplication);
-        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getForename(), txn.getSurname(),txn.getUserId(),txn.getDescription(),txn.getReference(),txn.getResumeUri(),txn.getStatus());
+        return new TransactionsData(txn.getId(), txn.getEmail(),txn.getUserId(),txn.getDescription(),txn.getReference(),txn.getResumeUri(),txn.getStatus());
     }
 
 }

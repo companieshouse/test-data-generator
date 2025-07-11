@@ -6,7 +6,6 @@ import java.security.SecureRandom;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.OptionalLong;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import org.bson.types.ObjectId;
@@ -91,7 +90,7 @@ public class RandomServiceImpl implements RandomService {
      @Override
     public String getTransactionId() {
         int randomNumber = 100000 + RND.nextInt(900000);
-        String value = String.valueOf(randomNumber);
+        var value = String.valueOf(randomNumber);
         return String.join("-", value, value, value);
     }
 }

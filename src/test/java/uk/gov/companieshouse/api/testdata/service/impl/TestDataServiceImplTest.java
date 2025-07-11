@@ -1859,7 +1859,7 @@ class TestDataServiceImplTest {
         TransactionsSpec transactionsSpec = new TransactionsSpec();
         transactionsSpec.setUserId("Test12454");
         transactionsSpec.setReference("ACSP Registration");
-        TransactionsData txn = new TransactionsData("id","Test12454","ACSP Registration" ,"forename","surname","email","description","resume_uri","status");
+        TransactionsData txn = new TransactionsData("Test12454","ACSP Registration" ,"forename","surname","email","description","status");
         when(transactionService.create(transactionsSpec)).thenReturn(txn);
         TransactionsData result = testDataService.createTransactionData(transactionsSpec);
         assertEquals(txn, result);
