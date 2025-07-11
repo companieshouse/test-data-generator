@@ -20,11 +20,9 @@ public class AcspApplication {
     @Field("links.self")
     private String self;
 
-
     public String getId() {
         return id;
     }
-
 
     public String getTypeOfBusiness(){
         return typeOfBusiness;
@@ -51,7 +49,6 @@ public class AcspApplication {
 
     public void setSelf(String self){
         this.self=self;
-
     }
 
 }

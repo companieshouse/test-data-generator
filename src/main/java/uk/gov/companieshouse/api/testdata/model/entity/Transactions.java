@@ -1,8 +1,4 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
-
-import java.time.Instant;
-import java.util.List;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -42,7 +38,6 @@ public class Transactions {
         return id;
     }
 
-
     public String getForename() {
         return forename;
     }
@@ -71,7 +66,6 @@ public class Transactions {
 
     public String getStatus(){ return status;}
 
-   
     public void setId(String id) {
         this.id = id;
     }
@@ -79,7 +73,6 @@ public class Transactions {
     public void setEmail(String email) {
         this.email = email;
     }
-
 
     public void setForename(String forename) {
         this.forename = forename;

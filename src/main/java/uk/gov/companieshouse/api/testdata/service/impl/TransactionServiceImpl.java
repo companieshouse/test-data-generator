@@ -36,18 +36,23 @@ public class TransactionServiceImpl implements TransactionService {
         String email = txnSpec.getEmail() != null ? txnSpec.getEmail() :
                 "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
         var acspApplicationId = randomService.getTransactionId();
-
+        var foreName = "Forename-TestData";
+        var surName = "Surname-TestData";
+        var description = "Create an ACSP registration transaction";
+        var reference = "ACSP Registration";
+        var typeOfBusiness = "limited-company";
+        var status ="open";
         txn.setId(randomId);
         txn.setEmail(email);
         txn.setUserId(Objects.requireNonNullElse(txnSpec.getUserId(),"12345678911"));
-        txn.setForename("Forename-TestData");
-        txn.setSurname("Surname-TestData");
-        txn.setDescription("Create an ACSP registration transaction");
-        txn.setReference("ACSP Registration");
+        txn.setForename(foreName);
+        txn.setSurname(surName);
+        txn.setDescription(description);
+        txn.setReference(reference);
         txn.setResumeUri( "/register-as-companies-house-authorised-agent/resume?transactionId="+randomId+"&acspId="+acspApplicationId);
-        txn.setStatus("open");
+        txn.setStatus(status);
         acspApplication.setId(acspApplicationId);
-        acspApplication.setTypeOfBusiness("limited-company");
+        acspApplication.setTypeOfBusiness(typeOfBusiness);
         acspApplication.setUser_id(Objects.requireNonNullElse(txnSpec.getUserId(),"12345678911"));
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);

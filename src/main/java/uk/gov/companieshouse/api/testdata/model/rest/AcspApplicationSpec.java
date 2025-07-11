@@ -22,11 +22,7 @@ public class AcspApplicationSpec {
     public void setId(String id) {
         this.id = id;
     }
-    public String getTypeOfBusiness(){return typeOfBusiness;}
-    public void setTypeOfBusiness(String typeOfBusiness){this.typeOfBusiness=typeOfBusiness;}
-
     public String getUser_id(){return user_id;}
     public void setUser_id(String user_id){this.user_id=user_id;}
-    public String getSelf(){return self;}
-    public void setSelf(String self){this.self=self;}
+
 }

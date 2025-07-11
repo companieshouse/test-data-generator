@@ -93,7 +93,6 @@ public class RandomServiceImpl implements RandomService {
         Random random = new Random();
         int randomNumber = 100000 + random.nextInt(900000);
         String value = String.valueOf(randomNumber);
-        String transactionReference = value+"-"+value+"-"+value;
-        return transactionReference;
+        return String.join("-", value, value, value);
     }
 }

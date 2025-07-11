@@ -663,28 +663,4 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
         }
     }
-
-
-    public TransactionsData create(final TransactionsSpec spec) throws DataException {
-        if (spec.getId() == null) {
-            throw new DataException("ID is required to create a transaction");
-        }
-
-        try {
-            TransactionsData createdTxn = transactionService.create(spec);
-            return new TransactionsData(
-                    createdTxn.getId(),
-                    createdTxn.getUserId(),
-                    createdTxn.getForename(),
-                    createdTxn.getSurname(),
-                    createdTxn.getEmail(),
-                    createdTxn.getDescription(),
-                    createdTxn.getReference(),
-                    createdTxn.getResume_uri(),
-                    createdTxn.getStatus()
-            );
-        } catch (Exception ex) {
-            throw new DataException("Error creating transaction", ex);
-        }
-    }
 }
