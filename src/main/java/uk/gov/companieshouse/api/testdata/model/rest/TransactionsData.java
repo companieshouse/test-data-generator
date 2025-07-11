@@ -7,12 +7,6 @@ public class TransactionsData {
   @JsonProperty("_id")
   private final String id;
 
-    //@JsonProperty("created_by.forname")
-    //private final String forename;
-
-   // @JsonProperty("created_by.surname")
-    //private final String surname;
-
  @JsonProperty("created_by.id")
     private final String userId;
 
