@@ -17,7 +17,7 @@ public class Transactions {
     private String surname;
 
     @Field("created_by.id")
-    private String user_id;
+    private String userId;
 
     @Field("created_by.email")
     private String email;
@@ -47,7 +47,7 @@ public class Transactions {
     }
 
      public String getUserId() {
-        return user_id;
+        return userId;
     }
 
  public String getEmail() {
@@ -82,8 +82,8 @@ public class Transactions {
         this.surname = surname;
     }
 
-     public void setUserId(String user_id) {
-        this.user_id = user_id;
+     public void setUserId(String userId) {
+        this.userId = userId;
     }
 
      public void setDescription(String description) {

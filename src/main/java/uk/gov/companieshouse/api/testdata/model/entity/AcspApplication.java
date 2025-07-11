@@ -15,7 +15,7 @@ public class AcspApplication {
     private String typeOfBusiness;
 
     @Field("acsp_data_submission.last_modified_by_user_id")
-    private String user_id;
+    private String userId;
 
     @Field("links.self")
     private String self;
@@ -26,8 +26,8 @@ public class AcspApplication {
     public String getTypeOfBusiness(){
         return typeOfBusiness;
     }
-    public String getUser_id(){
-        return user_id;
+    public String getUserId(){
+        return userId;
     }
 
     public String getSelf(){
@@ -41,8 +41,8 @@ public class AcspApplication {
         this.typeOfBusiness=typeOfBusiness;
     }
 
-    public void setUser_id(String user_id){
-        this.user_id=user_id;
+    public void setUserId(String userId){
+        this.userId=userId;
     }
 
     public void setSelf(String self){

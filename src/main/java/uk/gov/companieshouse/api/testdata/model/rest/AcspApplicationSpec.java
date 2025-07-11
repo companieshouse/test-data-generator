@@ -10,7 +10,7 @@ public class AcspApplicationSpec {
     private String typeOfBusiness;
 
     @JsonProperty("user_id")
-    private String user_id;
+    private String userId;
 
     @JsonProperty
     private String self;
@@ -22,7 +22,7 @@ public class AcspApplicationSpec {
     public void setId(String id) {
         this.id = id;
     }
-    public String getUser_id(){return user_id;}
-    public void setUser_id(String user_id){this.user_id=user_id;}
+    public String getUserId(){return userId;}
+    public void setUserId(String userId){this.userId=userId;}
 
 }

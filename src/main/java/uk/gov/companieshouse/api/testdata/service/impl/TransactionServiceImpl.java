@@ -53,7 +53,7 @@ public class TransactionServiceImpl implements TransactionService {
         txn.setStatus(status);
         acspApplication.setId(acspApplicationId);
         acspApplication.setTypeOfBusiness(typeOfBusiness);
-        acspApplication.setUser_id(Objects.requireNonNullElse(txnSpec.getUserId(),"12345678911"));
+        acspApplication.setUserId(Objects.requireNonNullElse(txnSpec.getUserId(),"12345678911"));
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);
         acsprepository.save(acspApplication);

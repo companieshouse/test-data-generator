@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.testdata.controller.TestDataController;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
 import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
@@ -83,7 +82,7 @@ public class TransactionServiceImplTest {
         assertEquals("open", captured.getStatus());
         assertEquals("Create an ACSP registration transaction", captured.getDescription());
         assertNotNull(captured.getResumeUri());
-        assertEquals("test123", acspAdded.getUser_id());
+        assertEquals("test123", acspAdded.getUserId());
         assertNotNull(acspAdded.getSelf());
         assertEquals("limited-company", acspAdded.getTypeOfBusiness());
     }
@@ -111,7 +110,7 @@ public class TransactionServiceImplTest {
         assertEquals("testuser@test.com", captured.getEmail());
         assertEquals("Create an ACSP registration transaction", captured.getDescription());
         assertNotNull(captured.getResumeUri());
-        assertEquals("test123", acspAdded.getUser_id());
+        assertEquals("test123", acspAdded.getUserId());
         assertNotNull(acspAdded.getSelf());
         assertEquals("limited-company", acspAdded.getTypeOfBusiness());
     }

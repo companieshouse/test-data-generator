@@ -14,7 +14,7 @@ public class TransactionsData {
     private final String surname;
 
  @JsonProperty("created_by.id")
-    private final String user_id;
+    private final String userId;
 
      @JsonProperty("created_by.email")
     private final String email;
@@ -31,12 +31,12 @@ public class TransactionsData {
     @JsonProperty("status")
     private final String status;
 
-    public TransactionsData(String id, String email,String forename, String surname,String user_id, String description , String reference, String resume_uri, String status) {
+    public TransactionsData(String id, String email,String forename, String surname,String userId, String description , String reference, String resume_uri, String status) {
         this.id = id;
         this.email = email;
         this.forename = forename;
         this.surname = surname;
-        this.user_id = user_id;
+        this.userId = userId;
         this.description = description;
         this.reference = reference;
         this.resume_uri=resume_uri;
@@ -57,7 +57,7 @@ public class TransactionsData {
     }
 
      public String getUserId() {
-        return user_id;
+        return userId;
     }
 
  public String getEmail() {

@@ -20,7 +20,7 @@ public class TransactionsSpec {
 
     @JsonProperty
     @NotEmpty(message = "user id is required")
-    private String user_id;
+    private String userId;
 
 
     public String getEmail() {
@@ -48,11 +48,11 @@ public class TransactionsSpec {
     }
 
     public String getUserId() {
-        return user_id;
+        return userId;
     }
 
-    public void setUserId(String user_id) {
-        this.user_id = user_id;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
 }
