@@ -19,7 +19,6 @@ public class AcspApplication {
 
     @Field("links.self")
     private String self;
-
     public String getId() {
         return id;
     }
@@ -27,7 +26,6 @@ public class AcspApplication {
     public String getTypeOfBusiness(){
         return typeOfBusiness;
     }
-
     public String getUser_id(){
         return user_id;
     }
