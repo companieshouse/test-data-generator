@@ -33,7 +33,7 @@ public class Transactions {
     private String reference;
 
     @Field("resume_journey_uri")
-    private String resume_uri;
+    private String resumeUri;
 
     @Field("status")
     private String status;
@@ -67,7 +67,7 @@ public class Transactions {
         return reference;
     }
 
-    public String getResume_uri(){ return resume_uri;}
+    public String getResumeUri(){ return resumeUri;}
 
     public String getStatus(){ return status;}
 
@@ -101,7 +101,7 @@ public class Transactions {
         this.reference = reference;
     }
 
-    public void setResume_uri(String resume_uri){this.resume_uri=resume_uri;}
+    public void setResumeUri(String resumeUri){this.resumeUri=resumeUri;}
 
     public void setStatus(String status){this.status=status;}
     

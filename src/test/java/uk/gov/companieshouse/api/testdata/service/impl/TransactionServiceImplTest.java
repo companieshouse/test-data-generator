@@ -7,8 +7,12 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.controller.TestDataController;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+
+import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
+import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspApplicationSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -42,6 +46,9 @@ public class TransactionServiceImplTest {
 
     private AcspApplicationSpec acspSpec;
     private TransactionsSpec txnSpec;
+    @Mock
+
+    private RandomService randomService;
 
 
     @BeforeEach
@@ -50,6 +57,7 @@ public class TransactionServiceImplTest {
         txnSpec = new TransactionsSpec();
         acspApplication = new AcspApplication();
         acspSpec = new AcspApplicationSpec();
+
     }
 
 
@@ -57,6 +65,7 @@ public class TransactionServiceImplTest {
     void createTransaction() throws DataException {
         txnSpec.setUserId("test123");
         txnSpec.setReference("ACSP Registration");
+        txnSpec.setId(randomService.getTransactionId());
         when(transactionsRepository.save(any(Transactions.class))).thenReturn(transactions);
         when(acspApplicationRepository.save(any(AcspApplication.class))).thenReturn(acspApplication);
         TransactionsData result = transactionServiceImpl.create(txnSpec);
@@ -73,7 +82,7 @@ public class TransactionServiceImplTest {
         assertEquals("ACSP Registration", captured.getReference());
         assertEquals("open", captured.getStatus());
         assertEquals("Create an ACSP registration transaction", captured.getDescription());
-        assertNotNull(captured.getResume_uri());
+        assertNotNull(captured.getResumeUri());
         assertEquals("test123", acspAdded.getUser_id());
         assertNotNull(acspAdded.getSelf());
         assertEquals("limited-company", acspAdded.getTypeOfBusiness());
@@ -101,7 +110,7 @@ public class TransactionServiceImplTest {
         assertEquals("open", captured.getStatus());
         assertEquals("testuser@test.com", captured.getEmail());
         assertEquals("Create an ACSP registration transaction", captured.getDescription());
-        assertNotNull(captured.getResume_uri());
+        assertNotNull(captured.getResumeUri());
         assertEquals("test123", acspAdded.getUser_id());
         assertNotNull(acspAdded.getSelf());
         assertEquals("limited-company", acspAdded.getTypeOfBusiness());

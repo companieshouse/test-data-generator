@@ -44,7 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
         txn.setSurname("Surname-TestData");
         txn.setDescription("Create an ACSP registration transaction");
         txn.setReference("ACSP Registration");
-        txn.setResume_uri( "/register-as-companies-house-authorised-agent/resume?transactionId="+randomId+"&acspId="+acspApplicationId);
+        txn.setResumeUri( "/register-as-companies-house-authorised-agent/resume?transactionId="+randomId+"&acspId="+acspApplicationId);
         txn.setStatus("open");
         acspApplication.setId(acspApplicationId);
         acspApplication.setTypeOfBusiness("limited-company");
@@ -52,7 +52,7 @@ public class TransactionServiceImpl implements TransactionService {
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);
         acsprepository.save(acspApplication);
-        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getForename(), txn.getSurname(),txn.getUserId(),txn.getDescription(),txn.getReference(),txn.getResume_uri(),txn.getStatus());
+        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getForename(), txn.getSurname(),txn.getUserId(),txn.getDescription(),txn.getReference(),txn.getResumeUri(),txn.getStatus());
     }
 
 }

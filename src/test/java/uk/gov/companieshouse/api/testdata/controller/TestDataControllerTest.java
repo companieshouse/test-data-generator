@@ -29,6 +29,8 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+
+
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -47,12 +49,13 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
-
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
@@ -77,6 +80,8 @@ class TestDataControllerTest {
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
+    @Mock
+    private RandomService randomService;
 
     @Test
     void createCompany() throws Exception {
@@ -844,8 +849,8 @@ class TestDataControllerTest {
         request.setUserId("rsf3pdwywvse5yz55mfodfx8");
         request.setReference("ACSP Registration");
 
-        TransactionsData txn = new TransactionsData("id","user_id","reference" ,"forename","surname","email","description","resume_uri","status");
-
+        TransactionsData txn = new TransactionsData("id","rsf3pdwywvse5yz55mfodfx8","ACSP Registration" ,"forename","surname","email","description","resume_uri","status");
+        when(this.transactionService.create(request)).thenReturn(txn);
         ResponseEntity<TransactionsData> response
                 = this.testDataController.createTransaction(request);
 
