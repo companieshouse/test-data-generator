@@ -70,9 +70,6 @@ class TestDataControllerTest {
     private TestDataService testDataService;
 
     @Mock
-    private TransactionService transactionService;
-
-    @Mock
     private CompanyAuthCodeService companyAuthCodeService;
 
     @InjectMocks
@@ -80,8 +77,6 @@ class TestDataControllerTest {
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
-    @Mock
-    private RandomService randomService;
 
     @Test
     void createCompany() throws Exception {
@@ -850,7 +845,7 @@ class TestDataControllerTest {
         request.setReference("ACSP Registration");
 
         TransactionsData txn = new TransactionsData("id","rsf3pdwywvse5yz55mfodfx8","ACSP Registration" ,"forename","surname","email","description","resume_uri","status");
-        when(this.transactionService.create(request)).thenReturn(txn);
+        when(this.testDataService.createTransactionData(request)).thenReturn(txn);
         ResponseEntity<TransactionsData> response
                 = this.testDataController.createTransaction(request);
 
@@ -865,7 +860,7 @@ class TestDataControllerTest {
         request.setReference("ACSP Registration");
         Throwable exception = new DataException("Error message");
 
-        when(this.transactionService.create(request)).thenThrow(exception);
+        when(this.testDataService.createTransactionData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 this.testDataController.createTransaction(request));

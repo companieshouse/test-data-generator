@@ -60,10 +60,6 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
-
-    @Autowired
-    private TransactionService transactionService;
-
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
 
@@ -316,7 +312,7 @@ public class TestDataController {
         Optional<TransactionsSpec> optionalRequest = Optional.ofNullable(request);
         TransactionsSpec spec = optionalRequest.orElse(new TransactionsSpec());
 
-        TransactionsData createdTransaction = transactionService.create(spec);
+        TransactionsData createdTransaction = testDataService.createTransactionData(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put("_id", createdTransaction.getId());

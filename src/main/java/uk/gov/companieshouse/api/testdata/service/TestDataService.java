@@ -15,6 +15,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -175,4 +177,6 @@ public interface TestDataService {
      * @throws DataException if there is an error retrieving the postcodes
      */
     PostcodesData getPostcodes(String country) throws DataException;
+    
+    TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException;
 }

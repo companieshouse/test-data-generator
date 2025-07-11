@@ -663,4 +663,15 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
         }
     }
+
+    public TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException{
+        try {
+            LOG.info("Creating Txn for User Id: " + transactionsSpec.getUserId());
+            return transactionService.create(transactionsSpec);
+        } catch (Exception ex) {
+            LOG.error("Failed to create Transaction for User Id: "
+                    + transactionsSpec.getUserId());
+            throw new DataException("Error creating transaction", ex);
+        }
+    }
 }
