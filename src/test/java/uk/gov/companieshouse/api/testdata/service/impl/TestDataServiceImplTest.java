@@ -71,6 +71,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -84,6 +86,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -157,6 +160,9 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+
+    @Mock
+    private TransactionService transactionService;
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
@@ -1846,5 +1852,16 @@ class TestDataServiceImplTest {
 
         assertNotNull(result);
         verify(disqualificationsService).create(spec);
+    }
+
+    @Test
+    void createTransactionData() throws DataException {
+        TransactionsSpec transactionsSpec = new TransactionsSpec();
+        transactionsSpec.setUserId("Test12454");
+        transactionsSpec.setReference("ACSP Registration");
+        TransactionsData txn = new TransactionsData("id","Test12454","ACSP Registration" ,"forename","surname","email","description","resume_uri","status");
+        when(transactionService.create(transactionsSpec)).thenReturn(txn);
+        TransactionsData result = testDataService.createTransactionData(transactionsSpec);
+        assertEquals(txn, result);
     }
 }

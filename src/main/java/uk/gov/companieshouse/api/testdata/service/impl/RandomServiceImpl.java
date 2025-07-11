@@ -90,8 +90,7 @@ public class RandomServiceImpl implements RandomService {
 
      @Override
     public String getTransactionId() {
-        Random random = new Random();
-        int randomNumber = 100000 + random.nextInt(900000);
+        int randomNumber = 100000 + RND.nextInt(900000);
         String value = String.valueOf(randomNumber);
         return String.join("-", value, value, value);
     }
