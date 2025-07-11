@@ -1864,4 +1864,17 @@ class TestDataServiceImplTest {
         TransactionsData result = testDataService.createTransactionData(transactionsSpec);
         assertEquals(txn, result);
     }
+
+    @Test
+    void createTransactionDataException() throws DataException {
+        TransactionsSpec transactionsSpec = new TransactionsSpec();
+        transactionsSpec.setUserId("Test12454");
+        transactionsSpec.setReference("ACSP Registration");
+        DataException ex = new DataException("creation failed");
+        when(transactionService.create(transactionsSpec)).thenThrow(ex);
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.createTransactionData(transactionsSpec));
+        assertEquals("Error creating transaction", thrown.getMessage());
+        assertEquals(ex, thrown.getCause());
+    }
 }
