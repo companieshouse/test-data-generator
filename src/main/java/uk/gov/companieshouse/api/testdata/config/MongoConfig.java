@@ -132,6 +132,12 @@ public class MongoConfig {
         return getMongoRepositoryBean(PostcodesRepository.class, "postcodes");
     }
 
+    @Bean
+    public UserCompanyAssociationRepository userCompanyAssociationRepository() {
+        return getMongoRepositoryBean(UserCompanyAssociationRepository.class,
+                "user_company_associations");
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 MongoClients.create(this.mongoProperties.getUri()), database);

@@ -57,9 +57,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -140,6 +143,11 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+    @Mock
+    private DataService<UserCompanyAssociationData,
+            UserCompanyAssociationSpec> userCompanyAssociationService;
+    @Mock
+    private UserCompanyAssociationRepository userCompanyAssociationRepository;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -1774,4 +1782,120 @@ class TestDataServiceImplTest {
         verify(postcodeService, times(1)).get(country);
     }
 
+    @Test
+    void createUserCompanyAssociationData() throws DataException {
+        var id = new ObjectId();
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId("userId");
+        spec.setCompanyNumber("TC123456");
+
+        UserCompanyAssociationData associationData =
+                new UserCompanyAssociationData(id, spec.getCompanyNumber(),
+                        spec.getUserId(), null, "confirmed",
+                        "auth_code", null,
+                        null);
+
+        when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
+
+        UserCompanyAssociationData createdAssociation =
+                testDataService.createUserCompanyAssociationData(spec);
+
+        assertNotNull(createdAssociation);
+        assertEquals(id.toString(), createdAssociation.getId());
+        assertEquals("userId", createdAssociation.getUserId());
+        assertEquals("TC123456", createdAssociation.getCompanyNumber());
+        assertEquals("confirmed", createdAssociation.getStatus());
+        assertEquals("auth_code", createdAssociation.getApprovalRoute());
+        assertNull(createdAssociation.getInvitations());
+        assertNull(createdAssociation.getPreviousStates());
+        assertNull(createdAssociation.getUserEmail());
+
+        verify(userCompanyAssociationService, times(1)).create(spec);
+    }
+
+    @Test
+    void createUserCompanyAssociationDataNoUserIdOrUserEmail() {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createUserCompanyAssociationData(spec));
+        assertEquals("A user_id or a user_email is required to create "
+                + "an association", exception.getMessage());
+    }
+
+    @Test
+    void createUserCompanyAssociationDataNoCompanyNumber() {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId("userId");
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createUserCompanyAssociationData(spec));
+        assertEquals("Company number is required to create an "
+                + "association", exception.getMessage());
+    }
+
+    @Test
+    void createUserCompanyAssociationDataException() throws DataException {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId("userId");
+        spec.setCompanyNumber("TC123456");
+
+        when(userCompanyAssociationService.create(spec))
+                .thenThrow(new RuntimeException("Error creating the "
+                        + "association"));
+
+        DataException exception =
+                assertThrows(DataException.class,
+                        () -> testDataService.createUserCompanyAssociationData(spec));
+
+        assertEquals("Error creating the association",
+                exception.getMessage());
+        verify(userCompanyAssociationService, times(1)).create(spec);
+    }
+
+    @Test
+    void deleteUserCompanyAssociation() throws DataException {
+        var id = "associationId";
+        when(userCompanyAssociationService.delete(id))
+                .thenReturn(true);
+
+        boolean result =
+                testDataService.deleteUserCompanyAssociationData(id);
+
+        assertTrue(result);
+        verify(userCompanyAssociationService).delete(id);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationNotFound() throws DataException {
+        var id = "associationId";
+        when(userCompanyAssociationService.delete(id))
+                .thenReturn(false);
+
+        boolean result =
+                testDataService.deleteUserCompanyAssociationData(id);
+
+        assertFalse(result);
+        verify(userCompanyAssociationService, times(1)).delete(id);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationException() {
+        var id = "associationId";
+        RuntimeException ex = new RuntimeException("Error deleting "
+                + "association");
+        when(userCompanyAssociationService.delete(id))
+                .thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.deleteUserCompanyAssociationData(id));
+
+        assertEquals("Error deleting association",
+                exception.getMessage());
+        verify(userCompanyAssociationService, times(1)).delete(id);
+    }
 }

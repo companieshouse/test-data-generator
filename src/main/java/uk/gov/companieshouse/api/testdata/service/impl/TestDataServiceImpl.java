@@ -42,6 +42,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
@@ -120,6 +122,10 @@ public class TestDataServiceImpl implements TestDataService {
     private CompanySearchService advancedCompanySearch;
     @Autowired
     private PostcodeService postcodeService;
+
+    @Autowired
+    private DataService<UserCompanyAssociationData,
+            UserCompanyAssociationSpec> userCompanyAssociationService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -625,6 +631,50 @@ public class TestDataServiceImpl implements TestDataService {
             this.acspProfileService.delete(acspNumber);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
+        }
+    }
+
+    @Override
+    public UserCompanyAssociationData
+            createUserCompanyAssociationData(UserCompanyAssociationSpec spec)
+            throws DataException {
+        if (spec.getUserId() == null
+                && spec.getUserEmail() == null) {
+            throw new DataException("A user_id or a user_email is "
+                    + "required to create an association");
+        }
+
+        if (spec.getCompanyNumber() == null || spec.getCompanyNumber().isEmpty()) {
+            throw new DataException("Company number is "
+                    + "required to create an association");
+        }
+
+        try {
+            UserCompanyAssociationData createdAssociation =
+                    userCompanyAssociationService.create(spec);
+
+            return new UserCompanyAssociationData(
+                    new ObjectId(createdAssociation.getId()),
+                    createdAssociation.getCompanyNumber(),
+                    createdAssociation.getUserId(),
+                    createdAssociation.getUserEmail(),
+                    createdAssociation.getStatus(),
+                    createdAssociation.getApprovalRoute(),
+                    createdAssociation.getInvitations(),
+                    createdAssociation.getPreviousStates()
+            );
+        } catch (Exception ex) {
+            throw new DataException("Error creating the association",
+                    ex);
+        }
+    }
+
+    @Override
+    public boolean deleteUserCompanyAssociationData(String id) throws DataException {
+        try {
+            return userCompanyAssociationService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting association", ex);
         }
     }
 }

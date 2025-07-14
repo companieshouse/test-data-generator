@@ -37,6 +37,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -282,6 +284,38 @@ public class TestDataController {
         }
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
+    }
+
+    @PostMapping("/associations")
+    public ResponseEntity<UserCompanyAssociationData> createAssociation(
+            @Valid @RequestBody UserCompanyAssociationSpec request) throws DataException {
+        var createdAssociation =
+                testDataService.createUserCompanyAssociationData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("association_id",
+                createdAssociation.getId());
+        LOG.info("New association created", data);
+        return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/associations/{associationId}")
+    public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId")
+                                                                 String associationId)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("association_id", associationId);
+        boolean deleteAssociation =
+                testDataService.deleteUserCompanyAssociationData(associationId);
+
+        if (deleteAssociation) {
+            LOG.info("Association is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Association is not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/health-check")

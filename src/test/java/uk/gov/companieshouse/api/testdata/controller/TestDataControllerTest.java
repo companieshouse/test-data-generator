@@ -46,6 +46,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
@@ -798,5 +800,90 @@ class TestDataControllerTest {
         var response = testDataController.healthCheck();
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("test-data-generator is alive",response.getBody());
+    }
+
+    @Test
+    void createUserCompanyAssociation() throws Exception {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId("userIdForAssociation");
+        spec.setCompanyNumber("TC123456");
+        spec.setStatus("confirmed");
+        spec.setApprovalRoute("auth_code");
+
+        UserCompanyAssociationData association =
+                new UserCompanyAssociationData(
+                new ObjectId(), "TC123456", "userIdForAssociation",
+                        null, "confirmed", "auth_code",
+                        null, null);
+
+        when(this.testDataService.createUserCompanyAssociationData(spec))
+                .thenReturn(association);
+        ResponseEntity<UserCompanyAssociationData> response
+                = this.testDataController.createAssociation(spec);
+
+        assertEquals(association, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createUserCompanyAssociationException() throws Exception {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        Throwable exception = new DataException("Error creating an "
+                + "association");
+
+        when(this.testDataService.createUserCompanyAssociationData(spec))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createAssociation(spec));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void deleteUserCompanyAssociation() throws Exception {
+        final String associationId = "associationId";
+
+        when(this.testDataService.deleteUserCompanyAssociationData(associationId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteAssociation(associationId);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteUserCompanyAssociationData(associationId);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationNotFound() throws Exception {
+        final String associationId = "associationId";
+
+        when(this.testDataService.deleteUserCompanyAssociationData(associationId))
+                .thenReturn(false);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteAssociation(associationId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("associationId",
+                Objects.requireNonNull(response.getBody()).get(
+                        "association_id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService, times(1)).deleteUserCompanyAssociationData(associationId);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationException() throws Exception {
+        final String associationId = "associationId";
+        Throwable exception = new DataException("Error deleting "
+                + "association");
+
+        when(this.testDataService.deleteUserCompanyAssociationData(associationId))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(
+                DataException.class,
+                () -> this.testDataController.deleteAssociation(associationId));
+        assertEquals(exception, thrown);
     }
 }
