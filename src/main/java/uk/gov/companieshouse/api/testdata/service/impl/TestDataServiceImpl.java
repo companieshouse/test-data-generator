@@ -691,8 +691,7 @@ public class TestDataServiceImpl implements TestDataService {
                     createdAssociation.getUserEmail(),
                     createdAssociation.getStatus(),
                     createdAssociation.getApprovalRoute(),
-                    createdAssociation.getInvitations(),
-                    createdAssociation.getPreviousStates()
+                    createdAssociation.getInvitations()
             );
         } catch (Exception ex) {
             throw new DataException("Error creating the association",

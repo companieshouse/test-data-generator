@@ -83,8 +83,7 @@ public class UserCompanyAssociationServiceImpl implements
                 association.getUserEmail(),
                 association.getStatus(),
                 association.getApprovalRoute(),
-                association.getInvitations(),
-                association.getPreviousStates());
+                association.getInvitations());
     }
 
     @Override

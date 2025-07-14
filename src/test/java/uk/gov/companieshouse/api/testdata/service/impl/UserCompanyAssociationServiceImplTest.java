@@ -36,6 +36,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class UserCompanyAssociationServiceImplTest {
+    private static final String COMPANY_NUMBER = "TC123456";
 
     @Mock
     private UserCompanyAssociationRepository repository;
@@ -51,7 +52,7 @@ class UserCompanyAssociationServiceImplTest {
     void createDefaultAssociation() throws DataException {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setCompanyNumber("TC123456");
+        spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId("userId");
 
         var createdDate = Instant.now();
@@ -63,7 +64,7 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociationData association = service.create(spec);
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
-        assertEquals("TC123456", association.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
         assertEquals("userId", association.getUserId());
 
         ArgumentCaptor<UserCompanyAssociation> captor =
@@ -72,7 +73,7 @@ class UserCompanyAssociationServiceImplTest {
 
         UserCompanyAssociation captured = captor.getValue();
         assertEquals(id, captured.getId());
-        assertEquals("TC123456", captured.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
         assertEquals("userId", captured.getUserId());
         assertEquals("confirmed", captured.getStatus());
         assertEquals("auth_code", captured.getApprovalRoute());
@@ -97,7 +98,7 @@ class UserCompanyAssociationServiceImplTest {
 
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setCompanyNumber("TC123456");
+        spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId("userA");
         spec.setApprovalRoute("invitation");
         spec.setStatus("awaiting-approval");
@@ -113,7 +114,7 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociationData association = service.create(spec);
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
-        assertEquals("TC123456", association.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
         assertEquals("userA", association.getUserId());
         assertEquals("awaiting-approval", association.getStatus());
         assertEquals("invitation", association.getApprovalRoute());
@@ -124,7 +125,7 @@ class UserCompanyAssociationServiceImplTest {
 
         UserCompanyAssociation captured = captor.getValue();
         assertEquals(id, captured.getId());
-        assertEquals("TC123456", captured.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
         assertEquals("userA", captured.getUserId());
         assertEquals("awaiting-approval", captured.getStatus());
         assertEquals("invitation", captured.getApprovalRoute());
@@ -148,7 +149,7 @@ class UserCompanyAssociationServiceImplTest {
     void createAssociationWithEmail() throws DataException {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setCompanyNumber("TC123456");
+        spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserEmail("test@example.com");
 
         var createdDate = Instant.now();
@@ -169,7 +170,7 @@ class UserCompanyAssociationServiceImplTest {
 
         UserCompanyAssociation captured = captor.getValue();
         assertEquals(id, captured.getId());
-        assertEquals("TC123456", captured.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
         assertEquals("test@example.com", captured.getUserEmail());
         assertEquals("confirmed", captured.getStatus());
         assertEquals("auth_code", captured.getApprovalRoute());

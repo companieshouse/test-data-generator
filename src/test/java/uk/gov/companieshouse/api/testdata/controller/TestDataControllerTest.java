@@ -848,7 +848,7 @@ class TestDataControllerTest {
                 new UserCompanyAssociationData(
                 new ObjectId(), "TC123456", "userIdForAssociation",
                         null, "confirmed", "auth_code",
-                        null, null);
+                        null);
 
         when(this.testDataService.createUserCompanyAssociationData(spec))
                 .thenReturn(association);

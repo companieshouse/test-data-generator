@@ -1855,9 +1855,9 @@ class TestDataServiceImplTest {
         assertNotNull(result);
         verify(disqualificationsService).create(spec);
     }
-  
-  @Test
-  void createUserCompanyAssociationData() throws DataException {
+
+    @Test
+    void createUserCompanyAssociationData() throws DataException {
         var id = new ObjectId();
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
@@ -1867,8 +1867,7 @@ class TestDataServiceImplTest {
         UserCompanyAssociationData associationData =
                 new UserCompanyAssociationData(id, spec.getCompanyNumber(),
                         spec.getUserId(), null, "confirmed",
-                        "auth_code", null,
-                        null);
+                        "auth_code", null);
 
         when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
 
@@ -1882,7 +1881,6 @@ class TestDataServiceImplTest {
         assertEquals("confirmed", createdAssociation.getStatus());
         assertEquals("auth_code", createdAssociation.getApprovalRoute());
         assertNull(createdAssociation.getInvitations());
-        assertNull(createdAssociation.getPreviousStates());
         assertNull(createdAssociation.getUserEmail());
 
         verify(userCompanyAssociationService, times(1)).create(spec);

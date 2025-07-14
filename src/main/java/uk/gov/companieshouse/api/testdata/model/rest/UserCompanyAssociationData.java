@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bson.types.ObjectId;
 import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
-import uk.gov.companieshouse.api.testdata.model.entity.PreviousState;
 
 public class UserCompanyAssociationData {
     @JsonProperty("id")
@@ -30,14 +29,10 @@ public class UserCompanyAssociationData {
     @JsonProperty("invitations")
     private final List<Invitation> invitations;
 
-    @JsonProperty("previous_states")
-    private final List<PreviousState> previousStates;
-
     public UserCompanyAssociationData(ObjectId id,
                                       String companyNumber, String userId,
                                       String userEmail, String status,
-                                      String approvalRoute, List<Invitation> invitations,
-                                      List<PreviousState> previousStates) {
+                                      String approvalRoute, List<Invitation> invitations) {
         this.id = id.toString();
         this.companyNumber = companyNumber;
         this.userId = userId;
@@ -45,7 +40,6 @@ public class UserCompanyAssociationData {
         this.status = status;
         this.approvalRoute = approvalRoute;
         this.invitations = invitations;
-        this.previousStates = previousStates;
     }
 
     public String getId() {
@@ -74,9 +68,5 @@ public class UserCompanyAssociationData {
 
     public List<Invitation> getInvitations() {
         return invitations;
-    }
-
-    public List<PreviousState> getPreviousStates() {
-        return previousStates;
     }
 }
