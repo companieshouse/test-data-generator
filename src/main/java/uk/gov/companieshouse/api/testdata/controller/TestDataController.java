@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +26,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -34,13 +34,16 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.GetPenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -174,7 +177,7 @@ public class TestDataController {
 
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
-    String acspMemberId)
+                                                                String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("acsp-member-id", acspMemberId);
@@ -192,7 +195,7 @@ public class TestDataController {
 
     @DeleteMapping("/certificates/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertificates(@PathVariable("id")
-                                                                      String id)
+                                                                  String id)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
@@ -230,10 +233,20 @@ public class TestDataController {
         }
     }
 
+    @PostMapping("/penalties")
+    public ResponseEntity<AccountPenaltiesData> createPenalty(
+            @Valid @RequestBody PenaltySpec request) throws DataException {
+        LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
+                + " and customer code: " + request.getCustomerCode());
+        var createdPenalties = testDataService.createPenaltyData(request);
+        LOG.info("Successfully created account penalties with ID: " + createdPenalties.getId());
+        return new ResponseEntity<>(createdPenalties, HttpStatus.CREATED);
+    }
+
     @GetMapping("/penalties/{penaltyRef}")
     public ResponseEntity<AccountPenaltiesData> getPenalty(
             @NotNull @PathVariable("penaltyRef") String penaltyRef,
-            @Valid @RequestBody AccountPenaltyRequest request) throws NoDataFoundException {
+            @Valid @RequestBody PenaltySpec request) throws NoDataFoundException {
 
         AccountPenaltiesData penaltyData = testDataService.getAccountPenaltyData(
                 request.getCompanyCode(), request.getCustomerCode(), penaltyRef);
@@ -244,10 +257,9 @@ public class TestDataController {
 
     @GetMapping("/penalties")
     public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
-            @Valid @RequestBody AccountPenaltyRequest request) throws NoDataFoundException {
+            @Valid @RequestBody GetPenaltyRequest request) throws NoDataFoundException {
 
-        var accountPenaltiesData = testDataService.getAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode());
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(request.getId());
 
         return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);
 
@@ -266,17 +278,17 @@ public class TestDataController {
 
     }
 
-    @DeleteMapping("/penalties")
+    @DeleteMapping("/penalties/{id}")
     public ResponseEntity<Void> deleteAccountPenalties(
-            @Valid @RequestBody AccountPenaltyRequest request)
+            @PathVariable("id") String id)
             throws DataException, NoDataFoundException {
 
-         return testDataService.deleteAccountPenaltiesData(
-                request.getCompanyCode(), request.getCustomerCode());
+        return testDataService.deleteAccountPenaltiesData(id);
     }
 
     @GetMapping("/postcodes")
-    public ResponseEntity<PostcodesData> getPostcode(@RequestParam(value = "country") String country) throws DataException {
+    public ResponseEntity<PostcodesData> getPostcode(
+            @RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
         if (postcode == null) {

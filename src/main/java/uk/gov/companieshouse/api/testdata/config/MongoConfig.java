@@ -133,6 +133,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public DisqualificationsRepository disqualificationsRepository() {
+        return getMongoRepositoryBean(DisqualificationsRepository.class, "disqualifications");
+    }
+  
+    @Bean
     public UserCompanyAssociationRepository userCompanyAssociationRepository() {
         return getMongoRepositoryBean(UserCompanyAssociationRepository.class,
                 "user_company_associations");

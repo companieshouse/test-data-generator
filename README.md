@@ -51,6 +51,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
   - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1. Has a maximum allowed value of 20.
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
+  - `disqualified_officers`: This takes a list to create a company with disqualified officers. Defaults a company without a disqualified offiecrs list.
   - `accounts_due_status`: Set the accounts and confirmation statement due dates of the company by providing accounts_due_status (e.g., `overdue`, `due-soon`). Defaults to current date. 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
   - `company_name`: The name of the company. Defaults to a randomly generated name. Creates a company with the name provided and appended with company number.
@@ -93,6 +94,7 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
   - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
   - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
+  - A usage example for creating a company with disqualified officers: `{ "disqualified_officers": [ { "disqualification_type": "court-order", "is_corporate_officer": false }]}`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
@@ -166,11 +168,27 @@ In order to use the generator, there are different possible endpoints that can b
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
   
-  - An usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
+  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
 
-#### Retrieving, Updating and Deleting Account Penalties
+#### Creating, Retrieving, Updating and Deleting Account Penalties
+- POST: Sending a POST request to create Account Penalties `{Base URL}/test-data/penalties` will create an Account Penalties entry in the account_penalties db collection. The request body must include all mandatory fields of `companyCode`, `customer_code` and `amount` then optional fields of `createdAt`, `closedAt`, `isPaid`, `amount`, `number_of_penalties`, `type_description`, `ledger_code`, `dunning_status`, `account_status`, `outstandingAMount`, `transaction_type` and `transaction_sub_type` parameters.
+  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. Mandatory field.
+  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. Mandatory field.
+  - `amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection. Mandatory field.
+  - `created_at`: The Created At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `closed_at`: The Closed At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `is_paid`: The Is Paid flag of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `outstanding_amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `number_of_penalties`: The number of penalties to be created in the Account Penalties data in the account_penalties db collection.
+  - `type_description`: The type description of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `ledger_code`: The ledger code of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `dunning_status`: The dunning status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `account_status`: The account status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `transaction_type`: The transaction type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `transaction_sub_type`: The transaction sub-type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
 
+  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
 - GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties`. The request body must include mandatory `companyCode` and `customer_code`.
   - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
   - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
@@ -180,8 +198,10 @@ In order to use the generator, there are different possible endpoints that can b
   - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
   - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
 
-  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
+  A usage example looks like this: `{ "company_code": "C9", "customer_code": "FC123456", "number_of_penalties": 1, "type_description": "random words to say nothing", "ledger_code": "FU", "dunning_status": "DCA", "account_status": "DCA", "closed_at": "2025-07-02T06:49:44.261+0000", "amount": 200.0, "is_paid": false, "transaction_type": "1", "transaction_sub_type": "A2" }`
+
 - PUT: Sending a PUT request to update Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will update an Account Penalties entry. The request body must include mandatory `companyCode` and `customer_code`, and optional `createdAt`, `closedAt`, `isPaid`, `amount` and `outstandingAMount` parameters.
+
   - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
   - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
   - `created_at`: The Created At date of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This cannot be set to null. This is optional.
@@ -191,11 +211,8 @@ In order to use the generator, there are different possible endpoints that can b
   - `outstanding_amount`: The Amount of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
 
   A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties` will delete the `Account Penalties`. `companyCode` and `companyCode` are required.
-  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
-  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
 
-  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties/{id}` will delete the `Account Penalties`. `id`  is required.
 
 #### Retrieving Postcode
 - GET: Sending a GET request to retrieve the Postcode `{Base URL}/test-data/postcode/{countrycode}`.
