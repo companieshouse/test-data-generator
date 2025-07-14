@@ -40,6 +40,8 @@ class WebConfigTest {
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/identity/**");
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/acsp-members/**");
+        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/transactions/**");
+
     }
 
     @Test
