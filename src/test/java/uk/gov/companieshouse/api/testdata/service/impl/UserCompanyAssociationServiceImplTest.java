@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -37,6 +36,14 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @ExtendWith(MockitoExtension.class)
 class UserCompanyAssociationServiceImplTest {
     private static final String COMPANY_NUMBER = "TC123456";
+    private static final String AUTH_CODE_APPROVAL_ROUTE =
+            "auth_code";
+    private static final String CONFIRMED_STATUS = "confirmed";
+    private static final String AWAITING_APPROVAL_STATUS =
+            "awaiting-approval";
+    private static final String INVITATION_APPROVAL_ROUTE = "invitation";
+    private static final String USER_ID = "userId";
+    private static final String ASSOCIATION_ID = "associationId";
 
     @Mock
     private UserCompanyAssociationRepository repository;
@@ -53,10 +60,10 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setUserId("userId");
+        spec.setUserId(USER_ID);
 
         var createdDate = Instant.now();
-        doReturn(createdDate).when(service).getCurrentDateTime();
+        when(randomService.getCurrentDateTime()).thenReturn(createdDate);
 
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
@@ -65,7 +72,7 @@ class UserCompanyAssociationServiceImplTest {
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
         assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
-        assertEquals("userId", association.getUserId());
+        assertEquals(USER_ID, association.getUserId());
 
         ArgumentCaptor<UserCompanyAssociation> captor =
                 ArgumentCaptor.forClass(UserCompanyAssociation.class);
@@ -74,9 +81,9 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociation captured = captor.getValue();
         assertEquals(id, captured.getId());
         assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
-        assertEquals("userId", captured.getUserId());
-        assertEquals("confirmed", captured.getStatus());
-        assertEquals("auth_code", captured.getApprovalRoute());
+        assertEquals(USER_ID, captured.getUserId());
+        assertEquals(CONFIRMED_STATUS, captured.getStatus());
+        assertEquals(AUTH_CODE_APPROVAL_ROUTE, captured.getApprovalRoute());
         assertNull(captured.getUserEmail());
         assertNull(captured.getInvitations());
         assertNull(captured.getApprovalExpiryAt());
@@ -99,14 +106,16 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setUserId("userA");
-        spec.setApprovalRoute("invitation");
-        spec.setStatus("awaiting-approval");
+        spec.setUserId(USER_ID);
+        spec.setApprovalRoute(INVITATION_APPROVAL_ROUTE);
+        spec.setStatus(AWAITING_APPROVAL_STATUS);
         spec.setInvitations(List.of(invitationSpec));
+        spec.setApprovalExpiryAt(invitationTime.plus(7,
+                ChronoUnit.DAYS));
         spec.setPreviousStates(List.of(previousStateSpec));
 
         var createdDate = Instant.now();
-        doReturn(createdDate).when(service).getCurrentDateTime();
+        when(randomService.getCurrentDateTime()).thenReturn(createdDate);
 
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
@@ -115,9 +124,9 @@ class UserCompanyAssociationServiceImplTest {
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
         assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
-        assertEquals("userA", association.getUserId());
-        assertEquals("awaiting-approval", association.getStatus());
-        assertEquals("invitation", association.getApprovalRoute());
+        assertEquals(USER_ID, association.getUserId());
+        assertEquals(AWAITING_APPROVAL_STATUS, association.getStatus());
+        assertEquals(INVITATION_APPROVAL_ROUTE, association.getApprovalRoute());
 
         ArgumentCaptor<UserCompanyAssociation> captor =
                 ArgumentCaptor.forClass(UserCompanyAssociation.class);
@@ -126,9 +135,9 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociation captured = captor.getValue();
         assertEquals(id, captured.getId());
         assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
-        assertEquals("userA", captured.getUserId());
-        assertEquals("awaiting-approval", captured.getStatus());
-        assertEquals("invitation", captured.getApprovalRoute());
+        assertEquals(USER_ID, captured.getUserId());
+        assertEquals(AWAITING_APPROVAL_STATUS, captured.getStatus());
+        assertEquals(INVITATION_APPROVAL_ROUTE, captured.getApprovalRoute());
         assertNull(captured.getUserEmail());
         assertEquals(invitationSpec.getInvitedAt(),
                 captured.getInvitations().getFirst().getInvitedAt());
@@ -141,7 +150,7 @@ class UserCompanyAssociationServiceImplTest {
         assertEquals(previousStateSpec.getChangedAt(),
                 captured.getPreviousStates().getFirst().getChangedAt());
         assertEquals(createdDate, captured.getCreatedAt());
-        assertEquals(createdDate
+        assertEquals(invitationTime
                 .plus(7, ChronoUnit.DAYS), captured.getApprovalExpiryAt());
     }
 
@@ -153,7 +162,7 @@ class UserCompanyAssociationServiceImplTest {
         spec.setUserEmail("test@example.com");
 
         var createdDate = Instant.now();
-        doReturn(createdDate).when(service).getCurrentDateTime();
+        when(randomService.getCurrentDateTime()).thenReturn(createdDate);
 
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
@@ -161,7 +170,7 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociationData association = service.create(spec);
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
-        assertEquals("TC123456", association.getCompanyNumber());
+        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
         assertEquals("test@example.com", association.getUserEmail());
 
         ArgumentCaptor<UserCompanyAssociation> captor =
@@ -172,8 +181,8 @@ class UserCompanyAssociationServiceImplTest {
         assertEquals(id, captured.getId());
         assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
         assertEquals("test@example.com", captured.getUserEmail());
-        assertEquals("confirmed", captured.getStatus());
-        assertEquals("auth_code", captured.getApprovalRoute());
+        assertEquals(CONFIRMED_STATUS, captured.getStatus());
+        assertEquals(AUTH_CODE_APPROVAL_ROUTE, captured.getApprovalRoute());
         assertNull(captured.getUserId());
         assertNull(captured.getInvitations());
         assertNull(captured.getApprovalExpiryAt());
@@ -185,16 +194,16 @@ class UserCompanyAssociationServiceImplTest {
     void deleteAssociation() {
         UserCompanyAssociation userCompanyAssociation =
                 new UserCompanyAssociation();
-        when(repository.findById("associationId")).thenReturn(Optional.of(userCompanyAssociation));
-        boolean result = service.delete("associationId");
+        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(userCompanyAssociation));
+        boolean result = service.delete(ASSOCIATION_ID);
         assertTrue(result);
         verify(repository).delete(userCompanyAssociation);
     }
 
     @Test
     void deleteAssociationNotFound() {
-        when(repository.findById("associationId")).thenReturn(Optional.empty());
-        boolean result = service.delete("associationId");
+        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.empty());
+        boolean result = service.delete(ASSOCIATION_ID);
         assertFalse(result);
         verify(repository, never()).delete(any(UserCompanyAssociation.class));
     }
@@ -204,13 +213,13 @@ class UserCompanyAssociationServiceImplTest {
         UserCompanyAssociation userCompanyAssociation =
                 new UserCompanyAssociation();
 
-        when(repository.findById("associationId")).thenReturn(Optional.of(userCompanyAssociation));
+        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(userCompanyAssociation));
         doThrow(new RuntimeException("Error deleting association"))
                 .when(repository).delete(userCompanyAssociation);
 
         RuntimeException exception =
                 assertThrows(RuntimeException.class,
-                        () -> service.delete("associationId"));
+                        () -> service.delete(ASSOCIATION_ID));
         assertEquals("Error deleting association", exception.getMessage());
     }
 }

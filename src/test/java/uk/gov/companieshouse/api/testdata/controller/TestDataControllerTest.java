@@ -62,6 +62,12 @@ class TestDataControllerTest {
     private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "NI23456";
+    private static final String COMPANY_NUMBER = "TC123456";
+    private static final String AUTH_CODE_APPROVAL_ROUTE =
+            "auth_code";
+    private static final String CONFIRMED_STATUS = "confirmed";
+    private static final String USER_ID = "userId";
+    private static final String ASSOCIATION_ID = "associationId";
 
     @Mock
     private TestDataService testDataService;
@@ -839,15 +845,15 @@ class TestDataControllerTest {
     void createUserCompanyAssociation() throws Exception {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setUserId("userIdForAssociation");
-        spec.setCompanyNumber("TC123456");
-        spec.setStatus("confirmed");
-        spec.setApprovalRoute("auth_code");
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setStatus(CONFIRMED_STATUS);
+        spec.setApprovalRoute(AUTH_CODE_APPROVAL_ROUTE);
 
         UserCompanyAssociationData association =
                 new UserCompanyAssociationData(
-                new ObjectId(), "TC123456", "userIdForAssociation",
-                        null, "confirmed", "auth_code",
+                new ObjectId(), COMPANY_NUMBER, USER_ID,
+                        null, CONFIRMED_STATUS, AUTH_CODE_APPROVAL_ROUTE,
                         null);
 
         when(this.testDataService.createUserCompanyAssociationData(spec))
@@ -876,47 +882,43 @@ class TestDataControllerTest {
 
     @Test
     void deleteUserCompanyAssociation() throws Exception {
-        final String associationId = "associationId";
-
-        when(this.testDataService.deleteUserCompanyAssociationData(associationId)).thenReturn(true);
+        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
+                .thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(associationId);
+                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteUserCompanyAssociationData(associationId);
+        verify(testDataService).deleteUserCompanyAssociationData(ASSOCIATION_ID);
     }
 
     @Test
     void deleteUserCompanyAssociationNotFound() throws Exception {
-        final String associationId = "associationId";
-
-        when(this.testDataService.deleteUserCompanyAssociationData(associationId))
+        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
                 .thenReturn(false);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(associationId);
+                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("associationId",
+        assertEquals(ASSOCIATION_ID,
                 Objects.requireNonNull(response.getBody()).get(
                         "association_id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
-        verify(testDataService, times(1)).deleteUserCompanyAssociationData(associationId);
+        verify(testDataService, times(1)).deleteUserCompanyAssociationData(ASSOCIATION_ID);
     }
 
     @Test
     void deleteUserCompanyAssociationException() throws Exception {
-        final String associationId = "associationId";
         Throwable exception = new DataException("Error deleting "
                 + "association");
 
-        when(this.testDataService.deleteUserCompanyAssociationData(associationId))
+        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
                 .thenThrow(exception);
 
         DataException thrown = assertThrows(
                 DataException.class,
-                () -> this.testDataController.deleteAssociation(associationId));
+                () -> this.testDataController.deleteAssociation(ASSOCIATION_ID));
         assertEquals(exception, thrown);
     }
 }

@@ -109,6 +109,10 @@ class TestDataServiceImplTest {
     private static final String API_URL = "http://localhost:4001";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
     private static final String CERTIFICATES_ID = "CRT-123456-789012";
+    private static final String AUTH_CODE_APPROVAL_ROUTE =
+            "auth_code";
+    private static final String CONFIRMED_STATUS = "confirmed";
+    private static final String ASSOCIATION_ID = "associationId";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -1861,13 +1865,13 @@ class TestDataServiceImplTest {
         var id = new ObjectId();
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setUserId("userId");
-        spec.setCompanyNumber("TC123456");
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
 
         UserCompanyAssociationData associationData =
                 new UserCompanyAssociationData(id, spec.getCompanyNumber(),
-                        spec.getUserId(), null, "confirmed",
-                        "auth_code", null);
+                        spec.getUserId(), null, CONFIRMED_STATUS,
+                        AUTH_CODE_APPROVAL_ROUTE, null);
 
         when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
 
@@ -1876,10 +1880,11 @@ class TestDataServiceImplTest {
 
         assertNotNull(createdAssociation);
         assertEquals(id.toString(), createdAssociation.getId());
-        assertEquals("userId", createdAssociation.getUserId());
-        assertEquals("TC123456", createdAssociation.getCompanyNumber());
-        assertEquals("confirmed", createdAssociation.getStatus());
-        assertEquals("auth_code", createdAssociation.getApprovalRoute());
+        assertEquals(USER_ID, createdAssociation.getUserId());
+        assertEquals(COMPANY_NUMBER, createdAssociation.getCompanyNumber());
+        assertEquals(CONFIRMED_STATUS, createdAssociation.getStatus());
+        assertEquals(AUTH_CODE_APPROVAL_ROUTE,
+                createdAssociation.getApprovalRoute());
         assertNull(createdAssociation.getInvitations());
         assertNull(createdAssociation.getUserEmail());
 
@@ -1901,7 +1906,7 @@ class TestDataServiceImplTest {
     void createUserCompanyAssociationDataNoCompanyNumber() {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setUserId("userId");
+        spec.setUserId(USER_ID);
 
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createUserCompanyAssociationData(spec));
@@ -1913,8 +1918,8 @@ class TestDataServiceImplTest {
     void createUserCompanyAssociationDataException() throws DataException {
         UserCompanyAssociationSpec spec =
                 new UserCompanyAssociationSpec();
-        spec.setUserId("userId");
-        spec.setCompanyNumber("TC123456");
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
 
         when(userCompanyAssociationService.create(spec))
                 .thenThrow(new RuntimeException("Error creating the "
@@ -1931,43 +1936,40 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteUserCompanyAssociation() throws DataException {
-        var id = "associationId";
-        when(userCompanyAssociationService.delete(id))
+        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenReturn(true);
 
         boolean result =
-                testDataService.deleteUserCompanyAssociationData(id);
+                testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
 
         assertTrue(result);
-        verify(userCompanyAssociationService).delete(id);
+        verify(userCompanyAssociationService).delete(ASSOCIATION_ID);
     }
 
     @Test
     void deleteUserCompanyAssociationNotFound() throws DataException {
-        var id = "associationId";
-        when(userCompanyAssociationService.delete(id))
+        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenReturn(false);
 
         boolean result =
-                testDataService.deleteUserCompanyAssociationData(id);
+                testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
 
         assertFalse(result);
-        verify(userCompanyAssociationService, times(1)).delete(id);
+        verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
     }
 
     @Test
     void deleteUserCompanyAssociationException() {
-        var id = "associationId";
         RuntimeException ex = new RuntimeException("Error deleting "
                 + "association");
-        when(userCompanyAssociationService.delete(id))
+        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class,
-                () -> testDataService.deleteUserCompanyAssociationData(id));
+                () -> testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID));
 
         assertEquals("Error deleting association",
                 exception.getMessage());
-        verify(userCompanyAssociationService, times(1)).delete(id);
+        verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
     }
 }

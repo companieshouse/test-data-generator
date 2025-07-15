@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Instant;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +23,8 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class UserCompanyAssociationServiceImpl implements
         DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> {
+    private static final String AUTH_CODE = "auth_code";
+    private static final String CONFIRMED_STATUS = "confirmed";
 
     @Autowired
     private UserCompanyAssociationRepository repository;
@@ -36,44 +36,25 @@ public class UserCompanyAssociationServiceImpl implements
     public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {
         var randomId = randomService.generateId();
         var association = new UserCompanyAssociation();
-        var currentDate = getCurrentDateTime();
+        var currentDate = randomService.getCurrentDateTime();
 
         association.setId(randomId);
         association.setCompanyNumber(spec.getCompanyNumber());
         association.setUserId(spec.getUserId());
         association.setUserEmail(spec.getUserEmail());
         association.setStatus(Objects.requireNonNullElse(spec.getStatus(),
-                "confirmed"));
+                CONFIRMED_STATUS));
         association.setCreatedAt(currentDate);
         association.setApprovalRoute(Objects.requireNonNullElse(spec.getApprovalRoute(),
-                "auth_code"));
-
-        if (spec.getInvitations() != null) {
-            List<Invitation> invitationList = new ArrayList<>();
-            for (InvitationSpec invite : spec.getInvitations()) {
-                var invitation = new Invitation();
-                invitation.setInvitedAt(invite.getInvitedAt());
-                invitation.setInvitedBy(invite.getInvitedBy());
-                invitationList.add(invitation);
-            }
-            association.setInvitations(invitationList);
-            association.setApprovalExpiryAt(Objects.requireNonNullElse(spec.getApprovalExpiryAt(),
+                AUTH_CODE));
+        association.setInvitations(spec.getInvitations() != null ? createInvitations(spec) : null);
+        association.setApprovalExpiryAt(spec.getInvitations() != null
+                ? Objects.requireNonNullElse(spec.getApprovalExpiryAt(),
                     currentDate.plus(7,
-                            ChronoUnit.DAYS)));
-        }
+                            ChronoUnit.DAYS)) : null);
+        association.setPreviousStates(spec.getPreviousStates() != null
+                ? createPreviousStates(spec) : null);
 
-        if (spec.getPreviousStates() != null) {
-            List<PreviousState> previousStateList = new ArrayList<>();
-            for (PreviousStateSpec prevState :
-                    spec.getPreviousStates()) {
-                var previousState = new PreviousState();
-                previousState.setChangedBy(prevState.getChangedBy());
-                previousState.setChangedAt(prevState.getChangedAt());
-                previousState.setStatus(prevState.getStatus());
-                previousStateList.add(previousState);
-            }
-            association.setPreviousStates(previousStateList);
-        }
         repository.save(association);
 
         return new UserCompanyAssociationData(
@@ -94,7 +75,27 @@ public class UserCompanyAssociationServiceImpl implements
         return association.isPresent();
     }
 
-    protected Instant getCurrentDateTime() {
-        return Instant.now().atZone(ZoneOffset.UTC).toInstant();
+    private List<Invitation> createInvitations(UserCompanyAssociationSpec spec) {
+        List<Invitation> invitationList = new ArrayList<>();
+        for (InvitationSpec invite : spec.getInvitations()) {
+            var invitation = new Invitation();
+            invitation.setInvitedAt(invite.getInvitedAt());
+            invitation.setInvitedBy(invite.getInvitedBy());
+            invitationList.add(invitation);
+        }
+        return invitationList;
+    }
+
+    private List<PreviousState> createPreviousStates(UserCompanyAssociationSpec spec) {
+        List<PreviousState> previousStateList = new ArrayList<>();
+        for (PreviousStateSpec prevState :
+                spec.getPreviousStates()) {
+            var previousState = new PreviousState();
+            previousState.setChangedBy(prevState.getChangedBy());
+            previousState.setChangedAt(prevState.getChangedAt());
+            previousState.setStatus(prevState.getStatus());
+            previousStateList.add(previousState);
+        }
+        return previousStateList;
     }
 }
