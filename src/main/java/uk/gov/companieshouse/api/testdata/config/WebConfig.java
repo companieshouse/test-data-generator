@@ -14,6 +14,8 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String ACSP_ENDPOINTS = "/test-data/acsp-members/**";
     private static final String APPEALS_ENDPOINTS = "/test-data/appeals/**";
     private static final String ACCOUNT_PENALTIES_ENDPOINTS = "/test-data/penalties/**";
+    private static final String USER_COMPANY_ASSOCIATION_ENDPOINTS =
+            "/test-data/associations/**";
 
     private static final String TRANSACTIONS_ENDPOINTS = "/test-data/transactions/**";
 
@@ -25,6 +27,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(ACSP_ENDPOINTS)
                 .addPathPatterns(APPEALS_ENDPOINTS)
                 .addPathPatterns(ACCOUNT_PENALTIES_ENDPOINTS)
+                .addPathPatterns(USER_COMPANY_ASSOCIATION_ENDPOINTS)
                 .addPathPatterns(TRANSACTIONS_ENDPOINTS);
 
     }

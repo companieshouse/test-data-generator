@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.OptionalLong;
 import org.bson.types.ObjectId;
@@ -70,4 +71,10 @@ public interface RandomService {
     ObjectId generateId();
 
     String getTransactionId();
+
+    /**
+     * Generates the current data and time.
+     * @return Current date and time.
+     */
+    Instant getCurrentDateTime();
 }
