@@ -3,7 +3,9 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Base64;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
@@ -85,5 +87,10 @@ public class RandomServiceImpl implements RandomService {
     @Override
     public ObjectId generateId() {
         return new ObjectId();
+    }
+
+    @Override
+    public Instant getCurrentDateTime() {
+        return Instant.now().atZone(ZoneOffset.UTC).toInstant();
     }
 }

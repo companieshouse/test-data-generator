@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.OptionalLong;
@@ -113,5 +114,15 @@ class RandomServiceImplTest {
         assertNotNull(firstId);
         assertNotNull(secondId);
         assertNotEquals(firstId, secondId);
+    }
+
+    @Test
+    void getCurrentDateTime() {
+        Instant firstTime = randomService.getCurrentDateTime();
+        Instant secondTime =
+                randomService.getCurrentDateTime();
+        assertNotNull(firstTime);
+        assertNotNull(secondTime);
+        assertNotEquals(firstTime, secondTime);
     }
 }

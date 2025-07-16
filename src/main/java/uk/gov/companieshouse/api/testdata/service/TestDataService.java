@@ -16,6 +16,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
@@ -175,4 +177,26 @@ public interface TestDataService {
      * @throws DataException if there is an error retrieving the postcodes
      */
     PostcodesData getPostcodes(String country) throws DataException;
+
+    /**
+     * Creates a new user company association test data based on the
+     * provided user specifications.
+     *
+     * @param userCompanyAssociationSpec the specifications of the
+     *                                   association to create
+     * @return the created user company association test data
+     * @throws DataException if there is an error during creation
+     */
+    UserCompanyAssociationData
+            createUserCompanyAssociationData(UserCompanyAssociationSpec userCompanyAssociationSpec)
+            throws DataException;
+
+    /**
+     * Deletes a user company association test data by
+     * association id.
+     *
+     * @param associationId the ID of the association to delete
+     * @throws DataException if there is an error during deletion
+     */
+    boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
 }

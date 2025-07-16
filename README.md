@@ -226,6 +226,25 @@ In order to use the generator, there are different possible endpoints that can b
     
   A usage example looks like this: `{"countrycode": "GB-ENG"}`
 
+#### Creating User Company Associations
+- POST: Sending a POST request to create User Company Association `{Base URL}/test-data/associations`. A `company_number` is mandatory and either a `user_id` or a `user_email` is required.
+  - `company_number`: The company number of the company.
+  - `user_id`: The user ID of the user. This is mandatory if there is no `user_email` provided.
+  - `user_email`: The user email of the user. This is mandatory if there is no `user_id` provided. 
+  - `status`: Status of the association. This is optional. Can only be confirmed, removed, migrated, awaiting-approval or unauthorised. Default is confirmed.
+  - `approval_route`: The route through which the association was created. This is optional. Can only be auth_code, invitation or migration. Default is auth_code.
+  - `approval_expiry_at`: The date and time the invitation expires. Default is 7 days from now. This is optional. It is only set if invitation data is passed.
+  - `invitations`:
+    - `invited_by`: User id of the user who invited them to the company.
+    - `invited_at`: When the user was invited to the company.
+  - `previous_states`: 
+    - `status`: The status of the association before it was changed.
+    - `changed_by`: The user id of the user who made the change.
+    - `changed_at`: When the association was changed.
+
+  A usage example looks like this: `{ "company_number": "12345678", "user_id": "userA", "status": "awaiting-approval", "approval_route": "invitation", "invitations": [ { "invited_by": "userB", "invited_at": "2025-07-14T10:10:26.945+00:00" }, { "invited_by": "UserC", "invited_at": "2025-07-06T08:49:25.354+00:00" } ], "approval_expiry_at": "2025-07-14T12:40:40.702+00:00", "previous_states": [ { "status": "removed", "changed_by": "UserC", "changed_at": "2025-07-05T08:49:25.354+00:00" }, { "status": "migrated", "changed_by": "UserD", "changed_at": "2025-07-04T08:49:25.354+00:00" } ] }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/associations/{associationId}` will delete the association. `associationId` is required to delete the association.
+
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
