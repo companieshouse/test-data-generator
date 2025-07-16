@@ -43,6 +43,8 @@ class WebConfigTest {
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/appeals/**");
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/penalties/**");
         verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/associations/**");
+        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/transactions/**");
+
     }
 
     @Test

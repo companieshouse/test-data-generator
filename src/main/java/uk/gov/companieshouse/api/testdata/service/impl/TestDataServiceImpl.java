@@ -49,6 +49,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -64,6 +66,7 @@ import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -92,6 +95,8 @@ public class TestDataServiceImpl implements TestDataService {
     private RandomService randomService;
     @Autowired
     private UserService userService;
+      @Autowired
+    private TransactionService transactionService;
     @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
@@ -705,6 +710,18 @@ public class TestDataServiceImpl implements TestDataService {
             return userCompanyAssociationService.delete(id);
         } catch (Exception ex) {
             throw new DataException("Error deleting association", ex);
+        }
+    }
+
+
+    public TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException{
+        try {
+            LOG.info("Creating Txn for User Id: " + transactionsSpec.getUserId());
+            return transactionService.create(transactionsSpec);
+        } catch (Exception ex) {
+            LOG.error("Failed to create Transaction for User Id: "
+                    + transactionsSpec.getUserId());
+            throw new DataException("Error creating transaction", ex);
         }
     }
 }

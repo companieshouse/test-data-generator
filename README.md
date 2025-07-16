@@ -226,6 +226,12 @@ In order to use the generator, there are different possible endpoints that can b
     
   A usage example looks like this: `{"countrycode": "GB-ENG"}`
 
+#### Creating transactions and ACSP applications
+- POST: Sending a POST request to `{Base URL}/test-data/transactions` will create a transaction and associated acsp application
+  `reference` : Type of transaction being created
+  `userId`    : CHS User Id of the user associated with the transaction
+  A usage example looks like this: `{"reference": "ACSP Registration" , "userId": "test12552"}`
+
 #### Creating User Company Associations
 - POST: Sending a POST request to create User Company Association `{Base URL}/test-data/associations`. A `company_number` is mandatory and either a `user_id` or a `user_email` is required.
   - `company_number`: The company number of the company.

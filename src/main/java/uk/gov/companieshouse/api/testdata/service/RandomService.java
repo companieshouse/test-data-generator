@@ -70,6 +70,8 @@ public interface RandomService {
      */
     ObjectId generateId();
 
+    String getTransactionId();
+
     /**
      * Generates the current data and time.
      * @return Current date and time.

@@ -115,6 +115,11 @@ class RandomServiceImplTest {
         assertNotNull(secondId);
         assertNotEquals(firstId, secondId);
     }
+    @Test
+    void getTransactionId(){
+        String value = randomService.getTransactionId();
+        assertNotNull(value);
+    }
 
     @Test
     void getCurrentDateTime() {

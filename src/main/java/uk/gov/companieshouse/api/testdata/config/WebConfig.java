@@ -17,6 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String USER_COMPANY_ASSOCIATION_ENDPOINTS =
             "/test-data/associations/**";
 
+    private static final String TRANSACTIONS_ENDPOINTS = "/test-data/transactions/**";
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(internalUserInterceptor())
@@ -25,7 +27,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(ACSP_ENDPOINTS)
                 .addPathPatterns(APPEALS_ENDPOINTS)
                 .addPathPatterns(ACCOUNT_PENALTIES_ENDPOINTS)
-                .addPathPatterns(USER_COMPANY_ASSOCIATION_ENDPOINTS);
+                .addPathPatterns(USER_COMPANY_ASSOCIATION_ENDPOINTS)
+                .addPathPatterns(TRANSACTIONS_ENDPOINTS);
+
     }
 
     @Bean

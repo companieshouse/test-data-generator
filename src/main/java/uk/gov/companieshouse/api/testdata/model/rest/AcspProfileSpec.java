@@ -14,6 +14,9 @@ public class AcspProfileSpec {
     @JsonProperty("acsp_number")
     private String acspNumber;
 
+    @JsonProperty
+    private String name;
+
     @JsonProperty("aml_details")
     private List<AmlSpec> amlDetails;
 
@@ -67,5 +70,12 @@ public class AcspProfileSpec {
 
     public void setBusinessSector(String businessSector) {
         this.businessSector = businessSector;
+    }
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

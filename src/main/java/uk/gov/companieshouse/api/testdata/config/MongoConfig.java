@@ -133,6 +133,17 @@ public class MongoConfig {
     }
 
     @Bean
+    public TransactionsRepository transactionsRepository() {
+        return getMongoRepositoryBean(TransactionsRepository.class, "transactions");
+    }
+
+    @Bean
+    public AcspApplicationRepository acspapplicationRepository() {
+        return getMongoRepositoryBean(AcspApplicationRepository.class, "acsp_application");
+    }
+
+
+    @Bean
     public DisqualificationsRepository disqualificationsRepository() {
         return getMongoRepositoryBean(DisqualificationsRepository.class, "disqualifications");
     }

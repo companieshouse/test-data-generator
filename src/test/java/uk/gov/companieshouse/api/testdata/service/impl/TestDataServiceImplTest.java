@@ -71,6 +71,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
@@ -87,6 +89,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -164,6 +167,9 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+
+    @Mock
+    private TransactionService transactionService;
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
     @Mock
@@ -1014,7 +1020,7 @@ class TestDataServiceImplTest {
         profileSpec.setType("limited-company");
 
         AcspProfileData acspProfileData =
-                new AcspProfileData(profileSpec.getAcspNumber());
+                new AcspProfileData(profileSpec.getAcspNumber(),profileSpec.getName());
         AcspMembersData expectedMembersData =
                 new AcspMembersData(new ObjectId(),
                         profileSpec.getAcspNumber(), "userId", "active", "role");
@@ -1055,9 +1061,9 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         AcspMembersData acspMembersData =
-                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(), "userId",
+                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(),"userId",
                         "active", "role");
         var acspStatus = "active";
         var acspType = "ltd";
@@ -1096,7 +1102,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         AcspMembersData acspMembersData = new AcspMembersData(new ObjectId(),
                 "acspNumber", "userId", "active", "role");
         spec.setAcspProfile(null);
@@ -1139,7 +1145,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
@@ -1971,5 +1977,29 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting association",
                 exception.getMessage());
         verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
+    }
+
+    @Test
+    void createTransactionData() throws DataException {
+        TransactionsSpec transactionsSpec = new TransactionsSpec();
+        transactionsSpec.setUserId("Test12454");
+        transactionsSpec.setReference("ACSP Registration");
+        TransactionsData txn = new TransactionsData("Test12454","ACSP Registration" ,"forename","surname","email","description","status");
+        when(transactionService.create(transactionsSpec)).thenReturn(txn);
+        TransactionsData result = testDataService.createTransactionData(transactionsSpec);
+        assertEquals(txn, result);
+    }
+
+    @Test
+    void createTransactionDataException() throws DataException {
+        TransactionsSpec transactionsSpec = new TransactionsSpec();
+        transactionsSpec.setUserId("Test12454");
+        transactionsSpec.setReference("ACSP Registration");
+        DataException ex = new DataException("creation failed");
+        when(transactionService.create(transactionsSpec)).thenThrow(ex);
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.createTransactionData(transactionsSpec));
+        assertEquals("Error creating transaction", thrown.getMessage());
+        assertEquals(ex, thrown.getCause());
     }
 }
