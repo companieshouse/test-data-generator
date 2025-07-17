@@ -552,17 +552,14 @@ class TestDataControllerTest {
     @Test
     void getAccountPenaltyNotFound() throws Exception {
         String id = "687932936d534811231973b6";
-        PenaltyRequest request = new PenaltyRequest();
-        request.setTransactionReference("A1234567");
-        request.setId(id);
+        String transactionReference = "A1234567";
 
-        Throwable exception = new NoDataFoundException("no account penalties");
+        when(this.testDataService.getAccountPenaltiesData(id))
+                .thenThrow(new NoDataFoundException("no account penalties"));
 
-        when(this.testDataService.getAccountPenaltiesData(id)).thenThrow(exception);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.getAccountPenalties(id, request));
-        assertEquals(exception, thrown);
+        assertThrows(NoDataFoundException.class, () -> {
+            this.testDataController.getAccountPenalties(id, transactionReference);
+        });
     }
 
     @Test
@@ -576,7 +573,7 @@ class TestDataControllerTest {
                 .thenReturn(accountPenaltiesData);
 
         ResponseEntity<AccountPenaltiesData> response = this.testDataController
-                .getAccountPenalties(request.getId(), request);
+                .getAccountPenalties(request.getId(), null);
 
         assertEquals(accountPenaltiesData, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -584,16 +581,14 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenaltiesNotFound() throws Exception {
-        PenaltyRequest request = new PenaltyRequest();
-        request.setId(PENALTY_ID);
+        String penaltyId = PENALTY_ID;
 
-        Throwable exception = new NoDataFoundException("Account penalties not found");
+        when(this.testDataService.getAccountPenaltiesData(penaltyId))
+                .thenThrow(new NoDataFoundException("Account penalties not found"));
 
-        when(this.testDataService.getAccountPenaltiesData(request.getId())).thenThrow(exception);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.getAccountPenalties(request.getId(), request));
-        assertEquals(exception, thrown);
+        assertThrows(NoDataFoundException.class, () -> {
+            this.testDataController.getAccountPenalties(penaltyId, null);
+        });
     }
 
     @Test

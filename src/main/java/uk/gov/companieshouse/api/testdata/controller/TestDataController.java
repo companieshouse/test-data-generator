@@ -247,14 +247,14 @@ public class TestDataController {
     @GetMapping("/penalties/{id}")
     public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
             @PathVariable("id") String id,
-            @RequestBody(required = false) PenaltyRequest request) throws NoDataFoundException {
+            @RequestParam(name = "transactionReference", required = false)
+            String transactionReference) throws NoDataFoundException {
 
         var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
-        if (request != null && request.getTransactionReference() != null) {
+        if (transactionReference != null) {
             var filteredPenalties = accountPenaltiesData.getPenalties().stream()
-                    .filter(p -> request.getTransactionReference().equals(
-                            p.getTransactionReference()))
+                    .filter(p -> transactionReference.equals(p.getTransactionReference()))
                     .toList();
             accountPenaltiesData.setPenalties(filteredPenalties);
         }
