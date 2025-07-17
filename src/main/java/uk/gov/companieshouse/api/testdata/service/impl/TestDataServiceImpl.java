@@ -34,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -94,6 +95,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Autowired
+    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
     @Autowired
     private AcspMembersRepository acspMembersRepository;
     @Autowired
@@ -526,6 +529,20 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             return certificatesService.create(spec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating certificates", ex);
+        }
+    }
+
+    @Override
+    public CertificatesData createCertifiedCopiesData(
+        final CertifiedCopiesSpec spec) throws DataException {
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create certificates");
+        }
+
+        try {
+            return certifiedCopiesService.create(spec);
         } catch (Exception ex) {
             throw new DataException("Error creating certificates", ex);
         }

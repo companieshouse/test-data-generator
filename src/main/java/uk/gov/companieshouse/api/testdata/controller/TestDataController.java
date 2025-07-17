@@ -30,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -171,6 +172,18 @@ public class TestDataController {
         data.put("certificated-id", createdCertificates.getCertificates().getFirst().getId());
         LOG.info("New certificates added", data);
         return new ResponseEntity<>(createdCertificates, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/certified-copies")
+    public ResponseEntity<CertificatesData> createCertifiedCopies(
+        @Valid @RequestBody CertifiedCopiesSpec request) throws DataException {
+
+        var createdCertifiedCopies = testDataService.createCertifiedCopiesData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("certificates-copies-id", createdCertifiedCopies.getCertificates().getFirst().getId());
+        LOG.info("New certified copies added", data);
+        return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/acsp-members/{acspMemberId}")
