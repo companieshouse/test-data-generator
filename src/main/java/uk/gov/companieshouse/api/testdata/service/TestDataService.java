@@ -169,6 +169,18 @@ public interface TestDataService {
     ResponseEntity<Void> deleteAccountPenaltiesData(String id)
             throws NoDataFoundException, DataException;
 
+    /**
+     * Deletes an account penalty by its reference.
+     *
+     * @param id                 the company code
+     * @param transactionReference the transaction reference
+     * @return the {@link ResponseEntity} with the HTTP status
+     * @throws NoDataFoundException if the account penalty cannot be found
+     * @throws DataException        if the account penalty failed to be deleted
+     */
+    ResponseEntity<Void> deleteAccountPenaltyByReference(String id, String transactionReference)
+            throws NoDataFoundException, DataException;
+
     AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException;
 
     /**

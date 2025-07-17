@@ -119,16 +119,39 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return ResponseEntity.noContent().build();
     }
 
+    @Override
+    public ResponseEntity<Void> deleteAccountPenaltyByReference(
+            String id, String transactionReference)
+            throws NoDataFoundException {
+        Optional<AccountPenalties> accountPenaltiesOpt = repository.findAllById(id);
+
+        if (accountPenaltiesOpt.isEmpty()) {
+            throw new NoDataFoundException("no account penalties");
+        }
+
+        AccountPenalties accountPenalties = accountPenaltiesOpt.get();
+        boolean removed = accountPenalties.getPenalties().removeIf(
+                p -> transactionReference.equals(p.getTransactionReference()));
+
+        if (!removed) {
+            throw new NoDataFoundException("penalty not found");
+        }
+
+        repository.save(accountPenalties);
+
+        return ResponseEntity.noContent().build();
+    }
+
     public AccountPenaltiesData createAccountPenalties(
             PenaltySpec penaltySpec) throws DataException {
         var accountPenalties = new AccountPenalties();
-        accountPenalties.setId(ObjectId.get());
+        accountPenalties.setId(new ObjectId());
         LOG.info("Creating account penalties with ID: " + accountPenalties.getId());
 
         accountPenalties.setCompanyCode(penaltySpec.getCompanyCode());
         accountPenalties.setCustomerCode(penaltySpec.getCustomerCode());
-        accountPenalties.setCreatedAt(Instant.now().minus(730, ChronoUnit.DAYS));
-        accountPenalties.setClosedAt(Instant.now().minus(730, ChronoUnit.DAYS));
+        accountPenalties.setCreatedAt(Instant.now());
+        accountPenalties.setClosedAt(Instant.now());
 
         accountPenalties.setPenalties(createPenaltiesList(penaltySpec));
 
@@ -150,7 +173,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             var penalty = new AccountPenalty();
 
             // Set common penalty properties
-            penalty.setCompanyCode(penaltySpec.getCompanyCode());
+            penalty.setCompanyCode(getDefaultIfBlank(penaltySpec.getCompanyCode(), "LP"));
             penalty.setCustomerCode(penaltySpec.getCustomerCode());
             penalty.setLedgerCode(getDefaultIfBlank(penaltySpec.getLedgerCode(), "SC"));
             penalty.setTransactionReference(generateTransactionReference());
@@ -199,7 +222,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     private AccountPenaltiesData mapToAccountPenaltiesData(AccountPenalties accountPenalties) {
         var accountPenaltiesData = new AccountPenaltiesData();
-        accountPenaltiesData.setId(accountPenalties.getId().toString());
+        accountPenaltiesData.setId(accountPenalties.getId());
         accountPenaltiesData.setCompanyCode(accountPenalties.getCompanyCode());
         accountPenaltiesData.setCustomerCode(accountPenalties.getCustomerCode());
         accountPenaltiesData.setCreatedAt(accountPenalties.getCreatedAt());
