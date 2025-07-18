@@ -254,18 +254,19 @@ public class TestDataController {
 
         var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
-        Optional.ofNullable(transactionReference)
-                .ifPresent(ref -> filterPenaltiesByReference(accountPenaltiesData, ref));
+        if (transactionReference != null) {
+            accountPenaltiesData.setPenalties(
+                    filterPenalties(accountPenaltiesData.getPenalties(), transactionReference)
+            );
+        }
 
         return ResponseEntity.ok(accountPenaltiesData);
     }
 
-    private void filterPenaltiesByReference(AccountPenaltiesData data, String reference) {
-        List<PenaltyData> filteredPenalties = data.getPenalties().stream()
+    private List<PenaltyData> filterPenalties(List<PenaltyData> penalties, String reference) {
+        return penalties.stream()
                 .filter(penalty -> reference.equals(penalty.getTransactionReference()))
                 .toList();
-
-        data.setPenalties(filteredPenalties);
     }
 
     @PutMapping("/penalties/{penaltyRef}")
