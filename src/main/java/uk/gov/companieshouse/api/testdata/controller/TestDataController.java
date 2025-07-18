@@ -250,15 +250,17 @@ public class TestDataController {
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
 
-        var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
+        AccountPenaltiesData accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
         if (transactionReference != null) {
-            var filteredPenalties = accountPenaltiesData.getPenalties().stream()
-                    .filter(p -> transactionReference.equals(p.getTransactionReference()));
-            accountPenaltiesData.setPenalties(filteredPenalties.toList());
+            accountPenaltiesData.setPenalties(
+                    accountPenaltiesData.getPenalties().stream()
+                            .filter(penalty -> transactionReference.equals(penalty.getTransactionReference()))
+                            .toList()
+            );
         }
 
-        return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);
+        return ResponseEntity.ok(accountPenaltiesData);
     }
 
     @PutMapping("/penalties/{penaltyRef}")
