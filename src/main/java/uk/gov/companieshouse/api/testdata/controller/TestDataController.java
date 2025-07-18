@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,18 +34,19 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.GetPenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -240,30 +241,32 @@ public class TestDataController {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
                 + " and customer code: " + request.getCustomerCode());
         var createdPenalties = testDataService.createPenaltyData(request);
-        LOG.info("Successfully created account penalties with ID: " + createdPenalties.getId());
+        LOG.info("Successfully created account penalties with ID: "
+                + createdPenalties.getIdAsString());
         return new ResponseEntity<>(createdPenalties, HttpStatus.CREATED);
     }
 
-    @GetMapping("/penalties/{penaltyRef}")
-    public ResponseEntity<AccountPenaltiesData> getPenalty(
-            @NotNull @PathVariable("penaltyRef") String penaltyRef,
-            @Valid @RequestBody PenaltySpec request) throws NoDataFoundException {
+    @GetMapping("/penalties/{id}")
+    public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
+            @PathVariable("id") String id,
+            @RequestParam(name = "transactionReference", required = false)
+            String transactionReference) throws NoDataFoundException {
 
-        AccountPenaltiesData penaltyData = testDataService.getAccountPenaltyData(
-                request.getCompanyCode(), request.getCustomerCode(), penaltyRef);
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
-        return new ResponseEntity<>(penaltyData, HttpStatus.OK);
+        if (transactionReference != null) {
+            accountPenaltiesData.setPenalties(
+                    filterPenalties(accountPenaltiesData.getPenalties(), transactionReference)
+            );
+        }
 
+        return ResponseEntity.ok(accountPenaltiesData);
     }
 
-    @GetMapping("/penalties")
-    public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
-            @Valid @RequestBody GetPenaltyRequest request) throws NoDataFoundException {
-
-        var accountPenaltiesData = testDataService.getAccountPenaltiesData(request.getId());
-
-        return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);
-
+    private List<PenaltyData> filterPenalties(List<PenaltyData> penalties, String reference) {
+        return penalties.stream()
+                .filter(penalty -> reference.equals(penalty.getTransactionReference()))
+                .toList();
     }
 
     @PutMapping("/penalties/{penaltyRef}")
@@ -281,10 +284,16 @@ public class TestDataController {
 
     @DeleteMapping("/penalties/{id}")
     public ResponseEntity<Void> deleteAccountPenalties(
-            @PathVariable("id") String id)
+            @PathVariable("id") String id,
+            @RequestBody(required = false) PenaltyRequest request)
             throws DataException, NoDataFoundException {
 
-        return testDataService.deleteAccountPenaltiesData(id);
+        if (request == null || request.getTransactionReference() == null) {
+            return testDataService.deleteAccountPenaltiesData(id);
+        } else {
+            return testDataService.deleteAccountPenaltyByReference(
+                    id, request.getTransactionReference());
+        }
     }
 
     @GetMapping("/postcodes")

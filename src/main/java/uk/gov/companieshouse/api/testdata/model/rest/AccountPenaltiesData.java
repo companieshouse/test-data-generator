@@ -1,13 +1,15 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.time.Instant;
 import java.util.List;
+import org.bson.types.ObjectId;
 
 public class AccountPenaltiesData {
 
     @JsonProperty("_id")
-    private String id;
+    private ObjectId id;
 
     @JsonProperty("company_code")
     private String companyCode;
@@ -60,11 +62,12 @@ public class AccountPenaltiesData {
         return penalties;
     }
 
-    public String getId() {
-        return id;
+    @JsonProperty("_id")
+    public String getIdAsString() {
+        return id != null ? id.toHexString() : null;
     }
 
-    public void setId(String id) {
+    public void setId(ObjectId id) {
         this.id = id;
     }
 

@@ -217,8 +217,8 @@ class AccountPenaltiesServiceImplTest {
     @Test
     void createAccountPenalties_success() throws DataException {
         PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("NI23456");
+        penaltySpec.setCompanyCode(COMPANY_CODE);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
         penaltySpec.setNumberOfPenalties(2);
         penaltySpec.setAmount(100.0);
         penaltySpec.setIsPaid(false);
@@ -238,14 +238,117 @@ class AccountPenaltiesServiceImplTest {
     @Test
     void createAccountPenalties_repositoryThrowsException() {
         PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("NI23456");
+        penaltySpec.setCompanyCode(COMPANY_CODE);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
 
         when(repository.save(any(AccountPenalties.class))).thenThrow(new RuntimeException("DB error"));
 
         DataException ex = assertThrows(DataException.class, () -> service.createAccountPenalties(penaltySpec));
         assertTrue(ex.getMessage().contains("Failed to create account penalties"));
         verify(repository, times(1)).save(any(AccountPenalties.class));
+    }
+
+    @Test
+    void testDeleteAccountPenaltyByReferenceSuccess() throws NoDataFoundException {
+        AccountPenalty penalty = new AccountPenalty();
+        penalty.setTransactionReference(PENALTY_REF);
+        List<AccountPenalty> penalties = new ArrayList<>();
+        penalties.add(penalty);
+
+        AccountPenalties accountPenalties = new AccountPenalties();
+        accountPenalties.setPenalties(penalties);
+
+        when(repository.findAllById(PENALTY_ID)).thenReturn(Optional.of(accountPenalties));
+
+        service.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF);
+
+        verify(repository, times(1)).save(accountPenalties);
+    }
+
+    @Test
+    void testDeleteAccountPenaltyByReferenceNotFound_NoPenalties() {
+        when(repository.findAllById(PENALTY_ID)).thenReturn(Optional.empty());
+
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class,
+                () -> service.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF));
+        assertEquals("no account penalties", exception.getMessage());
+    }
+
+    @Test
+    void testDeleteAccountPenaltyByReferenceNotFound_PenaltyNotFound() {
+        AccountPenalty penalty = new AccountPenalty();
+        penalty.setTransactionReference("A9988776");
+        List<AccountPenalty> penalties = new ArrayList<>();
+        penalties.add(penalty);
+
+        AccountPenalties accountPenalties = new AccountPenalties();
+        accountPenalties.setPenalties(penalties);
+
+        when(repository.findAllById(PENALTY_ID)).thenReturn(Optional.of(accountPenalties));
+
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class,
+                () -> service.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF));
+        assertEquals("penalty not found", exception.getMessage());
+    }
+
+    @Test
+    void testCreatePenaltiesListDefaults() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode(null);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(null);
+        penaltySpec.setAmount(null);
+        penaltySpec.setIsPaid(null);
+
+        AccountPenalties savedEntity = new AccountPenalties();
+        savedEntity.setPenalties(new ArrayList<>());
+
+        when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
+
+        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void testCalculatePenaltyAmountMultiplePenalties() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode(COMPANY_CODE);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(3);
+        penaltySpec.setAmount(100.0);
+        penaltySpec.setIsPaid(false);
+
+        AccountPenalties savedEntity = new AccountPenalties();
+        savedEntity.setPenalties(new ArrayList<>());
+
+        when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
+
+        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+
+        assertNotNull(result);
+    }
+
+    @Test
+    void testGetAccountPenaltyFiltersByPenaltyRef() throws NoDataFoundException {
+        AccountPenalty penalty1 = new AccountPenalty();
+        penalty1.setTransactionReference(PENALTY_REF);
+        AccountPenalty penalty2 = new AccountPenalty();
+        penalty2.setTransactionReference("A8765432");
+        List<AccountPenalty> penalties = List.of(penalty1, penalty2);
+
+        AccountPenalties accountPenalties = new AccountPenalties();
+        accountPenalties.setPenalties(new ArrayList<>(penalties));
+        accountPenalties.setCompanyCode(COMPANY_CODE);
+        accountPenalties.setCustomerCode(CUSTOMER_CODE);
+
+        when(repository.findPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
+                .thenReturn(Optional.of(accountPenalties));
+
+        AccountPenaltiesData result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+
+        assertEquals(1, result.getPenalties().size());
+        assertEquals(PENALTY_REF, result.getPenalties().get(0).getTransactionReference());
     }
 
     private static AccountPenalties createAccountPenalties() {
