@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -34,6 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
@@ -250,17 +252,20 @@ public class TestDataController {
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
 
-        AccountPenaltiesData accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
-        if (transactionReference != null) {
-            accountPenaltiesData.setPenalties(
-                    accountPenaltiesData.getPenalties().stream()
-                            .filter(penalty -> transactionReference.equals(penalty.getTransactionReference()))
-                            .toList()
-            );
-        }
+        Optional.ofNullable(transactionReference)
+                .ifPresent(ref -> filterPenaltiesByReference(accountPenaltiesData, ref));
 
         return ResponseEntity.ok(accountPenaltiesData);
+    }
+
+    private void filterPenaltiesByReference(AccountPenaltiesData data, String reference) {
+        List<PenaltyData> filteredPenalties = data.getPenalties().stream()
+                .filter(penalty -> reference.equals(penalty.getTransactionReference()))
+                .toList();
+
+        data.setPenalties(filteredPenalties);
     }
 
     @PutMapping("/penalties/{penaltyRef}")
