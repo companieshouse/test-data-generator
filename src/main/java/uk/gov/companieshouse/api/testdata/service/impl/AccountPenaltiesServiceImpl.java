@@ -4,7 +4,6 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +32,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AccountPenaltiesServiceImpl.class));
+    private static final String EXCEPTION_MSG = "no account penalties";
 
     @Autowired
     private AccountPenaltiesRepository repository;
@@ -64,7 +64,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             throws NoDataFoundException {
         var accountPenalties =
                 repository.findAllById(id)
-                        .orElseThrow(() -> new NoDataFoundException("no account penalties"));
+                        .orElseThrow(() -> new NoDataFoundException(EXCEPTION_MSG));
 
         return mapToAccountPenaltiesData(accountPenalties);
     }
@@ -111,7 +111,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
                 repository.findAllById(id);
 
         if (accountPenalties.isEmpty()) {
-            throw new NoDataFoundException("no account penalties");
+            throw new NoDataFoundException(EXCEPTION_MSG);
         }
 
         repository.deleteById(id);
@@ -126,10 +126,10 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         Optional<AccountPenalties> accountPenaltiesOpt = repository.findAllById(id);
 
         if (accountPenaltiesOpt.isEmpty()) {
-            throw new NoDataFoundException("no account penalties");
+            throw new NoDataFoundException(EXCEPTION_MSG);
         }
 
-        AccountPenalties accountPenalties = accountPenaltiesOpt.get();
+        var accountPenalties = accountPenaltiesOpt.get();
         boolean removed = accountPenalties.getPenalties().removeIf(
                 p -> transactionReference.equals(p.getTransactionReference()));
 
