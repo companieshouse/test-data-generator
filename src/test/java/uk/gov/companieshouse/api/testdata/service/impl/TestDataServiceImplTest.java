@@ -33,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -1731,6 +1732,116 @@ class TestDataServiceImplTest {
         assertEquals("Error creating account penalties", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
         verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+    }
+
+    @Test
+    void getAccountPenaltyDataDelegatesToService() throws Exception {
+        when(accountPenaltiesService.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
+                .thenReturn(new AccountPenaltiesData());
+        AccountPenaltiesData result = testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+        assertNotNull(result);
+        verify(accountPenaltiesService).getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+    }
+
+    @Test
+    void getAccountPenaltyDataThrowsNoDataFoundException() throws Exception {
+        when(accountPenaltiesService.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
+                .thenThrow(new NoDataFoundException("not found"));
+        NoDataFoundException ex = assertThrows(NoDataFoundException.class, () ->
+                testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF));
+        assertEquals("Error retrieving account penalty - not found", ex.getMessage());
+    }
+
+    @Test
+    void getAccountPenaltiesDataDelegatesToService() throws Exception {
+        when(accountPenaltiesService.getAccountPenalties(PENALTY_ID))
+                .thenReturn(new AccountPenaltiesData());
+        AccountPenaltiesData result = testDataService.getAccountPenaltiesData(PENALTY_ID);
+        assertNotNull(result);
+        verify(accountPenaltiesService).getAccountPenalties(PENALTY_ID);
+    }
+
+    @Test
+    void getAccountPenaltiesDataThrowsNoDataFoundException() throws Exception {
+        when(accountPenaltiesService.getAccountPenalties(PENALTY_ID))
+                .thenThrow(new NoDataFoundException("not found"));
+        NoDataFoundException ex = assertThrows(NoDataFoundException.class, () ->
+                testDataService.getAccountPenaltiesData(PENALTY_ID));
+        assertEquals("Error retrieving account penalties - not found", ex.getMessage());
+    }
+
+    @Test
+    void createPenaltyDataDelegatesToService() throws Exception {
+        PenaltySpec spec = new PenaltySpec();
+        AccountPenaltiesData data = new AccountPenaltiesData();
+        when(accountPenaltiesService.createAccountPenalties(spec)).thenReturn(data);
+        AccountPenaltiesData result = testDataService.createPenaltyData(spec);
+        assertEquals(data, result);
+        verify(accountPenaltiesService).createAccountPenalties(spec);
+    }
+
+    @Test
+    void createPenaltyDataThrowsDataException() throws Exception {
+        PenaltySpec spec = new PenaltySpec();
+        when(accountPenaltiesService.createAccountPenalties(spec))
+                .thenThrow(new DataException("fail"));
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.createPenaltyData(spec));
+        assertEquals("Error creating account penalties", ex.getMessage());
+    }
+
+    @Test
+    void deleteAccountPenaltiesDataDelegatesToService() throws Exception {
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
+                .thenReturn(ResponseEntity.ok().build());
+        ResponseEntity<Void> result = testDataService.deleteAccountPenaltiesData(PENALTY_ID);
+        assertNotNull(result);
+        verify(accountPenaltiesService).deleteAccountPenalties(PENALTY_ID);
+    }
+
+    @Test
+    void deleteAccountPenaltiesDataThrowsNoDataFoundException() throws Exception {
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
+                .thenThrow(new NoDataFoundException("not found"));
+        NoDataFoundException ex = assertThrows(NoDataFoundException.class, () ->
+                testDataService.deleteAccountPenaltiesData(PENALTY_ID));
+        assertEquals("Error deleting account penalties - not found", ex.getMessage());
+    }
+
+    @Test
+    void deleteAccountPenaltiesDataThrowsDataException() throws Exception {
+        when(accountPenaltiesService.deleteAccountPenalties(PENALTY_ID))
+                .thenThrow(new RuntimeException("fail"));
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.deleteAccountPenaltiesData(PENALTY_ID));
+        assertEquals("Error deleting account penalties", ex.getMessage());
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceDelegatesToService() throws Exception {
+        when(accountPenaltiesService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF))
+                .thenReturn(ResponseEntity.ok().build());
+        ResponseEntity<Void> result = testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF);
+        assertNotNull(result);
+        verify(accountPenaltiesService).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceThrowsNoDataFoundException() throws Exception {
+        when(accountPenaltiesService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF))
+                .thenThrow(new NoDataFoundException("not found"));
+        NoDataFoundException ex = assertThrows(NoDataFoundException.class, () ->
+                testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF));
+        assertEquals("Error deleting account penalty - not found", ex.getMessage());
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceThrowsDataException() throws Exception {
+        when(accountPenaltiesService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF))
+                .thenThrow(new RuntimeException("fail"));
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REF));
+        assertEquals("Error deleting account penalty", ex.getMessage());
     }
 
     @Test

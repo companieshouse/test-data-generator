@@ -190,11 +190,11 @@ In order to use the generator, there are different possible endpoints that can b
 
   - A usage example looks like this: `{ "company_code": "LP", "customer_code": "NI095887", "number_of_penalties": 2, "amount": 150 }`
 
-- GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties/{id}`. The request body must include mandatory `companyCode` and `customer_code`.
-  - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory.
-  - `penalty_ref`: The Transaction Reference of the Account Penalties entry in the account_penalties db collection. This is optional and used to return a single penalty from a list.
-
-  - A usage example looks like this: `{ "penalty_ref": "A123456" }`
+- GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties/{id}`. 
+  - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory and passed as a path variable.
+  - `penalty_ref`: The Transaction Reference of the Account Penalties entry in the account_penalties db collection. This is optional and passed as a query parameter to return a single penalty from a list.
+  - 
+  - A usage example looks like this: `GET {Base URL}/test-data/penalties/687932936d534811231973b6?transactionReference=A1234567`
 
 - PUT: Sending a PUT request to update Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will update an Account Penalties entry. The request body must include mandatory `companyCode` and `customer_code`, and optional `createdAt`, `closedAt`, `isPaid`, `amount` and `outstandingAMount` parameters.
 

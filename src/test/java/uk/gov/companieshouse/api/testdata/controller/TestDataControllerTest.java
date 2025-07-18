@@ -64,6 +64,7 @@ class TestDataControllerTest {
     private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "NI23456";
+    private static final String PENALTY_REFERENCE = "A1234567";
     private static final String COMPANY_NUMBER = "TC123456";
     private static final String AUTH_CODE_APPROVAL_ROUTE =
             "auth_code";
@@ -551,14 +552,11 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenaltyNotFound() throws Exception {
-        String id = "687932936d534811231973b6";
-        String transactionReference = "A1234567";
-
-        when(this.testDataService.getAccountPenaltiesData(id))
+        when(this.testDataService.getAccountPenaltiesData(PENALTY_ID))
                 .thenThrow(new NoDataFoundException("no account penalties"));
 
         assertThrows(NoDataFoundException.class, () -> {
-            this.testDataController.getAccountPenalties(id, transactionReference);
+            this.testDataController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
         });
     }
 
@@ -593,7 +591,6 @@ class TestDataControllerTest {
 
     @Test
     void updateAccountPenalties() throws Exception {
-        String penaltyRef = "A1234567";
         String companyCode = COMPANY_CODE;
         String customerCode = CUSTOMER_CODE;
         Instant now = Instant.now();
@@ -608,7 +605,7 @@ class TestDataControllerTest {
         request.setIsPaid(true);
 
         PenaltyData penalty = createPenaltyData(companyCode,
-                customerCode, penaltyRef, 0.0, true);
+                customerCode, PENALTY_REFERENCE, 0.0, true);
 
         AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
         accountPenaltiesData.setCompanyCode(companyCode);
@@ -616,13 +613,78 @@ class TestDataControllerTest {
         accountPenaltiesData.setClosedAt(now);
         accountPenaltiesData.setPenalties(Collections.singletonList(penalty));
 
-        when(this.testDataService.updateAccountPenaltiesData(penaltyRef, request))
+        when(this.testDataService.updateAccountPenaltiesData(PENALTY_REFERENCE, request))
                 .thenReturn(accountPenaltiesData);
         ResponseEntity<AccountPenaltiesData> response = this.testDataController
-                .updateAccountPenalties(penaltyRef, request);
+                .updateAccountPenalties(PENALTY_REFERENCE, request);
 
         assertEquals(accountPenaltiesData, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void getAccountPenaltiesFiltersByTransactionReference() throws Exception {
+        PenaltyData penalty1 = new PenaltyData();
+        penalty1.setTransactionReference(PENALTY_REFERENCE);
+        PenaltyData penalty2 = new PenaltyData();
+        penalty2.setTransactionReference("A2345678");
+
+        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
+        accountPenaltiesData.setPenalties(List.of(penalty1, penalty2));
+
+        when(testDataService.getAccountPenaltiesData(PENALTY_ID)).thenReturn(accountPenaltiesData);
+
+        ResponseEntity<AccountPenaltiesData> response =
+                testDataController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().getPenalties().size());
+        assertEquals(PENALTY_REFERENCE, response.getBody().getPenalties().get(0).getTransactionReference());
+        verify(testDataService, times(1)).getAccountPenaltiesData(PENALTY_ID);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceSuccess() throws Exception {
+        PenaltyRequest request = new PenaltyRequest();
+        request.setTransactionReference(PENALTY_REFERENCE);
+
+        when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
+                .thenReturn(ResponseEntity.noContent().build());
+
+        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, request);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceNotFound() throws Exception {
+        PenaltyRequest request = new PenaltyRequest();
+        request.setTransactionReference(PENALTY_REFERENCE);
+
+        NoDataFoundException exception = new NoDataFoundException("penalty not found");
+        when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
+                .thenThrow(exception);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.deleteAccountPenalties(PENALTY_ID, request));
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceOtherError() throws Exception {
+        PenaltyRequest request = new PenaltyRequest();
+        request.setTransactionReference(PENALTY_REFERENCE);
+
+        DataException exception = new DataException("error during deletion");
+        when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.deleteAccountPenalties(PENALTY_ID, request));
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, "A1234567");
     }
 
     @Test

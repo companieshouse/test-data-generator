@@ -253,10 +253,11 @@ public class TestDataController {
         var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
         if (transactionReference != null) {
-            var filteredPenalties = accountPenaltiesData.getPenalties().stream()
-                    .filter(p -> transactionReference.equals(p.getTransactionReference()))
-                    .toList();
-            accountPenaltiesData.setPenalties(filteredPenalties);
+            accountPenaltiesData.setPenalties(
+                    accountPenaltiesData.getPenalties().stream()
+                            .filter(p -> transactionReference.equals(p.getTransactionReference()))
+                            .toList()
+            );
         }
 
         return new ResponseEntity<>(accountPenaltiesData, HttpStatus.OK);
