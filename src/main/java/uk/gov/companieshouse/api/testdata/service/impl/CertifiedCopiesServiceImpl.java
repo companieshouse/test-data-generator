@@ -5,6 +5,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -79,12 +80,14 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         entity.setDate(spec.getDate());
 
         if (spec.getCapital() != null) {
-            List<Capital> capitalList = spec.getCapital().stream().map(c -> {
-                Capital capital = new Capital();
-                capital.setCurrency(c.getCurrency());
-                capital.setFigure(c.getFigure());
-                return capital;
-            }).toList();
+            List<Capital> capitalList = spec.getCapital().stream()
+                .map(c -> {
+                    Capital capital = new Capital();
+                    capital.setCurrency(c.getCurrency());
+                    capital.setFigure(c.getFigure());
+                    return capital;
+                })
+                .collect(Collectors.toList());
             entity.setCapital(capitalList);
         }
 
