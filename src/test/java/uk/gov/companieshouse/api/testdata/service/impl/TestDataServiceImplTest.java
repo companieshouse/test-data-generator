@@ -71,11 +71,16 @@ import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -84,6 +89,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -106,6 +112,10 @@ class TestDataServiceImplTest {
     private static final String API_URL = "http://localhost:4001";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
     private static final String CERTIFICATES_ID = "CRT-123456-789012";
+    private static final String AUTH_CODE_APPROVAL_ROUTE =
+            "auth_code";
+    private static final String CONFIRMED_STATUS = "confirmed";
+    private static final String ASSOCIATION_ID = "associationId";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -157,8 +167,16 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
+
+    @Mock
+    private TransactionService transactionService;
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
+    @Mock
+    private DataService<UserCompanyAssociationData,
+            UserCompanyAssociationSpec> userCompanyAssociationService;
+    @Mock
+    private UserCompanyAssociationRepository userCompanyAssociationRepository;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -1002,7 +1020,7 @@ class TestDataServiceImplTest {
         profileSpec.setType("limited-company");
 
         AcspProfileData acspProfileData =
-                new AcspProfileData(profileSpec.getAcspNumber());
+                new AcspProfileData(profileSpec.getAcspNumber(),profileSpec.getName());
         AcspMembersData expectedMembersData =
                 new AcspMembersData(new ObjectId(),
                         profileSpec.getAcspNumber(), "userId", "active", "role");
@@ -1043,9 +1061,9 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         AcspMembersData acspMembersData =
-                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(), "userId",
+                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(),"userId",
                         "active", "role");
         var acspStatus = "active";
         var acspType = "ltd";
@@ -1084,7 +1102,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         AcspMembersData acspMembersData = new AcspMembersData(new ObjectId(),
                 "acspNumber", "userId", "active", "role");
         spec.setAcspProfile(null);
@@ -1127,7 +1145,7 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber");
+        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
@@ -1846,5 +1864,142 @@ class TestDataServiceImplTest {
 
         assertNotNull(result);
         verify(disqualificationsService).create(spec);
+    }
+
+    @Test
+    void createUserCompanyAssociationData() throws DataException {
+        var id = new ObjectId();
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        UserCompanyAssociationData associationData =
+                new UserCompanyAssociationData(id, spec.getCompanyNumber(),
+                        spec.getUserId(), null, CONFIRMED_STATUS,
+                        AUTH_CODE_APPROVAL_ROUTE, null);
+
+        when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
+
+        UserCompanyAssociationData createdAssociation =
+                testDataService.createUserCompanyAssociationData(spec);
+
+        assertNotNull(createdAssociation);
+        assertEquals(id.toString(), createdAssociation.getId());
+        assertEquals(USER_ID, createdAssociation.getUserId());
+        assertEquals(COMPANY_NUMBER, createdAssociation.getCompanyNumber());
+        assertEquals(CONFIRMED_STATUS, createdAssociation.getStatus());
+        assertEquals(AUTH_CODE_APPROVAL_ROUTE,
+                createdAssociation.getApprovalRoute());
+        assertNull(createdAssociation.getInvitations());
+        assertNull(createdAssociation.getUserEmail());
+
+        verify(userCompanyAssociationService, times(1)).create(spec);
+    }
+
+    @Test
+    void createUserCompanyAssociationDataNoUserIdOrUserEmail() {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createUserCompanyAssociationData(spec));
+        assertEquals("A user_id or a user_email is required to create "
+                + "an association", exception.getMessage());
+    }
+
+    @Test
+    void createUserCompanyAssociationDataNoCompanyNumber() {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createUserCompanyAssociationData(spec));
+        assertEquals("Company number is required to create an "
+                + "association", exception.getMessage());
+    }
+
+    @Test
+    void createUserCompanyAssociationDataException() throws DataException {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(userCompanyAssociationService.create(spec))
+                .thenThrow(new RuntimeException("Error creating the "
+                        + "association"));
+
+        DataException exception =
+                assertThrows(DataException.class,
+                        () -> testDataService.createUserCompanyAssociationData(spec));
+
+        assertEquals("Error creating the association",
+                exception.getMessage());
+        verify(userCompanyAssociationService, times(1)).create(spec);
+    }
+
+    @Test
+    void deleteUserCompanyAssociation() throws DataException {
+        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
+                .thenReturn(true);
+
+        boolean result =
+                testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
+
+        assertTrue(result);
+        verify(userCompanyAssociationService).delete(ASSOCIATION_ID);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationNotFound() throws DataException {
+        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
+                .thenReturn(false);
+
+        boolean result =
+                testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
+
+        assertFalse(result);
+        verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationException() {
+        RuntimeException ex = new RuntimeException("Error deleting "
+                + "association");
+        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
+                .thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID));
+
+        assertEquals("Error deleting association",
+                exception.getMessage());
+        verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
+    }
+
+    @Test
+    void createTransactionData() throws DataException {
+        TransactionsSpec transactionsSpec = new TransactionsSpec();
+        transactionsSpec.setUserId("Test12454");
+        transactionsSpec.setReference("ACSP Registration");
+        TransactionsData txn = new TransactionsData("Test12454","ACSP Registration" ,"forename","surname","email","description","status");
+        when(transactionService.create(transactionsSpec)).thenReturn(txn);
+        TransactionsData result = testDataService.createTransactionData(transactionsSpec);
+        assertEquals(txn, result);
+    }
+
+    @Test
+    void createTransactionDataException() throws DataException {
+        TransactionsSpec transactionsSpec = new TransactionsSpec();
+        transactionsSpec.setUserId("Test12454");
+        transactionsSpec.setReference("ACSP Registration");
+        DataException ex = new DataException("creation failed");
+        when(transactionService.create(transactionsSpec)).thenThrow(ex);
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.createTransactionData(transactionsSpec));
+        assertEquals("Error creating transaction", thrown.getMessage());
+        assertEquals(ex, thrown.getCause());
     }
 }

@@ -29,6 +29,8 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+
+
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -48,12 +50,17 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -61,6 +68,12 @@ class TestDataControllerTest {
     private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "NI23456";
+    private static final String COMPANY_NUMBER = "TC123456";
+    private static final String AUTH_CODE_APPROVAL_ROUTE =
+            "auth_code";
+    private static final String CONFIRMED_STATUS = "confirmed";
+    private static final String USER_ID = "userId";
+    private static final String ASSOCIATION_ID = "associationId";
 
     @Mock
     private TestDataService testDataService;
@@ -869,5 +882,115 @@ class TestDataControllerTest {
         DataException thrown = assertThrows(DataException.class, () ->
             testDataController.createCertifiedCopies(request));
         assertEquals(exception.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void createUserCompanyAssociation() throws Exception {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setStatus(CONFIRMED_STATUS);
+        spec.setApprovalRoute(AUTH_CODE_APPROVAL_ROUTE);
+
+        UserCompanyAssociationData association =
+                new UserCompanyAssociationData(
+                new ObjectId(), COMPANY_NUMBER, USER_ID,
+                        null, CONFIRMED_STATUS, AUTH_CODE_APPROVAL_ROUTE,
+                        null);
+
+        when(this.testDataService.createUserCompanyAssociationData(spec))
+                .thenReturn(association);
+        ResponseEntity<UserCompanyAssociationData> response
+                = this.testDataController.createAssociation(spec);
+
+        assertEquals(association, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createUserCompanyAssociationException() throws Exception {
+        UserCompanyAssociationSpec spec =
+                new UserCompanyAssociationSpec();
+        Throwable exception = new DataException("Error creating an "
+                + "association");
+
+        when(this.testDataService.createUserCompanyAssociationData(spec))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createAssociation(spec));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void deleteUserCompanyAssociation() throws Exception {
+        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
+                .thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteUserCompanyAssociationData(ASSOCIATION_ID);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationNotFound() throws Exception {
+        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
+                .thenReturn(false);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(ASSOCIATION_ID,
+                Objects.requireNonNull(response.getBody()).get(
+                        "association_id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService, times(1)).deleteUserCompanyAssociationData(ASSOCIATION_ID);
+    }
+
+    @Test
+    void deleteUserCompanyAssociationException() throws Exception {
+        Throwable exception = new DataException("Error deleting "
+                + "association");
+
+        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(
+                DataException.class,
+                () -> this.testDataController.deleteAssociation(ASSOCIATION_ID));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createTransaction() throws Exception {
+        TransactionsSpec request = new TransactionsSpec();
+        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
+        request.setReference("ACSP Registration");
+
+        TransactionsData txn = new TransactionsData("rsf3pdwywvse5yz55mfodfx8","ACSP Registration" ,"forename","surname","email","description","status");
+        when(this.testDataService.createTransactionData(request)).thenReturn(txn);
+        ResponseEntity<TransactionsData> response
+                = this.testDataController.createTransaction(request);
+
+        assertEquals(txn, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createTransactionException() throws Exception {
+        TransactionsSpec request = new TransactionsSpec();
+        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
+        request.setReference("ACSP Registration");
+        Throwable exception = new DataException("Error message");
+
+        when(this.testDataService.createTransactionData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createTransaction(request));
+        assertEquals(exception, thrown);
     }
 }
