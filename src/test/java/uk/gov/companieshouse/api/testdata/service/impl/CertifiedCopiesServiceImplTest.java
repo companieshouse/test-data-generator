@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -25,6 +26,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
 import uk.gov.companieshouse.api.testdata.model.entity.CertifiedCopies;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionValues;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
@@ -377,6 +379,73 @@ class CertifiedCopiesServiceImplTest {
     }
 
     @Test
+    void validateCaptialIsNotPresent() {
+        FilingHistoryDescriptionValuesSpec spec = new FilingHistoryDescriptionValuesSpec();
+        spec.setDate("2024-05-01");
+        spec.setCapital(null);
+
+        FilingHistoryDescriptionValues result = service.mapToEntity(spec);
+
+        assertEquals("2024-05-01", result.getDate());
+        assertNull(result.getCapital()); // No capital should be set
+    }
+
+    @Test
+    void validateFilingHistoryDescriptionValuesIsNull() throws DataException {
+        FilingHistoryDocumentsSpec docSpec = new FilingHistoryDocumentsSpec();
+        docSpec.setFilingHistoryId("abc123");
+        docSpec.setFilingHistoryDescription("desc");
+        docSpec.setFilingHistoryDescriptionValues(null); // NULL branch
+        docSpec.setFilingHistoryDate("2024-01-01");
+        docSpec.setFilingHistoryType("type");
+        docSpec.setFilingHistoryCost("1");
+
+        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
+        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(docSpec));
+
+        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        spec.setItemOptions(List.of(itemOptionsSpec));
+        spec.setCompanyName("Test Ltd");
+        spec.setCompanyNumber("12345678");
+        spec.setUserId("user123");
+        spec.setKind("kind");
+        spec.setQuantity(1);
+        spec.setPostalDelivery(true);
+
+        when(randomService.getNumber(6)).thenReturn(111111L, 222222L);
+        when(randomService.getEtag()).thenReturn("etag123");
+        when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
+
+        CertificatesData result = service.create(spec);
+
+        assertNotNull(result);
+        assertFalse(result.getCertificates().isEmpty());
+    }
+
+    @Test
+    void validateItemCostsIsNull() throws DataException {
+        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        spec.setCompanyName("Null Cost Co");
+        spec.setCompanyNumber("00011122");
+        spec.setUserId("user123");
+        spec.setItemOptions(List.of(new ItemOptionsSpec()));
+        spec.setItemCosts(null); // 👈 This is the key path
+        spec.setKind("certified-copy");
+        spec.setQuantity(1);
+        spec.setPostalDelivery(false);
+
+        when(randomService.getNumber(6)).thenReturn(111111L, 222222L);
+        when(randomService.getEtag()).thenReturn("etag-test");
+
+        when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
+
+        CertificatesData result = service.create(spec);
+
+        assertNotNull(result);
+        assertFalse(result.getCertificates().isEmpty());
+    }
+
+    @Test
     void deleteCertificatesBasketNotFound() {
         String certificateId = "CCD-123456-789012";
 
@@ -403,5 +472,18 @@ class CertifiedCopiesServiceImplTest {
 
         verify(repository).delete(certifiedCopies);
         verify(basketRepository).delete(basket);
+    }
+
+    @Test
+    void validateBasketNotDeletedWhenNull() {
+        String basketId = "user123";
+        Basket basket = new Basket();
+        basket.setId(null);
+
+        when(basketRepository.findById(basketId)).thenReturn(Optional.of(basket));
+
+        service.deleteBasket(basketId);
+
+        verify(basketRepository, never()).delete(any());
     }
 }

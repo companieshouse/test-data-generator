@@ -78,7 +78,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         return new CertificatesData(certificateEntries);
     }
 
-    private FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesSpec spec) {
+    protected FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesSpec spec) {
         var filingHistoryDescriptionValues = new FilingHistoryDescriptionValues();
         filingHistoryDescriptionValues.setDate(spec.getDate());
 
@@ -169,15 +169,14 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
     }
 
     private Basket createBasket(CertifiedCopiesSpec spec, List<Basket.Item> items) {
-        CertificatesSpec certSpec = mapCertifiedCopiesToCertificatesSpec(spec);
+        var certSpec = mapCertifiedCopiesToCertificatesSpec(spec);
         return certificatesService.createBasket(certSpec, items);
     }
 
     private CertificatesSpec mapCertifiedCopiesToCertificatesSpec(CertifiedCopiesSpec spec) {
-        CertificatesSpec certificatesSpec = new CertificatesSpec();
+        var certificatesSpec = new CertificatesSpec();
         certificatesSpec.setUserId(spec.getUserId());
         certificatesSpec.setBasketSpec(spec.getBasketSpec());
-        // map other needed fields as appropriate
         return certificatesSpec;
     }
 

@@ -225,6 +225,24 @@ public class TestDataController {
         }
     }
 
+    @DeleteMapping("/certified-copies/{id}")
+    public ResponseEntity<Map<String, Object>> deleteCertifiedCopies(@PathVariable("id")
+    String id)
+        throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        boolean deleteCertificates = testDataService.deleteCertificatesData(id);
+
+        if (deleteCertificates) {
+            LOG.info("Certified Copies is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Certified Copies Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping("/appeals")
     public ResponseEntity<Void> deleteAppeal(
             @Valid @RequestBody DeleteAppealsRequest request) throws DataException {
