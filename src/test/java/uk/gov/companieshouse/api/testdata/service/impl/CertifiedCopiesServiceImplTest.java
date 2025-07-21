@@ -108,6 +108,8 @@ class CertifiedCopiesServiceImplTest {
         certifiedCopiesSpec.setPostalDelivery(true);
         certifiedCopiesSpec.setQuantity(1);
         certifiedCopiesSpec.setUserId("user123");
+        certifiedCopiesSpec.setPostageCost("0");
+        certifiedCopiesSpec.setTotalItemCost("30");
 
         basket = new Basket();
         basket.setId(certifiedCopiesSpec.getUserId());
@@ -168,6 +170,8 @@ class CertifiedCopiesServiceImplTest {
         assertTrue(captured.isPostalDelivery());
         assertEquals(certifiedCopiesSpec.getQuantity(), captured.getQuantity());
         assertEquals(certifiedCopiesSpec.getUserId(), captured.getUserId());
+        assertEquals(certifiedCopiesSpec.getPostageCost(), captured.getPostageCost());
+        assertEquals(certifiedCopiesSpec.getTotalItemCost(), captured.getTotalItemCost());
     }
 
     @Test

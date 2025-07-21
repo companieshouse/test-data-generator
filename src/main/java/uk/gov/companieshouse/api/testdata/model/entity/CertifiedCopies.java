@@ -53,8 +53,8 @@ public class CertifiedCopies {
     @Field("data.links.self")
     private String linksSelf;
 
-    @Field("data.postal_cost")
-    private String postalCost;
+    @Field("data.postage_cost")
+    private String postageCost;
 
     @Field("data.postal_delivery")
     private boolean postalDelivery;
@@ -189,10 +189,10 @@ public class CertifiedCopies {
         this.linksSelf = linksSelf;
     }
 
-    public String getPostalCost() { return postalCost; }
+    public String getPostageCost() { return postageCost; }
 
-    public void setPostalCost(String postalCost) {
-        this.postalCost = postalCost;
+    public void setPostageCost(String postageCost) {
+        this.postageCost = postageCost;
     }
 
     public boolean isPostalDelivery() {

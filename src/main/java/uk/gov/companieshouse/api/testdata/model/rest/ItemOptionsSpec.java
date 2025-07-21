@@ -33,6 +33,12 @@ public class ItemOptionsSpec {
     @JsonProperty("filing_history_documents")
     private List<FilingHistoryDocumentsSpec> filingHistoryDocuments;
 
+    @JsonProperty("forename")
+    private String foreName;
+
+    @JsonProperty("surname")
+    private String surName;
+
     public String getCertificateType() {
         return certificateType;
     }
@@ -99,5 +105,17 @@ public class ItemOptionsSpec {
 
     public void setContactNumber(String contactNumber) {
         this.contactNumber = contactNumber;
+    }
+
+    public String getForeName() { return foreName; }
+
+    public void setForeName(String foreName) {
+        this.foreName = foreName;
+    }
+
+    public String getSurName() { return surName; }
+
+    public void setSurName(String surName) {
+        this.surName = surName;
     }
 }

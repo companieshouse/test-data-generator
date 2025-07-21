@@ -34,6 +34,12 @@ public class CertifiedCopiesSpec {
     @JsonProperty("basket")
     private BasketSpec basketSpec;
 
+    @JsonProperty("postage_cost")
+    private String postageCost;
+
+    @JsonProperty("total_item_cost")
+    private String totalItemCost;
+
     public String getCompanyName() {
         return companyName;
     }
@@ -102,5 +108,17 @@ public class CertifiedCopiesSpec {
 
     public void setBasketSpec(BasketSpec basketSpec) {
         this.basketSpec = basketSpec;
+    }
+
+    public String getPostageCost() { return postageCost; }
+
+    public void setPostageCost(String postageCost) {
+        this.postageCost = postageCost;
+    }
+
+    public String getTotalItemCost() { return totalItemCost; }
+
+    public void setTotalItemCost(String totalItemCost) {
+        this.totalItemCost = totalItemCost;
     }
 }

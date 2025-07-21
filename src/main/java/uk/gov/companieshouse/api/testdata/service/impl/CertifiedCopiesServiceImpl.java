@@ -97,14 +97,19 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         Optional.ofNullable(optionsSpec.getContactNumber()).ifPresent(itemOptions::setContactNumber);
         itemOptions.setDeliveryTimescale(optionsSpec.getDeliveryTimescale());
         itemOptions.setDeliveryMethod(optionsSpec.getDeliveryMethod());
+        Optional.ofNullable(optionsSpec.getForeName()).ifPresent(itemOptions::setForeName);
+        Optional.ofNullable(optionsSpec.getSurName()).ifPresent(itemOptions::setSurName);
         if (optionsSpec.getFilingHistoryDocuments() != null) {
             List<FilingHistoryDocument> filingHistoryDocumentList = new ArrayList<>();
             for (FilingHistoryDocumentsSpec filingHistoryDocumentsSpec : optionsSpec.getFilingHistoryDocuments() ) {
                 var filingHistoryDocument = new FilingHistoryDocument();
                 filingHistoryDocument.setFilingHistoryDate(filingHistoryDocumentsSpec.getFilingHistoryDate());
                 filingHistoryDocument.setFilingHistoryDescription(filingHistoryDocumentsSpec.getFilingHistoryDescription());
-                FilingHistoryDescriptionValues values = mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues());
-                filingHistoryDocument.setFilingHistoryDescriptionValues(values);
+                FilingHistoryDescriptionValues values = null;
+                if (filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues() != null) {
+                    values = mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues());
+                    filingHistoryDocument.setFilingHistoryDescriptionValues(values);
+                }
                 filingHistoryDocument.setFilingHistoryId(filingHistoryDocumentsSpec.getFilingHistoryId());
                 filingHistoryDocument.setFilingHistoryType(filingHistoryDocumentsSpec.getFilingHistoryType());
                 filingHistoryDocument.setFilingHistoryCost(filingHistoryDocumentsSpec.getFilingHistoryCost());
@@ -151,6 +156,9 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         certifiedCopies.setPostalDelivery(spec.isPostalDelivery());
         certifiedCopies.setQuantity(spec.getQuantity());
         certifiedCopies.setUserId(spec.getUserId());
+        certifiedCopies.setPostageCost(spec.getPostageCost());
+        certifiedCopies.setTotalItemCost(spec.getTotalItemCost());
+
         return certifiedCopies;
     }
 

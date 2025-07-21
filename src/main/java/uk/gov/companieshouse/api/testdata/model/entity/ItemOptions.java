@@ -32,10 +32,10 @@ public class ItemOptions {
     private List<FilingHistoryDocument> filingHistoryDocuments;
 
     @Field("forename")
-    private String forename;
+    private String foreName;
 
     @Field("surname")
-    private String surname;
+    private String surName;
 
     public String getCertificateType() {
         return certificateType;
@@ -103,15 +103,15 @@ public class ItemOptions {
         this.contactNumber = contactNumber;
     }
 
-    public String getForename() { return forename; }
+    public String getForeName() { return foreName; }
 
-    public void setForename(String forename) {
-        this.forename = forename;
+    public void setForeName(String foreName) {
+        this.foreName = foreName;
     }
 
-    public String getSurname() { return surname; }
+    public String getSurName() { return surName; }
 
-    public void setSurname() {
-        this.surname = surname;
+    public void setSurName(String surName) {
+        this.surName = surName;
     }
 }
