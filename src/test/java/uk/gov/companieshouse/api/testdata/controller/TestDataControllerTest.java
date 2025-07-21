@@ -517,7 +517,6 @@ class TestDataControllerTest {
         verify(testDataService).deleteCertificatesData(certificateId);
     }
 
-
     @Test
     void deleteCertificateNotFound() throws Exception {
         final String certificateId = String.valueOf(1234);
@@ -540,6 +539,45 @@ class TestDataControllerTest {
         when(testDataService.deleteCertificatesData(certificateId)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataController.deleteCertificates(certificateId));
+
+        assertEquals(exception.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void deleteCertifiedCopiesSuccess() throws Exception {
+        final String certifiedCopiesId = "CCD-834723-192847";
+
+        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+            = testDataController.deleteCertifiedCopies(certifiedCopiesId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(testDataService).deleteCertifiedCopiesData(certifiedCopiesId);
+    }
+
+    @Test
+    void deleteCertifiedCopiesNotFound() throws Exception {
+        final String certifiedCopiesId = String.valueOf(1234);
+
+        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(false);
+        ResponseEntity<Map<String, Object>>
+            response = testDataController.deleteCertifiedCopies(certifiedCopiesId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        verify(testDataService).deleteCertifiedCopiesData(certifiedCopiesId);
+    }
+
+    @Test
+    void deleteCertifiedCopiesException() throws Exception {
+        final String certifiedCopiesId = "cert123";
+        DataException exception = new DataException("Failed to delete certificate");
+
+        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenThrow(exception);
+        DataException thrown = assertThrows(DataException.class, () ->
+            testDataController.deleteCertifiedCopies(certifiedCopiesId));
 
         assertEquals(exception.getMessage(), thrown.getMessage());
     }

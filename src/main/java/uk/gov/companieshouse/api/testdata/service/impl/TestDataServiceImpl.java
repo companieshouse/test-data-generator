@@ -56,6 +56,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 
+import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -108,6 +109,8 @@ public class TestDataServiceImpl implements TestDataService {
     private AcspMembersRepository acspMembersRepository;
     @Autowired
     private CertificatesRepository certificatesRepository;
+    @Autowired
+    private CertifiedCopiesRepository certifiedCopiesRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
@@ -549,13 +552,13 @@ public class TestDataServiceImpl implements TestDataService {
     public CertificatesData createCertifiedCopiesData(
         final CertifiedCopiesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
-            throw new DataException("User ID is required to create certificates");
+            throw new DataException("User ID is required to create certified copies");
         }
 
         try {
             return certifiedCopiesService.create(spec);
         } catch (Exception ex) {
-            throw new DataException("Error creating certificates", ex);
+            throw new DataException("Error creating certified copies", ex);
         }
     }
 
@@ -565,6 +568,15 @@ public class TestDataServiceImpl implements TestDataService {
             return certificatesService.delete(id);
         } catch (Exception ex) {
             throw new DataException("Error deleting certificates", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteCertifiedCopiesData(String id) throws DataException {
+        try {
+            return certifiedCopiesService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting certified copies", ex);
         }
     }
 

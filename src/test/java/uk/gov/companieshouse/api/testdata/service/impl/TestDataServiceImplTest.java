@@ -40,6 +40,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.CertifiedCopies;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
@@ -58,6 +59,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -116,6 +118,7 @@ class TestDataServiceImplTest {
             "auth_code";
     private static final String CONFIRMED_STATUS = "confirmed";
     private static final String ASSOCIATION_ID = "associationId";
+    private static final String CERTIFIED_COPIES_ID = "CCD-123456-789012";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -159,6 +162,8 @@ class TestDataServiceImplTest {
     private CompanySearchServiceImpl companySearchService;
     @Mock
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Mock
+    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
     @Mock
@@ -1501,6 +1506,90 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting certificates", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(certificatesService, times(1)).delete(CERTIFICATES_ID);
+    }
+
+    @Test
+    void createCertifiedCopiesData() throws DataException {
+        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        spec.setUserId(USER_ID);
+
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CCD-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CCD-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+
+        when(certifiedCopiesService.create(any(CertifiedCopiesSpec.class))).thenReturn(expectedCertificatesData);
+        CertificatesData result = testDataService.createCertifiedCopiesData(spec);
+
+        assertNotNull(result);
+        assertEquals(2, result.getCertificates().size());
+        assertEquals("CCD-111111-222222", result.getCertificates().get(0).getId());
+        assertEquals("CCD-333333-444444", result.getCertificates().get(1).getId());
+
+        verify(certifiedCopiesService).create(spec);
+    }
+
+    @Test
+    void createCertifiedCopiesDataNullUserId() {
+        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        DataException exception = assertThrows(DataException.class,
+            () -> testDataService.createCertifiedCopiesData(spec));
+        assertEquals("User ID is required to create certified copies", exception.getMessage());
+    }
+
+    @Test
+    void createCertifiedCopiesDataException() throws DataException {
+        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        spec.setUserId(USER_ID);
+
+        when(certifiedCopiesService.create(any(CertifiedCopiesSpec.class)))
+            .thenThrow(new DataException("Error creating certified copies"));
+        DataException exception = assertThrows(DataException.class,
+            () -> testDataService.createCertifiedCopiesData(spec));
+        assertEquals("Error creating certified copies", exception.getMessage());
+    }
+
+    @Test
+    void deleteCertifiedCopiesData() throws DataException {
+        CertifiedCopies certifiedCopies = new CertifiedCopies();
+        certifiedCopies.setId(CERTIFIED_COPIES_ID);
+
+        when(certifiedCopiesService.delete(CERTIFIED_COPIES_ID)).thenReturn(true);
+        boolean result = testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID);
+
+        assertTrue(result);
+        verify(certifiedCopiesService).delete(CERTIFIED_COPIES_ID);
+    }
+
+    @Test
+    void deleteCertifiedCopiesDataFailure() {
+        when(certifiedCopiesService.delete(CERTIFIED_COPIES_ID)).thenReturn(false);
+        boolean result = false;
+        try {
+            result = testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID);
+        } catch (DataException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertFalse(result);
+        verify(certifiedCopiesService, times(1)).delete(CERTIFIED_COPIES_ID);
+    }
+
+    @Test
+    void deleteCertifiedCopiesThrowsException() {
+        RuntimeException ex = new RuntimeException("error");
+        when(certifiedCopiesService.delete(CERTIFIED_COPIES_ID)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+            testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID));
+        assertEquals("Error deleting certified copies", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(certifiedCopiesService, times(1)).delete(CERTIFIED_COPIES_ID);
     }
 
     @Test

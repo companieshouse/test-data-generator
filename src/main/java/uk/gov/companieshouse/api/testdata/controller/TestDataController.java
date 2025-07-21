@@ -231,9 +231,9 @@ public class TestDataController {
         throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
-        boolean deleteCertificates = testDataService.deleteCertificatesData(id);
+        boolean deleteCertifiedCopies = testDataService.deleteCertifiedCopiesData(id);
 
-        if (deleteCertificates) {
+        if (deleteCertifiedCopies) {
             LOG.info("Certified Copies is deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {

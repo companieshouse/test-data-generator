@@ -123,6 +123,14 @@ public interface TestDataService {
     boolean deleteCertificatesData(String id) throws DataException;
 
     /**
+     * Deletes the certified copies test data for the given id.
+     *
+     * @param id the ID generated while creating certificates
+     * @throws DataException if there is an error during user deletion
+     */
+    boolean deleteCertifiedCopiesData(String id) throws DataException;
+
+    /**
      * Deletes all appeals data for a given penalty reference and company number.
      *
      * @param companyNumber    the company number
