@@ -17,12 +17,12 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -43,6 +43,9 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
 
     @Autowired
     public RandomService randomService;
+
+    @Autowired
+    private CertificatesServiceImpl certificatesService;
 
     @Override
     public CertificatesData create(CertifiedCopiesSpec spec) throws DataException {
@@ -82,7 +85,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         if (spec.getCapital() != null) {
             List<Capital> capitalList = spec.getCapital().stream()
                 .map(c -> {
-                    Capital capital = new Capital();
+                    var capital = new Capital();
                     capital.setCurrency(c.getCurrency());
                     capital.setFigure(c.getFigure());
                     return capital;
@@ -166,29 +169,25 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
     }
 
     private Basket createBasket(CertifiedCopiesSpec spec, List<Basket.Item> items) {
-        var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
-        Instant now = getCurrentDateTime();
-
-        var basket = new Basket();
-        basket.setId(spec.getUserId());
-        basket.setCreatedAt(now);
-        basket.setUpdatedAt(now);
-        basket.setDeliveryDetails(address);
-        basket.setForename(spec.getBasketSpec().getForename());
-        basket.setSurname(spec.getBasketSpec().getSurname());
-        basket.setEnrolled(spec.getBasketSpec().getEnrolled());
-        basket.setItems(items);
-
-        return basket;
+        CertificatesSpec certSpec = mapCertifiedCopiesToCertificatesSpec(spec);
+        return certificatesService.createBasket(certSpec, items);
     }
 
-    private void deleteBasket(String basketId) {
+    private CertificatesSpec mapCertifiedCopiesToCertificatesSpec(CertifiedCopiesSpec spec) {
+        CertificatesSpec certificatesSpec = new CertificatesSpec();
+        certificatesSpec.setUserId(spec.getUserId());
+        certificatesSpec.setBasketSpec(spec.getBasketSpec());
+        // map other needed fields as appropriate
+        return certificatesSpec;
+    }
+
+    void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
-                .ifPresent(basket -> {
-                    if (basket.getId() != null) {
-                        basketRepository.delete(basket);
-                    }
-                });
+            .ifPresent(basket -> {
+                if (basket.getId() != null) {
+                    basketRepository.delete(basket);
+                }
+            });
     }
 
     @Override
