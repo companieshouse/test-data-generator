@@ -76,8 +76,8 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
     }
 
     private FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesSpec spec) {
-        FilingHistoryDescriptionValues entity = new FilingHistoryDescriptionValues();
-        entity.setDate(spec.getDate());
+        var filingHistoryDescriptionValues = new FilingHistoryDescriptionValues();
+        filingHistoryDescriptionValues.setDate(spec.getDate());
 
         if (spec.getCapital() != null) {
             List<Capital> capitalList = spec.getCapital().stream()
@@ -88,10 +88,10 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                     return capital;
                 })
                 .collect(Collectors.toList());
-            entity.setCapital(capitalList);
+            filingHistoryDescriptionValues.setCapital(capitalList);
         }
 
-        return entity;
+        return filingHistoryDescriptionValues;
     }
 
     private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
