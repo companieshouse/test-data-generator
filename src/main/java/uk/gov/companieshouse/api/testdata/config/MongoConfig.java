@@ -123,6 +123,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public CertifiedCopiesRepository certifiedCopiesRepository() {
+        return getMongoRepositoryBean(CertifiedCopiesRepository.class, "items");
+    }
+
+    @Bean
     public AccountPenaltiesRepository accountPenaltiesRepository() {
         return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
     }

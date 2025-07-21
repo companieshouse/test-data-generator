@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "certified_copies")
-public class CertifiedCopies extends Certificates {
+public class CertifiedCopies {
     @Id
     @Field("_id")
     private String id;

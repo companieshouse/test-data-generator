@@ -35,6 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -457,16 +458,7 @@ class TestDataControllerTest {
 
     @Test
     void createCertificateSuccess() throws Exception {
-        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
-            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
-        );
-        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
-            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
-        );
-
-        // Use LinkedList to support getFirst()
-        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
-        CertificatesData certificateData = new CertificatesData(entries);
+        CertificatesData certificateData = getCertificatesData();
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
@@ -831,5 +823,51 @@ class TestDataControllerTest {
         var response = testDataController.healthCheck();
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("test-data-generator is alive",response.getBody());
+    }
+
+    @Test
+    void createCertifiedCopiesSuccess() throws Exception {
+        CertificatesData certificateData = getCertificatesData();
+
+        CertifiedCopiesSpec request = new CertifiedCopiesSpec();
+        request.setCompanyNumber("12345678");
+
+        when(testDataService.createCertifiedCopiesData(request)).thenReturn(certificateData);
+
+        ResponseEntity<CertificatesData> response = testDataController.createCertifiedCopies(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
+
+        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
+        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
+    }
+
+    private static CertificatesData getCertificatesData() {
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
+        );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
+        );
+
+        // Use LinkedList to support getFirst()
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData certificateData = new CertificatesData(entries);
+        return certificateData;
+    }
+
+
+    @Test
+    void createCertifiedCopiesException() throws Exception {
+        CertifiedCopiesSpec request = new CertifiedCopiesSpec();
+        request.setCompanyNumber("12345678");
+
+        DataException exception = new DataException("Error creating certificate");
+        when(testDataService.createCertifiedCopiesData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+            testDataController.createCertifiedCopies(request));
+        assertEquals(exception.getMessage(), thrown.getMessage());
     }
 }

@@ -20,7 +20,7 @@ public class ItemOptions {
     private String deliveryTimescale;
 
     @Field("include_email_copy")
-    private boolean includeEmailCopy;
+    private Boolean includeEmailCopy;
 
     @Field("company_type")
     private String companyType;
@@ -63,7 +63,7 @@ public class ItemOptions {
         return includeEmailCopy;
     }
 
-    public void setIncludeEmailCopy(boolean includeEmailCopy) {
+    public void setIncludeEmailCopy(Boolean includeEmailCopy) {
         this.includeEmailCopy = includeEmailCopy;
     }
 

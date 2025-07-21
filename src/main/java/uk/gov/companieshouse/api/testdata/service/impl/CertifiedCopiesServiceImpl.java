@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
-import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -32,7 +32,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class CertifiedCopiesServiceImpl implements DataService<CertificatesData, CertifiedCopiesSpec> {
 
     @Autowired
-    public CertificatesRepository certifiedCopiesRepository;
+    public CertifiedCopiesRepository certifiedCopiesRepository;
 
     @Autowired
     public BasketRepository basketRepository;
@@ -94,10 +94,10 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
     private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
         Optional.ofNullable(optionsSpec.getCollectionLocation()).ifPresent(itemOptions::setCollectionLocation);
-        Optional.ofNullable(optionsSpec.getContactNumber()).ifPresent(itemOptions::setCollectionLocation);
+        Optional.ofNullable(optionsSpec.getContactNumber()).ifPresent(itemOptions::setContactNumber);
         itemOptions.setDeliveryTimescale(optionsSpec.getDeliveryTimescale());
-        itemOptions.setIncludeEmailCopy(optionsSpec.getIncludeEmailCopy());
-        if (itemOptions.getFilingHistoryDocuments() != null) {
+        itemOptions.setDeliveryMethod(optionsSpec.getDeliveryMethod());
+        if (optionsSpec.getFilingHistoryDocuments() != null) {
             List<FilingHistoryDocument> filingHistoryDocumentList = new ArrayList<>();
             for (FilingHistoryDocumentsSpec filingHistoryDocumentsSpec : optionsSpec.getFilingHistoryDocuments() ) {
                 var filingHistoryDocument = new FilingHistoryDocument();
@@ -114,6 +114,11 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
             itemOptions.setFilingHistoryDocuments(filingHistoryDocumentList);
         }
 
+      return getCertifiedCopies(spec, randomId, itemOptions);
+    }
+
+    private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, String randomId,
+        ItemOptions itemOptions) {
         var certifiedCopies = new CertifiedCopies();
         var currentDate = getCurrentDateTime().toString();
 
@@ -146,7 +151,6 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         certifiedCopies.setPostalDelivery(spec.isPostalDelivery());
         certifiedCopies.setQuantity(spec.getQuantity());
         certifiedCopies.setUserId(spec.getUserId());
-
         return certifiedCopies;
     }
 

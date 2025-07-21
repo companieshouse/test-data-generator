@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 
 public class ItemOptionsSpec {
     @JsonProperty("certificate_type")
@@ -17,8 +17,12 @@ public class ItemOptionsSpec {
     @JsonProperty("delivery_timescale")
     private String deliveryTimescale;
 
+    @JsonProperty("delivery_method")
+    private String deliveryMethod;
+
     @JsonProperty("include_email_copy")
-    private boolean includeEmailCopy;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private Boolean includeEmailCopy;
 
     @JsonProperty("company_type")
     private String companyType;
@@ -45,11 +49,19 @@ public class ItemOptionsSpec {
         this.deliveryTimescale = deliveryTimescale;
     }
 
+    public String getDeliveryMethod() {
+        return  deliveryMethod;
+    }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
+    }
+
     public boolean getIncludeEmailCopy() {
         return includeEmailCopy;
     }
 
-    public void setIncludeEmailCopy(boolean includeEmailCopy) {
+    public void setIncludeEmailCopy(Boolean includeEmailCopy) {
         this.includeEmailCopy = includeEmailCopy;
     }
 
