@@ -145,6 +145,18 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         certifiedCopies.setDescriptionCertifiedCopy("certified copy for company " + spec.getCompanyNumber());
         certifiedCopies.setEtag(randomService.getEtag());
         if (spec.getItemCosts() != null) {
+            List<ItemCosts> itemCostsList = spec.getItemCosts().stream()
+                    .map(itemCostsSpec -> {
+                        var itemCosts = new ItemCosts();
+                        itemCosts.setDiscountApplied(itemCostsSpec.getDiscountApplied());
+                        itemCosts.setItemCost(itemCostsSpec.getItemCost());
+                        itemCosts.setCalculatedCost(itemCostsSpec.getCalculatedCost());
+                        itemCosts.setProductType(itemCostsSpec.getProductType());
+                        return itemCosts;
+                    })
+                    .collect(Collectors.toList());
+            certifiedCopies.setItemCosts(itemCostsList);
+        }
             List<ItemCosts> itemCostsList = new ArrayList<>();
             for (ItemCostsSpec itemCostsSpec : spec.getItemCosts()) {
                 var itemCosts = new ItemCosts();
