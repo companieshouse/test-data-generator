@@ -12,6 +12,9 @@ public class FilingHistoryDescriptionValues {
     @Field("capital")
     private List<Capital> capital;
 
+    @Field("charge_number")
+    private String chargeNumber;
+
     public String getDate() { return date; }
 
     public void setDate(String date) {
@@ -22,5 +25,11 @@ public class FilingHistoryDescriptionValues {
 
     public void setCapital(List<Capital> capital) {
       this.capital = capital;
+    }
+
+    public String getChargeNumber() { return chargeNumber; }
+
+    public void setChargeNumber(String chargeNumber) {
+        this.chargeNumber = chargeNumber;
     }
 }

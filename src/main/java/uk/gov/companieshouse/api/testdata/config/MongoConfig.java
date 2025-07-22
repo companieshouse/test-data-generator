@@ -128,6 +128,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public MissingImageDeliveriesRepository missingImageDeliveriesRepository() {
+        return getMongoRepositoryBean(MissingImageDeliveriesRepository.class, "items");
+    }
+
+    @Bean
     public AccountPenaltiesRepository accountPenaltiesRepository() {
         return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
     }

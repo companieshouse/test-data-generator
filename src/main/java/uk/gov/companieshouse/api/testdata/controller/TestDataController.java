@@ -189,6 +189,18 @@ public class TestDataController {
         return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
     }
 
+    @PostMapping("/missing-image-deliveries")
+    public ResponseEntity<CertificatesData> createMissingImageDeliveries(
+        @Valid @RequestBody MissingImageDeliveriesSpec request) throws DataException {
+
+        var createdMissingImageDeliveries = testDataService.createMissingImageDeliveriesData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("missing-image-deliveries-id", createdMissingImageDeliveries.getCertificates().getFirst().getId());
+        LOG.info("New missing image deliveries added", data);
+        return new ResponseEntity<>(createdMissingImageDeliveries, HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
                                                                 String acspMemberId)
@@ -227,6 +239,24 @@ public class TestDataController {
 
     @DeleteMapping("/certified-copies/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertifiedCopies(@PathVariable("id")
+    String id)
+        throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        boolean deleteCertifiedCopies = testDataService.deleteCertifiedCopiesData(id);
+
+        if (deleteCertifiedCopies) {
+            LOG.info("Certified Copies is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Certified Copies Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/missing-image-deliveries/{id}")
+    public ResponseEntity<Map<String, Object>> deleteMissingImageDeliveries(@PathVariable("id")
     String id)
         throws DataException {
         Map<String, Object> response = new HashMap<>();

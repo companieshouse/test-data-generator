@@ -22,6 +22,9 @@ public class FilingHistoryDocument {
     @Field("filing_history_cost")
     private String filingHistoryCost;
 
+    @Field("filing_history_category")
+    private String filingHistoryCategory;
+
     public String getFilingHistoryDate() {
         return filingHistoryDate;
     }
@@ -68,5 +71,13 @@ public class FilingHistoryDocument {
 
     public void setFilingHistoryCost(String filingHistoryCost) {
         this.filingHistoryCost = filingHistoryCost;
+    }
+
+    public String getFilingHistoryCategory() {
+        return  filingHistoryCategory;
+    }
+
+    public void setFilingHistoryCategory(String filingHistoryCategory) {
+        this.filingHistoryCategory = filingHistoryCategory;
     }
 }
