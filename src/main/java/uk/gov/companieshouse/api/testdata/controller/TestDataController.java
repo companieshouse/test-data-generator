@@ -253,7 +253,7 @@ public class TestDataController {
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
 
-        AccountPenaltiesData accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
         if (transactionReference != null) {
             List<PenaltyData> filteredPenalties = accountPenaltiesData.getPenalties().stream()
