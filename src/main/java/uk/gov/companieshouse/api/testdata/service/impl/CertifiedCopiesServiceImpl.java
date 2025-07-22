@@ -113,8 +113,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                 filingHistoryDocument.setFilingHistoryDescription(filingHistoryDocumentsSpec.getFilingHistoryDescription());
                 if (filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues() != null) {
                     filingHistoryDocument.setFilingHistoryDescriptionValues(
-                        mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues())
-                    );
+                        mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues()));
                 }
                 filingHistoryDocument.setFilingHistoryId(filingHistoryDocumentsSpec.getFilingHistoryId());
                 filingHistoryDocument.setFilingHistoryType(filingHistoryDocumentsSpec.getFilingHistoryType());
@@ -158,17 +157,6 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                     .collect(Collectors.toList());
             certifiedCopies.setItemCosts(itemCostsList);
         }
-            List<ItemCosts> itemCostsList = new ArrayList<>();
-            for (ItemCostsSpec itemCostsSpec : spec.getItemCosts()) {
-                var itemCosts = new ItemCosts();
-                itemCosts.setDiscountApplied(itemCostsSpec.getDiscountApplied());
-                itemCosts.setItemCost(itemCostsSpec.getItemCost());
-                itemCosts.setCalculatedCost(itemCostsSpec.getCalculatedCost());
-                itemCosts.setProductType(itemCostsSpec.getProductType());
-                itemCostsList.add(itemCosts);
-            }
-            certifiedCopies.setItemCosts(itemCostsList);
-        }
         certifiedCopies.setItemOptions(itemOptions);
         certifiedCopies.setKind(spec.getKind());
         certifiedCopies.setLinksSelf(url + randomId);
@@ -193,7 +181,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         return certificatesSpec;
     }
 
-    private void deleteBasket(String basketId) {
+    protected void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
             .ifPresent(basket -> {
                 if (basket.getId() != null) {
