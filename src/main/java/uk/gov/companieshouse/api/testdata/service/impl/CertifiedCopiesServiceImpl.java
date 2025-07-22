@@ -111,10 +111,10 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                 var filingHistoryDocument = new FilingHistoryDocument();
                 filingHistoryDocument.setFilingHistoryDate(filingHistoryDocumentsSpec.getFilingHistoryDate());
                 filingHistoryDocument.setFilingHistoryDescription(filingHistoryDocumentsSpec.getFilingHistoryDescription());
-                FilingHistoryDescriptionValues values = null;
                 if (filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues() != null) {
-                    values = mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues());
-                    filingHistoryDocument.setFilingHistoryDescriptionValues(values);
+                    filingHistoryDocument.setFilingHistoryDescriptionValues(
+                        mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues())
+                    );
                 }
                 filingHistoryDocument.setFilingHistoryId(filingHistoryDocumentsSpec.getFilingHistoryId());
                 filingHistoryDocument.setFilingHistoryType(filingHistoryDocumentsSpec.getFilingHistoryType());
@@ -130,6 +130,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
 
     private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, String randomId,
         ItemOptions itemOptions) {
+        String url = "/orderable/certified-copies/";
         var certifiedCopies = new CertifiedCopies();
         var currentDate = getCurrentDateTime().toString();
 
@@ -170,7 +171,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         }
         certifiedCopies.setItemOptions(itemOptions);
         certifiedCopies.setKind(spec.getKind());
-        certifiedCopies.setLinksSelf("/orderable/certified-copies/" + randomId);
+        certifiedCopies.setLinksSelf(url + randomId);
         certifiedCopies.setPostalDelivery(spec.isPostalDelivery());
         certifiedCopies.setQuantity(spec.getQuantity());
         certifiedCopies.setUserId(spec.getUserId());
@@ -192,7 +193,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         return certificatesSpec;
     }
 
-    void deleteBasket(String basketId) {
+    private void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
             .ifPresent(basket -> {
                 if (basket.getId() != null) {

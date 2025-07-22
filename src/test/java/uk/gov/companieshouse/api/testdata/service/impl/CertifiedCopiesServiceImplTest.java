@@ -248,6 +248,7 @@ class CertifiedCopiesServiceImplTest {
         assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getCompanyNumber());
         assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescription());
         assertEquals("certified-copy", captured.getDescriptionIdentifier());
+        assertEquals("CCD-123456-789012", captured.getDataId());
         assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
         assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
         assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());

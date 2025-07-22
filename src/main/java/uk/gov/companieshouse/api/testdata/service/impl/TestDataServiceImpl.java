@@ -554,7 +554,6 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certified copies");
         }
-
         try {
             return certifiedCopiesService.create(spec);
         } catch (Exception ex) {
