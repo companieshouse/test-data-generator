@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -252,21 +253,16 @@ public class TestDataController {
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
 
-        var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
+        AccountPenaltiesData accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
 
         if (transactionReference != null) {
-            accountPenaltiesData.setPenalties(
-                    filterPenalties(accountPenaltiesData.getPenalties(), transactionReference)
-            );
+            List<PenaltyData> filteredPenalties = accountPenaltiesData.getPenalties().stream()
+                    .filter(penalty -> transactionReference.equals(penalty.getTransactionReference()))
+                    .collect(Collectors.toList());
+            accountPenaltiesData.setPenalties(filteredPenalties);
         }
 
         return ResponseEntity.ok(accountPenaltiesData);
-    }
-
-    private List<PenaltyData> filterPenalties(List<PenaltyData> penalties, String reference) {
-        return penalties.stream()
-                .filter(penalty -> reference.equals(penalty.getTransactionReference()))
-                .toList();
     }
 
     @PutMapping("/penalties/{penaltyRef}")

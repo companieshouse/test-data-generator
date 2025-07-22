@@ -1614,24 +1614,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void getAccountPenaltyData() throws Exception {
-        testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
-        verify(accountPenaltiesService).getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
-    }
-
-    @Test
-    void getAccountPenaltyDataNotFoundException() throws NoDataFoundException {
-        NoDataFoundException ex = new NoDataFoundException(
-                "Error retrieving account penalty - not found");
-        when(accountPenaltiesService.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
-                .thenThrow(ex);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF));
-        assertEquals(ex.getMessage(), thrown.getMessage());
-    }
-
-    @Test
     void updateAccountPenaltiesData() throws Exception {
         UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
         request.setCompanyCode(COMPANY_CODE);
@@ -1732,24 +1714,6 @@ class TestDataServiceImplTest {
         assertEquals("Error creating account penalties", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
         verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
-    }
-
-    @Test
-    void getAccountPenaltyDataDelegatesToService() throws Exception {
-        when(accountPenaltiesService.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
-                .thenReturn(new AccountPenaltiesData());
-        AccountPenaltiesData result = testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
-        assertNotNull(result);
-        verify(accountPenaltiesService).getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
-    }
-
-    @Test
-    void getAccountPenaltyDataThrowsNoDataFoundException() throws Exception {
-        when(accountPenaltiesService.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
-                .thenThrow(new NoDataFoundException("not found"));
-        NoDataFoundException ex = assertThrows(NoDataFoundException.class, () ->
-                testDataService.getAccountPenaltyData(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF));
-        assertEquals("Error retrieving account penalty - not found", ex.getMessage());
     }
 
     @Test

@@ -562,18 +562,6 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltyData(
-            String companyCode, String customerCode, String penaltyReference)
-            throws NoDataFoundException {
-        try {
-            return accountPenaltiesService.getAccountPenalty(companyCode, customerCode,
-                    penaltyReference);
-        } catch (NoDataFoundException ex) {
-            throw new NoDataFoundException("Error retrieving account penalty - not found");
-        }
-    }
-
-    @Override
     public AccountPenaltiesData getAccountPenaltiesData(String id)
             throws NoDataFoundException {
         try {
