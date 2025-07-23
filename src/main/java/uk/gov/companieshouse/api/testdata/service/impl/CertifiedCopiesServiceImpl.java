@@ -21,7 +21,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
@@ -129,7 +128,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
 
     private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, String randomId,
         ItemOptions itemOptions) {
-        String url = "/orderable/certified-copies/";
+        var url = "/orderable/certified-copies/";
         var certifiedCopies = new CertifiedCopies();
         var currentDate = getCurrentDateTime().toString();
 
