@@ -123,19 +123,6 @@ public interface TestDataService {
     boolean deleteAppealsData(String companyNumber, String penaltyReference) throws DataException;
 
     /**
-     * Gets the account penalty data for a given company code, customer code and penalty reference.
-     *
-     * @param companyCode      the company code
-     * @param customerCode     the customer code
-     * @param penaltyReference the penalty reference
-     * @return the {@link AccountPenaltiesData} with only the requested penalty reference in the
-     * {@link PenaltyData} list
-     * @throws NoDataFoundException if the penalty cannot be found
-     */
-    AccountPenaltiesData getAccountPenaltyData(String companyCode, String customerCode,
-            String penaltyReference) throws NoDataFoundException;
-
-    /**
      * Gets the account penalties data for a given company code and customer code.
      *
      * @param id  the company code
@@ -167,6 +154,18 @@ public interface TestDataService {
      * @throws DataException        if the account penalties failed to be deleted
      */
     ResponseEntity<Void> deleteAccountPenaltiesData(String id)
+            throws NoDataFoundException, DataException;
+
+    /**
+     * Deletes an account penalty by its reference.
+     *
+     * @param id                 the company code
+     * @param transactionReference the transaction reference
+     * @return the {@link ResponseEntity} with the HTTP status
+     * @throws NoDataFoundException if the account penalty cannot be found
+     * @throws DataException        if the account penalty failed to be deleted
+     */
+    ResponseEntity<Void> deleteAccountPenaltyByReference(String id, String transactionReference)
             throws NoDataFoundException, DataException;
 
     AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException;

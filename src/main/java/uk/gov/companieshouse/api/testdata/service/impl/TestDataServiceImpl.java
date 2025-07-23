@@ -44,13 +44,13 @@ import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -65,8 +65,8 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.api.testdata.service.TransactionService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
 
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -95,7 +95,7 @@ public class TestDataServiceImpl implements TestDataService {
     private RandomService randomService;
     @Autowired
     private UserService userService;
-      @Autowired
+    @Autowired
     private TransactionService transactionService;
     @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
@@ -562,18 +562,6 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltyData(
-            String companyCode, String customerCode, String penaltyReference)
-            throws NoDataFoundException {
-        try {
-            return accountPenaltiesService.getAccountPenalty(companyCode, customerCode,
-                    penaltyReference);
-        } catch (NoDataFoundException ex) {
-            throw new NoDataFoundException("Error retrieving account penalty - not found");
-        }
-    }
-
-    @Override
     public AccountPenaltiesData getAccountPenaltiesData(String id)
             throws NoDataFoundException {
         try {
@@ -605,6 +593,20 @@ public class TestDataServiceImpl implements TestDataService {
             throw new NoDataFoundException("Error deleting account penalties - not found");
         } catch (Exception ex) {
             throw new DataException("Error deleting account penalties", ex);
+        }
+    }
+
+    @Override
+    public ResponseEntity<Void> deleteAccountPenaltyByReference(
+            String id, String transactionReference)
+            throws NoDataFoundException, DataException {
+        try {
+            return accountPenaltiesService.deleteAccountPenaltyByReference(
+                    id, transactionReference);
+        } catch (NoDataFoundException ex) {
+            throw new NoDataFoundException("Error deleting account penalty - not found");
+        } catch (Exception ex) {
+            throw new DataException("Error deleting account penalty", ex);
         }
     }
 
@@ -714,7 +716,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
 
-    public TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException{
+    public TransactionsData createTransactionData(TransactionsSpec transactionsSpec)
+            throws DataException {
         try {
             LOG.info("Creating Txn for User Id: " + transactionsSpec.getUserId());
             return transactionService.create(transactionsSpec);
