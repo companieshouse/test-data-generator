@@ -3,6 +3,11 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class FilingHistoryDocumentsSpec {
+    @JsonProperty("filing_history_barcode")
+    private String filingHistoryBarcode;
+
+    @JsonProperty("filing_history_category")
+    private String filingHistoryCategory;
 
     @JsonProperty("filing_history_date")
     private String filingHistoryDate;
@@ -21,6 +26,12 @@ public class FilingHistoryDocumentsSpec {
 
     @JsonProperty("filing_history_cost")
     private String filingHistoryCost;
+
+    public String getFilingHistoryCategory() { return filingHistoryCategory; }
+
+    public void setFilingHistoryCategory(String filingHistoryCategory) {
+        this.filingHistoryCategory = filingHistoryCategory;
+    }
 
     public String getFilingHistoryDate() { return filingHistoryDate; }
 
@@ -58,5 +69,13 @@ public class FilingHistoryDocumentsSpec {
 
     public void setFilingHistoryCost(String filingHistoryCost) {
         this.filingHistoryCost = filingHistoryCost;
+    }
+
+    public String getFilingHistoryBarcode() {
+        return filingHistoryBarcode;
+    }
+
+    public void setFilingHistoryBarcode(String filingHistoryBarcode) {
+        this.filingHistoryBarcode = filingHistoryBarcode;
     }
 }

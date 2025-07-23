@@ -15,6 +15,12 @@ public class FilingHistoryDescriptionValues {
     @Field("charge_number")
     private String chargeNumber;
 
+    @Field("made_up_date")
+    private String madeUpDate;
+
+    @Field("officer_name")
+    private String officerName;
+
     public String getDate() { return date; }
 
     public void setDate(String date) {
@@ -31,5 +37,17 @@ public class FilingHistoryDescriptionValues {
 
     public void setChargeNumber(String chargeNumber) {
         this.chargeNumber = chargeNumber;
+    }
+
+    public String getMadeUpDate() { return madeUpDate; }
+
+    public void setMadeUpDate(String madeUpDate) {
+        this.madeUpDate = madeUpDate;
+    }
+
+    public String getOfficerName() { return officerName; }
+
+    public void setOfficerName(String officerName) {
+        this.officerName = officerName;
     }
 }

@@ -26,6 +26,9 @@ public class MissingImageDeliveries {
     @Field("data.company_number")
     private String companyNumber;
 
+    @Field("data.customer_reference")
+    private String customerReference;
+
     @Field("data.description")
     private String description;
 
@@ -117,6 +120,14 @@ public class MissingImageDeliveries {
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
     public String getDescription() {
