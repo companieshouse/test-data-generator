@@ -21,7 +21,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
@@ -111,10 +110,9 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                 var filingHistoryDocument = new FilingHistoryDocument();
                 filingHistoryDocument.setFilingHistoryDate(filingHistoryDocumentsSpec.getFilingHistoryDate());
                 filingHistoryDocument.setFilingHistoryDescription(filingHistoryDocumentsSpec.getFilingHistoryDescription());
-                FilingHistoryDescriptionValues values = null;
                 if (filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues() != null) {
-                    values = mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues());
-                    filingHistoryDocument.setFilingHistoryDescriptionValues(values);
+                    filingHistoryDocument.setFilingHistoryDescriptionValues(
+                        mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues()));
                 }
                 filingHistoryDocument.setFilingHistoryId(filingHistoryDocumentsSpec.getFilingHistoryId());
                 filingHistoryDocument.setFilingHistoryType(filingHistoryDocumentsSpec.getFilingHistoryType());
@@ -130,6 +128,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
 
     private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, String randomId,
         ItemOptions itemOptions) {
+        var url = "/orderable/certified-copies/";
         var certifiedCopies = new CertifiedCopies();
         var currentDate = getCurrentDateTime().toString();
 
@@ -145,20 +144,21 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         certifiedCopies.setDescriptionCertifiedCopy("certified copy for company " + spec.getCompanyNumber());
         certifiedCopies.setEtag(randomService.getEtag());
         if (spec.getItemCosts() != null) {
-            List<ItemCosts> itemCostsList = new ArrayList<>();
-            for (ItemCostsSpec itemCostsSpec : spec.getItemCosts()) {
-                var itemCosts = new ItemCosts();
-                itemCosts.setDiscountApplied(itemCostsSpec.getDiscountApplied());
-                itemCosts.setItemCost(itemCostsSpec.getItemCost());
-                itemCosts.setCalculatedCost(itemCostsSpec.getCalculatedCost());
-                itemCosts.setProductType(itemCostsSpec.getProductType());
-                itemCostsList.add(itemCosts);
-            }
+            List<ItemCosts> itemCostsList = spec.getItemCosts().stream()
+                    .map(itemCostsSpec -> {
+                        var itemCosts = new ItemCosts();
+                        itemCosts.setDiscountApplied(itemCostsSpec.getDiscountApplied());
+                        itemCosts.setItemCost(itemCostsSpec.getItemCost());
+                        itemCosts.setCalculatedCost(itemCostsSpec.getCalculatedCost());
+                        itemCosts.setProductType(itemCostsSpec.getProductType());
+                        return itemCosts;
+                    })
+                    .collect(Collectors.toList());
             certifiedCopies.setItemCosts(itemCostsList);
         }
         certifiedCopies.setItemOptions(itemOptions);
         certifiedCopies.setKind(spec.getKind());
-        certifiedCopies.setLinksSelf("/orderable/certified-copies/" + randomId);
+        certifiedCopies.setLinksSelf(url + randomId);
         certifiedCopies.setPostalDelivery(spec.isPostalDelivery());
         certifiedCopies.setQuantity(spec.getQuantity());
         certifiedCopies.setUserId(spec.getUserId());
@@ -180,7 +180,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         return certificatesSpec;
     }
 
-    void deleteBasket(String basketId) {
+    protected void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
             .ifPresent(basket -> {
                 if (basket.getId() != null) {

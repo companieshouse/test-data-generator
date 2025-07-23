@@ -91,25 +91,17 @@ public class ItemOptions {
         this.filingHistoryDocuments = filingHistoryDocuments;
     }
 
-    public String getCollectionLocation() { return collectionLocation; }
-
     public void setCollectionLocation(String collectionLocation) {
         this.collectionLocation = collectionLocation;
     }
-
-    public String getContactNumber() { return contactNumber; }
 
     public void setContactNumber(String contactNumber) {
         this.contactNumber = contactNumber;
     }
 
-    public String getForeName() { return foreName; }
-
     public void setForeName(String foreName) {
         this.foreName = foreName;
     }
-
-    public String getSurName() { return surName; }
 
     public void setSurName(String surName) {
         this.surName = surName;

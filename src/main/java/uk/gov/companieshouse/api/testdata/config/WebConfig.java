@@ -16,8 +16,9 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String ACCOUNT_PENALTIES_ENDPOINTS = "/test-data/penalties/**";
     private static final String USER_COMPANY_ASSOCIATION_ENDPOINTS =
             "/test-data/associations/**";
-
     private static final String TRANSACTIONS_ENDPOINTS = "/test-data/transactions/**";
+    private static final String CERTIFICATES_ENDPOINTS = "/test-data/certificates/**";
+    private static final String CERTIFIED_COPIES_ENDPOINTS = "/test-data/certified-copies/**";
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -28,8 +29,9 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(APPEALS_ENDPOINTS)
                 .addPathPatterns(ACCOUNT_PENALTIES_ENDPOINTS)
                 .addPathPatterns(USER_COMPANY_ASSOCIATION_ENDPOINTS)
-                .addPathPatterns(TRANSACTIONS_ENDPOINTS);
-
+                .addPathPatterns(TRANSACTIONS_ENDPOINTS)
+                .addPathPatterns(CERTIFICATES_ENDPOINTS)
+                .addPathPatterns(CERTIFIED_COPIES_ENDPOINTS);
     }
 
     @Bean
