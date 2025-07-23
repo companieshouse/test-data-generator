@@ -1,16 +1,26 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.util.List;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 public class ItemOptions {
     @Field("certificate_type")
     private String certificateType;
 
+    @Field("collection_location")
+    private String collectionLocation;
+
+    @Field("contact_number")
+    private String contactNumber;
+
+    @Field("delivery_method")
+    private String deliveryMethod;
+
     @Field("delivery_timescale")
     private String deliveryTimescale;
 
     @Field("include_email_copy")
-    private boolean includeEmailCopy;
+    private Boolean includeEmailCopy;
 
     @Field("company_type")
     private String companyType;
@@ -18,12 +28,27 @@ public class ItemOptions {
     @Field("company_status")
     private String companyStatus;
 
+    @Field("filing_history_documents")
+    private List<FilingHistoryDocument> filingHistoryDocuments;
+
+    @Field("forename")
+    private String foreName;
+
+    @Field("surname")
+    private String surName;
+
     public String getCertificateType() {
         return certificateType;
     }
 
     public void setCertificateType(String certificateType) {
         this.certificateType = certificateType;
+    }
+
+    public String getDeliveryMethod() { return deliveryMethod; }
+
+    public void setDeliveryMethod(String deliveryMethod) {
+        this.deliveryMethod = deliveryMethod;
     }
 
     public String getDeliveryTimescale() {
@@ -38,7 +63,7 @@ public class ItemOptions {
         return includeEmailCopy;
     }
 
-    public void setIncludeEmailCopy(boolean includeEmailCopy) {
+    public void setIncludeEmailCopy(Boolean includeEmailCopy) {
         this.includeEmailCopy = includeEmailCopy;
     }
 
@@ -56,5 +81,29 @@ public class ItemOptions {
 
     public void setCompanyStatus(String companyStatus) {
         this.companyStatus = companyStatus;
+    }
+
+    public List<FilingHistoryDocument> getFilingHistoryDocuments() {
+        return filingHistoryDocuments;
+    }
+
+    public void setFilingHistoryDocuments(List<FilingHistoryDocument> filingHistoryDocuments) {
+        this.filingHistoryDocuments = filingHistoryDocuments;
+    }
+
+    public void setCollectionLocation(String collectionLocation) {
+        this.collectionLocation = collectionLocation;
+    }
+
+    public void setContactNumber(String contactNumber) {
+        this.contactNumber = contactNumber;
+    }
+
+    public void setForeName(String foreName) {
+        this.foreName = foreName;
+    }
+
+    public void setSurName(String surName) {
+        this.surName = surName;
     }
 }

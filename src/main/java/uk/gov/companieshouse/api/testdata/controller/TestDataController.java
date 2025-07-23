@@ -31,6 +31,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -178,6 +179,18 @@ public class TestDataController {
         return new ResponseEntity<>(createdCertificates, HttpStatus.CREATED);
     }
 
+    @PostMapping("/certified-copies")
+    public ResponseEntity<CertificatesData> createCertifiedCopies(
+        @Valid @RequestBody CertifiedCopiesSpec request) throws DataException {
+
+        var createdCertifiedCopies = testDataService.createCertifiedCopiesData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("certificates-copies-id", createdCertifiedCopies.getCertificates().getFirst().getId());
+        LOG.info("New certified copies added", data);
+        return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
                                                                 String acspMemberId)
@@ -210,6 +223,24 @@ public class TestDataController {
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Certificate Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/certified-copies/{id}")
+    public ResponseEntity<Map<String, Object>> deleteCertifiedCopies(@PathVariable("id")
+    String id)
+        throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        boolean deleteCertifiedCopies = testDataService.deleteCertifiedCopiesData(id);
+
+        if (deleteCertifiedCopies) {
+            LOG.info("Certified Copies is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Certified Copies Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

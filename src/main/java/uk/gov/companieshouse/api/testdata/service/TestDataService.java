@@ -8,6 +8,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
@@ -105,12 +106,29 @@ public interface TestDataService {
     CertificatesData createCertificatesData(CertificatesSpec certificatesSpec) throws DataException;
 
     /**
+     * Adds a new certificate test data based on the provided user specifications.
+     *
+     * @param certifiedCopiesSpec the specifications of the certified copies to order
+     * @return the created certificates test data
+     * @throws DataException if there is an error during user creation
+     */
+    CertificatesData createCertifiedCopiesData(CertifiedCopiesSpec certifiedCopiesSpec) throws DataException;
+
+    /**
      * Deletes the certificates test data for the given id.
      *
      * @param id the ID generated while creating certificates
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteCertificatesData(String id) throws DataException;
+
+    /**
+     * Deletes the certified copies test data for the given id.
+     *
+     * @param id the ID generated while creating certificates
+     * @throws DataException if there is an error during user deletion
+     */
+    boolean deleteCertifiedCopiesData(String id) throws DataException;
 
     /**
      * Deletes all appeals data for a given penalty reference and company number.

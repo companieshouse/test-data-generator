@@ -34,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -55,6 +56,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 
+import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -102,9 +104,13 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Autowired
+    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    @Autowired
     private AcspMembersRepository acspMembersRepository;
     @Autowired
     private CertificatesRepository certificatesRepository;
+    @Autowired
+    private CertifiedCopiesRepository certifiedCopiesRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
@@ -543,11 +549,33 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
+    public CertificatesData createCertifiedCopiesData(
+        final CertifiedCopiesSpec spec) throws DataException {
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create certified copies");
+        }
+        try {
+            return certifiedCopiesService.create(spec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating certified copies", ex);
+        }
+    }
+
+    @Override
     public boolean deleteCertificatesData(String id) throws DataException {
         try {
             return certificatesService.delete(id);
         } catch (Exception ex) {
             throw new DataException("Error deleting certificates", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteCertifiedCopiesData(String id) throws DataException {
+        try {
+            return certifiedCopiesService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting certified copies", ex);
         }
     }
 

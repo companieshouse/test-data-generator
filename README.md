@@ -144,6 +144,7 @@ In order to use the generator, there are different possible endpoints that can b
   A usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
 
 #### Adding Certificates and Basket
+##### Creating Certificates
 - POST: Sending a POST request to `{Base URL}/test-data/certificates` will order certificates for a company and add the basket details.
   - `company_name`: The name of the company.
   - `company_number`: The number of the company matching with company name.
@@ -151,13 +152,13 @@ In order to use the generator, there are different possible endpoints that can b
   - `description_values`: 
     - `company_number`: The description value which has number of the company matching with company name.
     - `certificate`: The description value of the certificate.
-  - `item_options`: {
+  - `item_options`: [{
     - `certificate_type`: The certificates types for the item.
     - `delivery_timescale`: The delivery time scale (e.g. `standard`, `express`).
     - `inclue_email_copy`: The boolean value for sending email copy. Default value is false.
     - `company_type`: The type of the company (e.g., `ltd`, `plc`).
     - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
-    }
+    }]
   - `basket`: {
     - `forename`: The forename for basket delivery details.
     - `surname`: The surname for basket delivery details.
@@ -169,7 +170,56 @@ In order to use the generator, there are different possible endpoints that can b
   - `user_id`: The user id who logged in to order a certificate.
   
   - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
+  - Adding multiple certificates example: `{"company_name" : "ACME Company", "company_number" : "SC172618", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "SC172618", "description_certificate" : "certificate for company SC172618", "item_options" : [{ "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "express", "include_email_copy" : false, "company_type" : "ltd", "company_status" : "active" }], "kind" : "item#certificate", "quantity" : 1, "postal_delivery": false, "user_id" : "xiteAZJVGMjGFgPUnqsHSLhtkiss", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
+
+##### Creating Certified copies
+- POST: Sending a POST request to `{Base URL}/test-data/certified-copies` will order certified copies for a company and add the basket details.
+  - `company_name`: The name of the company.
+  - `company_number`: The number of the company matching with company name.
+  - `item_costs`: {
+    - `discount_applied`: The discount applied for the certified copies.
+    - `item_cost`: The cost of the item.
+    - `calculated_cost`: The total cost of certified copies.
+    - `product_type`: The type of the product , default value is `certifed-copy`.
+      }
+  - `item_options`: [{
+    - `collection_location`: The location of delivery address. This should be added only if the delivery method is collection.
+    - `contact_number`: The contact number of the collection person. This should be added only if the delivery method is collection.
+    - `delivery_method`: The delivery method of the certified document (e.g., `collection`, `digital`, `postal`).
+    - `delivery_timescale`: The timescale for the delivery (e.g., `digital`, `same-day`, `standard`).
+    - `forename`: The forename of the person for the delivery or collection.
+    - `surname`: The surname of the person for the delivery or collection.
+    - `filing_history_documents`: [{
+      - `filing_history_date`: The date of the filing history in a string value.
+      - `filing_history_description`: The description of the filing history (e.g., `accounts-balance-sheet`, `capital-allotment-shares`)
+      - `filing_history_description_values`: {
+        - `date`: The date when filing history description values set.
+        - `capital`: [{
+          - `figure`: The figure value for the filing history.
+          - `currency`: The currency for the filling history.
+          ]}
+        }
+      - `filing_history_id`: The id value of the filing history document.
+      - `filing_history_type`: The filing history type value (e.g., `SH01`, `NEWINC`).
+      - `filing_history_cost`: The cost of the filing history document.
+      }]
+    }]
+  - `basket`: {
+    - `forename`: The forename for basket delivery details.
+    - `surname`: The surname for basket delivery details.
+    - `enrolled`: To make the multi-item basket available to all users, this should be set to true. Default value is true.
+      }
+  - `kind`: The kind of the certified copies.
+  - `quantity`: The number of the certified copies.
+  - `postal_delivery`: The boolean value for certified copies postal delivery. Default value is false.
+  - `user_id`: The user id who logged in to order a certified copies.
+  - `postage_cost`: The cost for the postage.
+  - `total_item_Cost`: The total cost of certified copies.
+
+  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "SC172618", "description_identifier" : "certified-copy", "description_company_number" : "SC172618", "description_certified_copy" : "certified copy for company SC172618", "item_options" : { "delivery_method" : "postal", "delivery_timescale" : "standard", "filing_history_documents" : [ { "filing_history_date" : "2019-11-23", "filing_history_description" : "capital-allotment-shares", "filing_history_description_values" : { "capital" : [ { "figure" : "34,253,377", "currency" : "GBP" } ], "date" : "2019-11-10" }, "filing_history_id" : "OTAwMzQ1NjM2M2FkaXF6a6N4", "filing_history_type" : "SH01", "filing_history_cost" : "15" } ] }, "kind" : "item#certified-copy", "quantity" : 1, "postal_delivery" : false, "user_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket" : { "forename" : "John", "surname" : "Doe", "enrolled" : true } }`
+  - Adding multiple certified copies example: `{"company_name" : "ACME Company", "company_number" : "SC172618", "item_costs" : [ { "discount_applied" : "0", "item_cost" : "15", "calculated_cost" : "15", "product_type" : "certified-copy" } ], "item_options" : [ { "delivery_method" : "postal", "delivery_timescale" : "standard", "filing_history_documents" : [ { "filing_history_date" : "2019-11-23", "filing_history_description" : "capital-allotment-shares", "filing_history_description_values" : { "capital" : [ { "figure" : "34,253,377", "currency" : "GBP" } ], "date" : "2019-11-10" }, "filing_history_id" : "OTAwMzQ1NjM2M2FkaXF6a6N4", "filing_history_type" : "SH01", "filing_history_cost" : "15" } ] }, { "collection_location" : "cardiff", "contact_number" : "013473847444", "delivery_method" : "collection", "delivery_timescale" : "standard", "filing_history_documents" : [ { "filing_history_date" : "2016-05-26", "filing_history_description" : "incorporation-company", "filing_history_id" : "MzE0OTM3MTQxNmFkaXF6a2N4", "filing_history_type" : "NEWINC", "filing_history_cost" : "30" } ], "forename" : "John", "surname" : "Smith" } ], "kind" : "item#certified-copy", "quantity" : 1, "postal_delivery" : false, "user_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket" : { "forename" : "John", "surname" : "Doe", "enrolled" : true }, "postage_cost" : "0", "total_item_cost" : "30" }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certified-copies/{id}` will delete the test certified copies.
 
 #### Creating, Retrieving, Updating and Deleting Account Penalties
 - POST: Sending a POST request to create Account Penalties `{Base URL}/test-data/penalties` will create an Account Penalties entry in the account_penalties db collection. The request body must include all mandatory fields of `companyCode`, `customer_code` and `amount` then optional fields of `createdAt`, `closedAt`, `isPaid`, `amount`, `number_of_penalties`, `type_description`, `ledger_code`, `dunning_status`, `account_status`, `outstandingAMount`, `transaction_type` and `transaction_sub_type` parameters.

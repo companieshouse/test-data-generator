@@ -36,6 +36,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -468,16 +469,7 @@ class TestDataControllerTest {
 
     @Test
     void createCertificateSuccess() throws Exception {
-        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
-            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
-        );
-        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
-            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
-        );
-
-        // Use LinkedList to support getFirst()
-        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
-        CertificatesData certificateData = new CertificatesData(entries);
+        CertificatesData certificateData = getCertificatesData();
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
@@ -523,7 +515,6 @@ class TestDataControllerTest {
         verify(testDataService).deleteCertificatesData(certificateId);
     }
 
-
     @Test
     void deleteCertificateNotFound() throws Exception {
         final String certificateId = String.valueOf(1234);
@@ -546,6 +537,45 @@ class TestDataControllerTest {
         when(testDataService.deleteCertificatesData(certificateId)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataController.deleteCertificates(certificateId));
+
+        assertEquals(exception.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void deleteCertifiedCopiesSuccess() throws Exception {
+        final String certifiedCopiesId = "CCD-834723-192847";
+
+        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+            = testDataController.deleteCertifiedCopies(certifiedCopiesId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(testDataService).deleteCertifiedCopiesData(certifiedCopiesId);
+    }
+
+    @Test
+    void deleteCertifiedCopiesNotFound() throws Exception {
+        final String certifiedCopiesId = String.valueOf(1234);
+
+        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(false);
+        ResponseEntity<Map<String, Object>>
+            response = testDataController.deleteCertifiedCopies(certifiedCopiesId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        verify(testDataService).deleteCertifiedCopiesData(certifiedCopiesId);
+    }
+
+    @Test
+    void deleteCertifiedCopiesException() throws Exception {
+        final String certifiedCopiesId = "cert123";
+        DataException exception = new DataException("Failed to delete certificate");
+
+        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenThrow(exception);
+        DataException thrown = assertThrows(DataException.class, () ->
+            testDataController.deleteCertifiedCopies(certifiedCopiesId));
 
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
@@ -872,6 +902,52 @@ class TestDataControllerTest {
         var response = testDataController.healthCheck();
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("test-data-generator is alive",response.getBody());
+    }
+
+    @Test
+    void createCertifiedCopiesSuccess() throws Exception {
+        CertificatesData certificateData = getCertificatesData();
+
+        CertifiedCopiesSpec request = new CertifiedCopiesSpec();
+        request.setCompanyNumber("12345678");
+
+        when(testDataService.createCertifiedCopiesData(request)).thenReturn(certificateData);
+
+        ResponseEntity<CertificatesData> response = testDataController.createCertifiedCopies(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
+
+        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
+        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
+    }
+
+    private static CertificatesData getCertificatesData() {
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
+        );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
+        );
+
+        // Use LinkedList to support getFirst()
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData certificateData = new CertificatesData(entries);
+        return certificateData;
+    }
+
+
+    @Test
+    void createCertifiedCopiesException() throws Exception {
+        CertifiedCopiesSpec request = new CertifiedCopiesSpec();
+        request.setCompanyNumber("12345678");
+
+        DataException exception = new DataException("Error creating certificate");
+        when(testDataService.createCertifiedCopiesData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+            testDataController.createCertifiedCopies(request));
+        assertEquals(exception.getMessage(), thrown.getMessage());
     }
 
     @Test

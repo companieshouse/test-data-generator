@@ -54,7 +54,6 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
                 certificate.getId(), now, now
             ));
 
-            // Add to basket items
             var item = new Basket.Item();
             item.setItemUri(certificate.getLinksSelf());
             basketItems.add(item);
@@ -100,7 +99,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return certificates;
     }
 
-    private Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
+    Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
         var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
         Instant now = getCurrentDateTime();
 
@@ -117,7 +116,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return basket;
     }
 
-    private void deleteBasket(String basketId) {
+    void deleteBasket(String basketId) {
         basketRepository.findById(basketId)
                 .ifPresent(basket -> {
                     if (basket.getId() != null) {
@@ -134,7 +133,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
             var basket = basketRepository.findById(userId);
 
             if (basket.isPresent()) {
-                deleteBasket(userId);
+                this.deleteBasket(userId);
             }
 
             certificatesRepository.delete(certificate.get());
