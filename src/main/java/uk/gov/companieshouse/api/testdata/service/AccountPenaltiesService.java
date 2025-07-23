@@ -56,5 +56,17 @@ public interface AccountPenaltiesService {
     ResponseEntity<Void> deleteAccountPenalties(String id)
             throws NoDataFoundException;
 
+    /**
+     * Deletes an account penalty by its reference.
+     *
+     * @param id            the company code
+     * @param penaltyRef    the penalty reference
+     * @return the {@link ResponseEntity} with the HTTP status
+     * @throws NoDataFoundException if the account penalty cannot be found
+     * @throws DataException if the account penalty failed to be deleted
+     */
+    ResponseEntity<Void> deleteAccountPenaltyByReference(String id, String penaltyRef)
+            throws NoDataFoundException;
+
     AccountPenaltiesData createAccountPenalties(PenaltySpec penaltySpec) throws DataException;
 }

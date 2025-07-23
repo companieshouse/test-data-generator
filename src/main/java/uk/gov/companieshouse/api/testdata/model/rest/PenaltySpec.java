@@ -24,6 +24,11 @@ public class PenaltySpec {
     @Max(value = 20, message = "Number of penalties must not exceed 20")
     private Integer numberOfPenalties;
 
+    @JsonProperty("amount")
+    @NotNull(message = "Amount must not be blank")
+    @Positive(message = "Amount must be a positive number")
+    private Double amount;
+
     @JsonProperty("type_description")
     private String typeDescription;
 
@@ -35,11 +40,6 @@ public class PenaltySpec {
 
     @JsonProperty("closed_at")
     private Instant closedAt;
-
-    @JsonProperty("amount")
-    @NotNull(message = "Amount must not be blank")
-    @Positive(message = "Amount must be a positive number")
-    private Double amount;
 
     @JsonProperty("is_paid")
     private Boolean isPaid;
@@ -81,28 +81,12 @@ public class PenaltySpec {
         return typeDescription;
     }
 
-    public void setTypeDescription(String typeDescription) {
-        this.typeDescription = typeDescription;
-    }
-
     public String getLedgerCode() {
         return ledgerCode;
     }
 
-    public void setLedgerCode(String ledgerCode) {
-        this.ledgerCode = ledgerCode;
-    }
-
     public String getDunningStatus() {
         return dunningStatus;
-    }
-
-    public void setDunningStatus(String dunningStatus) {
-        this.dunningStatus = dunningStatus;
-    }
-
-    public Instant getClosedAt() {
-        return closedAt;
     }
 
     public Double getAmount() {
@@ -131,10 +115,6 @@ public class PenaltySpec {
 
     public String getAccountStatus() {
         return accountStatus;
-    }
-
-    public void setAccountStatus(String accountStatus) {
-        this.accountStatus = accountStatus;
     }
 
 }

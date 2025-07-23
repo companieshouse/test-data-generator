@@ -30,7 +30,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 
-
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -43,7 +42,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.GetPenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
@@ -58,9 +57,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -68,6 +65,7 @@ class TestDataControllerTest {
     private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "NI23456";
+    private static final String PENALTY_REFERENCE = "A1234567";
     private static final String COMPANY_NUMBER = "TC123456";
     private static final String AUTH_CODE_APPROVAL_ROUTE =
             "auth_code";
@@ -583,50 +581,18 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getAccountPenalty() throws Exception {
-        String penaltyRef = "A1234567";
-        String companyCode = COMPANY_CODE;
-        String customerCode = CUSTOMER_CODE;
-        PenaltySpec request = new PenaltySpec();
-        request.setCompanyCode(companyCode);
-        request.setCustomerCode(customerCode);
-
-        PenaltyData penalty = createPenaltyData(companyCode,
-                customerCode, penaltyRef, 250.0, false);
-
-        AccountPenaltiesData accountPenaltiesData = createAccountPenaltiesData(
-                companyCode, penalty);
-
-        when(this.testDataService.getAccountPenaltyData(companyCode, customerCode, penaltyRef))
-                .thenReturn(accountPenaltiesData);
-        ResponseEntity<AccountPenaltiesData> response = this.testDataController
-                .getPenalty(penaltyRef, request);
-
-        assertEquals(accountPenaltiesData, response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test
     void getAccountPenaltyNotFound() throws Exception {
-        String penaltyRef = "A1234567";
-        PenaltySpec request = new PenaltySpec();
-        request.setCompanyCode(COMPANY_CODE);
-        request.setCustomerCode("A1234567");
+        when(this.testDataService.getAccountPenaltiesData(PENALTY_ID))
+                .thenThrow(new NoDataFoundException("no account penalties"));
 
-        Throwable exception = new NoDataFoundException("penalty not found");
-
-        when(this.testDataService.getAccountPenaltyData(
-                request.getCompanyCode(), request.getCustomerCode(), penaltyRef))
-                .thenThrow(exception);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.getPenalty(penaltyRef, request));
-        assertEquals(exception, thrown);
+        assertThrows(NoDataFoundException.class, () -> {
+            this.testDataController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
+        });
     }
 
     @Test
     void getAccountPenalties() throws Exception {
-        GetPenaltyRequest request = new GetPenaltyRequest();
+        PenaltyRequest request = new PenaltyRequest();
         request.setId(PENALTY_ID);
 
         AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
@@ -635,7 +601,7 @@ class TestDataControllerTest {
                 .thenReturn(accountPenaltiesData);
 
         ResponseEntity<AccountPenaltiesData> response = this.testDataController
-                .getAccountPenalties(request);
+                .getAccountPenalties(request.getId(), null);
 
         assertEquals(accountPenaltiesData, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -643,21 +609,18 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenaltiesNotFound() throws Exception {
-        GetPenaltyRequest request = new GetPenaltyRequest();
-        request.setId(PENALTY_ID);
+        String penaltyId = PENALTY_ID;
 
-        Throwable exception = new NoDataFoundException("Account penalties not found");
+        when(this.testDataService.getAccountPenaltiesData(penaltyId))
+                .thenThrow(new NoDataFoundException("Account penalties not found"));
 
-        when(this.testDataService.getAccountPenaltiesData(request.getId())).thenThrow(exception);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.getAccountPenalties(request));
-        assertEquals(exception, thrown);
+        assertThrows(NoDataFoundException.class, () -> {
+            this.testDataController.getAccountPenalties(penaltyId, null);
+        });
     }
 
     @Test
     void updateAccountPenalties() throws Exception {
-        String penaltyRef = "A1234567";
         String companyCode = COMPANY_CODE;
         String customerCode = CUSTOMER_CODE;
         Instant now = Instant.now();
@@ -672,7 +635,7 @@ class TestDataControllerTest {
         request.setIsPaid(true);
 
         PenaltyData penalty = createPenaltyData(companyCode,
-                customerCode, penaltyRef, 0.0, true);
+                customerCode, PENALTY_REFERENCE, 0.0, true);
 
         AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
         accountPenaltiesData.setCompanyCode(companyCode);
@@ -680,13 +643,78 @@ class TestDataControllerTest {
         accountPenaltiesData.setClosedAt(now);
         accountPenaltiesData.setPenalties(Collections.singletonList(penalty));
 
-        when(this.testDataService.updateAccountPenaltiesData(penaltyRef, request))
+        when(this.testDataService.updateAccountPenaltiesData(PENALTY_REFERENCE, request))
                 .thenReturn(accountPenaltiesData);
         ResponseEntity<AccountPenaltiesData> response = this.testDataController
-                .updateAccountPenalties(penaltyRef, request);
+                .updateAccountPenalties(PENALTY_REFERENCE, request);
 
         assertEquals(accountPenaltiesData, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void getAccountPenaltiesFiltersByTransactionReference() throws Exception {
+        PenaltyData penalty1 = new PenaltyData();
+        penalty1.setTransactionReference(PENALTY_REFERENCE);
+        PenaltyData penalty2 = new PenaltyData();
+        penalty2.setTransactionReference("A2345678");
+
+        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
+        accountPenaltiesData.setPenalties(List.of(penalty1, penalty2));
+
+        when(testDataService.getAccountPenaltiesData(PENALTY_ID)).thenReturn(accountPenaltiesData);
+
+        ResponseEntity<AccountPenaltiesData> response =
+                testDataController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().getPenalties().size());
+        assertEquals(PENALTY_REFERENCE, response.getBody().getPenalties().get(0).getTransactionReference());
+        verify(testDataService, times(1)).getAccountPenaltiesData(PENALTY_ID);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceSuccess() throws Exception {
+        PenaltyRequest request = new PenaltyRequest();
+        request.setTransactionReference(PENALTY_REFERENCE);
+
+        when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
+                .thenReturn(ResponseEntity.noContent().build());
+
+        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, request);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceNotFound() throws Exception {
+        PenaltyRequest request = new PenaltyRequest();
+        request.setTransactionReference(PENALTY_REFERENCE);
+
+        NoDataFoundException exception = new NoDataFoundException("penalty not found");
+        when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
+                .thenThrow(exception);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.deleteAccountPenalties(PENALTY_ID, request));
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE);
+    }
+
+    @Test
+    void deleteAccountPenaltyByReferenceOtherError() throws Exception {
+        PenaltyRequest request = new PenaltyRequest();
+        request.setTransactionReference(PENALTY_REFERENCE);
+
+        DataException exception = new DataException("error during deletion");
+        when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.deleteAccountPenalties(PENALTY_ID, request));
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, "A1234567");
     }
 
     @Test
@@ -718,7 +746,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID))
                 .thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID);
+        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, null);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
@@ -730,7 +758,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.deleteAccountPenalties(PENALTY_ID));
+                this.testDataController.deleteAccountPenalties(PENALTY_ID, null));
         assertEquals(exception, thrown);
     }
 
@@ -740,7 +768,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.deleteAccountPenalties(PENALTY_ID));
+                this.testDataController.deleteAccountPenalties(PENALTY_ID, null));
         assertEquals(exception, thrown);
     }
 

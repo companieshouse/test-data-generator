@@ -226,11 +226,11 @@ In order to use the generator, there are different possible endpoints that can b
   - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. Mandatory field.
   - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. Mandatory field.
   - `amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection. Mandatory field.
+  - `number_of_penalties`: The number of penalties to be created in the Account Penalties data in the account_penalties db collection. Mandatory field.
   - `created_at`: The Created At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `closed_at`: The Closed At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `is_paid`: The Is Paid flag of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `outstanding_amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection.
-  - `number_of_penalties`: The number of penalties to be created in the Account Penalties data in the account_penalties db collection.
   - `type_description`: The type description of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `ledger_code`: The ledger code of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `dunning_status`: The dunning status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
@@ -238,17 +238,13 @@ In order to use the generator, there are different possible endpoints that can b
   - `transaction_type`: The transaction type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_sub_type`: The transaction sub-type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
 
-  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
-- GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties`. The request body must include mandatory `companyCode` and `customer_code`.
-  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
-  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - A usage example looks like this: `{ "company_code": "LP", "customer_code": "NI095887", "number_of_penalties": 2, "amount": 150 }`
 
-  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678"}`
-- GET: Sending a GET request to retrieve the Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will get an Account Penalties entry with only the requested penalty being returned in the data object. The request body must include mandatory `companyCode` and `customer_code`.
-  - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
-  - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. This is mandatory.
-
-  A usage example looks like this: `{ "company_code": "C9", "customer_code": "FC123456", "number_of_penalties": 1, "type_description": "random words to say nothing", "ledger_code": "FU", "dunning_status": "DCA", "account_status": "DCA", "closed_at": "2025-07-02T06:49:44.261+0000", "amount": 200.0, "is_paid": false, "transaction_type": "1", "transaction_sub_type": "A2" }`
+- GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties/{id}`. 
+  - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory and passed as a path variable.
+  - `penalty_ref`: The Transaction Reference of the Account Penalties entry in the account_penalties db collection. This is optional and passed as a query parameter to return a single penalty from a list.
+  - 
+  - A usage example looks like this: `GET {Base URL}/test-data/penalties/687932936d534811231973b6?transactionReference=A1234567`
 
 - PUT: Sending a PUT request to update Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will update an Account Penalties entry. The request body must include mandatory `companyCode` and `customer_code`, and optional `createdAt`, `closedAt`, `isPaid`, `amount` and `outstandingAMount` parameters.
 
@@ -263,6 +259,10 @@ In order to use the generator, there are different possible endpoints that can b
   A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties/{id}` will delete the `Account Penalties`. `id`  is required.
+  - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory.
+  - `penalty_ref`: The Transaction Reference of the Account Penalties entry in the account_penalties db collection. This is optional and used to delete a single penalty from a list of penalties.
+
+  - A usage example looks like this: `{ "penalty_ref": "A123456" }`
 
 #### Retrieving Postcode
 - GET: Sending a GET request to retrieve the Postcode `{Base URL}/test-data/postcode/{countrycode}`.
