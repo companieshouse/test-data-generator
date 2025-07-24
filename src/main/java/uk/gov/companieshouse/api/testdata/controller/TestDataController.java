@@ -264,14 +264,14 @@ public class TestDataController {
         throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
-        boolean deleteCertifiedCopies = testDataService.deleteCertifiedCopiesData(id);
+        boolean deleteMissingImageDeliveries = testDataService.deleteMissingImageDeliveriesData(id);
 
-        if (deleteCertifiedCopies) {
-            LOG.info("Certified Copies is deleted", response);
+        if (deleteMissingImageDeliveries) {
+            LOG.info("Missing Image Deliveries is deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Certified Copies Not Found", response);
+            LOG.info("Missing Image Deliveries Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

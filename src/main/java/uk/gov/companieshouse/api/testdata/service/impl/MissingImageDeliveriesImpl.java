@@ -139,10 +139,10 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
         missingImageDeliveries.setCompanyName(spec.getCompanyName());
         missingImageDeliveries.setCompanyNumber(spec.getCompanyNumber());
         Optional.ofNullable(spec.getCustomerReference()).ifPresent(missingImageDeliveries::setCustomerReference);
-        missingImageDeliveries.setDescription("certified copy for company " + spec.getCompanyNumber());
-        missingImageDeliveries.setDescriptionIdentifier("certified-copy");
+        missingImageDeliveries.setDescription("missing image delivery for company " + spec.getCompanyNumber());
+        missingImageDeliveries.setDescriptionIdentifier("missing-image-delivery");
         missingImageDeliveries.setDescriptionCompanyNumber(spec.getCompanyNumber());
-        missingImageDeliveries.setDescriptionMissingImageDelivery("certified copy for company " + spec.getCompanyNumber());
+        missingImageDeliveries.setDescriptionMissingImageDelivery("missing image delivery for company " + spec.getCompanyNumber());
         missingImageDeliveries.setEtag(randomService.getEtag());
         if (spec.getItemCosts() != null) {
             List<ItemCosts> itemCostsList = new ArrayList<>();
