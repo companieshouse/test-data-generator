@@ -41,6 +41,9 @@ public class User {
     @Field("one_login_data.user_id")
     private String oneLoginUserId;
 
+    @Field("test_data")
+    private Boolean testData;
+
     public String getId() {
         return id;
     }
@@ -119,5 +122,13 @@ public class User {
 
     public void setOneLoginUserId(String oneLoginUserId) {
         this.oneLoginUserId = oneLoginUserId;
+    }
+
+    public Boolean getTestData() {
+        return testData;
+    }
+
+    public void setTestData(Boolean testData) {
+        this.testData = testData;
     }
 }
