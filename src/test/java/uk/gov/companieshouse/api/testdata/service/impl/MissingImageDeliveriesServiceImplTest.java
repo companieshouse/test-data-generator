@@ -26,7 +26,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
@@ -35,13 +34,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,11 +76,13 @@ class MissingImageDeliveriesServiceImplTest {
         FilingHistoryDescriptionValuesSpec descriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
         descriptionValuesSpec.setMadeUpDate("2019-11-10");
 
-        FilingHistoryDocumentsSpec filingHistoryDocument = getFilingHistoryDocumentsSpec(
-            descriptionValuesSpec);
-
         ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument));
+        itemOptionsSpec.setFilingHistoryCategory("accounts");
+        itemOptionsSpec.setFilingHistoryDate("2018-04-06");
+        itemOptionsSpec.setFilingHistoryDescription("accounts-with-accounts-type-small");
+        itemOptionsSpec.setFilingHistoryId("MzIwMTkzODk1NGFkaXF6a2N6");
+        itemOptionsSpec.setFilingHistoryType("AA");
+        itemOptionsSpec.setFilingHistoryDescriptionValues(descriptionValuesSpec);
 
         ItemCostsSpec itemCostsSpec = new ItemCostsSpec();
         itemCostsSpec.setDiscountApplied("0");
@@ -106,19 +105,6 @@ class MissingImageDeliveriesServiceImplTest {
         basket = new Basket();
         basket.setId("user123");
     }
-
-    private static FilingHistoryDocumentsSpec getFilingHistoryDocumentsSpec(
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec) {
-        FilingHistoryDocumentsSpec filingHistoryDocument = new FilingHistoryDocumentsSpec();
-        filingHistoryDocument.setFilingHistoryCategory("accounts");
-        filingHistoryDocument.setFilingHistoryDate("2018-04-06");
-        filingHistoryDocument.setFilingHistoryDescription("accounts-with-accounts-type-small");
-        filingHistoryDocument.setFilingHistoryId("MzIwMTkzODk1NGFkaXF6a2N6");
-        filingHistoryDocument.setFilingHistoryType("AA");
-        filingHistoryDocument.setFilingHistoryDescriptionValues(descriptionValuesSpec);
-        return filingHistoryDocument;
-    }
-
 
     @Test
     void createMissingImageDeliveriesWithMandatoryValues() throws DataException {
@@ -156,12 +142,9 @@ class MissingImageDeliveriesServiceImplTest {
         descriptionValuesSpec.setOfficerName("John Test");
         descriptionValuesSpec.setChargeNumber("21321312");
 
-        FilingHistoryDocumentsSpec filingHistoryDocument = new FilingHistoryDocumentsSpec();
-        filingHistoryDocument.setFilingHistoryBarcode("L72QXI0Y");
-        filingHistoryDocument.setFilingHistoryDescriptionValues(descriptionValuesSpec);
-
         ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument));
+        itemOptionsSpec.setFilingHistoryBarcode("L72QXI0Y");
+        itemOptionsSpec.setFilingHistoryDescriptionValues(descriptionValuesSpec);
 
         missingImageDeliveriesSpec.setItemOptions(List.of(itemOptionsSpec));
 
@@ -175,15 +158,13 @@ class MissingImageDeliveriesServiceImplTest {
 
         ItemOptions capturedOptions = captured.getItemOptions();
         ItemOptionsSpec expectedOptions = missingImageDeliveriesSpec.getItemOptions().getFirst();
-        List<FilingHistoryDocument> capturedFilingHistoryDocument = capturedOptions.getFilingHistoryDocuments();
-        List<FilingHistoryDocumentsSpec> expectedFilingHistoryDocument = expectedOptions.getFilingHistoryDocuments();
-        FilingHistoryDescriptionValues caturedFilingHistoryDescriptionValues = capturedFilingHistoryDocument.getFirst().getFilingHistoryDescriptionValues();
-        FilingHistoryDescriptionValuesSpec expectedFilingHistoryDescriptionValues = expectedFilingHistoryDocument.getFirst().getFilingHistoryDescriptionValues();
+        FilingHistoryDescriptionValues caturedFilingHistoryDescriptionValues = capturedOptions.getFilingHistoryDescriptionValues();
+        FilingHistoryDescriptionValuesSpec expectedFilingHistoryDescriptionValues = expectedOptions.getFilingHistoryDescriptionValues();
         List<Capital> capturedCapital = caturedFilingHistoryDescriptionValues.getCapital();
         List<CapitalSpec> expectedCapital = expectedFilingHistoryDescriptionValues.getCapital();
 
         assertEquals(missingImageDeliveriesSpec.getCustomerReference(), captured.getCustomerReference());
-        assertEquals(expectedFilingHistoryDocument.getFirst().getFilingHistoryBarcode(), capturedFilingHistoryDocument.getFirst().getFilingHistoryBarcode());
+        assertEquals(expectedOptions.getFilingHistoryBarcode(), capturedOptions.getFilingHistoryBarcode());
         assertEquals(expectedCapital.getFirst().getCurrency(), capturedCapital.getFirst().getCurrency());
         assertEquals(expectedCapital.getFirst().getFigure(), capturedCapital.getFirst().getFigure());
         assertEquals(expectedFilingHistoryDescriptionValues.getChargeNumber(), caturedFilingHistoryDescriptionValues.getChargeNumber());
@@ -245,29 +226,28 @@ class MissingImageDeliveriesServiceImplTest {
         capitalSpec.setFigure("34,253,377");
         capitalSpec.setCurrency("GBP");
 
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
-        descriptionValuesSpec.setDate("2019-11-10");
-        descriptionValuesSpec.setCapital(List.of(capitalSpec));
-
-        FilingHistoryDocumentsSpec filingHistoryDocument1 = getFilingHistoryDocumentsSpec(
-            descriptionValuesSpec);
+        FilingHistoryDescriptionValuesSpec descriptionValuesSpec1 = new FilingHistoryDescriptionValuesSpec();
+        descriptionValuesSpec1.setOfficerName("John test");
 
         ItemOptionsSpec itemOption1 = new ItemOptionsSpec();
-        itemOption1.setDeliveryTimescale("postal");
-        itemOption1.setDeliveryMethod("standard");
-        itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
+        itemOption1.setFilingHistoryDate("2019-11-23");
+        itemOption1.setFilingHistoryDescription("appoint-person-director-company-with-name");
+        itemOption1.setFilingHistoryDescriptionValues(descriptionValuesSpec1);
+        itemOption1.setFilingHistoryId("MzE0OTM3MTQxNmFkaXF6a2N4");
+        itemOption1.setFilingHistoryType("AP01");
+        itemOption1.setFilingHistoryCategory("officers");
 
-        FilingHistoryDocumentsSpec filingHistoryDocument2 = new FilingHistoryDocumentsSpec();
-        filingHistoryDocument1.setFilingHistoryDate("2019-11-23");
-        filingHistoryDocument1.setFilingHistoryDescription("incorporation-company");
-        filingHistoryDocument1.setFilingHistoryId("MzE0OTM3MTQxNmFkaXF6a2N4");
-        filingHistoryDocument1.setFilingHistoryType("NEWINC");
-        filingHistoryDocument1.setFilingHistoryCost("30");
+        FilingHistoryDescriptionValuesSpec descriptionValuesSpec2 = new FilingHistoryDescriptionValuesSpec();
+        descriptionValuesSpec2.setMadeUpDate("2017-12-31");
 
         ItemOptionsSpec itemOption2 = new ItemOptionsSpec();
-        itemOption1.setDeliveryTimescale("postal");
-        itemOption1.setDeliveryMethod("standard");
-        itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
+        itemOption2.setFilingHistoryDate("2016-11-23");
+        itemOption2.setFilingHistoryDescription("accounts-with-accounts-type-small");
+        itemOption2.setFilingHistoryDescriptionValues(descriptionValuesSpec2);
+        itemOption2.setFilingHistoryId("MzE0OTM3MTQxNmFkaXF6a2N4");
+        itemOption2.setFilingHistoryType("AA");
+        itemOption2.setFilingHistoryCategory("accounts");
+        itemOption2.setFilingHistoryBarcode("L72QXI0Y");
 
         missingImageDeliveriesSpec.setItemOptions(List.of(itemOption1, itemOption2));
 
@@ -358,16 +338,14 @@ class MissingImageDeliveriesServiceImplTest {
 
     @Test
     void validateFilingHistoryDescriptionValuesIsNull() throws DataException {
-        FilingHistoryDocumentsSpec docSpec = new FilingHistoryDocumentsSpec();
-        docSpec.setFilingHistoryId("abc123");
-        docSpec.setFilingHistoryDescription("desc");
-        docSpec.setFilingHistoryDescriptionValues(null); // NULL branch
-        docSpec.setFilingHistoryDate("2024-01-01");
-        docSpec.setFilingHistoryType("type");
-        docSpec.setFilingHistoryCost("1");
 
         ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(docSpec));
+        itemOptionsSpec.setFilingHistoryId("abc123");
+        itemOptionsSpec.setFilingHistoryDescription("desc");
+        itemOptionsSpec.setFilingHistoryDescriptionValues(null); // NULL branch
+        itemOptionsSpec.setFilingHistoryDate("2024-01-01");
+        itemOptionsSpec.setFilingHistoryType("type");
+
 
         MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
         spec.setItemOptions(List.of(itemOptionsSpec));
@@ -481,17 +459,12 @@ class MissingImageDeliveriesServiceImplTest {
     }
 
     private void assertItemOptionsAndFilingHistory(ItemOptions capturedOptions, ItemOptionsSpec expectedOptions) {
-        List<FilingHistoryDocument> capturedFilingHistoryDocument = capturedOptions.getFilingHistoryDocuments();
-        List<FilingHistoryDocumentsSpec> expectedFilingHistoryDocument = expectedOptions.getFilingHistoryDocuments();
 
-        var expectedFilingHistoryDocumentFirst = expectedFilingHistoryDocument.getFirst();
-        var capturedFilingHistoryDocumentFirst = capturedFilingHistoryDocument.getFirst();
-
-        assertEquals(expectedFilingHistoryDocumentFirst.getFilingHistoryCategory(), capturedFilingHistoryDocumentFirst.getFilingHistoryCategory());
-        assertEquals(expectedFilingHistoryDocumentFirst.getFilingHistoryDate(), capturedFilingHistoryDocumentFirst.getFilingHistoryDate());
-        assertEquals(expectedFilingHistoryDocumentFirst.getFilingHistoryDescription(), capturedFilingHistoryDocumentFirst.getFilingHistoryDescription());
-        assertEquals(expectedFilingHistoryDocumentFirst.getFilingHistoryId(), capturedFilingHistoryDocumentFirst.getFilingHistoryId());
-        assertEquals(expectedFilingHistoryDocumentFirst.getFilingHistoryType(), capturedFilingHistoryDocumentFirst.getFilingHistoryType());
-        assertEquals(expectedFilingHistoryDocumentFirst.getFilingHistoryDescriptionValues().getMadeUpDate(), capturedFilingHistoryDocumentFirst.getFilingHistoryDescriptionValues().getMadeUpDate());
+        assertEquals(expectedOptions.getFilingHistoryCategory(), capturedOptions.getFilingHistoryCategory());
+        assertEquals(expectedOptions.getFilingHistoryDate(), capturedOptions.getFilingHistoryDate());
+        assertEquals(expectedOptions.getFilingHistoryDescription(), capturedOptions.getFilingHistoryDescription());
+        assertEquals(expectedOptions.getFilingHistoryId(), capturedOptions.getFilingHistoryId());
+        assertEquals(expectedOptions.getFilingHistoryType(), capturedOptions.getFilingHistoryType());
+        assertEquals(expectedOptions.getFilingHistoryDescriptionValues().getMadeUpDate(), capturedOptions.getFilingHistoryDescriptionValues().getMadeUpDate());
     }
 }

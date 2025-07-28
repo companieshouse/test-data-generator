@@ -71,6 +71,9 @@ public class CertifiedCopies {
     @Field("basket")
     private Basket basket;
 
+    @Field("customer_reference")
+    private String customerReference;
+
     public String getId() {
         return id;
     }
@@ -231,5 +234,13 @@ public class CertifiedCopies {
 
     public void setBasket(Basket basket) {
         this.basket = basket;
+    }
+
+    public String getCustomerReference() {
+        return  customerReference;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 }

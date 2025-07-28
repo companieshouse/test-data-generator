@@ -28,7 +28,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.BasketSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DirectorDetailsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.RegisteredOfficeAddressDetailsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.SecretaryDetailsSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -68,18 +71,12 @@ class CertificatesServiceImplTest {
 
         ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
         itemOptionsSpec.setCertificateType("incorporation-with-all-name-changes");
-        itemOptionsSpec.setDeliveryTimescale("standard");
-        itemOptionsSpec.setIncludeEmailCopy(false);
-        itemOptionsSpec.setCompanyType("ltd");
-        itemOptionsSpec.setCompanyStatus("active");
 
         certificatesSpec = new CertificatesSpec();
         certificatesSpec.setCompanyName("Test Company");
         certificatesSpec.setCompanyNumber(companyNumber);
         certificatesSpec.setDescription("certificate for company " + companyNumber);
         certificatesSpec.setDescriptionIdentifier("certificate");
-        certificatesSpec.setDescriptionCompanyNumber(companyNumber);
-        certificatesSpec.setDescriptionCertificate("Test Certificate");
         certificatesSpec.setItemOptions(List.of(itemOptionsSpec));
         certificatesSpec.setKind("certificate-kind");
         certificatesSpec.setPostalDelivery(true);
@@ -91,7 +88,7 @@ class CertificatesServiceImplTest {
     }
 
     @Test
-    void createCertificates() throws DataException {
+    void createCertificatesWithMandatoryValues() throws DataException {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(Certificates.class))).thenReturn(certificates);
@@ -112,8 +109,82 @@ class CertificatesServiceImplTest {
         assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
         assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescription());
         assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
-        assertEquals(certificatesSpec.getDescriptionCompanyNumber(), captured.getDescriptionCompanyNumber());
-        assertEquals(certificatesSpec.getDescriptionCertificate(), captured.getDescriptionCertificate());
+        assertEquals(certificatesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescriptionCertificate());
+        assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
+        assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
+        assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
+        assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
+        assertEquals("etag123", captured.getEtag());
+        assertEquals(certificatesSpec.getKind(), captured.getKind());
+        assertEquals("/orderable/certificates/CRT-123456-789012", captured.getLinksSelf());
+        assertTrue(captured.isPostalDelivery());
+        assertEquals(certificatesSpec.getQuantity(), captured.getQuantity());
+        assertEquals(certificatesSpec.getUserId(), captured.getUserId());
+    }
+
+    @Test
+    void createCertificatesWithOptionalValues() throws DataException {
+        when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
+        when(randomService.getEtag()).thenReturn("etag123");
+        when(repository.save(any(Certificates.class))).thenReturn(certificates);
+
+        DirectorDetailsSpec directorDetailsSpec = new DirectorDetailsSpec();
+        directorDetailsSpec.setIncludeAddress(true);
+        directorDetailsSpec.setIncludeAppointmentDate(true);
+        directorDetailsSpec.setIncludeBasicInformation(true);
+        directorDetailsSpec.setIncludeCountryOfResidence(true);
+        directorDetailsSpec.setIncludeDobType("partial");
+        directorDetailsSpec.setIncludeNationality(true);
+        directorDetailsSpec.setIncludeOccupation(true);
+
+        SecretaryDetailsSpec secretaryDetailsSpec = new SecretaryDetailsSpec();
+        secretaryDetailsSpec.setIncludeAddress(true);
+        secretaryDetailsSpec.setIncludeAppointmentDate(true);
+        secretaryDetailsSpec.setIncludeBasicInformation(true);
+        secretaryDetailsSpec.setIncludeCountryOfResidence(true);
+        secretaryDetailsSpec.setIncludeDobType("partial");
+        secretaryDetailsSpec.setIncludeNationality(true);
+        secretaryDetailsSpec.setIncludeOccupation(true);
+
+        RegisteredOfficeAddressDetailsSpec registeredOfficeAddressDetailsSpec = new RegisteredOfficeAddressDetailsSpec();
+        registeredOfficeAddressDetailsSpec.setIncludeAddressRecordsType("all");
+        registeredOfficeAddressDetailsSpec.setIncludeDates(false);
+
+        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
+        itemOptionsSpec.setCompanyStatus("active");
+        itemOptionsSpec.setCompanyType("ltd");
+        itemOptionsSpec.setDeliveryMethod("postal");
+        itemOptionsSpec.setDeliveryTimescale("standard");
+        itemOptionsSpec.setDirectorDetails(directorDetailsSpec);
+        itemOptionsSpec.setForeName("John");
+        itemOptionsSpec.setIncludeCompanyObjectsInformation(true);
+        itemOptionsSpec.setIncludeEmailCopy(false);
+        itemOptionsSpec.setIncludeGoodStandingInformation(true);
+        itemOptionsSpec.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetailsSpec);
+        itemOptionsSpec.setSecretaryDetails(secretaryDetailsSpec);
+        itemOptionsSpec.setForeName("test");
+
+        certificatesSpec.setItemOptions(List.of(itemOptionsSpec));
+
+        CertificatesData result = service.create(certificatesSpec);
+
+        assertNotNull(result);
+        assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
+
+        verify(repository).save(certificatesCaptor.capture());
+        Certificates captured = certificatesCaptor.getValue();
+
+        ItemOptions capturedOptions = captured.getItemOptions();
+        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().getFirst();
+
+        assertEquals("CRT-123456-789012", captured.getId());
+        assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
+        assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescription());
+        assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
+        assertEquals(certificatesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescriptionCertificate());
         assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
         assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
         assertEquals(expectedOptions.getIncludeEmailCopy(), capturedOptions.getIncludeEmailCopy());
@@ -125,6 +196,30 @@ class CertificatesServiceImplTest {
         assertTrue(captured.isPostalDelivery());
         assertEquals(certificatesSpec.getQuantity(), captured.getQuantity());
         assertEquals(certificatesSpec.getUserId(), captured.getUserId());
+        assertEquals(expectedOptions.getCompanyStatus(),capturedOptions.getCompanyStatus());
+        assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
+        assertEquals(expectedOptions.getDeliveryMethod(), capturedOptions.getDeliveryMethod());
+        assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeAddress(), capturedOptions.getDirectorDetails().getIncludeAddress());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeAppointmentDate(), capturedOptions.getDirectorDetails().getIncludeAppointmentDate());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeBasicInformation(), capturedOptions.getDirectorDetails().getIncludeBasicInformation());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeCountryOfResidence(), capturedOptions.getDirectorDetails().getIncludeCountryOfResidence());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeDobType(), capturedOptions.getDirectorDetails().getIncludeDobType());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeNationality(), capturedOptions.getDirectorDetails().getIncludeNationality());
+        assertEquals(expectedOptions.getDirectorDetails().getIncludeOccupation(), capturedOptions.getDirectorDetails().getIncludeOccupation());
+        assertEquals(expectedOptions.getForeName(), capturedOptions.getForeName());
+        assertEquals(expectedOptions.getIncludeCompanyObjectsInformation(), capturedOptions.getIncludeCompanyObjectsInformation());
+        assertEquals(expectedOptions.getIncludeEmailCopy(), capturedOptions.getIncludeEmailCopy());
+        assertEquals(expectedOptions.getIncludeGoodStandingInformation(), capturedOptions.getIncludeGoodStandingInformation());
+        assertEquals(expectedOptions.getRegisteredOfficeAddressDetails().getIncludeAddressRecordsType(), capturedOptions.getRegisteredOfficeAddressDetails().getIncludeAddressRecordsType());
+        assertEquals(expectedOptions.getRegisteredOfficeAddressDetails().getIncludeDates(), capturedOptions.getRegisteredOfficeAddressDetails().getIncludeDates());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeAddress(), capturedOptions.getSecretaryDetails().getIncludeAddress());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeAppointmentDate(), capturedOptions.getSecretaryDetails().getIncludeAppointmentDate());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeBasicInformation(), capturedOptions.getSecretaryDetails().getIncludeBasicInformation());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeCountryOfResidence(), capturedOptions.getSecretaryDetails().getIncludeCountryOfResidence());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeDobType(), capturedOptions.getSecretaryDetails().getIncludeDobType());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeNationality(), capturedOptions.getSecretaryDetails().getIncludeNationality());
+        assertEquals(expectedOptions.getSecretaryDetails().getIncludeOccupation(), capturedOptions.getSecretaryDetails().getIncludeOccupation());
     }
 
     @Test
@@ -167,11 +262,10 @@ class CertificatesServiceImplTest {
         assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
         assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescription());
         assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
-        assertEquals(certificatesSpec.getDescriptionCompanyNumber(), captured.getDescriptionCompanyNumber());
-        assertEquals(certificatesSpec.getDescriptionCertificate(), captured.getDescriptionCertificate());
+        assertEquals(certificatesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescriptionCertificate());
         assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
         assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
-        assertEquals(expectedOptions.getIncludeEmailCopy(), capturedOptions.getIncludeEmailCopy());
         assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
         assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
         assertEquals("etag123", captured.getEtag());
@@ -244,8 +338,8 @@ class CertificatesServiceImplTest {
             assertEquals(certificatesSpec.getCompanyNumber(), cert.getCompanyNumber());
             assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), cert.getDescription());
             assertEquals(certificatesSpec.getDescriptionIdentifier(), cert.getDescriptionIdentifier());
-            assertEquals(certificatesSpec.getDescriptionCompanyNumber(), cert.getDescriptionCompanyNumber());
-            assertEquals(certificatesSpec.getDescriptionCertificate(), cert.getDescriptionCertificate());
+            assertEquals(certificatesSpec.getCompanyNumber(), cert.getDescriptionCompanyNumber());
+            assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), cert.getDescriptionCertificate());
 
             assertEquals(expectedOptions.getCertificateType(), cert.getItemOptions().getCertificateType());
             assertEquals(expectedOptions.getDeliveryTimescale(), cert.getItemOptions().getDeliveryTimescale());

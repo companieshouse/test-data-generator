@@ -474,7 +474,6 @@ class TestDataControllerTest {
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
-        request.setDescriptionCertificate("incorporation");
 
         when(testDataService.createCertificatesData(request)).thenReturn(certificateData);
 
@@ -493,7 +492,6 @@ class TestDataControllerTest {
     void createCertificateException() throws Exception {
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
-        request.setDescriptionCertificate("incorporation");
 
         DataException exception = new DataException("Error creating certificate");
         when(testDataService.createCertificatesData(request)).thenThrow(exception);

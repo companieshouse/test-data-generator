@@ -8,18 +8,17 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionValues;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
@@ -102,28 +101,20 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
 
     private MissingImageDeliveries getMissingImageDeliveries(MissingImageDeliveriesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
-        if (optionsSpec.getFilingHistoryDocuments() != null) {
-            List<FilingHistoryDocument> filingHistoryDocumentList = new ArrayList<>();
-            for (FilingHistoryDocumentsSpec filingHistoryDocumentsSpec : optionsSpec.getFilingHistoryDocuments() ) {
-                var filingHistoryDocument = new FilingHistoryDocument();
-                filingHistoryDocument.setFilingHistoryCategory(filingHistoryDocumentsSpec.getFilingHistoryCategory());
-                filingHistoryDocument.setFilingHistoryDate(filingHistoryDocumentsSpec.getFilingHistoryDate());
-                filingHistoryDocument.setFilingHistoryDescription(filingHistoryDocumentsSpec.getFilingHistoryDescription());
-                FilingHistoryDescriptionValues values = null;
-                if (filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues() != null) {
-                    values = mapToEntity(filingHistoryDocumentsSpec.getFilingHistoryDescriptionValues());
-                    filingHistoryDocument.setFilingHistoryDescriptionValues(values);
-                }
-                filingHistoryDocument.setFilingHistoryId(filingHistoryDocumentsSpec.getFilingHistoryId());
-                filingHistoryDocument.setFilingHistoryType(filingHistoryDocumentsSpec.getFilingHistoryType());
-                Optional.ofNullable(filingHistoryDocumentsSpec.getFilingHistoryBarcode()).ifPresent(filingHistoryDocument::setFilingHistoryBarcode);
+        itemOptions.setFilingHistoryCategory(optionsSpec.getFilingHistoryCategory());
+        itemOptions.setFilingHistoryDate(optionsSpec.getFilingHistoryDate());
+        itemOptions.setFilingHistoryDescription(optionsSpec.getFilingHistoryDescription());
 
-                filingHistoryDocumentList.add(filingHistoryDocument);
-            }
-            itemOptions.setFilingHistoryDocuments(filingHistoryDocumentList);
+        if (optionsSpec.getFilingHistoryDescriptionValues() != null) {
+            FilingHistoryDescriptionValues values = mapToEntity(optionsSpec.getFilingHistoryDescriptionValues());
+            itemOptions.setFilingHistoryDescriptionValues(values);
         }
 
-      return getMissingImageDeliveries(spec, randomId, itemOptions);
+        itemOptions.setFilingHistoryId(optionsSpec.getFilingHistoryId());
+        itemOptions.setFilingHistoryType(optionsSpec.getFilingHistoryType());
+        Optional.ofNullable(optionsSpec.getFilingHistoryBarcode()).ifPresent(itemOptions::setFilingHistoryBarcode);
+
+        return getMissingImageDeliveries(spec, randomId, itemOptions);
     }
 
     private MissingImageDeliveries getMissingImageDeliveries(MissingImageDeliveriesSpec spec, String randomId,

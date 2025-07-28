@@ -19,12 +19,6 @@ public class CertificatesSpec {
     @JsonProperty("description_identifier")
     private String descriptionIdentifier;
 
-    @JsonProperty("description_company_number")
-    private String descriptionCompanyNumber;
-
-    @JsonProperty("description_certificate")
-    private String descriptionCertificate;
-
     @JsonProperty("item_options")
     private List<ItemOptionsSpec> itemOptions;
 
@@ -74,22 +68,6 @@ public class CertificatesSpec {
 
     public void setDescriptionIdentifier(String descriptionIdentifier) {
         this.descriptionIdentifier = descriptionIdentifier;
-    }
-
-    public String getDescriptionCompanyNumber() {
-        return descriptionCompanyNumber;
-    }
-
-    public void setDescriptionCompanyNumber(String descriptionCompanyNumber) {
-        this.descriptionCompanyNumber = descriptionCompanyNumber;
-    }
-
-    public String getDescriptionCertificate() {
-        return descriptionCertificate;
-    }
-
-    public void setDescriptionCertificate(String descriptionCertificate) {
-        this.descriptionCertificate = descriptionCertificate;
     }
 
     public List<ItemOptionsSpec> getItemOptions() {

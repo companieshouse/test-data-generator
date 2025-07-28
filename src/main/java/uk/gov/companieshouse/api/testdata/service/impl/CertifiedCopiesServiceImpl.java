@@ -79,7 +79,10 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
 
     protected FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesSpec spec) {
         var filingHistoryDescriptionValues = new FilingHistoryDescriptionValues();
-        filingHistoryDescriptionValues.setDate(spec.getDate());
+        Optional.ofNullable(spec.getDate()).ifPresent(filingHistoryDescriptionValues::setDate);
+        Optional.ofNullable(spec.getOfficerName()).ifPresent(filingHistoryDescriptionValues::setOfficerName);
+        Optional.ofNullable(spec.getMadeUpDate()).ifPresent(filingHistoryDescriptionValues::setMadeUpDate);
+        Optional.ofNullable(spec.getChargeNumber()).ifPresent(filingHistoryDescriptionValues::setChargeNumber);
 
         if (spec.getCapital() != null) {
             List<Capital> capitalList = spec.getCapital().stream()
@@ -100,7 +103,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         var itemOptions = new ItemOptions();
         Optional.ofNullable(optionsSpec.getCollectionLocation()).ifPresent(itemOptions::setCollectionLocation);
         Optional.ofNullable(optionsSpec.getContactNumber()).ifPresent(itemOptions::setContactNumber);
-        itemOptions.setDeliveryTimescale(optionsSpec.getDeliveryTimescale());
+        Optional.ofNullable(optionsSpec.getDeliveryTimescale()).ifPresent(itemOptions::setDeliveryTimescale);
         itemOptions.setDeliveryMethod(optionsSpec.getDeliveryMethod());
         Optional.ofNullable(optionsSpec.getForeName()).ifPresent(itemOptions::setForeName);
         Optional.ofNullable(optionsSpec.getSurName()).ifPresent(itemOptions::setSurName);
@@ -138,6 +141,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         certifiedCopies.setDataId(randomId);
         certifiedCopies.setCompanyName(spec.getCompanyName());
         certifiedCopies.setCompanyNumber(spec.getCompanyNumber());
+        Optional.ofNullable(spec.getCustomerReference()).ifPresent(certifiedCopies::setCustomerReference);
         certifiedCopies.setDescription("certified copy for company " + spec.getCompanyNumber());
         certifiedCopies.setDescriptionIdentifier("certified-copy");
         certifiedCopies.setDescriptionCompanyNumber(spec.getCompanyNumber());
