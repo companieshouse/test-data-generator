@@ -270,6 +270,7 @@ class UserServiceImplTest {
         assertTrue(userData.getForename().contains("Forename"),
                 "Forename should contain 'Forename'");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+        assertTrue(savedUser.getTestData(), "User should be marked as test data");
     }
 
     @Test
