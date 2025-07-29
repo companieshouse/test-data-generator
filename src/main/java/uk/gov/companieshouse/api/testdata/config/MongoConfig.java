@@ -24,6 +24,7 @@ public class MongoConfig {
 
     private static final String ACCOUNT_DATABASE = "account";
     private final MongoProperties mongoProperties;
+    private static final String ITEMS_DATABASE = "items";
 
     public MongoConfig(MongoProperties mongoProperties) {
         super();
@@ -119,17 +120,17 @@ public class MongoConfig {
 
     @Bean
     public CertificatesRepository certificatesRepository() {
-        return getMongoRepositoryBean(CertificatesRepository.class, "items");
+        return getMongoRepositoryBean(CertificatesRepository.class, ITEMS_DATABASE);
     }
 
     @Bean
     public CertifiedCopiesRepository certifiedCopiesRepository() {
-        return getMongoRepositoryBean(CertifiedCopiesRepository.class, "items");
+        return getMongoRepositoryBean(CertifiedCopiesRepository.class, ITEMS_DATABASE);
     }
 
     @Bean
     public MissingImageDeliveriesRepository missingImageDeliveriesRepository() {
-        return getMongoRepositoryBean(MissingImageDeliveriesRepository.class, "items");
+        return getMongoRepositoryBean(MissingImageDeliveriesRepository.class, ITEMS_DATABASE);
     }
 
     @Bean

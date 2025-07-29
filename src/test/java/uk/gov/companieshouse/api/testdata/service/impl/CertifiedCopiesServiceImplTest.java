@@ -215,8 +215,12 @@ class CertifiedCopiesServiceImplTest {
         var expectedFilingHistoryDescriptionValues = expectedItemOptions.getFilingHistoryDocuments().getFirst().getFilingHistoryDescriptionValues();
         var capturedFilingHistoryDescriptionValues = capturedItemOptions.getFilingHistoryDocuments().getFirst().getFilingHistoryDescriptionValues();
         var expectedCapital = expectedFilingHistoryDescriptionValues.getCapital().getFirst();
-        var capturedCapital = expectedFilingHistoryDescriptionValues.getCapital().getFirst();
+        var capturedCapital = capturedFilingHistoryDescriptionValues.getCapital().getFirst();
+        assertOptionalItems(expectedItemOptions, capturedItemOptions, expectedCapital, capturedCapital, expectedFilingHistoryDescriptionValues, capturedFilingHistoryDescriptionValues);
 
+    }
+
+    private void assertOptionalItems(ItemOptionsSpec expectedItemOptions, ItemOptions capturedItemOptions, CapitalSpec expectedCapital, Capital capturedCapital, FilingHistoryDescriptionValuesSpec expectedFilingHistoryDescriptionValues, FilingHistoryDescriptionValues capturedFilingHistoryDescriptionValues) {
         assertEquals(expectedItemOptions.getCollectionLocation(), capturedItemOptions.getCollectionLocation());
         assertEquals(expectedItemOptions.getContactNumber(), capturedItemOptions.getContactNumber());
         assertEquals(expectedItemOptions.getDeliveryTimescale(), capturedItemOptions.getDeliveryTimescale());

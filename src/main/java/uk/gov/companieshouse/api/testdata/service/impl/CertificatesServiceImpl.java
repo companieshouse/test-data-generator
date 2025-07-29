@@ -25,13 +25,9 @@ import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CertificatesServiceImpl implements DataService<CertificatesData, CertificatesSpec> {
-    private static final Logger LOG =
-        LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
     @Autowired
     public CertificatesRepository certificatesRepository;
