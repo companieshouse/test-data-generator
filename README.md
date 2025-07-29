@@ -149,15 +149,39 @@ In order to use the generator, there are different possible endpoints that can b
   - `company_name`: The name of the company.
   - `company_number`: The number of the company matching with company name.
   - `description_identifier`: The identifier description of the certificate.
-  - `description_values`: 
-    - `company_number`: The description value which has number of the company matching with company name.
-    - `certificate`: The description value of the certificate.
   - `item_options`: [{
     - `certificate_type`: The certificates types for the item.
     - `delivery_timescale`: The delivery time scale (e.g. `standard`, `express`).
     - `inclue_email_copy`: The boolean value for sending email copy. Default value is false.
     - `company_type`: The type of the company (e.g., `ltd`, `plc`).
     - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`).
+    - `delivery_method`: The method delivery is requested (e.g., `postal`, `collection`)
+    - `director_details`: { The below values are for director details only.
+      - `include_address`: The boolean value for include address. This is optional
+      - `include_appointment_date`: The boolean value for include appointment date. This is optional.
+      - `include_basic_information`: The boolean value for include basic information. This is optional
+      - `include_country_of_residence`: The boolean value for include country of resident. This is optional.
+      - `include_dob_type`: The boolean value for include dob type. This is optional.
+      - `include_nationality`: The boolean value for include nationality. This is optional.
+      - `include_occupation`: The boolean value for include occupation. This is optional.
+      }
+    - `forename`: The forename of the item options. This is optional.
+    - `include_company_objects_information`: The boolean value to include the company objects information. This is optional.
+    - `include_good_standing_information`: The boolean value to include good standing information in certificates. This is optional.
+    - `registered_office_address_details`: {
+      - `include_address_records_type`: The include address records type of the registered office address details (e.g., `all`, `current`, `current-and-previous`, `current-previous-and-prior`). This is optional.
+      - `include_dates`: The boolean value for include dates. This is optional.
+      }
+    - `secretary_details`: { The below values are for secretary details only.
+      - `include_address`: The boolean value for include address. This is optional
+      - `include_appointment_date`: The boolean value for include appointment date. This is optional.
+      - `include_basic_information`: The boolean value for include basic information. This is optional
+      - `include_country_of_residence`: The boolean value for include country of resident. This is optional.
+      - `include_dob_type`: The boolean value for include dob type. This is optional.
+      - `include_nationality`: The boolean value for include nationality. This is optional.
+      - `include_occupation`: The boolean value for include occupation. This is optional.
+      }
+    - `surname`: The surname of the item options. This is optional.
     }]
   - `basket`: {
     - `forename`: The forename for basket delivery details.
@@ -168,15 +192,16 @@ In order to use the generator, there are different possible endpoints that can b
   - `quantity`: The number of the certificate.
   - `postal_delivery`: The boolean value for certificate postal delivery. Default value is false.
   - `user_id`: The user id who logged in to order a certificate.
-  
-  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "KA000034", "description_identifier" : "certificate", "description_company_number" : "KA000034", "description_certificate" : "certificate for company KA000034", "item_options" : { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, "kind" : "item#certificate", "quantity" : 1, "postal_delivery": true, "user_id" : "RYCWjabPzgLvwBdlLmuhPsSpfkZ", "basket": { "forename": "John", "surname": "Doe", "enrolled": true } }`
-  - Adding multiple certificates example: `{"company_name" : "ACME Company", "company_number" : "SC172618", "description" : "certificate for company", "description_identifier" : "certificate", "description_company_number" : "SC172618", "description_certificate" : "certificate for company SC172618", "item_options" : [{ "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "standard", "include_email_copy" : true, "company_type" : "ltd", "company_status" : "active" }, { "certificate_type" : "incorporation-with-all-name-changes", "delivery_timescale" : "express", "include_email_copy" : false, "company_type" : "ltd", "company_status" : "active" }], "kind" : "item#certificate", "quantity" : 1, "postal_delivery": false, "user_id" : "xiteAZJVGMjGFgPUnqsHSLhtkiss", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }}`
+
+  - A usage example looks like this: `{"company_name": "ACME Company", "company_number": "SC172618", "description_identifier": "certificate", "item_options": {"certificate_type": "incorporation-with-all-name-changes", "company_status": "active", "company_type": "ltd", "delivery_method": "postal", "delivery_timescale": "standard", "director_details": {"include_address": true, "include_appointment_date": true, "include_basic_information": true, "include_country_of_residence": true, "include_dob_type": "partial", "include_nationality": true, "include_occupation": true}, "forename": "John", "include_company_objects_information": true, "include_email_copy": false, "include_good_standing_information": true, "registered_office_address_details": {"include_address_records_type": "current", "include_dates": true}, "secretary_details": {"include_address": true, "include_appointment_date": true, "include_basic_information": true, "include_country_of_residence": true, "include_dob_type": "partial", "include_nationality": true, "include_occupation": true}, "surname": "Doe"}, "kind": "item#certificate", "quantity": 1, "postal_delivery": false, "user_id": "xiteAZJVGMjGFgPUnqsHSLhtkiss", "basket": {"forename": "John", "surname": "Doe", "enrolled": true}}`
+  - Adding multiple certificates example: `{"company_name": "ACME Company", "company_number": "SC172618", "description_identifier": "certificate", "item_options": [{"certificate_type": "incorporation-with-all-name-changes", "company_status": "active", "company_type": "ltd", "delivery_method": "postal", "delivery_timescale": "standard", "director_details": {"include_address": true, "include_appointment_date": true, "include_basic_information": true, "include_country_of_residence": true, "include_dob_type": "partial", "include_nationality": true, "include_occupation": true}, "forename": "John", "include_company_objects_information": true, "include_email_copy": false, "include_good_standing_information": true, "registered_office_address_details": {"include_address_records_type": "current", "include_dates": true}, "secretary_details": {"include_address": true, "include_appointment_date": true, "include_basic_information": true, "include_country_of_residence": true, "include_dob_type": "partial", "include_nationality": true, "include_occupation": true}, "surname": "Doe"}, {"certificate_type": "incorporation-with-all-name-changes", "company_status": "active", "company_type": "ltd", "delivery_method": "postal", "delivery_timescale": "express", "forename": "John", "include_company_objects_information": false, "include_email_copy": true, "include_good_standing_information": false, "surname": "Doe"}], "kind": "item#certificate", "quantity": 1, "postal_delivery": false, "user_id": "xiteAZJVGMjGFgPUnqsHSLhtkiss", "basket": {"forename": "John", "surname": "Doe", "enrolled": true}}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certificates/{id}` will delete the test certificate.
 
 ##### Creating Certified copies
 - POST: Sending a POST request to `{Base URL}/test-data/certified-copies` will order certified copies for a company and add the basket details.
   - `company_name`: The name of the company.
   - `company_number`: The number of the company matching with company name.
+  - `customer_reference`: The reference to the customer.
   - `item_costs`: {
     - `discount_applied`: The discount applied for the certified copies.
     - `item_cost`: The cost of the item.
@@ -198,7 +223,10 @@ In order to use the generator, there are different possible endpoints that can b
         - `capital`: [{
           - `figure`: The figure value for the filing history.
           - `currency`: The currency for the filling history.
-          ]}
+          ]},
+        - `charge_number`: The charge number for the filing history.
+        - `made_up_date`: The made up date for the filing history.
+        - `officer_name`: The office name for the filing history.
         }
       - `filing_history_id`: The id value of the filing history document.
       - `filing_history_type`: The filing history type value (e.g., `SH01`, `NEWINC`).
@@ -217,9 +245,56 @@ In order to use the generator, there are different possible endpoints that can b
   - `postage_cost`: The cost for the postage.
   - `total_item_Cost`: The total cost of certified copies.
 
-  - A usage example looks like this: `{"company_name" : "ACME Company", "company_number" : "SC172618", "description_identifier" : "certified-copy", "description_company_number" : "SC172618", "description_certified_copy" : "certified copy for company SC172618", "item_options" : { "delivery_method" : "postal", "delivery_timescale" : "standard", "filing_history_documents" : [ { "filing_history_date" : "2019-11-23", "filing_history_description" : "capital-allotment-shares", "filing_history_description_values" : { "capital" : [ { "figure" : "34,253,377", "currency" : "GBP" } ], "date" : "2019-11-10" }, "filing_history_id" : "OTAwMzQ1NjM2M2FkaXF6a6N4", "filing_history_type" : "SH01", "filing_history_cost" : "15" } ] }, "kind" : "item#certified-copy", "quantity" : 1, "postal_delivery" : false, "user_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket" : { "forename" : "John", "surname" : "Doe", "enrolled" : true } }`
-  - Adding multiple certified copies example: `{"company_name" : "ACME Company", "company_number" : "SC172618", "item_costs" : [ { "discount_applied" : "0", "item_cost" : "15", "calculated_cost" : "15", "product_type" : "certified-copy" } ], "item_options" : [ { "delivery_method" : "postal", "delivery_timescale" : "standard", "filing_history_documents" : [ { "filing_history_date" : "2019-11-23", "filing_history_description" : "capital-allotment-shares", "filing_history_description_values" : { "capital" : [ { "figure" : "34,253,377", "currency" : "GBP" } ], "date" : "2019-11-10" }, "filing_history_id" : "OTAwMzQ1NjM2M2FkaXF6a6N4", "filing_history_type" : "SH01", "filing_history_cost" : "15" } ] }, { "collection_location" : "cardiff", "contact_number" : "013473847444", "delivery_method" : "collection", "delivery_timescale" : "standard", "filing_history_documents" : [ { "filing_history_date" : "2016-05-26", "filing_history_description" : "incorporation-company", "filing_history_id" : "MzE0OTM3MTQxNmFkaXF6a2N4", "filing_history_type" : "NEWINC", "filing_history_cost" : "30" } ], "forename" : "John", "surname" : "Smith" } ], "kind" : "item#certified-copy", "quantity" : 1, "postal_delivery" : false, "user_id" : "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket" : { "forename" : "John", "surname" : "Doe", "enrolled" : true }, "postage_cost" : "0", "total_item_cost" : "30" }`
+  - A usage example looks like this: `{"company_name": "ACME Company", "company_number": "SC172618", "customer_reference": "test", "item_costs": [ { "discount_applied": "0", "item_cost": "15", "calculated_cost": "15", "product_type": "certified-copy" } ], "item_options": [ { "collection_location": "cardiff", "contact_number": "013473847444", "delivery_method": "collection", "delivery_timescale": "standard", "filing_history_documents": [ { "filing_history_date": "2016-05-26", "filing_history_description": "incorporation-company", "filing_history_id": "MzE0OTM3MTQxNmFkaXF6a2N4", "filing_history_type": "NEWINC", "filing_history_cost": "30" } ], "forename": "John", "surname": "Smith" } ], "kind": "item#certified-copy", "quantity": 1, "postal_delivery": false, "user_id": "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }, "postage_cost": "0", "total_item_cost": "30" }`
+  - Adding multiple certified copies example: `{ "company_name": "ACME Company", "company_number": "SC172618", "customer_reference": "test", "item_costs": [ { "discount_applied": "0", "item_cost": "15", "calculated_cost": "15", "product_type": "certified-copy" } ], "item_options": [ { "collection_location": "cardiff", "contact_number": "7252827444", "delivery_method": "postal", "delivery_timescale": "standard", "filing_history_documents": [ { "filing_history_date": "2019-11-23", "filing_history_description": "capital-allotment-shares", "filing_history_description_values": { "capital": [ { "figure": "34,253,377", "currency": "GBP" } ], "charge_number": "908484848", "date": "2019-11-10", "made_up_date": "2019-12-10", "officer_name": "Officer test" }, "filing_history_id": "OTAwMzQ1NjM2M2FkaXF6a6N4", "filing_history_type": "SH01", "filing_history_cost": "15" } ], "forename": "test", "surname": "sur test" }, { "collection_location": "cardiff", "contact_number": "013473847444", "delivery_method": "collection", "delivery_timescale": "standard", "filing_history_documents": [ { "filing_history_date": "2016-05-26", "filing_history_description": "incorporation-company", "filing_history_id": "MzE0OTM3MTQxNmFkaXF6a2N4", "filing_history_type": "NEWINC", "filing_history_cost": "30" } ], "forename": "John", "surname": "Smith" } ], "kind": "item#certified-copy", "quantity": 1, "postal_delivery": false, "user_id": "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }, "postage_cost": "0", "total_item_cost": "30" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/certified-copies/{id}` will delete the test certified copies.
+
+##### Creating Missing Image Deliveries
+- POST: Sending a POST request to `{Base URL}/test-data/missing-image-deliveries` will order missing image deliveries for a company and add the basket details.
+  - `company_name`: The name of the company.
+  - `company_number`: The number of the company matching with company name.
+  - `customer_reference`: The reference to the customer.
+  - `item_costs`: {
+    - `discount_applied`: The discount applied for the missing image deliveries.
+    - `item_cost`: The cost of the item.
+    - `calculated_cost`: The total cost of missing image deliveries.
+    - `product_type`: The type of the product , default value is `missing-image-delivery-accounts`.
+      }
+  - `item_options`: [{
+    - `filing_history_documents`: {
+      - `filing_history_date`: The date of the filing history in a string value.
+      - `filing_history_description`: The description of the filing history (e.g., `accounts-with-accounts-type-small`, `capital-allotment-shares`)
+      - `filing_history_description_values`: {
+        - `date`: The date when filing history description values set.
+        - `capital`: [{
+          - `figure`: The figure value for the filing history.
+          - `currency`: The currency for the filling history.
+            ]},
+        - `charge_number`: The charge number for the filing history.
+        - `made_up_date`: The made up date for the filing history.
+        - `officer_name`: The office name for the filing history.
+          }
+      - `filing_history_id`: The id value of the filing history document.
+      - `filing_history_type`: The filing history type value (e.g., `SH01`, `AA`).
+      - `filing_history_barcode`: The barcode of the filing history document.
+      - `filing_history_category`: The category of the filing history document (e.g., `accounts`, `capital`).
+        }]
+        }]
+  - `basket`: {
+    - `forename`: The forename for basket delivery details.
+    - `surname`: The surname for basket delivery details.
+    - `enrolled`: To make the multi-item basket available to all users, this should be set to true. Default value is true.
+      }
+  - `kind`: The kind of the missing image deliveries.
+  - `quantity`: The number of the missing image deliveries.
+  - `postal_delivery`: The boolean value for missing image deliveries postal delivery. Default value is false.
+  - `user_id`: The user id who logged in to order the missing image deliveries.
+  - `postage_cost`: The cost for the postage.
+  - `total_item_Cost`: The total cost of missing image deliveries.
+
+  - A usage example looks like this: `{"company_name": "ACME Company", "company_number": "SC172618", "customer_reference": "test", "item_costs": [ { "discount_applied": "0", "item_cost": "15", "calculated_cost": "15", "product_type": "certified-copy" } ], "item_options": [ { "filing_history_date": "2018-04-23", "filing_history_description": "mortgage-create-with-deed-with-charge-number", "filing_history_description_values": { "charge_number": "029231400009" }, "filing_history_id": "MzIwMzkwNTUxNmFkaXF6a2N0", "filing_history_type": "MR01", "filing_history_category": "mortgage", "filing_history_barcode": "J74HTP8H" } ], "kind": "item#missing-image-delivery", "quantity": 1, "postal_delivery": false, "user_id": "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }, "postage_cost": "0", "total_item_cost": "30" }`
+  - Adding multiple missing image deliveries example: `{"company_name": "ACME Company", "company_number": "SC172618", "customer_reference": "test", "item_costs": [ { "discount_applied": "0", "item_cost": "15", "calculated_cost": "15", "product_type": "certified-copy" } ], "item_options": [ { "filing_history_date": "2018-04-06", "filing_history_description": "accounts-with-accounts-type-small", "filing_history_description_values": { "capital": [ { "figure": "34,253,377", "currency": "GBP" } ], "charge_number": "908484848", "date": "2019-11-10", "made_up_date": "2019-12-10", "officer_name": "Officer test" }, "filing_history_id": "MzIwMTkzODk1NGFkaXF6a2N6", "filing_history_type": "AA", "filing_history_category": "accounts", "filing_history_barcode": "L72QXI0Y" }, { "filing_history_date": "2018-04-23", "filing_history_description": "mortgage-create-with-deed-with-charge-number", "filing_history_description_values": { "charge_number": "029231400009" }, "filing_history_id": "MzIwMzkwNTUxNmFkaXF6a2N0", "filing_history_type": "MR01", "filing_history_category": "mortgage", "filing_history_barcode": "J74HTP8H" } ], "kind": "item#missing-image-delivery", "quantity": 1, "postal_delivery": false, "user_id": "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }, "postage_cost": "0", "total_item_cost": "30" }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/missing-image-deliveries/{id}` will delete the test missing image deliveries.
 
 #### Creating, Retrieving, Updating and Deleting Account Penalties
 - POST: Sending a POST request to create Account Penalties `{Base URL}/test-data/penalties` will create an Account Penalties entry in the account_penalties db collection. The request body must include all mandatory fields of `companyCode`, `customer_code` and `amount` then optional fields of `createdAt`, `closedAt`, `isPaid`, `amount`, `number_of_penalties`, `type_description`, `ledger_code`, `dunning_status`, `account_status`, `outstandingAMount`, `transaction_type` and `transaction_sub_type` parameters.

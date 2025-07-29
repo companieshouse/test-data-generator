@@ -71,7 +71,7 @@ public class CertifiedCopies {
     @Field("basket")
     private Basket basket;
 
-    @Field("customer_reference")
+    @Field("data.customer_reference")
     private String customerReference;
 
     public String getId() {

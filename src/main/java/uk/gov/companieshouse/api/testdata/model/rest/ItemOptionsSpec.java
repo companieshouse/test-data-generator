@@ -1,10 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
-import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddressDetails;
-import uk.gov.companieshouse.api.testdata.model.entity.SecretaryDetails;
 
 public class ItemOptionsSpec {
     @JsonProperty("certificate_type")
@@ -73,7 +70,7 @@ public class ItemOptionsSpec {
     @JsonProperty("registered_office_address_details")
     private RegisteredOfficeAddressDetailsSpec registeredOfficeAddressDetails;
 
-    @JsonProperty("secretary_Details")
+    @JsonProperty("secretary_details")
     private SecretaryDetailsSpec secretaryDetails;
 
     public String getCertificateType() {
@@ -241,7 +238,7 @@ public class ItemOptionsSpec {
     }
 
     public void setIncludeGoodStandingInformation(Boolean includeGoodStandingInformation) {
-        this.includeCompanyObjectsInformation = includeGoodStandingInformation;
+        this.includeGoodStandingInformation = includeGoodStandingInformation;
     }
 
     public RegisteredOfficeAddressDetailsSpec getRegisteredOfficeAddressDetails() {

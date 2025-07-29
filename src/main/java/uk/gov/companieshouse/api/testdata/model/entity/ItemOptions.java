@@ -113,7 +113,7 @@ public class ItemOptions {
         this.includeGoodStandingInformation = includeGoodStandingInformation;
     }
 
-    public boolean getIncludeEmailCopy() {
+    public Boolean getIncludeEmailCopy() {
         return includeEmailCopy;
     }
 
