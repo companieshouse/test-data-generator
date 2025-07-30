@@ -79,36 +79,17 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         Optional.ofNullable(optionsSpec.getDeliveryMethod()).ifPresent(itemOptions::setDeliveryMethod);
         Optional.ofNullable(optionsSpec.getDeliveryTimescale()).ifPresent(itemOptions::setDeliveryTimescale);
         if (optionsSpec.getDirectorDetails() != null) {
-            var directorDetails = new DirectorDetails();
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeAddress()).ifPresent(directorDetails::setIncludeAddress);
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeAppointmentDate()).ifPresent(directorDetails::setIncludeAppointmentDate);
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeBasicInformation()).ifPresent(directorDetails::setIncludeBasicInformation);
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeCountryOfResidence()).ifPresent(directorDetails::setIncludeCountryOfResidence);
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeDobType()).ifPresent(directorDetails::setIncludeDobType);
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeNationality()).ifPresent(directorDetails::setIncludeNationality);
-            Optional.ofNullable(optionsSpec.getDirectorDetails().getIncludeOccupation()).ifPresent(directorDetails::setIncludeOccupation);
-            itemOptions.setDirectorDetails(directorDetails);
+            itemOptions.setDirectorDetails(buildDirectorDetails(optionsSpec));
         }
         Optional.ofNullable(optionsSpec.getForeName()).ifPresent(itemOptions::setForeName);
         Optional.ofNullable(optionsSpec.getIncludeCompanyObjectsInformation()).ifPresent(itemOptions::setIncludeCompanyObjectsInformation);
         Optional.ofNullable(optionsSpec.getIncludeEmailCopy()).ifPresent(itemOptions::setIncludeEmailCopy);
         Optional.ofNullable(optionsSpec.getIncludeGoodStandingInformation()).ifPresent(itemOptions::setIncludeGoodStandingInformation);
         if (optionsSpec.getRegisteredOfficeAddressDetails() != null) {
-            var registeredOfficeAddressDetails = new RegisteredOfficeAddressDetails();
-            Optional.ofNullable(optionsSpec.getRegisteredOfficeAddressDetails().getIncludeAddressRecordsType()).ifPresent(registeredOfficeAddressDetails::setIncludeAddressRecordsType);
-            Optional.ofNullable(optionsSpec.getRegisteredOfficeAddressDetails().getIncludeDates()).ifPresent(registeredOfficeAddressDetails::setIncludeDates);
-            itemOptions.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetails);
+            itemOptions.setRegisteredOfficeAddressDetails(buildRegisteredOfficeAddressDetails(optionsSpec));
         }
         if (optionsSpec.getSecretaryDetails() != null) {
-            var secretaryDetails = new SecretaryDetails();
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeAddress()).ifPresent(secretaryDetails::setIncludeAddress);
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeAppointmentDate()).ifPresent(secretaryDetails::setIncludeAppointmentDate);
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeBasicInformation()).ifPresent(secretaryDetails::setIncludeBasicInformation);
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeCountryOfResidence()).ifPresent(secretaryDetails::setIncludeCountryOfResidence);
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeDobType()).ifPresent(secretaryDetails::setIncludeDobType);
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeNationality()).ifPresent(secretaryDetails::setIncludeNationality);
-            Optional.ofNullable(optionsSpec.getSecretaryDetails().getIncludeOccupation()).ifPresent(secretaryDetails::setIncludeOccupation);
-            itemOptions.setSecretaryDetails(secretaryDetails);
+            itemOptions.setSecretaryDetails(buildSecretaryDetails(optionsSpec));
         }
         Optional.ofNullable(optionsSpec.getSurName()).ifPresent(itemOptions::setSurName);
 
@@ -135,6 +116,47 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
 
         return certificates;
     }
+
+    private DirectorDetails buildDirectorDetails(ItemOptionsSpec optionsSpec) {
+        var details = new DirectorDetails();
+        var director = optionsSpec.getDirectorDetails();
+
+        Optional.ofNullable(director.getIncludeAddress()).ifPresent(details::setIncludeAddress);
+        Optional.ofNullable(director.getIncludeAppointmentDate()).ifPresent(details::setIncludeAppointmentDate);
+        Optional.ofNullable(director.getIncludeBasicInformation()).ifPresent(details::setIncludeBasicInformation);
+        Optional.ofNullable(director.getIncludeCountryOfResidence()).ifPresent(details::setIncludeCountryOfResidence);
+        Optional.ofNullable(director.getIncludeDobType()).ifPresent(details::setIncludeDobType);
+        Optional.ofNullable(director.getIncludeNationality()).ifPresent(details::setIncludeNationality);
+        Optional.ofNullable(director.getIncludeOccupation()).ifPresent(details::setIncludeOccupation);
+
+        return details;
+    }
+
+    private SecretaryDetails buildSecretaryDetails(ItemOptionsSpec optionsSpec) {
+        var details = new SecretaryDetails();
+        var secretary = optionsSpec.getSecretaryDetails();
+
+        Optional.ofNullable(secretary.getIncludeAddress()).ifPresent(details::setIncludeAddress);
+        Optional.ofNullable(secretary.getIncludeAppointmentDate()).ifPresent(details::setIncludeAppointmentDate);
+        Optional.ofNullable(secretary.getIncludeBasicInformation()).ifPresent(details::setIncludeBasicInformation);
+        Optional.ofNullable(secretary.getIncludeCountryOfResidence()).ifPresent(details::setIncludeCountryOfResidence);
+        Optional.ofNullable(secretary.getIncludeDobType()).ifPresent(details::setIncludeDobType);
+        Optional.ofNullable(secretary.getIncludeNationality()).ifPresent(details::setIncludeNationality);
+        Optional.ofNullable(secretary.getIncludeOccupation()).ifPresent(details::setIncludeOccupation);
+
+        return details;
+    }
+
+    private RegisteredOfficeAddressDetails buildRegisteredOfficeAddressDetails(ItemOptionsSpec optionsSpec) {
+        var details = new RegisteredOfficeAddressDetails();
+        var address = optionsSpec.getRegisteredOfficeAddressDetails();
+
+        Optional.ofNullable(address.getIncludeAddressRecordsType()).ifPresent(details::setIncludeAddressRecordsType);
+        Optional.ofNullable(address.getIncludeDates()).ifPresent(details::setIncludeDates);
+
+        return details;
+    }
+
 
     Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
         var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);

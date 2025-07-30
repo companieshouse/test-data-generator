@@ -98,10 +98,6 @@ public class MissingImageDeliveries {
         this.updatedAt = updatedAt;
     }
 
-    public String getDataId() {
-        return dataId;
-    }
-
     public void setDataId(String dataId) {
         this.dataId = dataId;
     }
