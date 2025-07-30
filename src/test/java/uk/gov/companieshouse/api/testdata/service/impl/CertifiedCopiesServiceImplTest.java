@@ -82,19 +82,9 @@ class CertifiedCopiesServiceImplTest {
         certifiedCopies.setId("CCD-123456-789012");
         var companyNumber = "12345678";
 
-        CapitalSpec capitalSpec = new CapitalSpec();
-        capitalSpec.setFigure("34,253,377");
-        capitalSpec.setCurrency("GBP");
-
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
-        descriptionValuesSpec.setDate("2019-11-10");
-        descriptionValuesSpec.setCapital(List.of(capitalSpec));
-
-        FilingHistoryDocumentsSpec filingHistoryDocument = getFilingHistoryDocumentsSpec(
-            descriptionValuesSpec);
+        FilingHistoryDocumentsSpec filingHistoryDocument = getFilingHistoryDocumentsSpec();
 
         ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setDeliveryTimescale("postal");
         itemOptionsSpec.setDeliveryMethod("standard");
         itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument));
 
@@ -120,21 +110,18 @@ class CertifiedCopiesServiceImplTest {
         basket.setId("user123");
     }
 
-    private static FilingHistoryDocumentsSpec getFilingHistoryDocumentsSpec(
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec) {
+    private static FilingHistoryDocumentsSpec getFilingHistoryDocumentsSpec() {
         FilingHistoryDocumentsSpec filingHistoryDocument = new FilingHistoryDocumentsSpec();
         filingHistoryDocument.setFilingHistoryDate("2019-11-23");
         filingHistoryDocument.setFilingHistoryDescription("capital-allotment-shares");
-        filingHistoryDocument.setFilingHistoryDescriptionValues(descriptionValuesSpec);
         filingHistoryDocument.setFilingHistoryId("OTAwMzQ1NjM2M2FkaXF6a6N4");
         filingHistoryDocument.setFilingHistoryType("SH01");
         filingHistoryDocument.setFilingHistoryCost("15");
         return filingHistoryDocument;
     }
 
-
     @Test
-    void createCertifiedCopies() throws DataException {
+    void createCertifiedCopiesWithMandatoryValues() throws DataException {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
@@ -146,20 +133,6 @@ class CertifiedCopiesServiceImplTest {
 
         verify(repository).save(certifiedCopiesCaptor.capture());
         CertifiedCopies captured = certifiedCopiesCaptor.getValue();
-
-        ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = certifiedCopiesSpec.getItemOptions().getFirst();
-
-        List<FilingHistoryDocument> capturedFilingHistoryDocument = capturedOptions.getFilingHistoryDocuments();
-        List<FilingHistoryDocumentsSpec> expectedFilingHistoryDocument = expectedOptions.getFilingHistoryDocuments();
-
-        List<Capital> capturedCapital = capturedFilingHistoryDocument.getFirst().getFilingHistoryDescriptionValues().getCapital();
-        List<CapitalSpec> expectedCapital = expectedFilingHistoryDocument.getFirst().getFilingHistoryDescriptionValues()
-            .getCapital();
-
-        List<ItemCosts> capturedCosts =  captured.getItemCosts();
-        ItemCostsSpec expectedCosts = certifiedCopiesSpec.getItemCosts().getFirst();
-
 
         assertEquals("CCD-123456-789012", captured.getId());
         assertEquals(certifiedCopiesSpec.getCompanyName(), captured.getCompanyName());
@@ -178,6 +151,87 @@ class CertifiedCopiesServiceImplTest {
         assertEquals(certifiedCopiesSpec.getUserId(), captured.getUserId());
         assertEquals(certifiedCopiesSpec.getPostageCost(), captured.getPostageCost());
         assertEquals(certifiedCopiesSpec.getTotalItemCost(), captured.getTotalItemCost());
+    }
+
+    @Test
+    void createCertifiedCopiesWithOptionalValues() throws DataException {
+        when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
+        when(randomService.getEtag()).thenReturn("etag123");
+        when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
+
+        CapitalSpec capitalSpec = new CapitalSpec();
+        capitalSpec.setFigure("34,253,377");
+        capitalSpec.setCurrency("GBP");
+
+        FilingHistoryDescriptionValuesSpec filingHistoryDescriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
+        filingHistoryDescriptionValuesSpec.setCapital(List.of(capitalSpec));
+        filingHistoryDescriptionValuesSpec.setChargeNumber("029231400009");
+        filingHistoryDescriptionValuesSpec.setDate("2019-11-10");
+        filingHistoryDescriptionValuesSpec.setMadeUpDate("2017-12-31");
+        filingHistoryDescriptionValuesSpec.setOfficerName("Officer Test");
+
+        FilingHistoryDocumentsSpec filingHistoryDocumentsSpec = new FilingHistoryDocumentsSpec();
+        filingHistoryDocumentsSpec.setFilingHistoryDescriptionValues(filingHistoryDescriptionValuesSpec);
+
+        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
+        itemOptionsSpec.setCollectionLocation("wales");
+        itemOptionsSpec.setContactNumber("844740192");
+        itemOptionsSpec.setDeliveryTimescale("same-day");
+        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocumentsSpec));
+        itemOptionsSpec.setForeName("John");
+        itemOptionsSpec.setSurName("Test");
+
+        certifiedCopiesSpec.setCustomerReference("CustomerReference");
+        certifiedCopiesSpec.setItemOptions(List.of(itemOptionsSpec));
+
+        CertificatesData result = service.create(certifiedCopiesSpec);
+
+        assertNotNull(result);
+        assertEquals(certifiedCopies.getId(), result.getCertificates().getFirst().getId());
+
+        verify(repository).save(certifiedCopiesCaptor.capture());
+        CertifiedCopies captured = certifiedCopiesCaptor.getValue();
+
+        assertEquals("CCD-123456-789012", captured.getId());
+        assertEquals(certifiedCopiesSpec.getCompanyName(), captured.getCompanyName());
+        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescription());
+        assertEquals("certified-copy", captured.getDescriptionIdentifier());
+        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescriptionCertifiedCopy());
+        assertItemCosts(captured.getItemCosts(), certifiedCopiesSpec.getItemCosts().getFirst());
+        assertItemOptionsAndFilingHistory(captured.getItemOptions(), certifiedCopiesSpec.getItemOptions().getFirst());
+        assertEquals("etag123", captured.getEtag());
+        assertEquals(certifiedCopiesSpec.getKind(), captured.getKind());
+        assertEquals("/orderable/certified-copies/CCD-123456-789012", captured.getLinksSelf());
+        assertTrue(captured.isPostalDelivery());
+        assertEquals(certifiedCopiesSpec.getQuantity(), captured.getQuantity());
+        assertEquals(certifiedCopiesSpec.getUserId(), captured.getUserId());
+        assertEquals(certifiedCopiesSpec.getPostageCost(), captured.getPostageCost());
+        assertEquals(certifiedCopiesSpec.getTotalItemCost(), captured.getTotalItemCost());
+
+        var expectedItemOptions = certifiedCopiesSpec.getItemOptions().getFirst();
+        var capturedItemOptions = captured.getItemOptions();
+        var expectedFilingHistoryDescriptionValues = expectedItemOptions.getFilingHistoryDocuments().getFirst().getFilingHistoryDescriptionValues();
+        var capturedFilingHistoryDescriptionValues = capturedItemOptions.getFilingHistoryDocuments().getFirst().getFilingHistoryDescriptionValues();
+        var expectedCapital = expectedFilingHistoryDescriptionValues.getCapital().getFirst();
+        var capturedCapital = capturedFilingHistoryDescriptionValues.getCapital().getFirst();
+        assertOptionalItems(expectedItemOptions, capturedItemOptions, expectedCapital, capturedCapital, expectedFilingHistoryDescriptionValues, capturedFilingHistoryDescriptionValues);
+
+    }
+
+    private void assertOptionalItems(ItemOptionsSpec expectedItemOptions, ItemOptions capturedItemOptions, CapitalSpec expectedCapital, Capital capturedCapital, FilingHistoryDescriptionValuesSpec expectedFilingHistoryDescriptionValues, FilingHistoryDescriptionValues capturedFilingHistoryDescriptionValues) {
+        assertEquals(expectedItemOptions.getCollectionLocation(), capturedItemOptions.getCollectionLocation());
+        assertEquals(expectedItemOptions.getContactNumber(), capturedItemOptions.getContactNumber());
+        assertEquals(expectedItemOptions.getDeliveryTimescale(), capturedItemOptions.getDeliveryTimescale());
+        assertEquals(expectedCapital.getFigure(), capturedCapital.getFigure());
+        assertEquals(expectedCapital.getCurrency(), capturedCapital.getCurrency());
+        assertEquals(expectedFilingHistoryDescriptionValues.getChargeNumber(), capturedFilingHistoryDescriptionValues.getChargeNumber());
+        assertEquals(expectedFilingHistoryDescriptionValues.getDate(), capturedFilingHistoryDescriptionValues.getDate());
+        assertEquals(expectedFilingHistoryDescriptionValues.getMadeUpDate(), capturedFilingHistoryDescriptionValues.getMadeUpDate());
+        assertEquals(expectedFilingHistoryDescriptionValues.getOfficerName(), capturedFilingHistoryDescriptionValues.getOfficerName());
+        assertEquals(expectedItemOptions.getForeName(), capturedItemOptions.getForeName());
+        assertEquals(expectedItemOptions.getSurName(), capturedItemOptions.getSurName());
     }
 
     private void assertItemCosts(List<ItemCosts> capturedCosts, ItemCostsSpec expectedCosts) {
@@ -199,12 +253,6 @@ class CertifiedCopiesServiceImplTest {
         assertEquals(expectedFilingHistoryDocument.getFirst().getFilingHistoryId(), capturedFilingHistoryDocument.getFirst().getFilingHistoryId());
         assertEquals(expectedFilingHistoryDocument.getFirst().getFilingHistoryType(), capturedFilingHistoryDocument.getFirst().getFilingHistoryType());
         assertEquals(expectedFilingHistoryDocument.getFirst().getFilingHistoryCost(), capturedFilingHistoryDocument.getFirst().getFilingHistoryCost());
-
-        List<Capital> capturedCapital = capturedFilingHistoryDocument.getFirst().getFilingHistoryDescriptionValues().getCapital();
-        List<CapitalSpec> expectedCapital = expectedFilingHistoryDocument.getFirst().getFilingHistoryDescriptionValues().getCapital();
-
-        assertEquals(expectedCapital.getFirst().getFigure(), capturedCapital.getFirst().getFigure());
-        assertEquals(expectedCapital.getFirst().getCurrency(), capturedCapital.getFirst().getCurrency());
     }
 
     @Test
@@ -283,8 +331,7 @@ class CertifiedCopiesServiceImplTest {
         descriptionValuesSpec.setDate("2019-11-10");
         descriptionValuesSpec.setCapital(List.of(capitalSpec));
 
-        FilingHistoryDocumentsSpec filingHistoryDocument1 = getFilingHistoryDocumentsSpec(
-            descriptionValuesSpec);
+        FilingHistoryDocumentsSpec filingHistoryDocument1 = getFilingHistoryDocumentsSpec();
 
         ItemOptionsSpec itemOption1 = new ItemOptionsSpec();
         itemOption1.setDeliveryTimescale("postal");

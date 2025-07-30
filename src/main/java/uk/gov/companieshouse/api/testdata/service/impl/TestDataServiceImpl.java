@@ -41,6 +41,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
@@ -57,6 +58,7 @@ import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
+import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -106,11 +108,15 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
     @Autowired
+    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
+    @Autowired
     private AcspMembersRepository acspMembersRepository;
     @Autowired
     private CertificatesRepository certificatesRepository;
     @Autowired
     private CertifiedCopiesRepository certifiedCopiesRepository;
+    @Autowired
+    private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
     @Autowired
@@ -562,6 +568,21 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
+    public CertificatesData createMissingImageDeliveriesData(
+        final MissingImageDeliveriesSpec spec) throws DataException {
+        if (spec.getUserId() == null) {
+            throw new DataException("User ID is required to create missing image deliveries");
+        }
+
+        try {
+            return missingImageDeliveriesService.create(spec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating missing image deliveries", ex);
+        }
+    }
+
+
+    @Override
     public boolean deleteCertificatesData(String id) throws DataException {
         try {
             return certificatesService.delete(id);
@@ -576,6 +597,15 @@ public class TestDataServiceImpl implements TestDataService {
             return certifiedCopiesService.delete(id);
         } catch (Exception ex) {
             throw new DataException("Error deleting certified copies", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteMissingImageDeliveriesData(String id) throws DataException {
+        try {
+            return missingImageDeliveriesService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting missing image deliveries", ex);
         }
     }
 

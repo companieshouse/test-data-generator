@@ -2,10 +2,9 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
-public class CertificatesSpec {
+public class MissingImageDeliveriesSpec {
 
     @JsonProperty("company_name")
     private String companyName;
@@ -13,11 +12,11 @@ public class CertificatesSpec {
     @JsonProperty("company_number")
     private String companyNumber;
 
-    @JsonProperty("description")
-    private String description;
+    @JsonProperty("customer_reference")
+    private String customerReference;
 
-    @JsonProperty("description_identifier")
-    private String descriptionIdentifier;
+    @JsonProperty("item_costs")
+    private List<ItemCostsSpec> itemCosts;
 
     @JsonProperty("item_options")
     private List<ItemOptionsSpec> itemOptions;
@@ -38,6 +37,12 @@ public class CertificatesSpec {
     @JsonProperty("basket")
     private BasketSpec basketSpec;
 
+    @JsonProperty("postage_cost")
+    private String postageCost;
+
+    @JsonProperty("total_item_cost")
+    private String totalItemCost;
+
     public String getCompanyName() {
         return companyName;
     }
@@ -54,20 +59,16 @@ public class CertificatesSpec {
         this.companyNumber = companyNumber;
     }
 
-    public String getDescription() {
-        return description;
+    public String getCustomerReference() { return customerReference; }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public List<ItemCostsSpec> getItemCosts() { return itemCosts; }
 
-    public String getDescriptionIdentifier() {
-        return descriptionIdentifier;
-    }
-
-    public void setDescriptionIdentifier(String descriptionIdentifier) {
-        this.descriptionIdentifier = descriptionIdentifier;
+    public void setItemCosts(List<ItemCostsSpec> itemCosts) {
+        this.itemCosts = itemCosts;
     }
 
     public List<ItemOptionsSpec> getItemOptions() {
@@ -116,5 +117,17 @@ public class CertificatesSpec {
 
     public void setBasketSpec(BasketSpec basketSpec) {
         this.basketSpec = basketSpec;
+    }
+
+    public String getPostageCost() { return postageCost; }
+
+    public void setPostageCost(String postageCost) {
+        this.postageCost = postageCost;
+    }
+
+    public String getTotalItemCost() { return totalItemCost; }
+
+    public void setTotalItemCost(String totalItemCost) {
+        this.totalItemCost = totalItemCost;
     }
 }
