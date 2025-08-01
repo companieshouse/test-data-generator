@@ -23,6 +23,9 @@ public class UserSpec {
     @JsonProperty("is_company_auth_allow_list")
     private Boolean isCompanyAuthAllowList;
 
+    @JsonProperty("is_admin")
+    private Boolean isAdmin;
+
     public String getPassword() {
         return password;
     }
@@ -53,5 +56,13 @@ public class UserSpec {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Boolean getIsAdmin() {
+        return isAdmin;
+    }
+
+    public void setIsAdmin(Boolean isAdmin) {
+        this.isAdmin = isAdmin;
     }
 }

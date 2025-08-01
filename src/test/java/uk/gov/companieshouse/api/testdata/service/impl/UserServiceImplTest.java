@@ -270,7 +270,7 @@ class UserServiceImplTest {
         assertTrue(userData.getForename().contains("Forename"),
                 "Forename should contain 'Forename'");
         assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
-        assertTrue(savedUser.getTestData(), "User should be marked as test data");
+        assertTrue(savedUser.getTestData(), "test data as true by default");
     }
 
     @Test
@@ -301,5 +301,65 @@ class UserServiceImplTest {
 
         verify(userRepository, times(1)).findById(userId);
         verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
+    void testCreateUserWithIsAdminTrue() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("admin@hello.com");
+        userSpec.setPassword("password");
+        userSpec.setIsAdmin(true);
+
+        String generatedUserId = "adminid";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(userSpec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertTrue(savedUser.getAdminUser(), "User should be marked as admin when isAdmin is true");
+    }
+
+    @Test
+    void testCreateUserWithIsAdminFalse() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("user@hello.com");
+        userSpec.setPassword("password");
+        userSpec.setIsAdmin(false);
+
+        String generatedUserId = "userid";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(userSpec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertFalse(savedUser.getAdminUser(), "User should not be marked as admin when isAdmin is false");
+    }
+
+    @Test
+    void testCreateUserWithIsAdminNull() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("nulladmin@hello.com");
+        userSpec.setPassword("password");
+        userSpec.setIsAdmin(null);
+
+        String generatedUserId = "nulladminid";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(userSpec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertFalse(savedUser.getAdminUser(), "User should not be marked as admin when isAdmin is null");
     }
 }
