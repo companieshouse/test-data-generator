@@ -49,6 +49,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(password);
         user.setDirectLoginPrivilege(true);
         user.setCreated(getDateNow());
+        user.setAdminUser(Optional.ofNullable(userSpec.getIsAdmin()).orElse(false));
         user.setTestData(true);
         repository.save(user);
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());

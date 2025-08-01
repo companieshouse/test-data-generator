@@ -44,6 +44,9 @@ public class User {
     @Field("test_data")
     private Boolean testData;
 
+    @Field("admin_user")
+    private Boolean adminUser;
+
     public String getId() {
         return id;
     }
@@ -130,5 +133,13 @@ public class User {
 
     public void setTestData(Boolean testData) {
         this.testData = testData;
+    }
+
+    public Boolean getAdminUser() {
+        return adminUser;
+    }
+
+    public void setAdminUser(Boolean adminUser) {
+        this.adminUser = adminUser;
     }
 }
