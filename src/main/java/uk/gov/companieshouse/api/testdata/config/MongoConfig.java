@@ -116,6 +116,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public AdminPermissionsRepository adminPermissionsRepository() {
+        return getMongoRepositoryBean(AdminPermissionsRepository.class, ACCOUNT_DATABASE);
+    }
+
+    @Bean
     public AcspProfileRepository acspProfileRepository() {
         return getMongoRepositoryBean(AcspProfileRepository.class, "acsp_profile");
     }

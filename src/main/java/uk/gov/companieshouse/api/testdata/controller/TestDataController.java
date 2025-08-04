@@ -29,6 +29,8 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
@@ -115,6 +117,17 @@ public class TestDataController {
         data.put("user id", createdUser.getId());
         LOG.info("New user created", data);
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/user/admin-permissions")
+    public ResponseEntity<AdminPermissionsData> createUserWithAdminPermissions(@Valid @RequestBody() AdminPermissionsSpec request)
+            throws DataException {
+        var createdUser = testDataService.createAdminPermissions(request);
+        Map<String, Object> data = new HashMap<>();
+        data.put("user email", createdUser.getEmail());
+        data.put("user id", createdUser.getId());
+        LOG.info("New user with admin permissions created", data);
+        return new ResponseEntity<>(createdAdminPermission, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/user/{userId}")

@@ -1,8 +1,11 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.util.List;
+import java.util.Objects;
 
 public class RoleSpec {
 
@@ -10,7 +13,7 @@ public class RoleSpec {
     private String id;
 
     @JsonProperty
-    private List<String> permissions;
+    private List<AdminPermissions> permissions;
 
     public String getId() {
         return id;
@@ -20,11 +23,11 @@ public class RoleSpec {
         this.id = id;
     }
 
-    public List<String> getPermissions() {
+    public List<AdminPermissions> getPermissions() {
         return permissions;
     }
 
-    public void setPermissions(List<String> permissions) {
+    public void setPermissions(List<AdminPermissions> permissions) {
         this.permissions = permissions;
     }
 
@@ -33,7 +36,6 @@ public class RoleSpec {
                 && !id.isEmpty()
                 && permissions != null
                 && !permissions.isEmpty()
-                && permissions.stream().allMatch(permission ->
-                permission != null && !permission.isEmpty());
+                && permissions.stream().allMatch(Objects::nonNull);
     }
 }
