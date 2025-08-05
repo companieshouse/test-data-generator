@@ -390,57 +390,28 @@ class AccountPenaltiesServiceImplTest {
         assertNotNull(result.getClosedAt(), "closedAt should be set when isPaid is true");
     }
 
-    @Test
-    void createPenaltiesList_transactionReferencePrefix_LP() {
+    @ParameterizedTest
+    @MethodSource("penaltyReferencePrefixProvider")
+    void createPenaltiesList_transactionReferencePrefix(
+            String companyCode, String transactionSubType, String expectedPrefix) {
         PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setTransactionSubType("ANY");
-        penaltySpec.setCustomerCode("CUST");
+        penaltySpec.setCompanyCode(companyCode);
+        penaltySpec.setTransactionSubType(transactionSubType);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
         penaltySpec.setNumberOfPenalties(1);
 
         List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
 
-        assertTrue(penalties.get(0).getTransactionReference().startsWith("A"));
+        assertTrue(penalties.get(0).getTransactionReference().startsWith(expectedPrefix));
     }
 
-    @Test
-    void createPenaltiesList_transactionReferencePrefix_C1_S1() {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setTransactionSubType("S1");
-        penaltySpec.setCustomerCode("CUST");
-        penaltySpec.setNumberOfPenalties(1);
-
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
-
-        assertTrue(penalties.get(0).getTransactionReference().startsWith("P"));
-    }
-
-    @Test
-    void createPenaltiesList_transactionReferencePrefix_C1_A2() {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setTransactionSubType("A2");
-        penaltySpec.setCustomerCode("CUST");
-        penaltySpec.setNumberOfPenalties(1);
-
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
-
-        assertTrue(penalties.get(0).getTransactionReference().startsWith("U"));
-    }
-
-    @Test
-    void createPenaltiesList_transactionReferencePrefix_C1_Other() {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setTransactionSubType("ZZ");
-        penaltySpec.setCustomerCode("CUST");
-        penaltySpec.setNumberOfPenalties(1);
-
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
-
-        // Should default to "A" if not S1 or A2
-        assertTrue(penalties.get(0).getTransactionReference().startsWith("A"));
+    private static Stream<Arguments> penaltyReferencePrefixProvider() {
+        return Stream.of(
+                Arguments.of(COMPANY_CODE, "ANY", "A"),
+                Arguments.of("C1", "S1", "P"),
+                Arguments.of("C1", "A2", "U"),
+                Arguments.of("C1", "ZZ", "A")
+        );
     }
 
     private static AccountPenalties createAccountPenalties() {

@@ -153,7 +153,11 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         accountPenalties.setCreatedAt(Instant.now());
 
         Boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
-        accountPenalties.setClosedAt(isPaid ? Instant.now() : null);
+        if (isPaid) {
+            accountPenalties.setClosedAt(Instant.now());
+        } else {
+            accountPenalties.setClosedAt(null);
+        }
 
         accountPenalties.setPenalties(createPenaltiesList(penaltySpec));
 
@@ -259,7 +263,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     private String generateTransactionReference(String companyCode, String transactionSubType) {
         var secureRandom = new SecureRandom();
-        String prefix = "A";
+        var prefix = "A";
 
         if ("LP".equals(companyCode)) {
             prefix = "A";
