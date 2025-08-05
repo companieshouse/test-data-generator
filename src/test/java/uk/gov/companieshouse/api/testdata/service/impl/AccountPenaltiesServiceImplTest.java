@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -349,6 +350,97 @@ class AccountPenaltiesServiceImplTest {
 
         assertEquals(1, result.getPenalties().size());
         assertEquals(PENALTY_REF, result.getPenalties().get(0).getTransactionReference());
+    }
+
+    @Test
+    void createAccountPenalties_closedAtIsNullWhenIsPaidFalse() throws Exception {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setIsPaid(false);
+        penaltySpec.setCompanyCode(COMPANY_CODE);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+
+        AccountPenalties saved = new AccountPenalties();
+        saved.setId(new ObjectId());
+        saved.setClosedAt(null);
+        saved.setPenalties(new ArrayList<>());
+
+        when(repository.save(any(AccountPenalties.class))).thenReturn(saved);
+
+        var result = service.createAccountPenalties(penaltySpec);
+
+        assertNull(result.getClosedAt(), "closedAt should be null when isPaid is false");
+    }
+
+    @Test
+    void createAccountPenalties_closedAtIsSetWhenIsPaidTrue() throws Exception {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setIsPaid(true);
+        penaltySpec.setCompanyCode(COMPANY_CODE);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+
+        AccountPenalties saved = new AccountPenalties();
+        saved.setId(new ObjectId());
+        saved.setClosedAt(Instant.now());
+        saved.setPenalties(new ArrayList<>());
+
+        when(repository.save(any(AccountPenalties.class))).thenReturn(saved);
+
+        var result = service.createAccountPenalties(penaltySpec);
+
+        assertNotNull(result.getClosedAt(), "closedAt should be set when isPaid is true");
+    }
+
+    @Test
+    void createPenaltiesList_transactionReferencePrefix_LP() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setTransactionSubType("ANY");
+        penaltySpec.setCustomerCode("CUST");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertTrue(penalties.get(0).getTransactionReference().startsWith("A"));
+    }
+
+    @Test
+    void createPenaltiesList_transactionReferencePrefix_C1_S1() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setTransactionSubType("S1");
+        penaltySpec.setCustomerCode("CUST");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertTrue(penalties.get(0).getTransactionReference().startsWith("P"));
+    }
+
+    @Test
+    void createPenaltiesList_transactionReferencePrefix_C1_A2() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setTransactionSubType("A2");
+        penaltySpec.setCustomerCode("CUST");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertTrue(penalties.get(0).getTransactionReference().startsWith("U"));
+    }
+
+    @Test
+    void createPenaltiesList_transactionReferencePrefix_C1_Other() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setTransactionSubType("ZZ");
+        penaltySpec.setCustomerCode("CUST");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        // Should default to "A" if not S1 or A2
+        assertTrue(penalties.get(0).getTransactionReference().startsWith("A"));
     }
 
     private static AccountPenalties createAccountPenalties() {

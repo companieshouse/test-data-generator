@@ -1,5 +1,8 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.ALWAYS;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import java.time.Instant;
@@ -11,6 +14,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "account_penalties")
+@JsonInclude(ALWAYS)
 public class AccountPenalties {
 
     @Id
@@ -28,6 +32,7 @@ public class AccountPenalties {
     private Instant createdAt;
 
     @Field("closed_at")
+    @JsonInclude(ALWAYS)
     private Instant closedAt;
 
     @Field("data")

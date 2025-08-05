@@ -113,6 +113,10 @@ public class PenaltySpec {
         return transactionSubType;
     }
 
+    public void setTransactionSubType(String transactionSubType) {
+        this.transactionSubType = transactionSubType;
+    }
+
     public String getAccountStatus() {
         return accountStatus;
     }
