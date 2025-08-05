@@ -153,7 +153,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         accountPenalties.setCreatedAt(Instant.now());
 
         Boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
-        accountPenalties.setClosedAt(isPaid == true ? Instant.now() : null);
+        accountPenalties.setClosedAt(isPaid ? Instant.now() : null);
 
         accountPenalties.setPenalties(createPenaltiesList(penaltySpec));
 
