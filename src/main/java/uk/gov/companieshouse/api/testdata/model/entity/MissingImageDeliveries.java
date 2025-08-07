@@ -5,8 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "certified_copies")
-public class CertifiedCopies {
+@Document(collection = "missing_image_deliveries")
+public class MissingImageDeliveries {
     @Id
     @Field("_id")
     private String id;
@@ -26,6 +26,9 @@ public class CertifiedCopies {
     @Field("data.company_number")
     private String companyNumber;
 
+    @Field("data.customer_reference")
+    private String customerReference;
+
     @Field("data.description")
     private String description;
 
@@ -35,8 +38,8 @@ public class CertifiedCopies {
     @Field("data.description_values.company_number")
     private String descriptionCompanyNumber;
 
-    @Field("data.description_values.certified-copy")
-    private String descriptionCertifiedCopy;
+    @Field("data.description_values.missing-image-delivery")
+    private String descriptionMissingImageDelivery;
 
     @Field("data.etag")
     private String etag;
@@ -71,9 +74,6 @@ public class CertifiedCopies {
     @Field("basket")
     private Basket basket;
 
-    @Field("data.customer_reference")
-    private String customerReference;
-
     public String getId() {
         return id;
     }
@@ -98,10 +98,6 @@ public class CertifiedCopies {
         this.updatedAt = updatedAt;
     }
 
-    public String getDataId() {
-        return dataId;
-    }
-
     public void setDataId(String dataId) {
         this.dataId = dataId;
     }
@@ -120,6 +116,14 @@ public class CertifiedCopies {
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
+    }
+
+    public void setCustomerReference(String customerReference) {
+        this.customerReference = customerReference;
     }
 
     public String getDescription() {
@@ -146,12 +150,10 @@ public class CertifiedCopies {
         this.descriptionCompanyNumber = descriptionCompanyNumber;
     }
 
-    public String getDescriptionCertifiedCopy() {
-        return descriptionCertifiedCopy;
-    }
+    public String getDescriptionMissingImageDelivery() { return descriptionMissingImageDelivery; }
 
-    public void setDescriptionCertifiedCopy(String descriptionCertifiedCopy) {
-        this.descriptionCertifiedCopy = descriptionCertifiedCopy;
+    public void setDescriptionMissingImageDelivery(String descriptionMissingImageDelivery) {
+        this.descriptionMissingImageDelivery = descriptionMissingImageDelivery;
     }
 
     public List<ItemCosts> getItemCosts() { return itemCosts; }
@@ -234,13 +236,5 @@ public class CertifiedCopies {
 
     public void setBasket(Basket basket) {
         this.basket = basket;
-    }
-
-    public String getCustomerReference() {
-        return  customerReference;
-    }
-
-    public void setCustomerReference(String customerReference) {
-        this.customerReference = customerReference;
     }
 }

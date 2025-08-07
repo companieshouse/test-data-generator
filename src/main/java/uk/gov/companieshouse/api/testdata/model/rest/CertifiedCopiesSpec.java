@@ -12,6 +12,9 @@ public class CertifiedCopiesSpec {
     @JsonProperty("company_number")
     private String companyNumber;
 
+    @JsonProperty("customer_reference")
+    private String customerReference;
+
     @JsonProperty("item_costs")
     private List<ItemCostsSpec> itemCosts;
 
@@ -54,6 +57,14 @@ public class CertifiedCopiesSpec {
 
     public void setCompanyNumber(String companyNumber) {
         this.companyNumber = companyNumber;
+    }
+
+    public String getCustomerReference() {
+        return customerReference;
+    }
+
+    public void setCustomerReference(String customerReference){
+        this.customerReference = customerReference;
     }
 
     public List<ItemCostsSpec> getItemCosts() { return itemCosts; }

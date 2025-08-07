@@ -37,6 +37,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -191,6 +192,18 @@ public class TestDataController {
         return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
     }
 
+    @PostMapping("/missing-image-deliveries")
+    public ResponseEntity<CertificatesData> createMissingImageDeliveries(
+        @Valid @RequestBody MissingImageDeliveriesSpec request) throws DataException {
+
+        var createdMissingImageDeliveries = testDataService.createMissingImageDeliveriesData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("missing-image-deliveries-id", createdMissingImageDeliveries.getCertificates().getFirst().getId());
+        LOG.info("New missing image deliveries added", data);
+        return new ResponseEntity<>(createdMissingImageDeliveries, HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
                                                                 String acspMemberId)
@@ -241,6 +254,24 @@ public class TestDataController {
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Certified Copies Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/missing-image-deliveries/{id}")
+    public ResponseEntity<Map<String, Object>> deleteMissingImageDeliveries(@PathVariable("id")
+    String id)
+        throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        boolean deleteMissingImageDeliveries = testDataService.deleteMissingImageDeliveriesData(id);
+
+        if (deleteMissingImageDeliveries) {
+            LOG.info("Missing Image Deliveries is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Missing Image Deliveries Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

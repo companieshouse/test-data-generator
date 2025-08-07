@@ -42,6 +42,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
@@ -473,7 +474,6 @@ class TestDataControllerTest {
 
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
-        request.setDescriptionCertificate("incorporation");
 
         when(testDataService.createCertificatesData(request)).thenReturn(certificateData);
 
@@ -492,7 +492,6 @@ class TestDataControllerTest {
     void createCertificateException() throws Exception {
         CertificatesSpec request = new CertificatesSpec();
         request.setCompanyNumber("12345678");
-        request.setDescriptionCertificate("incorporation");
 
         DataException exception = new DataException("Error creating certificate");
         when(testDataService.createCertificatesData(request)).thenThrow(exception);
@@ -576,6 +575,45 @@ class TestDataControllerTest {
         when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
             testDataController.deleteCertifiedCopies(certifiedCopiesId));
+
+        assertEquals(exception.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void deleteMissingImageDeliveriesSuccess() throws Exception {
+        final String missingImageDeliveriesId = "MID-834723-192847";
+
+        when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+            = testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(testDataService).deleteMissingImageDeliveriesData(missingImageDeliveriesId);
+    }
+
+    @Test
+    void deleteMissingImageDeliveriesNotFound() throws Exception {
+        final String missingImageDeliveriesId = String.valueOf(1234);
+
+        when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenReturn(false);
+        ResponseEntity<Map<String, Object>>
+            response = testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        verify(testDataService).deleteMissingImageDeliveriesData(missingImageDeliveriesId);
+    }
+
+    @Test
+    void deleteMissingImageDeliveriesException() throws Exception {
+        final String missingImageDeliveriesId = "cert123";
+        DataException exception = new DataException("Failed to delete missing image deliveries");
+
+        when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenThrow(exception);
+        DataException thrown = assertThrows(DataException.class, () ->
+            testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId));
 
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
@@ -947,6 +985,37 @@ class TestDataControllerTest {
 
         DataException thrown = assertThrows(DataException.class, () ->
             testDataController.createCertifiedCopies(request));
+        assertEquals(exception.getMessage(), thrown.getMessage());
+    }
+
+    @Test
+    void createMissingImageDeliveriesSuccess() throws Exception {
+        CertificatesData certificateData = getCertificatesData();
+
+        MissingImageDeliveriesSpec request = new MissingImageDeliveriesSpec();
+        request.setCompanyNumber("12345678");
+
+        when(testDataService.createMissingImageDeliveriesData(request)).thenReturn(certificateData);
+
+        ResponseEntity<CertificatesData> response = testDataController.createMissingImageDeliveries(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
+
+        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
+        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
+    }
+
+    @Test
+    void createMissingImageDeliveriesException() throws Exception {
+        MissingImageDeliveriesSpec request = new MissingImageDeliveriesSpec();
+        request.setCompanyNumber("12345678");
+
+        DataException exception = new DataException("Error creating certificate");
+        when(testDataService.createMissingImageDeliveriesData(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+            testDataController.createMissingImageDeliveries(request));
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
 

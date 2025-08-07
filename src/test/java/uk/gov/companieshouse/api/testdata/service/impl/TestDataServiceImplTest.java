@@ -49,6 +49,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 
@@ -69,6 +70,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
@@ -120,6 +122,7 @@ class TestDataServiceImplTest {
     private static final String CONFIRMED_STATUS = "confirmed";
     private static final String ASSOCIATION_ID = "associationId";
     private static final String CERTIFIED_COPIES_ID = "CCD-123456-789012";
+    private static final String MISSING_IMAGE_DELIVERIES_ID = "MID-123456-789012";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -165,6 +168,8 @@ class TestDataServiceImplTest {
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Mock
     private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    @Mock
+    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
     @Mock
@@ -1591,6 +1596,90 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting certified copies", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(certifiedCopiesService, times(1)).delete(CERTIFIED_COPIES_ID);
+    }
+
+    @Test
+    void createMissingImageDeliveriesData() throws DataException {
+        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        spec.setUserId(USER_ID);
+
+        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+            "MID-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+            "MID-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+        );
+
+        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+
+        when(missingImageDeliveriesService.create(any(MissingImageDeliveriesSpec.class))).thenReturn(expectedCertificatesData);
+        CertificatesData result = testDataService.createMissingImageDeliveriesData(spec);
+
+        assertNotNull(result);
+        assertEquals(2, result.getCertificates().size());
+        assertEquals("MID-111111-222222", result.getCertificates().get(0).getId());
+        assertEquals("MID-333333-444444", result.getCertificates().get(1).getId());
+
+        verify(missingImageDeliveriesService).create(spec);
+    }
+
+    @Test
+    void createMissingImageDeliveriesDataNullUserId() {
+        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        DataException exception = assertThrows(DataException.class,
+            () -> testDataService.createMissingImageDeliveriesData(spec));
+        assertEquals("User ID is required to create missing image deliveries", exception.getMessage());
+    }
+
+    @Test
+    void createMissingImageDeliveriesDataException() throws DataException {
+        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        spec.setUserId(USER_ID);
+
+        when(missingImageDeliveriesService.create(any(MissingImageDeliveriesSpec.class)))
+            .thenThrow(new DataException("Error creating missing image deliveries"));
+        DataException exception = assertThrows(DataException.class,
+            () -> testDataService.createMissingImageDeliveriesData(spec));
+        assertEquals("Error creating missing image deliveries", exception.getMessage());
+    }
+
+    @Test
+    void deleteMissingImageDeliveriesData() throws DataException {
+        MissingImageDeliveries missingImageDeliveries = new MissingImageDeliveries();
+        missingImageDeliveries.setId(MISSING_IMAGE_DELIVERIES_ID);
+
+        when(missingImageDeliveriesService.delete(MISSING_IMAGE_DELIVERIES_ID)).thenReturn(true);
+        boolean result = testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID);
+
+        assertTrue(result);
+        verify(missingImageDeliveriesService).delete(MISSING_IMAGE_DELIVERIES_ID);
+    }
+
+    @Test
+    void deleteMissingImageDeliveriesDataFailure() {
+        when(missingImageDeliveriesService.delete(MISSING_IMAGE_DELIVERIES_ID)).thenReturn(false);
+        boolean result = false;
+        try {
+            result = testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID);
+        } catch (DataException e) {
+            throw new RuntimeException(e);
+        }
+
+        assertFalse(result);
+        verify(missingImageDeliveriesService, times(1)).delete(MISSING_IMAGE_DELIVERIES_ID);
+    }
+
+    @Test
+    void deleteMissingImageDeliveriesThrowsException() {
+        RuntimeException ex = new RuntimeException("error");
+        when(missingImageDeliveriesService.delete(MISSING_IMAGE_DELIVERIES_ID)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+            testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID));
+        assertEquals("Error deleting missing image deliveries", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(missingImageDeliveriesService, times(1)).delete(MISSING_IMAGE_DELIVERIES_ID);
     }
 
     @Test

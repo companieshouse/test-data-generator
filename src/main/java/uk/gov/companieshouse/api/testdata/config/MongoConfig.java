@@ -23,6 +23,8 @@ import uk.gov.companieshouse.api.testdata.repository.*;
 public class MongoConfig {
 
     private static final String ACCOUNT_DATABASE = "account";
+    private static final String ITEMS_DATABASE = "items";
+
     private final MongoProperties mongoProperties;
 
     public MongoConfig(MongoProperties mongoProperties) {
@@ -119,12 +121,17 @@ public class MongoConfig {
 
     @Bean
     public CertificatesRepository certificatesRepository() {
-        return getMongoRepositoryBean(CertificatesRepository.class, "items");
+        return getMongoRepositoryBean(CertificatesRepository.class, ITEMS_DATABASE);
     }
 
     @Bean
     public CertifiedCopiesRepository certifiedCopiesRepository() {
-        return getMongoRepositoryBean(CertifiedCopiesRepository.class, "items");
+        return getMongoRepositoryBean(CertifiedCopiesRepository.class, ITEMS_DATABASE);
+    }
+
+    @Bean
+    public MissingImageDeliveriesRepository missingImageDeliveriesRepository() {
+        return getMongoRepositoryBean(MissingImageDeliveriesRepository.class, ITEMS_DATABASE);
     }
 
     @Bean

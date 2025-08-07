@@ -5,13 +5,17 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
+import uk.gov.companieshouse.api.testdata.model.entity.DirectorDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
+import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddressDetails;
+import uk.gov.companieshouse.api.testdata.model.entity.SecretaryDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
@@ -70,10 +74,24 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     private Certificates getCertificates(CertificatesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
         itemOptions.setCertificateType(optionsSpec.getCertificateType());
-        itemOptions.setDeliveryTimescale(optionsSpec.getDeliveryTimescale());
-        itemOptions.setIncludeEmailCopy(optionsSpec.getIncludeEmailCopy());
-        itemOptions.setCompanyType(optionsSpec.getCompanyType());
-        itemOptions.setCompanyStatus(optionsSpec.getCompanyStatus());
+        Optional.ofNullable(optionsSpec.getCompanyStatus()).ifPresent(itemOptions::setCompanyStatus);
+        Optional.ofNullable(optionsSpec.getCompanyType()).ifPresent(itemOptions::setCompanyType);
+        Optional.ofNullable(optionsSpec.getDeliveryMethod()).ifPresent(itemOptions::setDeliveryMethod);
+        Optional.ofNullable(optionsSpec.getDeliveryTimescale()).ifPresent(itemOptions::setDeliveryTimescale);
+        if (optionsSpec.getDirectorDetails() != null) {
+            itemOptions.setDirectorDetails(buildDirectorDetails(optionsSpec));
+        }
+        Optional.ofNullable(optionsSpec.getForeName()).ifPresent(itemOptions::setForeName);
+        Optional.ofNullable(optionsSpec.getIncludeCompanyObjectsInformation()).ifPresent(itemOptions::setIncludeCompanyObjectsInformation);
+        Optional.ofNullable(optionsSpec.getIncludeEmailCopy()).ifPresent(itemOptions::setIncludeEmailCopy);
+        Optional.ofNullable(optionsSpec.getIncludeGoodStandingInformation()).ifPresent(itemOptions::setIncludeGoodStandingInformation);
+        if (optionsSpec.getRegisteredOfficeAddressDetails() != null) {
+            itemOptions.setRegisteredOfficeAddressDetails(buildRegisteredOfficeAddressDetails(optionsSpec));
+        }
+        if (optionsSpec.getSecretaryDetails() != null) {
+            itemOptions.setSecretaryDetails(buildSecretaryDetails(optionsSpec));
+        }
+        Optional.ofNullable(optionsSpec.getSurName()).ifPresent(itemOptions::setSurName);
 
         var certificates = new Certificates();
         var currentDate = getCurrentDateTime().toString();
@@ -84,10 +102,10 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         certificates.setDataId(randomId);
         certificates.setCompanyName(spec.getCompanyName());
         certificates.setCompanyNumber(spec.getCompanyNumber());
-        certificates.setDescription(spec.getDescription());
+        certificates.setDescription("certificate for company " + spec.getCompanyNumber());
         certificates.setDescriptionIdentifier(spec.getDescriptionIdentifier());
-        certificates.setDescriptionCompanyNumber(spec.getDescriptionCompanyNumber());
-        certificates.setDescriptionCertificate(spec.getDescriptionCertificate());
+        certificates.setDescriptionCompanyNumber(spec.getCompanyNumber());
+        certificates.setDescriptionCertificate("certificate for company " + spec.getCompanyNumber());
         certificates.setItemOptions(itemOptions);
         certificates.setEtag(randomService.getEtag());
         certificates.setKind(spec.getKind());
@@ -98,6 +116,47 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
 
         return certificates;
     }
+
+    private DirectorDetails buildDirectorDetails(ItemOptionsSpec optionsSpec) {
+        var details = new DirectorDetails();
+        var director = optionsSpec.getDirectorDetails();
+
+        Optional.ofNullable(director.getIncludeAddress()).ifPresent(details::setIncludeAddress);
+        Optional.ofNullable(director.getIncludeAppointmentDate()).ifPresent(details::setIncludeAppointmentDate);
+        Optional.ofNullable(director.getIncludeBasicInformation()).ifPresent(details::setIncludeBasicInformation);
+        Optional.ofNullable(director.getIncludeCountryOfResidence()).ifPresent(details::setIncludeCountryOfResidence);
+        Optional.ofNullable(director.getIncludeDobType()).ifPresent(details::setIncludeDobType);
+        Optional.ofNullable(director.getIncludeNationality()).ifPresent(details::setIncludeNationality);
+        Optional.ofNullable(director.getIncludeOccupation()).ifPresent(details::setIncludeOccupation);
+
+        return details;
+    }
+
+    private SecretaryDetails buildSecretaryDetails(ItemOptionsSpec optionsSpec) {
+        var details = new SecretaryDetails();
+        var secretary = optionsSpec.getSecretaryDetails();
+
+        Optional.ofNullable(secretary.getIncludeAddress()).ifPresent(details::setIncludeAddress);
+        Optional.ofNullable(secretary.getIncludeAppointmentDate()).ifPresent(details::setIncludeAppointmentDate);
+        Optional.ofNullable(secretary.getIncludeBasicInformation()).ifPresent(details::setIncludeBasicInformation);
+        Optional.ofNullable(secretary.getIncludeCountryOfResidence()).ifPresent(details::setIncludeCountryOfResidence);
+        Optional.ofNullable(secretary.getIncludeDobType()).ifPresent(details::setIncludeDobType);
+        Optional.ofNullable(secretary.getIncludeNationality()).ifPresent(details::setIncludeNationality);
+        Optional.ofNullable(secretary.getIncludeOccupation()).ifPresent(details::setIncludeOccupation);
+
+        return details;
+    }
+
+    private RegisteredOfficeAddressDetails buildRegisteredOfficeAddressDetails(ItemOptionsSpec optionsSpec) {
+        var details = new RegisteredOfficeAddressDetails();
+        var address = optionsSpec.getRegisteredOfficeAddressDetails();
+
+        Optional.ofNullable(address.getIncludeAddressRecordsType()).ifPresent(details::setIncludeAddressRecordsType);
+        Optional.ofNullable(address.getIncludeDates()).ifPresent(details::setIncludeDates);
+
+        return details;
+    }
+
 
     Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
         var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
