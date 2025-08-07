@@ -26,9 +26,13 @@ import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepos
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class MissingImageDeliveriesImpl implements DataService<CertificatesData, MissingImageDeliveriesSpec> {
+    private static final Logger LOG =
+        LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
     @Autowired
     public MissingImageDeliveriesRepository missingImageDeliveriesRepository;
@@ -47,23 +51,23 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
 
     @Override
     public CertificatesData create(MissingImageDeliveriesSpec spec) throws DataException {
-        List<ItemOptionsSpec> optionsList = spec.getItemOptions();
-        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
-        List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
+        final List<ItemOptionsSpec> optionsList = spec.getItemOptions();
+        final List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
+        final List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
 
         for (ItemOptionsSpec optionSpec : optionsList) {
-            Long firstPart = randomService.getNumber(6);
-            Long secondPart = randomService.getNumber(6);
-            var randomId = "MID-" + firstPart + "-" + secondPart;
-            var missingImageDeliveries = getMissingImageDeliveries(spec, optionSpec, randomId);
+            final Long firstPart = randomService.getNumber(6);
+            final Long secondPart = randomService.getNumber(6);
+            final var randomId = "MID-" + firstPart + "-" + secondPart;
+            final var missingImageDeliveries = getMissingImageDeliveries(spec, optionSpec, randomId);
             missingImageDeliveriesRepository.save(missingImageDeliveries);
-            var now = getCurrentDateTime().toString();
+            final var now = getCurrentDateTime().toString();
             certificateEntries.add(new CertificatesData.CertificateEntry(
                 missingImageDeliveries.getId(), now, now
             ));
 
             // Add to basket items
-            var item = new Basket.Item();
+            final var item = new Basket.Item();
             item.setItemUri(missingImageDeliveries.getLinksSelf());
             basketItems.add(item);
         }
@@ -181,8 +185,11 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
 
     @Override
     public boolean delete(String certificateId) {
+        LOG.info("Attempting to delete Missing Image Deliveries : " + certificateId);
         var missingImageDeliveries = missingImageDeliveriesRepository.findById(certificateId);
         if (missingImageDeliveries.isPresent()) {
+            LOG.info("Missing Image Deliveries found for id: "
+                + certificateId + ". Proceeding with deletion.");
             var userId = missingImageDeliveries.get().getUserId();
             var basket = basketRepository.findById(userId);
 
@@ -191,8 +198,10 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
             }
 
             missingImageDeliveriesRepository.delete(missingImageDeliveries.get());
+            LOG.info("Successfully deleted Missing Image Deliveries : " + certificateId);
             return true;
         }
+        LOG.info("No Missing Image Deliveries found for id: " + certificateId);
         return false;
     }
 

@@ -23,8 +23,9 @@ import uk.gov.companieshouse.api.testdata.repository.*;
 public class MongoConfig {
 
     private static final String ACCOUNT_DATABASE = "account";
-    private final MongoProperties mongoProperties;
     private static final String ITEMS_DATABASE = "items";
+
+    private final MongoProperties mongoProperties;
 
     public MongoConfig(MongoProperties mongoProperties) {
         super();
