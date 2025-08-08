@@ -157,11 +157,28 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return details;
     }
 
-
     Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
-        var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
         Instant now = getCurrentDateTime();
+        var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
 
+        // Check if basket already exists for the user
+        Optional<Basket> existingBasketOpt = basketRepository.findById(spec.getUserId());
+
+        if (existingBasketOpt.isPresent()) {
+            var existingBasket = existingBasketOpt.get();
+            // Add new items to existing basket
+            List<Basket.Item> existingItems = existingBasket.getItems();
+            if (existingItems == null) {
+                existingItems = new ArrayList<>();
+                existingBasket.setItems(existingItems);
+            }
+            existingItems.addAll(items);
+
+            existingBasket.setUpdatedAt(now);
+            return existingBasket; // Will be saved by caller
+        }
+
+        // Create new basket if it does not exist
         var basket = new Basket();
         basket.setId(spec.getUserId());
         basket.setCreatedAt(now);
