@@ -165,7 +165,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         Optional<Basket> existingBasketOpt = basketRepository.findById(spec.getUserId());
 
         if (existingBasketOpt.isPresent()) {
-            Basket existingBasket = existingBasketOpt.get();
+            var existingBasket = existingBasketOpt.get();
             // Add new items to existing basket
             List<Basket.Item> existingItems = existingBasket.getItems();
             if (existingItems == null) {

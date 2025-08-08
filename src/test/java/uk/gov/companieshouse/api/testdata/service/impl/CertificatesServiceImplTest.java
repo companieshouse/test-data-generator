@@ -333,6 +333,32 @@ class CertificatesServiceImplTest {
     }
 
     @Test
+    void createBasketShouldInitializeItemsWhenNull() {
+        var spec = new CertificatesSpec();
+        spec.setUserId("user-456");
+        var basketSpec = new BasketSpec();
+        basketSpec.setForename("John");
+        basketSpec.setSurname("Doe");
+        basketSpec.setEnrolled(true);
+        spec.setBasketSpec(basketSpec);
+
+        var existingBasket = new Basket();
+        existingBasket.setId("user-456");
+        existingBasket.setItems(null); // <--- triggers the null branch
+
+        when(basketRepository.findById("user-456")).thenReturn(Optional.of(existingBasket));
+
+        var itemsToAdd = List.of(new Basket.Item());
+
+        service.createBasket(spec, itemsToAdd);
+
+        assertNotNull(existingBasket.getItems(), "Items list should have been initialized");
+        assertEquals(1, existingBasket.getItems().size(), "Items list should contain the new item");
+        assertTrue(existingBasket.getItems().containsAll(itemsToAdd));
+    }
+
+
+    @Test
     void createMultipleCertificatesFromMultipleItemOptions() throws DataException {
         when(randomService.getNumber(6))
             .thenReturn(699255L, 990509L, 582923L, 900231L);
