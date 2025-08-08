@@ -151,7 +151,9 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         accountPenalties.setCompanyCode(penaltySpec.getCompanyCode());
         accountPenalties.setCustomerCode(penaltySpec.getCustomerCode());
         accountPenalties.setCreatedAt(Instant.now());
-        accountPenalties.setClosedAt(Instant.now());
+
+        boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
+        accountPenalties.setClosedAt(isPaid ? Instant.now() : null);
 
         accountPenalties.setPenalties(createPenaltiesList(penaltySpec));
 
@@ -162,7 +164,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         }
     }
 
-    private List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) {
+     List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) {
         int numberOfPenalties = Optional.ofNullable(penaltySpec.getNumberOfPenalties()).orElse(1);
         double baseAmount = Optional.ofNullable(penaltySpec.getAmount()).orElse(375.0);
         boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
@@ -172,19 +174,22 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         for (var i = 0; i < numberOfPenalties; i++) {
             var penalty = new AccountPenalty();
 
-            // Set common penalty properties
-            penalty.setCompanyCode(getDefaultIfBlank(penaltySpec.getCompanyCode(), "LP"));
+            String companyCode = getDefaultIfBlank(penaltySpec.getCompanyCode(), "LP");
+            String transactionSubType = getDefaultIfBlank(
+                    penaltySpec.getTransactionSubType(), "NH");
+
+            penalty.setCompanyCode(companyCode);
             penalty.setCustomerCode(penaltySpec.getCustomerCode());
             penalty.setLedgerCode(getDefaultIfBlank(penaltySpec.getLedgerCode(), "SC"));
-            penalty.setTransactionReference(generateTransactionReference());
+            penalty.setTransactionReference(generateTransactionReference(
+                    companyCode, transactionSubType));
             penalty.setTransactionDate(getFormattedDate(1));
             penalty.setMadeUpDate(getFormattedDate(2));
             penalty.setAmount(calculatePenaltyAmount(baseAmount, i));
             penalty.setIsPaid(isPaid);
             penalty.setOutstandingAmount(isPaid ? 0.0 : penalty.getAmount());
             penalty.setTransactionType(getDefaultIfNull(penaltySpec.getTransactionType(), "1"));
-            penalty.setTransactionSubType(getDefaultIfBlank(
-                    penaltySpec.getTransactionSubType(), "NH"));
+            penalty.setTransactionSubType(transactionSubType);
             penalty.setTypeDescription(getDefaultIfBlank(
                     penaltySpec.getTypeDescription(), "Penalty"));
             penalty.setDueDate(getFormattedDate(0, 6));
@@ -252,9 +257,21 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return penaltyData;
     }
 
-    private String generateTransactionReference() {
+    private String generateTransactionReference(String companyCode, String transactionSubType) {
         var secureRandom = new SecureRandom();
-        return "A" + String.format("%07d", secureRandom.nextInt(10000000));
+        var prefix = "A";
+
+        if ("LP".equals(companyCode)) {
+            prefix = "A";
+        } else if ("C1".equals(companyCode)) {
+            if ("S1".equals(transactionSubType)) {
+                prefix = "P";
+            } else if ("A2".equals(transactionSubType)) {
+                prefix = "U";
+            }
+        }
+
+        return prefix + String.format("%07d", secureRandom.nextInt(10000000));
     }
 
     private String getFormattedDate(int yearsAgo) {
