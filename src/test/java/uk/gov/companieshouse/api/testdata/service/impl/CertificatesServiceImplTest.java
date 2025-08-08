@@ -10,8 +10,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -237,7 +239,6 @@ class CertificatesServiceImplTest {
         assertEquals(expected.getIncludeDates(), actual.getIncludeDates());
     }
 
-
     @Test
     void createCertificatesWithBasket() throws DataException {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
@@ -297,6 +298,38 @@ class CertificatesServiceImplTest {
         assertEquals(basketSpec.getForename(), capturedBasket.getForename());  // Now should pass
         assertEquals(basketSpec.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
+    }
+
+    @Test
+    void createBasketWhenBasketAlreadyExists() throws DataException {
+        var existingBasket = new Basket();
+        existingBasket.setId("user-123");
+        existingBasket.setItems(new ArrayList<>(List.of(new Basket.Item())));
+
+        when(basketRepository.findById("user-123")).thenReturn(Optional.of(existingBasket));
+        when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
+        when(randomService.getEtag()).thenReturn("etag123");
+
+        var itemOptions = new ItemOptionsSpec();
+        itemOptions.setCertificateType("incorporation");
+        var spec = new CertificatesSpec();
+        spec.setUserId("user-123");
+        spec.setCompanyName("Test Company");
+        spec.setCompanyNumber("12345678");
+        spec.setKind("item#certificate");
+        spec.setQuantity(1);
+        spec.setPostalDelivery(true);
+        spec.setItemOptions(List.of(itemOptions));
+        spec.setBasketSpec(new BasketSpec());
+
+        CertificatesData result = service.create(spec);
+
+        ArgumentCaptor<Basket> basketCaptor = ArgumentCaptor.forClass(Basket.class);
+        verify(basketRepository).save(basketCaptor.capture());
+
+        Basket savedBasket = basketCaptor.getValue();
+        assertEquals(2, savedBasket.getItems().size());
+        assertEquals(1, result.getCertificates().size());
     }
 
     @Test
