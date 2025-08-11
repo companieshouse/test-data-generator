@@ -484,4 +484,16 @@ class CertificatesServiceImplTest {
         verify(repository).delete(certificates);
         verify(basketRepository).delete(basket);
     }
+
+    @Test
+    void deleteBasket_shouldDeleteWhenIdIsNotNull() {
+        String certificateId = "CRT-123456-789012";
+        Basket basket = new Basket();
+        basket.setId(certificateId);
+        when(basketRepository.findById(certificateId)).thenReturn(Optional.of(basket));
+
+        service.deleteBasket(certificateId);
+
+        verify(basketRepository, times(1)).delete(basket);
+    }
 }
