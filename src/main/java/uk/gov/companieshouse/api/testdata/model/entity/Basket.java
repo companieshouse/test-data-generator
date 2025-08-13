@@ -91,6 +91,10 @@ public class Basket {
         return surname;
     }
 
+    public List<Item> getItems() {
+        return items;
+    }
+
     public static class Item {
         @Field("item_uri")
         private String itemUri;
