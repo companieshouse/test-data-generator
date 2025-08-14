@@ -6,6 +6,8 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
@@ -271,4 +273,15 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
+
+    AdminPermissionsData createAdminPermissionsData(AdminPermissionsSpec spec) throws DataException;
+
+    /**
+     * Deletes admin permissions data by its ID.
+     *
+     * @param id the ID of the admin permissions to delete
+     * @return true if the admin permissions were deleted, false otherwise
+     * @throws DataException if there is an error during deletion
+     */
+    boolean deleteAdminPermissionsData(String id) throws DataException;
 }

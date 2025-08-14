@@ -31,6 +31,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
@@ -150,6 +152,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<UserCompanyAssociationData,
             UserCompanyAssociationSpec> userCompanyAssociationService;
+    @Autowired
+    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -816,6 +820,20 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.error("Failed to create Transaction for User Id: "
                     + transactionsSpec.getUserId());
             throw new DataException("Error creating transaction", ex);
+        }
+    }
+
+    @Override
+    public AdminPermissionsData createAdminPermissionsData(AdminPermissionsSpec spec) throws DataException {
+        return adminPermissionsService.create(spec);
+    }
+
+@Override
+    public boolean deleteAdminPermissionsData(String id) throws DataException {
+        try {
+            return adminPermissionsService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting admin permissions", ex);
         }
     }
 

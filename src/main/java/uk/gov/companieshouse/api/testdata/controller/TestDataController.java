@@ -119,15 +119,34 @@ public class TestDataController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @PostMapping("/user/admin-permissions")
-    public ResponseEntity<AdminPermissionsData> createUserWithAdminPermissions(@Valid @RequestBody() AdminPermissionsSpec request)
-            throws DataException {
-        var createdUser = testDataService.createAdminPermissions(request);
+    @PostMapping("/admin-permissions")
+    public ResponseEntity<AdminPermissionsData> createAdminPermissions(
+            @Valid @RequestBody AdminPermissionsSpec request) throws DataException {
+
+        var createdAdminPermissions = testDataService.createAdminPermissionsData(request);
+
         Map<String, Object> data = new HashMap<>();
-        data.put("user email", createdUser.getEmail());
-        data.put("user id", createdUser.getId());
-        LOG.info("New user with admin permissions created", data);
-        return new ResponseEntity<>(createdAdminPermission, HttpStatus.CREATED);
+        data.put("admin-permissions-id", createdAdminPermissions.getId());
+        data.put("group-name", createdAdminPermissions.getGroupName());
+        LOG.info("New admin permissions created", data);
+        return new ResponseEntity<>(createdAdminPermissions, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/admin-permissions/{id}")
+    public ResponseEntity<Map<String, Object>> deleteAdminPermissions(@PathVariable("id") String id)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("admin-permissions-id", id);
+        boolean deleted = testDataService.deleteAdminPermissionsData(id);
+
+        if (deleted) {
+            LOG.info("Admin permissions deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Admin permissions not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 
     @DeleteMapping("/user/{userId}")
