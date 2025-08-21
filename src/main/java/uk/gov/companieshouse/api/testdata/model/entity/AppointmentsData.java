@@ -78,8 +78,6 @@ public class AppointmentsData {
     @Field("updated.at")
     private Instant updated;
 
-    // Getters and setters for all fields
-
     public String getId() {
         return id;
     }
@@ -96,40 +94,20 @@ public class AppointmentsData {
         this.created = created;
     }
 
-    public String getInternalId() {
-        return internalId;
-    }
-
     public void setInternalId(String internalId) {
         this.internalId = internalId;
-    }
-
-    public String getAppointmentId() {
-        return appointmentId;
     }
 
     public void setAppointmentId(String appointmentId) {
         this.appointmentId = appointmentId;
     }
 
-    public String getNationality() {
-        return nationality;
-    }
-
     public void setNationality(String nationality) {
         this.nationality = nationality;
     }
 
-    public String getOccupation() {
-        return occupation;
-    }
-
     public void setOccupation(String occupation) {
         this.occupation = occupation;
-    }
-
-    public boolean isServiceAddressIsSameAsRegisteredOfficeAddress() {
-        return serviceAddressIsSameAsRegisteredOfficeAddress;
     }
 
     public void setServiceAddressIsSameAsRegisteredOfficeAddress(boolean value) {
@@ -160,16 +138,8 @@ public class AppointmentsData {
         this.forename = forename;
     }
 
-    public Instant getAppointedOn() {
-        return appointedOn;
-    }
-
     public void setAppointedOn(Instant appointedOn) {
         this.appointedOn = appointedOn;
-    }
-
-    public String getOfficerRole() {
-        return officerRole;
     }
 
     public void setOfficerRole(String officerRole) {
@@ -184,16 +154,8 @@ public class AppointmentsData {
         this.etag = etag;
     }
 
-    public Address getServiceAddress() {
-        return serviceAddress;
-    }
-
     public void setServiceAddress(Address serviceAddress) {
         this.serviceAddress = serviceAddress;
-    }
-
-    public String getDataCompanyNumber() {
-        return dataCompanyNumber;
     }
 
     public void setDataCompanyNumber(String dataCompanyNumber) {
@@ -216,10 +178,6 @@ public class AppointmentsData {
         this.surname = surname;
     }
 
-    public Instant getDateOfBirth() {
-        return dateOfBirth;
-    }
-
     public void setDateOfBirth(Instant dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
@@ -238,10 +196,6 @@ public class AppointmentsData {
 
     public void setCompanyStatus(String companyStatus) {
         this.companyStatus = companyStatus;
-    }
-
-    public String getOfficerId() {
-        return officerId;
     }
 
     public void setOfficerId(String officerId) {
@@ -278,52 +232,12 @@ public class AppointmentsData {
         @Field("premises")
         private String premises;
 
-        public String getAddressLine1() {
-            return addressLine1;
-        }
-
-        public void setAddressLine1(String addressLine1) {
-            this.addressLine1 = addressLine1;
-        }
-
         public String getCountry() {
             return country;
         }
 
         public void setCountry(String country) {
             this.country = country;
-        }
-
-        public String getPostalCode() {
-            return postalCode;
-        }
-
-        public void setPostalCode(String postalCode) {
-            this.postalCode = postalCode;
-        }
-
-        public String getLocality() {
-            return locality;
-        }
-
-        public void setLocality(String locality) {
-            this.locality = locality;
-        }
-
-        public String getRegion() {
-            return region;
-        }
-
-        public void setRegion(String region) {
-            this.region = region;
-        }
-
-        public String getPremises() {
-            return premises;
-        }
-
-        public void setPremises(String premises) {
-            this.premises = premises;
         }
     }
 
@@ -333,16 +247,8 @@ public class AppointmentsData {
         @Field("self")
         private String self;
 
-        public OfficerLinks getOfficer() {
-            return officer;
-        }
-
         public void setOfficer(OfficerLinks officer) {
             this.officer = officer;
-        }
-
-        public String getSelf() {
-            return self;
         }
 
         public void setSelf(String self) {
@@ -356,16 +262,8 @@ public class AppointmentsData {
         @Field("self")
         private String self;
 
-        public String getAppointments() {
-            return appointments;
-        }
-
         public void setAppointments(String appointments) {
             this.appointments = appointments;
-        }
-
-        public String getSelf() {
-            return self;
         }
 
         public void setSelf(String self) {
