@@ -81,7 +81,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
 
         List<String> appointmentIds = new ArrayList<>();
-        for (int i = 0; i < numberOfAppointments; i++) {
+        for (var i = 0; i < numberOfAppointments; i++) {
             appointmentIds.add(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         }
 
@@ -97,7 +97,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
             String currentRole = currentRoleEnum.getValue();
             validateOfficerRole(currentRole);
 
-            String roleName = setRoleName(currentRole);
             LOG.debug("Processing appointment {} with role: " + (i + 1) + currentRole);
 
             String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
@@ -112,9 +111,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
             Instant dateTimeNow = Instant.now();
             var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
+            String roleName = setRoleName(currentRole);
             var appointment = createBaseAppointment(
-                    spec, companyNumber, countryOfResidence, currentRole,
-                    roleName, internalId, officerId, dateTimeNow, today, appointmentId);
+                    spec, companyNumber, countryOfResidence, internalId,
+                    officerId, dateTimeNow, today, appointmentId);
             appointment.setForename(FORENAME + (i + 1));
             appointment.setSurname(roleName);
             appointment.setOccupation(roleName);
@@ -140,10 +140,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
             var dataLinks = new AppointmentsData.Links();
             var dataOfficerLinks = new AppointmentsData.OfficerLinks();
-            dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + "/appointments");
+            dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
             dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
             dataLinks.setOfficer(dataOfficerLinks);
-            dataLinks.setSelf("/company/"
+            dataLinks.setSelf(COMPANY_LINK
                     + spec.getCompanyNumber() + "/appointments/" + appointmentId);
             appointmentsData.setLinks(dataLinks);
 
@@ -205,7 +205,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private Appointment createBaseAppointment(
             CompanySpec spec, String companyNumber, String countryOfResidence,
-                                              String currentRole, String roleName,
             String internalId, String officerId,
             Instant dateTimeNow, Instant appointedOn, String appointmentId) {
         var appointment = new Appointment();
