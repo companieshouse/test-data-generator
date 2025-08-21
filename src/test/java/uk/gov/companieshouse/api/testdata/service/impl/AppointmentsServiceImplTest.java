@@ -87,7 +87,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointmentsWithMatchingIds(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -141,7 +141,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
 
-        appointmentsService.createAppointmentsWithMatchingIds(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -183,7 +183,7 @@ class AppointmentsServiceImplTest {
         spec.setOfficerRoles(Collections.singletonList(invalidRole));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentsService.createAppointmentsWithMatchingIds(spec);
+            appointmentsService.createAppointment(spec);
         });
         assertEquals("Invalid officer role: invalid_role", exception.getMessage());
     }
@@ -209,7 +209,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Fix
 
-        appointmentsService.createAppointmentsWithMatchingIds(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
     }
@@ -236,7 +236,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
 
-        appointmentsService.createAppointmentsWithMatchingIds(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(3)).save(any(Appointment.class));
     }

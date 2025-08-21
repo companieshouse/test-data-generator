@@ -250,7 +250,7 @@ class TestDataServiceImplTest {
         assertEquals(expectedJurisdiction, capturedSpec.getJurisdiction());
         verify(filingHistoryService, times(1)).create(capturedSpec);
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
-        verify(appointmentService, times(1)).createAppointmentsWithMatchingIds(capturedSpec);
+        verify(appointmentService, times(1)).createAppointment(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscsService, times(1)).create(capturedSpec);
@@ -407,7 +407,7 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.ENGLAND_WALES, capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber,
                 Jurisdiction.ENGLAND_WALES);
-        verify(appointmentService, times(1)).createAppointmentsWithMatchingIds(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -433,7 +433,7 @@ class TestDataServiceImplTest {
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 Jurisdiction.SCOTLAND);
-        verify(appointmentService, times(1)).createAppointmentsWithMatchingIds(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -477,7 +477,7 @@ class TestDataServiceImplTest {
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).createAppointmentsWithMatchingIds(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verifyDeleteCompanyData(fullCompanyNumber);
     }
@@ -500,7 +500,7 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.UNITED_KINGDOM, capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).createAppointmentsWithMatchingIds(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(companyPscStatementService).createPscStatements(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verify(companyPscsService).create(capturedSpec);

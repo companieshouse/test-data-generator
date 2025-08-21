@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
@@ -58,7 +59,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Autowired
     private OfficerRepository officerRepository;
 
-    public void createAppointmentsWithMatchingIds(CompanySpec spec) {
+    public void createAppointment(CompanySpec spec) {
         LOG.info("Starting creation of appointments with matching IDs for company number: "
                 + spec.getCompanyNumber());
 
@@ -112,9 +113,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
             String roleName = setRoleName(currentRole);
-            var appointment = createBaseAppointment(
-                    spec, companyNumber, countryOfResidence, internalId,
-                    officerId, dateTimeNow, today, appointmentId);
+            var request = new AppointmentCreationRequest(spec, companyNumber,
+                    countryOfResidence, internalId, officerId, dateTimeNow, today, appointmentId);
+            var appointment = createBaseAppointment(request);
             appointment.setForename(FORENAME + (i + 1));
             appointment.setSurname(roleName);
             appointment.setOccupation(roleName);
@@ -203,30 +204,27 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return false;
     }
 
-    private Appointment createBaseAppointment(
-            CompanySpec spec, String companyNumber, String countryOfResidence,
-            String internalId, String officerId,
-            Instant dateTimeNow, Instant appointedOn, String appointmentId) {
+    private Appointment createBaseAppointment(AppointmentCreationRequest request) {
         var appointment = new Appointment();
 
-        appointment.setId(appointmentId);
-        appointment.setCreated(dateTimeNow);
-        appointment.setInternalId(internalId);
-        appointment.setAppointmentId(appointmentId);
+        appointment.setId(request.getAppointmentId());
+        appointment.setCreated(request.getDateTimeNow());
+        appointment.setInternalId(request.getInternalId());
+        appointment.setAppointmentId(request.getAppointmentId());
         appointment.setNationality(NATIONALITY);
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-        appointment.setCountryOfResidence(countryOfResidence);
-        appointment.setUpdatedAt(dateTimeNow);
-        appointment.setAppointedOn(appointedOn);
+        appointment.setCountryOfResidence(request.getCountryOfResidence());
+        appointment.setUpdatedAt(request.getDateTimeNow());
+        appointment.setAppointedOn(request.getAppointedOn());
         appointment.setEtag(randomService.getEtag());
-        appointment.setServiceAddress(addressService.getAddress(spec.getJurisdiction()));
-        appointment.setDataCompanyNumber(companyNumber);
+        appointment.setServiceAddress(addressService.getAddress(request.getSpec().getJurisdiction()));
+        appointment.setDataCompanyNumber(request.getCompanyNumber());
         appointment.setDateOfBirth(DOB_INSTANT);
-        appointment.setCompanyName("Company " + companyNumber);
+        appointment.setCompanyName("Company " + request.getCompanyNumber());
         appointment.setCompanyStatus(COMPANY_STATUS);
-        appointment.setOfficerId(officerId);
-        appointment.setCompanyNumber(companyNumber);
-        appointment.setUpdated(dateTimeNow);
+        appointment.setOfficerId(request.getOfficerId());
+        appointment.setCompanyNumber(request.getCompanyNumber());
+        appointment.setUpdated(request.getDateTimeNow());
 
         return appointment;
     }

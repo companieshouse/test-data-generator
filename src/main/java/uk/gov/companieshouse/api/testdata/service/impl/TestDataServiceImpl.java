@@ -17,7 +17,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -186,7 +185,7 @@ public class TestDataServiceImpl implements TestDataService {
             filingHistoryService.create(spec);
             LOG.info("Successfully created filing history");
 
-            appointmentService.createAppointmentsWithMatchingIds(spec);
+            appointmentService.createAppointment(spec);
             LOG.info("Successfully created appointments ");
 
             var authCode = companyAuthCodeService.create(spec);
