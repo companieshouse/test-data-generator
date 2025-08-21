@@ -49,7 +49,6 @@ public class MongoConfig {
 
     private static final String ACCOUNT_DATABASE = "account";
     private static final String ITEMS_DATABASE = "items";
-    private static final String APPOINTMENTS_DATABASE = "appointments";
 
     private final MongoProperties mongoProperties;
 

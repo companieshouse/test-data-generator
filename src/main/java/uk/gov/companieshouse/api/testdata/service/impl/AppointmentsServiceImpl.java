@@ -88,7 +88,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         List<Appointment> createdAppointments = new ArrayList<>();
         List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
 
-        for (int i = 0; i < numberOfAppointments; i++) {
+        for (var i = 0; i < numberOfAppointments; i++) {
             OfficerRoles currentRoleEnum = officerRoleList.get(i);
             if (currentRoleEnum == null) {
                 LOG.error("Invalid officer role: null at index " + i);
@@ -112,7 +112,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             Instant dateTimeNow = Instant.now();
             var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-            Appointment appointment = createBaseAppointment(
+            var appointment = createBaseAppointment(
                     spec, companyNumber, countryOfResidence, currentRole,
                     roleName, internalId, officerId, dateTimeNow, today, appointmentId);
             appointment.setForename(FORENAME + (i + 1));
@@ -120,7 +120,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setOccupation(roleName);
             appointment.setOfficerRole(currentRole);
 
-            Links links = createAppointmentLinks(companyNumber, officerId, appointmentId);
+            var links = createAppointmentLinks(companyNumber, officerId, appointmentId);
             appointment.setLinks(links);
 
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
@@ -131,23 +131,23 @@ public class AppointmentsServiceImpl implements AppointmentService {
             createdAppointments.add(savedAppointment);
 
             // Create AppointmentsData with same appointmentId
-            AppointmentsData appointmentsData = createBaseAppointmentsData(
+            var appointmentsData = createBaseAppointmentsData(
                     spec, internalId, officerId, dateTimeNow, appointmentId);
             appointmentsData.setForename(FORENAME + (i + 1));
             appointmentsData.setSurname(roleName);
             appointmentsData.setOccupation(roleName);
             appointmentsData.setOfficerRole(currentRole);
 
-            AppointmentsData.Links dataLinks = new AppointmentsData.Links();
-            AppointmentsData.OfficerLinks dataOfficerLinks = new AppointmentsData.OfficerLinks();
-            dataOfficerLinks.setAppointments("/officers/" + officerId + "/appointments");
-            dataOfficerLinks.setSelf("/officers/" + officerId);
+            var dataLinks = new AppointmentsData.Links();
+            var dataOfficerLinks = new AppointmentsData.OfficerLinks();
+            dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + "/appointments");
+            dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
             dataLinks.setOfficer(dataOfficerLinks);
             dataLinks.setSelf("/company/"
                     + spec.getCompanyNumber() + "/appointments/" + appointmentId);
             appointmentsData.setLinks(dataLinks);
 
-            AppointmentsData savedData = appointmentsDataRepository.save(appointmentsData);
+            var savedData = appointmentsDataRepository.save(appointmentsData);
             createdAppointmentsData.add(savedData);
             LOG.info("AppointmentsData saved with ID: " + savedData.getId());
         }
@@ -208,7 +208,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                                               String currentRole, String roleName,
             String internalId, String officerId,
             Instant dateTimeNow, Instant appointedOn, String appointmentId) {
-        Appointment appointment = new Appointment();
+        var appointment = new Appointment();
 
         appointment.setId(appointmentId);
         appointment.setCreated(dateTimeNow);
@@ -235,7 +235,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private AppointmentsData createBaseAppointmentsData(
             CompanySpec spec, String internalId, String officerId,
             Instant now, String appointmentId) {
-        AppointmentsData appointmentsData = new AppointmentsData();
+        var appointmentsData = new AppointmentsData();
         String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
 
         appointmentsData.setId(appointmentId);
@@ -262,7 +262,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private Links createAppointmentLinks(
             String companyNumber, String officerId, String appointmentId) {
-        Links links = new Links();
+        var links = new Links();
         links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + appointmentId);
         links.setOfficerSelf(OFFICERS_LINK + officerId);
         links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
@@ -302,7 +302,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setDateOfBirthYear(DATE_OF_BIRTH.getYear());
         officerAppointment.setDateOfBirthMonth(DATE_OF_BIRTH.getMonthValue());
 
-        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        var dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         officerAppointment.setOfficerAppointmentItems(
                 createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow, role)
         );
