@@ -1,32 +1,71 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-
 import java.time.Instant;
 
 public class AppointmentCreationRequest {
-    private final CompanySpec spec;
-    private final String companyNumber;
-    private final String countryOfResidence;
-    private final String internalId;
-    private final String officerId;
-    private final Instant dateTimeNow;
-    private final Instant appointedOn;
-    private final String appointmentId;
+    private CompanySpec spec;
+    private String companyNumber;
+    private String countryOfResidence;
+    private String internalId;
+    private String officerId;
+    private Instant dateTimeNow;
+    private Instant appointedOn;
+    private String appointmentId;
 
-    public AppointmentCreationRequest(CompanySpec spec, String companyNumber, String countryOfResidence,
-                                      String internalId, String officerId, Instant dateTimeNow,
-                                      Instant appointedOn, String appointmentId) {
-        this.spec = spec;
-        this.companyNumber = companyNumber;
-        this.countryOfResidence = countryOfResidence;
-        this.internalId = internalId;
-        this.officerId = officerId;
-        this.dateTimeNow = dateTimeNow;
-        this.appointedOn = appointedOn;
-        this.appointmentId = appointmentId;
+    private AppointmentCreationRequest() {
     }
 
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final AppointmentCreationRequest request = new AppointmentCreationRequest();
+
+        public Builder spec(CompanySpec spec) {
+            request.spec = spec;
+            return this;
+        }
+
+        public Builder companyNumber(String companyNumber) {
+            request.companyNumber = companyNumber;
+            return this;
+        }
+
+        public Builder countryOfResidence(String countryOfResidence) {
+            request.countryOfResidence = countryOfResidence;
+            return this;
+        }
+
+        public Builder internalId(String internalId) {
+            request.internalId = internalId;
+            return this;
+        }
+
+        public Builder officerId(String officerId) {
+            request.officerId = officerId;
+            return this;
+        }
+
+        public Builder dateTimeNow(Instant dateTimeNow) {
+            request.dateTimeNow = dateTimeNow;
+            return this;
+        }
+
+        public Builder appointedOn(Instant appointedOn) {
+            request.appointedOn = appointedOn;
+            return this;
+        }
+
+        public Builder appointmentId(String appointmentId) {
+            request.appointmentId = appointmentId;
+            return this;
+        }
+
+        public AppointmentCreationRequest build() {
+            return request;
+        }
+    }
 
     public CompanySpec getSpec() {
         return spec;

@@ -113,8 +113,17 @@ public class AppointmentsServiceImpl implements AppointmentService {
             var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
             String roleName = setRoleName(currentRole);
-            var request = new AppointmentCreationRequest(spec, companyNumber,
-                    countryOfResidence, internalId, officerId, dateTimeNow, today, appointmentId);
+            var request = AppointmentCreationRequest.builder()
+                    .spec(spec)
+                    .companyNumber(companyNumber)
+                    .countryOfResidence(countryOfResidence)
+                    .internalId(internalId)
+                    .officerId(officerId)
+                    .dateTimeNow(dateTimeNow)
+                    .appointedOn(today)
+                    .appointmentId(appointmentId)
+                    .build();
+
             var appointment = createBaseAppointment(request);
             appointment.setForename(FORENAME + (i + 1));
             appointment.setSurname(roleName);
@@ -217,7 +226,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setUpdatedAt(request.getDateTimeNow());
         appointment.setAppointedOn(request.getAppointedOn());
         appointment.setEtag(randomService.getEtag());
-        appointment.setServiceAddress(addressService.getAddress(request.getSpec().getJurisdiction()));
+        appointment.setServiceAddress(
+                addressService.getAddress(request.getSpec().getJurisdiction()));
         appointment.setDataCompanyNumber(request.getCompanyNumber());
         appointment.setDateOfBirth(DOB_INSTANT);
         appointment.setCompanyName("Company " + request.getCompanyNumber());
