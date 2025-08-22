@@ -172,8 +172,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         LOG.info("Starting deletion of all appointments and appointments data for company number: "
                 + companyNumber);
 
-        boolean appointmentsDeleted = false;
-        boolean appointmentsDataDeleted = false;
+        var appointmentsDeleted = false;
+        var appointmentsDataDeleted = false;
 
         List<Appointment> foundAppointments =
                 appointmentsRepository.findAllByCompanyNumber(companyNumber);
