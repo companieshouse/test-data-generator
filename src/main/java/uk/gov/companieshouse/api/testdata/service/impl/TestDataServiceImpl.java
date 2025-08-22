@@ -335,14 +335,8 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
         try {
-            this.appointmentService.deleteAppointments(companyId);
+            this.appointmentService.deleteAllAppointments(companyId);
             LOG.info("Deleted appointments for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.appointmentService.deleteAppointmentsData(companyId);
-            LOG.info("Deleted appointments data for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }

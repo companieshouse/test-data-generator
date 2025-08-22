@@ -168,12 +168,15 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     @Override
-    public boolean deleteAppointments(String companyNumber) {
-        LOG.info("Starting deletion of" + APPOINTMENT_MSG + companyNumber);
+    public boolean deleteAllAppointments(String companyNumber) {
+        LOG.info("Starting deletion of all appointments and appointments data for company number: "
+                + companyNumber);
 
-        List<Appointment> foundAppointments
-                = appointmentsRepository.findAllByCompanyNumber(companyNumber);
+        boolean appointmentsDeleted = false;
+        boolean appointmentsDataDeleted = false;
 
+        List<Appointment> foundAppointments =
+                appointmentsRepository.findAllByCompanyNumber(companyNumber);
         if (!foundAppointments.isEmpty()) {
             LOG.info("Found " + foundAppointments.size() + APPOINTMENT_MSG + companyNumber);
 
@@ -185,32 +188,25 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 });
             }
 
-            LOG.info("Deleting all" + APPOINTMENT_MSG + companyNumber);
             appointmentsRepository.deleteAll(foundAppointments);
-            LOG.info("Successfully deleted all " + APPOINTMENT_MSG + companyNumber);
-            return true;
+            LOG.info("Successfully deleted all" + APPOINTMENT_MSG + companyNumber);
+            appointmentsDeleted = true;
+        } else {
+            LOG.info("No appointments found for company number: " + companyNumber);
         }
 
-        LOG.info("No appointments found for company number: " + companyNumber);
-        return false;
-    }
-
-    @Override
-    public boolean deleteAppointmentsData(String companyNumber) {
-        LOG.info("Starting deletion of appointments data for company number: " + companyNumber);
-
-        List<AppointmentsData> foundData
-                = appointmentsDataRepository.findAllByCompanyNumber(companyNumber);
-
+        List<AppointmentsData> foundData =
+                appointmentsDataRepository.findAllByCompanyNumber(companyNumber);
         if (!foundData.isEmpty()) {
             appointmentsDataRepository.deleteAll(foundData);
             LOG.info("Successfully deleted all appointments data for company number: "
                     + companyNumber);
-            return true;
+            appointmentsDataDeleted = true;
+        } else {
+            LOG.info("No appointments data found for company number: " + companyNumber);
         }
 
-        LOG.info("No appointments data found for company number: " + companyNumber);
-        return false;
+        return appointmentsDeleted || appointmentsDataDeleted;
     }
 
     private Appointment createBaseAppointment(AppointmentCreationRequest request) {

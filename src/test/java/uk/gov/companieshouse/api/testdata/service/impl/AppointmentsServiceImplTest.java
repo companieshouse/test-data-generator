@@ -252,7 +252,7 @@ class AppointmentsServiceImplTest {
         when(officerRepository.findById("TEST_OFFICER_ID"))
                 .thenReturn(Optional.of(officerAppointment));
 
-        boolean result = appointmentsService.deleteAppointments(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
 
         assertTrue(result);
         verify(officerRepository).findById("TEST_OFFICER_ID");
@@ -265,7 +265,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.findAllByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Collections.emptyList());
 
-        boolean result = appointmentsService.deleteAppointments(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
         assertFalse(result);
 
         verify(officerRepository, never()).delete(any());
@@ -282,7 +282,7 @@ class AppointmentsServiceImplTest {
         when(officerRepository.findById("UNKNOWN_OFFICER_ID"))
                 .thenReturn(Optional.empty());
 
-        boolean result = appointmentsService.deleteAppointments(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
         assertTrue(result);
         verify(officerRepository, never()).delete(any());
         verify(appointmentsRepository).deleteAll(Collections.singletonList(apt));
@@ -298,7 +298,7 @@ class AppointmentsServiceImplTest {
         OfficerAppointment officer = new OfficerAppointment();
         when(officerRepository.findById(OFFICER_ID)).thenReturn(Optional.of(officer));
 
-        boolean result = appointmentsService.deleteAppointments(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
 
         assertTrue(result);
         verify(officerRepository).delete(officer);
@@ -309,7 +309,7 @@ class AppointmentsServiceImplTest {
     void deleteAppointments_shouldReturnFalseIfNoAppointmentsFound() {
         when(appointmentsRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Collections.emptyList());
 
-        boolean result = appointmentsService.deleteAppointments(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
 
         assertFalse(result);
         verify(appointmentsRepository, never()).deleteAll(anyList());
@@ -322,7 +322,7 @@ class AppointmentsServiceImplTest {
 
         when(appointmentsDataRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(dataList);
 
-        boolean result = appointmentsService.deleteAppointmentsData(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
 
         assertTrue(result);
         verify(appointmentsDataRepository).deleteAll(dataList);
@@ -332,7 +332,7 @@ class AppointmentsServiceImplTest {
     void deleteAppointmentsData_shouldReturnFalseIfNoDataFound() {
         when(appointmentsDataRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Collections.emptyList());
 
-        boolean result = appointmentsService.deleteAppointmentsData(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
 
         assertFalse(result);
         verify(appointmentsDataRepository, never()).deleteAll(anyList());

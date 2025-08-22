@@ -314,8 +314,7 @@ class TestDataServiceImplTest {
         verify(companyProfileService).delete(companyNumber);
         verify(filingHistoryService).delete(companyNumber);
         verify(companyAuthCodeService).delete(companyNumber);
-        verify(appointmentService).deleteAppointments(companyNumber);
-        verify(appointmentService).deleteAppointmentsData(companyNumber);
+        verify(appointmentService).deleteAllAppointments(companyNumber);
         verify(companyPscStatementService).delete(companyNumber);
         verify(metricsService).delete(companyNumber);
         verify(companyPscsService).delete(companyNumber);
@@ -341,8 +340,7 @@ class TestDataServiceImplTest {
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
-        verify(appointmentService, times(1)).deleteAppointments(COMPANY_NUMBER);
-        verify(appointmentService, times(1)).deleteAppointmentsData(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).deleteAllAppointments(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
@@ -521,8 +519,7 @@ class TestDataServiceImplTest {
         verify(companyProfileService, never()).delete(any());
         verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
-        verify(appointmentService, never()).deleteAppointments(anyString());
-        verify(appointmentService, never()).deleteAppointmentsData(anyString());
+        verify(appointmentService, never()).deleteAllAppointments(anyString());
         verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
         verify(companyPscsService, never()).delete(COMPANY_NUMBER);
         verify(metricsService, never()).delete(COMPANY_NUMBER);
@@ -555,7 +552,7 @@ class TestDataServiceImplTest {
     @Test
     void deleteCompanyDataAppointmentException() {
         RuntimeException ex = new RuntimeException("exception");
-        when(appointmentService.deleteAppointmentsData(COMPANY_NUMBER)).thenThrow(ex);
+        when(appointmentService.deleteAllAppointments(COMPANY_NUMBER)).thenThrow(ex);
 
         assertDeleteCompanyDataException(ex);
     }
