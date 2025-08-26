@@ -62,6 +62,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -123,6 +125,7 @@ class TestDataServiceImplTest {
     private static final String ASSOCIATION_ID = "associationId";
     private static final String CERTIFIED_COPIES_ID = "CCD-123456-789012";
     private static final String MISSING_IMAGE_DELIVERIES_ID = "MID-123456-789012";
+    private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -164,6 +167,8 @@ class TestDataServiceImplTest {
     private Appointment commonAppointment;
     @Mock
     private CompanySearchServiceImpl companySearchService;
+    @Mock
+    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
     @Mock
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Mock
@@ -2254,5 +2259,80 @@ class TestDataServiceImplTest {
                 testDataService.createTransactionData(transactionsSpec));
         assertEquals("Error creating transaction", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
+    }
+
+    @Test
+    void createCombinedSicActivitiesData() throws DataException {
+        CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+        spec.setActivityDescription("Braunkohle waschen");
+        spec.setSicDescription("Abbau von Braunkohle");
+        spec.setIsChActivity(false);
+        spec.setActivityDescriptionSearchField("braunkohle waschen");
+
+        CombinedSicActivitiesData expectedData =
+            new CombinedSicActivitiesData(
+                new ObjectId(),
+                "12345",
+                "Abbau von Braunkohle"
+            );
+
+        when(combinedSicActivitiesService.create(any(CombinedSicActivitiesSpec.class)))
+            .thenReturn(expectedData);
+
+        CombinedSicActivitiesData result =
+            testDataService.createCombinedSicActivitiesData(spec);
+
+        assertNotNull(result);
+        assertEquals("12345", result.getSicCode());
+        assertEquals("Abbau von Braunkohle", result.getSicDescription());
+
+        verify(combinedSicActivitiesService).create(spec);
+    }
+
+    @Test
+    void createCombinedSicActivitiesDataException() throws DataException {
+        CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+        spec.setSicDescription("Test Sic Description");
+
+        when(combinedSicActivitiesService.create(any(CombinedSicActivitiesSpec.class)))
+            .thenThrow(new DataException("Error creating Sic code and keyword"));
+
+        DataException exception = assertThrows(DataException.class,
+            () -> testDataService.createCombinedSicActivitiesData(spec));
+
+        assertEquals("Error creating Sic code and keyword", exception.getMessage());
+    }
+
+    @Test
+    void deleteCombinedSicActivitiesData() throws DataException {
+        when(combinedSicActivitiesService.delete(SIC_ACTIVITY_ID)).thenReturn(true);
+
+        boolean result = testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
+
+        assertTrue(result);
+        verify(combinedSicActivitiesService).delete(SIC_ACTIVITY_ID);
+    }
+
+    @Test
+    void deleteCombinedSicActivitiesDataFailure() throws DataException {
+        when(combinedSicActivitiesService.delete(SIC_ACTIVITY_ID)).thenReturn(false);
+
+        boolean result = testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
+
+        assertFalse(result);
+        verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
+    }
+
+    @Test
+    void deleteCombinedSicActivitiesThrowsException() {
+        RuntimeException ex = new RuntimeException("error");
+        when(combinedSicActivitiesService.delete(SIC_ACTIVITY_ID)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+            testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID));
+
+        assertEquals("Error deleting appeals data", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
     }
 }
