@@ -88,6 +88,7 @@ import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
+import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -131,7 +132,7 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
     @Mock
-    private DataService<List<Appointment>, CompanySpec> appointmentService;
+    private AppointmentService appointmentService;
     @Mock
     private DataService<CompanyMetrics, CompanySpec> metricsService;
     @Mock
@@ -214,10 +215,6 @@ class TestDataServiceImplTest {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        Appointment mockAppointment = new Appointment();
-        mockAppointment.setOfficerId(OFFICER_ID);
-        mockAppointment.setAppointmentId(APPOINTMENT_ID);
-        when(appointmentService.create(any())).thenReturn(List.of(mockAppointment));
     }
 
     private CompanyData createCompanyDataWithRegisters(CompanySpec spec) throws Exception {
@@ -230,8 +227,6 @@ class TestDataServiceImplTest {
 
         when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        when(appointmentService.create(any())).thenReturn(
-                Collections.singletonList(commonAppointment));
 
         return testDataService.createCompanyData(spec);
     }
@@ -255,7 +250,7 @@ class TestDataServiceImplTest {
         assertEquals(expectedJurisdiction, capturedSpec.getJurisdiction());
         verify(filingHistoryService, times(1)).create(capturedSpec);
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
-        verify(appointmentService, times(1)).create(capturedSpec);
+        verify(appointmentService, times(1)).createAppointment(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscsService, times(1)).create(capturedSpec);
@@ -319,7 +314,7 @@ class TestDataServiceImplTest {
         verify(companyProfileService).delete(companyNumber);
         verify(filingHistoryService).delete(companyNumber);
         verify(companyAuthCodeService).delete(companyNumber);
-        verify(appointmentService).delete(companyNumber);
+        verify(appointmentService).deleteAllAppointments(companyNumber);
         verify(companyPscStatementService).delete(companyNumber);
         verify(metricsService).delete(companyNumber);
         verify(companyPscsService).delete(companyNumber);
@@ -345,7 +340,7 @@ class TestDataServiceImplTest {
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
         verify(filingHistoryService, times(1)).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
-        verify(appointmentService, times(1)).delete(COMPANY_NUMBER);
+        verify(appointmentService, times(1)).deleteAllAppointments(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
@@ -403,10 +398,6 @@ class TestDataServiceImplTest {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        Appointment mockAppointment = new Appointment();
-        mockAppointment.setOfficerId(OFFICER_ID);
-        mockAppointment.setAppointmentId(APPOINTMENT_ID);
-        when(appointmentService.create(any())).thenReturn(List.of(mockAppointment));
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -414,6 +405,7 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.ENGLAND_WALES, capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber,
                 Jurisdiction.ENGLAND_WALES);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -432,16 +424,14 @@ class TestDataServiceImplTest {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
-        Appointment mockAppointment = new Appointment();
-        mockAppointment.setOfficerId(OFFICER_ID);
-        mockAppointment.setAppointmentId(APPOINTMENT_ID);
-        when(appointmentService.create(any())).thenReturn(List.of(mockAppointment));
+
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 Jurisdiction.SCOTLAND);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -485,10 +475,8 @@ class TestDataServiceImplTest {
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).create(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(metricsService).create(capturedSpec);
-
-        // Verify rollback
         verifyDeleteCompanyData(fullCompanyNumber);
     }
 
@@ -510,7 +498,7 @@ class TestDataServiceImplTest {
         assertEquals(Jurisdiction.UNITED_KINGDOM, capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).create(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(companyPscStatementService).createPscStatements(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verify(companyPscsService).create(capturedSpec);
@@ -531,7 +519,7 @@ class TestDataServiceImplTest {
         verify(companyProfileService, never()).delete(any());
         verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
         verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
-        verify(appointmentService, never()).delete(COMPANY_NUMBER);
+        verify(appointmentService, never()).deleteAllAppointments(anyString());
         verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
         verify(companyPscsService, never()).delete(COMPANY_NUMBER);
         verify(metricsService, never()).delete(COMPANY_NUMBER);
@@ -564,7 +552,7 @@ class TestDataServiceImplTest {
     @Test
     void deleteCompanyDataAppointmentException() {
         RuntimeException ex = new RuntimeException("exception");
-        when(appointmentService.delete(COMPANY_NUMBER)).thenThrow(ex);
+        when(appointmentService.deleteAllAppointments(COMPANY_NUMBER)).thenThrow(ex);
 
         assertDeleteCompanyDataException(ex);
     }

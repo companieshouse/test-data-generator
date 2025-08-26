@@ -10,22 +10,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class AppointmentsServiceImpl implements DataService<List<Appointment>, CompanySpec> {
+public class AppointmentsServiceImpl implements AppointmentService {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AppointmentsServiceImpl.class));
@@ -41,6 +44,9 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
     private static final String OFFICERS_LINK = "/officers/";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
     private static final String APPOINTMENT_MSG = " appointments for company number: ";
+    private static final LocalDate DATE_OF_BIRTH = LocalDate.of(1951, 3, 4);
+    private static final Instant DOB_INSTANT
+            = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
     @Autowired
     private AddressService addressService;
@@ -49,15 +55,17 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
     @Autowired
     private AppointmentsRepository appointmentsRepository;
     @Autowired
+    private AppointmentsDataRepository appointmentsDataRepository;
+    @Autowired
     private OfficerRepository officerRepository;
 
-    @Override
-    public List<Appointment> create(CompanySpec spec) {
-        LOG.info("Starting creation of" + APPOINTMENT_MSG + spec.getCompanyNumber());
+    public void createAppointment(CompanySpec spec) {
+        LOG.info("Starting creation of appointments with matching IDs for company number: "
+                + spec.getCompanyNumber());
 
         final var companyNumber = spec.getCompanyNumber();
-        final String countryOfResidence =
-                addressService.getCountryOfResidence(spec.getJurisdiction());
+        final String countryOfResidence = addressService.getCountryOfResidence(
+                spec.getJurisdiction());
         int numberOfAppointments = spec.getNumberOfAppointments();
         if (numberOfAppointments <= 0) {
             LOG.info("Number of appointments is less than or equal to 0. Defaulting to 1.");
@@ -73,71 +81,57 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
             officerRoleList.add(OfficerRoles.DIRECTOR);
         }
 
-        LOG.info("Creating " + numberOfAppointments + APPOINTMENT_MSG + companyNumber);
+        List<String> appointmentIds = new ArrayList<>();
+        for (var i = 0; i < numberOfAppointments; i++) {
+            appointmentIds.add(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+        }
 
         List<Appointment> createdAppointments = new ArrayList<>();
+        List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
 
-        for (int i = 0; i < numberOfAppointments; i++) {
+        for (var i = 0; i < numberOfAppointments; i++) {
             OfficerRoles currentRoleEnum = officerRoleList.get(i);
             if (currentRoleEnum == null) {
                 LOG.error("Invalid officer role: null at index " + i);
                 throw new IllegalArgumentException("Invalid officer role: null");
             }
             String currentRole = currentRoleEnum.getValue();
-            try {
-                OfficerRoles.valueOf(currentRole.toUpperCase().replace("-", "_"));
-            } catch (IllegalArgumentException ex) {
-                LOG.error("Invalid officer role: " + currentRole + ex);
-                throw new IllegalArgumentException("Invalid officer role: " + currentRole);
-            }
+            validateOfficerRole(currentRole);
 
-            String roleName = setRoleName(currentRole);
             LOG.debug("Processing appointment {} with role: " + (i + 1) + currentRole);
 
-            Appointment appointment = new Appointment();
-            String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
             String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
             String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+
+            String appointmentId = appointmentIds.get(i);
 
             LOG.debug("Generated IDs - Appointment ID: "
                     + appointmentId + ", Internal ID: "
                     + internalId + ", Officer ID: " + officerId);
 
-            LocalDate officerDob = LocalDate.of(1990, 3, 6);
             Instant dateTimeNow = Instant.now();
             var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-            Instant dob = officerDob.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
-            appointment.setId(appointmentId);
-            appointment.setCreated(dateTimeNow);
-            appointment.setInternalId(internalId);
-            appointment.setAppointmentId(appointmentId);
-            appointment.setNationality(NATIONALITY);
-            appointment.setOccupation(roleName);
-            appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-            appointment.setCountryOfResidence(countryOfResidence);
-            appointment.setUpdatedAt(dateTimeNow);
+            String roleName = setRoleName(currentRole);
+            var request = AppointmentCreationRequest.builder()
+                    .spec(spec)
+                    .companyNumber(companyNumber)
+                    .countryOfResidence(countryOfResidence)
+                    .internalId(internalId)
+                    .officerId(officerId)
+                    .dateTimeNow(dateTimeNow)
+                    .appointedOn(today)
+                    .appointmentId(appointmentId)
+                    .build();
+
+            var appointment = createBaseAppointment(request);
             appointment.setForename(FORENAME + (i + 1));
-            appointment.setAppointedOn(today);
-            appointment.setOfficerRole(currentRole);
-            appointment.setEtag(randomService.getEtag());
-            appointment.setServiceAddress(addressService.getAddress(spec.getJurisdiction()));
-            appointment.setDataCompanyNumber(companyNumber);
-
-            Links links = new Links();
-            links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/"
-                    + appointmentId);
-            links.setOfficerSelf(OFFICERS_LINK + officerId);
-            links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
-            appointment.setLinks(links);
-
             appointment.setSurname(roleName);
-            appointment.setDateOfBirth(dob);
-            appointment.setCompanyName("Company " + companyNumber);
-            appointment.setCompanyStatus(COMPANY_STATUS);
-            appointment.setOfficerId(officerId);
-            appointment.setCompanyNumber(companyNumber);
-            appointment.setUpdated(dateTimeNow);
+            appointment.setOccupation(roleName);
+            appointment.setOfficerRole(currentRole);
+
+            var links = createAppointmentLinks(companyNumber, officerId, appointmentId);
+            appointment.setLinks(links);
 
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
             this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
@@ -145,20 +139,44 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
             Appointment savedAppointment = appointmentsRepository.save(appointment);
             LOG.info("Appointment saved with ID: " + savedAppointment.getId());
             createdAppointments.add(savedAppointment);
+
+            // Create AppointmentsData with same appointmentId
+            var appointmentsData = createBaseAppointmentsData(
+                    spec, internalId, officerId, dateTimeNow, appointmentId);
+            appointmentsData.setForename(FORENAME + (i + 1));
+            appointmentsData.setSurname(roleName);
+            appointmentsData.setOccupation(roleName);
+            appointmentsData.setOfficerRole(currentRole);
+
+            var dataLinks = new AppointmentsData.Links();
+            var dataOfficerLinks = new AppointmentsData.OfficerLinks();
+            dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
+            dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
+            dataLinks.setOfficer(dataOfficerLinks);
+            dataLinks.setSelf(COMPANY_LINK
+                    + spec.getCompanyNumber() + "/appointments/" + appointmentId);
+            appointmentsData.setLinks(dataLinks);
+
+            var savedData = appointmentsDataRepository.save(appointmentsData);
+            createdAppointmentsData.add(savedData);
+            LOG.info("AppointmentsData saved with ID: " + savedData.getId());
         }
 
-        LOG.info("Successfully created "
-                + createdAppointments.size() + APPOINTMENT_MSG + companyNumber);
-        return createdAppointments;
+        LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
+                + createdAppointmentsData.size()
+                + " appointments data with matching IDs for company number: " + companyNumber);
     }
 
     @Override
-    public boolean delete(String companyNumber) {
-        LOG.info("Starting deletion of" + APPOINTMENT_MSG + companyNumber);
+    public boolean deleteAllAppointments(String companyNumber) {
+        LOG.info("Starting deletion of all appointments and appointments data for company number: "
+                + companyNumber);
 
-        List<Appointment> foundAppointments
-                = appointmentsRepository.findAllByCompanyNumber(companyNumber);
+        var appointmentsDeleted = false;
+        var appointmentsDataDeleted = false;
 
+        List<Appointment> foundAppointments =
+                appointmentsRepository.findAllByCompanyNumber(companyNumber);
         if (!foundAppointments.isEmpty()) {
             LOG.info("Found " + foundAppointments.size() + APPOINTMENT_MSG + companyNumber);
 
@@ -170,14 +188,97 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
                 });
             }
 
-            LOG.info("Deleting all" + APPOINTMENT_MSG + companyNumber);
             appointmentsRepository.deleteAll(foundAppointments);
-            LOG.info("Successfully deleted all " + APPOINTMENT_MSG + companyNumber);
-            return true;
+            LOG.info("Successfully deleted all" + APPOINTMENT_MSG + companyNumber);
+            appointmentsDeleted = true;
+        } else {
+            LOG.info("No appointments found for company number: " + companyNumber);
         }
 
-        LOG.info("No appointments found for company number: " + companyNumber);
-        return false;
+        List<AppointmentsData> foundData =
+                appointmentsDataRepository.findAllByCompanyNumber(companyNumber);
+        if (!foundData.isEmpty()) {
+            appointmentsDataRepository.deleteAll(foundData);
+            LOG.info("Successfully deleted all appointments data for company number: "
+                    + companyNumber);
+            appointmentsDataDeleted = true;
+        } else {
+            LOG.info("No appointments data found for company number: " + companyNumber);
+        }
+
+        return appointmentsDeleted || appointmentsDataDeleted;
+    }
+
+    private Appointment createBaseAppointment(AppointmentCreationRequest request) {
+        var appointment = new Appointment();
+
+        appointment.setId(request.getAppointmentId());
+        appointment.setCreated(request.getDateTimeNow());
+        appointment.setInternalId(request.getInternalId());
+        appointment.setAppointmentId(request.getAppointmentId());
+        appointment.setNationality(NATIONALITY);
+        appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
+        appointment.setCountryOfResidence(request.getCountryOfResidence());
+        appointment.setUpdatedAt(request.getDateTimeNow());
+        appointment.setAppointedOn(request.getAppointedOn());
+        appointment.setEtag(randomService.getEtag());
+        appointment.setServiceAddress(
+                addressService.getAddress(request.getSpec().getJurisdiction()));
+        appointment.setDataCompanyNumber(request.getCompanyNumber());
+        appointment.setDateOfBirth(DOB_INSTANT);
+        appointment.setCompanyName("Company " + request.getCompanyNumber());
+        appointment.setCompanyStatus(COMPANY_STATUS);
+        appointment.setOfficerId(request.getOfficerId());
+        appointment.setCompanyNumber(request.getCompanyNumber());
+        appointment.setUpdated(request.getDateTimeNow());
+
+        return appointment;
+    }
+
+    private AppointmentsData createBaseAppointmentsData(
+            CompanySpec spec, String internalId, String officerId,
+            Instant now, String appointmentId) {
+        var appointmentsData = new AppointmentsData();
+        String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
+
+        appointmentsData.setId(appointmentId);
+        appointmentsData.setCreated(now);
+        appointmentsData.setInternalId(internalId);
+        appointmentsData.setAppointmentId(appointmentId);
+        appointmentsData.setNationality(NATIONALITY);
+        appointmentsData.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
+        appointmentsData.setCountryOfResidence(countryOfResidence);
+        appointmentsData.setUpdatedAt(now);
+        appointmentsData.setAppointedOn(now);
+        appointmentsData.setEtag(randomService.getEtag());
+        appointmentsData.setServiceAddress(addressService.getAddress(spec.getJurisdiction()));
+        appointmentsData.setDataCompanyNumber(spec.getCompanyNumber());
+        appointmentsData.setDateOfBirth(DOB_INSTANT);
+        appointmentsData.setCompanyName("Company" + " " + spec.getCompanyNumber());
+        appointmentsData.setCompanyStatus(COMPANY_STATUS);
+        appointmentsData.setOfficerId(officerId);
+        appointmentsData.setCompanyNumber(spec.getCompanyNumber());
+        appointmentsData.setUpdated(now);
+
+        return appointmentsData;
+    }
+
+    private Links createAppointmentLinks(
+            String companyNumber, String officerId, String appointmentId) {
+        var links = new Links();
+        links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + appointmentId);
+        links.setOfficerSelf(OFFICERS_LINK + officerId);
+        links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
+        return links;
+    }
+
+    private void validateOfficerRole(String role) {
+        try {
+            OfficerRoles.valueOf(role.toUpperCase().replace("-", "_"));
+        } catch (IllegalArgumentException ex) {
+            LOG.error("Invalid officer role: " + role + ex);
+            throw new IllegalArgumentException("Invalid officer role: " + role);
+        }
     }
 
     private void createOfficerAppointment(
@@ -185,7 +286,6 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
-        Instant dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         String roleName = setRoleName(role);
         officerAppointment.setId(officerId);
         officerAppointment.setCreatedAt(dayTimeNow);
@@ -202,9 +302,10 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
         officerAppointment.setLinks(links);
 
         officerAppointment.setEtag(randomService.getEtag());
-        officerAppointment.setDateOfBirthYear(1990);
-        officerAppointment.setDateOfBirthMonth(3);
+        officerAppointment.setDateOfBirthYear(DATE_OF_BIRTH.getYear());
+        officerAppointment.setDateOfBirthMonth(DATE_OF_BIRTH.getMonthValue());
 
+        var dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         officerAppointment.setOfficerAppointmentItems(
                 createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow, role)
         );
@@ -219,28 +320,10 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
             Instant dayTimeNow,
             String role
     ) {
-        List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
-
         var companyNumber = companySpec.getCompanyNumber();
         Jurisdiction jurisdiction = companySpec.getJurisdiction();
         String roleName = setRoleName(role);
-        OfficerAppointmentItem officerAppointmentItem = new OfficerAppointmentItem();
-        officerAppointmentItem.setOccupation(roleName);
-        officerAppointmentItem.setAddress(addressService.getAddress(jurisdiction));
-        officerAppointmentItem.setForename(FORENAME);
-        officerAppointmentItem.setSurname(roleName);
-        officerAppointmentItem.setOfficerRole(role);
-        officerAppointmentItem.setLinks(
-                createOfficerAppointmentItemLinks(companyNumber, appointmentId));
-        officerAppointmentItem.setCountryOfResidence(
-                addressService.getCountryOfResidence(jurisdiction));
-        officerAppointmentItem.setAppointedOn(dayNow);
-        officerAppointmentItem.setNationality(NATIONALITY);
-        officerAppointmentItem.setUpdatedAt(dayTimeNow);
-        officerAppointmentItem.setName(roleName + " " + FORENAME);
-        officerAppointmentItem.setCompanyName("Company " + companyNumber);
-        officerAppointmentItem.setCompanyNumber(companyNumber);
-        officerAppointmentItem.setCompanyStatus(COMPANY_STATUS);
+
         OfficerAppointmentItem item = new OfficerAppointmentItem();
         item.setOccupation(roleName);
         item.setAddress(addressService.getAddress(jurisdiction));
@@ -257,17 +340,17 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
         item.setCompanyNumber(companyNumber);
         item.setCompanyStatus(COMPANY_STATUS);
 
-        officerAppointmentItemList.add(officerAppointmentItem);
+        List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
+
+        officerAppointmentItemList.add(item);
 
         return officerAppointmentItemList;
     }
 
     private Links createOfficerAppointmentItemLinks(String companyNumber, String appointmentId) {
-
         Links links = new Links();
         links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + appointmentId);
         links.setCompany(COMPANY_LINK + companyNumber);
-
         return links;
     }
 
@@ -275,5 +358,4 @@ public class AppointmentsServiceImpl implements DataService<List<Appointment>, C
         return role.toLowerCase().replace(role.substring(0, 1),
                 role.substring(0, 1).toUpperCase());
     }
-
 }

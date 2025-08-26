@@ -17,7 +17,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -61,6 +60,7 @@ import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
+import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -88,7 +88,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
-    private DataService<List<Appointment>, CompanySpec> appointmentService;
+    private AppointmentService appointmentService;
     @Autowired
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Autowired
@@ -185,7 +185,7 @@ public class TestDataServiceImpl implements TestDataService {
             filingHistoryService.create(spec);
             LOG.info("Successfully created filing history");
 
-            appointmentService.create(spec);
+            appointmentService.createAppointment(spec);
             LOG.info("Successfully created appointments ");
 
             var authCode = companyAuthCodeService.create(spec);
@@ -335,7 +335,7 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
         try {
-            this.appointmentService.delete(companyId);
+            this.appointmentService.deleteAllAppointments(companyId);
             LOG.info("Deleted appointments for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
@@ -556,7 +556,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public CertificatesData createCertifiedCopiesData(
-        final CertifiedCopiesSpec spec) throws DataException {
+            final CertifiedCopiesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certified copies");
         }
@@ -569,7 +569,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public CertificatesData createMissingImageDeliveriesData(
-        final MissingImageDeliveriesSpec spec) throws DataException {
+            final MissingImageDeliveriesSpec spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create missing image deliveries");
         }

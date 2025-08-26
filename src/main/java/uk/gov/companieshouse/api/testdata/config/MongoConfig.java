@@ -16,7 +16,32 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 
-import uk.gov.companieshouse.api.testdata.repository.*;
+import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.AppealsRepository;
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyAuthAllowListRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
+import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
+import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
+import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
+import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
+import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
+import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
+import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -55,6 +80,11 @@ public class MongoConfig {
     @Bean
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
+    }
+
+    @Bean
+    public MongoTemplate mongoTemplate() {
+        return createMongoTemplate("appointments");
     }
 
     @Bean

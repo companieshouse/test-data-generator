@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -26,11 +27,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -46,11 +49,14 @@ class AppointmentsServiceImplTest {
     private static final String ETAG = "ETAG";
     private static final int INTERNAL_ID_LENGTH = 9;
     private static final String INTERNAL_ID_PREFIX = "8";
+    private static final String OFFICER_ID = "ODI5NjY4Nzg2NExOSVRNSEYx";
 
     @Mock
     private AddressService addressService;
     @Mock
     private AppointmentsRepository appointmentsRepository;
+    @Mock
+    private AppointmentsDataRepository appointmentsDataRepository;
     @Mock
     private OfficerRepository officerRepository;
     @Mock
@@ -78,14 +84,10 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES))
                 .thenReturn("Wales");
 
-        Appointment savedApt = new Appointment();
-        when(appointmentsRepository.save(any())).thenReturn(savedApt);
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        List<Appointment> returnedApts = appointmentsService.create(spec);
-
-        assertNotNull(returnedApts);
-        assertEquals(1, returnedApts.size());
-        assertEquals(savedApt, returnedApts.get(0));
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -137,13 +139,9 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
 
-        List<Appointment> returnedApts = appointmentsService.create(spec);
-
-        assertNotNull(returnedApts);
-        assertEquals(1, returnedApts.size());
-        Appointment returnedApt = returnedApts.get(0);
-        assertEquals(savedApt, returnedApt);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -185,7 +183,7 @@ class AppointmentsServiceImplTest {
         spec.setOfficerRoles(Collections.singletonList(invalidRole));
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentsService.create(spec);
+            appointmentsService.createAppointment(spec);
         });
         assertEquals("Invalid officer role: invalid_role", exception.getMessage());
     }
@@ -209,11 +207,9 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Fix
 
-        List<Appointment> returnedApts = appointmentsService.create(spec);
-
-        assertNotNull(returnedApts);
-        assertEquals(2, returnedApts.size());
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
     }
@@ -238,11 +234,9 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
 
-        List<Appointment> returnedApts = appointmentsService.create(spec);
-
-        assertNotNull(returnedApts);
-        assertEquals(3, returnedApts.size());
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(3)).save(any(Appointment.class));
     }
@@ -258,7 +252,7 @@ class AppointmentsServiceImplTest {
         when(officerRepository.findById("TEST_OFFICER_ID"))
                 .thenReturn(Optional.of(officerAppointment));
 
-        boolean result = appointmentsService.delete(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
 
         assertTrue(result);
         verify(officerRepository).findById("TEST_OFFICER_ID");
@@ -271,7 +265,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.findAllByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Collections.emptyList());
 
-        boolean result = appointmentsService.delete(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
         assertFalse(result);
 
         verify(officerRepository, never()).delete(any());
@@ -288,9 +282,99 @@ class AppointmentsServiceImplTest {
         when(officerRepository.findById("UNKNOWN_OFFICER_ID"))
                 .thenReturn(Optional.empty());
 
-        boolean result = appointmentsService.delete(COMPANY_NUMBER);
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
         assertTrue(result);
         verify(officerRepository, never()).delete(any());
         verify(appointmentsRepository).deleteAll(Collections.singletonList(apt));
+    }
+
+    @Test
+    void deleteAppointments_shouldDeleteAppointmentsAndOfficers() {
+        Appointment appointment = new Appointment();
+        appointment.setOfficerId(OFFICER_ID);
+        List<Appointment> appointments = List.of(appointment);
+
+        when(appointmentsRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(appointments);
+        OfficerAppointment officer = new OfficerAppointment();
+        when(officerRepository.findById(OFFICER_ID)).thenReturn(Optional.of(officer));
+
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
+
+        assertTrue(result);
+        verify(officerRepository).delete(officer);
+        verify(appointmentsRepository).deleteAll(appointments);
+    }
+
+    @Test
+    void deleteAppointments_shouldReturnFalseIfNoAppointmentsFound() {
+        when(appointmentsRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Collections.emptyList());
+
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
+
+        assertFalse(result);
+        verify(appointmentsRepository, never()).deleteAll(anyList());
+    }
+
+    @Test
+    void deleteAppointmentsData_shouldDeleteAppointmentsData() {
+        AppointmentsData data = new AppointmentsData();
+        List<AppointmentsData> dataList = List.of(data);
+
+        when(appointmentsDataRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(dataList);
+
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
+
+        assertTrue(result);
+        verify(appointmentsDataRepository).deleteAll(dataList);
+    }
+
+    @Test
+    void deleteAppointmentsData_shouldReturnFalseIfNoDataFound() {
+        when(appointmentsDataRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Collections.emptyList());
+
+        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
+
+        assertFalse(result);
+        verify(appointmentsDataRepository, never()).deleteAll(anyList());
+    }
+
+    @Test
+    void setRoleName_shouldCapitalizeFirstLetter() {
+        String result = invokeSetRoleName("director");
+        assertEquals("Director", result);
+    }
+
+    @Test
+    void validateOfficerRole_shouldNotThrowForValidRole() {
+        assertDoesNotThrow(() -> invokeValidateOfficerRole("director"));
+    }
+
+    @Test
+    void validateOfficerRole_shouldThrowForInvalidRole() {
+        Exception ex = assertThrows(IllegalArgumentException.class, () -> invokeValidateOfficerRole("invalid_role"));
+        assertEquals("Invalid officer role: invalid_role", ex.getMessage());
+    }
+
+    private String invokeSetRoleName(String role) {
+        try {
+            var method = AppointmentsServiceImpl.class.getDeclaredMethod("setRoleName", String.class);
+            method.setAccessible(true);
+            return (String) method.invoke(appointmentsService, role);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void invokeValidateOfficerRole(String role) {
+        try {
+            var method = AppointmentsServiceImpl.class.getDeclaredMethod("validateOfficerRole", String.class);
+            method.setAccessible(true);
+            method.invoke(appointmentsService, role);
+        } catch (Exception e) {
+            if (e.getCause() instanceof IllegalArgumentException) {
+                throw (IllegalArgumentException) e.getCause();
+            }
+            throw new RuntimeException(e);
+        }
     }
 }
