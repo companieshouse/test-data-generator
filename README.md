@@ -376,6 +376,23 @@ In order to use the generator, there are different possible endpoints that can b
   A usage example looks like this: `{ "company_number": "12345678", "user_id": "userA", "status": "awaiting-approval", "approval_route": "invitation", "invitations": [ { "invited_by": "userB", "invited_at": "2025-07-14T10:10:26.945+00:00" }, { "invited_by": "UserC", "invited_at": "2025-07-06T08:49:25.354+00:00" } ], "approval_expiry_at": "2025-07-14T12:40:40.702+00:00", "previous_states": [ { "status": "removed", "changed_by": "UserC", "changed_at": "2025-07-05T08:49:25.354+00:00" }, { "status": "migrated", "changed_by": "UserD", "changed_at": "2025-07-04T08:49:25.354+00:00" } ] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/associations/{associationId}` will delete the association. `associationId` is required to delete the association.
 
+#### Create SIC Code
+- POST: Sending a POST request to create SIC Code `{Base URL}/test-data/combined-sic-activities` will generate a new SIC code .
+  - `activity_description`: The User ID of user from the user db. This is mandatory.
+  - `sic_description`: This is the role of the ACSP Member.
+  - `is_ch_activity`: Status of the Acsp Member.
+  - `activity_description_search_field`: The activity description search field for the SIC code.
+
+  A usage example looks like this: `{ "activity_description" : "Braunkohle waschen", "sic_description" : "Abbau von Braunkohle", "is_ch_activity" : false, "activity_description_search_field" : "braunkohle waschen" }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the test `Sic Code and Keyword`.
+
+#### Deleting Appeals
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing
+  - `company_number`: The company number of the company. This is mandatory.
+  - `penalty_reference`: The penalty reference of the appeal. This is mandatory.
+
+  A usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
+
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
