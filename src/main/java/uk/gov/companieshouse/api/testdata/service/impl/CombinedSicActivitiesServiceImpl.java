@@ -13,14 +13,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.repository.CombinedSicActivitiesRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.logging.Logger;
-import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> {
-
-  private static final Logger LOG =
-      LoggerFactory.getLogger(String.valueOf(CombinedSicActivitiesServiceImpl.class));
 
   @Autowired
   private CombinedSicActivitiesRepository repository;
