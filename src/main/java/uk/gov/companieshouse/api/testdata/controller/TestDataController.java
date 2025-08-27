@@ -29,9 +29,11 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -419,4 +421,34 @@ public class TestDataController {
         LOG.info("Transaction created", data);
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
+
+    @PostMapping("/combined-sic-activities")
+    public ResponseEntity<CombinedSicActivitiesData> createCombinedSicActivities(
+        @Valid @RequestBody CombinedSicActivitiesSpec request) throws DataException {
+
+        var createdSicCodeKeyword = testDataService.createCombinedSicActivitiesData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("sic-code-keyword-id", createdSicCodeKeyword.getId());
+        LOG.info("New sic code keyword added", data);
+        return new ResponseEntity<>(createdSicCodeKeyword, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/combined-sic-activities/{id}")
+    public ResponseEntity<Map<String, Object>> deleteCombinedSicActivities(
+        @PathVariable("id") String id) throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", id);
+        boolean deleteCombinedSicActivities = testDataService.deleteCombinedSicActivitiesData(id);
+
+        if (deleteCombinedSicActivities) {
+            LOG.info("Combined Sic Activities is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Combined Sic Activities Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

@@ -37,6 +37,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -73,6 +75,7 @@ class TestDataControllerTest {
     private static final String CONFIRMED_STATUS = "confirmed";
     private static final String USER_ID = "userId";
     private static final String ASSOCIATION_ID = "associationId";
+    private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
 
     @Mock
     private TestDataService testDataService;
@@ -1128,4 +1131,94 @@ class TestDataControllerTest {
                 this.testDataController.createTransaction(request));
         assertEquals(exception, thrown);
     }
+
+    @Test
+    void createCombinedSicActivities() throws Exception {
+        CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+        spec.setActivityDescription("Braunkohle waschen");
+        spec.setSicDescription("Abbau von Braunkohle");
+        spec.setIsChActivity(false);
+        spec.setActivityDescriptionSearchField("braunkohle waschen");
+
+        CombinedSicActivitiesData data =
+            new CombinedSicActivitiesData(
+                new ObjectId(),
+                "21017",
+                "Abbau von Braunkohle");
+
+        when(this.testDataService.createCombinedSicActivitiesData(spec))
+            .thenReturn(data);
+
+        ResponseEntity<CombinedSicActivitiesData> response =
+            this.testDataController.createCombinedSicActivities(spec);
+
+        assertEquals(data, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        verify(testDataService, times(1)).createCombinedSicActivitiesData(spec);
+    }
+
+    @Test
+    void createCombinedSicActivitiesException() throws Exception {
+        CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+        spec.setActivityDescription("Braunkohle waschen");
+        spec.setSicDescription("Abbau von Braunkohle");
+        spec.setIsChActivity(false);
+        spec.setActivityDescriptionSearchField("braunkohle waschen");
+
+        Throwable exception = new DataException("Error creating combined sic activities");
+
+        when(this.testDataService.createCombinedSicActivitiesData(spec))
+            .thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class,
+            () -> this.testDataController.createCombinedSicActivities(spec));
+
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).createCombinedSicActivitiesData(spec);
+    }
+
+    @Test
+    void deleteCombinedSicActivities() throws Exception {
+        when(this.testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID))
+            .thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response =
+            this.testDataController.deleteCombinedSicActivities(SIC_ACTIVITY_ID);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService, times(1)).deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
+    }
+
+    @Test
+    void deleteCombinedSicActivitiesNotFound() throws Exception {
+        when(this.testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID))
+            .thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response =
+            this.testDataController.deleteCombinedSicActivities(SIC_ACTIVITY_ID);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(SIC_ACTIVITY_ID,
+            Objects.requireNonNull(response.getBody()).get("id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService, times(1)).deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
+    }
+
+    @Test
+    void deleteCombinedSicActivitiesException() throws Exception {
+        Throwable exception = new DataException("Error deleting combined sic activities");
+
+        when(this.testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID))
+            .thenThrow(exception);
+
+        DataException thrown = assertThrows(
+            DataException.class,
+            () -> this.testDataController.deleteCombinedSicActivities(SIC_ACTIVITY_ID));
+
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
+    }
+
 }

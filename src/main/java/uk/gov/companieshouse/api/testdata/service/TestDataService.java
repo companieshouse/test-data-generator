@@ -9,6 +9,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
@@ -124,6 +126,15 @@ public interface TestDataService {
     CertificatesData createMissingImageDeliveriesData(MissingImageDeliveriesSpec missingImageDeliveriesSpec) throws DataException;
 
     /**
+     * Adds a new sic code test data based on the provided user specifications.
+     *
+     * @param combinedSicActivitiesSpec the specifications of the sic code
+     * @return the created sic code with keyword test data
+     * @throws DataException if there is an error during user creation
+     */
+    CombinedSicActivitiesData createCombinedSicActivitiesData(CombinedSicActivitiesSpec combinedSicActivitiesSpec) throws DataException;
+
+    /**
      * Deletes the certificates test data for the given id.
      *
      * @param id the ID generated while creating certificates
@@ -156,6 +167,9 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAppealsData(String companyNumber, String penaltyReference) throws DataException;
+
+    boolean deleteCombinedSicActivitiesData(String id)
+        throws DataException;
 
     /**
      * Gets the account penalties data for a given company code and customer code.
