@@ -379,12 +379,12 @@ In order to use the generator, there are different possible endpoints that can b
 #### Create SIC Code
 - POST: Sending a POST request to create SIC Code `{Base URL}/test-data/combined-sic-activities` will generate a new SIC code .
   - `activity_description`: The User ID of user from the user db. This is mandatory.
-  - `sic_description`: This is the role of the ACSP Member.
-  - `is_ch_activity`: Status of the Acsp Member.
+  - `sic_description`: This is the Sic description for the Sic code.
+  - `is_ch_activity`: Status of the ch activity. This is boolean , default value is false
   - `activity_description_search_field`: The activity description search field for the SIC code.
 
   A usage example looks like this: `{ "activity_description" : "Braunkohle waschen", "sic_description" : "Abbau von Braunkohle", "is_ch_activity" : false, "activity_description_search_field" : "braunkohle waschen" }`
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the test `Sic Code and Keyword`.
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the `Sic Code and Keyword`.
 
 #### Deleting Appeals
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing
