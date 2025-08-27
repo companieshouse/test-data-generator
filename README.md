@@ -386,7 +386,7 @@ In order to use the generator, there are different possible endpoints that can b
   A usage example looks like this: `{ "activity_description" : "Braunkohle waschen", "sic_description" : "Abbau von Braunkohle", "is_ch_activity" : false, "activity_description_search_field" : "braunkohle waschen" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the `Sic Code and Keyword`.
 
-#### Deleting Appeals
+#### Deleting SIC Code
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing
   - `company_number`: The company number of the company. This is mandatory.
   - `penalty_reference`: The penalty reference of the appeal. This is mandatory.
