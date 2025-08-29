@@ -3,7 +3,7 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum AdminPermissions {
+public enum UserRoles {
     CHS_ADMIN_SUPERVISOR("chs admin supervisor", "b7c48d82-444b-414f-870b-4da96c2d075e"),
     CHS_ADMIN_RESTRICTED_WORD("chs admin restricted word", "71c2fd0b-62a3-4c5d-9417-b2cf12b441d1"),
     CHS_ADMIN_COMPANY_REFRESH("chs admin company refresh", "49fe6f2a-0301-45aa-84fe-918617d0d31b"),
@@ -25,7 +25,7 @@ public enum AdminPermissions {
     private final String groupName;
     private final String entraGroupId;
 
-    AdminPermissions(String groupName, String entraGroupId) {
+    UserRoles(String groupName, String entraGroupId) {
         this.groupName = groupName;
         this.entraGroupId = entraGroupId;
     }
@@ -40,8 +40,8 @@ public enum AdminPermissions {
     }
 
     @JsonCreator
-    public static AdminPermissions fromGroupName(String groupName) {
-        for (AdminPermissions perm : values()) {
+    public static UserRoles fromGroupName(String groupName) {
+        for (UserRoles perm : values()) {
             if (perm.groupName.equalsIgnoreCase(groupName)) {
                 return perm;
             }

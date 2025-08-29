@@ -110,14 +110,19 @@ public class MongoConfig {
         return getMongoRepositoryBean(UserRepository.class, ACCOUNT_DATABASE);
     }
 
-    @Bean
-    public RoleRepository roleRepository() {
-        return getMongoRepositoryBean(RoleRepository.class, ACCOUNT_DATABASE);
-    }
+//    @Bean
+//    public RoleRepository roleRepository() {
+//        return getMongoRepositoryBean(RoleRepository.class, ACCOUNT_DATABASE);
+//    }
+
+//    @Bean
+//    public AdminPermissionsRepository adminPermissionsRepository() {
+//        return getMongoRepositoryBean(AdminPermissionsRepository.class, "admin_permissions");
+//    }
 
     @Bean
-    public AdminPermissionsRepository adminPermissionsRepository() {
-        return getMongoRepositoryBean(AdminPermissionsRepository.class, ACCOUNT_DATABASE);
+    public MongoTemplate mongoTemplate() {
+        return createMongoTemplate(ACCOUNT_DATABASE);
     }
 
     @Bean

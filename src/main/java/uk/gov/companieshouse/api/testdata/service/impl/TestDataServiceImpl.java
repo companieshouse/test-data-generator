@@ -47,8 +47,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -58,6 +56,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
@@ -114,6 +113,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Autowired
     private AcspMembersRepository acspMembersRepository;
+    @Autowired
+    private AdminPermissionsRepository adminPermissionsRepository;
     @Autowired
     private CertificatesRepository certificatesRepository;
     @Autowired
@@ -407,16 +408,24 @@ public class TestDataServiceImpl implements TestDataService {
         if (password == null || password.isEmpty()) {
             throw new DataException("Password is required to create a user");
         }
-        List<RoleSpec> roleList = userSpec.getRoles();
-        if (roleList != null) {
-            boolean invalidRole = roleList.stream().anyMatch(roleData -> !roleData.isValid());
-            if (invalidRole) {
-                throw new DataException("Role ID and permissions are required to create a role");
+
+        List<String> adminPermissionIds = userSpec.getRoles();
+        if (adminPermissionIds != null && !adminPermissionIds.isEmpty()) {
+            List<String> permissionStrings = new ArrayList<>();
+
+            for (String entraGroupId : adminPermissionIds) {
+                var adminPermissionEntity = adminPermissionsRepository
+                        .findByEntraGroupId(entraGroupId);
+
+                if (adminPermissionEntity != null && adminPermissionEntity.getPermissions() != null) {
+                    permissionStrings.addAll(adminPermissionEntity.getPermissions());
+                }
             }
-            for (var roleData : roleList) {
-                roleService.create(roleData);
+            if (!permissionStrings.isEmpty()) {
+                userSpec.setRoles(permissionStrings);
             }
         }
+
         var userData = userService.create(userSpec);
         if (userSpec.getIsCompanyAuthAllowList() != null && userSpec.getIsCompanyAuthAllowList()) {
             var companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
@@ -432,14 +441,9 @@ public class TestDataServiceImpl implements TestDataService {
         if (user == null) {
             return false;
         }
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            for (String roleId : user.getRoles()) {
-                roleService.delete(roleId);
-            }
-        }
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
-            if (companyAuthAllowListService.getAuthId(user.getEmail()) != null) {
+            if (allowListId != null) {
                 companyAuthAllowListService.delete(allowListId);
             }
         }

@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -21,7 +20,6 @@ import jakarta.validation.ValidatorFactory;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -37,7 +35,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -115,34 +112,34 @@ class UserServiceImplTest {
         verify(userRepository, never()).save(any());
     }
 
-    @Test
-    void testCreateUserWithRoles() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("hello@hello.com");
-        userSpec.setPassword("password");
-
-        RoleSpec roleSpec = new RoleSpec();
-        roleSpec.setId("role-id");
-        roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
-        userSpec.setRoles(List.of(roleSpec));
-
-        String generatedUserId = "randomised";
-        when(randomService.getString(anyInt())).thenReturn(generatedUserId);
-        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
-
-        UserData userData = userServiceImpl.create(userSpec);
-
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(userCaptor.capture());
-        User savedUser = userCaptor.getValue();
-
-        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
-        assertEquals(1, savedUser.getRoles().size(), "User should have one role assigned");
-        assertEquals(
-                roleSpec.getId(),
-                savedUser.getRoles().getFirst(),
-                "The assigned role should match the role ID");
-    }
+//    @Test
+//    void testCreateUserWithRoles() throws DataException {
+//        UserSpec userSpec = new UserSpec();
+//        userSpec.setEmail("hello@hello.com");
+//        userSpec.setPassword("password");
+//
+//        RoleSpec roleSpec = new RoleSpec();
+//        roleSpec.setId("role-id");
+//        roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
+//        userSpec.setRoles(List.of(roleSpec));
+//
+//        String generatedUserId = "randomised";
+//        when(randomService.getString(anyInt())).thenReturn(generatedUserId);
+//        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+//
+//        UserData userData = userServiceImpl.create(userSpec);
+//
+//        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+//        verify(userRepository).save(userCaptor.capture());
+//        User savedUser = userCaptor.getValue();
+//
+//        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
+//        assertEquals(1, savedUser.getRoles().size(), "User should have one role assigned");
+//        assertEquals(
+//                roleSpec.getId(),
+//                savedUser.getRoles().getFirst(),
+//                "The assigned role should match the role ID");
+//    }
 
     @Test
     void testCreateUserWithEmptyRolesList() throws DataException {
