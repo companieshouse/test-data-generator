@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
@@ -387,6 +389,44 @@ class AppointmentsServiceImplTest {
         appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, never()).save(any());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(true);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertTrue(items.get(0).isSecureOfficer());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerFalse() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(false);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertFalse(items.get(0).isSecureOfficer());
+    }
+
+    private List<OfficerAppointmentItem> invokeCreateOfficerAppointmentItems(
+            CompanySpec spec, String appointmentId, Instant dayNow, Instant dayTimeNow, String role) {
+        try {
+            var method = AppointmentsServiceImpl.class.getDeclaredMethod(
+                    "createOfficerAppointmentItems", CompanySpec.class, String.class, Instant.class, Instant.class, String.class);
+            method.setAccessible(true);
+            return (List<OfficerAppointmentItem>) method.invoke(appointmentsService, spec, appointmentId, dayNow, dayTimeNow, role);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String invokeSetRoleName(String role) {

@@ -238,9 +238,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setCompanyNumber(request.getCompanyNumber());
         appointment.setUpdated(request.getDateTimeNow());
 
-        appointment.setSecureOfficer(request.getSpec().getSecureOfficer() != null
-                ? request.getSpec().getSecureOfficer()
-                : false);
+        Boolean secureOfficer = request.getSpec().getSecureOfficer();
+        appointment.setSecureOfficer(secureOfficer != null && secureOfficer);
 
         return appointment;
     }
@@ -270,9 +269,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsData.setCompanyNumber(spec.getCompanyNumber());
         appointmentsData.setUpdated(now);
 
-        appointmentsData.setSecureOfficer(spec.getSecureOfficer() != null
-                ? spec.getSecureOfficer()
-                : false);
+        appointmentsData.setSecureOfficer(Boolean.TRUE.equals(spec.getSecureOfficer()));
 
         return appointmentsData;
     }
@@ -354,9 +351,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         item.setCompanyNumber(companyNumber);
         item.setCompanyStatus(COMPANY_STATUS);
 
-        item.setSecureOfficer(companySpec.getSecureOfficer() != null
-                ? companySpec.getSecureOfficer()
-                : false);
+        item.setSecureOfficer(Boolean.TRUE.equals(companySpec.getSecureOfficer()));
 
         List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
         officerAppointmentItemList.add(item);

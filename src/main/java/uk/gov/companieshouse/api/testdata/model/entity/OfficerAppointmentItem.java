@@ -77,8 +77,12 @@ public class OfficerAppointmentItem {
         this.officerRole = officerRole;
     }
 
+    public boolean isSecureOfficer(){
+        return isSecureOfficer;
+    }
+
     public void setSecureOfficer(Boolean secureOfficer) {
-        isSecureOfficer = secureOfficer;
+        this.isSecureOfficer = secureOfficer;
     }
 
     public Links getLinks() {
