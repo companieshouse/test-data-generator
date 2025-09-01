@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
 
 @Document(collection = "delta_appointments")
 public class Appointment {
@@ -44,6 +44,9 @@ public class Appointment {
 
     @Field("data.officer_role")
     private String officerRole;
+
+    @Field("data.is_secure_officer")
+    private Boolean isSecureOfficer;
 
     @Field("data.etag")
     private String etag;
@@ -172,6 +175,10 @@ public class Appointment {
 
     public void setOfficerRole(String officerRole) {
         this.officerRole = officerRole;
+    }
+
+    public void setSecureOfficer(Boolean secureOfficer) {
+        isSecureOfficer = secureOfficer;
     }
 
     public String getEtag() {

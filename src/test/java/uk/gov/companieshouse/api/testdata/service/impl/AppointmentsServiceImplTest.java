@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -353,6 +355,38 @@ class AppointmentsServiceImplTest {
     void validateOfficerRole_shouldThrowForInvalidRole() {
         Exception ex = assertThrows(IllegalArgumentException.class, () -> invokeValidateOfficerRole("invalid_role"));
         assertEquals("Invalid officer role: invalid_role", ex.getMessage());
+    }
+
+    @Test
+    void createAppointment_shouldHandleMultipleOfficerRoles() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR, OfficerRoles.SECRETARY));
+        spec.setNumberOfAppointments(2);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn("ENCODED");
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn("ETAG");
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository, times(2)).save(any(Appointment.class));
+    }
+
+    @Test
+    void createAppointment_shouldNotCreateAppointmentIfNoDefaultOfficerTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setNoDefaultOfficer(true);
+
+        appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository, never()).save(any());
     }
 
     private String invokeSetRoleName(String role) {

@@ -2250,6 +2250,45 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void createCompanyData_appointmentCreatedWhenNoDefaultOfficerIsNull() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setNoDefaultOfficer(null);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(mockAuthCode);
+
+        testDataService.createCompanyData(spec);
+
+        verify(appointmentService, times(1)).createAppointment(spec);
+    }
+
+    @Test
+    void createCompanyData_appointmentCreatedWhenNoDefaultOfficerIsFalse() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setNoDefaultOfficer(false);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(mockAuthCode);
+
+        testDataService.createCompanyData(spec);
+
+        verify(appointmentService, times(1)).createAppointment(spec);
+    }
+
+    @Test
+    void createCompanyData_appointmentNotCreatedWhenNoDefaultOfficerIsTrue() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setNoDefaultOfficer(true);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(mockAuthCode);
+
+        testDataService.createCompanyData(spec);
+
+        verify(appointmentService, never()).createAppointment(spec);
+    }
+
+    @Test
     void createCombinedSicActivitiesData() throws DataException {
         CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
         spec.setActivityDescription("Braunkohle waschen");

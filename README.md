@@ -51,7 +51,9 @@ In order to use the generator, there are different possible endpoints that can b
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
   - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1. Has a maximum allowed value of 20.
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed.
-  - `disqualified_officers`: This takes a list to create a company with disqualified officers. Defaults a company without a disqualified offiecrs list.
+  - `is_secure_officer`: Boolean value to determine if the officer is a secure officer. Defaults to false, `true` value will create an officer with `is_secure_officer` set to true.
+  - `no_default_officers`: Boolean value to determine if the company is created without default officers. Defaults to false, `true` value will create a company without default officers.
+  - `disqualified_officers`: This takes a list to create a company with disqualified officers. Defaults a company without a disqualified officers list.
   - `accounts_due_status`: Set the accounts and confirmation statement due dates of the company by providing accounts_due_status (e.g., `overdue`, `due-soon`). Defaults to current date. 
   - `company_status_detail`: The status detail of the company (e.g., `active-proposal-to-strike-off`, `converted-to-plc`). Defaults to no value, field not present in the database.
   - `company_name`: The name of the company. Defaults to a randomly generated name. Creates a company with the name provided and appended with company number.

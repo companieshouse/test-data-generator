@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
-import org.springframework.data.mongodb.core.mapping.Field;
-
 import java.time.Instant;
+
+import org.springframework.data.mongodb.core.mapping.Field;
 
 public class OfficerAppointmentItem {
 
@@ -16,6 +16,8 @@ public class OfficerAppointmentItem {
     private String surname;
     @Field("officer_role")
     private String officerRole;
+    @Field("is_secure_officer")
+    private Boolean isSecureOfficer;
     @Field("links")
     private Links links;
     @Field("country_of_residence")
@@ -73,6 +75,10 @@ public class OfficerAppointmentItem {
 
     public void setOfficerRole(String officerRole) {
         this.officerRole = officerRole;
+    }
+
+    public void setSecureOfficer(Boolean secureOfficer) {
+        isSecureOfficer = secureOfficer;
     }
 
     public Links getLinks() {
