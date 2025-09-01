@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 
 public class CombinedSicActivitiesSpec {
   @JsonProperty("activity_description")
@@ -13,8 +14,8 @@ public class CombinedSicActivitiesSpec {
   private String sicDescription;
 
   @JsonProperty("is_ch_activity")
-  @NotEmpty(message = "Ch Activity is required")
-  private boolean isChActivity;
+  @NotNull(message = "Ch Activity is required")
+  private Boolean isChActivity;
 
   @JsonProperty("activity_description_search_field")
   @NotEmpty(message = "Activity description search field is required")

@@ -428,26 +428,25 @@ public class TestDataController {
 
         var createdSicCodeKeyword = testDataService.createCombinedSicActivitiesData(request);
 
-        Map<String, Object> data = new HashMap<>();
-        data.put("sic-code-keyword-id", createdSicCodeKeyword.getId());
-        LOG.info("New sic code keyword added", data);
+        Map<String, Object> data = Map.of("sic-code-keyword-id", createdSicCodeKeyword.getId());
+        LOG.info("New sic code keyword added", new HashMap<>(data));
         return new ResponseEntity<>(createdSicCodeKeyword, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/combined-sic-activities/{id}")
     public ResponseEntity<Map<String, Object>> deleteCombinedSicActivities(
         @PathVariable("id") String id) throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", id);
+        Map<String, Object> logMap = new HashMap<>();
+        logMap.put("id", id);
         boolean deleteCombinedSicActivities = testDataService.deleteCombinedSicActivitiesData(id);
 
         if (deleteCombinedSicActivities) {
-            LOG.info("Combined Sic Activities is deleted", response);
+            LOG.info("Combined Sic Activities is deleted", logMap);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Combined Sic Activities Not Found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+            logMap.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Combined Sic Activities Not Found", logMap);
+            return new ResponseEntity<>(logMap, HttpStatus.NOT_FOUND);
         }
     }
 

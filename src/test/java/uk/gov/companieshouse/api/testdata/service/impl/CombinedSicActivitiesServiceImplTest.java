@@ -68,6 +68,7 @@ class CombinedSicActivitiesServiceImplTest {
     CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
     spec.setActivityDescription("Failing Activity");
     spec.setSicDescription("Failing SIC");
+    spec.setIsChActivity(false);
 
     when(randomService.getNumber(5)).thenReturn(99999L);
     doThrow(new RuntimeException("DB error")).when(repository).save(any());
