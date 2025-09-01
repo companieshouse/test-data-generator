@@ -177,6 +177,10 @@ public class Appointment {
         this.officerRole = officerRole;
     }
 
+    public Boolean isSecureOfficer() {
+        return isSecureOfficer;
+    }
+
     public void setSecureOfficer(Boolean secureOfficer) {
         isSecureOfficer = secureOfficer;
     }
