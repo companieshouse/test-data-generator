@@ -20,6 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String CERTIFICATES_ENDPOINTS = "/test-data/certificates/**";
     private static final String CERTIFIED_COPIES_ENDPOINTS = "/test-data/certified-copies/**";
     private static final String MISSING_IMAGE_DELIVERIES = "/test-data/missing-image-deliveries/**";
+    private static final String SIC_CODE_KEYWORD = "/test-data/combined-sic-activities/**";
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -33,7 +34,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns(TRANSACTIONS_ENDPOINTS)
                 .addPathPatterns(CERTIFICATES_ENDPOINTS)
                 .addPathPatterns(CERTIFIED_COPIES_ENDPOINTS)
-                .addPathPatterns(MISSING_IMAGE_DELIVERIES);
+                .addPathPatterns(MISSING_IMAGE_DELIVERIES)
+                .addPathPatterns(SIC_CODE_KEYWORD);
     }
 
     @Bean

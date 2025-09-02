@@ -34,6 +34,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -107,6 +109,8 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Autowired
     private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    @Autowired
+    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
     @Autowired
     private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Autowired
@@ -581,6 +585,16 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
+    @Override
+    public CombinedSicActivitiesData createCombinedSicActivitiesData(
+        final CombinedSicActivitiesSpec spec) throws DataException {
+        try {
+            return combinedSicActivitiesService.create(spec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating Sic code and keyword", ex);
+        }
+    }
+
 
     @Override
     public boolean deleteCertificatesData(String id) throws DataException {
@@ -614,6 +628,16 @@ public class TestDataServiceImpl implements TestDataService {
             throws DataException {
         try {
             return appealsService.delete(companyNumber, penaltyReference);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting appeals data", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteCombinedSicActivitiesData(String id)
+        throws DataException {
+        try {
+            return combinedSicActivitiesService.delete(String.valueOf(id));
         } catch (Exception ex) {
             throw new DataException("Error deleting appeals data", ex);
         }

@@ -49,6 +49,7 @@ public class MongoConfig {
 
     private static final String ACCOUNT_DATABASE = "account";
     private static final String ITEMS_DATABASE = "items";
+    private static final String SIC_CODE_DATABASE = "sic_code";
 
     private final MongoProperties mongoProperties;
 
@@ -194,6 +195,11 @@ public class MongoConfig {
     public UserCompanyAssociationRepository userCompanyAssociationRepository() {
         return getMongoRepositoryBean(UserCompanyAssociationRepository.class,
                 "user_company_associations");
+    }
+
+    @Bean
+    public CombinedSicActivitiesRepository combinedSicActivitiesRepository() {
+        return getMongoRepositoryBean(CombinedSicActivitiesRepository.class, SIC_CODE_DATABASE);
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
