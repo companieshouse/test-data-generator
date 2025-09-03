@@ -25,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
+import uk.gov.companieshouse.api.testdata.repository.CombinedSicActivitiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthAllowListRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;

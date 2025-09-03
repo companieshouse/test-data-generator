@@ -145,7 +145,7 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(spec);
 
@@ -213,7 +213,7 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Fix
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(spec);
 
@@ -240,7 +240,7 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(spec);
 
@@ -364,7 +364,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createAppointment_shouldHandleMultipleOfficerRoles() {
         CompanySpec spec = new CompanySpec();
-        spec.setCompanyNumber("12345678");
+        spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR, OfficerRoles.SECRETARY));
         spec.setNumberOfAppointments(2);
 
@@ -403,7 +403,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
-        assertTrue(items.get(0).isSecureOfficer());
+        assertTrue(items.getFirst().isSecureOfficer());
     }
 
     @Test
@@ -416,7 +416,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
-        assertFalse(items.get(0).isSecureOfficer());
+        assertFalse(items.getFirst().isSecureOfficer());
     }
 
     @Test
@@ -436,8 +436,8 @@ class AppointmentsServiceImplTest {
 
         appointmentsService.createAppointment(spec);
 
-        verify(appointmentsRepository, times(1)).save(any());
-        verify(appointmentsDataRepository, times(1)).save(any());
+        verify(appointmentsRepository).save(any());
+        verify(appointmentsDataRepository).save(any());
     }
 
     @Test
@@ -484,7 +484,7 @@ class AppointmentsServiceImplTest {
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
         assertEquals(1, items.size());
-        assertTrue(items.get(0).isSecureOfficer());
+        assertTrue(items.getFirst().isSecureOfficer());
     }
 
     @Test
@@ -498,7 +498,7 @@ class AppointmentsServiceImplTest {
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
         assertEquals(1, items.size());
-        assertFalse(items.get(0).isSecureOfficer());
+        assertFalse(items.getFirst().isSecureOfficer());
     }
 
     @Test
@@ -512,7 +512,7 @@ class AppointmentsServiceImplTest {
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
         assertEquals(1, items.size());
-        assertFalse(items.get(0).isSecureOfficer());
+        assertFalse(items.getFirst().isSecureOfficer());
     }
 
     private AppointmentCreationRequest buildAppointmentCreationRequest(CompanySpec spec) {
