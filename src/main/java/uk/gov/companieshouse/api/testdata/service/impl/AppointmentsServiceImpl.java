@@ -60,6 +60,12 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private OfficerRepository officerRepository;
 
     public void createAppointment(CompanySpec spec) {
+        if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
+            LOG.info("No default officer request, skipping appointment creation for: "
+                    + spec.getCompanyNumber());
+            return;
+        }
+
         LOG.info("Starting creation of appointments with matching IDs for company number: "
                 + spec.getCompanyNumber());
 
@@ -232,6 +238,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setCompanyNumber(request.getCompanyNumber());
         appointment.setUpdated(request.getDateTimeNow());
 
+        Boolean secureOfficer = request.getSpec().getSecureOfficer();
+        appointment.setSecureOfficer(secureOfficer != null && secureOfficer);
+
         return appointment;
     }
 
@@ -259,6 +268,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsData.setOfficerId(officerId);
         appointmentsData.setCompanyNumber(spec.getCompanyNumber());
         appointmentsData.setUpdated(now);
+
+        appointmentsData.setSecureOfficer(Boolean.TRUE.equals(spec.getSecureOfficer()));
 
         return appointmentsData;
     }
@@ -340,8 +351,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
         item.setCompanyNumber(companyNumber);
         item.setCompanyStatus(COMPANY_STATUS);
 
-        List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
+        item.setSecureOfficer(Boolean.TRUE.equals(companySpec.getSecureOfficer()));
 
+        List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
         officerAppointmentItemList.add(item);
 
         return officerAppointmentItemList;

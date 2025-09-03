@@ -189,8 +189,10 @@ public class TestDataServiceImpl implements TestDataService {
             filingHistoryService.create(spec);
             LOG.info("Successfully created filing history");
 
-            appointmentService.createAppointment(spec);
-            LOG.info("Successfully created appointments ");
+            if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
+                appointmentService.createAppointment(spec);
+                LOG.info("Successfully created appointments ");
+            }
 
             var authCode = companyAuthCodeService.create(spec);
             LOG.info("Successfully created auth code: " + authCode.getAuthCode());

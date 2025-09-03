@@ -1,12 +1,11 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
+import java.util.List;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
-import java.util.List;
 
 @Document(collection = "officer_appointments")
 public class OfficerAppointment {

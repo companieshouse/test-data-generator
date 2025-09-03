@@ -7,12 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +33,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
@@ -50,6 +55,7 @@ class AppointmentsServiceImplTest {
     private static final int INTERNAL_ID_LENGTH = 9;
     private static final String INTERNAL_ID_PREFIX = "8";
     private static final String OFFICER_ID = "ODI5NjY4Nzg2NExOSVRNSEYx";
+    private static final String COUNTRY = "England";
 
     @Mock
     private AddressService addressService;
@@ -139,7 +145,7 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(spec);
 
@@ -207,7 +213,7 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Fix
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(spec);
 
@@ -234,7 +240,7 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData()); // <-- Add this line
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(spec);
 
@@ -353,6 +359,195 @@ class AppointmentsServiceImplTest {
     void validateOfficerRole_shouldThrowForInvalidRole() {
         Exception ex = assertThrows(IllegalArgumentException.class, () -> invokeValidateOfficerRole("invalid_role"));
         assertEquals("Invalid officer role: invalid_role", ex.getMessage());
+    }
+
+    @Test
+    void createAppointment_shouldHandleMultipleOfficerRoles() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR, OfficerRoles.SECRETARY));
+        spec.setNumberOfAppointments(2);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository, times(2)).save(any(Appointment.class));
+    }
+
+    @Test
+    void createAppointment_shouldNotCreateAppointmentIfNoDefaultOfficerTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setNoDefaultOfficer(true);
+
+        appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository, never()).save(any());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(true);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertTrue(items.getFirst().isSecureOfficer());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerFalse() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(false);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertFalse(items.getFirst().isSecureOfficer());
+    }
+
+    @Test
+    void createAppointment_shouldCreateAppointmentIfNoDefaultOfficerFalse() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNoDefaultOfficer(false);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository).save(any());
+        verify(appointmentsDataRepository).save(any());
+    }
+
+    @Test
+    void createBaseAppointment_shouldSetSecureOfficerTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setSecureOfficer(true);
+
+        var request = buildAppointmentCreationRequest(spec);
+        Appointment appointment = invokeCreateBaseAppointment(request);
+
+        assertTrue(appointment.isSecureOfficer());
+    }
+
+    @Test
+    void createBaseAppointment_shouldSetSecureOfficerFalse() {
+        CompanySpec spec = new CompanySpec();
+        spec.setSecureOfficer(false);
+
+        var request = buildAppointmentCreationRequest(spec);
+        Appointment appointment = invokeCreateBaseAppointment(request);
+
+        assertFalse(appointment.isSecureOfficer());
+    }
+
+    @Test
+    void createBaseAppointment_shouldSetSecureOfficerFalseWhenNull() {
+        CompanySpec spec = new CompanySpec();
+        spec.setSecureOfficer(null);
+
+        var request = buildAppointmentCreationRequest(spec);
+        Appointment appointment = invokeCreateBaseAppointment(request);
+
+        assertFalse(appointment.isSecureOfficer());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerTrueAndReturnSingleItem() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(true);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertEquals(1, items.size());
+        assertTrue(items.getFirst().isSecureOfficer());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerFalseAndReturnSingleItem() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(false);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertEquals(1, items.size());
+        assertFalse(items.getFirst().isSecureOfficer());
+    }
+
+    @Test
+    void createOfficerAppointmentItems_shouldSetSecureOfficerFalseWhenNullAndReturnSingleItem() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber("12345678");
+        spec.setSecureOfficer(null);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+
+        List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
+        assertEquals(1, items.size());
+        assertFalse(items.getFirst().isSecureOfficer());
+    }
+
+    private AppointmentCreationRequest buildAppointmentCreationRequest(CompanySpec spec) {
+        return AppointmentCreationRequest.builder()
+                .spec(spec)
+                .companyNumber(COMPANY_NUMBER)
+                .countryOfResidence(COUNTRY)
+                .internalId("INTERNAL_ID")
+                .officerId(OFFICER_ID)
+                .dateTimeNow(Instant.now())
+                .appointedOn(Instant.now())
+                .appointmentId("APPT_ID")
+                .build();
+    }
+
+    private Appointment invokeCreateBaseAppointment(AppointmentCreationRequest request) {
+        try {
+            var method = AppointmentsServiceImpl.class.getDeclaredMethod("createBaseAppointment", AppointmentCreationRequest.class);
+            method.setAccessible(true);
+            return (Appointment) method.invoke(appointmentsService, request);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private List<OfficerAppointmentItem> invokeCreateOfficerAppointmentItems(
+            CompanySpec spec, String appointmentId, Instant dayNow, Instant dayTimeNow, String role) {
+        try {
+            var method = AppointmentsServiceImpl.class.getDeclaredMethod(
+                    "createOfficerAppointmentItems", CompanySpec.class, String.class, Instant.class, Instant.class, String.class);
+            method.setAccessible(true);
+            return (List<OfficerAppointmentItem>) method.invoke(appointmentsService, spec, appointmentId, dayNow, dayTimeNow, role);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private String invokeSetRoleName(String role) {

@@ -110,6 +110,11 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     }
 
     private void setActiveDirectorsCount(CompanyMetrics metrics, CompanySpec spec) {
+        if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
+            metrics.setActiveDirectorsCount(0);
+            LOG.debug("No default officer specified. Set active directors count to 0.");
+            return;
+        }
         var numberOfAppointments = spec.getNumberOfAppointments();
         if (spec.getOfficerRoles() != null && spec.getOfficerRoles().stream()
                 .anyMatch(role -> "director".equalsIgnoreCase(role.toString()))) {

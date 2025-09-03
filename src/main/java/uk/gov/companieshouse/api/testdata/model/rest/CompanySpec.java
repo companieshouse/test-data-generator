@@ -36,6 +36,12 @@ public class CompanySpec {
     @JsonProperty("has_super_secure_pscs")
     private Boolean hasSuperSecurePscs;
 
+    @JsonProperty("is_secure_officer")
+    private Boolean isSecureOfficer;
+
+    @JsonProperty("no_default_officer")
+    private Boolean noDefaultOfficer;
+
     @JsonProperty
     @Valid
     private List<RegistersSpec> registers;
@@ -296,6 +302,22 @@ public class CompanySpec {
 
     public void setAdvancedSearch(Boolean advancedSearch) {
         this.advancedSearch = advancedSearch;
+    }
+
+    public Boolean getSecureOfficer() {
+        return isSecureOfficer;
+    }
+
+    public void setSecureOfficer(Boolean secureOfficer) {
+        isSecureOfficer = secureOfficer;
+    }
+
+    public Boolean getNoDefaultOfficer() {
+        return noDefaultOfficer;
+    }
+
+    public void setNoDefaultOfficer(Boolean defaultOfficerActive) {
+        this.noDefaultOfficer = defaultOfficerActive;
     }
 }
 

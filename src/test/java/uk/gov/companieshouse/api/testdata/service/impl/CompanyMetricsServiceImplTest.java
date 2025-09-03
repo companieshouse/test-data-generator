@@ -519,4 +519,24 @@ class CompanyMetricsServiceImplTest {
         assertEquals(4, metrics.getActivePscCount());
         assertEquals(4, metrics.getPscCount());
     }
+
+    @Test
+    void create_WithNoDefaultOfficerTrue_SetsActiveDirectorsCountToZero() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNoDefaultOfficer(true);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        CompanyMetrics savedMetrics = new CompanyMetrics();
+        when(repository.save(any())).thenReturn(savedMetrics);
+
+        CompanyMetrics result = metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics metrics = captor.getValue();
+
+        assertEquals(0, metrics.getActiveDirectorsCount());
+        assertEquals(savedMetrics, result);
+    }
 }

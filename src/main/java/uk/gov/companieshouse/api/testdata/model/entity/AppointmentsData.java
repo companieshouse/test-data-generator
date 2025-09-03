@@ -45,6 +45,9 @@ public class AppointmentsData {
     @Field("data.officer_role")
     private String officerRole;
 
+    @Field("data.is_secure_officer")
+    private Boolean isSecureOfficer;
+
     @Field("data.etag")
     private String etag;
 
@@ -144,6 +147,10 @@ public class AppointmentsData {
 
     public void setOfficerRole(String officerRole) {
         this.officerRole = officerRole;
+    }
+
+    public void setSecureOfficer(Boolean secureOfficer) {
+        isSecureOfficer = secureOfficer;
     }
 
     public String getEtag() {
