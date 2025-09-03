@@ -25,7 +25,6 @@ public class PenaltySpec {
     private Integer numberOfPenalties;
 
     @JsonProperty("amount")
-    @NotNull(message = "Amount must not be blank")
     @Positive(message = "Amount must be a positive number")
     private Double amount;
 
@@ -81,8 +80,15 @@ public class PenaltySpec {
         return typeDescription;
     }
 
+    public void setTypeDescription(String typeDescription) {
+        this.typeDescription = typeDescription;
+    }
+
     public String getLedgerCode() {
         return ledgerCode;
+    }
+    public void setLedgerCode(String ledgerCode) {
+        this.ledgerCode = ledgerCode;
     }
 
     public String getDunningStatus() {
@@ -107,6 +113,10 @@ public class PenaltySpec {
 
     public String getTransactionType() {
         return transactionType;
+    }
+
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
     public String getTransactionSubType() {

@@ -47,7 +47,7 @@ class AccountPenaltiesServiceImplTest {
     private AccountPenaltiesServiceImpl service;
 
     private static final AccountPenalties ACCOUNT_PENALTIES = new AccountPenalties();
-    private static final String COMPANY_CODE = "LP";
+    private static final String COMPANY_CODE = "C1";
     private static final String CUSTOMER_CODE = "12345678";
     private static final String PENALTY_REF = "A1234567";
     private static final String PENALTY_ID = "685abc4b9b34c84d4d2f5af6";
@@ -295,11 +295,9 @@ class AccountPenaltiesServiceImplTest {
     @Test
     void testCreatePenaltiesListDefaults() throws DataException {
         PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(null);
+        penaltySpec.setCompanyCode(COMPANY_CODE);
         penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(null);
-        penaltySpec.setAmount(null);
-        penaltySpec.setIsPaid(null);
+        penaltySpec.setNumberOfPenalties(1);
 
         AccountPenalties savedEntity = new AccountPenalties();
         savedEntity.setPenalties(new ArrayList<>());
@@ -390,6 +388,98 @@ class AccountPenaltiesServiceImplTest {
         assertNotNull(result.getClosedAt(), "closedAt should be set when isPaid is true");
     }
 
+    @Test
+    void createAccountPenalties_shouldThrowExceptionForInvalidCompanyCode() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("INVALID");
+        penaltySpec.setCustomerCode("12345678");
+
+        assertThrows(IllegalArgumentException.class, () -> service.createAccountPenalties(penaltySpec));
+    }
+
+    @Test
+    void createPenaltiesList_shouldDefaultCompanyCodeAndTransactionSubTypeIfBlank() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("");
+        penaltySpec.setTransactionSubType("");
+        penaltySpec.setCustomerCode("12345678");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertEquals("LP", penalties.getFirst().getCompanyCode());
+        assertEquals("NH", penalties.getFirst().getTransactionSubType());
+    }
+
+    @Test
+    void createPenaltiesList_shouldDefaultLedgerCodeAndTypeDescriptionIfConfigNotPresent() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("ZZ");
+        penaltySpec.setTransactionSubType("ZZ");
+        penaltySpec.setLedgerCode("");
+        penaltySpec.setTypeDescription("");
+        penaltySpec.setCustomerCode("12345678");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertEquals("SC", penalties.getFirst().getLedgerCode());
+        assertEquals("Penalty", penalties.getFirst().getTypeDescription());
+    }
+
+    @Test
+    void createPenaltiesList_shouldDefaultTransactionTypeIfNull() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("ZZ");
+        penaltySpec.setTransactionType(null);
+        penaltySpec.setCustomerCode("12345678");
+        penaltySpec.setNumberOfPenalties(1);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertEquals("1", penalties.get(0).getTransactionType());
+    }
+
+    @Test
+    void createPenaltiesList_shouldRoundAmountToTwoDecimals() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setCustomerCode("12345678");
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(99.999);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertEquals(100.0, penalties.get(0).getAmount());
+    }
+
+    @Test
+    void createPenaltiesList_shouldGenerateDifferentAmountsForMultiplePenalties() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setCustomerCode("12345678");
+        penaltySpec.setNumberOfPenalties(2);
+        penaltySpec.setAmount(50.0);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertEquals(2, penalties.size());
+        assertEquals(50.0, penalties.get(0).getAmount());
+        assertTrue(penalties.get(1).getAmount() >= 10.0 && penalties.get(1).getAmount() <= 99.0);
+    }
+
+    @Test
+    void generateTransactionReference_shouldUseCorrectPrefix() {
+        try {
+            var method = AccountPenaltiesServiceImpl.class.getDeclaredMethod("generateTransactionReference", String.class, String.class);
+            method.setAccessible(true);
+            String ref = (String) method.invoke(service, "CS", "S1");
+            assertTrue(ref.startsWith("P"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("penaltyReferencePrefixProvider")
     void createPenaltiesList_transactionReferencePrefix(
@@ -402,15 +492,14 @@ class AccountPenaltiesServiceImplTest {
 
         List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
 
-        assertTrue(penalties.get(0).getTransactionReference().startsWith(expectedPrefix));
+        assertTrue(penalties.getFirst().getTransactionReference().startsWith(expectedPrefix));
     }
 
     private static Stream<Arguments> penaltyReferencePrefixProvider() {
         return Stream.of(
-                Arguments.of(COMPANY_CODE, "ANY", "A"),
-                Arguments.of("C1", "S1", "P"),
-                Arguments.of("C1", "A2", "U"),
-                Arguments.of("C1", "ZZ", "A")
+                Arguments.of("C1", "ANY", "A"),
+                Arguments.of("CS", "S1", "P"),
+                Arguments.of("CS", "A2", "U")
         );
     }
 

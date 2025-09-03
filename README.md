@@ -302,7 +302,7 @@ In order to use the generator, there are different possible endpoints that can b
 - POST: Sending a POST request to create Account Penalties `{Base URL}/test-data/penalties` will create an Account Penalties entry in the account_penalties db collection. The request body must include all mandatory fields of `companyCode`, `customer_code` and `amount` then optional fields of `createdAt`, `closedAt`, `isPaid`, `amount`, `number_of_penalties`, `type_description`, `ledger_code`, `dunning_status`, `account_status`, `outstandingAMount`, `transaction_type` and `transaction_sub_type` parameters.
   - `company_code`: The Company Code of the Account Penalties entry in the account_penalties db collection. Mandatory field.
   - `customer_code`: The Customer Code of the Account Penalties entry in the account_penalties db collection. Mandatory field.
-  - `amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection. Mandatory field.
+  - `amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `number_of_penalties`: The number of penalties to be created in the Account Penalties data in the account_penalties db collection. Mandatory field.
   - `created_at`: The Created At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `closed_at`: The Closed At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
