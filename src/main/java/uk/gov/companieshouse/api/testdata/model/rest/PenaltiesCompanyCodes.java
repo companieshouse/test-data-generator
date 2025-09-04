@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public enum PenaltiesCompanyCodes {
     private final String transactionSubType;
     private final List<String> companyCodes;
 
-    private static final Random RANDOM = new Random();
+    private static final Random RANDOM = new SecureRandom();
 
     PenaltiesCompanyCodes(String prefix, String transactionType, List<String> ledgerCodes,
                           List<String> typeDescriptions, String transactionSubType,

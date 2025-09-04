@@ -289,7 +289,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         Optional<PenaltiesCompanyCodes> penaltyConfig =
                 PenaltiesCompanyCodes.fromCompanyAndSubType(companyCode, transactionSubType);
 
-        String prefix = "A";
+        var prefix = "A";
 
         if (penaltyConfig.isPresent()) {
             prefix = penaltyConfig.get().getPrefix();
