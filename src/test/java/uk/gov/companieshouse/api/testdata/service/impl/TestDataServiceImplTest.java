@@ -2298,7 +2298,7 @@ class TestDataServiceImplTest {
 
         CombinedSicActivitiesData expectedData =
             new CombinedSicActivitiesData(
-                new ObjectId(),
+                new ObjectId().toHexString(),
                 "12345",
                 "Abbau von Braunkohle"
             );

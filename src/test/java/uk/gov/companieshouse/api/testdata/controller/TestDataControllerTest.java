@@ -1142,7 +1142,7 @@ class TestDataControllerTest {
 
         CombinedSicActivitiesData data =
             new CombinedSicActivitiesData(
-                new ObjectId(),
+                new ObjectId().toHexString(),
                 "21017",
                 "Abbau von Braunkohle");
 

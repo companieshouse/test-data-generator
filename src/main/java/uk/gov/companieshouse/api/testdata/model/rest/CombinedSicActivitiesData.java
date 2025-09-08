@@ -6,7 +6,7 @@ import org.bson.types.ObjectId;
 public class CombinedSicActivitiesData {
 
   @JsonProperty("_id")
-  private final ObjectId id;
+  private final String id;
 
   @JsonProperty("sic_code")
   private final String sicCode;
@@ -14,13 +14,13 @@ public class CombinedSicActivitiesData {
   @JsonProperty("sic_description")
   private final String sicDescription;
 
-  public CombinedSicActivitiesData(ObjectId id, String sicCode, String sicDescription) {
+  public CombinedSicActivitiesData(String id, String sicCode, String sicDescription) {
     this.id = id;
     this.sicCode = sicCode;
     this.sicDescription = sicDescription;
   }
 
-  public ObjectId getId() {
+  public String getId() {
     return id;
   }
 
@@ -31,5 +31,4 @@ public class CombinedSicActivitiesData {
   public String getSicDescription() {
     return sicDescription;
   }
-
 }

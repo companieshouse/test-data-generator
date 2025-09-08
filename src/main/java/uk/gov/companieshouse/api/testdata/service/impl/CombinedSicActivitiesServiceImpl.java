@@ -55,7 +55,7 @@ public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSic
 
   private CombinedSicActivitiesData mapToSicActivitiesData(CombinedSicActivities sicActivity) {
     return new CombinedSicActivitiesData(
-        sicActivity.getId(),
+        sicActivity.getId().toHexString(),
         sicActivity.getSicCode(),
         sicActivity.getSicDescription()
     );
