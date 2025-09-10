@@ -52,6 +52,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -68,6 +69,8 @@ public class TestDataController {
     private TestDataService testDataService;
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
+    @Autowired
+    private AccountPenaltiesService accountPenaltyService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -305,6 +308,9 @@ public class TestDataController {
             @Valid @RequestBody PenaltySpec request) throws DataException {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
                 + " and customer code: " + request.getCustomerCode());
+
+        accountPenaltyService.validatePenaltySpec(request);
+
         var createdPenalties = testDataService.createPenaltyData(request);
         LOG.info("Successfully created account penalties with ID: "
                 + createdPenalties.getIdAsString());

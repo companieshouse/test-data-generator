@@ -389,12 +389,23 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createAccountPenalties_shouldThrowExceptionForInvalidCompanyCode() {
+    void createAccountPenalties_shouldThrowDataExceptionForInvalidCompanyCode() {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("INVALID");
         penaltySpec.setCustomerCode("12345678");
 
-        assertThrows(IllegalArgumentException.class, () -> service.createAccountPenalties(penaltySpec));
+        DataException ex = assertThrows(DataException.class,
+                () -> service.createAccountPenalties(penaltySpec));
+        assertTrue(ex.getMessage().contains("Failed to create account penalties"));
+    }
+
+    @Test
+    void validatePenaltySpec_shouldThrowIllegalArgumentExceptionForInvalidCompanyCode() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("INVALID");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.validatePenaltySpec(penaltySpec));
     }
 
     @Test

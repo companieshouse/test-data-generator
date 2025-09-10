@@ -42,6 +42,14 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
+    public void validatePenaltySpec(PenaltySpec penaltySpec) {
+        if (penaltySpec.getCompanyCode() != null
+                && !PenaltiesCompanyCodes.isValidCompanyCode(penaltySpec.getCompanyCode())) {
+            throw new IllegalArgumentException("Invalid company code: "
+                    + penaltySpec.getCompanyCode());
+        }
+    }
+
     @Override
     public AccountPenaltiesData getAccountPenalty(String companyCode, String customerCode,
                                                   String penaltyRef) throws NoDataFoundException {
@@ -146,10 +154,6 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     public AccountPenaltiesData createAccountPenalties(PenaltySpec penaltySpec)
             throws DataException {
-        if (!PenaltiesCompanyCodes.isValidCompanyCode(penaltySpec.getCompanyCode())) {
-            throw new IllegalArgumentException("Invalid company code: "
-                    + penaltySpec.getCompanyCode());
-        }
 
         var accountPenalties = new AccountPenalties();
         accountPenalties.setId(new ObjectId());

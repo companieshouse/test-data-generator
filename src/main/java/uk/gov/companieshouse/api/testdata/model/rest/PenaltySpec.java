@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidCompanyCode;
 
 import java.time.Instant;
 
@@ -16,6 +17,7 @@ public class PenaltySpec {
 
     @JsonProperty("company_code")
     @NotNull(message = "Company code must not be blank")
+    @ValidCompanyCode(message = "Company code is not valid")
     private String companyCode;
 
     @JsonProperty("number_of_penalties")
