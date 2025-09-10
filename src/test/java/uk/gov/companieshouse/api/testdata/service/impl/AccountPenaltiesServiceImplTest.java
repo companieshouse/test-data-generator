@@ -525,6 +525,56 @@ class AccountPenaltiesServiceImplTest {
         assertThrows(IllegalArgumentException.class, () -> service.validatePenaltySpec(penaltySpec));
     }
 
+    @Test
+    void validatePenaltySpec_shouldNotThrowWhenCompanyCodeIsNull() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode(null);
+
+        AccountPenaltiesServiceImpl service = new AccountPenaltiesServiceImpl();
+        assertDoesNotThrow(() -> service.validatePenaltySpec(penaltySpec));
+    }
+
+    @Test
+    void testUpdateAccountPenalties_updatesCorrectPenaltyByReference() throws Exception {
+        // Arrange
+        String penaltyRef = "REF123";
+        String otherRef = "REF456";
+        AccountPenalty penalty1 = new AccountPenalty();
+        penalty1.setTransactionReference(otherRef);
+        penalty1.setAmount(10.0);
+
+        AccountPenalty penalty2 = new AccountPenalty();
+        penalty2.setTransactionReference(penaltyRef);
+        penalty2.setAmount(20.0);
+
+        List<AccountPenalty> penalties = new ArrayList<>();
+        penalties.add(penalty1);
+        penalties.add(penalty2);
+
+        AccountPenalties accountPenalties = new AccountPenalties();
+        accountPenalties.setPenalties(new ArrayList<>(penalties));
+        accountPenalties.setCompanyCode(COMPANY_CODE);
+        accountPenalties.setCustomerCode(CUSTOMER_CODE);
+
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+        request.setIsPaid(true);
+        request.setAmount(99.0);
+
+        when(repository.findPenalty(COMPANY_CODE, CUSTOMER_CODE, penaltyRef))
+                .thenReturn(Optional.of(accountPenalties));
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // Act
+        AccountPenaltiesData result = service.updateAccountPenalties(penaltyRef, request);
+
+        // Assert
+        assertEquals(2, result.getPenalties().size());
+        assertEquals(10.0, result.getPenalties().get(0).getAmount());
+        assertEquals(99.0, result.getPenalties().get(1).getAmount());
+    }
+
     private static Stream<Arguments> penaltyReferencePrefixProvider() {
         return Stream.of(
                 Arguments.of("C1", "ANY", "A"),
