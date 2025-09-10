@@ -59,6 +59,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 
@@ -85,6 +86,9 @@ class TestDataControllerTest {
 
     @InjectMocks
     private TestDataController testDataController;
+
+    @Mock
+    private AccountPenaltiesService accountPenaltiesService;
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;

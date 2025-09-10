@@ -8,13 +8,12 @@ public class ValidCompanyCodeValidator implements ConstraintValidator<ValidCompa
 
     @Override
     public void initialize(ValidCompanyCode constraintAnnotation) {
-        // Initialization if needed
     }
 
     @Override
     public boolean isValid(String companyCode, ConstraintValidatorContext context) {
         if (companyCode == null || companyCode.isBlank()) {
-            return true; // Let @NotNull handle blank values
+            return true;
         }
         return PenaltiesCompanyCodes.isValidCompanyCode(companyCode);
     }
