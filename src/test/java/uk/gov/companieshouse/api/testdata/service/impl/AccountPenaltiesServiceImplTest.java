@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -504,6 +505,24 @@ class AccountPenaltiesServiceImplTest {
         List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
 
         assertTrue(penalties.getFirst().getTransactionReference().startsWith(expectedPrefix));
+    }
+
+    @Test
+    void validatePenaltySpec_shouldNotThrowForValidCompanyCode() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+
+        AccountPenaltiesServiceImpl service = new AccountPenaltiesServiceImpl();
+        assertDoesNotThrow(() -> service.validatePenaltySpec(penaltySpec));
+    }
+
+    @Test
+    void validatePenaltySpec_shouldThrowForInvalidCompanyCode() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("INVALID");
+
+        AccountPenaltiesServiceImpl service = new AccountPenaltiesServiceImpl();
+        assertThrows(IllegalArgumentException.class, () -> service.validatePenaltySpec(penaltySpec));
     }
 
     private static Stream<Arguments> penaltyReferencePrefixProvider() {

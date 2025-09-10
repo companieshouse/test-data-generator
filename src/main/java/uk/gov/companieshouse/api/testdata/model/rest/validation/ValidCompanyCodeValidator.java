@@ -8,6 +8,7 @@ public class ValidCompanyCodeValidator implements ConstraintValidator<ValidCompa
 
     @Override
     public void initialize(ValidCompanyCode constraintAnnotation) {
+        // Initialization if needed
     }
 
     @Override
