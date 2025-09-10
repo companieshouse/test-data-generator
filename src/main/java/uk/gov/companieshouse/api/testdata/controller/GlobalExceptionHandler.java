@@ -51,16 +51,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
     }
 
-    // Add this new exception handler for IllegalArgumentException
-    @ExceptionHandler(value = { IllegalArgumentException.class })
-    protected ResponseEntity<ValidationErrors> handleIllegalArgumentException(IllegalArgumentException ex) {
-        LOG.error("Invalid request: " + ex.getMessage());
-
-        ValidationErrors errors = new ValidationErrors();
-        errors.addError(createValidationError(ex.getMessage()));
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
-    }
-
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status,
