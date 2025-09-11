@@ -183,10 +183,9 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         String transactionSubType = getTransactionSubTypeValue(penaltySpec);
 
         List<AccountPenalty> penalties = new ArrayList<>();
-        var random = new Random();
 
         for (var i = 0; i < numberOfPenalties; i++) {
-            AccountPenalty penalty = createPenalty(penaltySpec, companyCode, transactionSubType, random, i, isPaid);
+            AccountPenalty penalty = createPenalty(penaltySpec, companyCode, transactionSubType, SECURE_RANDOM, i, isPaid);
             penalties.add(penalty);
         }
 
@@ -246,11 +245,14 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     private String getLPSubType(String transactionSubType, Random random) {
         if (transactionSubType == null || transactionSubType.isBlank()) {
-            List<PenaltiesTransactionSubType> allowed = Arrays.stream(
-                            PenaltiesTransactionSubType.values())
+            return Arrays.stream(PenaltiesTransactionSubType.values())
                     .filter(e -> !EXCLUDED_SUBTYPES.contains(e))
-                    .toList();
-            return allowed.get(random.nextInt(allowed.size())).getValue();
+                    .skip(random.nextInt((int) Arrays.stream(PenaltiesTransactionSubType.values())
+                            .filter(e -> !EXCLUDED_SUBTYPES.contains(e))
+                            .count()))
+                    .findFirst()
+                    .map(PenaltiesTransactionSubType::getValue)
+                    .orElseThrow();
         }
         return transactionSubType;
     }
