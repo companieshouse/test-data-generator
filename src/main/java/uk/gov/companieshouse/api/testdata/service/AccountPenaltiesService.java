@@ -46,8 +46,6 @@ public interface AccountPenaltiesService {
     AccountPenaltiesData updateAccountPenalties(String penaltyRef,
             UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
 
-        void validatePenaltySpec(PenaltySpec penaltySpec);
-
     /** .
      * Deletes an account penalties entity by its company code and customer code
      *

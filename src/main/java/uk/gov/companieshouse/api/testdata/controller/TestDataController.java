@@ -309,8 +309,6 @@ public class TestDataController {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
                 + " and customer code: " + request.getCustomerCode());
 
-        accountPenaltyService.validatePenaltySpec(request);
-
         var createdPenalties = testDataService.createPenaltyData(request);
         LOG.info("Successfully created account penalties with ID: "
                 + createdPenalties.getIdAsString());

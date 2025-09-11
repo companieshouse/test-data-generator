@@ -5,10 +5,13 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +21,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesCompanyCodes;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesTransactionSubType;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -33,6 +36,12 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AccountPenaltiesServiceImpl.class));
     private static final String EXCEPTION_MSG = "no account penalties";
+    private static final List<String> LP_LEDGER_CODES = List.of("EW", "SC", "NI");
+    private static final List<String> LP_TYPE_DESCRIPTIONS = List.of("EOCFP", "EOJSD");
+    private static final List<PenaltiesTransactionSubType> EXCLUDED_SUBTYPES = List.of(
+            PenaltiesTransactionSubType.S1, PenaltiesTransactionSubType.A2);
+    private static final List<String> C1_S1_LEDGER_CODES = List.of("E1", "S1", "N1");
+
 
     @Autowired
     private AccountPenaltiesRepository repository;
@@ -41,14 +50,6 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             new NoDataFoundException("penalty not found");
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
-
-    public void validatePenaltySpec(PenaltySpec penaltySpec) {
-        if (penaltySpec.getCompanyCode() != null
-                && !PenaltiesCompanyCodes.isValidCompanyCode(penaltySpec.getCompanyCode())) {
-            throw new IllegalArgumentException("Invalid company code: "
-                    + penaltySpec.getCompanyCode());
-        }
-    }
 
     @Override
     public AccountPenaltiesData getAccountPenalty(String companyCode, String customerCode,
@@ -180,29 +181,73 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
 
         String companyCode = getDefaultIfBlank(penaltySpec.getCompanyCode(), "LP");
-        String transactionSubType = getDefaultIfBlank(penaltySpec.getTransactionSubType(), "NH");
-
-        Optional<PenaltiesCompanyCodes> penaltyConfig =
-                PenaltiesCompanyCodes.fromCompanyAndSubType(companyCode, transactionSubType);
+        String transactionSubType = penaltySpec.getTransactionSubType() != null
+                ? penaltySpec.getTransactionSubType().getValue()
+                : null;
 
         List<AccountPenalty> penalties = new ArrayList<>();
+        Random random = new Random();
 
         for (var i = 0; i < numberOfPenalties; i++) {
             var penalty = new AccountPenalty();
-
             penalty.setCompanyCode(companyCode);
             penalty.setCustomerCode(penaltySpec.getCustomerCode());
 
-            if (penaltyConfig.isPresent()) {
-                PenaltiesCompanyCodes config = penaltyConfig.get();
-                penalty.setLedgerCode(config.getRandomLedgerCode());
-                penalty.setTransactionType(config.getTransactionType());
-                penalty.setTypeDescription(config.getRandomTypeDescription());
+            if ("LP".equals(companyCode)) {
+                penalty.setTransactionType("1");
+
+                String ledgerCode = getDefaultIfBlank(penaltySpec.getLedgerCode(),
+                        LP_LEDGER_CODES.get(random.nextInt(LP_LEDGER_CODES.size())));
+                penalty.setLedgerCode(ledgerCode);
+
+                String typeDescription = getDefaultIfBlank(penaltySpec.getTypeDescription(),
+                        LP_TYPE_DESCRIPTIONS.get(random.nextInt(LP_TYPE_DESCRIPTIONS.size())));
+                penalty.setTypeDescription(typeDescription);
+
+                String subType = transactionSubType;
+                if (subType == null || subType.isBlank()) {
+                    List<PenaltiesTransactionSubType> allowed = Arrays.stream(
+                            PenaltiesTransactionSubType.values())
+                            .filter(e -> !EXCLUDED_SUBTYPES.contains(e))
+                            .toList();
+                    subType = allowed.get(random.nextInt(allowed.size())).getValue();
+                }
+                penalty.setTransactionSubType(subType);
+                penalty.setTransactionReference(generateTransactionReference("LP", subType));
+            } else if ("C1".equals(companyCode) && "S1".equals(transactionSubType)) {
+                penalty.setTransactionType("1");
+                String ledgerCode = getDefaultIfBlank(penaltySpec.getLedgerCode(),
+                        C1_S1_LEDGER_CODES.get(random.nextInt(C1_S1_LEDGER_CODES.size())));
+                penalty.setLedgerCode(ledgerCode);
+                penalty.setTypeDescription("CS01");
+                penalty.setTransactionSubType("S1");
+                penalty.setTransactionReference(generateTransactionReference("C1", "S1"));
+            } else if ("C1".equals(companyCode) && "A2".equals(transactionSubType)) {
+                penalty.setTransactionType("1");
+                penalty.setLedgerCode("FU");
+                penalty.setTypeDescription("PENU");
+                penalty.setTransactionSubType("A2");
+                penalty.setTransactionReference(generateTransactionReference("C1", "A2"));
             } else {
-                penalty.setLedgerCode(getDefaultIfBlank(penaltySpec.getLedgerCode(), "SC"));
-                penalty.setTransactionType(getDefaultIfNull(penaltySpec.getTransactionType(), "1"));
-                penalty.setTypeDescription(getDefaultIfBlank(
-                        penaltySpec.getTypeDescription(), "Penalty"));
+                Optional<PenaltiesTransactionSubType> penaltyConfig =
+                        PenaltiesTransactionSubType.fromCompanyAndSubType(
+                                companyCode, transactionSubType);
+
+                if (penaltyConfig.isPresent()) {
+                    PenaltiesTransactionSubType config = penaltyConfig.get();
+                    penalty.setLedgerCode(config.getRandomLedgerCode());
+                    penalty.setTransactionType(config.getTransactionType());
+                    penalty.setTypeDescription(config.getRandomTypeDescription());
+                } else {
+                    penalty.setLedgerCode(getDefaultIfBlank(penaltySpec.getLedgerCode(), "SC"));
+                    penalty.setTransactionType(
+                            getDefaultIfNull(penaltySpec.getTransactionType(), "1"));
+                    penalty.setTypeDescription(getDefaultIfBlank(
+                            penaltySpec.getTypeDescription(), "Penalty"));
+                }
+                penalty.setTransactionSubType(getDefaultIfBlank(transactionSubType, "NH"));
+                penalty.setTransactionReference(generateTransactionReference(
+                        companyCode, transactionSubType));
             }
 
             double amount;
@@ -217,13 +262,10 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             }
             penalty.setAmount(roundToTwoDecimals(amount));
 
-            penalty.setTransactionReference(generateTransactionReference(
-                    companyCode, transactionSubType));
             penalty.setTransactionDate(getFormattedDate(1));
             penalty.setMadeUpDate(getFormattedDate(2));
             penalty.setIsPaid(isPaid);
             penalty.setOutstandingAmount(isPaid ? 0.0 : penalty.getAmount());
-            penalty.setTransactionSubType(transactionSubType);
             penalty.setDueDate(getFormattedDate(0, 6));
             penalty.setAccountStatus(getDefaultIfBlank(penaltySpec.getAccountStatus(), "CHS"));
             penalty.setDunningStatus(getDefaultIfBlank(penaltySpec.getDunningStatus(), "PEN3"));
@@ -290,17 +332,15 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     private String generateTransactionReference(String companyCode, String transactionSubType) {
-        Optional<PenaltiesCompanyCodes> penaltyConfig =
-                PenaltiesCompanyCodes.fromCompanyAndSubType(companyCode, transactionSubType);
-
-        var prefix = "A";
-
-        if (penaltyConfig.isPresent()) {
-            prefix = penaltyConfig.get().getPrefix();
+        String prefix = "A";
+        if ("LP".equals(companyCode)) {
+            prefix = "A";
+        } else if ("C1".equals(companyCode) && "S1".equals(transactionSubType)) {
+            prefix = "P";
+        } else if ("C1".equals(companyCode) && "A2".equals(transactionSubType)) {
+            prefix = "U";
         }
-
-        var secureRandom = new SecureRandom();
-        return prefix + String.format("%07d", secureRandom.nextInt(10000000));
+        return prefix + String.format("%07d", SECURE_RANDOM.nextInt(10000000));
     }
 
     private String getFormattedDate(int yearsAgo) {
