@@ -1,9 +1,9 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 public enum PenaltiesTransactionSubType {
     C1("C1", "1", List.of("E1", "S1", "N1"), List.of("CS01")),
@@ -98,6 +98,7 @@ public enum PenaltiesTransactionSubType {
     private final String transactionType;
     private final List<String> ledgerCodes;
     private final List<String> typeDescriptions;
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     PenaltiesTransactionSubType(
             String value, String transactionType,
@@ -119,16 +120,16 @@ public enum PenaltiesTransactionSubType {
 
     public String getRandomLedgerCode() {
         if (ledgerCodes == null || ledgerCodes.isEmpty()) return "";
-        return ledgerCodes.get(new Random().nextInt(ledgerCodes.size()));
+        return ledgerCodes.get(SECURE_RANDOM.nextInt(ledgerCodes.size()));
     }
 
     public String getRandomTypeDescription() {
         if (typeDescriptions == null || typeDescriptions.isEmpty()) return "";
-        return typeDescriptions.get(new Random().nextInt(typeDescriptions.size()));
+        return typeDescriptions.get(SECURE_RANDOM.nextInt(typeDescriptions.size()));
     }
 
     public static Optional<PenaltiesTransactionSubType>
-    fromCompanyAndSubType(String companyCode, String transactionSubType) {
+    fromCompanyAndSubType(String transactionSubType) {
         if (transactionSubType == null) return Optional.empty();
         for (PenaltiesTransactionSubType subType : PenaltiesTransactionSubType.values()) {
             if (subType.getValue().equals(transactionSubType)) {
