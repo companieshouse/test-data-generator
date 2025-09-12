@@ -34,13 +34,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected void handleDataException(DataException ex) {
         logException(ex);
     }
-    
+
     @ExceptionHandler(value = { NoDataFoundException.class })
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     protected void handleNoDataFoundException(NoDataFoundException ex) {
         logException(ex);
     }
-    
+
     @ExceptionHandler(value = { InvalidAuthCodeException.class })
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<ValidationErrors> handleInvalidAuthCode(InvalidAuthCodeException ex) {
@@ -50,13 +50,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         errors.addError(createValidationError("incorrect company auth_code"));
         return new ResponseEntity<>(errors, HttpStatus.UNAUTHORIZED);
     }
-    
+
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-        HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status,
-        WebRequest request) {
+            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status,
+            WebRequest request) {
         logException(ex);
-        
+
         String message = "invalid request";
         Throwable cause = ex.getCause();
         if (cause instanceof InvalidFormatException) {
@@ -74,19 +74,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         errors.addError(createValidationError(message));
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
-    
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-            HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+                                                                  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         logException(ex);
-        
+
         ValidationErrors errors = new ValidationErrors();
         ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage)
                 .map(this::createValidationError)
                 .forEach(errors::addError);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
-    
+
     private ValidationError createValidationError(String message) {
         return new ValidationError(message, null, null, "ch:validation");
     }
@@ -94,5 +94,4 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private void logException(Exception ex) {
         LOG.error(ex);
     }
-
 }

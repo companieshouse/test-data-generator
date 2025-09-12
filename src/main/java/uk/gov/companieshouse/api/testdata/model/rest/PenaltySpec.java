@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 
 import java.time.Instant;
@@ -16,6 +17,8 @@ public class PenaltySpec {
 
     @JsonProperty("company_code")
     @NotNull(message = "Company code must not be blank")
+    @Pattern(regexp = "LP|C1",
+            message = "Invalid Company Code")
     private String companyCode;
 
     @JsonProperty("number_of_penalties")
@@ -29,9 +32,13 @@ public class PenaltySpec {
     private Double amount;
 
     @JsonProperty("type_description")
+    @Pattern(regexp = "EOCFP|EOJSD|PENU|CS01}",
+            message = "Invalid type description")
     private String typeDescription;
 
     @JsonProperty("ledger_code")
+    @Pattern(regexp = "EW|SC|NI|E1|S1|N1|FU",
+            message = "Invalid ledger code")
     private String ledgerCode;
 
     @JsonProperty("dunning_status")
@@ -47,7 +54,7 @@ public class PenaltySpec {
     private String transactionType;
 
     @JsonProperty("transaction_sub_type")
-    private String transactionSubType;
+    private PenaltiesTransactionSubType transactionSubType;
 
     @JsonProperty("account_status")
     private String accountStatus;
@@ -119,11 +126,11 @@ public class PenaltySpec {
         this.transactionType = transactionType;
     }
 
-    public String getTransactionSubType() {
+    public PenaltiesTransactionSubType getTransactionSubType() {
         return transactionSubType;
     }
 
-    public void setTransactionSubType(String transactionSubType) {
+    public void setTransactionSubType(PenaltiesTransactionSubType transactionSubType) {
         this.transactionSubType = transactionSubType;
     }
 
