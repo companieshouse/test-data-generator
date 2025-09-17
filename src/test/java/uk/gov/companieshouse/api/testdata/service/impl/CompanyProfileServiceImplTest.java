@@ -19,10 +19,14 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -803,24 +807,19 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
     }
 
-    @Test
-    void setsLegalFormToDefaultWhenForeignCompanyLegalFormIsNull() {
-        overseasSpec.setForeignCompanyLegalForm(null);
+    @ParameterizedTest
+    @MethodSource("legalFormProvider")
+    void setsLegalFormBasedOnForeignCompanyLegalForm(String inputLegalForm, String expectedLegalForm) {
+        overseasSpec.setForeignCompanyLegalForm(inputLegalForm);
         CompanyProfile profile = companyProfileService.create(overseasSpec);
-        assertEquals("Plc", ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
+        assertEquals(expectedLegalForm, ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
     }
 
-    @Test
-    void setsLegalFormToDefaultWhenForeignCompanyLegalFormIsBlank() {
-        overseasSpec.setForeignCompanyLegalForm("   ");
-        CompanyProfile profile = companyProfileService.create(overseasSpec);
-        assertEquals("Plc", ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
-    }
-
-    @Test
-    void setsLegalFormToProvidedValueWhenForeignCompanyLegalFormIsNotBlank() {
-        overseasSpec.setForeignCompanyLegalForm("GmbH");
-        CompanyProfile profile = companyProfileService.create(overseasSpec);
-        assertEquals("GmbH", ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
+    static Stream<Arguments> legalFormProvider() {
+        return Stream.of(
+                Arguments.of(null, "Plc"),
+                Arguments.of("   ", "Plc"),
+                Arguments.of("GmbH", "GmbH")
+        );
     }
 }
