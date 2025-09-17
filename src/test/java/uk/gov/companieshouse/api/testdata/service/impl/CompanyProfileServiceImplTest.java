@@ -802,4 +802,25 @@ class CompanyProfileServiceImplTest {
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
     }
+
+    @Test
+    void setsLegalFormToDefaultWhenForeignCompanyLegalFormIsNull() {
+        overseasSpec.setForeignCompanyLegalForm(null);
+        CompanyProfile profile = companyProfileService.create(overseasSpec);
+        assertEquals("Plc", ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
+    }
+
+    @Test
+    void setsLegalFormToDefaultWhenForeignCompanyLegalFormIsBlank() {
+        overseasSpec.setForeignCompanyLegalForm("   ");
+        CompanyProfile profile = companyProfileService.create(overseasSpec);
+        assertEquals("Plc", ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
+    }
+
+    @Test
+    void setsLegalFormToProvidedValueWhenForeignCompanyLegalFormIsNotBlank() {
+        overseasSpec.setForeignCompanyLegalForm("GmbH");
+        CompanyProfile profile = companyProfileService.create(overseasSpec);
+        assertEquals("GmbH", ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
+    }
 }

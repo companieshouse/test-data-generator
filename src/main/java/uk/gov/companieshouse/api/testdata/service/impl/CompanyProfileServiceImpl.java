@@ -238,9 +238,14 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         OverseasEntity.IForeignCompanyDetails foreignCompanyDetails =
                 OverseasEntity.createForeignCompanyDetails();
         foreignCompanyDetails.setGovernedBy(GOVERNED_BY);
-        foreignCompanyDetails.setLegalForm(LEGAL_FORM);
         foreignCompanyDetails.setCreditFinancialInstitution(true);
         foreignCompanyDetails.setBusinessActivity(BUSINESS_ACTIVITY);
+
+        var legalForm = (spec.getForeignCompanyLegalForm() == null
+                || spec.getForeignCompanyLegalForm().isBlank())
+                ? LEGAL_FORM
+                : spec.getForeignCompanyLegalForm();
+        foreignCompanyDetails.setLegalForm(legalForm);
 
         // Originating Registry
         OverseasEntity.IOriginatingRegistry originatingRegistry =
