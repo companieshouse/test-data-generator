@@ -48,6 +48,8 @@ public class OverseasEntity extends CompanyProfile {
     public static interface IForeignCompanyDetails {
         void setGovernedBy(String governedBy);
 
+        String getLegalForm();
+
         void setLegalForm(String legalForm);
 
         void setOriginatingRegistry(IOriginatingRegistry originatingRegistry);
@@ -153,6 +155,10 @@ public class OverseasEntity extends CompanyProfile {
         this.externalRegistrationNumber = externalRegistrationNumber;
     }
 
+    public IForeignCompanyDetails getForeignCompanyDetails() {
+        return this.foreignCompanyDetails;
+    }
+
     public void setForeignCompanyDetails(IForeignCompanyDetails foreignCompanyDetails) {
         this.foreignCompanyDetails = (ForeignCompanyDetails) foreignCompanyDetails;
     }
@@ -223,6 +229,11 @@ public class OverseasEntity extends CompanyProfile {
         @Override
         public void setGovernedBy(String governedBy) {
             this.governedBy = governedBy;
+        }
+
+        @Override
+        public String getLegalForm() {
+            return this.legalForm;
         }
 
         @Override

@@ -108,6 +108,9 @@ public class CompanySpec {
     @JsonProperty("advanced_search")
     private Boolean advancedSearch;
 
+    @JsonProperty("foreign_company_legal_form")
+    private String foreignCompanyLegalForm;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -318,6 +321,14 @@ public class CompanySpec {
 
     public void setNoDefaultOfficer(Boolean defaultOfficerActive) {
         this.noDefaultOfficer = defaultOfficerActive;
+    }
+
+    public String getForeignCompanyLegalForm() {
+        return foreignCompanyLegalForm;
+    }
+
+    public void setForeignCompanyLegalForm(String foreignComapnyLegalForm) {
+        this.foreignCompanyLegalForm = foreignComapnyLegalForm;
     }
 }
 
