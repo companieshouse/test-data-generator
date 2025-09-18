@@ -665,6 +665,30 @@ class TestDataControllerTest {
     }
 
     @Test
+    void getAccountPenaltiesByCustomerCodeAndCompanyCode() throws Exception {
+        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
+
+        when(this.testDataService.getAccountPenaltiesData(CUSTOMER_CODE, COMPANY_CODE))
+                .thenReturn(accountPenaltiesData);
+
+        ResponseEntity<AccountPenaltiesData> response = this.testDataController
+                .getAccountPenaltiesByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE);
+
+        assertEquals(accountPenaltiesData, response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void getAccountPenaltiesByCustomerCodeAndCompanyCodeNotFound() throws Exception {
+        when(this.testDataService.getAccountPenaltiesData(CUSTOMER_CODE, COMPANY_CODE))
+                .thenThrow(new NoDataFoundException("Account penalties not found"));
+
+        assertThrows(NoDataFoundException.class, () -> {
+            this.testDataController.getAccountPenaltiesByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE);
+        });
+    }
+
+    @Test
     void updateAccountPenalties() throws Exception {
         String companyCode = COMPANY_CODE;
         String customerCode = CUSTOMER_CODE;

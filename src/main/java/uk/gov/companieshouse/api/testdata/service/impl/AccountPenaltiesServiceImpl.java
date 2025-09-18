@@ -81,6 +81,16 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     @Override
+    public AccountPenaltiesData getAccountPenalties(String customerCode, String companyCode)
+            throws NoDataFoundException {
+        var accountPenalties =
+                repository.findByCustomerCodeAndCompanyCode(customerCode, companyCode)
+                        .orElseThrow(() -> new NoDataFoundException(EXCEPTION_MSG));
+
+        return mapToAccountPenaltiesData(accountPenalties);
+    }
+
+    @Override
     public AccountPenaltiesData updateAccountPenalties(
             String penaltyRef, UpdateAccountPenaltiesRequest request)
             throws NoDataFoundException, DataException {

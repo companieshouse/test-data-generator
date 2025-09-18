@@ -24,13 +24,24 @@ public interface AccountPenaltiesService {
             String penaltyRef) throws NoDataFoundException;
 
     /**
-     * Gets an account penalties entity by its company code and customer code.
+     * Gets an account penalties entity by its ID.
      *
-     * @param id  the company code
+     * @param id  the ID of the AccountPenalties Mongo DB collection
      * @return the {@link AccountPenaltiesData} with all penalties the {@link PenaltyData} list
      * @throws NoDataFoundException if the account penalties cannot be found
      */
     AccountPenaltiesData getAccountPenalties(String id)
+            throws NoDataFoundException;
+
+    /**
+     * Gets an account penalties entity by its company code and customer code.
+     *
+     * @param customerCode the customer code
+     * @param companyCode the company code
+     * @return the {@link AccountPenaltiesData} with all penalties the {@link PenaltyData} list
+     * @throws NoDataFoundException if the account penalties cannot be found
+     */
+    AccountPenaltiesData getAccountPenalties(String customerCode, String companyCode)
             throws NoDataFoundException;
 
     /**

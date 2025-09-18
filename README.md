@@ -317,11 +317,17 @@ In order to use the generator, there are different possible endpoints that can b
 
   - A usage example looks like this: `{ "company_code": "LP", "customer_code": "NI095887", "number_of_penalties": 2, "amount": 150 }`
 
-- GET: Sending a GET request to retrieve the Account Penalties `{Base URL}/test-data/penalties/{id}`. 
+- GET: Sending a GET request to retrieve the Account Penalties by id `{Base URL}/test-data/penalties/{id}`. 
   - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory and passed as a path variable.
   - `penalty_ref`: The Transaction Reference of the Account Penalties entry in the account_penalties db collection. This is optional and passed as a query parameter to return a single penalty from a list.
-  - 
+
   - A usage example looks like this: `GET {Base URL}/test-data/penalties/687932936d534811231973b6?transactionReference=A1234567`
+
+- GET: Sending a GET request to retrieve the Account Penalties by customer code and company code `{Base URL}/test-data/penalties/query?customerCode=<customerCode>&companyCode=<companyCode>`. 
+  - `customerCode`: The customer code of the Account Penalties in the account_penalties db collection. This is mandatory and passed as a query parameter.
+  - `companyCode`: The Company code of the Account Penalties entry in the account_penalties db collection. This is mandatory and passed as a query parameter.
+
+  - A usage example looks like this: `GET {Base URL}/test-data/penalties/query?customerCode=12345678&companyCode=LP`
 
 - PUT: Sending a PUT request to update Account Penalties for a specific Penalty `{Base URL}/test-data/penalties/{penaltyRef}` will update an Account Penalties entry. The request body must include mandatory `companyCode` and `customer_code`, and optional `createdAt`, `closedAt`, `isPaid`, `amount` and `outstandingAMount` parameters.
 
@@ -333,7 +339,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `amount`: The Amount of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
   - `outstanding_amount`: The Amount of the Penalty being updated in the Account Penalties data in the account_penalties db collection. This is optional.
 
-  A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
+  - A usage example looks like this: `{"company_code": "LP", "customer_code": "12345678", "created_at": "2026-06-07T14:04:23.512Z", "closed_at": "2026-06-07T14:04:23.512Z", "is_paid": true, "amount": 50, "outstanding_amount": 0}`
 
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/penalties/{id}` will delete the `Account Penalties`. `id`  is required.
   - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory.

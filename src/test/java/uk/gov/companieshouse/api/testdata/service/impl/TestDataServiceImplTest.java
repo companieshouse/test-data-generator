@@ -1785,6 +1785,24 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void getAccountPenaltiesDataByCustomerCodeAndCompanyCode() throws Exception {
+        testDataService.getAccountPenaltiesData(CUSTOMER_CODE, COMPANY_CODE);
+        verify(accountPenaltiesService).getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
+    }
+
+    @Test
+    void getAccountPenaltiesDataByCustomerCodeAndCompanyCodeNotFoundException() throws NoDataFoundException {
+        NoDataFoundException ex = new NoDataFoundException(
+                "Error retrieving account penalties - not found");
+        when(accountPenaltiesService.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE))
+                .thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataService.getAccountPenaltiesData(CUSTOMER_CODE, COMPANY_CODE));
+        assertEquals(ex.getMessage(), thrown.getMessage());
+    }
+
+    @Test
     void updateAccountPenaltiesData() throws Exception {
         UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
         request.setCompanyCode(COMPANY_CODE);

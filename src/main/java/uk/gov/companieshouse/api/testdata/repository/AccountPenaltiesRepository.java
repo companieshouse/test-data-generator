@@ -15,5 +15,8 @@ public interface AccountPenaltiesRepository extends MongoRepository<AccountPenal
     Optional<AccountPenalties> findPenalty(
             String companyCode, String customerCode, String transactionReference);
 
+    @Query("{ 'customer_code':  ?0, 'company_code':  ?1}")
+    Optional<AccountPenalties> findByCustomerCodeAndCompanyCode(String customerCode, String companyCode);
+
     Optional<AccountPenalties> findAllById(String id);
 }
