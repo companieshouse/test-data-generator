@@ -127,6 +127,7 @@ class TestDataServiceImplTest {
     private static final String CERTIFIED_COPIES_ID = "CCD-123456-789012";
     private static final String MISSING_IMAGE_DELIVERIES_ID = "MID-123456-789012";
     private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
+    private static final String TRANSACTION_ID = "903085-903085-903085";
 
     @Mock
     private CompanyProfileService companyProfileService;
@@ -184,9 +185,7 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
-
-    @Mock
-    private TransactionService transactionService;
+    @Mock private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
     @Mock
@@ -2230,7 +2229,7 @@ class TestDataServiceImplTest {
         TransactionsSpec transactionsSpec = new TransactionsSpec();
         transactionsSpec.setUserId("Test12454");
         transactionsSpec.setReference("ACSP Registration");
-        TransactionsData txn = new TransactionsData("Test12454","ACSP Registration" ,"forename","surname","email","description","status");
+        TransactionsData txn = new TransactionsData("Test12454","ACSP Registration" ,"forename","surname","email","description","status", "250788-250788-250788");
         when(transactionService.create(transactionsSpec)).thenReturn(txn);
         TransactionsData result = testDataService.createTransactionData(transactionsSpec);
         assertEquals(txn, result);
@@ -2247,6 +2246,39 @@ class TestDataServiceImplTest {
                 testDataService.createTransactionData(transactionsSpec));
         assertEquals("Error creating transaction", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
+    }
+
+    @Test
+    void deleteTransactionData() throws DataException {
+        when(transactionService.delete(TRANSACTION_ID)).thenReturn(true);
+
+        boolean result = testDataService.deleteTransaction(TRANSACTION_ID);
+
+        assertTrue(result);
+        verify(transactionService).delete(TRANSACTION_ID);
+    }
+
+    @Test
+    void deleteTransactionDataFailure() throws DataException {
+        when(transactionService.delete(TRANSACTION_ID)).thenReturn(false);
+
+        boolean result = testDataService.deleteTransaction(TRANSACTION_ID);
+
+        assertFalse(result);
+        verify(transactionService, times(1)).delete(TRANSACTION_ID);
+    }
+
+    @Test
+    void deleteTransactionThrowsException() {
+        RuntimeException ex = new RuntimeException("error");
+        when(transactionService.delete(TRANSACTION_ID)).thenThrow(ex);
+
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.deleteTransaction(TRANSACTION_ID));
+
+        assertEquals("Error deleting transaction", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(transactionService, times(1)).delete(TRANSACTION_ID);
     }
 
     @Test

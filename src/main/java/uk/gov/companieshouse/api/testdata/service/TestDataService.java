@@ -228,7 +228,16 @@ public interface TestDataService {
      */
     PostcodesData getPostcodes(String country) throws DataException;
 
+    /**
+     * Adds a new transaction and acsp application test data based on the provided specifications.
+     *
+     * @param transactionsSpec the specifications of the transactions
+     * @return the transactions and acsp application id
+     * @throws DataException if there is an error during transactions or acsp application creation
+     */
     TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException;
+
+    boolean deleteTransaction(String transactionId) throws DataException;
 
     /**
      * Creates a new user company association test data based on the

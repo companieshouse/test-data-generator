@@ -2,6 +2,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.Objects;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +15,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TransactionService;
+import uk.gov.companieshouse.api.testdata.service.DataService;
 
 @Service
-public class TransactionServiceImpl implements TransactionService {
- 
+public class TransactionServiceImpl implements DataService<TransactionsData, TransactionsSpec>  {
 
     @Autowired
     private TransactionsRepository repository;
@@ -27,7 +28,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private RandomService randomService;
-
  
     public TransactionsData create(TransactionsSpec txnSpec) throws DataException {
         var randomId = randomService.getTransactionId();
@@ -57,7 +57,36 @@ public class TransactionServiceImpl implements TransactionService {
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);
         acsprepository.save(acspApplication);
-        return new TransactionsData(txn.getId(), txn.getEmail(),txn.getUserId(),txn.getDescription(),txn.getReference(),txn.getResumeUri(),txn.getStatus());
+        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getUserId(), txn.getDescription(), txn.getReference(), txn.getResumeUri(), txn.getStatus(), acspApplicationId);
     }
 
+    @Override
+    public boolean delete(String transactionId) {
+        var txnOpt = repository.findById(transactionId);
+        if (txnOpt.isEmpty()) {
+            return false;
+        }
+
+        Transactions txn = txnOpt.get();
+        String resumeUri = txn.getResumeUri();
+        String acspApplicationId = extractAcspId(resumeUri);
+
+        var acspOpt = acsprepository.findById(acspApplicationId);
+        acspOpt.ifPresent(acsprepository::delete);
+
+        repository.delete(txn);
+        return true;
+    }
+
+    private String extractAcspId(String uri) {
+        if (uri == null) return null;
+
+        Pattern pattern = Pattern.compile("acspId=([^&]+)");
+        Matcher matcher = pattern.matcher(uri);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        // Return null if not found
+        return null;
+    }
 }

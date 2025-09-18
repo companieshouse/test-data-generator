@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,6 +20,8 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +61,6 @@ class TransactionServiceImplTest {
         acspSpec = new AcspApplicationSpec();
 
     }
-
 
     @Test
     void createTransaction() throws DataException {
@@ -114,5 +116,28 @@ class TransactionServiceImplTest {
         assertNotNull(acspAdded.getSelf());
         assertEquals("limited-company", acspAdded.getTypeOfBusiness());
     }
+    @Test
+    void deleteTransactionSuccessfully() {
+        String id = "903085-903085-903085";
+        Transactions entity = new Transactions();
+        entity.setId(id);
 
+        when(transactionsRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        boolean result = transactionServiceImpl.delete(id);
+
+        assertTrue(result);
+        verify(transactionsRepository, times(1)).delete(entity);
+    }
+
+    @Test
+    void deleteTransactionNotFound() {
+        String id = "nonexistent";
+        when(transactionsRepository.findById(id)).thenReturn(Optional.empty());
+
+        boolean result = transactionServiceImpl.delete(id);
+
+        assertFalse(result);
+        verify(transactionsRepository, never()).delete(any());
+    }
 }
