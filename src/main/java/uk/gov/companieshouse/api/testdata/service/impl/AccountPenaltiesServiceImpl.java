@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -83,9 +84,12 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     @Override
     public AccountPenaltiesData getAccountPenalties(String customerCode, String companyCode)
             throws NoDataFoundException {
-        var accountPenalties =
-                repository.findByCustomerCodeAndCompanyCode(customerCode, companyCode)
-                        .orElseThrow(() -> new NoDataFoundException(EXCEPTION_MSG));
+        // CustomerCode and CompanyCode together form a composite unique key, so this would return a list of
+        // a single AccountPenalties or an empty list
+        var accountPenalties = repository.findByCustomerCodeAndCompanyCode(customerCode, companyCode)
+                .orElseGet(Collections::emptyList)
+                .stream().findFirst()
+                .orElseThrow(() -> new NoDataFoundException(EXCEPTION_MSG));
 
         return mapToAccountPenaltiesData(accountPenalties);
     }

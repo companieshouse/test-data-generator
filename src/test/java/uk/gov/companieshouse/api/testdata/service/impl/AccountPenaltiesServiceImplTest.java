@@ -120,7 +120,7 @@ class AccountPenaltiesServiceImplTest {
         AccountPenalties accountPenalties = createAccountPenalties();
 
         when(repository.findByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE))
-                .thenReturn(Optional.of(accountPenalties));
+                .thenReturn(Optional.of(List.of(accountPenalties)));
 
         AccountPenaltiesData result = service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
 

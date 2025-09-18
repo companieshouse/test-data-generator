@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -16,7 +17,7 @@ public interface AccountPenaltiesRepository extends MongoRepository<AccountPenal
             String companyCode, String customerCode, String transactionReference);
 
     @Query("{ 'customer_code':  ?0, 'company_code':  ?1}")
-    Optional<AccountPenalties> findByCustomerCodeAndCompanyCode(String customerCode, String companyCode);
+    Optional<List<AccountPenalties>> findByCustomerCodeAndCompanyCode(String customerCode, String companyCode);
 
     Optional<AccountPenalties> findAllById(String id);
 }
