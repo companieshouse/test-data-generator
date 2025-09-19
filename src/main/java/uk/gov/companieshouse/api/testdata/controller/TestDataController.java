@@ -326,9 +326,19 @@ public class TestDataController {
         if (transactionReference != null) {
             List<PenaltyData> filteredPenalties = accountPenaltiesData.getPenalties().stream()
                     .filter(penalty -> transactionReference.equals(penalty.getTransactionReference()))
-                    .collect(Collectors.toList());
+                    .toList();
             accountPenaltiesData.setPenalties(filteredPenalties);
         }
+
+        return ResponseEntity.ok(accountPenaltiesData);
+    }
+
+    @GetMapping("/penalties/query")
+    public ResponseEntity<AccountPenaltiesData> getAccountPenaltiesByCustomerCodeAndCompanyCode(
+            @RequestParam(name = "customerCode") String customerCode,
+            @RequestParam(name = "companyCode") String companyCode) throws NoDataFoundException {
+
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(customerCode, companyCode);
 
         return ResponseEntity.ok(accountPenaltiesData);
     }

@@ -116,6 +116,34 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
+    void testGetAccountPenaltiesByCustomerCodeAndCompanyCodeSuccess() throws NoDataFoundException {
+        AccountPenalties accountPenalties = createAccountPenalties();
+
+        when(repository.findByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE))
+                .thenReturn(Optional.of(List.of(accountPenalties)));
+
+        AccountPenaltiesData result = service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
+
+        assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
+        assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
+        assertEquals(accountPenalties.getId().toHexString(), result.getIdAsString());
+        assertFalse(accountPenalties.getPenalties().isEmpty());
+        verify(repository, times(1))
+                .findByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE);
+    }
+
+    @Test
+    void testGetAccountPenaltiesByCustomerCodeAndCompanyCodeNotFound() {
+        when(repository.findByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE))
+                .thenReturn(Optional.empty());
+
+        NoDataFoundException exception =
+                assertThrows(NoDataFoundException.class,
+                        () -> service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE));
+        assertEquals("no account penalties", exception.getMessage());
+    }
+
+    @Test
     void testDeleteAccountPenaltiesSuccess() throws NoDataFoundException {
         when(repository.findAllById(PENALTY_ID)).thenReturn(Optional.of(ACCOUNT_PENALTIES));
 

@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -76,6 +77,19 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         var accountPenalties =
                 repository.findAllById(id)
                         .orElseThrow(() -> new NoDataFoundException(EXCEPTION_MSG));
+
+        return mapToAccountPenaltiesData(accountPenalties);
+    }
+
+    @Override
+    public AccountPenaltiesData getAccountPenalties(String customerCode, String companyCode)
+            throws NoDataFoundException {
+        // CustomerCode and CompanyCode together form a composite unique key, so this would return a list of
+        // a single AccountPenalties or an empty list
+        var accountPenalties = repository.findByCustomerCodeAndCompanyCode(customerCode, companyCode)
+                .orElseGet(Collections::emptyList)
+                .stream().findFirst()
+                .orElseThrow(() -> new NoDataFoundException(EXCEPTION_MSG));
 
         return mapToAccountPenaltiesData(accountPenalties);
     }
@@ -297,11 +311,11 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     private void configurePenaltyAmount(AccountPenalty penalty, PenaltySpec penaltySpec, int index) {
         double amount;
         if (penaltySpec.getAmount() != null) {
-            amount = (index == 0) ? penaltySpec.getAmount() : generateRandomAmount(10, 99);
+            amount = (index == 0) ? roundToTwoDecimals(penaltySpec.getAmount()) : generateRandomAmount(10, 99);
         } else {
             amount = generateRandomAmount(10, 99);
         }
-        penalty.setAmount(roundToTwoDecimals(amount));
+        penalty.setAmount(amount);
     }
 
     private void configurePenaltyDatesAndStatus(AccountPenalty penalty, boolean isPaid, PenaltySpec penaltySpec) {
@@ -394,8 +408,10 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return Math.round(value * 100.0) / 100.0;
     }
 
+    // Generate random numbers between min and max, both min and max inclusive
     private double generateRandomAmount(double min, double max) {
-        return min + (max - min) * SECURE_RANDOM.nextDouble();
+        double maxRand = max - min;
+        return Math.round(min + (SECURE_RANDOM.nextDouble() * maxRand));
     }
 
     private String getDefaultIfBlank(String value, String defaultValue) {

@@ -172,13 +172,24 @@ public interface TestDataService {
         throws DataException;
 
     /**
-     * Gets the account penalties data for a given company code and customer code.
+     * Gets the account penalties data for a given company by AccountPenalties ID.
      *
-     * @param id  the company code
+     * @param id  the ID of the AccountPenalties Mongo DB collection
      * @return @return the {@link AccountPenaltiesData}
      * @throws NoDataFoundException if the penalty cannot be found
      */
     AccountPenaltiesData getAccountPenaltiesData(String id)
+            throws NoDataFoundException;
+
+    /**
+     * Gets the account penalties data for a given company code and customer code.
+     *
+     * @param customerCode  the customer code
+     * @param companyCode  the company code
+     * @return @return the {@link AccountPenaltiesData}
+     * @throws NoDataFoundException if the penalty cannot be found
+     */
+    AccountPenaltiesData getAccountPenaltiesData(String customerCode, String companyCode)
             throws NoDataFoundException;
 
     /**
