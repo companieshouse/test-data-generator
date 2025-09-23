@@ -28,7 +28,7 @@ public class TransactionServiceImpl implements DataService<TransactionsData, Tra
 
     @Autowired
     private RandomService randomService;
- 
+
     public TransactionsData create(TransactionsSpec txnSpec) throws DataException {
         var randomId = randomService.getTransactionId();
         final var txn = new Transactions();
@@ -71,8 +71,10 @@ public class TransactionServiceImpl implements DataService<TransactionsData, Tra
         String resumeUri = txn.getResumeUri();
         String acspApplicationId = extractAcspId(resumeUri);
 
-        var acspOpt = acsprepository.findById(acspApplicationId);
-        acspOpt.ifPresent(acsprepository::delete);
+        if (acspApplicationId != null) {
+            var acspOpt = acsprepository.findById(acspApplicationId);
+            acspOpt.ifPresent(acsprepository::delete);
+        }
 
         repository.delete(txn);
         return true;
@@ -81,12 +83,12 @@ public class TransactionServiceImpl implements DataService<TransactionsData, Tra
     private String extractAcspId(String uri) {
         if (uri == null) return null;
 
-        Pattern pattern = Pattern.compile("acspId=([^&]+)");
-        Matcher matcher = pattern.matcher(uri);
+        var pattern = Pattern.compile("acspId=([^&]+)");
+        var matcher = pattern.matcher(uri);
         if (matcher.find()) {
             return matcher.group(1);
         }
-        // Return null if not found
+
         return null;
     }
 }

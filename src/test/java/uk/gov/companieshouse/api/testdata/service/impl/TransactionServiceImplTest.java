@@ -140,4 +140,20 @@ class TransactionServiceImplTest {
         assertFalse(result);
         verify(transactionsRepository, never()).delete(any());
     }
+
+    @Test
+    void deleteTransactionWithNullResumeUri() {
+        String id = "txn-null-uri";
+        Transactions entity = new Transactions();
+        entity.setId(id);
+        entity.setResumeUri(null);
+
+        when(transactionsRepository.findById(id)).thenReturn(Optional.of(entity));
+
+        boolean result = transactionServiceImpl.delete(id);
+
+        assertTrue(result);
+        verify(acspApplicationRepository, never()).findById(any());
+        verify(transactionsRepository, times(1)).delete(entity);
+    }
 }
