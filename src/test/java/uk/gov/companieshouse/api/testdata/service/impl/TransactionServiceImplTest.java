@@ -69,14 +69,19 @@ class TransactionServiceImplTest {
         txnSpec.setId(randomService.getTransactionId());
         when(transactionsRepository.save(any(Transactions.class))).thenReturn(transactions);
         when(acspApplicationRepository.save(any(AcspApplication.class))).thenReturn(acspApplication);
+
         TransactionsData result = transactionServiceImpl.create(txnSpec);
+
         assertNotNull(result);
+
         verify(transactionsRepository).save(any(Transactions.class));
         verify(transactionsRepository).save(txnCaptor.capture());
         verify(acspApplicationRepository).save(any(AcspApplication.class));
         verify(acspApplicationRepository).save(acspApplicationCaptor.capture());
+
         Transactions captured = txnCaptor.getValue();
         AcspApplication acspAdded = acspApplicationCaptor.getValue();
+
         assertNotNull(captured);
         assertNotNull(acspAdded);
         assertEquals("test123", captured.getUserId());
@@ -94,18 +99,24 @@ class TransactionServiceImplTest {
         txnSpec.setUserId("test123");
         txnSpec.setReference("ACSP Registration");
         txnSpec.setEmail("testuser@test.com");
+
         when(transactionsRepository.save(any(Transactions.class))).thenReturn(transactions);
         when(acspApplicationRepository.save(any(AcspApplication.class))).thenReturn(acspApplication);
+
         TransactionsData result = transactionServiceImpl.create(txnSpec);
+
         assertNotNull(result);
         verify(transactionsRepository).save(any(Transactions.class));
         verify(transactionsRepository).save(txnCaptor.capture());
         verify(acspApplicationRepository).save(any(AcspApplication.class));
         verify(acspApplicationRepository).save(acspApplicationCaptor.capture());
+
         Transactions captured = txnCaptor.getValue();
         AcspApplication acspAdded = acspApplicationCaptor.getValue();
+
         assertNotNull(captured);
         assertNotNull(acspAdded);
+
         assertEquals("test123", captured.getUserId());
         assertEquals("ACSP Registration", captured.getReference());
         assertEquals("open", captured.getStatus());
@@ -118,15 +129,25 @@ class TransactionServiceImplTest {
     }
     @Test
     void deleteTransactionSuccessfully() {
-        String id = "903085-903085-903085";
+        String txnId = "903085-903085-903085";
+        String acspId = "acsp-456";
+
         Transactions entity = new Transactions();
-        entity.setId(id);
+        entity.setId(txnId);
+        entity.setResumeUri("/register-as-companies-house-authorised-agent/resume?transactionId="
+                + txnId + "&acspId=" + acspId);
 
-        when(transactionsRepository.findById(id)).thenReturn(Optional.of(entity));
+        AcspApplication acspEntity = new AcspApplication();
+        acspEntity.setId(acspId);
 
-        boolean result = transactionServiceImpl.delete(id);
+        when(transactionsRepository.findById(txnId)).thenReturn(Optional.of(entity));
+        when(acspApplicationRepository.findById(acspId)).thenReturn(Optional.of(acspEntity));
+
+        boolean result = transactionServiceImpl.delete(txnId);
 
         assertTrue(result);
+        verify(acspApplicationRepository, times(1)).findById(acspId);
+        verify(acspApplicationRepository, times(1)).delete(acspEntity);
         verify(transactionsRepository, times(1)).delete(entity);
     }
 
@@ -139,6 +160,7 @@ class TransactionServiceImplTest {
 
         assertFalse(result);
         verify(transactionsRepository, never()).delete(any());
+        verify(acspApplicationRepository, never()).findById(any());
     }
 
     @Test
@@ -154,6 +176,44 @@ class TransactionServiceImplTest {
 
         assertTrue(result);
         verify(acspApplicationRepository, never()).findById(any());
-        verify(transactionsRepository, times(1)).delete(entity);
+        verify(acspApplicationRepository, never()).delete(any());
+        verify(transactionsRepository).delete(entity);
+    }
+
+    @Test
+    void deleteTransactionWithResumeUriWithoutAcspId() {
+        String txnId = "txn-no-acsp";
+        Transactions entity = new Transactions();
+        entity.setId(txnId);
+        entity.setResumeUri("/resume?transactionId=" + txnId); // no acspId param
+
+        when(transactionsRepository.findById(txnId)).thenReturn(Optional.of(entity));
+
+        boolean result = transactionServiceImpl.delete(txnId);
+
+        assertTrue(result);
+        verify(acspApplicationRepository, never()).findById(any());
+        verify(acspApplicationRepository, never()).delete(any());
+        verify(transactionsRepository).delete(entity);
+    }
+
+    @Test
+    void deleteTransactionAcspIdNotFoundInRepository() {
+        String txnId = "txn-789";
+        String acspId = "acsp-999";
+
+        Transactions entity = new Transactions();
+        entity.setId(txnId);
+        entity.setResumeUri("/resume?transactionId=" + txnId + "&acspId=" + acspId);
+
+        when(transactionsRepository.findById(txnId)).thenReturn(Optional.of(entity));
+        when(acspApplicationRepository.findById(acspId)).thenReturn(Optional.empty());
+
+        boolean result = transactionServiceImpl.delete(txnId);
+
+        assertTrue(result);
+        verify(acspApplicationRepository).findById(acspId);
+        verify(acspApplicationRepository, never()).delete(any());
+        verify(transactionsRepository).delete(entity);
     }
 }
