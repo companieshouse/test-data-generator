@@ -13,9 +13,6 @@ public class TransactionsData {
   @JsonProperty("created_by.email")
   private final String email;
 
-  @JsonProperty("description")
-  private final String description;
-
   @JsonProperty("reference")
   private final String reference;
 
@@ -28,11 +25,10 @@ public class TransactionsData {
   @JsonProperty("acsp_application_id")
   private final String acspApplicationId;
 
-  public TransactionsData(String id,String email,String userId, String description , String reference,String resumeUri, String status, String acspApplicationId) {
+  public TransactionsData(String id,String email,String userId, String reference,String resumeUri, String status, String acspApplicationId) {
       this.id=id;
       this.email = email;
       this.userId = userId;
-      this.description = description;
       this.reference = reference;
       this.resumeUri = resumeUri;
       this.status = status;
@@ -48,10 +44,6 @@ public class TransactionsData {
 
   public String getEmail() {
       return email;
-  }
-
-  public String getDescription() {
-      return description;
   }
 
   public String getReference() {

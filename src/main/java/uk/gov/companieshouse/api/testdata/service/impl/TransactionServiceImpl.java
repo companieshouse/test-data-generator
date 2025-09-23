@@ -56,7 +56,7 @@ public class TransactionServiceImpl implements DataService<TransactionsData, Tra
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);
         acsprepository.save(acspApplication);
-        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getUserId(), txn.getDescription(), txn.getReference(), txn.getResumeUri(), txn.getStatus(), acspApplicationId);
+        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getUserId(), txn.getReference(), txn.getResumeUri(), txn.getStatus(), acspApplicationId);
     }
 
     @Override

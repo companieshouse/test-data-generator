@@ -1114,7 +1114,7 @@ class TestDataControllerTest {
         request.setUserId("rsf3pdwywvse5yz55mfodfx8");
         request.setReference("ACSP Registration");
 
-        TransactionsData txn = new TransactionsData("rsf3pdwywvse5yz55mfodfx8","ACSP Registration" ,"forename","surname","email","description","status", "250788-250788-250788");
+        TransactionsData txn = new TransactionsData("rsf3pdwywvse5yz55mfodfx8","email@email.com" ,"forename","surname","resumeURI","status", "250788-250788-250788");
         when(this.testDataService.createTransactionData(request)).thenReturn(txn);
         ResponseEntity<TransactionsData> response
                 = this.testDataController.createTransaction(request);
