@@ -46,25 +46,29 @@ public class Transactions {
         return surname;
     }
 
-     public String getUserId() {
+    public String getUserId() {
         return userId;
     }
 
- public String getEmail() {
+    public String getEmail() {
         return email;
     }
 
- public String getDescription() {
+    public String getDescription() {
         return description;
     }
 
-     public String getReference() {
+    public String getReference() {
         return reference;
     }
 
-    public String getResumeUri(){ return resumeUri;}
+    public String getResumeUri() {
+        return resumeUri;
+    }
 
-    public String getStatus(){ return status;}
+    public String getStatus() {
+        return status;
+    }
 
     public void setId(String id) {
         this.id = id;
@@ -82,20 +86,23 @@ public class Transactions {
         this.surname = surname;
     }
 
-     public void setUserId(String userId) {
+    public void setUserId(String userId) {
         this.userId = userId;
     }
 
-     public void setDescription(String description) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
- public void setReference(String reference) {
+    public void setReference(String reference) {
         this.reference = reference;
     }
 
-    public void setResumeUri(String resumeUri){this.resumeUri=resumeUri;}
+    public void setResumeUri(String resumeUri){
+        this.resumeUri=resumeUri;
+    }
 
-    public void setStatus(String status){this.status=status;}
-    
+    public void setStatus(String status){
+        this.status=status;
+    }
 }

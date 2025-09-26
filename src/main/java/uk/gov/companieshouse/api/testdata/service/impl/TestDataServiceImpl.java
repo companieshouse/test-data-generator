@@ -71,7 +71,6 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.TransactionService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 import uk.gov.companieshouse.logging.Logger;
@@ -102,8 +101,6 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private UserService userService;
     @Autowired
-    private TransactionService transactionService;
-    @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
@@ -123,6 +120,8 @@ public class TestDataServiceImpl implements TestDataService {
     private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
     @Autowired
     private DataService<RoleData, RoleSpec> roleService;
+    @Autowired
+    private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Autowired
     private DataService<IdentityData, IdentitySpec> identityService;
     @Autowired
@@ -148,7 +147,6 @@ public class TestDataServiceImpl implements TestDataService {
     private PostcodeService postcodeService;
     @Autowired
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
-
     @Autowired
     private DataService<UserCompanyAssociationData,
             UserCompanyAssociationSpec> userCompanyAssociationService;
@@ -809,7 +807,6 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-
     public TransactionsData createTransactionData(TransactionsSpec transactionsSpec)
             throws DataException {
         try {
@@ -819,6 +816,15 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.error("Failed to create Transaction for User Id: "
                     + transactionsSpec.getUserId());
             throw new DataException("Error creating transaction", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteTransaction(String transactionId) throws DataException {
+        try {
+            return transactionService.delete(transactionId);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting transaction", ex);
         }
     }
 }

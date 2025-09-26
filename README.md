@@ -364,7 +364,9 @@ In order to use the generator, there are different possible endpoints that can b
 - POST: Sending a POST request to `{Base URL}/test-data/transactions` will create a transaction and associated acsp application
   `reference` : Type of transaction being created
   `userId`    : CHS User Id of the user associated with the transaction
+
   A usage example looks like this: `{"reference": "ACSP Registration" , "userId": "test12552"}`
+  - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/transactions/{transaction_id}` will delete the `Transaction and ACSP application`.
 
 #### Creating User Company Associations
 - POST: Sending a POST request to create User Company Association `{Base URL}/test-data/associations`. A `company_number` is mandatory and either a `user_id` or a `user_email` is required.
@@ -394,13 +396,6 @@ In order to use the generator, there are different possible endpoints that can b
 
   A usage example looks like this: `{ "activity_description" : "Braunkohle waschen", "sic_description" : "Abbau von Braunkohle", "is_ch_activity" : false, "activity_description_search_field" : "braunkohle waschen" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the `Sic Code and Keyword`.
-
-#### Deleting Sic Code
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing
-  - `company_number`: The company number of the company. This is mandatory.
-  - `penalty_reference`: The penalty reference of the appeal. This is mandatory.
-
-  A usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.

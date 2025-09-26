@@ -436,6 +436,24 @@ public class TestDataController {
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/transactions/{transactionId}")
+    public ResponseEntity<Map<String, Object>> deleteTransaction(@PathVariable("transactionId")
+    String transactionId) throws DataException {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("transaction_id", transactionId);
+        boolean deleteTransaction = testDataService.deleteTransaction(transactionId);
+
+        if (deleteTransaction) {
+            LOG.info("Transaction is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Transaction is not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping("/combined-sic-activities")
     public ResponseEntity<CombinedSicActivitiesData> createCombinedSicActivities(
         @Valid @RequestBody CombinedSicActivitiesSpec request) throws DataException {
