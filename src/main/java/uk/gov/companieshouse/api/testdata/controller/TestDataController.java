@@ -355,16 +355,15 @@ public class TestDataController {
             @PathVariable("id") String id,
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
-
         var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
-
         if (transactionReference != null) {
-            List<PenaltyData> filteredPenalties = accountPenaltiesData.getPenalties().stream()
-                    .filter(penalty -> transactionReference.equals(
-                            penalty.getTransactionReference())).toList();
-            accountPenaltiesData.setPenalties(filteredPenalties);
+            accountPenaltiesData.setPenalties(
+                    accountPenaltiesData.getPenalties().stream()
+                            .filter(penalty -> transactionReference.equals(
+                                    penalty.getTransactionReference()))
+                            .toList()
+            );
         }
-
         return ResponseEntity.ok(accountPenaltiesData);
     }
 
