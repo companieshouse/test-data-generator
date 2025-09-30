@@ -361,7 +361,7 @@ public class TestDataController {
                     accountPenaltiesData.getPenalties().stream()
                             .filter(penalty -> transactionReference.equals(
                                     penalty.getTransactionReference()))
-                            .toList()
+                            .collect(Collectors.toList())
             );
         }
         return ResponseEntity.ok(accountPenaltiesData);
