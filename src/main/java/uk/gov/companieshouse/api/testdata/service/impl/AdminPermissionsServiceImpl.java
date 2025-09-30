@@ -12,7 +12,8 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class AdminPermissionsServiceImpl implements DataService<AdminPermissionsData, AdminPermissionsSpec> {
+public class AdminPermissionsServiceImpl implements DataService<
+        AdminPermissionsData, AdminPermissionsSpec> {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AdminPermissionsServiceImpl.class));
@@ -33,11 +34,9 @@ public class AdminPermissionsServiceImpl implements DataService<AdminPermissions
 
         LOG.info("Successfully created admin permissions with ID: " + savedPermissions.getId());
 
-        var adminPermissionsData = new AdminPermissionsData(
+        return new AdminPermissionsData(
                 savedPermissions.getId(),
                 savedPermissions.getGroupName());
-
-        return adminPermissionsData;
     }
 
     public boolean delete(String id) {

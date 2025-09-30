@@ -108,7 +108,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
     @Autowired
-    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    private DataService<CombinedSicActivitiesData,
+            CombinedSicActivitiesSpec> combinedSicActivitiesService;
     @Autowired
     private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Autowired
@@ -121,8 +122,6 @@ public class TestDataServiceImpl implements TestDataService {
     private CertifiedCopiesRepository certifiedCopiesRepository;
     @Autowired
     private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
-    @Autowired
-    private DataService<RoleData, RoleSpec> roleService;
     @Autowired
     private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Autowired
@@ -417,7 +416,8 @@ public class TestDataServiceImpl implements TestDataService {
                 var adminPermissionEntity = adminPermissionsRepository
                         .findByEntraGroupId(entraGroupId);
 
-                if (adminPermissionEntity != null && adminPermissionEntity.getPermissions() != null) {
+                if (adminPermissionEntity != null
+                        && adminPermissionEntity.getPermissions() != null) {
                     permissionStrings.addAll(adminPermissionEntity.getPermissions());
                 }
             }
@@ -595,7 +595,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public CombinedSicActivitiesData createCombinedSicActivitiesData(
-        final CombinedSicActivitiesSpec spec) throws DataException {
+            final CombinedSicActivitiesSpec spec) throws DataException {
         try {
             return combinedSicActivitiesService.create(spec);
         } catch (Exception ex) {
@@ -643,7 +643,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public boolean deleteCombinedSicActivitiesData(String id)
-        throws DataException {
+            throws DataException {
         try {
             return combinedSicActivitiesService.delete(String.valueOf(id));
         } catch (Exception ex) {
@@ -773,8 +773,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public UserCompanyAssociationData
-            createUserCompanyAssociationData(UserCompanyAssociationSpec spec)
+    public UserCompanyAssociationData createUserCompanyAssociationData(
+            UserCompanyAssociationSpec spec)
             throws DataException {
         if (spec.getUserId() == null
                 && spec.getUserEmail() == null) {
@@ -828,11 +828,12 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AdminPermissionsData createAdminPermissionsData(AdminPermissionsSpec spec) throws DataException {
+    public AdminPermissionsData createAdminPermissionsData(
+            AdminPermissionsSpec spec) throws DataException {
         return adminPermissionsService.create(spec);
     }
 
-@Override
+    @Override
     public boolean deleteAdminPermissionsData(String id) throws DataException {
         try {
             return adminPermissionsService.delete(id);

@@ -13,8 +13,8 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -45,19 +45,18 @@ public class UserServiceImpl implements UserService {
             List<String> entraGroupIds = new ArrayList<>();
             for (String roleName : userSpec.getRoles()) {
                 try {
-                    // Convert the role name to UserRoles enum to get the entraGroupId
                     UserRoles userRole = UserRoles.valueOf(roleName);
                     String entraGroupId = userRole.getEntraGroupId();
 
-                    // Verify that the admin permission exists for this entraGroupId
-                    var adminPermissionEntity = adminPermissionsRepository.findByEntraGroupId(entraGroupId);
+                    var adminPermissionEntity =
+                            adminPermissionsRepository.findByEntraGroupId(entraGroupId);
                     if (adminPermissionEntity == null) {
-                        throw new DataException("No admin permissions found for entraGroupId: " + entraGroupId + " (role: " + roleName + ")");
+                        throw new DataException("No admin permissions found for entraGroupId: "
+                                + entraGroupId + " (role: " + roleName + ")");
                     }
 
-                    // Add the entraGroupId to the user's roles
                     entraGroupIds.add(entraGroupId);
-                } catch (IllegalArgumentException e) {
+                } catch (IllegalArgumentException error) {
                     throw new DataException("Invalid role name: " + roleName);
                 }
             }

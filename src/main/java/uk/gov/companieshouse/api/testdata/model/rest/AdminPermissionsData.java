@@ -10,8 +10,6 @@ public class AdminPermissionsData {
     @JsonProperty("group_name")
     private String groupName;
 
-    public AdminPermissionsData() {}
-
     public AdminPermissionsData(String id, String groupName) {
         this.id = id;
         this.groupName = groupName;
