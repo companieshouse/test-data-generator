@@ -40,12 +40,11 @@ public class UserServiceImpl implements UserService {
         final String password = userSpec.getPassword();
         final var user = new User();
 
-        // Process admin permissions to get the entraGroupIds
         if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {
             List<String> entraGroupIds = new ArrayList<>();
             for (String roleName : userSpec.getRoles()) {
                 try {
-                    UserRoles userRole = UserRoles.valueOf(roleName);
+                    var userRole = UserRoles.valueOf(roleName);
                     String entraGroupId = userRole.getEntraGroupId();
 
                     var adminPermissionEntity =
