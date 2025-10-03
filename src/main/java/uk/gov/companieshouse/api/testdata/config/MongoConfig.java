@@ -39,7 +39,6 @@ import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
-import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -85,11 +84,6 @@ public class MongoConfig {
     }
 
     @Bean
-    public MongoTemplate mongoTemplate() {
-        return createMongoTemplate("appointments");
-    }
-
-    @Bean
     public CompanyMetricsRepository companyMetricsRepository() {
         return getMongoRepositoryBean(CompanyMetricsRepository.class, "company_metrics");
     }
@@ -111,8 +105,8 @@ public class MongoConfig {
     }
 
     @Bean
-    public RoleRepository roleRepository() {
-        return getMongoRepositoryBean(RoleRepository.class, ACCOUNT_DATABASE);
+    public MongoTemplate mongoTemplate() {
+        return createMongoTemplate(ACCOUNT_DATABASE);
     }
 
     @Bean

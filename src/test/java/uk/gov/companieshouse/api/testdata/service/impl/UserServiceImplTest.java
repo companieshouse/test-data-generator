@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -21,7 +21,6 @@ import jakarta.validation.ValidatorFactory;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,10 +35,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -49,6 +49,9 @@ class UserServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private AdminPermissionsRepository adminPermissionsRepository;
 
     @Mock
     private RandomService randomService;
@@ -116,19 +119,19 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testCreateUserWithRoles() throws DataException {
+    void testCreateUserWithValidRolesAndAdminPermissions() throws DataException {
         UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("hello@hello.com");
+        userSpec.setEmail("valid@hello.com");
         userSpec.setPassword("password");
+        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR",
+                "CHS_ADMIN_SUPPORT_MEMBER"));
 
-        RoleSpec roleSpec = new RoleSpec();
-        roleSpec.setId("role-id");
-        roleSpec.setPermissions(Arrays.asList("permission1", "permission2"));
-        userSpec.setRoles(List.of(roleSpec));
-
-        String generatedUserId = "randomised";
-        when(randomService.getString(anyInt())).thenReturn(generatedUserId);
+        String generatedUserId = "validid";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        var adminPermissionMock = new AdminPermissions();
+        when(adminPermissionsRepository.findByEntraGroupId(anyString())).thenReturn(adminPermissionMock);
 
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -136,12 +139,39 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
-        assertEquals(1, savedUser.getRoles().size(), "User should have one role assigned");
-        assertEquals(
-                roleSpec.getId(),
-                savedUser.getRoles().getFirst(),
-                "The assigned role should match the role ID");
+        assertEquals(List.of("b7c48d82-444b-414f-870b-4da96c2d075e", "1cf86422-f0e6-4463-9aac-37c210cdc7f6").size(), savedUser.getRoles().size());
+        assertEquals(generatedUserId, userData.getId());
+    }
+
+    @Test
+    void testCreateUserWithInvalidRoleNameThrowsException() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("invalidrole@hello.com");
+        userSpec.setPassword("password");
+        userSpec.setRoles(List.of("NOT_A_ROLE"));
+
+        String generatedUserId = "invalidid";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
+
+        DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+        assertTrue(ex.getMessage().contains("Invalid role name: NOT_A_ROLE"));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testCreateUserWithMissingAdminPermissionsThrowsException() {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setEmail("missingperm@hello.com");
+        userSpec.setPassword("password");
+        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
+
+        String generatedUserId = "missingid";
+        when(randomService.getString(23)).thenReturn(generatedUserId);
+        when(adminPermissionsRepository.findByEntraGroupId(anyString())).thenReturn(null);
+
+        DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+        assertTrue(ex.getMessage().contains("No admin permissions found for entraGroupId"));
+        verify(userRepository, never()).save(any());
     }
 
     @Test

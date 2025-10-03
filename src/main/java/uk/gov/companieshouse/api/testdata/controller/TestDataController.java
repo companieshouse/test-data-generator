@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.controller;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -29,10 +28,12 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -40,7 +41,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
@@ -117,6 +117,36 @@ public class TestDataController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
+    @PostMapping("/admin-permissions")
+    public ResponseEntity<AdminPermissionsData> createAdminPermissions(
+            @Valid @RequestBody AdminPermissionsSpec request) throws DataException {
+
+        var createdAdminPermissions = testDataService.createAdminPermissionsData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("admin-permissions-id", createdAdminPermissions.getId());
+        data.put("group-name", createdAdminPermissions.getGroupName());
+        LOG.info("New admin permissions created", data);
+        return new ResponseEntity<>(createdAdminPermissions, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/admin-permissions/{id}")
+    public ResponseEntity<Map<String, Object>> deleteAdminPermissions(@PathVariable("id") String id)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("admin-permissions-id", id);
+        boolean deleted = testDataService.deleteAdminPermissionsData(id);
+
+        if (deleted) {
+            LOG.info("Admin permissions deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Admin permissions not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @DeleteMapping("/user/{userId}")
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId)
             throws DataException {
@@ -187,24 +217,27 @@ public class TestDataController {
 
     @PostMapping("/certified-copies")
     public ResponseEntity<CertificatesData> createCertifiedCopies(
-        @Valid @RequestBody CertifiedCopiesSpec request) throws DataException {
+            @Valid @RequestBody CertifiedCopiesSpec request) throws DataException {
 
         var createdCertifiedCopies = testDataService.createCertifiedCopiesData(request);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("certificates-copies-id", createdCertifiedCopies.getCertificates().getFirst().getId());
+        data.put("certificates-copies-id",
+                createdCertifiedCopies.getCertificates().getFirst().getId());
         LOG.info("New certified copies added", data);
         return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
     }
 
     @PostMapping("/missing-image-deliveries")
     public ResponseEntity<CertificatesData> createMissingImageDeliveries(
-        @Valid @RequestBody MissingImageDeliveriesSpec request) throws DataException {
+            @Valid @RequestBody MissingImageDeliveriesSpec request) throws DataException {
 
-        var createdMissingImageDeliveries = testDataService.createMissingImageDeliveriesData(request);
+        var createdMissingImageDeliveries =
+                testDataService.createMissingImageDeliveriesData(request);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("missing-image-deliveries-id", createdMissingImageDeliveries.getCertificates().getFirst().getId());
+        data.put("missing-image-deliveries-id",
+                createdMissingImageDeliveries.getCertificates().getFirst().getId());
         LOG.info("New missing image deliveries added", data);
         return new ResponseEntity<>(createdMissingImageDeliveries, HttpStatus.CREATED);
     }
@@ -247,8 +280,8 @@ public class TestDataController {
 
     @DeleteMapping("/certified-copies/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertifiedCopies(@PathVariable("id")
-    String id)
-        throws DataException {
+                                                                     String id)
+            throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
         boolean deleteCertifiedCopies = testDataService.deleteCertifiedCopiesData(id);
@@ -265,8 +298,8 @@ public class TestDataController {
 
     @DeleteMapping("/missing-image-deliveries/{id}")
     public ResponseEntity<Map<String, Object>> deleteMissingImageDeliveries(@PathVariable("id")
-    String id)
-        throws DataException {
+                                                                            String id)
+            throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("id", id);
         boolean deleteMissingImageDeliveries = testDataService.deleteMissingImageDeliveriesData(id);
@@ -320,16 +353,15 @@ public class TestDataController {
             @PathVariable("id") String id,
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
-
         var accountPenaltiesData = testDataService.getAccountPenaltiesData(id);
-
         if (transactionReference != null) {
-            List<PenaltyData> filteredPenalties = accountPenaltiesData.getPenalties().stream()
-                    .filter(penalty -> transactionReference.equals(penalty.getTransactionReference()))
-                    .toList();
-            accountPenaltiesData.setPenalties(filteredPenalties);
+            accountPenaltiesData.setPenalties(
+                    accountPenaltiesData.getPenalties().stream()
+                            .filter(penalty -> transactionReference.equals(
+                                    penalty.getTransactionReference()))
+                            .collect(Collectors.toList())
+            );
         }
-
         return ResponseEntity.ok(accountPenaltiesData);
     }
 
@@ -338,7 +370,8 @@ public class TestDataController {
             @RequestParam(name = "customerCode") String customerCode,
             @RequestParam(name = "companyCode") String companyCode) throws NoDataFoundException {
 
-        var accountPenaltiesData = testDataService.getAccountPenaltiesData(customerCode, companyCode);
+        var accountPenaltiesData = testDataService.getAccountPenaltiesData(
+                customerCode, companyCode);
 
         return ResponseEntity.ok(accountPenaltiesData);
     }
@@ -437,8 +470,8 @@ public class TestDataController {
     }
 
     @DeleteMapping("/transactions/{transactionId}")
-    public ResponseEntity<Map<String, Object>> deleteTransaction(@PathVariable("transactionId")
-    String transactionId) throws DataException {
+    public ResponseEntity<Map<String, Object>> deleteTransaction(
+            @PathVariable("transactionId") String transactionId) throws DataException {
 
         Map<String, Object> response = new HashMap<>();
         response.put("transaction_id", transactionId);
@@ -456,7 +489,7 @@ public class TestDataController {
 
     @PostMapping("/combined-sic-activities")
     public ResponseEntity<CombinedSicActivitiesData> createCombinedSicActivities(
-        @Valid @RequestBody CombinedSicActivitiesSpec request) throws DataException {
+            @Valid @RequestBody CombinedSicActivitiesSpec request) throws DataException {
 
         var createdSicCodeKeyword = testDataService.createCombinedSicActivitiesData(request);
 
@@ -467,7 +500,7 @@ public class TestDataController {
 
     @DeleteMapping("/combined-sic-activities/{id}")
     public ResponseEntity<Map<String, Object>> deleteCombinedSicActivities(
-        @PathVariable("id") String id) throws DataException {
+            @PathVariable("id") String id) throws DataException {
         Map<String, Object> logMap = new HashMap<>();
         logMap.put("id", id);
         boolean deleteCombinedSicActivities = testDataService.deleteCombinedSicActivitiesData(id);
