@@ -8,7 +8,7 @@ locals {
   eric_port                  = "10000"
   docker_repo                = "test-data-generator"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
-  healthcheck_path           = "/test-data-generator/healthcheck" ## healthcheck path for test-data-generator
+  healthcheck_path           = "/test-data/healthcheck" ## healthcheck path for test-data-generator
   healthcheck_matcher        = "200"
   vpc_name                   = local.stack_secrets["vpc_name"]
   s3_config_bucket           = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
