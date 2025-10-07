@@ -28,7 +28,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForEngland() {
-        // Arrange
         String country = "gb-eng";
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
 
@@ -37,10 +36,8 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        // Act
         List<Postcodes> result = postcodeService.get(country);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("E1 6AN", result.getFirst().getPretty());
         verify(postcodesRepository, times(1)).findByStrippedContaining(
@@ -51,7 +48,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForWales() {
-        // Arrange
         String country = "gb-wls";
         List<Postcodes> mockPostcodes = createMockPostcodes("CF10 1AA");
 
@@ -60,10 +56,8 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        // Act
         List<Postcodes> result = postcodeService.get(country);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("CF10 1AA", result.get(0).getPretty());
         verify(postcodesRepository, times(1)).findByStrippedContaining(
@@ -74,7 +68,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForScotland() {
-        // Arrange
         String country = "gb-sct";
         List<Postcodes> mockPostcodes = createMockPostcodes("EH1 1BB");
 
@@ -83,10 +76,8 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        // Act
         List<Postcodes> result = postcodeService.get(country);
 
-        // Assert
         assertEquals(1, result.size());
         assertEquals("EH1 1BB", result.get(0).getPretty());
         verify(postcodesRepository, times(1)).findByStrippedContaining(
@@ -97,10 +88,8 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForInvalidCountry() {
-        // Arrange
         String invalidCountry = "invalid-country";
 
-        // Act & Assert
         try {
             postcodeService.get(invalidCountry);
         } catch (IllegalArgumentException e) {
