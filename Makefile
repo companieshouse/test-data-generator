@@ -57,3 +57,4 @@ docker-build:
 .PHONY: docker-run
 docker-run:
 	docker run -i -t -p $(exposed_port):$(exposed_port) --env-file=local_env $(artifact_name):$(version)
+
