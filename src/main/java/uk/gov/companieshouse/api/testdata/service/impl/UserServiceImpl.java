@@ -45,16 +45,21 @@ public class UserServiceImpl implements UserService {
             for (String roleName : userSpec.getRoles()) {
                 try {
                     var userRole = UserRoles.valueOf(roleName);
-                    String entraGroupId = userRole.getEntraGroupId();
+                    String groupName = userRole.getGroupName();
 
                     var adminPermissionEntity =
-                            adminPermissionsRepository.findByEntraGroupId(entraGroupId);
+                            adminPermissionsRepository.findByGroupName(groupName);
                     if (adminPermissionEntity == null) {
-                        throw new DataException("No admin permissions found for entraGroupId: "
-                                + entraGroupId + " (role: " + roleName + ")");
+                        throw new DataException("No admin permissions found for groupName: "
+                                + groupName + " (role: " + roleName + ")");
                     }
 
-                    entraGroupIds.add(entraGroupId);
+                    String entraGroupId = adminPermissionEntity.getEntraGroupId();
+                    if (entraGroupId != null && !entraGroupId.isEmpty()) {
+                        entraGroupIds.add(entraGroupId);
+                    } else {
+                        throw new DataException("No entra_group_id found for group: " + groupName);
+                    }
                 } catch (IllegalArgumentException error) {
                     throw new DataException("Invalid role name: " + roleName);
                 }

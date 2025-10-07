@@ -711,7 +711,7 @@ class TestDataServiceImplTest {
 
         var entity = new AdminPermissions();
         entity.setPermissions(List.of("perm1", "perm2"));
-        when(adminPermissionsRepository.findByEntraGroupId("group1")).thenReturn(entity);
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
         UserData userData = new UserData("id", "email", "forename", "surname");
         when(userService.create(userSpec)).thenReturn(userData);
@@ -730,7 +730,7 @@ class TestDataServiceImplTest {
         userSpec.setPassword("password");
         userSpec.setRoles(List.of("group1"));
 
-        when(adminPermissionsRepository.findByEntraGroupId("group1")).thenReturn(null);
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
 
         UserData userData = new UserData("id", "email", "forename", "surname");
         when(userService.create(userSpec)).thenReturn(userData);

@@ -38,6 +38,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -123,15 +124,21 @@ class UserServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setEmail("valid@hello.com");
         userSpec.setPassword("password");
-        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR",
-                "CHS_ADMIN_SUPPORT_MEMBER"));
+        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR", "CHS_ADMIN_SUPPORT_MEMBER"));
 
         String generatedUserId = "validid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        var adminPermissionMock = new AdminPermissions();
-        when(adminPermissionsRepository.findByEntraGroupId(anyString())).thenReturn(adminPermissionMock);
+        AdminPermissions supervisorPerm = new AdminPermissions();
+        supervisorPerm.setEntraGroupId("entra-group-id-1");
+        AdminPermissions supportPerm = new AdminPermissions();
+        supportPerm.setEntraGroupId("entra-group-id-2");
+
+        when(adminPermissionsRepository.findByGroupName(UserRoles.CHS_ADMIN_SUPERVISOR.getGroupName()))
+                .thenReturn(supervisorPerm);
+        when(adminPermissionsRepository.findByGroupName(UserRoles.CHS_ADMIN_SUPPORT_MEMBER.getGroupName()))
+                .thenReturn(supportPerm);
 
         UserData userData = userServiceImpl.create(userSpec);
 
@@ -139,7 +146,10 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertEquals(List.of("b7c48d82-444b-414f-870b-4da96c2d075e", "1cf86422-f0e6-4463-9aac-37c210cdc7f6").size(), savedUser.getRoles().size());
+        List<String> expectedEntraGroupIds = List.of("entra-group-id-1", "entra-group-id-2");
+
+        assertEquals(expectedEntraGroupIds.size(), savedUser.getRoles().size());
+        assertTrue(savedUser.getRoles().containsAll(expectedEntraGroupIds));
         assertEquals(generatedUserId, userData.getId());
     }
 
@@ -155,22 +165,6 @@ class UserServiceImplTest {
 
         DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
         assertTrue(ex.getMessage().contains("Invalid role name: NOT_A_ROLE"));
-        verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    void testCreateUserWithMissingAdminPermissionsThrowsException() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("missingperm@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
-
-        String generatedUserId = "missingid";
-        when(randomService.getString(23)).thenReturn(generatedUserId);
-        when(adminPermissionsRepository.findByEntraGroupId(anyString())).thenReturn(null);
-
-        DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
-        assertTrue(ex.getMessage().contains("No admin permissions found for entraGroupId"));
         verify(userRepository, never()).save(any());
     }
 

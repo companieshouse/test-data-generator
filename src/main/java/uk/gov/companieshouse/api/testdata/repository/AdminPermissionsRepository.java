@@ -4,5 +4,5 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 
 public interface AdminPermissionsRepository extends MongoRepository<AdminPermissions, String> {
-    AdminPermissions findByEntraGroupId(String entraGroupId);
+    AdminPermissions findByGroupName(String groupName);
 }
