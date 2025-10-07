@@ -1,13 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -26,9 +23,13 @@ class PostcodeServiceImplTest {
     @InjectMocks
     private PostcodeServiceImpl postcodeService;
 
+    private static final String COUNTRY_ENGLAND = "gb-eng";
+    private static final String COUNTRY_WALES = "gb-wls";
+    private static final String COUNTRY_SCOTLAND = "gb-sct";
+    private static final String COUNTRY_NORTHERN_IRELAND = "gb-nir";
+
     @Test
     void testGetPostcodesForEngland() {
-        String country = "gb-eng";
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
 
         when(postcodesRepository.findByStrippedContaining(
@@ -36,7 +37,7 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(country);
+        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
 
         assertEquals(1, result.size());
         assertEquals("E1 6AN", result.getFirst().getPretty());
@@ -48,7 +49,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForWales() {
-        String country = "gb-wls";
         List<Postcodes> mockPostcodes = createMockPostcodes("CF10 1AA");
 
         when(postcodesRepository.findByStrippedContaining(
@@ -56,10 +56,10 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(country);
+        List<Postcodes> result = postcodeService.get(COUNTRY_WALES);
 
         assertEquals(1, result.size());
-        assertEquals("CF10 1AA", result.get(0).getPretty());
+        assertEquals("CF10 1AA", result.getFirst().getPretty());
         verify(postcodesRepository, times(1)).findByStrippedContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
@@ -68,7 +68,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForScotland() {
-        String country = "gb-sct";
         List<Postcodes> mockPostcodes = createMockPostcodes("EH1 1BB");
 
         when(postcodesRepository.findByStrippedContaining(
@@ -76,10 +75,10 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(country);
+        List<Postcodes> result = postcodeService.get(COUNTRY_SCOTLAND);
 
         assertEquals(1, result.size());
-        assertEquals("EH1 1BB", result.get(0).getPretty());
+        assertEquals("EH1 1BB", result.getFirst().getPretty());
         verify(postcodesRepository, times(1)).findByStrippedContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
@@ -88,7 +87,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testGetPostcodesForNorthernIreland() {
-        String country = "gb-nir";
         List<Postcodes> mockPostcodes = createMockPostcodes("BT1 1AA");
 
         when(postcodesRepository.findByStrippedContaining(
@@ -96,10 +94,10 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(country);
+        List<Postcodes> result = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
 
         assertEquals(1, result.size());
-        assertEquals("BT1 1AA", result.get(0).getPretty());
+        assertEquals("BT1 1AA", result.getFirst().getPretty());
         verify(postcodesRepository, times(1)).findByStrippedContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
