@@ -67,6 +67,7 @@ class UserServiceImplTest {
     void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
+        //doReturn(Instant.parse("2024-06-01T00:00:00Z")).when(userServiceImpl).getDateNow();
     }
 
     @Test
@@ -215,6 +216,131 @@ class UserServiceImplTest {
         Optional<User> result = userServiceImpl.getUserById(userId);
 
         assertTrue(result.isEmpty(), "User should be empty when not found");
+    }
+
+    @Test
+    void createUser_withAllFieldsAndRoles() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("test@domain.com");
+        spec.setPassword("pass");
+        spec.setIsAdmin(true);
+        spec.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
+
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        // Match the group name as returned by UserRoles.getGroupName()
+        AdminPermissions adminPermissions = new AdminPermissions();
+        adminPermissions.setEntraGroupId("entra-group-id");
+        when(adminPermissionsRepository.findByGroupName("chs admin supervisor")).thenReturn(adminPermissions);
+
+        UserData result = userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+
+        assertEquals("randomid", saved.getId());
+        assertEquals("test@domain.com", saved.getEmail());
+        assertEquals("Forename-randomid", saved.getForename());
+        assertEquals("Surname-randomid", saved.getSurname());
+        assertEquals("GB_en", saved.getLocale());
+        assertEquals("pass", saved.getPassword());
+        assertTrue(saved.getDirectLoginPrivilege());
+        assertEquals(DATE_NOW, saved.getCreated());
+        assertTrue(saved.getAdminUser());
+        assertTrue(saved.getTestData());
+        assertEquals(List.of("entra-group-id"), saved.getRoles());
+
+        assertEquals(saved.getId(), result.getId());
+        assertEquals(saved.getEmail(), result.getEmail());
+        assertEquals(saved.getForename(), result.getForename());
+        assertEquals(saved.getSurname(), result.getSurname());
+    }
+
+    @Test
+    void createUser_withoutEmail_assignsGeneratedEmail() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setPassword("pass");
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+
+        UserData result = userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+
+        assertEquals("test-data-generatedrandomid@chtesttdg.mailosaur.net", saved.getEmail());
+        assertEquals("randomid", saved.getId());
+        assertEquals("pass", saved.getPassword());
+    }
+
+    @Test
+    void createUser_withNullRoles_doesNotSetRoles() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("test@domain.com");
+        spec.setPassword("pass");
+        spec.setRoles(null);
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+
+        UserData result = userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+
+        assertNull(saved.getRoles());
+    }
+
+    @Test
+    void createUser_withEmptyRoles_doesNotSetRoles() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("test@domain.com");
+        spec.setPassword("pass");
+        spec.setRoles(List.of());
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+
+        UserData result = userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+
+        assertNull(saved.getRoles());
+    }
+
+    @Test
+    void createUser_withIsAdminFalse_setsAdminUserFalse() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("test@domain.com");
+        spec.setPassword("pass");
+        spec.setIsAdmin(false);
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+
+        assertFalse(saved.getAdminUser());
+    }
+
+    @Test
+    void createUser_withIsAdminNull_setsAdminUserFalse() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("test@domain.com");
+        spec.setPassword("pass");
+        spec.setIsAdmin(null);
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User saved = userCaptor.getValue();
+
+        assertFalse(saved.getAdminUser());
     }
 
     @Test
