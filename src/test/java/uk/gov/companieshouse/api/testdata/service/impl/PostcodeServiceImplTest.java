@@ -87,6 +87,26 @@ class PostcodeServiceImplTest {
     }
 
     @Test
+    void testGetPostcodesForNorthernIreland() {
+        String country = "gb-nir";
+        List<Postcodes> mockPostcodes = createMockPostcodes("BT1 1AA");
+
+        when(postcodesRepository.findByStrippedContaining(
+                org.mockito.ArgumentMatchers.anyList(),
+                org.mockito.ArgumentMatchers.any()
+        )).thenReturn(mockPostcodes);
+
+        List<Postcodes> result = postcodeService.get(country);
+
+        assertEquals(1, result.size());
+        assertEquals("BT1 1AA", result.get(0).getPretty());
+        verify(postcodesRepository, times(1)).findByStrippedContaining(
+                org.mockito.ArgumentMatchers.anyList(),
+                org.mockito.ArgumentMatchers.any()
+        );
+    }
+
+    @Test
     void testGetPostcodesForInvalidCountry() {
         String invalidCountry = "invalid-country";
 
