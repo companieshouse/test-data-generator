@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
     }
 
-    private List<String> processRoles(List<String> roles) throws DataException {
+    List<String> processRoles(List<String> roles) throws DataException {
         List<String> entraGroupIds = new ArrayList<>();
         for (String roleName : roles) {
             var userRole = getUserRole(roleName);
@@ -81,7 +81,10 @@ public class UserServiceImpl implements UserService {
         return entraGroupIds;
     }
 
-    private UserRoles getUserRole(String roleName) throws DataException {
+    UserRoles getUserRole(String roleName) throws DataException {
+        if (roleName == null) {
+            throw new DataException("Invalid role name: null");
+        }
         try {
             return UserRoles.valueOf(roleName);
         } catch (IllegalArgumentException error) {
