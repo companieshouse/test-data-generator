@@ -8,7 +8,7 @@ locals {
   eric_port                  = "10000"
   docker_repo                = "test-data-generator"
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
-  lb_listener_rule_priority  = 20
+  lb_listener_rule_priority  = 55
   lb_listener_paths          = [ "/test-data/*" ]
   healthcheck_path           = "/test-data/healthcheck" ## healthcheck path for test-data-generator
   healthcheck_matcher        = "200"
