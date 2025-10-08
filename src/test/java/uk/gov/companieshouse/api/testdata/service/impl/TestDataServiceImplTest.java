@@ -711,7 +711,7 @@ class TestDataServiceImplTest {
 
         var entity = new AdminPermissions();
         entity.setPermissions(List.of("perm1", "perm2"));
-        when(adminPermissionsRepository.findByEntraGroupId("group1")).thenReturn(entity);
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
         UserData userData = new UserData("id", "email", "forename", "surname");
         when(userService.create(userSpec)).thenReturn(userData);
@@ -730,7 +730,7 @@ class TestDataServiceImplTest {
         userSpec.setPassword("password");
         userSpec.setRoles(List.of("group1"));
 
-        when(adminPermissionsRepository.findByEntraGroupId("group1")).thenReturn(null);
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
 
         UserData userData = new UserData("id", "email", "forename", "surname");
         when(userService.create(userSpec)).thenReturn(userData);
@@ -741,6 +741,81 @@ class TestDataServiceImplTest {
         assertEquals(List.of("group1"), userSpec.getRoles());
         verify(userService).create(userSpec);
         verify(companyAuthAllowListService, never()).create(any());
+    }
+
+    @Test
+    void createUserData_addsPermissionsWhenEntityAndPermissionsExist() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setRoles(List.of("group1"));
+
+        AdminPermissions entity = new AdminPermissions();
+        entity.setPermissions(List.of("perm1", "perm2"));
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
+
+        UserData userData = new UserData("id", "email", "forename", "surname");
+        when(userService.create(userSpec)).thenReturn(userData);
+
+        testDataService.createUserData(userSpec);
+
+        assertEquals(List.of("perm1", "perm2"), userSpec.getRoles());
+    }
+
+    @Test
+    void createUserData_doesNotAddPermissionsWhenEntityIsNull() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setRoles(List.of("group1"));
+
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
+
+        UserData userData = new UserData("id", "email", "forename", "surname");
+        when(userService.create(userSpec)).thenReturn(userData);
+
+        testDataService.createUserData(userSpec);
+
+        assertEquals(List.of("group1"), userSpec.getRoles());
+    }
+
+    @Test
+    void createUserData_doesNotAddPermissionsWhenPermissionsAreNull() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setRoles(List.of("group1"));
+
+        AdminPermissions entity = new AdminPermissions();
+        entity.setPermissions(null);
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
+
+        UserData userData = new UserData("id", "email", "forename", "surname");
+        when(userService.create(userSpec)).thenReturn(userData);
+
+        testDataService.createUserData(userSpec);
+
+        assertEquals(List.of("group1"), userSpec.getRoles());
+    }
+
+    @Test
+    void createUserData_handlesMultipleGroupNamesWithMixedEntities() throws DataException {
+        UserSpec userSpec = new UserSpec();
+        userSpec.setPassword("password");
+        userSpec.setRoles(List.of("group1", "group2", "group3"));
+
+        AdminPermissions entity1 = new AdminPermissions();
+        entity1.setPermissions(List.of("perm1"));
+        AdminPermissions entity2 = new AdminPermissions();
+        entity2.setPermissions(null);
+
+        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity1);
+        when(adminPermissionsRepository.findByGroupName("group2")).thenReturn(null);
+        when(adminPermissionsRepository.findByGroupName("group3")).thenReturn(entity2);
+
+        UserData userData = new UserData("id", "email", "forename", "surname");
+        when(userService.create(userSpec)).thenReturn(userData);
+
+        testDataService.createUserData(userSpec);
+
+        assertEquals(List.of("perm1"), userSpec.getRoles());
     }
 
     @Test

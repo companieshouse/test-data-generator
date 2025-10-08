@@ -412,9 +412,9 @@ public class TestDataServiceImpl implements TestDataService {
         if (adminPermissionIds != null && !adminPermissionIds.isEmpty()) {
             List<String> permissionStrings = new ArrayList<>();
 
-            for (String entraGroupId : adminPermissionIds) {
+            for (String groupName : adminPermissionIds) {
                 var adminPermissionEntity = adminPermissionsRepository
-                        .findByEntraGroupId(entraGroupId);
+                        .findByGroupName(groupName);
 
                 if (adminPermissionEntity != null
                         && adminPermissionEntity.getPermissions() != null) {

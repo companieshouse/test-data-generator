@@ -41,25 +41,7 @@ public class UserServiceImpl implements UserService {
         final var user = new User();
 
         if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {
-            List<String> entraGroupIds = new ArrayList<>();
-            for (String roleName : userSpec.getRoles()) {
-                try {
-                    var userRole = UserRoles.valueOf(roleName);
-                    String entraGroupId = userRole.getEntraGroupId();
-
-                    var adminPermissionEntity =
-                            adminPermissionsRepository.findByEntraGroupId(entraGroupId);
-                    if (adminPermissionEntity == null) {
-                        throw new DataException("No admin permissions found for entraGroupId: "
-                                + entraGroupId + " (role: " + roleName + ")");
-                    }
-
-                    entraGroupIds.add(entraGroupId);
-                } catch (IllegalArgumentException error) {
-                    throw new DataException("Invalid role name: " + roleName);
-                }
-            }
-            user.setRoles(entraGroupIds);
+            user.setRoles(processRoles(userSpec.getRoles()));
         }
 
         String email = userSpec.getEmail() != null ? userSpec.getEmail() :
@@ -77,6 +59,37 @@ public class UserServiceImpl implements UserService {
         user.setTestData(true);
         repository.save(user);
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
+    }
+
+    List<String> processRoles(List<String> roles) throws DataException {
+        List<String> entraGroupIds = new ArrayList<>();
+        for (String roleName : roles) {
+            var userRole = getUserRole(roleName);
+            String groupName = userRole.getGroupName();
+            var adminPermissionEntity = adminPermissionsRepository.findByGroupName(groupName);
+            if (adminPermissionEntity == null) {
+                throw new DataException("No admin permissions found for groupName: "
+                        + groupName + " (role: " + roleName + ")");
+            }
+            String entraGroupId = adminPermissionEntity.getEntraGroupId();
+            if (entraGroupId != null && !entraGroupId.isEmpty()) {
+                entraGroupIds.add(entraGroupId);
+            } else {
+                throw new DataException("No entra_group_id found for group: " + groupName);
+            }
+        }
+        return entraGroupIds;
+    }
+
+    UserRoles getUserRole(String roleName) throws DataException {
+        if (roleName == null) {
+            throw new DataException("Invalid role name: null");
+        }
+        try {
+            return UserRoles.valueOf(roleName);
+        } catch (IllegalArgumentException error) {
+            throw new DataException("Invalid role name: " + roleName);
+        }
     }
 
     @Override
