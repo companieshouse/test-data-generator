@@ -30,14 +30,14 @@
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 
-        <spring-boot-dependencies.version>3.3.5</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.3.5</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>3.3.12</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.3.12</spring-boot-maven-plugin.version>
         <log4j2.version>2.17.1</log4j2.version>
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.8</api-security-java.version>
         <private-api-sdk-java.version>4.0.255</private-api-sdk-java.version>
-        <api-sdk-manager-java-library.version>3.0.6</api-sdk-manager-java-library.version>
+        <api-sdk-manager-java-library.version>3.0.10</api-sdk-manager-java-library.version>
 
         <!-- Overrides -->
         <!-- CVE-2025-48924 -->
