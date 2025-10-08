@@ -38,7 +38,7 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
+import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.RoleRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
@@ -172,8 +172,8 @@ public class MongoConfig {
     }
 
     @Bean
-    public PostcodesRepository postcodesRepository() {
-        return getMongoRepositoryBean(PostcodesRepository.class, "postcodes");
+    public PostcodeRepository postcodeRepository() {
+        return getMongoRepositoryBean(PostcodeRepository.class, "postcodes");
     }
 
     @Bean

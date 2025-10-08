@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +11,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
+import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 
 @Service
 public class PostcodeServiceImpl implements PostcodeService {
 
     @Autowired
-    private PostcodesRepository postcodesRepository;
+    private PostcodeRepository postcodeRepository;
 
     @Override
     public List<Postcodes> get(String country) {
@@ -57,6 +58,13 @@ public class PostcodeServiceImpl implements PostcodeService {
             return condition;
         }).collect(Collectors.toList());
 
-        return postcodesRepository.findByStrippedContaining(orConditions, PageRequest.of(0, 10));
+        int randomPage = ThreadLocalRandom.current().nextInt(0, 100);
+        PageRequest pageRequest = PageRequest.of(randomPage, 1);
+        List<Postcodes> postcodes = postcodeRepository.findByPostcodePrefixContaining(orConditions, pageRequest);
+        if (postcodes.isEmpty()) {
+            pageRequest = PageRequest.of(0, 1);
+            postcodes = postcodeRepository.findByPostcodePrefixContaining(orConditions, pageRequest);
+        }
+        return postcodes;
     }
 }

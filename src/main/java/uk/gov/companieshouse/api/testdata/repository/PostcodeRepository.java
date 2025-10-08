@@ -9,7 +9,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 
 @NoRepositoryBean
-public interface PostcodesRepository extends MongoRepository<Postcodes, String> {
+public interface PostcodeRepository extends MongoRepository<Postcodes, String> {
     @Query(value = "{ '$or': ?0 }")
-    List<Postcodes> findByStrippedContaining(List<Object> substrings, Pageable pageable);
+    List<Postcodes> findByPostcodePrefixContaining(List<Object> substrings, Pageable pageable);
 }

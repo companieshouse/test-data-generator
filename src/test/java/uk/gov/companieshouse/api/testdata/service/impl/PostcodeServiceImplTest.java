@@ -13,12 +13,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
+import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 
 @ExtendWith(MockitoExtension.class)
 class PostcodeServiceImplTest {
     @Mock
-    private PostcodesRepository postcodesRepository;
+    private PostcodeRepository postcodeRepository;
 
     @InjectMocks
     private PostcodeServiceImpl postcodeService;
@@ -32,7 +32,7 @@ class PostcodeServiceImplTest {
     void testGetPostcodesForEngland() {
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
 
-        when(postcodesRepository.findByStrippedContaining(
+        when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
@@ -41,7 +41,7 @@ class PostcodeServiceImplTest {
 
         assertEquals(1, result.size());
         assertEquals("E1 6AN", result.getFirst().getPretty());
-        verify(postcodesRepository, times(1)).findByStrippedContaining(
+        verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         );
@@ -51,7 +51,7 @@ class PostcodeServiceImplTest {
     void testGetPostcodesForWales() {
         List<Postcodes> mockPostcodes = createMockPostcodes("CF10 1AA");
 
-        when(postcodesRepository.findByStrippedContaining(
+        when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
@@ -60,7 +60,7 @@ class PostcodeServiceImplTest {
 
         assertEquals(1, result.size());
         assertEquals("CF10 1AA", result.getFirst().getPretty());
-        verify(postcodesRepository, times(1)).findByStrippedContaining(
+        verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         );
@@ -70,7 +70,7 @@ class PostcodeServiceImplTest {
     void testGetPostcodesForScotland() {
         List<Postcodes> mockPostcodes = createMockPostcodes("EH1 1BB");
 
-        when(postcodesRepository.findByStrippedContaining(
+        when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
@@ -79,7 +79,7 @@ class PostcodeServiceImplTest {
 
         assertEquals(1, result.size());
         assertEquals("EH1 1BB", result.getFirst().getPretty());
-        verify(postcodesRepository, times(1)).findByStrippedContaining(
+        verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         );
@@ -89,7 +89,7 @@ class PostcodeServiceImplTest {
     void testGetPostcodesForNorthernIreland() {
         List<Postcodes> mockPostcodes = createMockPostcodes("BT1 1AA");
 
-        when(postcodesRepository.findByStrippedContaining(
+        when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
@@ -98,7 +98,7 @@ class PostcodeServiceImplTest {
 
         assertEquals(1, result.size());
         assertEquals("BT1 1AA", result.getFirst().getPretty());
-        verify(postcodesRepository, times(1)).findByStrippedContaining(
+        verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         );
