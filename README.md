@@ -423,3 +423,4 @@ The supported environmental variables have been categorised by use case and are 
 | MONGODB_URL              | Mongo database URL.                  | ✓         |         | mongodb://localhost:27017 |
 | BARCODE_SERVICE_URL      | URL of barcode service               | ✓         |         | http://localhost:9000     |
 | API_URL                  | URL of (company) API service         | ✓         |         |                           |
+
