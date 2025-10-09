@@ -19,6 +19,8 @@ import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 class PostcodeServiceImplTest {
     @Mock
     private PostcodeRepository postcodeRepository;
+    @Mock
+    private RandomServiceImpl randomService;
 
     @InjectMocks
     private PostcodeServiceImpl postcodeService;
@@ -36,7 +38,7 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-
+        when(randomService.getNumberInRange(0, 100)).thenReturn(java.util.OptionalLong.of(0));
         List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
 
         assertEquals(1, result.size());
@@ -55,7 +57,7 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-
+        when(randomService.getNumberInRange(0, 100)).thenReturn(java.util.OptionalLong.of(0));
         List<Postcodes> result = postcodeService.get(COUNTRY_WALES);
 
         assertEquals(1, result.size());
@@ -74,7 +76,7 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-
+        when(randomService.getNumberInRange(0, 100)).thenReturn(java.util.OptionalLong.of(0));
         List<Postcodes> result = postcodeService.get(COUNTRY_SCOTLAND);
 
         assertEquals(1, result.size());
