@@ -6,6 +6,8 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
@@ -239,7 +241,16 @@ public interface TestDataService {
      */
     PostcodesData getPostcodes(String country) throws DataException;
 
+    /**
+     * Adds a new transaction and acsp application test data based on the provided specifications.
+     *
+     * @param transactionsSpec the specifications of the transactions
+     * @return the transactions and acsp application id
+     * @throws DataException if there is an error during transactions or acsp application creation
+     */
     TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException;
+
+    boolean deleteTransaction(String transactionId) throws DataException;
 
     /**
      * Creates a new user company association test data based on the
@@ -262,4 +273,15 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
+
+    AdminPermissionsData createAdminPermissionsData(AdminPermissionsSpec spec) throws DataException;
+
+    /**
+     * Deletes admin permissions data by its ID.
+     *
+     * @param id the ID of the admin permissions to delete
+     * @return true if the admin permissions were deleted, false otherwise
+     * @throws DataException if there is an error during deletion
+     */
+    boolean deleteAdminPermissionsData(String id) throws DataException;
 }

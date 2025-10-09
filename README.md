@@ -106,11 +106,20 @@ In order to use the generator, there are different possible endpoints that can b
 - POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/user` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
     - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.
     - `password`: The password of the user. This is mandatory.
-    - `roles`: The roles of the user along with `permissions`. Roles is optional. If we provide the roles, we need to provide the `id` of the role and the `permissions` associated with the role. permissions are mandatory if we provide role id and vice versa.
+    - `roles`: The entra group name of the user which contains all the associated roles for that user. Roles is optional.
     - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
     
-    A usage example looks like this: `{ "password": "password", "roles": [ { "id": "roleId1", "permissions": [ "permission1", "permission2" ] }, { "id": "roleId2", "permissions": [ "permission3", "permission4" ] }, { "id": "roleId3", "permissions": [ "permission5", "permission6" ] } ], "is_company_auth_allow_list": true }`
+    A usage example looks like this: `{ "password": "password", "roles": [  "GROUPNAME_1", "GROUPNAME_2"] ], "is_company_auth_allow_list": true }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
+
+#### Creating admin permission
+- POST: Sending a POST request to create admin permission for a user `{Base URL}/test-data/admin-permission` will generate a new admin permission for a user. The request body must include `AdminPermissionSpec` parameter to customise the generated admin permission.
+    - `entra_group_id`: The user id of the user. This is mandatory.
+    - `group_name`: The permission of the user. This is mandatory.
+    - `roles`: The roles associated with the permission.
+    
+    A usage example looks like this: `{"group_id": "8aa9fc1c-8d78-4ce3-8ba9-fee57adf3a84", "group_name": "chs admin csi support", "roles": [ "/admin/images"  ] }`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/admin-permission/{id}` will delete the test admin permission. `id` is required to delete the admin permission; This is generated as response when an admin permission is created.
 
 #### Validating user Identity
 - POST: Sending a POST request to validate the user identity `{Base URL}/test-data/identity` will validate the user identity. The request body must include `IdentitySpec` parameter to validate the user identity.
@@ -364,7 +373,9 @@ In order to use the generator, there are different possible endpoints that can b
 - POST: Sending a POST request to `{Base URL}/test-data/transactions` will create a transaction and associated acsp application
   `reference` : Type of transaction being created
   `userId`    : CHS User Id of the user associated with the transaction
+
   A usage example looks like this: `{"reference": "ACSP Registration" , "userId": "test12552"}`
+  - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/transactions/{transaction_id}` will delete the `Transaction and ACSP application`.
 
 #### Creating User Company Associations
 - POST: Sending a POST request to create User Company Association `{Base URL}/test-data/associations`. A `company_number` is mandatory and either a `user_id` or a `user_email` is required.
@@ -395,13 +406,6 @@ In order to use the generator, there are different possible endpoints that can b
   A usage example looks like this: `{ "activity_description" : "Braunkohle waschen", "sic_description" : "Abbau von Braunkohle", "is_ch_activity" : false, "activity_description_search_field" : "braunkohle waschen" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the `Sic Code and Keyword`.
 
-#### Deleting Sic Code
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing
-  - `company_number`: The company number of the company. This is mandatory.
-  - `penalty_reference`: The penalty reference of the appeal. This is mandatory.
-
-  A usage example looks like this: `{"company_number": "123456", "penalty_reference": "A0000001"}`
-
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
@@ -419,3 +423,4 @@ The supported environmental variables have been categorised by use case and are 
 | MONGODB_URL              | Mongo database URL.                  | ✓         |         | mongodb://localhost:27017 |
 | BARCODE_SERVICE_URL      | URL of barcode service               | ✓         |         | http://localhost:9000     |
 | API_URL                  | URL of (company) API service         | ✓         |         |                           |
+

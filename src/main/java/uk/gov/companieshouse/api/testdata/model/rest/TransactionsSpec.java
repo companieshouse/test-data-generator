@@ -15,13 +15,12 @@ public class TransactionsSpec {
     @NotEmpty(message = "reference is required")
     private String reference;
 
-       @JsonProperty
+    @JsonProperty
     private String id;
 
     @JsonProperty
     @NotEmpty(message = "user id is required")
     private String userId;
-
 
     public String getEmail() {
         return email;
@@ -54,5 +53,4 @@ public class TransactionsSpec {
     public void setUserId(String userId) {
         this.userId = userId;
     }
-
 }

@@ -31,6 +31,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
@@ -45,8 +47,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleData;
-import uk.gov.companieshouse.api.testdata.model.rest.RoleSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -56,6 +56,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
@@ -71,7 +72,6 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.TransactionService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 import uk.gov.companieshouse.logging.Logger;
@@ -102,19 +102,20 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private UserService userService;
     @Autowired
-    private TransactionService transactionService;
-    @Autowired
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     @Autowired
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
     @Autowired
     private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
     @Autowired
-    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    private DataService<CombinedSicActivitiesData,
+            CombinedSicActivitiesSpec> combinedSicActivitiesService;
     @Autowired
     private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Autowired
     private AcspMembersRepository acspMembersRepository;
+    @Autowired
+    private AdminPermissionsRepository adminPermissionsRepository;
     @Autowired
     private CertificatesRepository certificatesRepository;
     @Autowired
@@ -122,7 +123,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
     @Autowired
-    private DataService<RoleData, RoleSpec> roleService;
+    private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Autowired
     private DataService<IdentityData, IdentitySpec> identityService;
     @Autowired
@@ -148,10 +149,11 @@ public class TestDataServiceImpl implements TestDataService {
     private PostcodeService postcodeService;
     @Autowired
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
-
     @Autowired
     private DataService<UserCompanyAssociationData,
             UserCompanyAssociationSpec> userCompanyAssociationService;
+    @Autowired
+    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -405,16 +407,25 @@ public class TestDataServiceImpl implements TestDataService {
         if (password == null || password.isEmpty()) {
             throw new DataException("Password is required to create a user");
         }
-        List<RoleSpec> roleList = userSpec.getRoles();
-        if (roleList != null) {
-            boolean invalidRole = roleList.stream().anyMatch(roleData -> !roleData.isValid());
-            if (invalidRole) {
-                throw new DataException("Role ID and permissions are required to create a role");
+
+        List<String> adminPermissionIds = userSpec.getRoles();
+        if (adminPermissionIds != null && !adminPermissionIds.isEmpty()) {
+            List<String> permissionStrings = new ArrayList<>();
+
+            for (String groupName : adminPermissionIds) {
+                var adminPermissionEntity = adminPermissionsRepository
+                        .findByGroupName(groupName);
+
+                if (adminPermissionEntity != null
+                        && adminPermissionEntity.getPermissions() != null) {
+                    permissionStrings.addAll(adminPermissionEntity.getPermissions());
+                }
             }
-            for (var roleData : roleList) {
-                roleService.create(roleData);
+            if (!permissionStrings.isEmpty()) {
+                userSpec.setRoles(permissionStrings);
             }
         }
+
         var userData = userService.create(userSpec);
         if (userSpec.getIsCompanyAuthAllowList() != null && userSpec.getIsCompanyAuthAllowList()) {
             var companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
@@ -430,14 +441,9 @@ public class TestDataServiceImpl implements TestDataService {
         if (user == null) {
             return false;
         }
-        if (user.getRoles() != null && !user.getRoles().isEmpty()) {
-            for (String roleId : user.getRoles()) {
-                roleService.delete(roleId);
-            }
-        }
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
             var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
-            if (companyAuthAllowListService.getAuthId(user.getEmail()) != null) {
+            if (allowListId != null) {
                 companyAuthAllowListService.delete(allowListId);
             }
         }
@@ -589,7 +595,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public CombinedSicActivitiesData createCombinedSicActivitiesData(
-        final CombinedSicActivitiesSpec spec) throws DataException {
+            final CombinedSicActivitiesSpec spec) throws DataException {
         try {
             return combinedSicActivitiesService.create(spec);
         } catch (Exception ex) {
@@ -637,7 +643,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public boolean deleteCombinedSicActivitiesData(String id)
-        throws DataException {
+            throws DataException {
         try {
             return combinedSicActivitiesService.delete(String.valueOf(id));
         } catch (Exception ex) {
@@ -767,8 +773,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public UserCompanyAssociationData
-            createUserCompanyAssociationData(UserCompanyAssociationSpec spec)
+    public UserCompanyAssociationData createUserCompanyAssociationData(
+            UserCompanyAssociationSpec spec)
             throws DataException {
         if (spec.getUserId() == null
                 && spec.getUserEmail() == null) {
@@ -809,7 +815,6 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-
     public TransactionsData createTransactionData(TransactionsSpec transactionsSpec)
             throws DataException {
         try {
@@ -819,6 +824,30 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.error("Failed to create Transaction for User Id: "
                     + transactionsSpec.getUserId());
             throw new DataException("Error creating transaction", ex);
+        }
+    }
+
+    @Override
+    public AdminPermissionsData createAdminPermissionsData(
+            AdminPermissionsSpec spec) throws DataException {
+        return adminPermissionsService.create(spec);
+    }
+
+    @Override
+    public boolean deleteAdminPermissionsData(String id) throws DataException {
+        try {
+            return adminPermissionsService.delete(id);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting admin permissions", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteTransaction(String transactionId) throws DataException {
+        try {
+            return transactionService.delete(transactionId);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting transaction", ex);
         }
     }
 }

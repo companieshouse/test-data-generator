@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,6 +35,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
@@ -44,12 +47,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
@@ -77,6 +80,7 @@ class TestDataControllerTest {
     private static final String USER_ID = "userId";
     private static final String ASSOCIATION_ID = "associationId";
     private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
+    private static final String TRANSACTION_ID = "412123-412123-412123";
 
     @Mock
     private TestDataService testDataService;
@@ -1137,7 +1141,7 @@ class TestDataControllerTest {
         request.setUserId("rsf3pdwywvse5yz55mfodfx8");
         request.setReference("ACSP Registration");
 
-        TransactionsData txn = new TransactionsData("rsf3pdwywvse5yz55mfodfx8","ACSP Registration" ,"forename","surname","email","description","status");
+        TransactionsData txn = new TransactionsData("rsf3pdwywvse5yz55mfodfx8","email@email.com" ,"forename","surname","resumeURI","status", "250788-250788-250788");
         when(this.testDataService.createTransactionData(request)).thenReturn(txn);
         ResponseEntity<TransactionsData> response
                 = this.testDataController.createTransaction(request);
@@ -1158,6 +1162,50 @@ class TestDataControllerTest {
         DataException thrown = assertThrows(DataException.class, () ->
                 this.testDataController.createTransaction(request));
         assertEquals(exception, thrown);
+    }
+
+    @Test
+    void deleteTransaction() throws Exception {
+        when(this.testDataService.deleteTransaction(TRANSACTION_ID))
+                .thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response =
+                this.testDataController.deleteTransaction(TRANSACTION_ID);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService, times(1)).deleteTransaction(TRANSACTION_ID);
+    }
+
+    @Test
+    void deleteTransactionNotFound() throws Exception {
+        when(this.testDataService.deleteTransaction(TRANSACTION_ID))
+                .thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response =
+                this.testDataController.deleteTransaction(TRANSACTION_ID);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(TRANSACTION_ID,
+                Objects.requireNonNull(response.getBody()).get("transaction_id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+
+        verify(testDataService, times(1)).deleteTransaction(TRANSACTION_ID);
+    }
+
+    @Test
+    void deleteTransactionException() throws Exception {
+        Throwable exception = new DataException("Error deleting transaction");
+
+        when(this.testDataService.deleteTransaction(TRANSACTION_ID))
+                .thenThrow(exception);
+
+        DataException thrown = assertThrows(
+                DataException.class,
+                () -> this.testDataController.deleteTransaction(TRANSACTION_ID));
+
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteTransaction(TRANSACTION_ID);
     }
 
     @Test
@@ -1249,4 +1297,70 @@ class TestDataControllerTest {
         verify(testDataService, times(1)).deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
     }
 
+    @Test
+    void createAdminPermissions_success() throws Exception {
+        AdminPermissionsSpec spec = new AdminPermissionsSpec();
+        AdminPermissionsData data = new AdminPermissionsData("permId", "groupName");
+
+        when(testDataService.createAdminPermissionsData(spec)).thenReturn(data);
+
+        ResponseEntity<AdminPermissionsData> response = testDataController.createAdminPermissions(spec);
+
+        assertEquals(HttpStatus.CREATED.value(), response.getStatusCodeValue());
+        assertEquals(data, response.getBody());
+        verify(testDataService, times(1)).createAdminPermissionsData(spec);
+    }
+
+    @Test
+    void createAdminPermissions_throwsException() throws Exception {
+        AdminPermissionsSpec spec = new AdminPermissionsSpec();
+        DataException exception = new DataException("Error creating admin permissions");
+
+        when(testDataService.createAdminPermissionsData(spec)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createAdminPermissions(spec)
+        );
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).createAdminPermissionsData(spec);
+    }
+
+    @Test
+    void deleteAdminPermissions_success() throws Exception {
+        String id = "permId";
+        when(testDataService.deleteAdminPermissionsData(id)).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
+
+        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCodeValue());
+        assertNull(response.getBody());
+        verify(testDataService, times(1)).deleteAdminPermissionsData(id);
+    }
+
+    @Test
+    void deleteAdminPermissions_notFound() throws Exception {
+        String id = "permId";
+        when(testDataService.deleteAdminPermissionsData(id)).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
+
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(id, response.getBody().get("admin-permissions-id"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        verify(testDataService, times(1)).deleteAdminPermissionsData(id);
+    }
+
+    @Test
+    void deleteAdminPermissions_throwsException() throws Exception {
+        String id = "permId";
+        DataException exception = new DataException("Error deleting admin permissions");
+        when(testDataService.deleteAdminPermissionsData(id)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.deleteAdminPermissions(id)
+        );
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteAdminPermissionsData(id);
+    }
 }

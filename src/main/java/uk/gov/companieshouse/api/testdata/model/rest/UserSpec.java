@@ -8,8 +8,8 @@ import java.util.List;
 
 public class UserSpec {
 
-    @JsonProperty
-    private List<RoleSpec> roles;
+    @JsonProperty("roles")
+    private List<String> roles;
 
     @JsonProperty
     @Pattern(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$",
@@ -34,11 +34,11 @@ public class UserSpec {
         this.password = password;
     }
 
-    public List<RoleSpec> getRoles() {
+    public List<String> getRoles() {
         return roles;
     }
 
-    public void setRoles(List<RoleSpec> roles) {
+    public void setRoles(List<String> roles) {
         this.roles = roles;
     }
 

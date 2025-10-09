@@ -11,7 +11,6 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class User {
 
     @Id
-    @Field("id")
     private String id;
 
     @Field("email")
@@ -40,6 +39,9 @@ public class User {
 
     @Field("one_login_data.user_id")
     private String oneLoginUserId;
+
+    @Field("entra_group_ids")
+    private List<String> entraGroupIds;
 
     @Field("test_data")
     private Boolean testData;
@@ -125,6 +127,14 @@ public class User {
 
     public void setOneLoginUserId(String oneLoginUserId) {
         this.oneLoginUserId = oneLoginUserId;
+    }
+
+    public List<String> getEntraGroupIds() {
+        return entraGroupIds;
+    }
+
+    public void setEntraGroupIds(List<String> entraGroupIds) {
+        this.entraGroupIds = entraGroupIds;
     }
 
     public Boolean getTestData() {
