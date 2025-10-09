@@ -13,12 +13,16 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class PostcodeServiceImpl implements PostcodeService {
 
     @Autowired
     private PostcodeRepository postcodeRepository;
+
+    @Autowired
+    private RandomService randomService;
 
     @Override
     public List<Postcodes> get(String country) {
@@ -58,8 +62,8 @@ public class PostcodeServiceImpl implements PostcodeService {
             return condition;
         }).collect(Collectors.toList());
 
-        int randomPage = ThreadLocalRandom.current().nextInt(0, 100);
-        PageRequest pageRequest = PageRequest.of(randomPage, 1);
+        var randomPage = (int) randomService.getNumberInRange(0, 100).orElse(0);
+        var pageRequest = PageRequest.of(randomPage, 1);
         List<Postcodes> postcodes = postcodeRepository.findByPostcodePrefixContaining(orConditions, pageRequest);
         if (postcodes.isEmpty()) {
             pageRequest = PageRequest.of(0, 1);
