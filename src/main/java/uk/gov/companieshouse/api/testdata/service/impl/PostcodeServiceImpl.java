@@ -1,9 +1,8 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -25,7 +24,36 @@ public class PostcodeServiceImpl implements PostcodeService {
 
     @Override
     public List<Postcodes> get(String country) {
-        // Prefix lists (trimmed for brevity — keep your full lists)
+        final List<String> prefixes = getPrefixes(country);
+
+        if (prefixes.size() == 1) {
+            return queryByPrefix(prefixes.getFirst());
+        }
+
+        int size = prefixes.size();
+        boolean[] tried = new boolean[size];
+        int triedCount = 0;
+
+        while (triedCount < size) {
+            int idx = (int) randomService.getNumberInRange(0, size - 1).orElse(0);
+
+            if (tried[idx]) {
+                int next = idx;
+                do { next = (next + 1) % size; } while (tried[next] && next != idx);
+                idx = next;
+            }
+
+            if (tried[idx]) break; // safety (shouldn’t happen)
+            tried[idx] = true; triedCount++;
+
+            List<Postcodes> result = queryByPrefix(prefixes.get(idx));
+            if (!result.isEmpty()) return result;
+        }
+
+        return List.of();
+    }
+
+    private static List<String> getPrefixes(String country) {
         List<String> prefixesWales = List.of("CF", "LL", "NP", "LD", "SA");
         List<String> prefixesScotland = List.of("AB", "DD", "DG", "EH", "FK", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "HS", "IV", "KA", "KW", "KY", "ML", "PA", "PH", "TD");
         List<String> prefixesEngland = List.of(
@@ -45,29 +73,24 @@ public class PostcodeServiceImpl implements PostcodeService {
         );
         List<String> prefixesNI = List.of("BT");
 
-        List<String> prefixes = switch (country.toLowerCase()) {
-            case "gb-wls", "gb-cym" -> prefixesWales;
+        return switch (country.toLowerCase()) {
+            case "gb-wls" -> prefixesWales;
             case "gb-sct" -> prefixesScotland;
             case "gb-nir" -> prefixesNI;
             case "gb-eng" -> prefixesEngland;
             default -> throw new IllegalArgumentException("Country not recognised: " + country);
         };
+    }
 
-        List<Object> orConditions = prefixes.stream().map(prefix -> {
-            Map<String, Object> regex = new HashMap<>();
-            regex.put("$regex", "^" + prefix);
-            Map<String, Object> condition = new HashMap<>();
-            condition.put("postcode.stripped", regex);
-            return condition;
-        }).collect(Collectors.toList());
+    private List<Postcodes> queryByPrefix(String prefix) {
+        Map<String, Object> regex = new HashMap<>();
+        regex.put("$regex", "^" + prefix);
 
-        var randomPage = (int) randomService.getNumberInRange(0, 100).orElse(0);
-        var pageRequest = PageRequest.of(randomPage, 1);
-        List<Postcodes> postcodes = postcodeRepository.findByPostcodePrefixContaining(orConditions, pageRequest);
-        if (postcodes.isEmpty()) {
-            pageRequest = PageRequest.of(0, 1);
-            postcodes = postcodeRepository.findByPostcodePrefixContaining(orConditions, pageRequest);
-        }
-        return postcodes;
+        Map<String, Object> condition = new HashMap<>();
+        condition.put("postcode.stripped", regex);
+
+        var pageRequest = PageRequest.of(0, 10);
+        List<Postcodes> result = postcodeRepository.findByPostcodePrefixContaining(List.of(condition), pageRequest);
+        return result == null ? List.of() : result;
     }
 }

@@ -5,7 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageRequest;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 
@@ -40,7 +38,6 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        when(randomService.getNumberInRange(0, 100)).thenReturn(java.util.OptionalLong.of(0));
         List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
 
         assertEquals(1, result.size());
@@ -59,7 +56,6 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        when(randomService.getNumberInRange(0, 100)).thenReturn(java.util.OptionalLong.of(0));
         List<Postcodes> result = postcodeService.get(COUNTRY_WALES);
 
         assertEquals(1, result.size());
@@ -78,7 +74,6 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        when(randomService.getNumberInRange(0, 100)).thenReturn(java.util.OptionalLong.of(0));
         List<Postcodes> result = postcodeService.get(COUNTRY_SCOTLAND);
 
         assertEquals(1, result.size());
@@ -97,7 +92,6 @@ class PostcodeServiceImplTest {
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-
         List<Postcodes> result = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
 
         assertEquals(1, result.size());
@@ -120,19 +114,12 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testFallbackToFirstPageWhenRandomPageIsEmpty() {
-        List<Postcodes> emptyList = Collections.emptyList();
-        List<Postcodes> mockPostcodes = createMockPostcodes("BT1 1AA");
-
-        when(postcodeRepository.findByPostcodePrefixContaining(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.any(PageRequest.class)))
-                .thenReturn(emptyList)
-                .thenReturn(mockPostcodes);
-
-        List<Postcodes> result = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
-
-        assertEquals(1, result.size());
-        assertEquals("BT1 1AA", result.getFirst().getPretty());
-        verify(postcodeRepository, times(2)).findByPostcodePrefixContaining(org.mockito.ArgumentMatchers.anyList(), org.mockito.ArgumentMatchers.any(PageRequest.class));
+    void testGetPostcodesForEmptyCountry() {
+        try {
+            postcodeService.get("");
+        } catch (IllegalArgumentException e) {
+            assertEquals("Country not recognised: ", e.getMessage());
+        }
     }
 
     private List<Postcodes> createMockPostcodes(String prettyPostcode) {
