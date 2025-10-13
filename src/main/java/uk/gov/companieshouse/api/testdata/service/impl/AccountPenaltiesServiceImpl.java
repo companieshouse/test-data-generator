@@ -196,11 +196,11 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         }
     }
 
-    List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) throws DataException {
+    List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) {
         if (Boolean.TRUE.equals(penaltySpec.isDuplicate())) {
             List<AccountPenalty> duplicatePenalties = createDuplicatePenalties(penaltySpec);
             if (duplicatePenalties == null) {
-                return null;
+                return new ArrayList<>();
             }
             return duplicatePenalties;
         }
@@ -244,7 +244,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         int numberOfPenalties = Optional.ofNullable(penaltySpec.getNumberOfPenalties()).orElse(1);
 
         if (numberOfPenalties < 2) {
-            return null;
+            return new ArrayList<>();
         }
 
         List<AccountPenalty> penalties = new ArrayList<>();
@@ -258,8 +258,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         // Generate one transaction reference for all duplicates
         String sharedTransactionRef = generateTransactionReference(companyCode, transactionSubType);
 
-        for (int i = 0; i < numberOfPenalties; i++) {
-            AccountPenalty penaltyCopy = new AccountPenalty();
+        for (var i = 0; i < numberOfPenalties; i++) {
+            var penaltyCopy = new AccountPenalty();
 
             penaltyCopy.setCompanyCode(basePenalty.getCompanyCode());
             penaltyCopy.setCustomerCode(basePenalty.getCustomerCode());
