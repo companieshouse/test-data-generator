@@ -9,10 +9,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class PostcodeServiceImpl implements PostcodeService {
@@ -25,38 +28,45 @@ public class PostcodeServiceImpl implements PostcodeService {
 
     private final Map<String, List<Postcodes>> cache = new HashMap<>();
 
-    @Override
-    public List<Postcodes> get(String country) {
-        final List<String> prefixes = getPrefixes(country);
+    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-        if (prefixes.size() == 1) {
-            return queryByPrefix(prefixes.getFirst());
+    @Override
+    public List<Postcodes> getPostcodeByCountry(String country) {
+        final List<String> postcodePrefixes = getPostcodePrefixes(country);
+
+        var size = postcodePrefixes.size();
+        if (size == 1) {
+            return queryByPrefix(postcodePrefixes.getFirst());
         }
 
-        var size = prefixes.size();
         var tried = new boolean[size];
         var triedCount = 0;
 
+        // Try random postcode prefixes until we find one that returns results, or we run out of postcode prefixes
         while (triedCount < size) {
             var idx = (int) randomService.getNumberInRange(0, size - 1).orElse(0);
 
+            // Skip already-tried postcodePrefixes
             if (tried[idx]) {
                 int next = idx;
                 do { next = (next + 1) % size; } while (tried[next] && next != idx);
                 idx = next;
             }
 
-            if (tried[idx]) break; // safety (shouldn’t happen)
-            tried[idx] = true; triedCount++;
+            // Safety check - if all tried, break
+            if (tried[idx]) break;
+            tried[idx] = true;
+            triedCount++;
 
-            List<Postcodes> result = queryByPrefix(prefixes.get(idx));
+            List<Postcodes> result = queryByPrefix(postcodePrefixes.get(idx));
+            LOG.info("Tried prefix {} " +  postcodePrefixes.get(idx) + " got {} results" + result.size());
             if (!result.isEmpty()) return result;
         }
 
         return List.of();
     }
 
-    private static List<String> getPrefixes(String country) {
+    private static List<String> getPostcodePrefixes(String country) {
         List<String> prefixesWales = List.of("CF", "LL", "NP", "LD", "SA");
         List<String> prefixesScotland = List.of("AB", "DD", "DG", "EH", "FK", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "HS", "IV", "KA", "KW", "KY", "ML", "PA", "PH", "TD");
         List<String> prefixesEngland = List.of(
@@ -102,7 +112,10 @@ public class PostcodeServiceImpl implements PostcodeService {
 
         var pageRequest = PageRequest.of(0, 10);
         List<Postcodes> result = postcodeRepository.findByPostcodePrefixContaining(List.of(condition), pageRequest);
+
+        // Ensure we never return null - always return empty list if no results
         result = result == null ? List.of() : result;
+        LOG.info("Tried prefix {} " +  prefix + " got {} results" + result.size());
 
         cache.put(prefix, result);
         return result;

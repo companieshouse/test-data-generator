@@ -36,14 +36,14 @@ class PostcodeServiceImplTest {
     private static final String COUNTRY_NORTHERN_IRELAND = "gb-nir";
 
     @Test
-    void testGetPostcodesForEngland() {
+    void testGetPostcodeByCountryPostcodesForEngland() {
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
 
         when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
 
         assertEquals("E1 6AN", result.stream().findFirst().get().getPretty());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
@@ -53,14 +53,14 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testGetPostcodesForWales() {
+    void testGetPostcodeByCountryPostcodesForWales() {
         List<Postcodes> mockPostcodes = createMockPostcodes("CF10 1AA");
 
         when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        List<Postcodes> result = postcodeService.get(COUNTRY_WALES);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
 
         assertEquals("CF10 1AA", result.stream().findFirst().get().getPretty());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
@@ -70,14 +70,14 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testGetPostcodesForScotland() {
+    void testGetPostcodeByCountryPostcodesForScotland() {
         List<Postcodes> mockPostcodes = createMockPostcodes("EH1 1BB");
 
         when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        List<Postcodes> result = postcodeService.get(COUNTRY_SCOTLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_SCOTLAND);
 
         assertEquals("EH1 1BB", result.stream().findFirst().get().getPretty());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
@@ -87,14 +87,14 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testGetPostcodesForNorthernIreland() {
+    void testGetPostcodeByCountryPostcodesForNorthernIreland() {
         List<Postcodes> mockPostcodes = createMockPostcodes("BT1 1AA");
 
         when(postcodeRepository.findByPostcodePrefixContaining(
                 org.mockito.ArgumentMatchers.anyList(),
                 org.mockito.ArgumentMatchers.any()
         )).thenReturn(mockPostcodes);
-        List<Postcodes> result = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
 
         assertEquals("BT1 1AA", result.stream().findFirst().get().getPretty());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(
@@ -104,20 +104,20 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testGetPostcodesForInvalidCountry() {
+    void testGetPostcodeByCountryPostcodesForInvalidCountry() {
         String invalidCountry = "invalid-country";
 
         try {
-            postcodeService.get(invalidCountry);
+            postcodeService.getPostcodeByCountry(invalidCountry);
         } catch (IllegalArgumentException e) {
             assertEquals("Country not recognised: invalid-country", e.getMessage());
         }
     }
 
     @Test
-    void testGetPostcodesForEmptyCountry() {
+    void testGetPostcodeByCountryPostcodesForEmptyCountry() {
         try {
-            postcodeService.get("");
+            postcodeService.getPostcodeByCountry("");
         } catch (IllegalArgumentException e) {
             assertEquals("Country not recognised: ", e.getMessage());
         }
@@ -130,12 +130,12 @@ class PostcodeServiceImplTest {
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(mockPostcodes);
 
         // First call to populate the cache
-        List<Postcodes> result1 = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
+        List<Postcodes> result1 = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
         assertEquals(1, result1.size());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(anyList(), any());
 
         // Second call should use the cache
-        List<Postcodes> result2 = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
+        List<Postcodes> result2 = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
         assertEquals(1, result2.size());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(anyList(), any());
     }
@@ -145,7 +145,7 @@ class PostcodeServiceImplTest {
         String prefix = "BT";
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(List.of());
 
-        List<Postcodes> result = postcodeService.get(COUNTRY_NORTHERN_IRELAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
         assertTrue(result.isEmpty());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(anyList(), any());
     }
@@ -156,7 +156,7 @@ class PostcodeServiceImplTest {
         List<Postcodes> mockPostcodes = createMockPostcodes("CF1 1AA");
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(country);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(country);
         assertEquals(1, result.size());
         verify(postcodeRepository, times(1)).findByPostcodePrefixContaining(anyList(), any());
     }
@@ -168,7 +168,7 @@ class PostcodeServiceImplTest {
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(mockPostcodes);
         when(randomService.getNumberInRange(anyInt(), anyInt())).thenReturn(OptionalLong.of(0));
 
-        List<Postcodes> result = postcodeService.get(country);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(country);
         assertEquals(1, result.size());
         verify(randomService, times(1)).getNumberInRange(anyInt(), anyInt());
     }
@@ -179,7 +179,7 @@ class PostcodeServiceImplTest {
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
 
         assertEquals(1, result.size());
         verify(randomService, times(1)).getNumberInRange(0, 88);
@@ -191,7 +191,7 @@ class PostcodeServiceImplTest {
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
 
         assertEquals(1, result.size());
         verify(randomService, times(1)).getNumberInRange(0, 88);
@@ -202,7 +202,7 @@ class PostcodeServiceImplTest {
         when(randomService.getNumberInRange(0, 88)).thenReturn(OptionalLong.empty());
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(List.of());
 
-        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
 
         assertTrue(result.isEmpty());
         verify(randomService, times(89)).getNumberInRange(0, 88);
@@ -213,7 +213,7 @@ class PostcodeServiceImplTest {
         List<Postcodes> mockPostcodes = createMockPostcodes("E1 6AN");
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(mockPostcodes);
 
-        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
 
         assertEquals(1, result.size());
     }
@@ -222,7 +222,7 @@ class PostcodeServiceImplTest {
     void testReturningEmptyListWhenNoResultsFound() {
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(List.of());
 
-        List<Postcodes> result = postcodeService.get(COUNTRY_ENGLAND);
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
 
         assertTrue(result.isEmpty());
     }
