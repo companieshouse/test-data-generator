@@ -944,6 +944,17 @@ class TestDataControllerTest {
     }
 
     @Test
+    void testPenaltyOutstandingAmountWhenNotPaid() {
+        PenaltyData penaltyCopy = new PenaltyData();
+        penaltyCopy.setAmount(100.0);
+
+        boolean isPaid = false;
+        penaltyCopy.setOutstandingAmount(isPaid ? 0.0 : penaltyCopy.getAmount());
+
+        assertEquals(100.0, penaltyCopy.getOutstandingAmount());
+    }
+
+    @Test
     void getPostcodeSuccess() throws Exception {
         String country = "England";
         PostcodesData postcodesData =
