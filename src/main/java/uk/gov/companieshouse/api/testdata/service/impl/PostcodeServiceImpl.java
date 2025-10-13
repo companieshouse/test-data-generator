@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,8 @@ public class PostcodeServiceImpl implements PostcodeService {
     @Autowired
     private RandomService randomService;
 
+    private final Map<String, List<Postcodes>> cache = new HashMap<>();
+
     @Override
     public List<Postcodes> get(String country) {
         final List<String> prefixes = getPrefixes(country);
@@ -30,12 +33,12 @@ public class PostcodeServiceImpl implements PostcodeService {
             return queryByPrefix(prefixes.getFirst());
         }
 
-        int size = prefixes.size();
+        var size = prefixes.size();
         boolean[] tried = new boolean[size];
-        int triedCount = 0;
+        var triedCount = 0;
 
         while (triedCount < size) {
-            int idx = (int) randomService.getNumberInRange(0, size - 1).orElse(0);
+            var idx = (int) randomService.getNumberInRange(0, size - 1).orElse(0);
 
             if (tried[idx]) {
                 int next = idx;
@@ -82,15 +85,24 @@ public class PostcodeServiceImpl implements PostcodeService {
         };
     }
 
+    @Cacheable("postcodesByPrefix")
     private List<Postcodes> queryByPrefix(String prefix) {
+        if (cache.containsKey(prefix)) {
+            return cache.get(prefix);
+        }
+
         Map<String, Object> regex = new HashMap<>();
         regex.put("$regex", "^" + prefix);
 
         Map<String, Object> condition = new HashMap<>();
         condition.put("postcode.stripped", regex);
+        condition.put("building_number", new HashMap<String, Object>() {{ put("$ne", null); }});
 
         var pageRequest = PageRequest.of(0, 10);
         List<Postcodes> result = postcodeRepository.findByPostcodePrefixContaining(List.of(condition), pageRequest);
-        return result == null ? List.of() : result;
+        result = result == null ? List.of() : result;
+
+        cache.put(prefix, result);
+        return result;
     }
 }
