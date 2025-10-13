@@ -59,6 +59,9 @@ public class PenaltySpec {
     @JsonProperty("account_status")
     private String accountStatus;
 
+    @JsonProperty("duplicate")
+    private boolean duplicate = false;
+
     public Integer getNumberOfPenalties() {
         return numberOfPenalties;
     }
@@ -138,4 +141,11 @@ public class PenaltySpec {
         return accountStatus;
     }
 
+    public boolean isDuplicate() {
+        return duplicate;
+    }
+
+    public void setDuplicate(boolean duplicate) {
+        this.duplicate = duplicate;
+    }
 }

@@ -882,7 +882,7 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
 
-        ResponseEntity<AccountPenaltiesData> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = testDataController.createPenalty(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(createdPenalties, response.getBody());

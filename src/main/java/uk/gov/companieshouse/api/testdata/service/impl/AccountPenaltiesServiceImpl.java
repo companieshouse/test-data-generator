@@ -170,6 +170,12 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     public AccountPenaltiesData createAccountPenalties(PenaltySpec penaltySpec)
             throws DataException {
 
+        List<AccountPenalty> penalties = createPenaltiesList(penaltySpec);
+
+        if (penalties == null) {
+            return null;
+        }
+
         var accountPenalties = new AccountPenalties();
         accountPenalties.setId(new ObjectId());
         LOG.info("Creating account penalties with ID: " + accountPenalties.getId());
@@ -190,7 +196,15 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         }
     }
 
-    List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) {
+    List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) throws DataException {
+        if (Boolean.TRUE.equals(penaltySpec.isDuplicate())) {
+            List<AccountPenalty> duplicatePenalties = createDuplicatePenalties(penaltySpec);
+            if (duplicatePenalties == null) {
+                return null;
+            }
+            return duplicatePenalties;
+        }
+
         int numberOfPenalties = Optional.ofNullable(penaltySpec.getNumberOfPenalties()).orElse(1);
         boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
         String companyCode = getDefaultIfBlank(penaltySpec.getCompanyCode(), "LP");
@@ -225,6 +239,51 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
         return penalty;
     }
+
+    private List<AccountPenalty> createDuplicatePenalties(PenaltySpec penaltySpec) {
+        int numberOfPenalties = Optional.ofNullable(penaltySpec.getNumberOfPenalties()).orElse(1);
+
+        if (numberOfPenalties < 2) {
+            return null;
+        }
+
+        List<AccountPenalty> penalties = new ArrayList<>();
+        String companyCode = getDefaultIfBlank(penaltySpec.getCompanyCode(), "LP");
+        String transactionSubType = getTransactionSubTypeValue(penaltySpec);
+        boolean isPaid = Optional.ofNullable(penaltySpec.getIsPaid()).orElse(false);
+
+        // Create base penalty
+        AccountPenalty basePenalty = createPenalty(penaltySpec, companyCode, transactionSubType, SECURE_RANDOM, 0, isPaid);
+
+        // Generate one transaction reference for all duplicates
+        String sharedTransactionRef = generateTransactionReference(companyCode, transactionSubType);
+
+        for (int i = 0; i < numberOfPenalties; i++) {
+            AccountPenalty penaltyCopy = new AccountPenalty();
+
+            penaltyCopy.setCompanyCode(basePenalty.getCompanyCode());
+            penaltyCopy.setCustomerCode(basePenalty.getCustomerCode());
+            penaltyCopy.setLedgerCode(basePenalty.getLedgerCode());
+            penaltyCopy.setTransactionType(basePenalty.getTransactionType());
+            penaltyCopy.setTypeDescription(basePenalty.getTypeDescription());
+            penaltyCopy.setTransactionSubType(basePenalty.getTransactionSubType());
+            penaltyCopy.setAccountStatus(basePenalty.getAccountStatus());
+            penaltyCopy.setDunningStatus(basePenalty.getDunningStatus());
+            penaltyCopy.setIsPaid(isPaid);
+            penaltyCopy.setTransactionReference(sharedTransactionRef);
+
+            penaltyCopy.setAmount(generateRandomAmount(10, 99));
+            penaltyCopy.setOutstandingAmount(isPaid ? 0.0 : penaltyCopy.getAmount());
+            penaltyCopy.setTransactionDate(getFormattedDate(i));
+            penaltyCopy.setMadeUpDate(getFormattedDate(i + 1));
+            penaltyCopy.setDueDate(getFormattedDate(0, i + 1));
+
+            penalties.add(penaltyCopy);
+        }
+
+        return penalties;
+    }
+
 
     private void configurePenaltyBasedOnCompanyAndSubType(AccountPenalty penalty, String companyCode,
                                                           String transactionSubType, Random random,
