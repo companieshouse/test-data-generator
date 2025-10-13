@@ -48,8 +48,12 @@ public class PostcodeServiceImpl implements PostcodeService {
 
             // Skip already-tried postcodePrefixes
             if (tried[idx]) {
+                LOG.debug("Prefix at index " + idx + " already tried, finding next index.");
                 int next = idx;
-                do { next = (next + 1) % size; } while (tried[next] && next != idx);
+                do {
+                    next = (next + 1) % size;
+                } while (tried[next] && next != idx);
+                LOG.debug("Next index to try is " + next);
                 idx = next;
             }
 
@@ -59,7 +63,7 @@ public class PostcodeServiceImpl implements PostcodeService {
             triedCount++;
 
             List<Postcodes> result = queryByPrefix(postcodePrefixes.get(idx));
-            LOG.info("Tried prefix {} " +  postcodePrefixes.get(idx) + " got {} results" + result.size());
+            LOG.info("Tried prefix {} " + postcodePrefixes.get(idx) + " got {} results" + result.size());
             if (!result.isEmpty()) return result;
         }
 
@@ -115,7 +119,7 @@ public class PostcodeServiceImpl implements PostcodeService {
 
         // Ensure we never return null - always return empty list if no results
         result = result == null ? List.of() : result;
-        LOG.info("Tried prefix {} " +  prefix + " got {} results" + result.size());
+        LOG.info("Tried prefix {} " + prefix + " got {} results" + result.size());
 
         cache.put(prefix, result);
         return result;
