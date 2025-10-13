@@ -702,7 +702,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setRegisteredOfficeAddressIsInDisputeTrue() {
+    void setRegisteredOfficeIsInDisputeTrue() {
         setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setRegisteredOfficeIsInDispute(true);
         CompanyProfile profile = createAndCapture(spec);
@@ -723,6 +723,30 @@ class CompanyProfileServiceImplTest {
         spec.setRegisteredOfficeIsInDispute(null);
         CompanyProfile profile = createAndCapture(spec);
         assertFalse(profile.getRegisteredOfficeIsInDispute());
+    }
+
+    @Test
+    void setUndeliverableRegisteredOfficeAddressTrue() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
+        spec.setUndeliverableRegisteredOfficeAddress(true);
+        CompanyProfile profile = createAndCapture(spec);
+        assertTrue(profile.getUndeliverableRegisteredOfficeAddress());
+    }
+
+    @Test
+    void setUndeliverableRegisteredOfficeAddressFalse() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND,CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        spec.setUndeliverableRegisteredOfficeAddress(false);
+        CompanyProfile profile = createAndCapture(spec);
+        assertFalse(profile.getUndeliverableRegisteredOfficeAddress());
+    }
+
+    @Test
+    void setUndeliverableRegisteredOfficeAddressNull() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND,CompanyType.OVERSEA_COMPANY);
+        spec.setUndeliverableRegisteredOfficeAddress(null);
+        CompanyProfile profile = createAndCapture(spec);
+        assertFalse(profile.getUndeliverableRegisteredOfficeAddress());
     }
 
     private void setCompanyJurisdictionAndType(Jurisdiction jurisdiction, CompanyType companyType) {
