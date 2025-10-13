@@ -926,6 +926,24 @@ class TestDataControllerTest {
     }
 
     @Test
+    void createPenaltyDuplicateButNoCreatedPenalties() throws Exception {
+        PenaltySpec request = new PenaltySpec();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+        request.setDuplicate(true);
+
+        when(testDataService.createPenaltyData(request)).thenReturn(null);
+
+        ResponseEntity<?> response = testDataController.createPenalty(request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertNotNull(body);
+        assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
+        assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
+    }
+
+    @Test
     void getPostcodeSuccess() throws Exception {
         String country = "England";
         PostcodesData postcodesData =
