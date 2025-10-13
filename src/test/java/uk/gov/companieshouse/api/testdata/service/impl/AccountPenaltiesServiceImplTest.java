@@ -30,6 +30,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -582,6 +583,58 @@ class AccountPenaltiesServiceImplTest {
         assertEquals(10.0, result.getPenalties().get(0).getAmount());
         assertEquals(99.0, result.getPenalties().get(1).getAmount());
     }
+
+    @Test
+    void testCreateAccountPenalties_whenPenaltiesNull_returnsNull() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode(COMPANY_CODE);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+
+        AccountPenaltiesServiceImpl spyService = Mockito.spy(service);
+        Mockito.doReturn(null).when(spyService).createPenaltiesList(penaltySpec);
+
+        AccountPenaltiesData result = spyService.createAccountPenalties(penaltySpec);
+
+        assertNull(result);
+    }
+
+    @Test
+    void createPenaltiesList_duplicatePenalties() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(3);
+        penaltySpec.setDuplicate(true); // important!
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(3, penalties.size());
+        String transactionRef = penalties.get(0).getTransactionReference();
+        assertTrue(penalties.stream().allMatch(p -> p.getTransactionReference().equals(transactionRef)));
+    }
+
+    @Test
+    void createDuplicatePenalties_shouldGenerateMultiplePenaltiesWithSameTransactionReference() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode("12345678");
+        penaltySpec.setNumberOfPenalties(3);
+        penaltySpec.setDuplicate(true);
+        penaltySpec.setIsPaid(false);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(3, penalties.size(), "Should create 3 duplicate penalties");
+
+        String ref = penalties.get(0).getTransactionReference();
+        assertTrue(penalties.stream().allMatch(p -> p.getTransactionReference().equals(ref)),
+                "All duplicate penalties should share the same transaction reference");
+
+        penalties.forEach(p -> assertTrue(p.getAmount() >= 10 && p.getAmount() <= 99));
+    }
+
 
     private static Stream<Arguments> penaltyReferencePrefixProvider() {
         return Stream.of(
