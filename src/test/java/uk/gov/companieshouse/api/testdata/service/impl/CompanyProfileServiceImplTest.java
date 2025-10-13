@@ -702,7 +702,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setRegisteredOfficeIsInDisputeTrue() {
+    void setRegisteredOfficeAddressIsInDisputeTrue() {
         setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES,CompanyType.LTD);
         spec.setRegisteredOfficeIsInDispute(true);
         CompanyProfile profile = createAndCapture(spec);
