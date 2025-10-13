@@ -34,7 +34,7 @@ public class PostcodeServiceImpl implements PostcodeService {
         }
 
         var size = prefixes.size();
-        boolean[] tried = new boolean[size];
+        var tried = new boolean[size];
         var triedCount = 0;
 
         while (triedCount < size) {
