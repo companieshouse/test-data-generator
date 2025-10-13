@@ -96,7 +96,9 @@ public class PostcodeServiceImpl implements PostcodeService {
 
         Map<String, Object> condition = new HashMap<>();
         condition.put("postcode.stripped", regex);
-        condition.put("building_number", new HashMap<String, Object>() {{ put("$ne", null); }});
+        Map<String, Object> buildingNumberConditionMap = new HashMap<>();
+        buildingNumberConditionMap.put("$ne", null);
+        condition.put("building_number", buildingNumberConditionMap);
 
         var pageRequest = PageRequest.of(0, 10);
         List<Postcodes> result = postcodeRepository.findByPostcodePrefixContaining(List.of(condition), pageRequest);
