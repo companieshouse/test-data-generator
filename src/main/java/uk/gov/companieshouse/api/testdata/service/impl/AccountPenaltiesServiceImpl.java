@@ -198,11 +198,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
     List<AccountPenalty> createPenaltiesList(PenaltySpec penaltySpec) {
         if (Boolean.TRUE.equals(penaltySpec.isDuplicate())) {
-            List<AccountPenalty> duplicatePenalties = createDuplicatePenalties(penaltySpec);
-            if (duplicatePenalties == null) {
-                return new ArrayList<>();
-            }
-            return duplicatePenalties;
+            return createDuplicatePenalties(penaltySpec);
         }
 
         int numberOfPenalties = Optional.ofNullable(penaltySpec.getNumberOfPenalties()).orElse(1);
