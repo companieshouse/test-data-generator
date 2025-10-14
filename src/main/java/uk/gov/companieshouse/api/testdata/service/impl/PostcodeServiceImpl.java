@@ -63,7 +63,7 @@ public class PostcodeServiceImpl implements PostcodeService {
             triedCount++;
 
             List<Postcodes> result = queryByPrefix(postcodePrefixes.get(idx));
-            LOG.info("Tried prefix {} " + postcodePrefixes.get(idx) + " got {} results" + result.size());
+            LOG.info("Tried prefix " + postcodePrefixes.get(idx) + " got "+ result + " results");
             if (!result.isEmpty()) return result;
         }
 
@@ -119,7 +119,7 @@ public class PostcodeServiceImpl implements PostcodeService {
 
         // Ensure we never return null - always return empty list if no results
         result = result == null ? List.of() : result;
-        LOG.info("Tried prefix {} " + prefix + " got {} results" + result.size());
+        LOG.info("Tried prefix " + prefix + " got "+ result + " results");
 
         cache.put(prefix, result);
         return result;
