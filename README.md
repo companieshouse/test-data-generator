@@ -324,8 +324,10 @@ In order to use the generator, there are different possible endpoints that can b
   - `account_status`: The account status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_type`: The transaction type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_sub_type`: The transaction sub-type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `duplicate`: The duplicate will create multiple penalties with same transaction reference. This is boolean by default is false which will not create duplicate penalties
 
-  - A usage example looks like this: `{ "company_code": "LP", "customer_code": "NI095887", "number_of_penalties": 2, "amount": 150 }`
+  - An usage example looks like this: `{ "company_code": "LP", "customer_code": "NI095887", "number_of_penalties": 2, "amount": 150 }`
+  - An usage example for duplicate penalties looks like this: `{ "company_code": "LP", "customer_code": "NI095887", "number_of_penalties": 2, "amount": 150, "duplicate": true }`
 
 - GET: Sending a GET request to retrieve the Account Penalties by id `{Base URL}/test-data/penalties/{id}`. 
   - `id`: The ID of the Account Penalties entry in the account_penalties db collection. This is mandatory and passed as a path variable.
