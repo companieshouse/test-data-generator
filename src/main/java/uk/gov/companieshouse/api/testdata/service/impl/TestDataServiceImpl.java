@@ -727,7 +727,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public PostcodesData getPostcodes(String country) throws DataException {
         try {
-            List<Postcodes> postcodes = postcodeService.get(country);
+            List<Postcodes> postcodes = postcodeService.getPostcodeByCountry(country);
             if (postcodes == null || postcodes.isEmpty()) {
                 LOG.info("No postcodes found for country: " + country);
                 return null;

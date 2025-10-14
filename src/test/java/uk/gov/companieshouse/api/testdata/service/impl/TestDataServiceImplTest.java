@@ -97,7 +97,6 @@ import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TransactionService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
 @ExtendWith(MockitoExtension.class)
@@ -2014,7 +2013,7 @@ class TestDataServiceImplTest {
         mockPostcode.setPretty("EC1 1BB");
         mockPostcode.setCountry(country);
 
-        when(postcodeService.get(country)).thenReturn(List.of(mockPostcode));
+        when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of(mockPostcode));
 
         PostcodesData result = testDataService.getPostcodes(country);
 
@@ -2023,31 +2022,31 @@ class TestDataServiceImplTest {
         assertEquals("Central", result.getDependentLocality());
         assertEquals("London", result.getPostTown());
         assertEquals("EC1 1BB", result.getPostcode());
-        verify(postcodeService, times(1)).get(country);
+        verify(postcodeService, times(1)).getPostcodeByCountry(country);
     }
 
     @Test
     void testGetPostcodesInvalidCountry() throws DataException {
         String country = "InvalidCountry";
 
-        when(postcodeService.get(country)).thenReturn(List.of());
+        when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of());
 
         PostcodesData result = testDataService.getPostcodes(country);
 
         assertNull(result);
-        verify(postcodeService, times(1)).get(country);
+        verify(postcodeService, times(1)).getPostcodeByCountry(country);
     }
 
     @Test
     void testGetPostcodesThrowsException() {
         String country = "ErrorCountry";
 
-        when(postcodeService.get(country)).thenThrow(new RuntimeException("Error retrieving postcodes"));
+        when(postcodeService.getPostcodeByCountry(country)).thenThrow(new RuntimeException("Error retrieving postcodes"));
 
         DataException exception = assertThrows(DataException.class, () -> testDataService.getPostcodes(country));
 
         assertEquals("Error retrieving postcodes", exception.getMessage());
-        verify(postcodeService, times(1)).get(country);
+        verify(postcodeService, times(1)).getPostcodeByCountry(country);
     }
 
     @Test

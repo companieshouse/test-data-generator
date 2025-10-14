@@ -10,5 +10,5 @@ public interface PostcodeService {
      * @param country the country name which to retrieve postcodes for
      * @return Postcodes object containing the post codes for the specified country
      */
-    List<Postcodes> get(String country);
+    List<Postcodes> getPostcodeByCountry(String country);
 }
