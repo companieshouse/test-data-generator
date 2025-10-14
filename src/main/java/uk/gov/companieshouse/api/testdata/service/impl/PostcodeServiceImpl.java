@@ -44,27 +44,29 @@ public class PostcodeServiceImpl implements PostcodeService {
 
         // Try random postcode prefixes until we find one that returns results, or we run out of postcode prefixes
         while (triedCount < size) {
-            var idx = (int) randomService.getNumberInRange(0, size - 1).orElse(0);
+            var postcodePrefixIndex = (int) randomService.getNumberInRange(0, size - 1).orElse(0);
 
             // Skip already-tried postcodePrefixes
-            if (tried[idx]) {
-                LOG.debug("Prefix at index " + idx + " already tried, finding next index.");
-                int next = idx;
+            if (tried[postcodePrefixIndex]) {
+                LOG.debug("Prefix at index " + postcodePrefixIndex + " already tried, finding next postcode prefix index.");
+                int nextPostcodePrefixIndex = postcodePrefixIndex;
                 do {
-                    next = (next + 1) % size;
-                } while (tried[next] && next != idx);
-                LOG.debug("Next index to try is " + next);
-                idx = next;
+                    nextPostcodePrefixIndex = (nextPostcodePrefixIndex + 1) % size;
+                } while (tried[nextPostcodePrefixIndex] && nextPostcodePrefixIndex != postcodePrefixIndex);
+                LOG.debug("Next index to try is " + nextPostcodePrefixIndex);
+                postcodePrefixIndex = nextPostcodePrefixIndex;
             }
 
             // Safety check - if all tried, break
-            if (tried[idx]) break;
-            tried[idx] = true;
+            if (tried[postcodePrefixIndex]) break;
+            tried[postcodePrefixIndex] = true;
             triedCount++;
 
-            List<Postcodes> result = queryByPrefix(postcodePrefixes.get(idx));
-            LOG.info("Tried prefix " + postcodePrefixes.get(idx) + " got "+ result + " results");
-            if (!result.isEmpty()) return result;
+            List<Postcodes> result = queryByPrefix(postcodePrefixes.get(postcodePrefixIndex));
+            if (!result.isEmpty()) {
+                LOG.info(String.format("Tried prefix %s got %s results", postcodePrefixes.get(postcodePrefixIndex), result));
+                return result;
+            }
         }
 
         return List.of();
@@ -119,8 +121,6 @@ public class PostcodeServiceImpl implements PostcodeService {
 
         // Ensure we never return null - always return empty list if no results
         result = result == null ? List.of() : result;
-        LOG.info("Tried prefix " + prefix + " got "+ result + " results");
-
         cache.put(prefix, result);
         return result;
     }
