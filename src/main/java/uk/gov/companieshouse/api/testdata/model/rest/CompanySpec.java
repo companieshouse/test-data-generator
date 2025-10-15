@@ -96,6 +96,9 @@ public class CompanySpec {
     @JsonProperty("registered_office_is_in_dispute")
     private Boolean registeredOfficeIsInDispute;
 
+    @JsonProperty("undeliverable_registered_office_address")
+    private Boolean undeliverableRegisteredOfficeAddress;
+
     @JsonProperty("company_name")
     private String companyName;
 
@@ -249,6 +252,14 @@ public class CompanySpec {
 
     public void setRegisteredOfficeIsInDispute(Boolean registeredOfficeIsInDispute) {
         this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
+    }
+
+    public Boolean getUndeliverableRegisteredOfficeAddress() {
+        return undeliverableRegisteredOfficeAddress;
+    }
+
+    public void setUndeliverableRegisteredOfficeAddress(Boolean undeliverableRegisteredOfficeAddress) {
+        this.undeliverableRegisteredOfficeAddress = undeliverableRegisteredOfficeAddress;
     }
 
     public Boolean getPscActive() {

@@ -143,7 +143,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         profile.setDateOfCreation(dateParams.getDateOneYearAgo());
         profile.setType(companyTypeValue);
-        profile.setUndeliverableRegisteredOfficeAddress(false);
+        profile.setUndeliverableRegisteredOfficeAddress(BooleanUtils.isTrue(spec.getUndeliverableRegisteredOfficeAddress()));
 
         profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
         if (spec.getCompanyName() != null) {
@@ -219,7 +219,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.getConfirmationStatement().setOverdue(false);
 
         // Company Details
-        overseasEntity.setUndeliverableRegisteredOfficeAddress(false);
+        overseasEntity.setUndeliverableRegisteredOfficeAddress(BooleanUtils.isTrue(spec.getUndeliverableRegisteredOfficeAddress()));
+
         if (spec.getCompanyName() != null) {
             overseasEntity.setCompanyName(spec.getCompanyName() + " " + companyNumber);
         } else {

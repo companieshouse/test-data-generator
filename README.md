@@ -93,6 +93,7 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with active psc statements: `{ "active_statements": 5 }`
   - A usage example of creating a company with an inactive psc: `{ "number_of_psc": 1, "psc_active": false }`
   - A usage example for creating a company with registered office in dispute: `{ "registered_office_is_in_dispute": true }`
+  - A usage example for creating a company with undeliverable office address: { "undeliverable_registered_office_address": true}
   - A usage example for creating a company with padded company number: `{ "is_company_number_padding": true }`
   - A usage example for creating a company with company name: `{ "company_name": "Test Company Ltd" }`
   - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
