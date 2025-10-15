@@ -338,7 +338,6 @@ class CertifiedCopiesServiceImplTest {
         itemOption1.setDeliveryMethod("standard");
         itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
 
-        FilingHistoryDocumentsSpec filingHistoryDocument2 = new FilingHistoryDocumentsSpec();
         filingHistoryDocument1.setFilingHistoryDate("2019-11-23");
         filingHistoryDocument1.setFilingHistoryDescription("incorporation-company");
         filingHistoryDocument1.setFilingHistoryId("MzE0OTM3MTQxNmFkaXF6a2N4");

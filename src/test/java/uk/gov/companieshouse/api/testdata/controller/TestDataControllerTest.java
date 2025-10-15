@@ -27,10 +27,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -845,15 +845,6 @@ class TestDataControllerTest {
         assertEquals(exception, thrown);
     }
 
-    private static AccountPenaltiesData createAccountPenaltiesData(String companyCode,
-                                                                   PenaltyData penalty) {
-        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
-        accountPenaltiesData.setCreatedAt(Instant.now());
-        accountPenaltiesData.setCompanyCode(companyCode);
-        accountPenaltiesData.setPenalties(Collections.singletonList(penalty));
-        return accountPenaltiesData;
-    }
-
     private PenaltyData createPenaltyData(String companyCode, String customerCode,
                                           String penaltyRef, double amount, boolean paid) {
         PenaltyData penalty = new PenaltyData();
@@ -916,9 +907,10 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
 
-        ResponseEntity<?> response = testDataController.createPenalty(request);
+        ResponseEntity<Object> response = testDataController.createPenalty(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
         assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
@@ -934,9 +926,10 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(null);
 
-        ResponseEntity<?> response = testDataController.createPenalty(request);
+        ResponseEntity<Object> response = testDataController.createPenalty(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
         assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
@@ -1356,7 +1349,7 @@ class TestDataControllerTest {
 
         ResponseEntity<AdminPermissionsData> response = testDataController.createAdminPermissions(spec);
 
-        assertEquals(HttpStatus.CREATED.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         assertEquals(data, response.getBody());
         verify(testDataService, times(1)).createAdminPermissionsData(spec);
     }
@@ -1382,7 +1375,7 @@ class TestDataControllerTest {
 
         ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
 
-        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCode().value());
         assertNull(response.getBody());
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
     }
@@ -1394,7 +1387,7 @@ class TestDataControllerTest {
 
         ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
 
-        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(id, response.getBody().get("admin-permissions-id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));

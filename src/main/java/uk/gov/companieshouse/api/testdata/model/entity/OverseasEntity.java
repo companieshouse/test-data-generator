@@ -350,10 +350,6 @@ public class OverseasEntity extends CompanyProfile {
         public void setMonths(int months) {
             this.months = months;
         }
-
-        public int getMonths() {
-            return months;
-        }
     }
 
     private static class AccountPeriod {

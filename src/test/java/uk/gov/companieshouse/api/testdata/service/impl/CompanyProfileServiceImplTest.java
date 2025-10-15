@@ -108,7 +108,7 @@ class CompanyProfileServiceImplTest {
     private CompanyProfile createAndCapture(CompanySpec spec) {
         Address mockAddress = new Address("", "", "", "", "", "");
         setupCommonMocks(spec, mockAddress);
-        CompanyProfile returnedProfile = companyProfileService.create(spec);
+        companyProfileService.create(spec);
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
         return captor.getValue();
