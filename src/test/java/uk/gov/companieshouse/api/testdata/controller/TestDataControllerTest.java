@@ -882,7 +882,7 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
 
-        ResponseEntity<AccountPenaltiesData> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = testDataController.createPenalty(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(createdPenalties, response.getBody());
@@ -902,6 +902,56 @@ class TestDataControllerTest {
                 testDataController.createPenalty(request));
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).createPenaltyData(request);
+    }
+
+    @Test
+    void createPenaltyDuplicateButNoPenalties() throws Exception {
+        PenaltySpec request = new PenaltySpec();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+        request.setDuplicate(true); // simulate duplicate request
+
+        AccountPenaltiesData createdPenalties = new AccountPenaltiesData();
+        createdPenalties.setPenalties(Collections.emptyList()); // empty list simulates failure
+
+        when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
+
+        ResponseEntity<?> response = testDataController.createPenalty(request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertNotNull(body);
+        assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
+        assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
+    }
+
+    @Test
+    void createPenaltyDuplicateButNoCreatedPenalties() throws Exception {
+        PenaltySpec request = new PenaltySpec();
+        request.setCompanyCode(COMPANY_CODE);
+        request.setCustomerCode(CUSTOMER_CODE);
+        request.setDuplicate(true);
+
+        when(testDataService.createPenaltyData(request)).thenReturn(null);
+
+        ResponseEntity<?> response = testDataController.createPenalty(request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertNotNull(body);
+        assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
+        assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
+    }
+
+    @Test
+    void testPenaltyOutstandingAmountWhenNotPaid() {
+        PenaltyData penaltyCopy = new PenaltyData();
+        penaltyCopy.setAmount(100.0);
+
+        boolean isPaid = false;
+        penaltyCopy.setOutstandingAmount(isPaid ? 0.0 : penaltyCopy.getAmount());
+
+        assertEquals(100.0, penaltyCopy.getOutstandingAmount());
     }
 
     @Test

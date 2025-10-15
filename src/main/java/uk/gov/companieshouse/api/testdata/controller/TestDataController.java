@@ -337,12 +337,20 @@ public class TestDataController {
     }
 
     @PostMapping("/penalties")
-    public ResponseEntity<AccountPenaltiesData> createPenalty(
+    public ResponseEntity<Object> createPenalty(
             @Valid @RequestBody PenaltySpec request) throws DataException {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
                 + " and customer code: " + request.getCustomerCode());
 
         var createdPenalties = testDataService.createPenaltyData(request);
+
+        if (Boolean.TRUE.equals(request.isDuplicate()) && (createdPenalties == null || createdPenalties.getPenalties().isEmpty())) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "number_of_penalties should be greater than 1 for duplicate penalties");
+            errorResponse.put(STATUS, HttpStatus.BAD_REQUEST.value());
+            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+        }
+
         LOG.info("Successfully created account penalties with ID: "
                 + createdPenalties.getIdAsString());
         return new ResponseEntity<>(createdPenalties, HttpStatus.CREATED);
