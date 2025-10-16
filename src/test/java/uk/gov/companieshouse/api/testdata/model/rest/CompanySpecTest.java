@@ -57,7 +57,6 @@ class CompanySpecTest {
     }
 
     private void validateCompanySpec(CompanySpec spec, String expectedViolationMessage) {
-        Validation.buildDefaultValidatorFactory();
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
         assertTrue(violations.stream().anyMatch(v ->
                 expectedViolationMessage.equals(v.getMessage())),

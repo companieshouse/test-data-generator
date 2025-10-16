@@ -87,15 +87,19 @@ class CompanyProfileServiceImplTest {
     @BeforeEach
     void setUp() {
         spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
         overseasSpec = new CompanySpec();
+        
         overseaCompanySpec = new CompanySpec();
+        
         overseasSpec.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
         overseasSpec.setCompanyType(OVERSEAS_ENTITY_TYPE);
         overseaCompanySpec.setCompanyType(OVERSEA_COMPANY_TYPE);
         overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
         overseasSpec.setHasSuperSecurePscs(Boolean.TRUE);
-        spec.setCompanyNumber(COMPANY_NUMBER);
+        
         savedProfile = new CompanyProfile();
     }
 

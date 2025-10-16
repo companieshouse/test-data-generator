@@ -182,7 +182,6 @@ class MissingImageDeliveriesServiceImplTest {
         basketSpec.setEnrolled(true);
         missingImageDeliveriesSpec.setBasketSpec(basketSpec);
 
-        basket = new Basket();
         basket.setForename(basketSpec.getForename());
         basket.setSurname(basketSpec.getSurname());
         basket.setEnrolled(true);
