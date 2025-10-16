@@ -54,12 +54,20 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
+    private final FilingHistoryRepository filingHistoryRepository;
+
+    private final RandomService randomService;
+    
+    private final BarcodeService barcodeService;
+
     @Autowired
-    private FilingHistoryRepository filingHistoryRepository;
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private BarcodeService barcodeService;
+    public FilingHistoryServiceImpl(FilingHistoryRepository filingHistoryRepository, RandomService randomService,
+            BarcodeService barcodeService) {
+        super();
+        this.filingHistoryRepository = filingHistoryRepository;
+        this.randomService = randomService;
+        this.barcodeService = barcodeService;
+    }
 
     @Override
     public FilingHistory create(CompanySpec spec) throws DataException {
@@ -187,7 +195,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 
         AssociatedFiling incorporation = new AssociatedFiling();
-        incorporation.setCategory("incorporation");
+        incorporation.setCategory(CATEGORY);
         incorporation.setDate(dayTimeNow);
         incorporation.setDescription("model-articles-adopted");
         incorporation.setType("MODEL ARTICLES");

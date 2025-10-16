@@ -1,11 +1,8 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import jakarta.validation.Valid;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
@@ -51,8 +49,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -65,12 +61,16 @@ public class TestDataController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
 
+    private final TestDataService testDataService;
+
+    private final CompanyAuthCodeService companyAuthCodeService;
+
     @Autowired
-    private TestDataService testDataService;
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
-    @Autowired
-    private AccountPenaltiesService accountPenaltyService;
+    public TestDataController(TestDataService testDataService, CompanyAuthCodeService companyAuthCodeService) {
+        super();
+        this.testDataService = testDataService;
+        this.companyAuthCodeService = companyAuthCodeService;
+    }
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -367,7 +367,7 @@ public class TestDataController {
                     accountPenaltiesData.getPenalties().stream()
                             .filter(penalty -> transactionReference.equals(
                                     penalty.getTransactionReference()))
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
         return ResponseEntity.ok(accountPenaltiesData);

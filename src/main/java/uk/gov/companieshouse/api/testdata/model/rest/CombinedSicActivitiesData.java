@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.bson.types.ObjectId;
 
 public class CombinedSicActivitiesData {
 

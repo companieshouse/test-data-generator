@@ -59,8 +59,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         String message = "invalid request";
         Throwable cause = ex.getCause();
-        if (cause instanceof InvalidFormatException) {
-            InvalidFormatException ife = (InvalidFormatException) cause;
+        if (cause instanceof InvalidFormatException ife) {
             String pathReference = ife.getPathReference();
             if (pathReference != null && pathReference.startsWith(CompanySpec.class.getName())) {
                 // Handle invalid format in CompanySpec (failed to deserialize enum)

@@ -130,7 +130,6 @@ class PostcodeServiceImplTest {
 
     @Test
     void testEmptyResults() {
-        String prefix = "BT";
         when(postcodeRepository.findByPostcodePrefixContaining(anyList(), any())).thenReturn(List.of());
 
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);

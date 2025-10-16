@@ -25,14 +25,20 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
-    @Autowired
-    private UserRepository repository;
+    private final UserRepository repository;
+
+    private final AdminPermissionsRepository adminPermissionsRepository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private AdminPermissionsRepository adminPermissionsRepository;
-
-    @Autowired
-    private RandomService randomService;
+    public UserServiceImpl(UserRepository repository, AdminPermissionsRepository adminPermissionsRepository,
+            RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.adminPermissionsRepository = adminPermissionsRepository;
+        this.randomService = randomService;
+    }
 
     @Override
     public UserData create(UserSpec userSpec) throws DataException {
