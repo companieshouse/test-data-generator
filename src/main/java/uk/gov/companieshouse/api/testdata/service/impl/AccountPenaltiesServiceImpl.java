@@ -34,6 +34,13 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
+    private static List<AccountPenalty> filterByPenaltyRef(String penaltyRef,
+                                                           AccountPenalties accountPenalties) {
+        return accountPenalties.getPenalties().stream()
+                .filter(p -> p.getTransactionReference().equals(penaltyRef))
+                .toList();
+    }
+
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AccountPenaltiesServiceImpl.class));
     private static final String EXCEPTION_MSG = "no account penalties";
@@ -43,14 +50,18 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             PenaltiesTransactionSubType.S1, PenaltiesTransactionSubType.A2);
     private static final List<String> C1_S1_LEDGER_CODES = List.of("E1", "S1", "N1");
 
-
-    @Autowired
-    private AccountPenaltiesRepository repository;
-
     private static final NoDataFoundException PENALTY_NOT_FOUND_EX =
             new NoDataFoundException("penalty not found");
 
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
+    private final AccountPenaltiesRepository repository;
+
+    @Autowired
+    public AccountPenaltiesServiceImpl(AccountPenaltiesRepository repository) {
+        super();
+        this.repository = repository;
+    }
 
     @Override
     public AccountPenaltiesData getAccountPenalty(String companyCode, String customerCode,
@@ -62,13 +73,6 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         accountPenalties.setPenalties(filterByPenaltyRef(penaltyRef, accountPenalties));
 
         return mapToAccountPenaltiesData(accountPenalties);
-    }
-
-    private static List<AccountPenalty> filterByPenaltyRef(String penaltyRef,
-                                                           AccountPenalties accountPenalties) {
-        return accountPenalties.getPenalties().stream()
-                .filter(p -> p.getTransactionReference().equals(penaltyRef))
-                .toList();
     }
 
     @Override

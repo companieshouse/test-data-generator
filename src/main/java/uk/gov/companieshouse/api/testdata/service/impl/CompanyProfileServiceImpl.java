@@ -65,18 +65,24 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER =
             "full-data-available-from-financial-conduct-authority-mutuals-public-register";
 
-    @Autowired
-    private RandomService randomService;
+    private final RandomService randomService;
 
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
 
-    @Autowired
-    private CompanyProfileRepository repository;
+    private final CompanyProfileRepository repository;
 
     private boolean hasCompanyRegisters = false;
 
     private boolean isCompanyTypeHasNoFilingHistory = true;
+
+    @Autowired
+    public CompanyProfileServiceImpl(RandomService randomService, AddressService addressService,
+            CompanyProfileRepository repository) {
+        super();
+        this.randomService = randomService;
+        this.addressService = addressService;
+        this.repository = repository;
+    }
 
     @Override
     public CompanyProfile create(CompanySpec spec) {

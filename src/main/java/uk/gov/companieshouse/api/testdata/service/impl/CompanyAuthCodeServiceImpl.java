@@ -23,14 +23,17 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     private static final String COMPANY_AUTH_DATA_NOT_FOUND = "company auth data not found";
     private static final int AUTH_CODE_LENGTH = 6;
 
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private CompanyAuthCodeRepository repository;
+    private final RandomService randomService;
+
+    private final CompanyAuthCodeRepository repository;
 
     private final MessageDigest sha256Digest;
 
-    public CompanyAuthCodeServiceImpl() throws NoSuchAlgorithmException {
+    @Autowired
+    public CompanyAuthCodeServiceImpl(RandomService randomService, CompanyAuthCodeRepository repository) throws NoSuchAlgorithmException {
+        super();
+        this.randomService = randomService;
+        this.repository = repository;
         sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
     }
 

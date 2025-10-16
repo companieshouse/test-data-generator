@@ -24,7 +24,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -35,20 +34,23 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
     private static final Logger LOG =
         LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
-    @Autowired
-    public MissingImageDeliveriesRepository missingImageDeliveriesRepository;
+    private final MissingImageDeliveriesRepository missingImageDeliveriesRepository;
+
+    private final BasketRepository basketRepository;
+
+    private final RandomService randomService;
+
+    private final CertificatesServiceImpl certificatesService;
 
     @Autowired
-    public BasketRepository basketRepository;
-
-    @Autowired
-    public AddressService addressService;
-
-    @Autowired
-    public RandomService randomService;
-
-    @Autowired
-    private CertificatesServiceImpl certificatesService;
+    public MissingImageDeliveriesImpl(MissingImageDeliveriesRepository missingImageDeliveriesRepository,
+            BasketRepository basketRepository, RandomService randomService, CertificatesServiceImpl certificatesService) {
+        super();
+        this.missingImageDeliveriesRepository = missingImageDeliveriesRepository;
+        this.basketRepository = basketRepository;
+        this.randomService = randomService;
+        this.certificatesService = certificatesService;
+    }
 
     @Override
     public CertificatesData create(MissingImageDeliveriesSpec spec) throws DataException {

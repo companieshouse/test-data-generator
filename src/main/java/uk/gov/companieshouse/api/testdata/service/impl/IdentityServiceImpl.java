@@ -18,11 +18,16 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class IdentityServiceImpl implements DataService<IdentityData,IdentitySpec> {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
-    @Autowired
-    private IdentityRepository repository;
+    private final IdentityRepository repository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private RandomService randomService;
+    public IdentityServiceImpl(IdentityRepository repository, RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public IdentityData create(IdentitySpec identitySpec) {

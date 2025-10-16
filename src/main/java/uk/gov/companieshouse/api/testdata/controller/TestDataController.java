@@ -61,10 +61,16 @@ public class TestDataController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
 
+    private final TestDataService testDataService;
+
+    private final CompanyAuthCodeService companyAuthCodeService;
+
     @Autowired
-    private TestDataService testDataService;
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
+    public TestDataController(TestDataService testDataService, CompanyAuthCodeService companyAuthCodeService) {
+        super();
+        this.testDataService = testDataService;
+        this.companyAuthCodeService = companyAuthCodeService;
+    }
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(

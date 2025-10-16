@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -19,15 +20,20 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class PostcodeServiceImpl implements PostcodeService {
 
-    @Autowired
-    private PostcodeRepository postcodeRepository;
-
-    @Autowired
-    private RandomService randomService;
-
-    private final Map<String, List<Postcodes>> cache = new HashMap<>();
-
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+
+    private final PostcodeRepository postcodeRepository;
+
+    private final RandomService randomService;
+
+    private final Map<String, List<Postcodes>> cache = new ConcurrentHashMap<>();
+
+    @Autowired
+    public PostcodeServiceImpl(PostcodeRepository postcodeRepository, RandomService randomService) {
+        super();
+        this.postcodeRepository = postcodeRepository;
+        this.randomService = randomService;
+    }
 
     @Override
     public List<Postcodes> getPostcodeByCountry(String country) {

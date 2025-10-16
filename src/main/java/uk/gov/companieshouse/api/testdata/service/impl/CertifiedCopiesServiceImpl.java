@@ -25,27 +25,29 @@ import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class CertifiedCopiesServiceImpl implements DataService<CertificatesData, CertifiedCopiesSpec> {
 
-    @Autowired
-    public CertifiedCopiesRepository certifiedCopiesRepository;
+    private final CertifiedCopiesRepository certifiedCopiesRepository;
+
+    private final BasketRepository basketRepository;
+
+    private final RandomService randomService;
+
+    private final CertificatesServiceImpl certificatesService;
 
     @Autowired
-    public BasketRepository basketRepository;
-
-    @Autowired
-    public AddressService addressService;
-
-    @Autowired
-    public RandomService randomService;
-
-    @Autowired
-    private CertificatesServiceImpl certificatesService;
+    public CertifiedCopiesServiceImpl(CertifiedCopiesRepository certifiedCopiesRepository, BasketRepository basketRepository, 
+            RandomService randomService, CertificatesServiceImpl certificatesService) {
+        super();
+        this.certifiedCopiesRepository = certifiedCopiesRepository;
+        this.basketRepository = basketRepository;
+        this.randomService = randomService;
+        this.certificatesService = certificatesService;
+    }
 
     @Override
     public CertificatesData create(CertifiedCopiesSpec spec) throws DataException {
