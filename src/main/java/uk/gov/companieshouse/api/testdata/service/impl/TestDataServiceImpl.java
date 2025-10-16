@@ -75,70 +75,65 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
-    @Autowired
+    
     private CompanyProfileService companyProfileService;
-    @Autowired
+    
     private DataService<FilingHistory, CompanySpec> filingHistoryService;
-    @Autowired
+    
     private CompanyAuthCodeService companyAuthCodeService;
-    @Autowired
+    
     private AppointmentService appointmentService;
-    @Autowired
+    
     private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
-    @Autowired
+    
     private CompanyPscStatementServiceImpl companyPscStatementService;
-    @Autowired
+    
     private DataService<CompanyPscs, CompanySpec> companyPscsService;
-    @Autowired
+    
     private RandomService randomService;
-    @Autowired
+    
     private UserService userService;
-    @Autowired
+    
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
-    @Autowired
+    
     private DataService<CertificatesData, CertificatesSpec> certificatesService;
-    @Autowired
+    
     private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
-    @Autowired
-    private DataService<CombinedSicActivitiesData,
-            CombinedSicActivitiesSpec> combinedSicActivitiesService;
-    @Autowired
+    
+    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    
     private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
-    @Autowired
+    
     private AcspMembersRepository acspMembersRepository;
-    @Autowired
+    
     private AdminPermissionsRepository adminPermissionsRepository;
-    @Autowired
+    
     private DataService<TransactionsData, TransactionsSpec> transactionService;
-    @Autowired
+    
     private DataService<IdentityData, IdentitySpec> identityService;
-    @Autowired
+    
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
-    @Autowired
+    
     private CompanyAuthAllowListService companyAuthAllowListService;
-    @Autowired
-    AppealsService appealsService;
-    @Autowired
+    
+    private AppealsService appealsService;
+    
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
-    @Autowired
-    @Qualifier("companySearchService")
+    
     private CompanySearchService companySearchService;
-    @Autowired
+    
     private AccountPenaltiesService accountPenaltiesService;
-    @Autowired
-    @Qualifier("alphabeticalCompanySearchService")
+    
     private CompanySearchService alphabeticalCompanySearch;
-    @Autowired
-    @Qualifier("advancedCompanySearchService")
+    
     private CompanySearchService advancedCompanySearch;
-    @Autowired
+    
     private PostcodeService postcodeService;
-    @Autowired
+    
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
-    @Autowired
-    private DataService<UserCompanyAssociationData,
-            UserCompanyAssociationSpec> userCompanyAssociationService;
-    @Autowired
+    
+    private DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService;
+    
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @Value("${api.url}")
@@ -153,6 +148,71 @@ public class TestDataServiceImpl implements TestDataService {
 
     void setElasticSearchDeployed(Boolean isElasticSearchDeployed) {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
+    }
+
+    @Autowired
+    public TestDataServiceImpl(CompanyProfileService companyProfileService,
+            DataService<FilingHistory, CompanySpec> filingHistoryService, 
+            CompanyAuthCodeService companyAuthCodeService,
+            AppointmentService appointmentService, 
+            DataService<CompanyMetrics, CompanySpec> companyMetricsService,
+            CompanyPscStatementServiceImpl companyPscStatementService, 
+            DataService<CompanyPscs, CompanySpec> companyPscsService,
+            RandomService randomService, 
+            UserService userService,
+            DataService<AcspMembersData, AcspMembersSpec> acspMembersService,
+            DataService<CertificatesData, CertificatesSpec> certificatesService,
+            DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService,
+            DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService,
+            DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService,
+            AcspMembersRepository acspMembersRepository, 
+            AdminPermissionsRepository adminPermissionsRepository,
+            DataService<TransactionsData, 
+            TransactionsSpec> transactionService,
+            DataService<IdentityData, IdentitySpec> identityService,
+            DataService<AcspProfileData, AcspProfileSpec> acspProfileService,
+            CompanyAuthAllowListService companyAuthAllowListService,
+            AppealsService appealsService,
+            DataService<CompanyRegisters, CompanySpec> companyRegistersService,
+            @Qualifier("companySearchService") CompanySearchService companySearchService,
+            AccountPenaltiesService accountPenaltiesService,
+            @Qualifier("alphabeticalCompanySearchService") CompanySearchService alphabeticalCompanySearch,
+            @Qualifier("advancedCompanySearchService") CompanySearchService advancedCompanySearch,
+            PostcodeService postcodeService,
+            DataService<Disqualifications, CompanySpec> disqualificationsService,
+            DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService,
+            DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService) {
+        super();
+        this.companyProfileService = companyProfileService;
+        this.filingHistoryService = filingHistoryService;
+        this.companyAuthCodeService = companyAuthCodeService;
+        this.appointmentService = appointmentService;
+        this.companyMetricsService = companyMetricsService;
+        this.companyPscStatementService = companyPscStatementService;
+        this.companyPscsService = companyPscsService;
+        this.randomService = randomService;
+        this.userService = userService;
+        this.acspMembersService = acspMembersService;
+        this.certificatesService = certificatesService;
+        this.certifiedCopiesService = certifiedCopiesService;
+        this.combinedSicActivitiesService = combinedSicActivitiesService;
+        this.missingImageDeliveriesService = missingImageDeliveriesService;
+        this.acspMembersRepository = acspMembersRepository;
+        this.adminPermissionsRepository = adminPermissionsRepository;
+        this.transactionService = transactionService;
+        this.identityService = identityService;
+        this.acspProfileService = acspProfileService;
+        this.companyAuthAllowListService = companyAuthAllowListService;
+        this.appealsService = appealsService;
+        this.companyRegistersService = companyRegistersService;
+        this.companySearchService = companySearchService;
+        this.accountPenaltiesService = accountPenaltiesService;
+        this.alphabeticalCompanySearch = alphabeticalCompanySearch;
+        this.advancedCompanySearch = advancedCompanySearch;
+        this.postcodeService = postcodeService;
+        this.disqualificationsService = disqualificationsService;
+        this.userCompanyAssociationService = userCompanyAssociationService;
+        this.adminPermissionsService = adminPermissionsService;
     }
 
     @Override

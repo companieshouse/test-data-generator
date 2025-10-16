@@ -137,7 +137,7 @@ class TestDataServiceImplTest {
     @Mock
     private AppointmentService appointmentService;
     @Mock
-    private DataService<CompanyMetrics, CompanySpec> metricsService;
+    private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     @Mock
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock
@@ -147,17 +147,25 @@ class TestDataServiceImplTest {
     @Mock
     private UserService userService;
     @Mock
-    private AdminPermissionsRepository adminPermissionsRepository;
-    @Mock
     private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    @Mock
+    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Mock
+    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    @Mock
+    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    @Mock
+    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Mock
     private AcspMembersRepository acspMembersRepository;
     @Mock
-    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
-    @Captor
-    private ArgumentCaptor<CompanySpec> specCaptor;
+    private AdminPermissionsRepository adminPermissionsRepository;
+    @Mock 
+    private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Mock
     private DataService<IdentityData, IdentitySpec> identityService;
+    @Mock
+    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Mock
@@ -165,17 +173,7 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     @Mock
-    private Appointment commonAppointment;
-    @Mock
     private CompanySearchServiceImpl companySearchService;
-    @Mock
-    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
-    @Mock
-    private DataService<CertificatesData, CertificatesSpec> certificatesService;
-    @Mock
-    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
-    @Mock
-    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
     @Mock
@@ -184,7 +182,6 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
-    @Mock private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
     @Mock
@@ -195,6 +192,11 @@ class TestDataServiceImplTest {
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
+
+    @Captor
+    private ArgumentCaptor<CompanySpec> specCaptor;
+    @Mock
+    private Appointment commonAppointment;
 
     @BeforeEach
     void setUp() {
@@ -246,7 +248,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
         verify(appointmentService, times(1)).createAppointment(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
-        verify(metricsService, times(1)).create(capturedSpec);
+        verify(companyMetricsService, times(1)).create(capturedSpec);
         verify(companyPscsService, times(1)).create(capturedSpec);
 
         assertEquals(expectedFullCompanyNumber, createdCompany.getCompanyNumber());
@@ -310,7 +312,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService).delete(companyNumber);
         verify(appointmentService).deleteAllAppointments(companyNumber);
         verify(companyPscStatementService).delete(companyNumber);
-        verify(metricsService).delete(companyNumber);
+        verify(companyMetricsService).delete(companyNumber);
         verify(companyPscsService).delete(companyNumber);
         verify(companyRegistersService).delete(companyNumber);
     }
@@ -336,7 +338,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, times(1)).delete(COMPANY_NUMBER);
         verify(appointmentService, times(1)).deleteAllAppointments(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
-        verify(metricsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyMetricsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
         verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
         verify(disqualificationsService, times(1)).delete(COMPANY_NUMBER);
@@ -470,7 +472,7 @@ class TestDataServiceImplTest {
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointment(capturedSpec);
-        verify(metricsService).create(capturedSpec);
+        verify(companyMetricsService).create(capturedSpec);
         verifyDeleteCompanyData(fullCompanyNumber);
     }
 
@@ -494,7 +496,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointment(capturedSpec);
         verify(companyPscStatementService).createPscStatements(capturedSpec);
-        verify(metricsService).create(capturedSpec);
+        verify(companyMetricsService).create(capturedSpec);
         verify(companyPscsService).create(capturedSpec);
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
@@ -516,7 +518,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, never()).deleteAllAppointments(anyString());
         verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
         verify(companyPscsService, never()).delete(COMPANY_NUMBER);
-        verify(metricsService, never()).delete(COMPANY_NUMBER);
+        verify(companyMetricsService, never()).delete(COMPANY_NUMBER);
     }
 
     @Test
@@ -570,7 +572,7 @@ class TestDataServiceImplTest {
     @Test
     void deleteCompanyDataMetricsException() {
         RuntimeException ex = new RuntimeException("exception");
-        when(metricsService.delete(COMPANY_NUMBER)).thenThrow(ex);
+        when(companyMetricsService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         assertDeleteCompanyDataException(ex);
     }
