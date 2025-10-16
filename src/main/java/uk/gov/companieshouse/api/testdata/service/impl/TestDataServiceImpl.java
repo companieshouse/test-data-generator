@@ -75,67 +75,65 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
-    // these fields should conventionally be marked "final" when using constructor injection, but for some unknown reason doing this causes the test case to fail (Mockito)
+    private final CompanyProfileService companyProfileService;
     
-    private CompanyProfileService companyProfileService;
+    private final DataService<FilingHistory, CompanySpec> filingHistoryService;
     
-    private DataService<FilingHistory, CompanySpec> filingHistoryService;
+    private final CompanyAuthCodeService companyAuthCodeService;
     
-    private CompanyAuthCodeService companyAuthCodeService;
+    private final AppointmentService appointmentService;
     
-    private AppointmentService appointmentService;
+    private final DataService<CompanyMetrics, CompanySpec> companyMetricsService;
     
-    private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
+    private final CompanyPscStatementServiceImpl companyPscStatementService;
     
-    private CompanyPscStatementServiceImpl companyPscStatementService;
+    private final DataService<CompanyPscs, CompanySpec> companyPscsService;
     
-    private DataService<CompanyPscs, CompanySpec> companyPscsService;
+    private final RandomService randomService;
     
-    private RandomService randomService;
+    private final UserService userService;
     
-    private UserService userService;
+    private final DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
     
-    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    private final DataService<CertificatesData, CertificatesSpec> certificatesService;
     
-    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    private final DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
     
-    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    private final DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
     
-    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    private final DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
     
-    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
+    private final AcspMembersRepository acspMembersRepository;
     
-    private AcspMembersRepository acspMembersRepository;
+    private final AdminPermissionsRepository adminPermissionsRepository;
     
-    private AdminPermissionsRepository adminPermissionsRepository;
+    private final DataService<TransactionsData, TransactionsSpec> transactionService;
     
-    private DataService<TransactionsData, TransactionsSpec> transactionService;
+    private final DataService<IdentityData, IdentitySpec> identityService;
     
-    private DataService<IdentityData, IdentitySpec> identityService;
+    private final DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     
-    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    private final CompanyAuthAllowListService companyAuthAllowListService;
     
-    private CompanyAuthAllowListService companyAuthAllowListService;
+    private final AppealsService appealsService;
     
-    private AppealsService appealsService;
+    private final DataService<CompanyRegisters, CompanySpec> companyRegistersService;
     
-    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    private final CompanySearchService companySearchService;
     
-    private CompanySearchService companySearchService;
+    private final AccountPenaltiesService accountPenaltiesService;
     
-    private AccountPenaltiesService accountPenaltiesService;
+    private final CompanySearchService alphabeticalCompanySearch;
     
-    private CompanySearchService alphabeticalCompanySearch;
+    private final CompanySearchService advancedCompanySearch;
     
-    private CompanySearchService advancedCompanySearch;
+    private final PostcodeService postcodeService;
     
-    private PostcodeService postcodeService;
+    private final DataService<Disqualifications, CompanySpec> disqualificationsService;
     
-    private DataService<Disqualifications, CompanySpec> disqualificationsService;
+    private final DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService;
     
-    private DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService;
-    
-    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+    private final DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -168,8 +166,7 @@ public class TestDataServiceImpl implements TestDataService {
             DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService,
             AcspMembersRepository acspMembersRepository, 
             AdminPermissionsRepository adminPermissionsRepository,
-            DataService<TransactionsData, 
-            TransactionsSpec> transactionService,
+            DataService<TransactionsData, TransactionsSpec> transactionService,
             DataService<IdentityData, IdentitySpec> identityService,
             DataService<AcspProfileData, AcspProfileSpec> acspProfileService,
             CompanyAuthAllowListService companyAuthAllowListService,

@@ -27,9 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
@@ -188,7 +186,6 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
-    @InjectMocks
     private TestDataServiceImpl testDataService;
 
     @Captor
@@ -198,7 +195,38 @@ class TestDataServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        // workaround for InjectMocks fails when using constructor injection and final fields
+        testDataService = new TestDataServiceImpl(companyProfileService,
+                filingHistoryService, 
+                companyAuthCodeService,
+                appointmentService, 
+                companyMetricsService,
+                companyPscStatementService, 
+                companyPscsService,
+                randomService, 
+                userService,
+                acspMembersService,
+                certificatesService,
+                certifiedCopiesService,
+                combinedSicActivitiesService,
+                missingImageDeliveriesService,
+                acspMembersRepository, 
+                adminPermissionsRepository,
+                transactionService,
+                identityService,
+                acspProfileService,
+                companyAuthAllowListService,
+                appealsService,
+                companyRegistersService,
+                companySearchService,
+                accountPenaltiesService,
+                alphabeticalCompanySearch,
+                advancedCompanySearch,
+                postcodeService,
+                disqualificationsService,
+                userCompanyAssociationService,
+                adminPermissionsService);
+        
         this.testDataService.setAPIUrl(API_URL);
     }
 
