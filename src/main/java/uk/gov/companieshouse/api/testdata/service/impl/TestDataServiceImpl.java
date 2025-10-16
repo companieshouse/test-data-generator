@@ -75,6 +75,7 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
+    // these fields should conventionally be marked "final" when using constructor injection, but for some unknown reason doing this causes the test case to fail (Mockito)
     
     private CompanyProfileService companyProfileService;
     
