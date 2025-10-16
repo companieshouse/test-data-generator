@@ -269,7 +269,7 @@ class CompanyPscsServiceImplTest {
     }
 
     @Test
-    void create_NumberZeroWithPscType_ReturnsNull() throws DataException {
+    void create_NumberZeroWithPscType_ReturnsNull() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);

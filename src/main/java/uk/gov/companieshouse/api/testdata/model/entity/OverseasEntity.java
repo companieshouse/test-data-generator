@@ -242,9 +242,9 @@ public class OverseasEntity extends CompanyProfile {
         }
 
         @Override
-        public void setOriginatingRegistry(IOriginatingRegistry originatingRegistry) {
-            if (originatingRegistry instanceof OriginatingRegistry) {
-                this.originatingRegistry = (OriginatingRegistry) originatingRegistry;
+        public void setOriginatingRegistry(IOriginatingRegistry iOriginatingRegistry) {
+            if (iOriginatingRegistry instanceof OriginatingRegistry theOriginatingRegistry) {
+                this.originatingRegistry = theOriginatingRegistry;
             }
         }
 
@@ -264,16 +264,16 @@ public class OverseasEntity extends CompanyProfile {
         }
 
         @Override
-        public void setAccountingRequirement(IAccountingRequirement accountingRequirement) {
-            if (accountingRequirement instanceof AccountingRequirement) {
-                this.accountingRequirement = (AccountingRequirement) accountingRequirement;
+        public void setAccountingRequirement(IAccountingRequirement iAccountingRequirement) {
+            if (iAccountingRequirement instanceof AccountingRequirement theAccountingRequirement) {
+                this.accountingRequirement = theAccountingRequirement;
             }
         }
 
         @Override
-        public void setAccounts(IAccountsDetails accountsDetails) {
-            if (accountsDetails instanceof AccountsDetails) {
-                this.accountsDetails = (AccountsDetails) accountsDetails;
+        public void setAccounts(IAccountsDetails iAccountsDetails) {
+            if (iAccountsDetails instanceof AccountsDetails theAccountsDetails) {
+                this.accountsDetails = theAccountsDetails;
             }
         }
     }
@@ -335,9 +335,9 @@ public class OverseasEntity extends CompanyProfile {
         }
 
         @Override
-        public void setMustFileWithin(IMustFileWithin mustFileWithin) {
-            if (mustFileWithin instanceof MustFileWithin) {
-                this.mustFileWithin = (MustFileWithin) mustFileWithin;
+        public void setMustFileWithin(IMustFileWithin iMustFileWithin) {
+            if (iMustFileWithin instanceof MustFileWithin theMustFileWithin) {
+                this.mustFileWithin = theMustFileWithin;
             }
         }
     }

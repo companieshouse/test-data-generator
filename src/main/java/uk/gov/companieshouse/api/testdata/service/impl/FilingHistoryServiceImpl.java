@@ -187,7 +187,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 
         AssociatedFiling incorporation = new AssociatedFiling();
-        incorporation.setCategory("incorporation");
+        incorporation.setCategory(CATEGORY);
         incorporation.setDate(dayTimeNow);
         incorporation.setDescription("model-articles-adopted");
         incorporation.setType("MODEL ARTICLES");

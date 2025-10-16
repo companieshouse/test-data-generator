@@ -5,9 +5,10 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
@@ -92,7 +93,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                     capital.setFigure(c.getFigure());
                     return capital;
                 })
-                .collect(Collectors.toList());
+                .toList();
             filingHistoryDescriptionValues.setCapital(capitalList);
         }
 
@@ -157,7 +158,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
                         itemCosts.setProductType(itemCostsSpec.getProductType());
                         return itemCosts;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
             certifiedCopies.setItemCosts(itemCostsList);
         }
         certifiedCopies.setItemOptions(itemOptions);

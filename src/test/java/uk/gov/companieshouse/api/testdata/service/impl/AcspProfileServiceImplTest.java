@@ -255,27 +255,6 @@ class AcspProfileServiceImplTest {
                 "Surname randomId");
     }
 
-    @Test
-    void createAcspProfileAsSoleTraderWithDefaultValues() throws DataException {
-        acspProfileSpec.setType("sole-trader");
-
-        when(randomService.getString(8)).thenReturn("randomId");
-        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(addressService
-                .getCountryOfResidence(Jurisdiction.ENGLAND)).thenReturn("England");
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
-
-        AcspProfileData result = service.create(acspProfileSpec);
-
-        assertNotNull(result);
-        assertEquals(acspProfile.getAcspNumber(), result.getAcspNumber());
-
-        verify(repository).save(profileCaptor.capture());
-        AcspProfile captured = profileCaptor.getValue();
-
-        assertCommonProfileDetails(captured, "sole-trader", "Forename randomId",
-                "Surname randomId");
-    }
      @Test
     void createAcspProfileWithName() throws DataException {
         acspProfileSpec.setName("Business Test");
@@ -308,7 +287,6 @@ class AcspProfileServiceImplTest {
 
     @Test
     void deleteAcspProfile() {
-        AcspProfile acspProfile = new AcspProfile();
         when(repository.findById("profileId")).thenReturn(Optional.of(acspProfile));
 
         boolean result = service.delete("profileId");

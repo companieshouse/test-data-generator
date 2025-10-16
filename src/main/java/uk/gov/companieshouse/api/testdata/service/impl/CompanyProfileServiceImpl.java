@@ -2,13 +2,12 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -366,7 +365,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
             Jurisdiction companyJurisdiction) {
-        Map<CompanyType, String> partialDataOptions = new HashMap<>();
+        EnumMap<CompanyType, String> partialDataOptions = new EnumMap<>(CompanyType.class);
         partialDataOptions.put(CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL,
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
         partialDataOptions.put(CompanyType.ASSURANCE_COMPANY,
@@ -543,7 +542,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return repository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
                 .stream()
                 .map(CompanyProfile::getCompanyNumber)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

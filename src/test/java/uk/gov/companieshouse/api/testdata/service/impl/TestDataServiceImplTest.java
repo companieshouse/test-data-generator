@@ -204,15 +204,12 @@ class TestDataServiceImplTest {
 
     /**
      * Sets up common mocks for creating a company.
-     *
-     * @param spec                      the CompanySpec to be created.
      * @param companyNumber             the raw company number (as string) to be returned by
      *                                  randomService.
      * @param numberDigits              the number of digits to request from randomService.
      * @param expectedFullCompanyNumber the full company number expected in the created spec.
      */
-    private void setupCompanyCreationMocks(CompanySpec spec, String companyNumber, int numberDigits,
-                                           String expectedFullCompanyNumber) throws DataException {
+    private void setupCompanyCreationMocks(String companyNumber, int numberDigits, String expectedFullCompanyNumber) throws DataException {
         when(randomService.getNumber(numberDigits)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -235,12 +232,6 @@ class TestDataServiceImplTest {
     }
 
     private CompanySpec captureCompanySpec() throws DataException {
-        ArgumentCaptor<CompanySpec> captor = ArgumentCaptor.forClass(CompanySpec.class);
-        verify(companyProfileService, times(1)).create(captor.capture());
-        return captor.getValue();
-    }
-
-    private CompanySpec captureCreatedSpec() throws DataException {
         ArgumentCaptor<CompanySpec> captor = ArgumentCaptor.forClass(CompanySpec.class);
         verify(companyProfileService, times(1)).create(captor.capture());
         return captor.getValue();
@@ -358,7 +349,7 @@ class TestDataServiceImplTest {
         spec.setCompanyStatus("administration");
 
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -371,7 +362,7 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 6, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -384,7 +375,7 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.NI);
         String expectedFullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 6, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -444,7 +435,7 @@ class TestDataServiceImplTest {
         directorsRegister.setRegisterType("directors");
         directorsRegister.setRegisterMovedTo("Companies House");
         spec.setRegisters(List.of(directorsRegister));
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -1070,20 +1061,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createAcspMembersDataProfileCreationException() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
-        spec.setUserId("userId");
-
-        when(acspProfileService.create(any(AcspProfileSpec.class)))
-                .thenThrow(new DataException("Error creating ACSP profile"));
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
-        assertEquals(
-                "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
-                exception.getMessage());
-    }
-
-    @Test
     void createAcspMembersDataMemberCreationException() throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
@@ -1232,40 +1209,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteUserDataWithEmailAndAllowListId() {
-        String userId = "userId";
-        User user = new User();
-        user.setEmail("email@example.com");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("authId");
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, times(1)).delete("authId");
-    }
-
-    @Test
-    void deleteUserDataWithEmailAndNoAllowListId() {
-        String userId = "userId";
-        User user = new User();
-        user.setEmail("email@example.com");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, never()).delete(anyString());
-    }
-
-    @Test
     void deleteUserDataWithNullEmail() {
         String userId = "userId";
         User user = new User();
@@ -1343,7 +1286,7 @@ class TestDataServiceImplTest {
         spec.setRegisters(null);
 
         CompanyData createdCompany = createCompanyDataWithRegisters(spec);
-        CompanySpec capturedSpec = captureCreatedSpec();
+        CompanySpec capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
                 Jurisdiction.ENGLAND_WALES);
 
@@ -1357,7 +1300,7 @@ class TestDataServiceImplTest {
         spec.setRegisters(new ArrayList<>());
 
         CompanyData createdCompany = createCompanyDataWithRegisters(spec);
-        CompanySpec capturedSpec = captureCreatedSpec();
+        CompanySpec capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
                 Jurisdiction.ENGLAND_WALES);
     }
@@ -1666,7 +1609,7 @@ class TestDataServiceImplTest {
         spec.setAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -1682,7 +1625,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException {
         testDataService.setElasticSearchDeployed(true);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
@@ -1695,7 +1638,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchNotDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
@@ -1947,7 +1890,7 @@ class TestDataServiceImplTest {
         // Use anyInt() to allow flexibility in the argument
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(companyNumber));
 
-        setupCompanyCreationMocks(spec, companyNumber, 3, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(companyNumber, 3, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -1964,7 +1907,7 @@ class TestDataServiceImplTest {
         spec.setCompanyStatus("administration");
         spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -1987,7 +1930,7 @@ class TestDataServiceImplTest {
         spec.setCompanyStatus("administration");
         spec.setAlphabeticalSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyData createdCompany = testDataService.createCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
@@ -2057,7 +2000,7 @@ class TestDataServiceImplTest {
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         Disqualifications disqEntity = new Disqualifications();
         disqEntity.setId("D123");

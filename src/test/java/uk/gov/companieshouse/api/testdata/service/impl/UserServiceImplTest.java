@@ -487,7 +487,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testGetUserRoleWithCaseSensitiveRoleName() throws DataException {
+    void testGetUserRoleWithCaseSensitiveRoleName() {
         String lowercaseRoleName = "chs_admin_supervisor";
 
         DataException ex = assertThrows(DataException.class,

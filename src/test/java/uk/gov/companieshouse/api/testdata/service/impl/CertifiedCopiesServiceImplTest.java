@@ -266,7 +266,6 @@ class CertifiedCopiesServiceImplTest {
         basketSpec.setEnrolled(true);
         certifiedCopiesSpec.setBasketSpec(basketSpec);
 
-        Basket basket = new Basket();
         basket.setForename(basketSpec.getForename());
         basket.setSurname(basketSpec.getSurname());
         basket.setEnrolled(true);
@@ -524,7 +523,6 @@ class CertifiedCopiesServiceImplTest {
     @Test
     void validateBasketNotDeletedWhenNull() {
         String basketId = "user123";
-        Basket basket = new Basket();
         basket.setId(null);
 
         when(basketRepository.findById(basketId)).thenReturn(Optional.of(basket));

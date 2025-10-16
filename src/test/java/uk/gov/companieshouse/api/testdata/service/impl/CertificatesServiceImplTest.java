@@ -250,7 +250,6 @@ class CertificatesServiceImplTest {
         basketSpec.setEnrolled(true);
         certificatesSpec.setBasketSpec(basketSpec);
 
-        Basket basket = new Basket();
         basket.setForename(basketSpec.getForename());
         basket.setSurname(basketSpec.getSurname());
         basket.setEnrolled(true);
@@ -488,7 +487,6 @@ class CertificatesServiceImplTest {
     @Test
     void deleteBasket_shouldDeleteWhenIdIsNotNull() {
         String certificateId = "CRT-123456-789012";
-        Basket basket = new Basket();
         basket.setId(certificateId);
         when(basketRepository.findById(certificateId)).thenReturn(Optional.of(basket));
 

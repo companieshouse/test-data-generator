@@ -1,11 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
@@ -101,7 +100,6 @@ public class PostcodeServiceImpl implements PostcodeService {
         };
     }
 
-    @Cacheable("postcodesByPrefix")
     private List<Postcodes> queryByPrefix(String prefix) {
         if (cache.containsKey(prefix)) {
             return cache.get(prefix);

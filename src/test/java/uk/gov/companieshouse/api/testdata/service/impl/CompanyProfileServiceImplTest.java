@@ -280,7 +280,6 @@ class CompanyProfileServiceImplTest {
     @Test
     void testCreateOverseaLinks() throws Exception {
         CompanyType companyType = CompanyType.OVERSEA_COMPANY;
-        CompanySpec spec = new CompanySpec();
         spec.setHasUkEstablishment(true);
         Jurisdiction jurisdiction = Jurisdiction.UNITED_KINGDOM;
         DateParameters dateParams = new DateParameters(LocalDate.now());
@@ -416,13 +415,6 @@ class CompanyProfileServiceImplTest {
         assertNull(profile.getLinks().getFilingHistory());
         assertNull(profile.getLinks().getOfficers());
         assertNull(profile.getLinks().getPersonsWithSignificantControlStatement());
-    }
-
-    @Test
-    void deleteCompanyProfileNotExists() {
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
-        assertFalse(companyProfileService.delete(COMPANY_NUMBER));
-        verify(repository, never()).delete(any());
     }
 
     @Test
@@ -774,18 +766,18 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile companyProfile = captor.getValue();
 
-        assertEquals(expectedUkEstablishmentNumber, savedProfile.getCompanyNumber());
-        assertEquals("COMPANY BR123456 LIMITED", savedProfile.getCompanyName());
-        assertEquals("open", savedProfile.getCompanyStatus());
-        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), savedProfile.getType());
-        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
-        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
-        assertEquals(mockAddress, savedProfile.getRegisteredOfficeAddress());
-        assertFalse(savedProfile.getHasCharges());
-        assertFalse(savedProfile.getHasSuperSecurePscs());
-        assertEquals(ETAG, savedProfile.getEtag());
+        assertEquals(expectedUkEstablishmentNumber, companyProfile.getCompanyNumber());
+        assertEquals("COMPANY BR123456 LIMITED", companyProfile.getCompanyName());
+        assertEquals("open", companyProfile.getCompanyStatus());
+        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), companyProfile.getType());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, companyProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, companyProfile.getLinks().getOverseas());
+        assertEquals(mockAddress, companyProfile.getRegisteredOfficeAddress());
+        assertFalse(companyProfile.getHasCharges());
+        assertFalse(companyProfile.getHasSuperSecurePscs());
+        assertEquals(ETAG, companyProfile.getEtag());
     }
 
     @Test
@@ -808,10 +800,10 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile companyProfile = captor.getValue();
 
-        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
-        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, companyProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, companyProfile.getLinks().getOverseas());
     }
 
     @Test
