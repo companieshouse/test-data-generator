@@ -25,14 +25,9 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
 
     @Autowired
     private RandomService randomService;
+
     @Autowired
     private CompanyAuthCodeRepository repository;
-
-    private final MessageDigest sha256Digest;
-
-    public CompanyAuthCodeServiceImpl() throws NoSuchAlgorithmException {
-        sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
-    }
 
     @Override
     public CompanyAuthCode create(CompanySpec spec) {
@@ -53,7 +48,12 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     }
 
     private byte[] sha256(final String authCode) {
-        return sha256Digest.digest(authCode.getBytes(StandardCharsets.UTF_8));
+        try {
+            MessageDigest sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
+            return sha256Digest.digest(authCode.getBytes(StandardCharsets.UTF_8));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 algorithm not found", e);
+        }
     }
 
     @Override
