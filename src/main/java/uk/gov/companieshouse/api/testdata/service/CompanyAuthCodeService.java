@@ -18,7 +18,7 @@ public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, Com
      *         False if it does not match.
      * @throws NoDataFoundException If no authorisation code was found for the given
      *                              {@code companyNumber}
-     * @throws DataException       If an error occurs during verification
+     * @throws DataException        If there is a general fault setting the auth code.
      */
     boolean verifyAuthCode(String companyNumber, String authCode) throws NoDataFoundException, DataException;
 
