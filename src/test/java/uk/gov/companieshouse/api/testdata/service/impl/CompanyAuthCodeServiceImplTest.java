@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -73,7 +74,7 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void verifyAuthCodeCorrect() throws NoSuchAlgorithmException, NoDataFoundException {
+    void verifyAuthCodeCorrect() throws NoSuchAlgorithmException, NoDataFoundException, DataException {
         final String plainCode = "222";
         
         // Create a valid encrypted auth code
@@ -89,7 +90,7 @@ class CompanyAuthCodeServiceImplTest {
     }
     
     @Test
-    void verifyAuthCodeIncorrect() throws NoDataFoundException {
+    void verifyAuthCodeIncorrect() throws NoDataFoundException, DataException {
         final String plainCode = "222";
         
         final String encryptedAuthCode = "$2a$10$randomrandomrandomrandomrandomrandomrandomrandom12345";

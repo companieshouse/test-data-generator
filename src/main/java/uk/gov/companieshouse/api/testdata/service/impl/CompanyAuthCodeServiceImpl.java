@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
@@ -30,7 +31,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     private CompanyAuthCodeRepository repository;
 
     @Override
-    public CompanyAuthCode create(CompanySpec spec) {
+    public CompanyAuthCode create(CompanySpec spec) throws DataException {
         final String authCode = String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH));
 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();
@@ -43,16 +44,16 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         return repository.save(companyAuthCode);
     }
 
-    private String encrypt(final String authCode) {
+    private String encrypt(final String authCode) throws DataException {
         return BCrypt.hashpw(sha256(authCode), BCrypt.gensalt());
     }
 
-    private byte[] sha256(final String authCode) {
+    private byte[] sha256(final String authCode) throws DataException {
         try {
-            MessageDigest sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
+            var sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
             return sha256Digest.digest(authCode.getBytes(StandardCharsets.UTF_8));
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not found", e);
+            throw new DataException("SHA-256 algorithm not found when hashing auth code.");
         }
     }
 
@@ -67,7 +68,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
 
     @Override
     public boolean verifyAuthCode(
-            String companyNumber, String plainAuthCode) throws NoDataFoundException {
+            String companyNumber, String plainAuthCode) throws NoDataFoundException, DataException {
         String encryptedAuthCode = repository.findById(companyNumber)
                 .orElseThrow(() -> new NoDataFoundException(
                         COMPANY_AUTH_DATA_NOT_FOUND)).getEncryptedAuthCode();
