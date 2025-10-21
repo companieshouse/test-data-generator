@@ -15,9 +15,7 @@ import java.util.Optional;
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -140,20 +138,14 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void sha256ThrowsDataExceptionOnNoSuchAlgorithm() throws Exception {
-        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
-            @Override
-            protected byte[] sha256(String authCode) throws DataException {
-                try {
-                    MessageDigest.getInstance("broken-algo");
-                    return null;
-                } catch (NoSuchAlgorithmException e) {
-                    throw new DataException("SHA-256 algorithm not found when hashing auth code.");
-                }
-            }
-        };
+    void sha256ThrowsDataExceptionOnNoSuchAlgorithm() {
+        try (MockedStatic<MessageDigest> mocked = Mockito.mockStatic(MessageDigest.class)) {
+            mocked.when(() -> MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256))
+                    .thenThrow(new NoSuchAlgorithmException());
 
-        assertThrows(DataException.class, () -> brokenService.sha256("test"));
+            CompanyAuthCodeServiceImpl service = new CompanyAuthCodeServiceImpl();
+            assertThrows(DataException.class, () -> service.sha256("test"));
+        }
     }
 
     @Test
