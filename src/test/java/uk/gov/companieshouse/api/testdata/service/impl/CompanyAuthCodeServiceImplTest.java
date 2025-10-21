@@ -1,15 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -130,6 +127,40 @@ class CompanyAuthCodeServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         assertFalse(this.companyAuthCodeServiceImpl.delete(COMPANY_NUMBER));
         verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void sha256ReturnsCorrectHash() throws Exception {
+        String input = "test123";
+        byte[] expected = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+                .digest(input.getBytes(StandardCharsets.UTF_8));
+
+        Method sha256 = CompanyAuthCodeServiceImpl.class.getDeclaredMethod("sha256", String.class);
+        sha256.setAccessible(true);
+        byte[] actual = (byte[]) sha256.invoke(companyAuthCodeServiceImpl, input);
+
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    void sha256ThrowsDataExceptionOnNoSuchAlgorithm() throws Exception {
+        Method sha256 = CompanyAuthCodeServiceImpl.class.getDeclaredMethod("sha256", String.class);
+        sha256.setAccessible(true);
+
+        // Temporarily break the algorithm name for this test using a subclass
+        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
+            @Override
+            protected byte[] sha256(String authCode) throws DataException {
+                try {
+                    MessageDigest.getInstance("broken-algo");
+                    return null;
+                } catch (NoSuchAlgorithmException e) {
+                    throw new DataException("SHA-256 algorithm not found when hashing auth code.");
+                }
+            }
+        };
+
+        assertThrows(DataException.class, () -> brokenService.sha256("test"));
     }
 
 }

@@ -48,7 +48,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         return BCrypt.hashpw(sha256(authCode), BCrypt.gensalt());
     }
 
-    private byte[] sha256(final String authCode) throws DataException {
+    byte[] sha256(final String authCode) throws DataException {
         try {
             var sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
             return sha256Digest.digest(authCode.getBytes(StandardCharsets.UTF_8));
