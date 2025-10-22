@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
@@ -54,7 +56,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.IdentityVerificationService;
+import uk.gov.companieshouse.api.identityverification.model.Identity;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.impl.UvidLookupService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -71,6 +76,10 @@ public class TestDataController {
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
+    @Autowired
+    private IdentityVerificationService identityVerificationService;
+    @Autowired
+    private UvidLookupService uvidLookupService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -513,6 +522,23 @@ public class TestDataController {
             LOG.info("Combined Sic Activities Not Found", logMap);
             return new ResponseEntity<>(logMap, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/identity-verification")
+    public ResponseEntity<Map<String, Object>> createIdentityAndUvid(
+            @Valid @RequestBody() Identity request)
+            throws DataException, ApiErrorResponseException, URIValidationException {
+
+        String verificationId = identityVerificationService.createIdentityAndGetUvid(request);
+        String uvid = uvidLookupService.getUvidByIdentityId(verificationId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", verificationId);
+        response.put("uvid", uvid);
+        response.put("message", "Identity verification created successfully");
+
+        LOG.info("Created identity verification with IdentityID : " + verificationId +  " and UViD:" + uvid + " for email: " + request.getEmail());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
 }

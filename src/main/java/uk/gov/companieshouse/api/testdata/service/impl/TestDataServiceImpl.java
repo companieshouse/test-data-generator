@@ -13,6 +13,9 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.api.identityverification.model.Identity;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -69,11 +72,13 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.IdentityVerificationService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
+import uk.gov.companieshouse.api.testdata.service.impl.UvidLookupService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -154,6 +159,10 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationSpec> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+    @Autowired
+    private IdentityVerificationService identityVerificationService;
+    @Autowired
+    private UvidLookupService uvidLookupService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -848,6 +857,31 @@ public class TestDataServiceImpl implements TestDataService {
             return transactionService.delete(transactionId);
         } catch (Exception ex) {
             throw new DataException("Error deleting transaction", ex);
+        }
+    }
+
+    public String createIdentityAndUvid(Identity identity)
+            throws DataException {
+        try {
+            LOG.info("Creating identity and UViD for: " + identity.getEmail());
+
+            String identityId = identityVerificationService.createIdentityAndGetUvid(identity);
+
+            // Wait briefly for the UViD to be generated
+            Thread.sleep(1000);
+
+            var uvid = uvidLookupService.getUvidByIdentityId(identityId);
+
+            if (uvid != null) {
+                LOG.info("Successfully created identity with ID: " + identityId + " and UViD: " + uvid);
+                return uvid;
+            } else {
+                throw new DataException("UViD not found for identity ID: " + identityId);
+            }
+
+        } catch (ApiErrorResponseException | URIValidationException | InterruptedException ex) {
+            LOG.error("Failed to create identity and UViD for: " + identity.getEmail(), ex);
+            throw new DataException("Error creating identity and UViD", ex);
         }
     }
 }

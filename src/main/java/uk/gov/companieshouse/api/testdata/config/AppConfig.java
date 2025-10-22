@@ -42,6 +42,7 @@ public class AppConfig implements WebMvcConfigurer {
 
             var internalApiClient = new InternalApiClient(apiKeyHttpClient);
             internalApiClient.setBasePath(apiUrl);
+            internalApiClient.setInternalBasePath(apiUrl);
 
             return internalApiClient;
         };

@@ -1,7 +1,9 @@
 package uk.gov.companieshouse.api.testdata.config;
 
 import com.mongodb.client.MongoClients;
+
 import java.io.Serializable;
+
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +44,7 @@ import uk.gov.companieshouse.api.testdata.repository.PostcodesRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -129,6 +132,11 @@ public class MongoConfig {
         return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
     }
 
+//    @Bean
+//    public UvidRepository uvidRepository() {
+//        return getMongoRepositoryBean(UvidRepository.class, "identity_verification");
+//    }
+
     @Bean
     public CompanyAuthAllowListRepository companyAuthAllowListRepository() {
         return getMongoRepositoryBean(CompanyAuthAllowListRepository.class,
@@ -185,7 +193,7 @@ public class MongoConfig {
     public DisqualificationsRepository disqualificationsRepository() {
         return getMongoRepositoryBean(DisqualificationsRepository.class, "disqualifications");
     }
-  
+
     @Bean
     public UserCompanyAssociationRepository userCompanyAssociationRepository() {
         return getMongoRepositoryBean(UserCompanyAssociationRepository.class,
