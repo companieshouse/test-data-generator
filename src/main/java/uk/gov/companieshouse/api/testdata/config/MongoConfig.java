@@ -38,7 +38,6 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -163,11 +162,6 @@ public class MongoConfig {
     @Bean
     public AccountPenaltiesRepository accountPenaltiesRepository() {
         return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
-    }
-
-    @Bean
-    public PostcodeRepository postcodeRepository() {
-        return getMongoRepositoryBean(PostcodeRepository.class, "postcodes");
     }
 
     @Bean
