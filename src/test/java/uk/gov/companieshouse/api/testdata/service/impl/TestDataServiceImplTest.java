@@ -2006,11 +2006,17 @@ class TestDataServiceImplTest {
         String country = "England";
         Postcodes mockPostcode = new Postcodes();
         mockPostcode.setBuildingNumber(12);
-        mockPostcode.setThoroughfareName("First Avenue");
-        mockPostcode.setThoroughfareDescriptor("High Street");
-        mockPostcode.setDependentLocality("Central");
-        mockPostcode.setLocalityPostTown("London");
-        mockPostcode.setPretty("EC1 1BB");
+        Postcodes.Thoroughfare thoroughfare = new Postcodes.Thoroughfare();
+        thoroughfare.setName("First Avenue");
+        thoroughfare.setDescriptor("High Street");
+        mockPostcode.setThoroughfare(thoroughfare);
+        Postcodes.Locality locality = new Postcodes.Locality();
+        locality.setDependentLocality("High Street");
+        locality.setPostTown("London");
+        mockPostcode.setLocality(locality);
+        Postcodes.PostcodeDetails postcodeDetails = new Postcodes.PostcodeDetails();
+        postcodeDetails.setPretty("EC1 1BB");
+        mockPostcode.setPostcode(postcodeDetails);
         mockPostcode.setCountry(country);
 
         when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of(mockPostcode));
@@ -2019,7 +2025,7 @@ class TestDataServiceImplTest {
 
         assertEquals(12, result.getBuildingNumber());
         assertEquals("First Avenue High Street", result.getFirstLine());
-        assertEquals("Central", result.getDependentLocality());
+        assertEquals("High Street", result.getDependentLocality());
         assertEquals("London", result.getPostTown());
         assertEquals("EC1 1BB", result.getPostcode());
         verify(postcodeService, times(1)).getPostcodeByCountry(country);
