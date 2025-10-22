@@ -165,4 +165,13 @@ class PostcodeServiceImplTest {
         List<Postcodes> result = service.loadAllPostcodes();
         assertTrue(result.isEmpty(), "Should return empty list when IOException occurs");
     }
+
+    @Test
+    void testLoadAllPostcodesReturnsEmptyListWhenInputStreamIsNull() {
+        PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
+        doReturn(null).when(service).getPostcodesResourceStream();
+
+        List<Postcodes> result = service.loadAllPostcodes();
+        assertTrue(result.isEmpty(), "Should return empty list when inputStream is null");
+    }
 }
