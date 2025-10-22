@@ -1,21 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.io.IOException;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -111,7 +105,7 @@ public class PostcodeServiceImpl implements PostcodeService {
                 .filter(p -> p.getPostcode() != null && p.getPostcode().getStripped().startsWith(prefix))
                 .filter(p -> p.getBuildingNumber() != null)
                 .limit(10)
-                .toList();
+                .collect(java.util.stream.Collectors.toList());
     }
 
     private List<Postcodes> loadAllPostcodes() {
@@ -120,7 +114,7 @@ public class PostcodeServiceImpl implements PostcodeService {
                 LOG.error("postcodes.json not found in resources");
                 return List.of();
             }
-            ObjectMapper mapper = new ObjectMapper();
+            var mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
         } catch (IOException e) {
             LOG.error("Failed to read postcodes.json", e);
