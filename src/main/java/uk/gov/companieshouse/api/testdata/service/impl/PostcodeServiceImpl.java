@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -109,7 +110,7 @@ public class PostcodeServiceImpl implements PostcodeService {
     }
 
     List<Postcodes> loadAllPostcodes() {
-        try (var inputStream = getClass().getClassLoader().getResourceAsStream("postcodes.json")) {
+        try (var inputStream = getPostcodesResourceStream()) {
             if (inputStream == null) {
                 LOG.error("postcodes.json not found in resources");
                 return List.of();
@@ -120,5 +121,9 @@ public class PostcodeServiceImpl implements PostcodeService {
             LOG.error("Failed to read postcodes.json", e);
             return List.of();
         }
+    }
+
+    protected InputStream getPostcodesResourceStream() {
+        return getClass().getClassLoader().getResourceAsStream("postcodes.json");
     }
 }

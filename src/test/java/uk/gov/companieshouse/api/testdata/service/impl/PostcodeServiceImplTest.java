@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.OptionalLong;
 
@@ -147,5 +148,21 @@ class PostcodeServiceImplTest {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
         assertEquals(1, result.size());
         assertTrue(result.contains(valid));
+    }
+
+    @Test
+    void testIOExceptionWhenReadingPostcodesJsonReturnsEmptyList() throws Exception {
+        PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
+        // Create an InputStream that throws IOException on read
+        var faultyStream = new java.io.InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new IOException("Simulated IO error");
+            }
+        };
+        doReturn(faultyStream).when(service).getPostcodesResourceStream();
+
+        List<Postcodes> result = service.loadAllPostcodes();
+        assertTrue(result.isEmpty(), "Should return empty list when IOException occurs");
     }
 }
