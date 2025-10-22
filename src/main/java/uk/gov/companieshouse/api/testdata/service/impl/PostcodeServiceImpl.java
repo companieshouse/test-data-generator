@@ -108,7 +108,7 @@ public class PostcodeServiceImpl implements PostcodeService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    private List<Postcodes> loadAllPostcodes() {
+    List<Postcodes> loadAllPostcodes() {
         try (var inputStream = getClass().getClassLoader().getResourceAsStream("postcodes.json")) {
             if (inputStream == null) {
                 LOG.error("postcodes.json not found in resources");

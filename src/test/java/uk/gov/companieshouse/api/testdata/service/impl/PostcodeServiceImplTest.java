@@ -1,20 +1,25 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.List;
+import java.util.OptionalLong;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostcodeServiceImplTest {
 
+    @Spy
     @InjectMocks
     private PostcodeServiceImpl postcodeService;
 
@@ -101,5 +106,46 @@ class PostcodeServiceImplTest {
         }
     }
 
+    @Test
+    void gbWales_returnsCfMatches_whenRandomPicksCF() {
+        when(randomService.getNumberInRange(0, 4)).thenReturn(OptionalLong.of(0)); // index 0 -> "CF"
 
+        var list = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
+        assertFalse(list.isEmpty(), "Expected CF matches");
+        assertTrue(
+                list.stream().allMatch(p -> p.getPostcode() != null && p.getPostcode().getStripped().startsWith("CF")),
+                "All results should start with CF"
+        );
+        assertTrue(list.stream().allMatch(p -> p.getBuildingNumber() != null), "buildingNumber must be non-null");
+        assertTrue(list.size() <= 10, "Should return up to 10 results");
+    }
+
+    @Test
+    void testMissingPostcodesJsonReturnsEmptyList() {
+        doReturn(List.of()).when(postcodeService).loadAllPostcodes();
+        List<Postcodes> result = postcodeService.getPostcodeByCountry("gb-eng");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testPostcodeWithNullPostcodeOrBuildingNumberFilteredOut() {
+        Postcodes valid = mock(Postcodes.class);
+        Postcodes.PostcodeDetails postcodeObj = new Postcodes.PostcodeDetails();
+        postcodeObj.setStripped("EN118GB");
+        when(valid.getPostcode()).thenReturn(postcodeObj);
+        when(valid.getBuildingNumber()).thenReturn(1);
+
+        Postcodes nullPostcode = mock(Postcodes.class);
+        when(nullPostcode.getPostcode()).thenReturn(null);
+
+        Postcodes nullBuilding = mock(Postcodes.class);
+        when(nullBuilding.getPostcode()).thenReturn(postcodeObj);
+        when(nullBuilding.getBuildingNumber()).thenReturn(null);
+
+        doReturn(List.of(valid, nullPostcode, nullBuilding)).when(postcodeService).loadAllPostcodes();
+
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
+        assertEquals(1, result.size());
+        assertTrue(result.contains(valid));
+    }
 }
