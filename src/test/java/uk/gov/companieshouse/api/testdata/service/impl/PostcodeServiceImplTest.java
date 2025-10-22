@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import static org.junit.jupiter.api.Assertions.*;
