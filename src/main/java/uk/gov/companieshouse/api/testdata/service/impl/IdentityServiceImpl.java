@@ -98,13 +98,13 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
             identityRepository.save(identity);
 
             var uvid = new Uvid();
-            uvid.setUvid(generateUvid());
+            uvid.setUv_id(generateUvid());
             uvid.setType("PERMANENT");
             uvid.setIdentityId(identity.getId());
             uvid.setCreated(getCurrentDateTime());
             uvid = uvidRepository.save(uvid);
 
-            return new UvidData(uvid.getId(), uvid.getUvid());
+            return new UvidData(uvid.getId(), uvid.getUv_id());
 
         } catch (DataException ex) {
             throw ex;
@@ -139,8 +139,8 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
         }
         var randomDigit = (int) (randomService.getNumber(1) % 10);
         uvid.append(randomDigit);
-        for (int i = 0; i < 2; i++) {
-            char randomChar = (char) ('A' + (randomService.getNumber(2) % 26));
+        for (var i = 0; i < 2; i++) {
+            var randomChar = (char) ('A' + (randomService.getNumber(2) % 26));
             uvid.append(randomChar);
         }
         uvid.append("22223");

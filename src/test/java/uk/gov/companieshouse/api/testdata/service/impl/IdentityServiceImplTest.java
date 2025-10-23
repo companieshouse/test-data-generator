@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -128,7 +127,7 @@ class IdentityServiceImplTest {
 
         when(uvidRepository.save(any(Uvid.class))).thenAnswer(invocation -> {
             Uvid uvid = invocation.getArgument(0);
-            uvid.setUvid("ABC5DE22223");
+            uvid.setUv_id("ABC5DE22223");
             uvid.setType("PERMANENT");
             uvid.setCreated(createdDate);
             uvid.setId(new org.bson.types.ObjectId());
@@ -149,7 +148,7 @@ class IdentityServiceImplTest {
 
         assertEquals("test@test.com", savedIdentity.getEmail());
         assertEquals("testUserId", savedIdentity.getUserId());
-        assertEquals("ABC5DE22223", savedUvid.getUvid());
+        assertEquals("ABC5DE22223", savedUvid.getUv_id());
         assertEquals("PERMANENT", savedUvid.getType());
         assertEquals(savedIdentity.getId(), savedUvid.getIdentityId());
     }
@@ -202,7 +201,7 @@ class IdentityServiceImplTest {
         existingIdentity.setId("existingIdentityId");
 
         Uvid existingUvid = new Uvid();
-        existingUvid.setUvid("EXISTING123");
+        existingUvid.setUv_id("EXISTING123");
 
         when(userRepository.findById("testUserId")).thenReturn(Optional.of(mockUser));
         when(identityRepository.findByUserId("testUserId")).thenReturn(Optional.of(existingIdentity));
@@ -326,5 +325,100 @@ class IdentityServiceImplTest {
         assertNotNull(currentTime, "Current time should not be null");
         assertTrue(currentTime.isAfter(Instant.now().minusSeconds(60)),
                 "Current time should be recent");
+    }
+
+    @Test
+    void testCreateIdentityWithUvid_EmptyUserId() {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("");
+        identitySpec.setEmail("test@test.com");
+
+        DataException exception = assertThrows(DataException.class, ()
+                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
+
+        assertEquals("User ID is required", exception.getMessage());
+    }
+
+    @Test
+    void testCreateIdentityWithUvid_EmptyEmail() {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("testUserId");
+        identitySpec.setEmail("");
+
+        DataException exception = assertThrows(DataException.class, ()
+                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
+
+        assertEquals("Email is required", exception.getMessage());
+    }
+
+    @Test
+    void testCreateIdentityWithUvid_UvidSaveException() {
+        IdentitySpec identitySpec = new IdentitySpec();
+        identitySpec.setUserId("testUserId");
+        identitySpec.setEmail("test@test.com");
+        identitySpec.setVerificationSource("source");
+
+        User mockUser = new User();
+        mockUser.setId("testUserId");
+
+        when(userRepository.findById("testUserId")).thenReturn(Optional.of(mockUser));
+        when(identityRepository.findByUserId("testUserId")).thenReturn(Optional.empty());
+        when(identityRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
+
+        when(uvidRepository.save(any(Uvid.class)))
+                .thenThrow(new RuntimeException("UVID database error"));
+
+        DataException exception = assertThrows(DataException.class, ()
+                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
+
+        assertEquals("Failed to create identity and UVID", exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertEquals("UVID database error", exception.getCause().getMessage());
+
+        verify(identityRepository, times(1)).save(any(Identity.class));
+        verify(uvidRepository, times(1)).save(any(Uvid.class));
+    }
+
+    @Test
+    void testDeleteIdentity_WithUvid() {
+        Identity mockIdentity = new Identity();
+        mockIdentity.setId("identityId");
+
+        Uvid mockUvid = new Uvid();
+        mockUvid.setIdentityId("identityId");
+
+        when(identityRepository.findById("identityId")).thenReturn(Optional.of(mockIdentity));
+        when(uvidRepository.findByIdentityId("identityId")).thenReturn(mockUvid);
+        doNothing().when(uvidRepository).delete(mockUvid);
+        doNothing().when(identityRepository).delete(mockIdentity);
+
+        boolean result = identityServiceImpl.delete("identityId");
+
+        assertTrue(result, "Identity and UVID should be deleted successfully");
+        verify(uvidRepository, times(1)).delete(mockUvid);
+        verify(identityRepository, times(1)).delete(mockIdentity);
+    }
+
+    @Test
+    void testDeleteIdentity_UvidDeleteException() {
+        Identity mockIdentity = new Identity();
+        mockIdentity.setId("identityId");
+
+        Uvid mockUvid = new Uvid();
+        mockUvid.setIdentityId("identityId");
+
+        when(identityRepository.findById("identityId")).thenReturn(Optional.of(mockIdentity));
+        when(uvidRepository.findByIdentityId("identityId")).thenReturn(mockUvid);
+
+        doThrow(new RuntimeException("UVID delete error"))
+                .when(uvidRepository).delete(mockUvid);
+
+        Exception exception = assertThrows(RuntimeException.class, ()
+                -> identityServiceImpl.delete("identityId"));
+
+        assertEquals("UVID delete error", exception.getMessage());
+
+        verify(uvidRepository, times(1)).delete(mockUvid);
+        verify(identityRepository, never()).delete(any(Identity.class));
     }
 }

@@ -2352,4 +2352,108 @@ class TestDataServiceImplTest {
         assertEquals(ex, exception.getCause());
         verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
     }
+
+    /**
+     * Helper method to create an IdentitySpec with all required fields.
+     */
+    private IdentitySpec createValidIdentitySpec() {
+        IdentitySpec spec = new IdentitySpec();
+        spec.setUserId("test-user-id");
+        spec.setEmail("test@example.com");
+        spec.setVerificationSource("test-source");
+        return spec;
+    }
+
+    @Test
+    void createIdentityWithUvid_NullUserId() throws DataException {
+        IdentitySpec spec = createValidIdentitySpec();
+        spec.setUserId(null);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("User Id is required to create identity with UVID", exception.getMessage());
+        verify(identityService, never()).create(any());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
+
+    @Test
+    void createIdentityWithUvid_EmptyUserId() throws DataException {
+        IdentitySpec spec = createValidIdentitySpec();
+        spec.setUserId("");
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("User Id is required to create identity with UVID", exception.getMessage());
+        verify(identityService, never()).create(any());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
+
+    @Test
+    void createIdentityWithUvid_NullEmail() throws DataException {
+        IdentitySpec spec = createValidIdentitySpec();
+        spec.setEmail(null);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("Email is required to create identity with UVID", exception.getMessage());
+        verify(identityService, never()).create(any());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
+
+    @Test
+    void createIdentityWithUvid_EmptyEmail() throws DataException {
+        IdentitySpec spec = createValidIdentitySpec();
+        spec.setEmail("");
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("Email is required to create identity with UVID", exception.getMessage());
+        verify(identityService, never()).create(any());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
+
+    @Test
+    void createIdentityWithUvid_NullVerificationSource() throws DataException {
+        IdentitySpec spec = createValidIdentitySpec();
+        spec.setVerificationSource(null);
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("Verification source is required to create identity with UVID", exception.getMessage());
+        verify(identityService, never()).create(any());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
+
+    @Test
+    void createIdentityWithUvid_EmptyVerificationSource() throws DataException {
+        IdentitySpec spec = createValidIdentitySpec();
+        spec.setVerificationSource("");
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("Verification source is required to create identity with UVID", exception.getMessage());
+        verify(identityService, never()).create(any());
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
+
+    @Test
+    void createIdentityWithUvid_ClassCastException() {
+        IdentitySpec spec = createValidIdentitySpec();
+
+        DataException exception = assertThrows(DataException.class,
+                () -> testDataService.createIdentityWithUvid(spec));
+
+        assertEquals("Identity service implementation does not support createIdentityWithUvid method",
+                exception.getMessage());
+        assertNotNull(exception.getCause());
+        assertTrue(exception.getCause() instanceof ClassCastException);
+
+        verify(userService, never()).updateUserWithOneLogin(anyString());
+    }
 }
