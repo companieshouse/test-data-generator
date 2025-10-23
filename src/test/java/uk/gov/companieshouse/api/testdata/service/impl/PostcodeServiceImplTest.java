@@ -84,14 +84,16 @@ class PostcodeServiceImplTest {
     @Test
     void testReturningEmptyListWhenNoResultsFound() {
         try {
-            postcodeService.getPostcodeByCountry("zz");
+            List<Postcodes> result = postcodeService.getPostcodeByCountry("zz");
+            assertTrue(result.isEmpty());
         } catch (IllegalArgumentException e) {
             assertEquals("Country not recognised: zz", e.getMessage());
         }
     }
 
     @Test
-    void testWhenRandomPicksPostcodeMatches() {
+    void testSpecificPostcodePrefixReturnsValidResult() {
+        // Select the first prefix for Wales (CF)
         when(randomService.getNumberInRange(0, 4)).thenReturn(OptionalLong.of(0));
 
         var list = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
@@ -123,6 +125,7 @@ class PostcodeServiceImplTest {
 
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
         assertEquals(1, result.size());
+        assertTrue(result.stream().allMatch(p -> p.getPostcode() != null && p.getBuildingNumber() != null));
         assertTrue(result.contains(valid));
     }
 
