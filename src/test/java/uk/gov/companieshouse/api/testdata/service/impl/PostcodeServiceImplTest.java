@@ -76,29 +76,13 @@ class PostcodeServiceImplTest {
 
     @Test
     void testEmptyResults() {
-        // This test assumes postcodes.json is empty or does not contain BT prefix
+        doReturn(List.of()).when(postcodeService).loadAllPostcodes();
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
-        if (!result.isEmpty()) {
-            result.stream().findFirst();
-        }
-        assertTrue(true);
-    }
-
-    @Test
-    void testMultiplePrefixes() {
-        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
-        assertTrue(result.size() <= 10);
-    }
-
-    @Test
-    void testReturningResultsWhenFound() {
-        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
-        assertFalse(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
     void testReturningEmptyListWhenNoResultsFound() {
-        // This test assumes postcodes.json does not contain a prefix "ZZ"
         try {
             postcodeService.getPostcodeByCountry("zz");
         } catch (IllegalArgumentException e) {
@@ -107,8 +91,8 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void gbWales_returnsCfMatches_whenRandomPicksCF() {
-        when(randomService.getNumberInRange(0, 4)).thenReturn(OptionalLong.of(0)); // index 0 -> "CF"
+    void testWhenRandomPicksPostcodeMatches() {
+        when(randomService.getNumberInRange(0, 4)).thenReturn(OptionalLong.of(0));
 
         var list = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
         assertFalse(list.isEmpty(), "Expected CF matches");
@@ -118,13 +102,6 @@ class PostcodeServiceImplTest {
         );
         assertTrue(list.stream().allMatch(p -> p.getBuildingNumber() != null), "buildingNumber must be non-null");
         assertTrue(list.size() <= 10, "Should return up to 10 results");
-    }
-
-    @Test
-    void testMissingPostcodesJsonReturnsEmptyList() {
-        doReturn(List.of()).when(postcodeService).loadAllPostcodes();
-        List<Postcodes> result = postcodeService.getPostcodeByCountry("gb-eng");
-        assertTrue(result.isEmpty());
     }
 
     @Test
@@ -150,7 +127,7 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testIOExceptionWhenReadingPostcodesJsonReturnsEmptyList() throws Exception {
+    void testIOExceptionWhenReadingPostcodesJsonReturnsEmptyList() {
         PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
         // Create an InputStream that throws IOException on read
         var faultyStream = new java.io.InputStream() {

@@ -74,8 +74,10 @@ public class Postcodes {
     public static class PostcodeDetails {
         @JsonProperty("pretty")
         private String pretty;
+
         @JsonProperty("stripped")
         private String stripped;
+
         @JsonProperty("type")
         private String type;
 
@@ -107,6 +109,7 @@ public class Postcodes {
     public static class Locality {
         @JsonProperty("post_town")
         private String postTown;
+
         @JsonProperty("dependent_locality")
         private String dependentLocality;
 
@@ -130,6 +133,7 @@ public class Postcodes {
     public static class Thoroughfare {
         @JsonProperty("name")
         private String name;
+
         @JsonProperty("descriptor")
         private String descriptor;
 
