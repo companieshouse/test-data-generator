@@ -13,7 +13,7 @@ public class Uvid {
     @Id
     private ObjectId id;
 
-    @Field("uvid")
+    @Field("uv_id")
     private String uvid;
 
     @Field("type")
@@ -25,21 +25,11 @@ public class Uvid {
     @Field("created")
     private Instant created;
 
-    // Getters and setters
-
     public String getId() {
         return id != null ? id.toHexString() : null;
     }
 
     public void setId(ObjectId id) {
-        this.id = id;
-    }
-
-    public ObjectId getObjectId() {
-        return id;
-    }
-
-    public void setObjectId(ObjectId id) {
         this.id = id;
     }
 

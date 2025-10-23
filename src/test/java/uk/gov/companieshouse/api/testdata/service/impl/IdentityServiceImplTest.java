@@ -119,12 +119,10 @@ class IdentityServiceImplTest {
         when(identityRepository.findByUserId("testUserId")).thenReturn(Optional.empty());
         when(identityRepository.findByEmail("test@test.com")).thenReturn(Optional.empty());
 
-        // Mock UVID generation
         when(randomService.getNumber(3)).thenReturn(0L, 1L, 2L); // For "ABC"
         when(randomService.getNumber(1)).thenReturn(5L); // For "5"
         when(randomService.getNumber(2)).thenReturn(3L, 4L); // For "DE"
 
-        // Capture the identity and use its id for the Uvid
         ArgumentCaptor<Identity> identityCaptor = ArgumentCaptor.forClass(Identity.class);
         when(identityRepository.save(identityCaptor.capture())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -133,7 +131,7 @@ class IdentityServiceImplTest {
             uvid.setUvid("ABC5DE22223");
             uvid.setType("PERMANENT");
             uvid.setCreated(createdDate);
-            uvid.setObjectId(new org.bson.types.ObjectId());
+            uvid.setId(new org.bson.types.ObjectId());
             return uvid;
         });
 

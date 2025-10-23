@@ -55,7 +55,6 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
 
     public UvidData createIdentityWithUvid(IdentitySpec identitySpec) throws DataException {
         try {
-            // Validate required fields
             if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
                 throw new DataException("User ID is required");
             }
@@ -66,19 +65,16 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
             String userId = identitySpec.getUserId();
             String email = identitySpec.getEmail();
 
-            // Check if user exists in user table
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isEmpty()) {
                 throw new DataException("User not found with ID: " + userId);
             }
 
-            // Check if identity already exists for this user
             Optional<Identity> existingIdentityOpt = identityRepository.findByUserId(userId);
             if (existingIdentityOpt.isPresent()) {
-                Identity existingIdentity = existingIdentityOpt.get();
+                var existingIdentity = existingIdentityOpt.get();
 
-                // Check if UVID already exists for this identity
-                Uvid existingUvid = uvidRepository.findByIdentityId(existingIdentity.getId());
+                var existingUvid = uvidRepository.findByIdentityId(existingIdentity.getId());
                 if (existingUvid != null) {
                     throw new DataException("User already has both identity and UVID");
                 } else {
@@ -86,14 +82,12 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
                 }
             }
 
-            // Check if email is already used by another identity
             Optional<Identity> existingEmailIdentityOpt = identityRepository.findByEmail(email);
             if (existingEmailIdentityOpt.isPresent()) {
                 throw new DataException("Email is already associated with another identity");
             }
 
-            // Create new identity
-            Identity identity = new Identity();
+            var identity = new Identity();
             identity.setId(UUID.randomUUID().toString());
             identity.setEmail(email);
             identity.setCreated(getCurrentDateTime());
@@ -103,8 +97,7 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
             identity.setSecureIndicator(false);
             identityRepository.save(identity);
 
-            // Create UVID for the identity
-            Uvid uvid = new Uvid();
+            var uvid = new Uvid();
             uvid.setUvid(generateUvid());
             uvid.setType("PERMANENT");
             uvid.setIdentityId(identity.getId());
@@ -124,7 +117,7 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
     public boolean delete(String identityId) {
         var identity = identityRepository.findById(identityId);
         if (identity.isPresent()) {
-            Uvid existingUvid = uvidRepository.findByIdentityId(identityId);
+            var existingUvid = uvidRepository.findByIdentityId(identityId);
             if (existingUvid != null) {
                 uvidRepository.delete(existingUvid);
             }
@@ -139,12 +132,12 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
     }
 
     private String generateUvid() {
-        StringBuilder uvid = new StringBuilder();
-        for (int i = 0; i < 3; i++) {
-            char randomChar = (char) ('A' + (randomService.getNumber(3) % 26));
+        var uvid = new StringBuilder();
+        for (var i = 0; i < 3; i++) {
+            var randomChar = (char) ('A' + (randomService.getNumber(3) % 26));
             uvid.append(randomChar);
         }
-        int randomDigit = (int) (randomService.getNumber(1) % 10);
+        var randomDigit = (int) (randomService.getNumber(1) % 10);
         uvid.append(randomDigit);
         for (int i = 0; i < 2; i++) {
             char randomChar = (char) ('A' + (randomService.getNumber(2) % 26));

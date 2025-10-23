@@ -865,9 +865,8 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         try {
-            // Cast to IdentityServiceImpl to access the createIdentityWithUvid method
-            IdentityServiceImpl identityServiceImpl = (IdentityServiceImpl) identityService;
-            UvidData uvidData = identityServiceImpl.createIdentityWithUvid(identitySpec);
+            var identityServiceImpl = (IdentityServiceImpl) identityService;
+            var uvidData = identityServiceImpl.createIdentityWithUvid(identitySpec);
             userService.updateUserWithOneLogin(identitySpec.getUserId());
             return uvidData;
         } catch (ClassCastException ex) {
