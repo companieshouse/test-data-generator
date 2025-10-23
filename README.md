@@ -132,13 +132,13 @@ In order to use the generator, there are different possible endpoints that can b
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/identity/{identityId}` will delete the test user identity. `identityId` is required to delete the user identity.
 
 #### Creating UVID after user identity validation
-- POST: Sending a POST request to create UVID for a user `{Base URL}/test-data/identity/uv_id` will generate a new UVID for a user. The request body must include `Identityspec` parameter to used to validate user identity.
+- POST: Sending a POST request to create UVID for a user `{Base URL}/test-data/identity/uvid` will generate a new UVID for a user. The request body must include `Identityspec` parameter to used to validate user identity.
     - `email`: The email id of the user. This is mandatory.
     - `user_id`: The user id of the user. This is mandatory.
     - `verification_source`: The verification source of the user. This is mandatory.
     
     A usage example looks like this: `{ "email": "test@test.com", "user_id": "userid", "verification_source": "TEST" }`
-- DELETE: USes the same endpoint and data as the identity. Deleting the identity deletes all associated uv_id data.
+- DELETE: USes the same endpoint and data as the identity. Deleting the identity deletes all associated uvid data.
 
 
 #### Creating Acsp Members and Acsp Profiles

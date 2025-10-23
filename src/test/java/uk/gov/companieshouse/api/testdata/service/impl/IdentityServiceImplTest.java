@@ -16,9 +16,13 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -127,7 +131,7 @@ class IdentityServiceImplTest {
 
         when(uvidRepository.save(any(Uvid.class))).thenAnswer(invocation -> {
             Uvid uvid = invocation.getArgument(0);
-            uvid.setUv_id("ABC5DE22223");
+            uvid.setUvid("ABC5DE22223");
             uvid.setType("PERMANENT");
             uvid.setCreated(createdDate);
             uvid.setId(new org.bson.types.ObjectId());
@@ -148,31 +152,9 @@ class IdentityServiceImplTest {
 
         assertEquals("test@test.com", savedIdentity.getEmail());
         assertEquals("testUserId", savedIdentity.getUserId());
-        assertEquals("ABC5DE22223", savedUvid.getUv_id());
+        assertEquals("ABC5DE22223", savedUvid.getUvid());
         assertEquals("PERMANENT", savedUvid.getType());
         assertEquals(savedIdentity.getId(), savedUvid.getIdentityId());
-    }
-
-    @Test
-    void testCreateIdentityWithUvid_MissingUserId() {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId(null);
-        identitySpec.setEmail("test@test.com");
-
-        DataException exception = assertThrows(DataException.class, ()
-                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
-        assertEquals("User ID is required", exception.getMessage());
-    }
-
-    @Test
-    void testCreateIdentityWithUvid_MissingEmail() {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("testUserId");
-        identitySpec.setEmail(null);
-
-        DataException exception = assertThrows(DataException.class, ()
-                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
-        assertEquals("Email is required", exception.getMessage());
     }
 
     @Test
@@ -201,7 +183,7 @@ class IdentityServiceImplTest {
         existingIdentity.setId("existingIdentityId");
 
         Uvid existingUvid = new Uvid();
-        existingUvid.setUv_id("EXISTING123");
+        existingUvid.setUvid("EXISTING123");
 
         when(userRepository.findById("testUserId")).thenReturn(Optional.of(mockUser));
         when(identityRepository.findByUserId("testUserId")).thenReturn(Optional.of(existingIdentity));
@@ -327,28 +309,30 @@ class IdentityServiceImplTest {
                 "Current time should be recent");
     }
 
-    @Test
-    void testCreateIdentityWithUvid_EmptyUserId() {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("");
-        identitySpec.setEmail("test@test.com");
-
-        DataException exception = assertThrows(DataException.class, ()
-                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
-
-        assertEquals("User ID is required", exception.getMessage());
+    /**
+     * Provides test cases for validation failures in createIdentityWithUvid.
+     *
+     * @return A Stream of Arguments, each containing: [userId, email, expectedMessage]
+     */
+    private static Stream<Arguments> createIdentityWithUvid_ValidationFailureCases() {
+        return Stream.of(
+                Arguments.of(null, "test@test.com", "User ID is required"),
+                Arguments.of("", "test@test.com", "User ID is required"),
+                Arguments.of("testUserId", null, "Email is required"),
+                Arguments.of("testUserId", "", "Email is required")
+        );
     }
 
-    @Test
-    void testCreateIdentityWithUvid_EmptyEmail() {
+    @ParameterizedTest(name = "[{index}] userId=''{0}'', email=''{1}'' => ''{2}''")
+    @MethodSource("createIdentityWithUvid_ValidationFailureCases")
+    void testCreateIdentityWithUvid_ValidationFailures(String userId, String email, String expectedMessage) throws DataException {
         IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("testUserId");
-        identitySpec.setEmail("");
+        identitySpec.setUserId(userId);
+        identitySpec.setEmail(email);
 
         DataException exception = assertThrows(DataException.class, ()
-                -> identityServiceImpl.createIdentityWithUvid(identitySpec));
-
-        assertEquals("Email is required", exception.getMessage());
+               -> identityServiceImpl.createIdentityWithUvid(identitySpec));
+        assertEquals(expectedMessage, exception.getMessage());
     }
 
     @Test
