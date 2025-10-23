@@ -52,6 +52,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+import uk.gov.companieshouse.api.testdata.model.rest.UvidData;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -189,6 +190,17 @@ public class TestDataController {
             LOG.info("Identity not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @PostMapping("/identity/uvid")
+    public ResponseEntity<UvidData> createIdentityWithUvid(@Valid @RequestBody IdentitySpec request) throws DataException {
+        UvidData createdUvid = testDataService.createIdentityWithUvid(request);
+        Map<String, Object> data = new HashMap<>();
+        data.put("uvid_id", createdUvid.getId());
+        data.put("uvid", createdUvid.getUvid());
+        data.put("user_id", request.getUserId());
+        LOG.info("New identity and UVID created", data);
+        return new ResponseEntity<>(createdUvid, HttpStatus.CREATED);
     }
 
     @PostMapping("/acsp-members")

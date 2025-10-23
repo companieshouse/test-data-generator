@@ -62,6 +62,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UvidData;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -1412,5 +1413,39 @@ class TestDataControllerTest {
         );
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
+    }
+
+    @Test
+    void createIdentityWithUvid_success() throws Exception {
+        IdentitySpec spec = new IdentitySpec();
+        spec.setUserId(USER_ID);
+        spec.setEmail("user@example.com");
+        spec.setVerificationSource("source");
+
+        UvidData uvid = new UvidData("uvid-id-123", "ABC12");
+        when(this.testDataService.createIdentityWithUvid(spec)).thenReturn(uvid);
+
+        ResponseEntity<UvidData> response = this.testDataController.createIdentityWithUvid(spec);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(uvid, response.getBody());
+        verify(this.testDataService, times(1)).createIdentityWithUvid(spec);
+    }
+
+    @Test
+    void createIdentityWithUvid_throwsDataException() throws Exception {
+        IdentitySpec spec = new IdentitySpec();
+        spec.setUserId(USER_ID);
+        spec.setEmail("user@example.com");
+        spec.setVerificationSource("source");
+
+        DataException exception = new DataException("Failed to create identity with UVID");
+        when(this.testDataService.createIdentityWithUvid(spec)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createIdentityWithUvid(spec));
+
+        assertEquals(exception.getMessage(), thrown.getMessage());
+        verify(this.testDataService, times(1)).createIdentityWithUvid(spec);
     }
 }

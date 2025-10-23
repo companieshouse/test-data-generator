@@ -55,6 +55,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 
+import uk.gov.companieshouse.api.testdata.model.rest.UvidData;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -848,6 +849,31 @@ public class TestDataServiceImpl implements TestDataService {
             return transactionService.delete(transactionId);
         } catch (Exception ex) {
             throw new DataException("Error deleting transaction", ex);
+        }
+    }
+
+    @Override
+    public UvidData createIdentityWithUvid(IdentitySpec identitySpec) throws DataException {
+        if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
+            throw new DataException("User Id is required to create identity with UVID");
+        }
+        if (identitySpec.getEmail() == null || identitySpec.getEmail().isEmpty()) {
+            throw new DataException("Email is required to create identity with UVID");
+        }
+        if (identitySpec.getVerificationSource() == null || identitySpec.getVerificationSource().isEmpty()) {
+            throw new DataException("Verification source is required to create identity with UVID");
+        }
+
+        try {
+            // Cast to IdentityServiceImpl to access the createIdentityWithUvid method
+            IdentityServiceImpl identityServiceImpl = (IdentityServiceImpl) identityService;
+            UvidData uvidData = identityServiceImpl.createIdentityWithUvid(identitySpec);
+            userService.updateUserWithOneLogin(identitySpec.getUserId());
+            return uvidData;
+        } catch (ClassCastException ex) {
+            throw new DataException("Identity service implementation does not support createIdentityWithUvid method", ex);
+        } catch (Exception ex) {
+            throw new DataException("Error creating identity with UVID", ex);
         }
     }
 }
