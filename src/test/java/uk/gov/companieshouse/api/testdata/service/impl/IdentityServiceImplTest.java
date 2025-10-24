@@ -131,7 +131,7 @@ class IdentityServiceImplTest {
 
         when(uvidRepository.save(any(Uvid.class))).thenAnswer(invocation -> {
             Uvid uvid = invocation.getArgument(0);
-            uvid.setUvid("ABC5DE22223");
+            uvid.setIdentityUvid("ABC5DE22223");
             uvid.setType("PERMANENT");
             uvid.setCreated(createdDate);
             uvid.setId(new org.bson.types.ObjectId());
@@ -152,7 +152,7 @@ class IdentityServiceImplTest {
 
         assertEquals("test@test.com", savedIdentity.getEmail());
         assertEquals("testUserId", savedIdentity.getUserId());
-        assertEquals("ABC5DE22223", savedUvid.getUvid());
+        assertEquals("ABC5DE22223", savedUvid.getIdentityUvid());
         assertEquals("PERMANENT", savedUvid.getType());
         assertEquals(savedIdentity.getId(), savedUvid.getIdentityId());
     }
@@ -183,7 +183,7 @@ class IdentityServiceImplTest {
         existingIdentity.setId("existingIdentityId");
 
         Uvid existingUvid = new Uvid();
-        existingUvid.setUvid("EXISTING123");
+        existingUvid.setIdentityUvid("EXISTING123");
 
         when(userRepository.findById("testUserId")).thenReturn(Optional.of(mockUser));
         when(identityRepository.findByUserId("testUserId")).thenReturn(Optional.of(existingIdentity));

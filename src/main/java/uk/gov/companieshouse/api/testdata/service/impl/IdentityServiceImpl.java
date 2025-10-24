@@ -98,13 +98,13 @@ public class IdentityServiceImpl implements DataService<IdentityData, IdentitySp
             identityRepository.save(identity);
 
             var uvid = new Uvid();
-            uvid.setUvid(generateUvid());
+            uvid.setIdentityUvid(generateUvid());
             uvid.setType("PERMANENT");
             uvid.setIdentityId(identity.getId());
             uvid.setCreated(getCurrentDateTime());
             uvid = uvidRepository.save(uvid);
 
-            return new UvidData(uvid.getId(), uvid.getUvid());
+            return new UvidData(uvid.getId(), uvid.getIdentityUvid());
 
         } catch (DataException ex) {
             throw ex;

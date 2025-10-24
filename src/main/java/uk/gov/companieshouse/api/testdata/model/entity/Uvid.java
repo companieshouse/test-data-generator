@@ -7,14 +7,14 @@ import org.bson.types.ObjectId;
 
 import java.time.Instant;
 
-@Document(collection = "uvid")
+@Document(collection = "identityUvid")
 public class Uvid {
 
     @Id
     private ObjectId id;
 
-    @Field("uvid")
-    private String uvid;
+    @Field("identity_uvid")
+    private String identityUvid;
 
     @Field("type")
     private String type;
@@ -33,12 +33,12 @@ public class Uvid {
         this.id = id;
     }
 
-    public String getUvid() {
-        return uvid;
+    public String getIdentityUvid() {
+        return identityUvid;
     }
 
-    public void setUvid(String uvid) {
-        this.uvid = uvid;
+    public void setIdentityUvid(String identityUvid) {
+        this.identityUvid = identityUvid;
     }
 
     public String getType() {
