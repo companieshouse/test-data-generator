@@ -68,7 +68,7 @@ public class PostcodeServiceImpl implements PostcodeService {
 
     private static List<String> getPostcodePrefixes(String country) {
         List<String> prefixesWales = List.of("CF", "LL", "NP", "LD", "SA");
-        List<String> prefixesScotland = List.of("AB", "DD", "DG", "EH", "FK", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "HS", "IV", "KA", "KW", "KY", "ML", "PA", "PH", "TD");
+        List<String> prefixesScotland = List.of("AB", "DD", "DG", "EH", "FK", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "HS", "IV", "KA", "KW", "KY", "ML", "PA", "PH", "TD");
         List<String> prefixesEngland = List.of(
                 "AL", "B", "BA", "BB", "BD", "BH", "BL", "BN", "BR", "BS",
                 "CB", "CM", "CO", "CR", "CT", "CV", "DA", "DE", "DH", "DL", "DN", "DT", "DY",

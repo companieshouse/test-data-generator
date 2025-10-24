@@ -34,25 +34,25 @@ class PostcodeServiceImplTest {
     @Test
     void testGetPostcodeByCountryPostcodesForEngland() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
-        assertTrue(result.stream().findFirst().isPresent());
+        assertEquals(10, result.size());
     }
 
     @Test
     void testGetPostcodeByCountryPostcodesForWales() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
-        assertTrue(result.stream().findFirst().isPresent());
+        assertEquals(10, result.size());
     }
 
     @Test
     void testGetPostcodeByCountryPostcodesForScotland() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_SCOTLAND);
-        assertTrue(result.stream().findFirst().isPresent());
+        assertEquals(10, result.size());
     }
 
     @Test
     void testGetPostcodeByCountryPostcodesForNorthernIreland() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
-        assertTrue(result.stream().findFirst().isPresent());
+        assertEquals(10, result.size());
     }
 
     @Test
@@ -103,7 +103,7 @@ class PostcodeServiceImplTest {
                 "All results should start with CF"
         );
         assertTrue(list.stream().allMatch(p -> p.getBuildingNumber() != null), "buildingNumber must be non-null");
-        assertTrue(list.size() <= 10, "Should return up to 10 results");
+        assertEquals(10, list.size(), "Should return 10 results");
     }
 
     @Test
