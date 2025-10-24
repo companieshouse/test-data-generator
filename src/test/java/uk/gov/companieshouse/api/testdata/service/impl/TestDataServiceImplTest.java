@@ -2003,31 +2003,35 @@ class TestDataServiceImplTest {
 
     @Test
     void testGetPostcodesValidCountry() throws DataException {
-        String country = "England";
+        var country = "England";
+        var streetName = "First Avenue";
+        var streetDescriptor = "High Street";
+        var dependentLocality = "London Road";
+        var postTown = "London";
+        var postcodePretty = "EC1 1BB";
+        var buildingNumber = 12;
         Postcodes mockPostcode = new Postcodes();
-        mockPostcode.setBuildingNumber(12);
+        mockPostcode.setBuildingNumber(buildingNumber);
         Postcodes.Thoroughfare thoroughfare = new Postcodes.Thoroughfare();
-        thoroughfare.setName("First Avenue");
-        thoroughfare.setDescriptor("High Street");
+        thoroughfare.setName(streetName);
+        thoroughfare.setDescriptor(streetDescriptor);
         mockPostcode.setThoroughfare(thoroughfare);
         Postcodes.Locality locality = new Postcodes.Locality();
-        locality.setDependentLocality("High Street");
-        locality.setPostTown("London");
+        locality.setDependentLocality(dependentLocality);
+        locality.setPostTown(postTown);
         mockPostcode.setLocality(locality);
         Postcodes.PostcodeDetails postcodeDetails = new Postcodes.PostcodeDetails();
-        postcodeDetails.setPretty("EC1 1BB");
+        postcodeDetails.setPretty(postcodePretty);
         mockPostcode.setPostcode(postcodeDetails);
         mockPostcode.setCountry(country);
 
         when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of(mockPostcode));
-
         PostcodesData result = testDataService.getPostcodes(country);
-
-        assertEquals(12, result.getBuildingNumber());
-        assertEquals("First Avenue High Street", result.getFirstLine());
-        assertEquals("High Street", result.getDependentLocality());
-        assertEquals("London", result.getPostTown());
-        assertEquals("EC1 1BB", result.getPostcode());
+        assertEquals(buildingNumber, result.getBuildingNumber());
+        assertEquals(streetName + " " + streetDescriptor, result.getFirstLine());
+        assertEquals(dependentLocality, result.getDependentLocality());
+        assertEquals(postTown, result.getPostTown());
+        assertEquals(postcodePretty, result.getPostcode());
         verify(postcodeService, times(1)).getPostcodeByCountry(country);
     }
 

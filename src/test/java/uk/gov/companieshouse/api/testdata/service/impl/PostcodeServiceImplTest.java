@@ -32,31 +32,31 @@ class PostcodeServiceImplTest {
     private static final String COUNTRY_NORTHERN_IRELAND = "gb-nir";
 
     @Test
-    void testGetPostcodeByCountryPostcodesForEngland() {
+    void testPostcodeByCountryEngland() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
         assertEquals(10, result.size());
     }
 
     @Test
-    void testGetPostcodeByCountryPostcodesForWales() {
+    void testPostcodeByCountryWales() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
         assertEquals(10, result.size());
     }
 
     @Test
-    void testGetPostcodeByCountryPostcodesForScotland() {
+    void testPostcodeByCountryScotland() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_SCOTLAND);
         assertEquals(10, result.size());
     }
 
     @Test
-    void testGetPostcodeByCountryPostcodesForNorthernIreland() {
+    void testPostcodeByCountryNorthernIreland() {
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
         assertEquals(10, result.size());
     }
 
     @Test
-    void testGetPostcodeByCountryPostcodesForInvalidCountry() {
+    void testPostcodesForInvalidCountry() {
         String invalidCountry = "invalid-country";
         try {
             postcodeService.getPostcodeByCountry(invalidCountry);
@@ -66,7 +66,7 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testGetPostcodeByCountryPostcodesForEmptyCountry() {
+    void testPostcodesForEmptyCountry() {
         try {
             postcodeService.getPostcodeByCountry("");
         } catch (IllegalArgumentException e) {
@@ -75,20 +75,10 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testEmptyResults() {
+    void testEmptyResultsForLoadingPostcodes() {
         doReturn(List.of()).when(postcodeService).loadAllPostcodes();
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND);
         assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testReturningEmptyListWhenNoResultsFound() {
-        try {
-            List<Postcodes> result = postcodeService.getPostcodeByCountry("zz");
-            assertTrue(result.isEmpty());
-        } catch (IllegalArgumentException e) {
-            assertEquals("Country not recognised: zz", e.getMessage());
-        }
     }
 
     @Test
@@ -107,7 +97,7 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testPostcodeWithNullPostcodeOrBuildingNumberFilteredOut() {
+    void testNoBuildingNumberShouldReturnNoPostcode() {
         Postcodes valid = mock(Postcodes.class);
         Postcodes.PostcodeDetails postcodeObj = new Postcodes.PostcodeDetails();
         postcodeObj.setStripped("EN118GB");
@@ -130,7 +120,7 @@ class PostcodeServiceImplTest {
     }
 
     @Test
-    void testIOExceptionWhenReadingPostcodesJsonReturnsEmptyList() {
+    void testIOExceptionWhenReadingPostcodesJsonReturnsException() {
         PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
         // Create an InputStream that throws IOException on read
         var faultyStream = new java.io.InputStream() {
@@ -140,9 +130,11 @@ class PostcodeServiceImplTest {
             }
         };
         doReturn(faultyStream).when(service).getPostcodesResourceStream();
-
-        List<Postcodes> result = service.loadAllPostcodes();
-        assertTrue(result.isEmpty(), "Should return empty list when IOException occurs");
+        try {
+            service.loadAllPostcodes();
+        } catch (RuntimeException e) {
+            assertEquals("java.io.IOException: Simulated IO error", e.getMessage());
+        }
     }
 
     @Test

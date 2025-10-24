@@ -119,7 +119,7 @@ public class PostcodeServiceImpl implements PostcodeService {
             return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
         } catch (IOException e) {
             LOG.error("Failed to read postcodes.json", e);
-            return List.of();
+            throw new RuntimeException(e);
         }
     }
 
