@@ -1928,9 +1928,6 @@
       "dependent_locality": "SILVER END",
       "post_town": "WITHAM"
     },
-    "dependent_thoroughfare": {
-      "name": "THE MANORS"
-    },
     "country": "gb-eng"
   },
   {
@@ -2200,9 +2197,6 @@
     "locality": {
       "post_town": "CROYDON"
     },
-    "dependent_thoroughfare": {
-      "name": "INGLEWOOD"
-    },
     "postcode": {
       "pretty": "CR0 9LP",
       "type": "S",
@@ -2419,9 +2413,6 @@
       "stripped": "CT29HQ"
     },
     "building_number": 1,
-    "dependent_thoroughfare": {
-      "name": "THE GAP"
-    },
     "locality": {
       "post_town": "CANTERBURY",
       "dependent_locality": "BLEAN"
@@ -2919,10 +2910,6 @@
     "locality": {
       "post_town": "BURTON-ON-TRENT"
     },
-    "dependent_thoroughfare": {
-      "descriptor": "GARDENS",
-      "name": "RIVERSIDE"
-    },
     "country": "gb-eng"
   },
   {
@@ -3317,10 +3304,6 @@
     "locality": {
       "post_town": "SCUNTHORPE"
     },
-    "dependent_thoroughfare": {
-      "name": "NEW",
-      "descriptor": "ROAD"
-    },
     "building_number": 10,
     "postcode": {
       "pretty": "DN17 2AR",
@@ -3354,10 +3337,6 @@
     "locality": {
       "post_town": "BRIGG",
       "dependent_locality": "WRAWBY"
-    },
-    "dependent_thoroughfare": {
-      "name": "BRIGGFIELD",
-      "descriptor": "VILLAS"
     },
     "building_number": 1,
     "postcode": {
@@ -4104,10 +4083,6 @@
       "type": "S",
       "stripped": "EN28QW"
     },
-    "dependent_thoroughfare": {
-      "descriptor": "COURT",
-      "name": "NEWMINSTER"
-    },
     "locality": {
       "post_town": "ENFIELD"
     },
@@ -4408,9 +4383,6 @@
   {
     "locality": {
       "post_town": "PINNER"
-    },
-    "dependent_thoroughfare": {
-      "name": "THE CLOSE"
     },
     "postcode": {
       "pretty": "HA5 5EU",
@@ -5050,10 +5022,6 @@
       "stripped": "HP123AY",
       "type": "S"
     },
-    "dependent_thoroughfare": {
-      "descriptor": "COURT",
-      "name": "PARK VIEW"
-    },
     "locality": {
       "post_town": "HIGH WYCOMBE"
     },
@@ -5183,10 +5151,6 @@
       "type": "S",
       "stripped": "HU152LQ",
       "pretty": "HU15 2LQ"
-    },
-    "dependent_thoroughfare": {
-      "name": "HANOVER",
-      "descriptor": "COURT"
     },
     "locality": {
       "post_town": "BROUGH",
@@ -5357,10 +5321,6 @@
     "locality": {
       "post_town": "WOODFORD GREEN"
     },
-    "dependent_thoroughfare": {
-      "name": "CHRISTY",
-      "descriptor": "TERRACE"
-    },
     "building_number": 1,
     "postcode": {
       "pretty": "IG8 8JX",
@@ -5516,9 +5476,6 @@
     },
     "locality": {
       "post_town": "HARLESTON"
-    },
-    "dependent_thoroughfare": {
-      "name": "SOUTHGATE"
     },
     "country": "gb-eng"
   },
@@ -6455,10 +6412,6 @@
       "post_town": "LUTON",
       "dependent_locality": "SKIMPOT"
     },
-    "dependent_thoroughfare": {
-      "descriptor": "PARK",
-      "name": "CADDINGTON"
-    },
     "building_number": 19,
     "postcode": {
       "stripped": "LU14AY",
@@ -7124,10 +7077,6 @@
     "locality": {
       "post_town": "NOTTINGHAM",
       "dependent_locality": "RADCLIFFE-ON-TRENT"
-    },
-    "dependent_thoroughfare": {
-      "descriptor": "LANE",
-      "name": "NATHANS"
     },
     "country": "gb-eng"
   },
@@ -7943,10 +7892,6 @@
     "country": "gb-eng"
   },
   {
-    "dependent_thoroughfare": {
-      "descriptor": "MEWS",
-      "name": "TRANLEY"
-    },
     "locality": {
       "post_town": "LONDON"
     },
@@ -8209,10 +8154,6 @@
     "country": "gb-eng"
   },
   {
-    "dependent_thoroughfare": {
-      "descriptor": "MEWS",
-      "name": "APPLEBY"
-    },
     "locality": {
       "post_town": "BANBURY"
     },
@@ -9149,10 +9090,6 @@
     "country": "gb-eng"
   },
   {
-    "dependent_thoroughfare": {
-      "name": "ASPEN",
-      "descriptor": "PLACE"
-    },
     "locality": {
       "post_town": "WOKINGHAM"
     },
@@ -10075,9 +10012,6 @@
     "country": "gb-eng"
   },
   {
-    "dependent_thoroughfare": {
-      "name": "MEADOWSIDE"
-    },
     "locality": {
       "post_town": "MACCLESFIELD"
     },
@@ -10269,10 +10203,6 @@
     "locality": {
       "post_town": "SLOUGH",
       "dependent_locality": "LANGLEY"
-    },
-    "dependent_thoroughfare": {
-      "name": "ELDER",
-      "descriptor": "WAY"
     },
     "country": "gb-eng"
   },
@@ -11836,15 +11766,19 @@
     "country": "gb-eng"
   },
   {
-    "building_number": 24,
-    "locality": {
-      "post_town": "TELFORD",
-      "dependent_locality": "LAWLEY VILLAGE"
+    "postcode" : {
+      "pretty" : "TF4 2PA",
+      "stripped" : "TF42PA",
+      "type" : "S"
     },
-    "postcode": {
-      "pretty": "TF4 2PG",
-      "type": "S",
-      "stripped": "TF42PG"
+    "building_number" : 15,
+    "locality" : {
+      "post_town" : "TELFORD",
+      "dependent_locality" : "HORSEHAY"
+    },
+    "thoroughfare" : {
+      "descriptor" : "WALK",
+      "name" : "SIMPSONS"
     },
     "country": "gb-eng"
   },
@@ -11958,10 +11892,6 @@
       "type": "S",
       "stripped": "TN131TE"
     },
-    "dependent_thoroughfare": {
-      "descriptor": "VIEW",
-      "name": "LANDSEER"
-    },
     "locality": {
       "post_town": "SEVENOAKS"
     },
@@ -11993,9 +11923,6 @@
       "pretty": "TN11 8RJ",
       "stripped": "TN118RJ",
       "type": "S"
-    },
-    "dependent_thoroughfare": {
-      "name": "THE SQUARE"
     },
     "locality": {
       "post_town": "TONBRIDGE",
@@ -12073,10 +12000,6 @@
   {
     "locality": {
       "post_town": "TUNBRIDGE WELLS"
-    },
-    "dependent_thoroughfare": {
-      "descriptor": "PLACE",
-      "name": "SHERBOURNE"
     },
     "building_number": 44,
     "postcode": {
@@ -12676,9 +12599,6 @@
     "country": "gb-eng"
   },
   {
-    "dependent_thoroughfare": {
-      "name": "THAMES EYOT"
-    },
     "locality": {
       "post_town": "TWICKENHAM"
     },
@@ -13065,10 +12985,6 @@
     "country": "gb-eng"
   },
   {
-    "dependent_thoroughfare": {
-      "name": "GERARDS",
-      "descriptor": "COURT"
-    },
     "locality": {
       "post_town": "ST. HELENS"
     },
@@ -13098,10 +13014,6 @@
     "locality": {
       "dependent_locality": "MOBBERLEY",
       "post_town": "KNUTSFORD"
-    },
-    "dependent_thoroughfare": {
-      "name": "ROWAN TREE",
-      "descriptor": "ROAD"
     },
     "country": "gb-eng"
   },
@@ -13970,15 +13882,18 @@
     "country": "gb-eng"
   },
   {
-    "locality": {
-      "dependent_locality": "EARDISTON",
-      "post_town": "TENBURY WELLS"
+    "locality" : {
+      "post_town" : "TENBURY WELLS"
     },
-    "building_number": 46,
-    "postcode": {
-      "pretty": "WR15 8JH",
-      "stripped": "WR158JH",
-      "type": "S"
+    "thoroughfare" : {
+      "name" : "TEME",
+      "descriptor" : "STREET"
+    },
+    "building_number" : 58,
+    "postcode" : {
+      "type" : "S",
+      "stripped" : "WR158AA",
+      "pretty" : "WR15 8AA"
     },
     "country": "gb-eng"
   },
@@ -14352,9 +14267,6 @@
     "locality": {
       "post_town": "WOLVERHAMPTON",
       "dependent_locality": "COVEN HEATH"
-    },
-    "dependent_thoroughfare": {
-      "name": "THE HOMELANDS"
     },
     "country": "gb-eng"
   },
@@ -14785,10 +14697,6 @@
     "country": "gb-wls"
   },
   {
-    "dependent_thoroughfare": {
-      "descriptor": "ROAD",
-      "name": "LLEWELYN"
-    },
     "locality": {
       "post_town": "WREXHAM",
       "dependent_locality": "TANYFRON"
@@ -15653,10 +15561,6 @@
       "stripped": "DD115TD",
       "type": "S"
     },
-    "dependent_thoroughfare": {
-      "descriptor": "COURT",
-      "name": "ANDY STEWART"
-    },
     "locality": {
       "post_town": "ARBROATH"
     },
@@ -16155,10 +16059,6 @@
     "locality": {
       "post_town": "FALKIRK",
       "dependent_locality": "BRIGHTONS"
-    },
-    "dependent_thoroughfare": {
-      "descriptor": "PLACE",
-      "name": "ALBERT"
     },
     "postcode": {
       "stripped": "FK20JX",
@@ -17491,28 +17391,35 @@
     "country": "gb-sct"
   },
   {
-    "locality": {
-      "post_town": "ISLE OF LEWIS",
-      "dependent_locality": "LOCHCROISTEAN"
+    "thoroughfare" : {
+      "name" : "NORTH",
+      "descriptor" : "STREET"
     },
-    "building_number": 1,
-    "postcode": {
-      "type": "S",
-      "stripped": "HS29EP",
-      "pretty": "HS2 9EP"
+    "postcode" : {
+      "stripped" : "HS20AD",
+      "type" : "S",
+      "pretty" : "HS2 0AD"
+    },
+    "building_number" : 16,
+    "locality" : {
+      "dependent_locality" : "SANDWICK",
+      "post_town" : "ISLE OF LEWIS"
     },
     "country": "gb-sct"
   },
   {
-    "postcode": {
-      "pretty": "HS3 3AY",
-      "stripped": "HS33AY",
-      "type": "S"
+    "locality" : {
+      "dependent_locality" : "HORGABOST",
+      "post_town" : "ISLE OF HARRIS"
     },
-    "building_number": 1,
-    "locality": {
-      "post_town": "ISLE OF HARRIS",
-      "dependent_locality": "HUSHINISH"
+    "building_number" : 12,
+    "postcode" : {
+      "pretty" : "HS3 3AE",
+      "stripped" : "HS33AE",
+      "type" : "S"
+    },
+    "thoroughfare" : {
+      "name" : "PAIRC NISEABOIST"
     },
     "country": "gb-sct"
   },
@@ -17548,83 +17455,100 @@
     "country": "gb-sct"
   },
   {
-    "building_number": 3,
-    "locality": {
-      "dependent_locality": "CREAGORRY",
-      "post_town": "ISLE OF BENBECULA"
+    "thoroughfare" : {
+      "descriptor" : "CLOSE",
+      "name" : "TUZO"
     },
-    "postcode": {
-      "type": "S",
-      "stripped": "HS75PG",
-      "pretty": "HS7 5PG"
+    "building_number" : 21,
+    "locality" : {
+      "dependent_locality" : "BALIVANICH",
+      "post_town" : "ISLE OF BENBECULA"
     },
-    "country": "gb-sct"
-  },
-  {
-    "thoroughfare": {
-      "descriptor": "ROAD",
-      "name": "WILLOWGLEN"
-    },
-    "postcode": {
-      "pretty": "HS1 2EJ",
-      "type": "S",
-      "stripped": "HS12EJ"
-    },
-    "building_number": 1,
-    "locality": {
-      "post_town": "STORNOWAY"
+    "postcode" : {
+      "type" : "S",
+      "stripped" : "HS75LB",
+      "pretty" : "HS7 5LB"
     },
     "country": "gb-sct"
   },
   {
-    "building_number": 26,
-    "locality": {
-      "dependent_locality": "GRESS",
-      "post_town": "ISLE OF LEWIS"
+    "postcode" : {
+      "pretty" : "HS2 0AU",
+      "type" : "S",
+      "stripped" : "HS20AU"
     },
-    "postcode": {
-      "type": "S",
-      "stripped": "HS20NB",
-      "pretty": "HS2 0NB"
+    "building_number" : 57,
+    "locality" : {
+      "dependent_locality" : "SANDWICK",
+      "post_town" : "ISLE OF LEWIS"
     },
-    "country": "gb-sct"
-  },
-  {
-    "postcode": {
-      "pretty": "HS7 5QF",
-      "stripped": "HS75QF",
-      "type": "S"
-    },
-    "building_number": 4,
-    "locality": {
-      "post_town": "ISLE OF BENBECULA",
-      "dependent_locality": "KILERIVAGH"
+    "thoroughfare" : {
+      "name" : "PARKEND"
     },
     "country": "gb-sct"
   },
   {
-    "building_number": 11,
-    "locality": {
-      "post_town": "ISLE OF NORTH UIST",
-      "dependent_locality": "CARINISH"
+    "thoroughfare" : {
+      "name" : "GLEN"
     },
-    "postcode": {
-      "pretty": "HS6 5HL",
-      "type": "S",
-      "stripped": "HS65HL"
+    "building_number" : 1,
+    "locality" : {
+      "post_town" : "ISLE OF LEWIS",
+      "dependent_locality" : "NORTH TOLSTA"
+    },
+    "postcode" : {
+      "pretty" : "HS2 0ND",
+      "type" : "S",
+      "stripped" : "HS20ND"
     },
     "country": "gb-sct"
   },
   {
-    "building_number": 1,
-    "locality": {
-      "dependent_locality": "PLASTERFIELD",
-      "post_town": "STORNOWAY"
+    "thoroughfare" : {
+      "descriptor" : "CLOSE",
+      "name" : "TUZO"
     },
-    "postcode": {
-      "pretty": "HS1 2UX",
-      "type": "S",
-      "stripped": "HS12UX"
+    "building_number" : 21,
+    "locality" : {
+      "dependent_locality" : "BALIVANICH",
+      "post_town" : "ISLE OF BENBECULA"
+    },
+    "postcode" : {
+      "type" : "S",
+      "stripped" : "HS75LB",
+      "pretty" : "HS7 5LB"
+    },
+    "country": "gb-sct"
+  },
+  {
+    "postcode" : {
+      "stripped" : "HS65AB",
+      "type" : "S",
+      "pretty" : "HS6 5AB"
+    },
+    "building_number" : 13,
+    "locality" : {
+      "post_town" : "ISLE OF NORTH UIST",
+      "dependent_locality" : "LOCHMADDY"
+    },
+    "thoroughfare" : {
+      "descriptor" : "PLACE",
+      "name" : "DUNROSSIL"
+    },
+    "country": "gb-sct"
+  },
+  {
+    "thoroughfare" : {
+      "name" : "LANAIG FHADA"
+    },
+    "locality" : {
+      "post_town" : "STORNOWAY"
+    },
+    "building_number" : 8,
+    "postcode" : {
+      "stripped" : "HS12UA",
+      "type" : "S",
+      "pretty" : "HS1 2UA"
     },
     "country": "gb-sct"
   },
@@ -18796,15 +18720,18 @@
     "country": "gb-sct"
   },
   {
-    "locality": {
-      "dependent_locality": "ETAL",
-      "post_town": "CORNHILL-ON-TWEED"
+    "building_number" : 6,
+    "postcode" : {
+      "pretty" : "TD12 4TS",
+      "type" : "S",
+      "stripped" : "TD124TS"
     },
-    "building_number": 1,
-    "postcode": {
-      "pretty": "TD12 4TL",
-      "type": "S",
-      "stripped": "TD124TL"
+    "locality" : {
+      "post_town" : "CORNHILL-ON-TWEED"
+    },
+    "thoroughfare" : {
+      "descriptor" : "GARDENS",
+      "name" : "STATION"
     },
     "country": "gb-sct"
   },
@@ -18841,15 +18768,18 @@
     "country": "gb-sct"
   },
   {
-    "building_number": 10,
-    "locality": {
-      "post_town": "CORNHILL-ON-TWEED",
-      "dependent_locality": "ETAL"
+    "postcode" : {
+      "type" : "S",
+      "stripped" : "TD124TX",
+      "pretty" : "TD12 4TX"
     },
-    "postcode": {
-      "pretty": "TD12 4TN",
-      "stripped": "TD124TN",
-      "type": "S"
+    "building_number" : 2,
+    "locality" : {
+      "post_town" : "CORNHILL-ON-TWEED"
+    },
+    "thoroughfare" : {
+      "descriptor" : "MEWS",
+      "name" : "MARSHALL"
     },
     "country": "gb-sct"
   },
