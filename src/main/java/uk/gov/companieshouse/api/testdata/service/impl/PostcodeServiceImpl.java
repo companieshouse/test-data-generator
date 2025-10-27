@@ -1,17 +1,16 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -21,12 +20,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class PostcodeServiceImpl implements PostcodeService {
 
     @Autowired
-    private PostcodeRepository postcodeRepository;
-
-    @Autowired
     private RandomService randomService;
-
-    private final Map<String, List<Postcodes>> cache = new HashMap<>();
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
@@ -74,7 +68,7 @@ public class PostcodeServiceImpl implements PostcodeService {
 
     private static List<String> getPostcodePrefixes(String country) {
         List<String> prefixesWales = List.of("CF", "LL", "NP", "LD", "SA");
-        List<String> prefixesScotland = List.of("AB", "DD", "DG", "EH", "FK", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9", "HS", "IV", "KA", "KW", "KY", "ML", "PA", "PH", "TD");
+        List<String> prefixesScotland = List.of("AB", "DD", "DG", "EH", "FK", "G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "HS", "IV", "KA", "KW", "KY", "ML", "PA", "PH", "TD");
         List<String> prefixesEngland = List.of(
                 "AL", "B", "BA", "BB", "BD", "BH", "BL", "BN", "BR", "BS",
                 "CB", "CM", "CO", "CR", "CT", "CV", "DA", "DE", "DH", "DL", "DN", "DT", "DY",
@@ -101,27 +95,35 @@ public class PostcodeServiceImpl implements PostcodeService {
         };
     }
 
-    @Cacheable("postcodesByPrefix")
     private List<Postcodes> queryByPrefix(String prefix) {
-        if (cache.containsKey(prefix)) {
-            return cache.get(prefix);
+        List<Postcodes> allPostcodes = loadAllPostcodes();
+        if (allPostcodes.isEmpty()) {
+            LOG.error("No postcodes loaded from postcodes.json");
+            return List.of();
         }
 
-        Map<String, Object> regex = new HashMap<>();
-        regex.put("$regex", "^" + prefix);
+        return allPostcodes.stream()
+                .filter(p -> p.getPostcode() != null && p.getPostcode().getStripped().startsWith(prefix))
+                .filter(p -> p.getBuildingNumber() != null)
+                .limit(10)
+                .collect(java.util.stream.Collectors.toList());
+    }
 
-        Map<String, Object> condition = new HashMap<>();
-        condition.put("postcode.stripped", regex);
-        Map<String, Object> buildingNumberConditionMap = new HashMap<>();
-        buildingNumberConditionMap.put("$ne", null);
-        condition.put("building_number", buildingNumberConditionMap);
+    List<Postcodes> loadAllPostcodes() {
+        try (var inputStream = getPostcodesResourceStream()) {
+            if (inputStream == null) {
+                LOG.error("postcodes.json not found in resources");
+                return List.of();
+            }
+            var mapper = new ObjectMapper();
+            return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
+        } catch (IOException e) {
+            LOG.error("Failed to read postcodes.json", e);
+            throw new RuntimeException(e);
+        }
+    }
 
-        var pageRequest = PageRequest.of(0, 10);
-        List<Postcodes> result = postcodeRepository.findByPostcodePrefixContaining(List.of(condition), pageRequest);
-
-        // Ensure we never return null - always return empty list if no results
-        result = result == null ? List.of() : result;
-        cache.put(prefix, result);
-        return result;
+    protected InputStream getPostcodesResourceStream() {
+        return getClass().getClassLoader().getResourceAsStream("postcodes.json");
     }
 }

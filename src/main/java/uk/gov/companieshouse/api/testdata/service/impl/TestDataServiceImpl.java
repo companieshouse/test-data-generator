@@ -746,10 +746,10 @@ public class TestDataServiceImpl implements TestDataService {
             var postcodeData = new PostcodesData(
                     postcode.getBuildingNumber() != null ? postcode
                             .getBuildingNumber().intValue() : null,
-                    postcode.getThoroughfareName() + " " + postcode.getThoroughfareDescriptor(),
-                    postcode.getDependentLocality(),
-                    postcode.getLocalityPostTown(),
-                    postcode.getPretty()
+                    postcode.getThoroughfare().getName() + " " + (postcode.getThoroughfare().getDescriptor() != null ? postcode.getThoroughfare().getDescriptor() : ""),
+                    postcode.getLocality().getDependentLocality(),
+                    postcode.getLocality().getPostTown(),
+                    postcode.getPostcode().getPretty()
             );
             postcodesDataList.add(postcodeData);
         }
