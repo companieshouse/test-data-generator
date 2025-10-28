@@ -854,7 +854,7 @@ public class TestDataServiceImpl implements TestDataService {
 
     @Override
     public CompanyData createPublicCompanyData(PublicCompanySpec spec) throws DataException {
-        CompanySpec publicSpec = new CompanySpec();
+        var publicSpec = new CompanySpec();
         // Only set allowed fields from PublicCompanySpec
         publicSpec.setCompanyNumber(spec.getCompanyNumber());
         publicSpec.setJurisdiction(spec.getJurisdiction());

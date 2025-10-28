@@ -73,6 +73,10 @@ public class TestDataController {
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
 
+    private static final String COMPANY_NUMBER_DATA = "company number";
+    private static final String JURISDICTION_DATA = "jurisdiction";
+    private static final String NEW_COMPANY_CREATED = "New company created";
+
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
             @Valid @RequestBody(required = false) PublicCompanySpec request) throws DataException {
@@ -80,12 +84,12 @@ public class TestDataController {
         Optional<PublicCompanySpec> optionalRequest = Optional.ofNullable(request);
         PublicCompanySpec spec = optionalRequest.orElse(new PublicCompanySpec());
 
-        CompanyData createdCompany = testDataService.createPublicCompanyData(spec);
+        var createdCompany = testDataService.createPublicCompanyData(spec);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("company number", createdCompany.getCompanyNumber());
-        data.put("jurisdiction", spec.getJurisdiction());
-        LOG.info("New company created", data);
+        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
+        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
@@ -99,9 +103,9 @@ public class TestDataController {
         CompanyData createdCompany = testDataService.createCompanyData(spec);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("company number", createdCompany.getCompanyNumber());
-        data.put("jurisdiction", spec.getJurisdiction());
-        LOG.info("New company created", data);
+        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
+        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
@@ -118,7 +122,7 @@ public class TestDataController {
         testDataService.deleteCompanyData(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("company number", companyNumber);
+        data.put(COMPANY_NUMBER_DATA, companyNumber);
         LOG.info("Company deleted", data);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
