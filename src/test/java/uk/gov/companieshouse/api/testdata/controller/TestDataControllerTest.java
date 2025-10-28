@@ -98,6 +98,9 @@ class TestDataControllerTest {
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
 
+    @Captor
+    private ArgumentCaptor<PublicCompanySpec> publicSpecCaptor;
+
     @Test
     void createCompanyInternal() throws Exception {
         CompanySpec request = new CompanySpec();
@@ -158,9 +161,9 @@ class TestDataControllerTest {
 
     @Test
     void createCompanyPublic() throws Exception {
-        PublicCompanySpec request = new PublicCompanySpec();
+        var request = new PublicCompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
-        CompanyData company =
+        var company =
                 new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
@@ -172,7 +175,7 @@ class TestDataControllerTest {
 
     @Test
     void createPublicCompanyInternalNoRequest() throws Exception {
-        CompanyData company =
+        var company =
                 new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createPublicCompanyData(any())).thenReturn(company);
@@ -181,16 +184,16 @@ class TestDataControllerTest {
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        verify(testDataService).createCompanyData(specCaptor.capture());
-        CompanySpec usedSpec = specCaptor.getValue();
+        verify(testDataService).createPublicCompanyData(publicSpecCaptor.capture());
+        var usedSpec = publicSpecCaptor.getValue();
 
         assertEquals(Jurisdiction.ENGLAND_WALES, usedSpec.getJurisdiction());
     }
 
     @Test
     void createCompanyPublicDefaultJurisdiction() throws Exception {
-        PublicCompanySpec request = new PublicCompanySpec();
-        CompanyData company =
+        var request = new PublicCompanySpec();
+        var company =
                 new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
@@ -205,7 +208,7 @@ class TestDataControllerTest {
 
     @Test
     void createCompanyPublicException() throws Exception {
-        PublicCompanySpec request = new PublicCompanySpec();
+        var request = new PublicCompanySpec();
         request.setJurisdiction(Jurisdiction.NI);
         Throwable exception = new DataException("Error message");
         when(this.testDataService.createPublicCompanyData(request)).thenThrow(exception);
