@@ -25,32 +25,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -74,6 +49,22 @@ public class TestDataController {
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
+            @Valid @RequestBody(required = false) PublicCompanySpec request) throws DataException {
+
+        Optional<PublicCompanySpec> optionalRequest = Optional.ofNullable(request);
+        PublicCompanySpec spec = optionalRequest.orElse(new PublicCompanySpec());
+
+        CompanyData createdCompany = testDataService.createPublicCompanyData(spec);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("company number", createdCompany.getCompanyNumber());
+        data.put("jurisdiction", spec.getJurisdiction());
+        LOG.info("New company created", data);
+        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+    }
+
+    @PostMapping("/internal/company")
+    public ResponseEntity<CompanyData> createCompanyInternal(
             @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
         Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
@@ -88,7 +79,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/company/{companyNumber}")
+    @DeleteMapping({"/internal/company/{companyNumber}", "/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
             @PathVariable("companyNumber") String companyNumber,
             @Valid @RequestBody DeleteCompanyRequest request)
@@ -106,7 +97,7 @@ public class TestDataController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PostMapping("/user")
+    @PostMapping("/internal/user")
     public ResponseEntity<UserData> createUser(@Valid @RequestBody() UserSpec request)
             throws DataException {
         var createdUser = testDataService.createUserData(request);
@@ -117,7 +108,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
     }
 
-    @PostMapping("/admin-permissions")
+    @PostMapping("/internal/admin-permissions")
     public ResponseEntity<AdminPermissionsData> createAdminPermissions(
             @Valid @RequestBody AdminPermissionsSpec request) throws DataException {
 
@@ -130,7 +121,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdAdminPermissions, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/admin-permissions/{id}")
+    @DeleteMapping("/internal/admin-permissions/{id}")
     public ResponseEntity<Map<String, Object>> deleteAdminPermissions(@PathVariable("id") String id)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
@@ -147,7 +138,7 @@ public class TestDataController {
         }
     }
 
-    @DeleteMapping("/user/{userId}")
+    @DeleteMapping("/internal/user/{userId}")
     public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
@@ -164,7 +155,7 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/identity")
+    @PostMapping("/internal/identity")
     public ResponseEntity<Map<String, Object>> createIdentity(
             @Valid @RequestBody() IdentitySpec request) throws DataException {
         var createdIdentity = testDataService.createIdentityData(request);
@@ -174,7 +165,7 @@ public class TestDataController {
         return new ResponseEntity<>(data, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/identity/{identityId}")
+    @DeleteMapping("/internal/identity/{identityId}")
     public ResponseEntity<Map<String, Object>> deleteIdentity(
             @PathVariable("identityId") String identityId) throws DataException {
         Map<String, Object> response = new HashMap<>();
@@ -191,7 +182,7 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/acsp-members")
+    @PostMapping("/internal/acsp-members")
     public ResponseEntity<AcspMembersData> createAcspMember(
             @Valid @RequestBody AcspMembersSpec request) throws DataException {
 
@@ -203,7 +194,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdAcspMember, HttpStatus.CREATED);
     }
 
-    @PostMapping("/certificates")
+    @PostMapping("/internal/certificates")
     public ResponseEntity<CertificatesData> createCertificates(
             @Valid @RequestBody CertificatesSpec request) throws DataException {
 
@@ -215,7 +206,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdCertificates, HttpStatus.CREATED);
     }
 
-    @PostMapping("/certified-copies")
+    @PostMapping("/internal/certified-copies")
     public ResponseEntity<CertificatesData> createCertifiedCopies(
             @Valid @RequestBody CertifiedCopiesSpec request) throws DataException {
 
@@ -228,7 +219,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
     }
 
-    @PostMapping("/missing-image-deliveries")
+    @PostMapping("/internal/missing-image-deliveries")
     public ResponseEntity<CertificatesData> createMissingImageDeliveries(
             @Valid @RequestBody MissingImageDeliveriesSpec request) throws DataException {
 
@@ -242,7 +233,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdMissingImageDeliveries, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/acsp-members/{acspMemberId}")
+    @DeleteMapping("/internal/acsp-members/{acspMemberId}")
     public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
                                                                 String acspMemberId)
             throws DataException {
@@ -260,7 +251,7 @@ public class TestDataController {
         }
     }
 
-    @DeleteMapping("/certificates/{id}")
+    @DeleteMapping("/internal/certificates/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertificates(@PathVariable("id")
                                                                   String id)
             throws DataException {
@@ -278,7 +269,7 @@ public class TestDataController {
         }
     }
 
-    @DeleteMapping("/certified-copies/{id}")
+    @DeleteMapping("/internal/certified-copies/{id}")
     public ResponseEntity<Map<String, Object>> deleteCertifiedCopies(@PathVariable("id")
                                                                      String id)
             throws DataException {
@@ -296,7 +287,7 @@ public class TestDataController {
         }
     }
 
-    @DeleteMapping("/missing-image-deliveries/{id}")
+    @DeleteMapping("/internal/missing-image-deliveries/{id}")
     public ResponseEntity<Map<String, Object>> deleteMissingImageDeliveries(@PathVariable("id")
                                                                             String id)
             throws DataException {
@@ -314,7 +305,7 @@ public class TestDataController {
         }
     }
 
-    @DeleteMapping("/appeals")
+    @DeleteMapping("/internal/appeals")
     public ResponseEntity<Void> deleteAppeal(
             @Valid @RequestBody DeleteAppealsRequest request) throws DataException {
 
@@ -336,7 +327,7 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/penalties")
+    @PostMapping("/internal/penalties")
     public ResponseEntity<Object> createPenalty(
             @Valid @RequestBody PenaltySpec request) throws DataException {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
@@ -356,7 +347,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdPenalties, HttpStatus.CREATED);
     }
 
-    @GetMapping("/penalties/{id}")
+    @GetMapping("/internal/penalties/{id}")
     public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
             @PathVariable("id") String id,
             @RequestParam(name = "transactionReference", required = false)
@@ -373,7 +364,7 @@ public class TestDataController {
         return ResponseEntity.ok(accountPenaltiesData);
     }
 
-    @GetMapping("/penalties/query")
+    @GetMapping("/internal/penalties/query")
     public ResponseEntity<AccountPenaltiesData> getAccountPenaltiesByCustomerCodeAndCompanyCode(
             @RequestParam(name = "customerCode") String customerCode,
             @RequestParam(name = "companyCode") String companyCode) throws NoDataFoundException {
@@ -384,7 +375,7 @@ public class TestDataController {
         return ResponseEntity.ok(accountPenaltiesData);
     }
 
-    @PutMapping("/penalties/{penaltyRef}")
+    @PutMapping("/internal/penalties/{penaltyRef}")
     public ResponseEntity<AccountPenaltiesData> updateAccountPenalties(
             @PathVariable("penaltyRef") String penaltyRef,
             @Valid @RequestBody UpdateAccountPenaltiesRequest request)
@@ -397,7 +388,7 @@ public class TestDataController {
 
     }
 
-    @DeleteMapping("/penalties/{id}")
+    @DeleteMapping("/internal/penalties/{id}")
     public ResponseEntity<Void> deleteAccountPenalties(
             @PathVariable("id") String id,
             @RequestBody(required = false) PenaltyRequest request)
@@ -411,7 +402,7 @@ public class TestDataController {
         }
     }
 
-    @GetMapping("/postcodes")
+    @GetMapping("/internal/postcodes")
     public ResponseEntity<PostcodesData> getPostcode(
             @RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
@@ -423,7 +414,7 @@ public class TestDataController {
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
 
-    @PostMapping("/associations")
+    @PostMapping("/internal/associations")
     public ResponseEntity<UserCompanyAssociationData> createAssociation(
             @Valid @RequestBody UserCompanyAssociationSpec request) throws DataException {
         var createdAssociation =
@@ -436,7 +427,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/associations/{associationId}")
+    @DeleteMapping("/internal/associations/{associationId}")
     public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId")
                                                                  String associationId)
             throws DataException {
@@ -461,7 +452,7 @@ public class TestDataController {
         return new ResponseEntity<>("test-data-generator is alive", HttpStatus.OK);
     }
 
-    @PostMapping("/transactions")
+    @PostMapping("/internal/transactions")
     public ResponseEntity<TransactionsData> createTransaction(
             @Valid @RequestBody TransactionsSpec request) throws DataException {
 
@@ -477,7 +468,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/transactions/{transactionId}")
+    @DeleteMapping("/internal/transactions/{transactionId}")
     public ResponseEntity<Map<String, Object>> deleteTransaction(
             @PathVariable("transactionId") String transactionId) throws DataException {
 
@@ -495,7 +486,7 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/combined-sic-activities")
+    @PostMapping("/internal/combined-sic-activities")
     public ResponseEntity<CombinedSicActivitiesData> createCombinedSicActivities(
             @Valid @RequestBody CombinedSicActivitiesSpec request) throws DataException {
 
@@ -506,7 +497,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdSicCodeKeyword, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/combined-sic-activities/{id}")
+    @DeleteMapping("/internal/combined-sic-activities/{id}")
     public ResponseEntity<Map<String, Object>> deleteCombinedSicActivities(
             @PathVariable("id") String id) throws DataException {
         Map<String, Object> logMap = new HashMap<>();

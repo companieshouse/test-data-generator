@@ -37,18 +37,7 @@ class WebConfigTest {
         webConfig.addInterceptors(registry);
 
         verify(registry, times(1)).addInterceptor(any(InternalUserInterceptor.class));
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/user/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/identity/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/acsp-members/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/appeals/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/penalties/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/associations/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/transactions/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/certificates/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/certified-copies/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/missing-image-deliveries/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/combined-sic-activities/**");
-        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/admin-permissions/**");
+        verify(interceptorRegistration, times(1)).addPathPatterns("/test-data/internal/**");
     }
 
     @Test
