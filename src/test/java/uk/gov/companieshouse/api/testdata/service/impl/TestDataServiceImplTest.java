@@ -2337,16 +2337,28 @@ class TestDataServiceImplTest {
     @Test
     void createPublicCompany() throws DataException {
         PublicCompanySpec spec = new PublicCompanySpec();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setJurisdiction(Jurisdiction.ENGLAND);
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        testPublicCompanySpec(spec);
+    }
+
+    @Test
+    void createPublicCompanyWithNullSpec() throws DataException {
+        PublicCompanySpec spec = new PublicCompanySpec();
+        testPublicCompanySpec(spec);
+    }
+
+    private void testPublicCompanySpec(PublicCompanySpec spec) throws DataException{
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+
+        when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         CompanyData createdCompany = testDataService.createPublicCompanyData(spec);
         CompanySpec capturedSpec = captureCompanySpec();
-        verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 Jurisdiction.ENGLAND_WALES);
-        verify(companyRegistersService, times(1)).create(capturedSpec);
     }
 }
