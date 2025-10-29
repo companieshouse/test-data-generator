@@ -44,7 +44,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -71,7 +70,7 @@ public class TestDataController {
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
     @Autowired
-    private VerifiedIdentityService verifiedIdentityService;
+    private VerifiedIdentityService <IdentityVerificationData>verifiedIdentityService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -506,11 +505,7 @@ public class TestDataController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
-        var spec = new VerifiedIdentitySpec();
-        spec.setEmail(email);
-
-        var data = verifiedIdentityService.getIdentityVerificationData(spec);
-
+        var data = verifiedIdentityService.getIdentityVerificationData(email);
         if (data == null) {
             throw new NoDataFoundException("No identity verification found for email: " + email);
         }

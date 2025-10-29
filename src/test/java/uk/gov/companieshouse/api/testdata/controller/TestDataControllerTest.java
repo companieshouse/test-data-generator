@@ -61,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -94,7 +95,7 @@ class TestDataControllerTest {
     private AccountPenaltiesService accountPenaltiesService;
 
     @Mock
-    private VerifiedIdentityService verifiedIdentityService;
+    private VerifiedIdentityService <IdentityVerificationData> verifiedIdentityService;
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
@@ -1356,40 +1357,53 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getIdentityVerification_serviceReturnsNull_throwsNoDataFoundException() throws Exception {
-        final String email = "missing@example.com";
-
-        when(this.verifiedIdentityService.getIdentityVerificationData(
-                any(uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec.class)))
-                .thenReturn(null);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.getIdentityVerification(email));
-        assertEquals("No identity verification found for email: " + email, thrown.getMessage());
-
-        ArgumentCaptor<uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec> captor =
-                ArgumentCaptor.forClass(uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec.class);
-        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(captor.capture());
-        assertEquals(email, captor.getValue().getEmail());
-    }
-
-    @Test
     void getIdentityVerification_serviceReturnsData_returnsOk() throws Exception {
         final String email = "user@example.com";
         var data = new IdentityVerificationData("identity-id-123", "UVID-ABC");
 
-        when(this.verifiedIdentityService.getIdentityVerificationData(
-                any(uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec.class)))
+        // 1. FIX: Mock the service call with the 'email' String
+        when(this.verifiedIdentityService.getIdentityVerificationData(email))
                 .thenReturn(data);
 
+        // Call the controller
         ResponseEntity<IdentityVerificationData> response = this.testDataController.getIdentityVerification(email);
 
+        // Assert the response is correct
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(data, response.getBody());
 
-        ArgumentCaptor<uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec> captor =
-                ArgumentCaptor.forClass(uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec.class);
-        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(captor.capture());
-        assertEquals(email, captor.getValue().getEmail());
+        // 2. FIX: Verify the service was called with the 'email' String
+        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void getIdentityVerification_serviceReturnsNull_throwsNoDataFoundException() throws Exception {
+        final String email = "missing@example.com";
+
+        // 1. FIX: Mock the service call with the 'email' String
+        when(this.verifiedIdentityService.getIdentityVerificationData(email))
+                .thenReturn(null);
+
+        // Assert the correct exception is thrown
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                this.testDataController.getIdentityVerification(email));
+
+        assertEquals("No identity verification found for email: " + email, thrown.getMessage());
+
+        // 2. FIX: Verify the service was called
+        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void getIdentityVerification_nullEmail_returnsNotFound() throws Exception {
+        // Call the controller with a null email
+        ResponseEntity<IdentityVerificationData> response = this.testDataController.getIdentityVerification(null);
+
+        // Assert it returns NOT_FOUND
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+
+        // Verify the service was NEVER called
+        verify(verifiedIdentityService, never()).getIdentityVerificationData(anyString());
     }
 }

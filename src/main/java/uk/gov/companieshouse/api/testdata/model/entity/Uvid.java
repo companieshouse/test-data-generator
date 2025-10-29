@@ -12,8 +12,13 @@ public class Uvid {
     @Id
     private String id;
 
+    /**
+     * The @Field("uvid") annotation is kept to ensure
+     * the MongoDB document field name remains "uvid".
+     * The Java field name is changed to "value" to satisfy SonarQube.
+     */
     @Field("uvid")
-    private String uvid;
+    private String value; // RENAMED
 
     @Field("type")
     private String type;
@@ -32,12 +37,12 @@ public class Uvid {
         this.id = id;
     }
 
-    public String getUvid() {
-        return uvid;
+    public String getValue() {
+        return value;
     }
 
-    public void setUvid(String uvid) {
-        this.uvid = uvid;
+    public void setValue(String value) {
+        this.value = value;
     }
 
     public String getType() {

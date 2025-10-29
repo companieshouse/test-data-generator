@@ -8,7 +8,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
-import uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 
@@ -38,12 +37,10 @@ class IdentityVerificationServiceImplTest {
     @Test
     void getIdentityVerification_whenIdentityNotFound_returnsNull() {
         String email = "missing@example.com";
-        VerifiedIdentitySpec spec = new VerifiedIdentitySpec();
-        spec.setEmail(email);
 
         when(identityRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        IdentityVerificationData result = service.getIdentityVerificationData(spec);
+        IdentityVerificationData result = service.getIdentityVerificationData(email);
 
         assertNull(result);
         verify(identityRepository, times(1)).findByEmail(email);
@@ -55,16 +52,13 @@ class IdentityVerificationServiceImplTest {
         String email = "user@example.com";
         String identityId = "identity-id-123";
 
-        VerifiedIdentitySpec spec = new VerifiedIdentitySpec();
-        spec.setEmail(email);
-
         Identity identityMock = mock(Identity.class);
         when(identityMock.getId()).thenReturn(identityId);
 
         when(identityRepository.findByEmail(email)).thenReturn(Optional.of(identityMock));
         when(uvidRepository.findByIdentityId(identityId)).thenReturn(Optional.empty());
 
-        IdentityVerificationData result = service.getIdentityVerificationData(spec);
+        IdentityVerificationData result = service.getIdentityVerificationData(email);
 
         assertNull(result);
         verify(identityRepository, times(1)).findByEmail(email);
@@ -77,20 +71,17 @@ class IdentityVerificationServiceImplTest {
         String identityId = "identity-id-123";
         String uvidValue = "UVID-ABC";
 
-        VerifiedIdentitySpec spec = new VerifiedIdentitySpec();
-        spec.setEmail(email);
-
         Identity identityMock = mock(Identity.class);
         when(identityMock.getId()).thenReturn(identityId);
 
         Uvid uvid = new Uvid();
-        uvid.setUvid(uvidValue);
+        uvid.setValue(uvidValue);
         uvid.setIdentityId(identityId);
 
         when(identityRepository.findByEmail(email)).thenReturn(Optional.of(identityMock));
         when(uvidRepository.findByIdentityId(identityId)).thenReturn(Optional.of(uvid));
 
-        IdentityVerificationData result = service.getIdentityVerificationData(spec);
+        IdentityVerificationData result = service.getIdentityVerificationData(email);
 
         assertNotNull(result);
         assertEquals(identityId, result.getIdentityId());

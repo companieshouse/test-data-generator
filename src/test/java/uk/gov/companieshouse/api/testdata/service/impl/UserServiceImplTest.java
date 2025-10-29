@@ -845,7 +845,7 @@ class UserServiceImplTest {
         ArgumentCaptor<Uvid> uvidCaptor = ArgumentCaptor.forClass(Uvid.class);
         verify(uvidRepository, times(1)).save(uvidCaptor.capture());
         Uvid savedUvid = uvidCaptor.getValue();
-        assertEquals(TEST_UVID, savedUvid.getUvid());
+        assertEquals(TEST_UVID, savedUvid.getValue());
         assertEquals(TEST_IDENTITY_ID, savedUvid.getIdentityId());
         assertEquals("PERMANENT", savedUvid.getType());
     }

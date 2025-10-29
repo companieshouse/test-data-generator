@@ -16,6 +16,7 @@ import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+import java.security.SecureRandom;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -25,11 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Autowired
     private UserRepository repository;
@@ -49,6 +50,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserData create(UserSpec userSpec) throws DataException {
+
         var randomId = randomService.getString(23).toLowerCase();
         final String password = userSpec.getPassword();
         final var user = new User();
@@ -75,30 +77,29 @@ public class UserServiceImpl implements UserService {
 
         if (userSpec.getIdentityVerification() != null && !userSpec.getIdentityVerification().isEmpty()) {
             for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
-                if (identityVerificationSpec == null) {
-                    continue;
-                }
-                var verificationSource = identityVerificationSpec.getVerificationSource();
-                if (verificationSource == null || verificationSource.isEmpty()) {
-                    continue;
-                }
 
-                var identity = new Identity();
-                identity.setId(generateIdentityId());
-                identity.setCreated(getDateNow());
-                identity.setStatus("VALID");
-                identity.setUserId(user.getId());
-                identity.setVerificationSource(verificationSource);
-                identity.setEmail(user.getEmail());
-                identity.setSecureIndicator(false);
-                identityRepository.save(identity);
+                if (identityVerificationSpec != null) {
+                    var verificationSource = identityVerificationSpec.getVerificationSource();
 
-                var uvid = new Uvid();
-                uvid.setUvid(generateUvid());
-                uvid.setType("PERMANENT");
-                uvid.setIdentityId(identity.getId());
-                uvid.setCreated(getDateNow());
-                uvidRepository.save(uvid);
+                    if (verificationSource != null && !verificationSource.isEmpty()) {
+                        var identity = new Identity();
+                        identity.setId(generateIdentityId());
+                        identity.setCreated(getDateNow());
+                        identity.setStatus("VALID");
+                        identity.setUserId(user.getId());
+                        identity.setVerificationSource(verificationSource);
+                        identity.setEmail(user.getEmail());
+                        identity.setSecureIndicator(false);
+                        identityRepository.save(identity);
+
+                        var uvid = new Uvid();
+                        uvid.setValue(generateUvid()); // This now calls the secure method
+                        uvid.setType("PERMANENT");
+                        uvid.setIdentityId(identity.getId());
+                        uvid.setCreated(getDateNow());
+                        uvidRepository.save(uvid);
+                    }
+                }
             }
         }
 
@@ -146,7 +147,7 @@ public class UserServiceImpl implements UserService {
 
         Optional<Identity> identityOpt = identityRepository.findByUserId(userId);
         if (identityOpt.isPresent()) {
-            Identity identity = identityOpt.get();
+            var identity = identityOpt.get();
             uvidRepository.deleteByIdentityId(identity.getId());
             identityRepository.delete(identity);
         }
@@ -178,8 +179,8 @@ public class UserServiceImpl implements UserService {
     }
 
     String generateUvid() {
-        var randomChar = (char) ThreadLocalRandom.current().nextInt('A', 'Z' + 1);
-        var randomThreeDigits = ThreadLocalRandom.current().nextInt(0, 1000);
+        var randomChar = (char) ('A' + SECURE_RANDOM.nextInt(26));
+        var randomThreeDigits = SECURE_RANDOM.nextInt(1000);
         var formattedDigits = String.format("%03d", randomThreeDigits);
 
         return "X" + randomChar + formattedDigits + "22223";
