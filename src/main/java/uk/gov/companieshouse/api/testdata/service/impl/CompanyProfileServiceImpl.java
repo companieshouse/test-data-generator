@@ -546,7 +546,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     @Override
-    public Optional<CompanyProfile> getCompanyProfile(String companyNumber) {
+    public CompanyProfile getCompanyProfile(String companyNumber) {
         return repository.findByCompanyNumber(companyNumber);
     }
 

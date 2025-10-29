@@ -219,8 +219,11 @@ public class TestDataServiceImpl implements TestDataService {
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
+            CompanyProfile companyProfile= companyProfileService.getCompanyProfile(spec.getCompanyNumber());
             var companyData = new CompanyData(spec.getCompanyNumber(),
-                    authCode.getAuthCode(), companyUri);
+                    authCode.getAuthCode(), companyUri, companyProfile.getAccounts().getPeriodStart(), companyProfile.getAccounts().getPeriodEnd(),
+                    companyProfile.get);
+
             if (isElasticSearchDeployed) {
                 LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
                 this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);

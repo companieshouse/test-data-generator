@@ -4,7 +4,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface CompanyProfileService extends DataService<CompanyProfile, CompanySpec> {
 
@@ -18,5 +17,5 @@ public interface CompanyProfileService extends DataService<CompanyProfile, Compa
 
     List<String> findUkEstablishmentsByParent(String parentCompanyNumber);
 
-    Optional<CompanyProfile> getCompanyProfile(String companyNumber);
+    CompanyProfile getCompanyProfile(String companyNumber);
 }
