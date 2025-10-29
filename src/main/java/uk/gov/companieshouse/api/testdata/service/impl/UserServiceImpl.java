@@ -1,5 +1,22 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.Identity;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -7,19 +24,8 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
-import uk.gov.companieshouse.api.testdata.repository.UserRepository;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -34,7 +40,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RandomService randomService;
 
+    @Autowired
+    private IdentityRepository identityRepository;
+
+    @Autowired
+    private UvidRepository uvidRepository;
+
     @Override
+    @Transactional
     public UserData create(UserSpec userSpec) throws DataException {
         var randomId = randomService.getString(23).toLowerCase();
         final String password = userSpec.getPassword();
@@ -44,7 +57,8 @@ public class UserServiceImpl implements UserService {
             user.setRoles(processRoles(userSpec.getRoles()));
         }
 
-        String email = userSpec.getEmail() != null ? userSpec.getEmail() :
+        String email = userSpec.getEmail() != null ?
+                userSpec.getEmail() :
                 "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
 
         user.setId(randomId);
@@ -58,6 +72,36 @@ public class UserServiceImpl implements UserService {
         user.setAdminUser(Optional.ofNullable(userSpec.getIsAdmin()).orElse(false));
         user.setTestData(true);
         repository.save(user);
+
+        if (userSpec.getIdentityVerification() != null && !userSpec.getIdentityVerification().isEmpty()) {
+            for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
+                if (identityVerificationSpec == null) {
+                    continue;
+                }
+                var verificationSource = identityVerificationSpec.getVerificationSource();
+                if (verificationSource == null || verificationSource.isEmpty()) {
+                    continue;
+                }
+
+                var identity = new Identity();
+                identity.setId(generateIdentityId());
+                identity.setCreated(getDateNow());
+                identity.setStatus("VALID");
+                identity.setUserId(user.getId());
+                identity.setVerificationSource(verificationSource);
+                identity.setEmail(user.getEmail());
+                identity.setSecureIndicator(false);
+                identityRepository.save(identity);
+
+                var uvid = new Uvid();
+                uvid.setUvid(generateUvid());
+                uvid.setType("PERMANENT");
+                uvid.setIdentityId(identity.getId());
+                uvid.setCreated(getDateNow());
+                uvidRepository.save(uvid);
+            }
+        }
+
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
     }
 
@@ -93,10 +137,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean delete(String userId) {
-        var user = repository.findById(userId);
-        user.ifPresent(repository::delete);
-        return user.isPresent();
+        var userOpt = repository.findById(userId);
+        if (userOpt.isEmpty()) {
+            return false;
+        }
+
+        Optional<Identity> identityOpt = identityRepository.findByUserId(userId);
+        if (identityOpt.isPresent()) {
+            Identity identity = identityOpt.get();
+            uvidRepository.deleteByIdentityId(identity.getId());
+            identityRepository.delete(identity);
+        }
+
+        repository.delete(userOpt.get());
+        return true;
     }
 
     public void updateUserWithOneLogin(String userId) {
@@ -115,5 +171,17 @@ public class UserServiceImpl implements UserService {
 
     protected Instant getDateNow() {
         return LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC);
+    }
+
+    String generateIdentityId() {
+        return UUID.randomUUID().toString();
+    }
+
+    String generateUvid() {
+        var randomChar = (char) ThreadLocalRandom.current().nextInt('A', 'Z' + 1);
+        var randomThreeDigits = ThreadLocalRandom.current().nextInt(0, 1000);
+        var formattedDigits = String.format("%03d", randomThreeDigits);
+
+        return "X" + randomChar + formattedDigits + "22223";
     }
 }

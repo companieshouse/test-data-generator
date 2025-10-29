@@ -1,12 +1,6 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
@@ -39,7 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -51,13 +44,18 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
-import uk.gov.companieshouse.api.testdata.model.rest.UvidData;
+import uk.gov.companieshouse.api.testdata.model.rest.VerifiedIdentitySpec;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -72,6 +70,8 @@ public class TestDataController {
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
+    @Autowired
+    private VerifiedIdentityService verifiedIdentityService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -163,44 +163,6 @@ public class TestDataController {
             LOG.info("User not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-    }
-
-    @PostMapping("/identity")
-    public ResponseEntity<Map<String, Object>> createIdentity(
-            @Valid @RequestBody() IdentitySpec request) throws DataException {
-        var createdIdentity = testDataService.createIdentityData(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("identity id", createdIdentity.getId());
-        LOG.info("New identity created", data);
-        return new ResponseEntity<>(data, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/identity/{identityId}")
-    public ResponseEntity<Map<String, Object>> deleteIdentity(
-            @PathVariable("identityId") String identityId) throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("identity id", identityId);
-        boolean deleteIdentity = testDataService.deleteIdentityData(identityId);
-
-        if (deleteIdentity) {
-            LOG.info("Identity deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Identity not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PostMapping("/identity/uvid")
-    public ResponseEntity<UvidData> createIdentityWithUvid(@Valid @RequestBody IdentitySpec request) throws DataException {
-        UvidData createdUvid = testDataService.createIdentityWithUvid(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("uvid_id", createdUvid.getId());
-        data.put("uvid", createdUvid.getUvid());
-        data.put("user_id", request.getUserId());
-        LOG.info("New identity and UVID created", data);
-        return new ResponseEntity<>(createdUvid, HttpStatus.CREATED);
     }
 
     @PostMapping("/acsp-members")
@@ -533,6 +495,27 @@ public class TestDataController {
             LOG.info("Combined Sic Activities Not Found", logMap);
             return new ResponseEntity<>(logMap, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/identity/verification")
+    public ResponseEntity<IdentityVerificationData> getIdentityVerification(
+            @RequestParam(value = "email", required = false) String email)
+            throws DataException, NoDataFoundException {
+
+        if (email == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        var spec = new VerifiedIdentitySpec();
+        spec.setEmail(email);
+
+        var data = verifiedIdentityService.getIdentityVerificationData(spec);
+
+        if (data == null) {
+            throw new NoDataFoundException("No identity verification found for email: " + email);
+        }
+
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
 }

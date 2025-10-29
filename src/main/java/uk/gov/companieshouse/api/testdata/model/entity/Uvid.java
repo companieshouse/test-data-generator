@@ -3,18 +3,17 @@ package uk.gov.companieshouse.api.testdata.model.entity;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-import org.bson.types.ObjectId;
 
 import java.time.Instant;
 
-@Document(collection = "identityUvid")
+@Document(collection = "uvid")
 public class Uvid {
 
     @Id
-    private ObjectId id;
+    private String id;
 
-    @Field("identity_uvid")
-    private String identityUvid;
+    @Field("uvid")
+    private String uvid;
 
     @Field("type")
     private String type;
@@ -26,19 +25,19 @@ public class Uvid {
     private Instant created;
 
     public String getId() {
-        return id != null ? id.toHexString() : null;
+        return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(String id) {
         this.id = id;
     }
 
-    public String getIdentityUvid() {
-        return identityUvid;
+    public String getUvid() {
+        return uvid;
     }
 
-    public void setIdentityUvid(String identityUvid) {
-        this.identityUvid = identityUvid;
+    public void setUvid(String uvid) {
+        this.uvid = uvid;
     }
 
     public String getType() {

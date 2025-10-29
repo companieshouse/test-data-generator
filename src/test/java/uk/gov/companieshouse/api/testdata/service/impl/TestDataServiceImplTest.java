@@ -1,27 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import jakarta.validation.ConstraintViolationException;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -53,7 +31,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -70,8 +47,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -84,7 +59,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
@@ -98,6 +72,27 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
@@ -156,8 +151,6 @@ class TestDataServiceImplTest {
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
-    @Mock
-    private DataService<IdentityData, IdentitySpec> identityService;
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Mock
@@ -848,114 +841,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createIdentityData() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        IdentityData mockIdentityData = new IdentityData("identityId");
-
-        when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
-
-        IdentityData createdIdentityData = testDataService.createIdentityData(identitySpec);
-
-        assertEquals(mockIdentityData, createdIdentityData);
-
-        verify(identityService, times(1)).create(identitySpec);
-    }
-
-    @Test
-    void createIdentityDataWithMissingUserId() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-        assertEquals("User Id is required to create an identity", exception.getMessage());
-        verify(identityService, never()).create(any());
-    }
-
-    @Test
-    void createIdentityDataWithMissingEmail() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setVerificationSource("source");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-        assertEquals("Email is required to create an identity", exception.getMessage());
-        verify(identityService, never()).create(any());
-    }
-
-    @Test
-    void createIdentityDataWithMissingVerificationSource() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setUserId("userId");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-        assertEquals("Verification source is required to create an identity",
-                exception.getMessage());
-        verify(identityService, never()).create(any());
-    }
-
-    @Test
-    void createIdentityDataThrowsException() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-
-        assertEquals("Error creating identity", exception.getMessage());
-        verify(identityService, times(1)).create(identitySpec);
-    }
-
-    @Test
-    void deleteIdentityData() throws DataException {
-        String identityId = "identityId";
-        when(identityService.delete(identityId)).thenReturn(true);
-
-        boolean result = testDataService.deleteIdentityData(identityId);
-
-        assertTrue(result);
-        verify(identityService, times(1)).delete(identityId);
-    }
-
-    @Test
-    void deleteIdentityDataWhenIdentityNotFound() throws DataException {
-        String identityId = "identityId";
-        when(identityService.delete(identityId)).thenReturn(false);
-
-        boolean result = testDataService.deleteIdentityData(identityId);
-
-        assertFalse(result);
-        verify(identityService, times(1)).delete(identityId);
-    }
-
-    @Test
-    void deleteIdentityDataThrowsException() {
-        String identityId = "identityId";
-        RuntimeException ex = new RuntimeException("error");
-
-        when(identityService.delete(identityId)).thenThrow(ex);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.deleteIdentityData(identityId));
-
-        assertEquals("Error deleting identity", exception.getMessage());
-        assertEquals(ex, exception.getCause());
-        verify(identityService, times(1)).delete(identityId);
-    }
-
-    @Test
     void createAcspMembersData() throws DataException {
         AcspProfileSpec profileSpec = new AcspProfileSpec();
         profileSpec.setAcspNumber("acspNumber");
@@ -1612,36 +1497,6 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting missing image deliveries", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(missingImageDeliveriesService, times(1)).delete(MISSING_IMAGE_DELIVERIES_ID);
-    }
-
-    @Test
-    void testUpdateUserWithOneLoginCalled() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        IdentityData mockIdentityData = new IdentityData("identityId");
-        when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
-        IdentityData result = testDataService.createIdentityData(identitySpec);
-
-        assertEquals(mockIdentityData, result);
-        verify(userService, times(1)).updateUserWithOneLogin("userId");
-    }
-
-    @Test
-    void testUpdateUserWithOneLoginNotCalledOnException() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityData(identitySpec));
-        assertEquals("Error creating identity", exception.getMessage());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
     }
 
     @Test
@@ -2351,109 +2206,5 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting appeals data", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
-    }
-
-    /**
-     * Helper method to create an IdentitySpec with all required fields.
-     */
-    private IdentitySpec createValidIdentitySpec() {
-        IdentitySpec spec = new IdentitySpec();
-        spec.setUserId("test-user-id");
-        spec.setEmail("test@example.com");
-        spec.setVerificationSource("test-source");
-        return spec;
-    }
-
-    @Test
-    void createIdentityWithUvid_NullUserId() throws DataException {
-        IdentitySpec spec = createValidIdentitySpec();
-        spec.setUserId(null);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("User Id is required to create identity with UVID", exception.getMessage());
-        verify(identityService, never()).create(any());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
-    void createIdentityWithUvid_EmptyUserId() throws DataException {
-        IdentitySpec spec = createValidIdentitySpec();
-        spec.setUserId("");
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("User Id is required to create identity with UVID", exception.getMessage());
-        verify(identityService, never()).create(any());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
-    void createIdentityWithUvid_NullEmail() throws DataException {
-        IdentitySpec spec = createValidIdentitySpec();
-        spec.setEmail(null);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("Email is required to create identity with UVID", exception.getMessage());
-        verify(identityService, never()).create(any());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
-    void createIdentityWithUvid_EmptyEmail() throws DataException {
-        IdentitySpec spec = createValidIdentitySpec();
-        spec.setEmail("");
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("Email is required to create identity with UVID", exception.getMessage());
-        verify(identityService, never()).create(any());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
-    void createIdentityWithUvid_NullVerificationSource() throws DataException {
-        IdentitySpec spec = createValidIdentitySpec();
-        spec.setVerificationSource(null);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("Verification source is required to create identity with UVID", exception.getMessage());
-        verify(identityService, never()).create(any());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
-    void createIdentityWithUvid_EmptyVerificationSource() throws DataException {
-        IdentitySpec spec = createValidIdentitySpec();
-        spec.setVerificationSource("");
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("Verification source is required to create identity with UVID", exception.getMessage());
-        verify(identityService, never()).create(any());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
-    void createIdentityWithUvid_ClassCastException() {
-        IdentitySpec spec = createValidIdentitySpec();
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityWithUvid(spec));
-
-        assertEquals("Identity service implementation does not support createIdentityWithUvid method",
-                exception.getMessage());
-        assertNotNull(exception.getCause());
-        assertTrue(exception.getCause() instanceof ClassCastException);
-
-        verify(userService, never()).updateUserWithOneLogin(anyString());
     }
 }

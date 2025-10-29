@@ -15,8 +15,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
@@ -27,7 +25,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UvidData;
 
 
 public interface TestDataService {
@@ -65,23 +62,6 @@ public interface TestDataService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteUserData(String userId) throws DataException;
-
-    /**
-     * Creates a new identity test data based on the provided identity specifications.
-     *
-     * @param identitySpec the specifications of the identity to create
-     * @return the created identity's test data
-     * @throws DataException if there is an error during identity creation
-     */
-    IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException;
-
-    /**
-     * Deletes an identity test data by their identity ID.
-     *
-     * @param identityId the ID of the identity to delete
-     * @throws DataException if there is an error during identity deletion
-     */
-    boolean deleteIdentityData(String identityId) throws DataException;
 
     /**
      * Creates a new acsp member test data based on the provided user specifications.
@@ -284,14 +264,4 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAdminPermissionsData(String id) throws DataException;
-
-    /**
-     * Creates both identity and UVID for the given specification
-     * Validates if user exists and if user already has an identity
-     *
-     * @param identitySpec The specification containing user details
-     * @return UvidData containing the created UVID information
-     * @throws DataException if validation fails or creation fails
-     */
-    UvidData createIdentityWithUvid(IdentitySpec identitySpec) throws DataException;
 }
