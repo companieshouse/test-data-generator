@@ -117,11 +117,11 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setCategory(getOrDefault(fhSpec, FilingHistorySpec::getCategory, CATEGORY));
         filingHistory.setType(type);
         filingHistory.setSubCategory(getOrDefault(fhSpec, FilingHistorySpec::getSubCategory, null));
-        filingHistory.setOriginalDescription(getOrDefault(fhSpec, FilingHistorySpec::getOriginalDescription, ORIGINAL_DESCRIPTION));
+        filingHistory.setOriginalDescription(ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
-        filingHistory.setDescription(getOrDefault(fhSpec, FilingHistorySpec::getDescription, DESCRIPTION));
+        filingHistory.setDescription("description filing history entry for " + spec.getCompanyNumber());
 
-        applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow);
+        applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow,barcode);
 
         if (!"MR01".equals(type)) {
             filingHistory.setActionDate(dayTimeNow);
@@ -148,7 +148,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return (spec != null && StringUtils.hasText(getter.apply(spec))) ? getter.apply(spec) : defaultValue;
     }
 
-    private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow) {
+    private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow, String barcode) {
         switch (type) {
             case "AP01" -> {
                 filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
@@ -160,7 +160,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 filingHistory.setDate(FIXED_MR01_DATE);
             }
             case "RESOLUTIONS" ->
-                filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow) : null);
+                filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow,barcode) : null);
             case "CS01", "AA" -> filingHistory.setDescriptionValues(createDescriptionValues(type,dayNow,fhSpec));
             default -> filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
         }
@@ -271,17 +271,17 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return base + microseconds;
     }
 
-    private List<Resolutions> createResolutions(FilingHistorySpec fhSpec, Instant dayTimeNow) {
+    private List<Resolutions> createResolutions(FilingHistorySpec fhSpec, Instant dayTimeNow, String barcode) {
         List<Resolutions> resolutionsList = new ArrayList<>();
 
         if (fhSpec.getResolutions() != null) {
             for (ResolutionsSpec resSpec : fhSpec.getResolutions()) {
                 var resolution = new Resolutions();
-                resolution.setBarcode(resSpec.getBarcode());
+                resolution.setBarcode(barcode);
                 resolution.setCategory(resSpec.getCategory());
-                resolution.setDescription(resSpec.getDescription());
+                resolution.setDescription(resSpec.getDescription().getValue());
                 resolution.setSubCategory(resSpec.getSubCategory());
-                resolution.setType(resSpec.getType());
+                resolution.setType(resSpec.getType().getValue());
                 resolution.setDeltaAt(convertInstantToDeltaAt(dayTimeNow));
 
                 resolutionsList.add(resolution);

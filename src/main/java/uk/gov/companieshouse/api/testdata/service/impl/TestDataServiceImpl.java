@@ -855,10 +855,37 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public CompanyData createPublicCompanyData(PublicCompanySpec spec) throws DataException {
         var publicSpec = new CompanySpec();
+
         // Only set allowed fields from PublicCompanySpec
         publicSpec.setCompanyNumber(spec.getCompanyNumber());
         publicSpec.setJurisdiction(spec.getJurisdiction());
-        // Add other allowed fields as needed
+        publicSpec.setCompanyType(spec.getCompanyType());
+        publicSpec.setCompanyStatus(spec.getCompanyStatus());
+        publicSpec.setSubType(spec.getSubType());
+        publicSpec.setHasSuperSecurePscs(spec.getHasSuperSecurePscs());
+        publicSpec.setNumberOfAppointments(spec.getNumberOfAppointments());
+        publicSpec.setSecureOfficer(spec.getSecureOfficer());
+        publicSpec.setNoDefaultOfficer(spec.getNoDefaultOfficer());
+        publicSpec.setRegisters(spec.getRegisters());
+        publicSpec.setCompanyStatusDetail(spec.getCompanyStatusDetail());
+        publicSpec.setFilingHistoryList(spec.getFilingHistoryList());
+        if (spec.getFilingHistoryList() != null) {
+            publicSpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
+        }
+        publicSpec.setNumberOfAppointments(spec.getNumberOfAppointments());
+        publicSpec.setOfficerRoles(spec.getOfficerRoles());
+        publicSpec.setDisqualifiedOfficers(spec.getDisqualifiedOfficers());
+        publicSpec.setAccountsDueStatus(spec.getAccountsDueStatus());
+        publicSpec.setNumberOfPsc(spec.getNumberOfPsc());
+        publicSpec.setPscType(spec.getPscType());
+        publicSpec.setPscActive(spec.getPscActive());
+        publicSpec.setWithdrawnStatements(spec.getWithdrawnStatements());
+        publicSpec.setActiveStatements(spec.getActiveStatements());
+        publicSpec.setHasUkEstablishment(spec.getHasUkEstablishment());
+        publicSpec.setRegisteredOfficeIsInDispute(spec.getRegisteredOfficeIsInDispute());
+        publicSpec.setUndeliverableRegisteredOfficeAddress(spec.getUndeliverableRegisteredOfficeAddress());
+        publicSpec.setForeignCompanyLegalForm(spec.getForeignCompanyLegalForm());
+
         return createCompanyData(publicSpec);
     }
 }

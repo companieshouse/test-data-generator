@@ -14,12 +14,6 @@ public class FilingHistorySpec {
     @JsonProperty("category")
     private String category;
 
-    @JsonProperty("description")
-    private String description;
-
-    @JsonProperty("original_description")
-    private String originalDescription;
-
     @JsonProperty("resolutions")
     private List<ResolutionsSpec> resolutions;
 
@@ -43,22 +37,6 @@ public class FilingHistorySpec {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getOriginalDescription() {
-        return originalDescription;
-    }
-
-    public void setOriginalDescription(String originalDescription) {
-        this.originalDescription = originalDescription;
     }
 
     public String getSubCategory() { return subCategory; }
