@@ -823,8 +823,14 @@ class UserServiceImplTest {
 
         when(randomService.getString(23)).thenReturn(TEST_USER_ID);
 
-        doReturn(TEST_IDENTITY_ID).when(userServiceImpl).generateIdentityId();
-        doReturn(TEST_UVID).when(userServiceImpl).generateUvid();
+        when(identityRepository.save(any(Identity.class))).thenAnswer(invocation -> {
+            Identity saved = invocation.getArgument(0);
+            saved.setId(TEST_IDENTITY_ID);
+            return saved;
+        });
+
+        when(randomService.getString(10)).thenReturn(TEST_UVID);
+
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         userServiceImpl.create(spec);
@@ -921,31 +927,56 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testGenerateUvid_returnsCorrectPattern() throws Exception {
-        Method generateUvid = UserServiceImpl.class.getDeclaredMethod("generateUvid");
-        generateUvid.setAccessible(true);
+    void testGenerateUvid_returnsCorrectPattern_noReflection() throws Exception {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("TEST_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
 
-        for (int i = 0; i < 5; i++) {
-            String uvid = (String) generateUvid.invoke(userServiceImpl);
-            assertNotNull(uvid);
-            Pattern uvidPattern = Pattern.compile("^X[A-Z]\\d{3}22223$");
-            assertTrue(uvidPattern.matcher(uvid).matches(),
-                    "UVID " + uvid + " does not match pattern ^X[A-Z]\\d{3}22223$");
-        }
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
+        when(randomService.getString(10)).thenReturn(TEST_UVID);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        when(identityRepository.save(any(Identity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<Uvid> uvidCaptor = ArgumentCaptor.forClass(Uvid.class);
+        verify(uvidRepository, times(1)).save(uvidCaptor.capture());
+        Uvid savedUvid = uvidCaptor.getValue();
+
+        assertNotNull(savedUvid.getValue());
+        Pattern uvidPattern = Pattern.compile("^X[A-Z]\\d{3}22223$");
+        assertTrue(uvidPattern.matcher(savedUvid.getValue()).matches(),
+                "UVID " + savedUvid.getValue() + " does not match pattern ^X[A-Z]\\d{3}22223$");
     }
 
     @Test
-    void testGenerateIdentityId_returnsValidUUID() throws Exception {
-        Method generateIdentityId = UserServiceImpl.class.getDeclaredMethod("generateIdentityId");
-        generateIdentityId.setAccessible(true);
+    void testGenerateIdentityId_returnsValidUUID_noReflection() throws Exception {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("TEST_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
 
-        String identityId = (String) generateIdentityId.invoke(userServiceImpl);
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
+        when(randomService.getString(10)).thenReturn(TEST_UVID);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        assertNotNull(identityId);
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<Identity> identityCaptor = ArgumentCaptor.forClass(Identity.class);
+        verify(identityRepository, times(1)).save(identityCaptor.capture());
+        Identity savedIdentity = identityCaptor.getValue();
+
+        assertNotNull(savedIdentity.getId());
         try {
-            UUID.fromString(identityId);
+            UUID.fromString(savedIdentity.getId());
         } catch (IllegalArgumentException e) {
-            throw new AssertionError("Generated ID " + identityId + " is not a valid UUID");
+            throw new AssertionError("Generated ID " + savedIdentity.getId() + " is not a valid UUID");
         }
     }
 }

@@ -74,7 +74,7 @@ public class TestDataController {
     private AccountPenaltiesService accountPenaltyService;
 
     @Autowired
-    private VerifiedIdentityService  < IdentityVerificationData >  verifiedIdentityService;
+    private VerifiedIdentityService<IdentityVerificationData>  verifiedIdentityService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -504,12 +504,8 @@ public class TestDataController {
 
     @GetMapping("/identity/verification")
     public ResponseEntity<IdentityVerificationData> getIdentityVerification(
-            @RequestParam(value = "email", required = false) String email)
+            @RequestParam("email") String email)
             throws DataException, NoDataFoundException {
-
-        if (email == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
 
         var data = verifiedIdentityService.getIdentityVerificationData(email);
         if (data == null) {

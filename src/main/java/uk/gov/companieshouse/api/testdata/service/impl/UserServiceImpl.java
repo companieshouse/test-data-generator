@@ -54,17 +54,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserData create(UserSpec userSpec) throws DataException {
-
-        final String randomId;
-        try {
-            randomId = randomService.getString(23).toLowerCase();
-            LOG.debug("randomService returned id= " + randomId);
-        } catch (NullPointerException npe) {
-            LOG.error(
-                    "randomService.getString(23)"
-                            + "returned null and caused NPE when lowering case", npe);
-            throw npe;
-        }
+        final String randomId = randomService.getString(23).toLowerCase();
+        LOG.debug("randomService returned id= " + randomId);
 
         final String password = userSpec.getPassword();
         final var user = new User();
@@ -109,41 +100,42 @@ public class UserServiceImpl implements UserService {
 
         for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
 
-            if (identityVerificationSpec == null) {
+            if (identityVerificationSpec != null) {
+                var verificationSource = identityVerificationSpec.getVerificationSource();
+
+                if (verificationSource != null && !verificationSource.isEmpty()) {
+
+                    LOG.debug("Creating identity for verificationSource= "
+                            + verificationSource);
+                    var identity = new Identity();
+                    identity.setId(UUID.randomUUID().toString());
+                    identity.setCreated(getDateNow());
+                    identity.setStatus("VALID");
+                    identity.setUserId(user.getId());
+                    identity.setVerificationSource(verificationSource);
+                    identity.setEmail(user.getEmail());
+                    identity.setSecureIndicator(false);
+                    identityRepository.save(identity);
+                    LOG.info("Saved identity id = "
+                            + identity.getId() + " for userId= " + user.getId());
+
+                    var uvid = new Uvid();
+                    uvid.setValue(randomService.getString(10).toUpperCase());
+                    uvid.setType("PERMANENT");
+                    uvid.setIdentityId(identity.getId());
+                    uvid.setCreated(getDateNow());
+                    uvidRepository.save(uvid);
+                    LOG.info("Saved uvid = " + uvid.getValue()
+                            + " for identityId= " + identity.getId());
+
+                } else {
+                    LOG.debug(
+                            "Skipped identity verification entry "
+                                    + "because verificationSource was null/empty");
+                }
+            } else {
                 LOG.debug("Skipped null identityVerificationSpec");
-                continue;
             }
-
-            var verificationSource = identityVerificationSpec.getVerificationSource();
-            if (verificationSource == null || verificationSource.isEmpty()) {
-                LOG.debug(
-                        "Skipped identity verification entry "
-                                + "because verificationSource was null/empty");
-                continue;
-            }
-
-            LOG.debug("Creating identity for verificationSource= "
-                    + verificationSource);
-            var identity = new Identity();
-            identity.setId(generateIdentityId());
-            identity.setCreated(getDateNow());
-            identity.setStatus("VALID");
-            identity.setUserId(user.getId());
-            identity.setVerificationSource(verificationSource);
-            identity.setEmail(user.getEmail());
-            identity.setSecureIndicator(false);
-            identityRepository.save(identity);
-            LOG.info("Saved identity id = "
-                    + identity.getId() + " for userId= " + user.getId());
-
-            var uvid = new Uvid();
-            uvid.setValue(generateUvid());
-            uvid.setType("PERMANENT");
-            uvid.setIdentityId(identity.getId());
-            uvid.setCreated(getDateNow());
-            uvidRepository.save(uvid);
-            LOG.info("Saved uvid = " + uvid.getValue()
-                    + " for identityId= " + identity.getId());
         }
     }
 
@@ -205,17 +197,19 @@ public class UserServiceImpl implements UserService {
             try {
                 uvidRepository.deleteByIdentityId(identity.getId());
                 LOG.debug("Deleted UVIDs for identityId = " + identity.getId());
-            } catch (Exception er) {
-                LOG.info("Failed to delete UVIDs for identityId = "
-                        + identity.getId() + er.getMessage());
+            } catch (Exception ex) {
+                LOG.error("Failed to delete UVIDs for identityId = "
+                        + identity.getId() + ex.getMessage());
+                throw ex;
             }
 
             try {
                 identityRepository.delete(identity);
                 LOG.debug("Deleted identity id= " + identity.getId());
-            } catch (Exception er) {
-                LOG.info("Failed to delete identity id= "
-                        + identity.getId() +  er.getMessage());
+            } catch (Exception ex) {
+                LOG.error("Failed to delete identity id= "
+                        + identity.getId() +  ex.getMessage());
+                throw ex;
             }
         } else {
             LOG.debug("No identity associated with userId= " + userId);
@@ -224,9 +218,9 @@ public class UserServiceImpl implements UserService {
         try {
             repository.delete(userOpt.get());
             LOG.info("Deleted user id= " + userId);
-        } catch (Exception er) {
-            LOG.error("Failed to delete user id " + userId, er);
-            throw er;
+        } catch (Exception ex) {
+            LOG.error("Failed to delete user id " + userId, ex);
+            throw ex;
         }
         return true;
     }
@@ -252,22 +246,5 @@ public class UserServiceImpl implements UserService {
 
     protected Instant getDateNow() {
         return LocalDateTime.now(ZONE_ID_UTC).toInstant(ZoneOffset.UTC);
-    }
-
-    String generateIdentityId() {
-        var id = UUID.randomUUID().toString();
-        LOG.debug("generateIdentityId returning " + id);
-        return id;
-    }
-
-    String generateUvid() {
-        var secureRandom = new SecureRandom();
-        var randomChar = (char) ('A' + secureRandom.nextInt(26));
-        var randomThreeDigits = secureRandom.nextInt(1000);
-        var formattedDigits = String.format("%03d", randomThreeDigits);
-
-        String uvid = "X" + randomChar + formattedDigits + "22223";
-        LOG.debug("generateUvid returning " + uvid);
-        return uvid;
     }
 }
