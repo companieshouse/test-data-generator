@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.ZoneId;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
