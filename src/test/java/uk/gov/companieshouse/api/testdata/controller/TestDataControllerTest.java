@@ -856,7 +856,7 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
-        assertEquals("number_of_penalties  should be greater than 1 for duplicate penalties", body.get("error"));
+        assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
         assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
     }
 
@@ -874,7 +874,7 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
-        assertEquals("number_of_penalties  should be greater than 1 for duplicate penalties", body.get("error"));
+        assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
         assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
     }
 

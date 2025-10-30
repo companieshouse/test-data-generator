@@ -74,7 +74,7 @@ public class TestDataController {
     private AccountPenaltiesService accountPenaltyService;
 
     @Autowired
-    private VerifiedIdentityService<IdentityVerificationData>  verifiedIdentityService;
+    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -324,7 +324,7 @@ public class TestDataController {
         if (Boolean.TRUE.equals(request.isDuplicate())
                 && (createdPenalties == null || createdPenalties.getPenalties().isEmpty())) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "number_of_penalties  "
+            errorResponse.put("error", "number_of_penalties "
                     + "should be greater than 1 for duplicate penalties");
             errorResponse.put(STATUS, HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
