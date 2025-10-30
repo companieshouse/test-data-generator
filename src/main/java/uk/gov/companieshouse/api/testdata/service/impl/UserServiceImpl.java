@@ -34,7 +34,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
-    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
@@ -92,53 +91,60 @@ public class UserServiceImpl implements UserService {
         user.setTestData(true);
         repository.save(user);
 
-        if (userSpec.getIdentityVerification()
-                != null && !userSpec.getIdentityVerification().isEmpty()) {
-            LOG.debug("Creating identity verification entries: count= "
-                    + userSpec.getIdentityVerification().size());
-            for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
-
-                if (identityVerificationSpec != null) {
-                    var verificationSource = identityVerificationSpec.getVerificationSource();
-
-                    if (verificationSource != null && !verificationSource.isEmpty()) {
-                        LOG.debug("Creating identity for verificationSource= "
-                                + verificationSource);
-                        var identity = new Identity();
-                        identity.setId(generateIdentityId());
-                        identity.setCreated(getDateNow());
-                        identity.setStatus("VALID");
-                        identity.setUserId(user.getId());
-                        identity.setVerificationSource(verificationSource);
-                        identity.setEmail(user.getEmail());
-                        identity.setSecureIndicator(false);
-                        identityRepository.save(identity);
-                        LOG.info("Saved identity id = "
-                                + identity.getId() + " for userId= " + user.getId());
-
-                        var uvid = new Uvid();
-                        uvid.setValue(generateUvid());
-                        uvid.setType("PERMANENT");
-                        uvid.setIdentityId(identity.getId());
-                        uvid.setCreated(getDateNow());
-                        uvidRepository.save(uvid);
-                        LOG.info("Saved uvid = " + uvid.getValue()
-                                + " for identityId= " + identity.getId());
-                    } else {
-                        LOG.debug(
-                                "Skipped identity verification entry "
-                                        + "because verificationSource was null/empty");
-                    }
-                } else {
-                    LOG.debug("Skipped null identityVerificationSpec");
-                }
-            }
-        } else {
-            LOG.debug("No identity verification data provided");
-        }
+        processIdentityVerifications(user, userSpec);
 
         LOG.info("User created successfully id= " + user.getId());
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
+    }
+
+    private void processIdentityVerifications(User user, UserSpec userSpec) {
+        if (userSpec.getIdentityVerification() == null
+                || userSpec.getIdentityVerification().isEmpty()) {
+            LOG.debug("No identity verification data provided");
+            return;
+        }
+
+        LOG.debug("Creating identity verification entries: count= "
+                + userSpec.getIdentityVerification().size());
+
+        for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
+
+            if (identityVerificationSpec == null) {
+                LOG.debug("Skipped null identityVerificationSpec");
+                continue;
+            }
+
+            var verificationSource = identityVerificationSpec.getVerificationSource();
+            if (verificationSource == null || verificationSource.isEmpty()) {
+                LOG.debug(
+                        "Skipped identity verification entry "
+                                + "because verificationSource was null/empty");
+                continue;
+            }
+
+            LOG.debug("Creating identity for verificationSource= "
+                    + verificationSource);
+            var identity = new Identity();
+            identity.setId(generateIdentityId());
+            identity.setCreated(getDateNow());
+            identity.setStatus("VALID");
+            identity.setUserId(user.getId());
+            identity.setVerificationSource(verificationSource);
+            identity.setEmail(user.getEmail());
+            identity.setSecureIndicator(false);
+            identityRepository.save(identity);
+            LOG.info("Saved identity id = "
+                    + identity.getId() + " for userId= " + user.getId());
+
+            var uvid = new Uvid();
+            uvid.setValue(generateUvid());
+            uvid.setType("PERMANENT");
+            uvid.setIdentityId(identity.getId());
+            uvid.setCreated(getDateNow());
+            uvidRepository.save(uvid);
+            LOG.info("Saved uvid = " + uvid.getValue()
+                    + " for identityId= " + identity.getId());
+        }
     }
 
     List<String> processRoles(List<String> roles) throws DataException {
@@ -249,14 +255,15 @@ public class UserServiceImpl implements UserService {
     }
 
     String generateIdentityId() {
-        String id = UUID.randomUUID().toString();
+        var id = UUID.randomUUID().toString();
         LOG.debug("generateIdentityId returning " + id);
         return id;
     }
 
     String generateUvid() {
-        var randomChar = (char) ('A' + SECURE_RANDOM.nextInt(26));
-        var randomThreeDigits = SECURE_RANDOM.nextInt(1000);
+        var secureRandom = new SecureRandom();
+        var randomChar = (char) ('A' + secureRandom.nextInt(26));
+        var randomThreeDigits = secureRandom.nextInt(1000);
         var formattedDigits = String.format("%03d", randomThreeDigits);
 
         String uvid = "X" + randomChar + formattedDigits + "22223";
