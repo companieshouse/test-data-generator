@@ -1,5 +1,11 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
@@ -8,14 +14,9 @@ import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.util.Optional;
-
 @Service
-public class IdentityVerificationServiceImpl implements VerifiedIdentityService<IdentityVerificationData> {
+public class IdentityVerificationServiceImpl implements
+        VerifiedIdentityService<IdentityVerificationData> {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
     @Autowired
@@ -24,13 +25,6 @@ public class IdentityVerificationServiceImpl implements VerifiedIdentityService<
     @Autowired
     private UvidRepository uvidRepository;
 
-    /**
-     * Finds an identity by email, then finds the associated UVID.
-     *
-     * @param email The email to search for.
-     * @return An IdentityVerificationData (identity_id and uvid)
-     * if both are found, otherwise null.
-     */
     @Override
     public IdentityVerificationData getIdentityVerificationData(String email) {
 

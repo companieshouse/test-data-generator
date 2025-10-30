@@ -1,6 +1,12 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -51,11 +57,6 @@ import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @RestController
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class TestDataController {
@@ -65,12 +66,15 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
+
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
+
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
+
     @Autowired
-    private VerifiedIdentityService <IdentityVerificationData>verifiedIdentityService;
+    private VerifiedIdentityService  < IdentityVerificationData >  verifiedIdentityService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -317,9 +321,11 @@ public class TestDataController {
 
         var createdPenalties = testDataService.createPenaltyData(request);
 
-        if (Boolean.TRUE.equals(request.isDuplicate()) && (createdPenalties == null || createdPenalties.getPenalties().isEmpty())) {
+        if (Boolean.TRUE.equals(request.isDuplicate())
+                && (createdPenalties == null || createdPenalties.getPenalties().isEmpty())) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "number_of_penalties should be greater than 1 for duplicate penalties");
+            errorResponse.put("error", "number_of_penalties  "
+                    + "should be greater than 1 for duplicate penalties");
             errorResponse.put(STATUS, HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }

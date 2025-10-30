@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
-import java.time.Instant;
 
 @Document(collection = "uvid")
 public class Uvid {
@@ -18,7 +18,7 @@ public class Uvid {
      * The Java field name is changed to "value" to satisfy SonarQube.
      */
     @Field("uvid")
-    private String value; // RENAMED
+    private String value;
 
     @Field("type")
     private String type;
