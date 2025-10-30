@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.security.SecureRandom;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -88,7 +86,7 @@ public class UserServiceImpl implements UserService {
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
     }
 
-    private void processIdentityVerifications(User user, UserSpec userSpec) {
+    protected void processIdentityVerifications(User user, UserSpec userSpec) {
         if (userSpec.getIdentityVerification() == null
                 || userSpec.getIdentityVerification().isEmpty()) {
             LOG.debug("No identity verification data provided");

@@ -30,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -978,5 +979,143 @@ class UserServiceImplTest {
         } catch (IllegalArgumentException e) {
             throw new AssertionError("Generated ID " + savedIdentity.getId() + " is not a valid UUID");
         }
+    }
+
+    @Test
+    void processIdentityVerifications_withNullList_doesNothing() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(null);
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withEmptyList_doesNothing() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(List.of());
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withNullItemInList_skipsItem() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(Arrays.asList((IdentityVerificationSpec) null));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withNullVerificationSource_skipsItem() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource(null);
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withEmptyVerificationSource_skipsItem() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withValidSpec_createsIdentityAndUvid() {
+        User user = new User();
+        user.setId(TEST_USER_ID);
+        user.setEmail("test@example.com");
+
+        UserSpec spec = new UserSpec();
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("VALID_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        doReturn(DATE_NOW).when(userServiceImpl).getDateNow();
+        when(randomService.getString(10)).thenReturn("RANDOMUVID");
+
+        ArgumentCaptor<Identity> identityCaptor = ArgumentCaptor.forClass(Identity.class);
+        when(identityRepository.save(identityCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        Identity savedIdentity = identityCaptor.getValue();
+        assertNotNull(savedIdentity.getId());
+        assertEquals(DATE_NOW, savedIdentity.getCreated());
+        assertEquals("VALID", savedIdentity.getStatus());
+        assertEquals(TEST_USER_ID, savedIdentity.getUserId());
+        assertEquals("VALID_SOURCE", savedIdentity.getVerificationSource());
+        assertEquals("test@example.com", savedIdentity.getEmail());
+        assertFalse(savedIdentity.getSecureIndicator());
+
+        ArgumentCaptor<Uvid> uvidCaptor = ArgumentCaptor.forClass(Uvid.class);
+        verify(uvidRepository, times(1)).save(uvidCaptor.capture());
+        Uvid savedUvid = uvidCaptor.getValue();
+        assertEquals("RANDOMUVID", savedUvid.getValue());
+        assertEquals("PERMANENT", savedUvid.getType());
+        assertEquals(savedIdentity.getId(), savedUvid.getIdentityId());
+        assertEquals(DATE_NOW, savedUvid.getCreated());
+    }
+
+    @Test
+    void processIdentityVerifications_withMixedList_processesValidItemsOnly() {
+        User user = new User();
+        user.setId(TEST_USER_ID);
+        user.setEmail("test@example.com");
+
+        IdentityVerificationSpec validSpec1 = new IdentityVerificationSpec();
+        validSpec1.setVerificationSource("VALID_1");
+
+        IdentityVerificationSpec nullSourceSpec = new IdentityVerificationSpec();
+        nullSourceSpec.setVerificationSource(null);
+
+        IdentityVerificationSpec emptySourceSpec = new IdentityVerificationSpec();
+        emptySourceSpec.setVerificationSource("");
+
+        IdentityVerificationSpec validSpec2 = new IdentityVerificationSpec();
+        validSpec2.setVerificationSource("VALID_2");
+
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(Arrays.asList(
+                validSpec1,
+                nullSourceSpec,
+                null,
+                emptySourceSpec,
+                validSpec2
+        ));
+
+        doReturn(DATE_NOW).when(userServiceImpl).getDateNow();
+        when(randomService.getString(10)).thenReturn("UVID-1", "UVID-2");
+        when(identityRepository.save(any(Identity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, times(2)).save(any(Identity.class));
+        verify(uvidRepository, times(2)).save(any(Uvid.class));
     }
 }

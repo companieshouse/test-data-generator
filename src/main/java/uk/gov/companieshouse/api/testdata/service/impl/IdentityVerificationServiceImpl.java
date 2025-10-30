@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +17,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class IdentityVerificationServiceImpl implements
         VerifiedIdentityService<IdentityVerificationData> {
-    private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
