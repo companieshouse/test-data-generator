@@ -2,6 +2,9 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -89,5 +92,16 @@ class IdentityVerificationServiceImplTest {
 
         verify(identityRepository, times(1)).findByEmail(email);
         verify(uvidRepository, times(1)).findByIdentityId(identityId);
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {"", "  ", "\t"})
+    void getIdentityVerification_whenEmailIsBlankOrNull_returnsNull(String invalidEmail) {
+        IdentityVerificationData result = service.getIdentityVerificationData(invalidEmail);
+
+        assertNull(result, "Service should return null for invalid email input");
+        verifyNoInteractions(identityRepository);
+        verifyNoInteractions(uvidRepository);
     }
 }
