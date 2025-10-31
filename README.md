@@ -109,8 +109,9 @@ In order to use the generator, there are different possible endpoints that can b
     - `password`: The password of the user. This is mandatory.
     - `roles`: The entra group name of the user which contains all the associated roles for that user. Roles is optional.
     - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
+    - `identity_verification`: This is optional. It takes a list of `IdentiyVerificationSpec` and creates an `identity` and `uvid`
     
-    A usage example looks like this: `{ "password": "password", "roles": [  "GROUPNAME_1", "GROUPNAME_2"] ], "is_company_auth_allow_list": true }`
+    A usage example looks like this: `{ "password": "password", "roles": [  "GROUPNAME_1", "GROUPNAME_2"] ], "is_company_auth_allow_list": true, "identity_verification": [{"verification_source": "ONE_LOGIN"}] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
 
 #### Creating admin permission
@@ -122,14 +123,10 @@ In order to use the generator, there are different possible endpoints that can b
     A usage example looks like this: `{"group_id": "8aa9fc1c-8d78-4ce3-8ba9-fee57adf3a84", "group_name": "chs admin csi support", "roles": [ "/admin/images"  ] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/admin-permission/{id}` will delete the test admin permission. `id` is required to delete the admin permission; This is generated as response when an admin permission is created.
 
-#### Validating user Identity
-- POST: Sending a POST request to validate the user identity `{Base URL}/test-data/identity` will validate the user identity. The request body must include `IdentitySpec` parameter to validate the user identity.
-    - `email`: The email id of the user. This is mandatory.
-    - `user_id`: The user id of the user. This is mandatory.
-    - `verification_source`: The verification source of the user. This is mandatory.'
+#### Getting Identity_Id and Uvid for a user
+- GET: Sending a GET request on the endpoint `{Base URL}/test-data/identity/?email=email@email.com` will return the identity id and uvid for the user. `userId` is required to get the identity id and uvid.
     
-    A usage example looks like this: `{ "email": "test@test.com", "user_id": "userid", "verification_source": "TEST" }`
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/identity/{identityId}` will delete the test user identity. `identityId` is required to delete the user identity.
+    A usage example response looks like this: `{"identity_id": "d4b5f5e2-5f4e-4c3a-9f3e-2b5f5e25f4e4", "uvid": "XX4YBV22223"}`
 
 #### Creating Acsp Members and Acsp Profiles
 - POST: Sending a POST request to create Acsp Members and Acsp Profiles `{Base URL}/test-data/acsp-members` will generate a new Acsp Member and Acsp Profile. The request body must include mandatory `userId` and optional `AcspMembersSpec` and `AcspProfile` parameter to customise the generated Acsp Member and Acsp Profile.

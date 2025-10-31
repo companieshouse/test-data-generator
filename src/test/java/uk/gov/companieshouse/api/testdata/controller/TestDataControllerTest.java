@@ -1,22 +1,5 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -47,8 +29,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
@@ -65,6 +46,24 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -93,6 +92,9 @@ class TestDataControllerTest {
 
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
+
+    @Mock
+    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
@@ -293,74 +295,6 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteUserData(userId);
-    }
-
-    @Test
-    void createIdentity() throws Exception {
-        IdentitySpec request = new IdentitySpec();
-        when(this.testDataService.createIdentityData(request))
-                .thenReturn(new IdentityData("identityId"));
-
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.createIdentity(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals("identityId", Objects.requireNonNull(response.getBody()).get("identity id"));
-    }
-
-    @Test
-    void createIdentityException() throws Exception {
-        IdentitySpec request = new IdentitySpec();
-        DataException exception = new DataException("Error message");
-
-        when(this.testDataService.createIdentityData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createIdentity(request));
-        assertEquals(exception.getMessage(), thrown.getMessage()); // Match message
-    }
-
-    @Test
-    void deleteIdentity() throws Exception {
-        final String identityId = "identityId";
-
-        when(this.testDataService.deleteIdentityData(identityId)).thenReturn(true);
-
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteIdentity(identityId);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-
-        verify(testDataService).deleteIdentityData(identityId);
-    }
-
-    @Test
-    void deleteIdentityException() throws Exception {
-        final String identityId = "identityId";
-        DataException exception = new DataException("Error message");
-
-        when(this.testDataService.deleteIdentityData(identityId)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.deleteIdentity(identityId));
-        assertEquals(exception.getMessage(), thrown.getMessage()); // Match message
-    }
-
-    @Test
-    void deleteIdentityNotFound() throws Exception {
-        final String identityId = "identityId";
-
-        when(this.testDataService.deleteIdentityData(identityId)).thenReturn(false);
-
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteIdentity(identityId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("identityId", response.getBody().get("identity id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-
-        verify(testDataService).deleteIdentityData(identityId);
     }
 
     @Test
@@ -1412,5 +1346,36 @@ class TestDataControllerTest {
         );
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
+    }
+
+    @Test
+    void getIdentityVerification_serviceReturnsData_returnsOk() throws Exception {
+        final String email = "user@example.com";
+        var data = new IdentityVerificationData("identity-id-123", "UVID-ABC");
+
+        when(this.verifiedIdentityService.getIdentityVerificationData(email))
+                .thenReturn(data);
+
+        ResponseEntity<IdentityVerificationData> response = this.testDataController.getIdentityVerification(email);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(data, response.getBody());
+
+        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void getIdentityVerification_serviceReturnsNull_throwsNoDataFoundException() throws Exception {
+        final String email = "missing@example.com";
+
+        when(this.verifiedIdentityService.getIdentityVerificationData(email))
+                .thenReturn(null);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                this.testDataController.getIdentityVerification(email));
+
+        assertEquals("No identity verification found for email: " + email, thrown.getMessage());
+
+        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
     }
 }

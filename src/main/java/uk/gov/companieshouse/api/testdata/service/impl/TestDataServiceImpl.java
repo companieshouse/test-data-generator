@@ -1,12 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,7 +9,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -24,13 +16,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -42,8 +32,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
@@ -54,11 +42,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
-
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
@@ -73,9 +59,15 @@ import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
-
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
@@ -124,8 +116,6 @@ public class TestDataServiceImpl implements TestDataService {
     private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
     @Autowired
     private DataService<TransactionsData, TransactionsSpec> transactionService;
-    @Autowired
-    private DataService<IdentityData, IdentitySpec> identityService;
     @Autowired
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Autowired
@@ -450,35 +440,6 @@ public class TestDataServiceImpl implements TestDataService {
         return this.userService.delete(userId);
     }
 
-    @Override
-    public IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException {
-        if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
-            throw new DataException("User Id is required to create an identity");
-        }
-        if (identitySpec.getEmail() == null || identitySpec.getEmail().isEmpty()) {
-            throw new DataException("Email is required to create an identity");
-        }
-        if (identitySpec.getVerificationSource() == null
-                || identitySpec.getVerificationSource().isEmpty()) {
-            throw new DataException("Verification source is required to create an identity");
-        }
-        try {
-            var identityData = identityService.create(identitySpec);
-            userService.updateUserWithOneLogin(identitySpec.getUserId());
-            return identityData;
-        } catch (Exception ex) {
-            throw new DataException("Error creating identity", ex);
-        }
-    }
-
-    @Override
-    public boolean deleteIdentityData(String identityId) throws DataException {
-        try {
-            return identityService.delete(identityId);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting identity", ex);
-        }
-    }
 
     @Override
     public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {

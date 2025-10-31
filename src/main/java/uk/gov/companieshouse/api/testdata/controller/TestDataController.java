@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
@@ -39,7 +38,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -51,10 +50,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -67,10 +66,15 @@ public class TestDataController {
 
     @Autowired
     private TestDataService testDataService;
+
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
+
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
+
+    @Autowired
+    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
 
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
@@ -160,33 +164,6 @@ public class TestDataController {
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("User not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @PostMapping("/identity")
-    public ResponseEntity<Map<String, Object>> createIdentity(
-            @Valid @RequestBody() IdentitySpec request) throws DataException {
-        var createdIdentity = testDataService.createIdentityData(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("identity id", createdIdentity.getId());
-        LOG.info("New identity created", data);
-        return new ResponseEntity<>(data, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/identity/{identityId}")
-    public ResponseEntity<Map<String, Object>> deleteIdentity(
-            @PathVariable("identityId") String identityId) throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("identity id", identityId);
-        boolean deleteIdentity = testDataService.deleteIdentityData(identityId);
-
-        if (deleteIdentity) {
-            LOG.info("Identity deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Identity not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -344,9 +321,11 @@ public class TestDataController {
 
         var createdPenalties = testDataService.createPenaltyData(request);
 
-        if (Boolean.TRUE.equals(request.isDuplicate()) && (createdPenalties == null || createdPenalties.getPenalties().isEmpty())) {
+        if (Boolean.TRUE.equals(request.isDuplicate())
+                && (createdPenalties == null || createdPenalties.getPenalties().isEmpty())) {
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "number_of_penalties should be greater than 1 for duplicate penalties");
+            errorResponse.put("error", "number_of_penalties "
+                    + "should be greater than 1 for duplicate penalties");
             errorResponse.put(STATUS, HttpStatus.BAD_REQUEST.value());
             return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
         }
@@ -521,6 +500,19 @@ public class TestDataController {
             LOG.info("Combined Sic Activities Not Found", logMap);
             return new ResponseEntity<>(logMap, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/identity/verification")
+    public ResponseEntity<IdentityVerificationData> getIdentityVerification(
+            @RequestParam("email") String email)
+            throws DataException, NoDataFoundException {
+
+        var data = verifiedIdentityService.getIdentityVerificationData(email);
+        if (data == null) {
+            throw new NoDataFoundException("No identity verification found for email: " + email);
+        }
+
+        return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
 }
