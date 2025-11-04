@@ -1,30 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
-
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,26 +12,65 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
+import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import java.lang.reflect.Method;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
     private static final Instant DATE_NOW = Instant.now();
+    private static final String TEST_USER_ID = "randomised-user-id";
+    private static final String TEST_IDENTITY_ID = "4e93b3e8-4652-4484-af39-708f80a011ff";
+    private static final String TEST_UVID = "XT12322223";
 
     @Mock
     private UserRepository userRepository;
 
     @Mock
     private AdminPermissionsRepository adminPermissionsRepository;
+
+    @Mock
+    private IdentityRepository identityRepository;
+
+    @Mock
+    private UvidRepository uvidRepository;
 
     @Mock
     private RandomService randomService;
@@ -74,8 +92,8 @@ class UserServiceImplTest {
         UserSpec userSpec = new UserSpec();
         userSpec.setEmail("hello@hello.com");
         userSpec.setPassword("password");
-        var generatedUserId = "randomised";
-        when(randomService.getString(23)).thenReturn(generatedUserId);
+
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         UserData userData = userServiceImpl.create(userSpec);
@@ -84,7 +102,7 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
+        assertCommonUserAssertions(userSpec, savedUser, userData, TEST_USER_ID);
         assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
 
@@ -92,8 +110,8 @@ class UserServiceImplTest {
     void testCreateUserWithoutEmailsAndRoles() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setPassword("password");
-        var generatedUserId = "randomised";
-        when(randomService.getString(23)).thenReturn(generatedUserId);
+
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         UserData userData = userServiceImpl.create(userSpec);
@@ -101,10 +119,10 @@ class UserServiceImplTest {
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
-
-        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
+        assertCommonUserAssertions(userSpec, savedUser, userData, TEST_USER_ID);
         assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
+
 
     @Test
     void testCreateUserWithInvalidEmail() {
@@ -126,8 +144,7 @@ class UserServiceImplTest {
         userSpec.setPassword("password");
         userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR", "CHS_ADMIN_SUPPORT_MEMBER"));
 
-        String generatedUserId = "validid";
-        when(randomService.getString(23)).thenReturn(generatedUserId);
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
         AdminPermissions supervisorPerm = new AdminPermissions();
@@ -150,7 +167,7 @@ class UserServiceImplTest {
 
         assertEquals(expectedEntraGroupIds.size(), savedUser.getRoles().size());
         assertTrue(savedUser.getRoles().containsAll(expectedEntraGroupIds));
-        assertEquals(generatedUserId, userData.getId());
+        assertEquals(TEST_USER_ID, userData.getId());
     }
 
     @Test
@@ -597,7 +614,8 @@ class UserServiceImplTest {
                 savedUser.getPassword(),
                 "Password should match the one set in UserSpec");
         assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
-        String expectedEmail = userSpec.getEmail() != null ? userSpec.getEmail() :
+        String expectedEmail = userSpec.getEmail() != null ?
+                userSpec.getEmail() :
                 "test-data-generated" + generatedUserId + "@chtesttdg.mailosaur.net";
         assertEquals(expectedEmail, savedUser.getEmail(), "Email should match");
 
@@ -614,7 +632,6 @@ class UserServiceImplTest {
                 true, savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
         assertEquals(DATE_NOW, savedUser.getCreated(),
                 "Created date should be set to today's date");
-
         assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
         assertTrue(
                 userData.getEmail().contains(userSpec.getEmail() != null ? userSpec.getEmail()
@@ -659,15 +676,51 @@ class UserServiceImplTest {
 
     @Test
     void testDeleteUserNotFound() {
-        String userId = "nonExistentUserId";
+        when(userRepository.findById("nonExistentUserId")).thenReturn(Optional.empty());
 
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        boolean result = userServiceImpl.delete(userId);
+        boolean result = userServiceImpl.delete("nonExistentUserId");
 
         assertFalse(result, "Delete should return false when user does not exist");
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(0)).delete(any(User.class));
+        verify(userRepository, never()).delete(any(User.class));
+        verify(identityRepository, never()).findByUserId(anyString());
+        verify(uvidRepository, never()).deleteByIdentityId(anyString());
+    }
+
+    @Test
+    void testDeleteUser_DeletesUserIdentityAndUvid() {
+        User mockUser = new User();
+        mockUser.setId(TEST_USER_ID);
+
+        Identity mockIdentity = new Identity();
+        mockIdentity.setId(TEST_IDENTITY_ID);
+        mockIdentity.setUserId(TEST_USER_ID);
+
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(identityRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(mockIdentity));
+
+        boolean result = userServiceImpl.delete(TEST_USER_ID);
+
+        assertTrue(result, "Delete should return true");
+
+        verify(uvidRepository, times(1)).deleteByIdentityId(TEST_IDENTITY_ID);
+        verify(identityRepository, times(1)).delete(mockIdentity);
+        verify(userRepository, times(1)).delete(mockUser);
+    }
+
+    @Test
+    void testDeleteUser_WhenIdentityNotFound_DeletesOnlyUser() {
+        User mockUser = new User();
+        mockUser.setId(TEST_USER_ID);
+
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(identityRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.empty());
+
+        boolean result = userServiceImpl.delete(TEST_USER_ID);
+
+        assertTrue(result, "Delete should return true");
+        verify(uvidRepository, never()).deleteByIdentityId(anyString());
+        verify(identityRepository, never()).delete(any(Identity.class));
+        verify(userRepository, times(1)).delete(mockUser);
     }
 
     @Test
@@ -758,5 +811,311 @@ class UserServiceImplTest {
         User savedUser = userCaptor.getValue();
 
         assertFalse(savedUser.getAdminUser(), "User should not be marked as admin when isAdmin is null");
+    }
+
+    @Test
+    void create_WithIdentityVerification_CreatesIdentityAndUvid() throws Exception {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("TEST_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
+
+        when(identityRepository.save(any(Identity.class))).thenAnswer(invocation -> {
+            Identity saved = invocation.getArgument(0);
+            saved.setId(TEST_IDENTITY_ID);
+            return saved;
+        });
+
+        when(randomService.getString(10)).thenReturn(TEST_UVID);
+
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository, times(1)).save(userCaptor.capture());
+        assertEquals(TEST_USER_ID, userCaptor.getValue().getId());
+
+        ArgumentCaptor<Identity> identityCaptor = ArgumentCaptor.forClass(Identity.class);
+        verify(identityRepository, times(1)).save(identityCaptor.capture());
+        Identity savedIdentity = identityCaptor.getValue();
+        assertEquals(TEST_IDENTITY_ID, savedIdentity.getId());
+        assertEquals(TEST_USER_ID, savedIdentity.getUserId());
+        assertEquals("user@example.com", savedIdentity.getEmail());
+        assertEquals("TEST_SOURCE", savedIdentity.getVerificationSource());
+        assertEquals("VALID", savedIdentity.getStatus());
+
+        ArgumentCaptor<Uvid> uvidCaptor = ArgumentCaptor.forClass(Uvid.class);
+        verify(uvidRepository, times(1)).save(uvidCaptor.capture());
+        Uvid savedUvid = uvidCaptor.getValue();
+        assertEquals(TEST_UVID, savedUvid.getValue());
+        assertEquals(TEST_IDENTITY_ID, savedUvid.getIdentityId());
+        assertEquals("PERMANENT", savedUvid.getType());
+    }
+
+    @Test
+    void create_WithoutIdentityVerification_DoesNotCreateIdentityOrUvid() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        spec.setIdentityVerification(null);
+
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(spec);
+
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void create_WithEmptyIdentityVerification_DoesNotCreateIdentityOrUvid() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        spec.setIdentityVerification(new ArrayList<>());
+
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(spec);
+
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void create_WithNullIvSpecItem_SkipsAndDoesNotCreate() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        spec.setIdentityVerification(java.util.Arrays.asList((IdentityVerificationSpec) null));
+
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(spec);
+
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void create_WithNullVerificationSource_SkipsAndDoesNotCreate() throws DataException {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource(null);
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        when(randomService.getString(23)).thenReturn("RANDOMID");
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(spec);
+
+        verify(userRepository, times(1)).save(any(User.class));
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void testGenerateUvid_returnsCorrectPattern_noReflection() throws Exception {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("TEST_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
+        when(randomService.getString(10)).thenReturn(TEST_UVID);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        when(identityRepository.save(any(Identity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<Uvid> uvidCaptor = ArgumentCaptor.forClass(Uvid.class);
+        verify(uvidRepository, times(1)).save(uvidCaptor.capture());
+        Uvid savedUvid = uvidCaptor.getValue();
+
+        assertNotNull(savedUvid.getValue());
+        Pattern uvidPattern = Pattern.compile("^X[A-Z]\\d{3}22223$");
+        assertTrue(uvidPattern.matcher(savedUvid.getValue()).matches(),
+                "UVID " + savedUvid.getValue() + " does not match pattern ^X[A-Z]\\d{3}22223$");
+    }
+
+    @Test
+    void testGenerateIdentityId_returnsValidUUID_noReflection() throws Exception {
+        UserSpec spec = new UserSpec();
+        spec.setEmail("user@example.com");
+        spec.setPassword("password");
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("TEST_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
+        when(randomService.getString(10)).thenReturn(TEST_UVID);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        userServiceImpl.create(spec);
+
+        ArgumentCaptor<Identity> identityCaptor = ArgumentCaptor.forClass(Identity.class);
+        verify(identityRepository, times(1)).save(identityCaptor.capture());
+        Identity savedIdentity = identityCaptor.getValue();
+
+        assertNotNull(savedIdentity.getId());
+        try {
+            UUID.fromString(savedIdentity.getId());
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError("Generated ID " + savedIdentity.getId() + " is not a valid UUID");
+        }
+    }
+
+    @Test
+    void processIdentityVerifications_withNullList_doesNothing() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(null);
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withEmptyList_doesNothing() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(List.of());
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withNullItemInList_skipsItem() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(Arrays.asList((IdentityVerificationSpec) null));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withNullVerificationSource_skipsItem() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource(null);
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withEmptyVerificationSource_skipsItem() {
+        User user = new User();
+        UserSpec spec = new UserSpec();
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, never()).save(any(Identity.class));
+        verify(uvidRepository, never()).save(any(Uvid.class));
+    }
+
+    @Test
+    void processIdentityVerifications_withValidSpec_createsIdentityAndUvid() {
+        User user = new User();
+        user.setId(TEST_USER_ID);
+        user.setEmail("test@example.com");
+
+        UserSpec spec = new UserSpec();
+        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        ivSpec.setVerificationSource("VALID_SOURCE");
+        spec.setIdentityVerification(List.of(ivSpec));
+
+        doReturn(DATE_NOW).when(userServiceImpl).getDateNow();
+        when(randomService.getString(10)).thenReturn("RANDOMUVID");
+
+        ArgumentCaptor<Identity> identityCaptor = ArgumentCaptor.forClass(Identity.class);
+        when(identityRepository.save(identityCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        Identity savedIdentity = identityCaptor.getValue();
+        assertNotNull(savedIdentity.getId());
+        assertEquals(DATE_NOW, savedIdentity.getCreated());
+        assertEquals("VALID", savedIdentity.getStatus());
+        assertEquals(TEST_USER_ID, savedIdentity.getUserId());
+        assertEquals("VALID_SOURCE", savedIdentity.getVerificationSource());
+        assertEquals("test@example.com", savedIdentity.getEmail());
+        assertFalse(savedIdentity.getSecureIndicator());
+
+        ArgumentCaptor<Uvid> uvidCaptor = ArgumentCaptor.forClass(Uvid.class);
+        verify(uvidRepository, times(1)).save(uvidCaptor.capture());
+        Uvid savedUvid = uvidCaptor.getValue();
+        assertEquals("RANDOMUVID", savedUvid.getValue());
+        assertEquals("PERMANENT", savedUvid.getType());
+        assertEquals(savedIdentity.getId(), savedUvid.getIdentityId());
+        assertEquals(DATE_NOW, savedUvid.getCreated());
+    }
+
+    @Test
+    void processIdentityVerifications_withMixedList_processesValidItemsOnly() {
+        User user = new User();
+        user.setId(TEST_USER_ID);
+        user.setEmail("test@example.com");
+
+        IdentityVerificationSpec validSpec1 = new IdentityVerificationSpec();
+        validSpec1.setVerificationSource("VALID_1");
+
+        IdentityVerificationSpec nullSourceSpec = new IdentityVerificationSpec();
+        nullSourceSpec.setVerificationSource(null);
+
+        IdentityVerificationSpec emptySourceSpec = new IdentityVerificationSpec();
+        emptySourceSpec.setVerificationSource("");
+
+        IdentityVerificationSpec validSpec2 = new IdentityVerificationSpec();
+        validSpec2.setVerificationSource("VALID_2");
+
+        UserSpec spec = new UserSpec();
+        spec.setIdentityVerification(Arrays.asList(
+                validSpec1,
+                nullSourceSpec,
+                null,
+                emptySourceSpec,
+                validSpec2
+        ));
+
+        doReturn(DATE_NOW).when(userServiceImpl).getDateNow();
+        when(randomService.getString(10)).thenReturn("UVID-1", "UVID-2");
+        when(identityRepository.save(any(Identity.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        userServiceImpl.processIdentityVerifications(user, spec);
+
+        verify(identityRepository, times(2)).save(any(Identity.class));
+        verify(uvidRepository, times(2)).save(any(Uvid.class));
     }
 }

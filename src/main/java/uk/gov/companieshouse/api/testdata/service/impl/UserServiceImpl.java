@@ -7,23 +7,32 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
+    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
     private UserRepository repository;
@@ -34,17 +43,29 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private RandomService randomService;
 
+    @Autowired
+    private IdentityRepository identityRepository;
+
+    @Autowired
+    private UvidRepository uvidRepository;
+
     @Override
+    @Transactional
     public UserData create(UserSpec userSpec) throws DataException {
-        var randomId = randomService.getString(23).toLowerCase();
+        final String randomId = randomService.getString(23).toLowerCase();
+        LOG.debug("randomService returned id= " + randomId);
+
         final String password = userSpec.getPassword();
         final var user = new User();
 
         if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {
             user.setRoles(processRoles(userSpec.getRoles()));
+        } else {
+            LOG.debug("No roles provided for user creation");
         }
 
-        String email = userSpec.getEmail() != null ? userSpec.getEmail() :
+        String email = userSpec.getEmail() != null
+                ? userSpec.getEmail() :
                 "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
 
         user.setId(randomId);
@@ -58,7 +79,62 @@ public class UserServiceImpl implements UserService {
         user.setAdminUser(Optional.ofNullable(userSpec.getIsAdmin()).orElse(false));
         user.setTestData(true);
         repository.save(user);
+
+        processIdentityVerifications(user, userSpec);
+
+        LOG.info("User created successfully id= " + user.getId());
         return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
+    }
+
+    protected void processIdentityVerifications(User user, UserSpec userSpec) {
+        if (userSpec.getIdentityVerification() == null
+                || userSpec.getIdentityVerification().isEmpty()) {
+            LOG.debug("No identity verification data provided");
+            return;
+        }
+
+        LOG.debug("Creating identity verification entries: count= "
+                + userSpec.getIdentityVerification().size());
+
+        for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
+
+            if (identityVerificationSpec != null) {
+                var verificationSource = identityVerificationSpec.getVerificationSource();
+
+                if (verificationSource != null && !verificationSource.isEmpty()) {
+
+                    LOG.debug("Creating identity for verificationSource= "
+                            + verificationSource);
+                    var identity = new Identity();
+                    identity.setId(UUID.randomUUID().toString());
+                    identity.setCreated(getDateNow());
+                    identity.setStatus("VALID");
+                    identity.setUserId(user.getId());
+                    identity.setVerificationSource(verificationSource);
+                    identity.setEmail(user.getEmail());
+                    identity.setSecureIndicator(false);
+                    identityRepository.save(identity);
+                    LOG.info("Saved identity id = "
+                            + identity.getId() + " for userId= " + user.getId());
+
+                    var uvid = new Uvid();
+                    uvid.setValue(randomService.getString(10).toUpperCase());
+                    uvid.setType("PERMANENT");
+                    uvid.setIdentityId(identity.getId());
+                    uvid.setCreated(getDateNow());
+                    uvidRepository.save(uvid);
+                    LOG.info("Saved uvid = " + uvid.getValue()
+                            + " for identityId= " + identity.getId());
+
+                } else {
+                    LOG.debug(
+                            "Skipped identity verification entry "
+                                    + "because verificationSource was null/empty");
+                }
+            } else {
+                LOG.debug("Skipped null identityVerificationSpec");
+            }
+        }
     }
 
     List<String> processRoles(List<String> roles) throws DataException {
@@ -74,6 +150,7 @@ public class UserServiceImpl implements UserService {
             String entraGroupId = adminPermissionEntity.getEntraGroupId();
             if (entraGroupId != null && !entraGroupId.isEmpty()) {
                 entraGroupIds.add(entraGroupId);
+                LOG.debug("Added entraGroupId " + entraGroupId + " for groupName= " + groupName);
             } else {
                 throw new DataException("No entra_group_id found for group: " + groupName);
             }
@@ -82,21 +159,68 @@ public class UserServiceImpl implements UserService {
     }
 
     UserRoles getUserRole(String roleName) throws DataException {
+        LOG.debug("getUserRole called with roleName= " + roleName);
         if (roleName == null) {
+            LOG.error("Invalid role name: null");
             throw new DataException("Invalid role name: null");
         }
         try {
-            return UserRoles.valueOf(roleName);
+            var role = UserRoles.valueOf(roleName);
+            LOG.debug("Found UserRoles enum for roleName= " + roleName);
+            return role;
         } catch (IllegalArgumentException error) {
-            throw new DataException("Invalid role name: " + roleName);
+            LOG.error("Invalid role name provided: "
+                    + roleName);
+            throw new DataException("Invalid role name: "
+                    + roleName);
         }
     }
 
     @Override
+    @Transactional
     public boolean delete(String userId) {
-        var user = repository.findById(userId);
-        user.ifPresent(repository::delete);
-        return user.isPresent();
+        LOG.info("delete called for userId= " + userId);
+        var userOpt = repository.findById(userId);
+        if (userOpt.isEmpty()) {
+            LOG.debug("User not found for id=  " + userId);
+            return false;
+        }
+
+        Optional<Identity> identityOpt = identityRepository.findByUserId(userId);
+        if (identityOpt.isPresent()) {
+            var identity = identityOpt.get();
+            LOG.info("Found identity for userId = "
+                    + userId
+                    + "Identity_id = " + identity.getId());
+            try {
+                uvidRepository.deleteByIdentityId(identity.getId());
+                LOG.debug("Deleted UVIDs for identityId = " + identity.getId());
+            } catch (Exception ex) {
+                LOG.error("Failed to delete UVIDs for identityId = "
+                        + identity.getId() + ex.getMessage());
+                throw ex;
+            }
+
+            try {
+                identityRepository.delete(identity);
+                LOG.debug("Deleted identity id= " + identity.getId());
+            } catch (Exception ex) {
+                LOG.error("Failed to delete identity id= "
+                        + identity.getId() +  ex.getMessage());
+                throw ex;
+            }
+        } else {
+            LOG.debug("No identity associated with userId= " + userId);
+        }
+
+        try {
+            repository.delete(userOpt.get());
+            LOG.info("Deleted user id= " + userId);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete user id " + userId, ex);
+            throw ex;
+        }
+        return true;
     }
 
     public void updateUserWithOneLogin(String userId) {
@@ -105,12 +229,17 @@ public class UserServiceImpl implements UserService {
             var existingUser = user.get();
             existingUser.setOneLoginUserId(userId);
             repository.save(existingUser);
+        } else {
+            LOG.debug("User not found for updateUserWithOneLogin with id= " + userId);
         }
     }
 
     @Override
     public Optional<User> getUserById(String userId) {
-        return repository.findById(userId);
+        LOG.debug("getUserById called for userId= " + userId);
+        var result = repository.findById(userId);
+        LOG.debug("getUserById found={}");
+        return result;
     }
 
     protected Instant getDateNow() {

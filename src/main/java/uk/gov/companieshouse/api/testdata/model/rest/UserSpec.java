@@ -26,6 +26,9 @@ public class UserSpec {
     @JsonProperty("is_admin")
     private Boolean isAdmin;
 
+    @JsonProperty("identity_verification")
+    private List<IdentityVerificationSpec> identityVerification;
+
     public String getPassword() {
         return password;
     }
@@ -64,5 +67,13 @@ public class UserSpec {
 
     public void setIsAdmin(Boolean isAdmin) {
         this.isAdmin = isAdmin;
+    }
+
+    public List<IdentityVerificationSpec> getIdentityVerification() {
+        return identityVerification;
+    }
+
+    public void setIdentityVerification(List<IdentityVerificationSpec> identityVerifications) {
+        this.identityVerification = identityVerifications;
     }
 }
