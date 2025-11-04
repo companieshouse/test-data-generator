@@ -40,7 +40,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     private static final List<String> LP_LEDGER_CODES = List.of("EW", "SC", "NI");
     private static final List<String> LP_TYPE_DESCRIPTIONS = List.of("EOCFP", "EOJSD");
     private static final List<PenaltiesTransactionSubType> EXCLUDED_SUBTYPES = List.of(
-            PenaltiesTransactionSubType.S1, PenaltiesTransactionSubType.A2);
+            PenaltiesTransactionSubType.S1, PenaltiesTransactionSubType.A2, PenaltiesTransactionSubType.S3);
     private static final List<String> C1_S1_LEDGER_CODES = List.of("E1", "S1", "N1");
 
 
@@ -288,6 +288,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
             configureLPPenalty(penalty, transactionSubType, random, penaltySpec);
         } else if ("C1".equals(companyCode) && "S1".equals(transactionSubType)) {
             configureC1S1Penalty(penalty, random, penaltySpec);
+        } else if ("C1".equals(companyCode) && "S3".equals(transactionSubType)) {
+            configureC1S3Penalty(penalty, random, penaltySpec);
         } else if ("C1".equals(companyCode) && "A2".equals(transactionSubType)) {
             configureC1A2Penalty(penalty);
         } else {
@@ -342,6 +344,16 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         penalty.setTypeDescription("PENU");
         penalty.setTransactionSubType("A2");
         penalty.setTransactionReference(generateTransactionReference("C1", "A2"));
+    }
+
+    private void configureC1S3Penalty(AccountPenalty penalty, Random random, PenaltySpec penaltySpec){
+        penalty.setTransactionType("1");
+        String ledgerCode = getDefaultIfBlank(penaltySpec.getLedgerCode(),
+                C1_S1_LEDGER_CODES.get(random.nextInt(C1_S1_LEDGER_CODES.size())));
+        penalty.setLedgerCode(ledgerCode);
+        penalty.setTypeDescription("CS01");
+        penalty.setTransactionSubType("S3");
+        penalty.setTransactionReference(generateTransactionReference("C1", "S3"));
     }
 
     private void configureGenericPenalty(AccountPenalty penalty, String companyCode,
@@ -442,7 +454,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         var prefix = "A";
         if ("LP".equals(companyCode)) {
             prefix = "A";
-        } else if ("C1".equals(companyCode) && "S1".equals(transactionSubType)) {
+        } else if ("C1".equals(companyCode) && ("S1".equals(transactionSubType) || "S3".equals(transactionSubType))) {
             prefix = "P";
         } else if ("C1".equals(companyCode) && "A2".equals(transactionSubType)) {
             prefix = "U";
