@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-public class PublicCompanySpecTest {
+class PublicCompanySpecTest {
     private Validator validator;
 
     @BeforeEach

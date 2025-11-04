@@ -189,33 +189,6 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/internal/identity")
-    public ResponseEntity<Map<String, Object>> createIdentity(
-            @Valid @RequestBody() IdentitySpec request) throws DataException {
-        var createdIdentity = testDataService.createIdentityData(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("identity id", createdIdentity.getId());
-        LOG.info("New identity created", data);
-        return new ResponseEntity<>(data, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/internal/identity/{identityId}")
-    public ResponseEntity<Map<String, Object>> deleteIdentity(
-            @PathVariable("identityId") String identityId) throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("identity id", identityId);
-        boolean deleteIdentity = testDataService.deleteIdentityData(identityId);
-
-        if (deleteIdentity) {
-            LOG.info("Identity deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Identity not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
     @PostMapping("/internal/acsp-members")
     public ResponseEntity<AcspMembersData> createAcspMember(
             @Valid @RequestBody AcspMembersSpec request) throws DataException {
