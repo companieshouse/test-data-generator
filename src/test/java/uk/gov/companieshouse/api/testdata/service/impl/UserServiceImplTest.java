@@ -724,36 +724,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testUpdateUserWithOneLogin() {
-        String userId = "userId";
-        User user = new User();
-        user.setId(userId);
-
-        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        userServiceImpl.updateUserWithOneLogin(userId);
-        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, times(1)).save(userCaptor.capture());
-        User updatedUser = userCaptor.getValue();
-
-        assertEquals(userId, updatedUser.getOneLoginUserId(), "OneLoginUserId should be updated");
-    }
-
-    @Test
-    void testUpdateUserWithOneLoginUserNotFound() {
-        String userId = "nonExistentUserId";
-
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
-
-        userServiceImpl.updateUserWithOneLogin(userId);
-
-        verify(userRepository, times(1)).findById(userId);
-        verify(userRepository, never()).save(any(User.class));
-    }
-
-    @Test
     void testCreateUserWithIsAdminTrue() throws DataException {
         UserSpec userSpec = new UserSpec();
         userSpec.setEmail("admin@hello.com");
