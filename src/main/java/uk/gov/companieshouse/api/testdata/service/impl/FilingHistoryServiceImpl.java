@@ -7,7 +7,6 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -124,7 +123,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setOriginalDescription(ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
         filingHistory.setDescription("description filing history entry for " + spec.getCompanyNumber());
-
         applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow, barcode);
 
         if (!"MR01".equals(type)) {

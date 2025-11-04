@@ -81,6 +81,7 @@ public class TestDataController {
     @Autowired
     private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
 
+    /* Public endpoint to create company data */
     @PostMapping("/company")
     public ResponseEntity<CompanyData> createCompany(
             @Valid @RequestBody(required = false) PublicCompanySpec request) throws DataException {
@@ -97,6 +98,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
+    /* Internal endpoint to create company data */
     @PostMapping("/internal/company")
     public ResponseEntity<CompanyData> createCompanyInternal(
             @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
