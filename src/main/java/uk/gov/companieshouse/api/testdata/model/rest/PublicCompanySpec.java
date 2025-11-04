@@ -3,8 +3,10 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.*;
-
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import java.util.List;
 
 /**
@@ -50,6 +52,7 @@ public class PublicCompanySpec {
     private String companyStatusDetail;
 
     @Size(max = 20, message = "Filing history items must not exceed 20")
+    @Valid
     @JsonProperty("filing_history")
     private List<FilingHistorySpec> filingHistoryList;
 
@@ -59,10 +62,12 @@ public class PublicCompanySpec {
     private int numberOfAppointments = 1;
 
     @Size(max = 20, message = "Officer roles must not exceed 20")
+    @Valid
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
 
     @Size(max = 20, message = "Disqualified officers must not exceed 20")
+    @Valid
     @JsonProperty("disqualified_officers")
     private List<DisqualificationsSpec> disqualifiedOfficers;
 
@@ -76,6 +81,7 @@ public class PublicCompanySpec {
     private Integer numberOfPsc;
 
     @Size(max = 20, message = "PSC types must not exceed 20")
+    @Valid
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 

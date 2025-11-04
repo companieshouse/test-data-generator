@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -16,6 +17,7 @@ public class FilingHistorySpec {
     private CategoryType category;
 
     @Size(max = 20, message = "Resolutions must not exceed 20")
+    @Valid
     @JsonProperty("resolutions")
     private List<ResolutionsSpec> resolutions;
 
@@ -35,6 +37,7 @@ public class FilingHistorySpec {
         }
         this.type = type;
     }
+
     public CategoryType getCategory() {
         return category;
     }
@@ -43,9 +46,13 @@ public class FilingHistorySpec {
         this.category = category;
     }
 
-    public SubcategoryType getSubCategory() { return subCategory; }
+    public SubcategoryType getSubCategory() {
+        return subCategory;
+    }
 
-    public void setSubCategory(SubcategoryType subCategory) { this.subCategory = subCategory; }
+    public void setSubCategory(SubcategoryType subCategory) {
+        this.subCategory = subCategory;
+    }
 
     public List<ResolutionsSpec> getResolutions() {
         return resolutions;
