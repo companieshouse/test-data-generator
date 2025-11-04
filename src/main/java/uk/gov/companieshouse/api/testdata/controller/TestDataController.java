@@ -523,7 +523,7 @@ public class TestDataController {
         }
     }
 
-    @GetMapping("/identity/verification")
+    @GetMapping("/internal/identity/verification")
     public ResponseEntity<IdentityVerificationData> getIdentityVerification(
             @RequestParam("email") String email)
             throws DataException, NoDataFoundException {
