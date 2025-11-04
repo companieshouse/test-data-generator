@@ -79,7 +79,8 @@ public class UserServiceImpl implements UserService {
         user.setAdminUser(Optional.ofNullable(userSpec.getIsAdmin()).orElse(false));
         user.setTestData(true);
 
-        if (userSpec.getIdentityVerification() != null && !userSpec.getIdentityVerification().isEmpty()) {
+        if (userSpec.getIdentityVerification()
+                != null && !userSpec.getIdentityVerification().isEmpty()) {
             user.setOneLoginUserId(user.getId());
         }
 

@@ -8,7 +8,7 @@ public class IdentityVerificationSpec {
     @NotNull
     @JsonProperty("verification_source")
     @Pattern(regexp = "(ONE_LOGIN|ACSP)",
-            message = "verification_source must be either 'ONE_LOGIN' or 'ACSP'")
+            message = "incorrect verification source")
     private String verificationSource;
 
     public  String getVerificationSource() {
