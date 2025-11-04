@@ -7,12 +7,12 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,10 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
 import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
-import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -43,8 +40,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
-    private static final String CATEGORY = "incorporation";
-    private static final String DESCRIPTION = "incorporation-company";
     private static final String TYPE = "NEWINC";
     private static final Instant FIXED_MR01_DATE = LocalDate.of(2003, 2, 28).atStartOfDay(ZoneOffset.UTC).toInstant();
     private static final String ORIGINAL_DESCRIPTION =
@@ -114,14 +109,23 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setCompanyNumber(spec.getCompanyNumber());
         filingHistory.setLinks(createLinks(spec.getCompanyNumber(), entityId, fhSpec != null && Boolean.TRUE.equals(fhSpec.getDocumentMetadata())));
         filingHistory.setEntityId(entityId);
-        filingHistory.setCategory(getOrDefault(fhSpec, FilingHistorySpec::getCategory, CATEGORY));
+        if (fhSpec != null && fhSpec.getCategory() != null) {
+            filingHistory.setCategory(fhSpec.getCategory().getValue());
+        } else {
+            filingHistory.setCategory(CategoryType.INCORPORATION.getValue());
+        }
+        if (fhSpec != null && fhSpec.getSubCategory() != null) {
+            filingHistory.setSubCategory(fhSpec.getSubCategory().getValue());
+        }
+        else {
+            filingHistory.setSubCategory(SubcategoryType.OTHER.getValue());
+        }
         filingHistory.setType(type);
-        filingHistory.setSubCategory(getOrDefault(fhSpec, FilingHistorySpec::getSubCategory, null));
         filingHistory.setOriginalDescription(ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
         filingHistory.setDescription("description filing history entry for " + spec.getCompanyNumber());
 
-        applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow,barcode);
+        applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow, barcode);
 
         if (!"MR01".equals(type)) {
             filingHistory.setActionDate(dayTimeNow);
@@ -144,10 +148,6 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
     }
 
-    private String getOrDefault(FilingHistorySpec spec, Function<FilingHistorySpec, String> getter, String defaultValue) {
-        return (spec != null && StringUtils.hasText(getter.apply(spec))) ? getter.apply(spec) : defaultValue;
-    }
-
     private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow, String barcode) {
         switch (type) {
             case "AP01" -> {
@@ -160,8 +160,8 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 filingHistory.setDate(FIXED_MR01_DATE);
             }
             case "RESOLUTIONS" ->
-                filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow,barcode) : null);
-            case "CS01", "AA" -> filingHistory.setDescriptionValues(createDescriptionValues(type,dayNow,fhSpec));
+                    filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow, barcode) : null);
+            case "CS01", "AA" -> filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
             default -> filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
         }
     }
@@ -182,7 +182,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return false;
     }
 
-    private List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow) {
+    List<AssociatedFiling> createAssociatedFilings(Instant dayTimeNow, Instant dayNow) {
 
         ArrayList<AssociatedFiling> associatedFilings = new ArrayList<>();
 
@@ -217,7 +217,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return associatedFilings;
     }
 
-    private Links createLinks(String companyNumber, String id, boolean includeMetaData) {
+    Links createLinks(String companyNumber, String id, boolean includeMetaData) {
         Links links = new Links();
         links.setSelf("/company/" + companyNumber + "/filing-history/" + id);
         if (includeMetaData) {
@@ -253,7 +253,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return descriptionValues;
     }
 
-    private OriginalValues createOriginalValues( Instant dayNow) {
+    private OriginalValues createOriginalValues(Instant dayNow) {
         var originalValues = new OriginalValues();
         originalValues.setAppointmentDate(dayNow);
         originalValues.setOfficerName("John Test");

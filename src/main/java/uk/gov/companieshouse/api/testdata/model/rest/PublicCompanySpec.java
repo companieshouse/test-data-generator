@@ -3,15 +3,12 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.*;
 
 import java.util.List;
 
 /**
- * Requirements a new company must meet.
+ * Requirements a new company must meet for public.
  */
 public class PublicCompanySpec {
 
@@ -44,6 +41,7 @@ public class PublicCompanySpec {
 
     @JsonProperty
     @Valid
+    @Size(max = 20, message = "Registers must not exceed 20")
     private List<RegistersSpec> registers;
 
     @JsonProperty("company_status_detail")
@@ -51,6 +49,7 @@ public class PublicCompanySpec {
             message = "Invalid company status detail")
     private String companyStatusDetail;
 
+    @Size(max = 20, message = "Filing history items must not exceed 20")
     @JsonProperty("filing_history")
     private List<FilingHistorySpec> filingHistoryList;
 
@@ -59,9 +58,11 @@ public class PublicCompanySpec {
     @JsonProperty("number_of_appointments")
     private int numberOfAppointments = 1;
 
+    @Size(max = 20, message = "Officer roles must not exceed 20")
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
 
+    @Size(max = 20, message = "Disqualified officers must not exceed 20")
     @JsonProperty("disqualified_officers")
     private List<DisqualificationsSpec> disqualifiedOfficers;
 
@@ -74,6 +75,7 @@ public class PublicCompanySpec {
     @JsonProperty("number_of_psc")
     private Integer numberOfPsc;
 
+    @Size(max = 20, message = "PSC types must not exceed 20")
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
@@ -112,14 +114,6 @@ public class PublicCompanySpec {
 
     public void setJurisdiction(Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
-    }
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
     }
 
     public String getCompanyStatus() {
@@ -296,6 +290,14 @@ public class PublicCompanySpec {
 
     public void setForeignCompanyLegalForm(String foreignComapnyLegalForm) {
         this.foreignCompanyLegalForm = foreignComapnyLegalForm;
+    }
+
+    public String getCompanyNumber() {
+        return companyNumber;
+    }
+
+    public void setCompanyNumber(String companyNumber) {
+        this.companyNumber = companyNumber;
     }
 
 }
