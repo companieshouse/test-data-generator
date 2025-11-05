@@ -351,7 +351,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         String ledgerCode = getDefaultIfBlank(penaltySpec.getLedgerCode(),
                 C1_S1_LEDGER_CODES.get(random.nextInt(C1_S1_LEDGER_CODES.size())));
         penalty.setLedgerCode(ledgerCode);
-        penalty.setTypeDescription("CS01 IDV");
+        penalty.setTypeDescription("CS01 IDV                                ");
         penalty.setTransactionSubType("S3");
         penalty.setTransactionReference(generateTransactionReference("C1", "S3"));
     }
