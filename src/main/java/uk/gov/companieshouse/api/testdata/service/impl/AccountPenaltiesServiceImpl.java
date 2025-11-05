@@ -392,7 +392,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         penalty.setOutstandingAmount(isPaid ? 0.0 : penalty.getAmount());
         penalty.setDueDate(getFormattedDate(0, 6));
         penalty.setAccountStatus(getDefaultIfBlank(penaltySpec.getAccountStatus(), "CHS"));
-        penalty.setDunningStatus(getDefaultIfBlank(penaltySpec.getDunningStatus(), "PEN3"));
+        penalty.setDunningStatus(getDefaultIfBlank(penaltySpec.getDunningStatus(), "PEN1"));
     }
 
     private AccountPenalty createPenaltyUpdate(AccountPenalty accountPenalty, Boolean isPaid,
