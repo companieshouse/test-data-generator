@@ -78,6 +78,12 @@ public class UserServiceImpl implements UserService {
         user.setCreated(getDateNow());
         user.setAdminUser(Optional.ofNullable(userSpec.getIsAdmin()).orElse(false));
         user.setTestData(true);
+
+        if (userSpec.getIdentityVerification()
+                != null && !userSpec.getIdentityVerification().isEmpty()) {
+            user.setOneLoginUserId(user.getId());
+        }
+
         repository.save(user);
 
         processIdentityVerifications(user, userSpec);
@@ -221,17 +227,6 @@ public class UserServiceImpl implements UserService {
             throw ex;
         }
         return true;
-    }
-
-    public void updateUserWithOneLogin(String userId) {
-        var user = repository.findById(userId);
-        if (user.isPresent()) {
-            var existingUser = user.get();
-            existingUser.setOneLoginUserId(userId);
-            repository.save(existingUser);
-        } else {
-            LOG.debug("User not found for updateUserWithOneLogin with id= " + userId);
-        }
     }
 
     @Override
