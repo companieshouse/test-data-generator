@@ -54,7 +54,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String FOREIGN_ACCOUNT_TYPE = "ForeignAccountType";
     private static final String TERMS_OF_PUBLICATION = "Terms of Account Publication";
     private static final String GOVERNED_BY = "Federal Government";
-    public static final String
+        public static final String
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY =
             "full-data-available-from-financial-conduct-authority";
     public static final String

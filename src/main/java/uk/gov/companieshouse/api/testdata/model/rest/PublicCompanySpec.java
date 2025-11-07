@@ -66,11 +66,6 @@ public class PublicCompanySpec {
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
 
-    @Size(max = 20, message = "Disqualified officers must not exceed 20")
-    @Valid
-    @JsonProperty("disqualified_officers")
-    private List<DisqualificationsSpec> disqualifiedOfficers;
-
     @JsonProperty("accounts_due_status")
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
     private String accountsDueStatus;
@@ -108,7 +103,7 @@ public class PublicCompanySpec {
     private Boolean undeliverableRegisteredOfficeAddress;
 
     @JsonProperty("foreign_company_legal_form")
-    private String foreignCompanyLegalForm;
+    private Boolean foreignCompanyLegalForm;
 
     public PublicCompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -168,14 +163,6 @@ public class PublicCompanySpec {
 
     public void setOfficerRoles(List<OfficerRoles> officerRoles) {
         this.officerRoles = officerRoles;
-    }
-
-    public List<DisqualificationsSpec> getDisqualifiedOfficers() {
-        return disqualifiedOfficers;
-    }
-
-    public void setDisqualifiedOfficers(List<DisqualificationsSpec> disqualifiedOfficers) {
-        this.disqualifiedOfficers = disqualifiedOfficers;
     }
 
     public List<RegistersSpec> getRegisters() {
@@ -290,12 +277,12 @@ public class PublicCompanySpec {
         this.noDefaultOfficer = defaultOfficerActive;
     }
 
-    public String getForeignCompanyLegalForm() {
+    public Boolean getForeignCompanyLegalForm() {
         return foreignCompanyLegalForm;
     }
 
-    public void setForeignCompanyLegalForm(String foreignComapnyLegalForm) {
-        this.foreignCompanyLegalForm = foreignComapnyLegalForm;
+    public void setForeignCompanyLegalForm(Boolean foreignCompanyLegalForm) {
+        this.foreignCompanyLegalForm = foreignCompanyLegalForm;
     }
 
     public String getCompanyNumber() {

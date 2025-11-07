@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 import uk.gov.companieshouse.logging.Logger;
@@ -29,19 +30,19 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @ExceptionHandler(value = { DataException.class })
+    @ExceptionHandler(value = {DataException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     protected void handleDataException(DataException ex) {
         logException(ex);
     }
 
-    @ExceptionHandler(value = { NoDataFoundException.class })
+    @ExceptionHandler(value = {NoDataFoundException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     protected void handleNoDataFoundException(NoDataFoundException ex) {
         logException(ex);
     }
 
-    @ExceptionHandler(value = { InvalidAuthCodeException.class })
+    @ExceptionHandler(value = {InvalidAuthCodeException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     protected ResponseEntity<ValidationErrors> handleInvalidAuthCode(InvalidAuthCodeException ex) {
         LOG.error("Incorrect company auth_code provided for company " + ex.getCompanyNumber());
@@ -62,7 +63,9 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         if (cause instanceof InvalidFormatException) {
             InvalidFormatException ife = (InvalidFormatException) cause;
             String pathReference = ife.getPathReference();
-            if (pathReference != null && pathReference.startsWith(CompanySpec.class.getName())) {
+            if (pathReference != null
+                    && (pathReference.startsWith(CompanySpec.class.getName())
+                    || pathReference.startsWith(PublicCompanySpec.class.getName()))) {
                 // Handle invalid format in CompanySpec (failed to deserialize enum)
                 String invalidField = pathReference.substring(pathReference.indexOf("[\"") + 2,
                         pathReference.indexOf("\"]"));

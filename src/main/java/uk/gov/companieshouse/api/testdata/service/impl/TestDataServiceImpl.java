@@ -1,5 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -63,12 +70,6 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
@@ -814,39 +815,42 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyData createPublicCompanyData(PublicCompanySpec spec) throws DataException {
-        var publicSpec = new CompanySpec();
+    public CompanyData createPublicCompanyData(PublicCompanySpec publicCompanySpec) throws DataException {
+        var companySpec = new CompanySpec();
 
         // Only set allowed fields from PublicCompanySpec
-        publicSpec.setCompanyNumber(spec.getCompanyNumber());
-        publicSpec.setJurisdiction(spec.getJurisdiction());
-        publicSpec.setCompanyType(spec.getCompanyType());
-        publicSpec.setCompanyStatus(spec.getCompanyStatus());
-        publicSpec.setSubType(spec.getSubType());
-        publicSpec.setHasSuperSecurePscs(spec.getHasSuperSecurePscs());
-        publicSpec.setNumberOfAppointments(spec.getNumberOfAppointments());
-        publicSpec.setSecureOfficer(spec.getSecureOfficer());
-        publicSpec.setNoDefaultOfficer(spec.getNoDefaultOfficer());
-        publicSpec.setRegisters(spec.getRegisters());
-        publicSpec.setCompanyStatusDetail(spec.getCompanyStatusDetail());
-        publicSpec.setFilingHistoryList(spec.getFilingHistoryList());
-        if (spec.getFilingHistoryList() != null) {
-            publicSpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
+        companySpec.setCompanyNumber(publicCompanySpec.getCompanyNumber());
+        companySpec.setJurisdiction(publicCompanySpec.getJurisdiction());
+        companySpec.setCompanyType(publicCompanySpec.getCompanyType());
+        companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
+        companySpec.setSubType(publicCompanySpec.getSubType());
+        companySpec.setHasSuperSecurePscs(publicCompanySpec.getHasSuperSecurePscs());
+        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        companySpec.setSecureOfficer(publicCompanySpec.getSecureOfficer());
+        companySpec.setNoDefaultOfficer(publicCompanySpec.getNoDefaultOfficer());
+        companySpec.setRegisters(publicCompanySpec.getRegisters());
+        companySpec.setCompanyStatusDetail(publicCompanySpec.getCompanyStatusDetail());
+        companySpec.setFilingHistoryList(publicCompanySpec.getFilingHistoryList());
+        if (publicCompanySpec.getFilingHistoryList() != null) {
+            companySpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
         }
-        publicSpec.setNumberOfAppointments(spec.getNumberOfAppointments());
-        publicSpec.setOfficerRoles(spec.getOfficerRoles());
-        publicSpec.setDisqualifiedOfficers(spec.getDisqualifiedOfficers());
-        publicSpec.setAccountsDueStatus(spec.getAccountsDueStatus());
-        publicSpec.setNumberOfPsc(spec.getNumberOfPsc());
-        publicSpec.setPscType(spec.getPscType());
-        publicSpec.setPscActive(spec.getPscActive());
-        publicSpec.setWithdrawnStatements(spec.getWithdrawnStatements());
-        publicSpec.setActiveStatements(spec.getActiveStatements());
-        publicSpec.setHasUkEstablishment(spec.getHasUkEstablishment());
-        publicSpec.setRegisteredOfficeIsInDispute(spec.getRegisteredOfficeIsInDispute());
-        publicSpec.setUndeliverableRegisteredOfficeAddress(spec.getUndeliverableRegisteredOfficeAddress());
-        publicSpec.setForeignCompanyLegalForm(spec.getForeignCompanyLegalForm());
+        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        companySpec.setOfficerRoles(publicCompanySpec.getOfficerRoles());
+        companySpec.setAccountsDueStatus(publicCompanySpec.getAccountsDueStatus());
+        companySpec.setNumberOfPsc(publicCompanySpec.getNumberOfPsc());
+        companySpec.setPscType(publicCompanySpec.getPscType());
+        companySpec.setPscActive(publicCompanySpec.getPscActive());
+        companySpec.setWithdrawnStatements(publicCompanySpec.getWithdrawnStatements());
+        companySpec.setActiveStatements(publicCompanySpec.getActiveStatements());
+        companySpec.setHasUkEstablishment(publicCompanySpec.getHasUkEstablishment());
+        companySpec.setRegisteredOfficeIsInDispute(publicCompanySpec.getRegisteredOfficeIsInDispute());
+        companySpec.setUndeliverableRegisteredOfficeAddress(
+                publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
+        if (publicCompanySpec.getForeignCompanyLegalForm() != null && publicCompanySpec.getForeignCompanyLegalForm()) {
+            companySpec.setForeignCompanyLegalForm("legal form for company "
+                    + publicCompanySpec.getCompanyNumber());
+        }
 
-        return createCompanyData(publicSpec);
+        return createCompanyData(companySpec);
     }
 }

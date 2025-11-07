@@ -38,8 +38,8 @@ class PublicCompanySpecTest {
         spec.setNumberOfAppointments(5);
         assertEquals(5, spec.getNumberOfAppointments());
 
-        spec.setForeignCompanyLegalForm("LegalForm");
-        assertEquals("LegalForm", spec.getForeignCompanyLegalForm());
+        spec.setForeignCompanyLegalForm(true);
+        assertEquals(true, spec.getForeignCompanyLegalForm());
     }
 
     @Test
