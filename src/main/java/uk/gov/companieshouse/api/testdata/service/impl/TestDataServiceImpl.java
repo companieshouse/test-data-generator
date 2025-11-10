@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -819,7 +820,6 @@ public class TestDataServiceImpl implements TestDataService {
         var companySpec = new CompanySpec();
 
         // Only set allowed fields from PublicCompanySpec
-        companySpec.setCompanyNumber(publicCompanySpec.getCompanyNumber());
         companySpec.setJurisdiction(publicCompanySpec.getJurisdiction());
         companySpec.setCompanyType(publicCompanySpec.getCompanyType());
         companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
@@ -827,11 +827,10 @@ public class TestDataServiceImpl implements TestDataService {
         companySpec.setHasSuperSecurePscs(publicCompanySpec.getHasSuperSecurePscs());
         companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
         companySpec.setSecureOfficer(publicCompanySpec.getSecureOfficer());
-        companySpec.setNoDefaultOfficer(publicCompanySpec.getNoDefaultOfficer());
         companySpec.setRegisters(publicCompanySpec.getRegisters());
         companySpec.setCompanyStatusDetail(publicCompanySpec.getCompanyStatusDetail());
         companySpec.setFilingHistoryList(publicCompanySpec.getFilingHistoryList());
-        if (publicCompanySpec.getFilingHistoryList() != null) {
+        if (!CollectionUtils.isEmpty(publicCompanySpec.getFilingHistoryList())) {
             companySpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
         }
         companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
@@ -846,11 +845,11 @@ public class TestDataServiceImpl implements TestDataService {
         companySpec.setRegisteredOfficeIsInDispute(publicCompanySpec.getRegisteredOfficeIsInDispute());
         companySpec.setUndeliverableRegisteredOfficeAddress(
                 publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
-        if (publicCompanySpec.getForeignCompanyLegalForm() != null && publicCompanySpec.getForeignCompanyLegalForm()) {
+        if (publicCompanySpec.getForeignCompanyLegalForm() != null
+                && publicCompanySpec.getForeignCompanyLegalForm()) {
             companySpec.setForeignCompanyLegalForm("legal form for company "
-                    + publicCompanySpec.getCompanyNumber());
+                    + randomService.getString(10));
         }
-
         return createCompanyData(companySpec);
     }
 }

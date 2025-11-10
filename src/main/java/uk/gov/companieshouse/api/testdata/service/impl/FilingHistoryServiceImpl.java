@@ -26,7 +26,14 @@ import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
 import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+
+import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.SubcategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
+
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -115,8 +122,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
         if (fhSpec != null && fhSpec.getSubCategory() != null) {
             filingHistory.setSubCategory(fhSpec.getSubCategory().getValue());
-        }
-        else {
+        } else {
             filingHistory.setSubCategory(SubcategoryType.OTHER.getValue());
         }
         filingHistory.setType(type);
@@ -157,8 +163,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 filingHistory.setPaperFiled(true);
                 filingHistory.setDate(FIXED_MR01_DATE);
             }
-            case "RESOLUTIONS" ->
-                    filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow, barcode) : null);
+            case "RESOLUTIONS" -> filingHistory.setResolutions(fhSpec != null ? createResolutions(fhSpec, dayTimeNow, barcode) : null);
             case "CS01", "AA" -> filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
             default -> filingHistory.setAssociatedFilings(createAssociatedFilings(dayTimeNow, dayNow));
         }

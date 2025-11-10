@@ -29,9 +29,6 @@ class PublicCompanySpecTest {
     @Test
     void testGettersAndSetters() {
         PublicCompanySpec spec = new PublicCompanySpec();
-        spec.setCompanyNumber("12345678");
-        assertEquals("12345678", spec.getCompanyNumber());
-
         spec.setCompanyStatus("active");
         assertEquals("active", spec.getCompanyStatus());
 

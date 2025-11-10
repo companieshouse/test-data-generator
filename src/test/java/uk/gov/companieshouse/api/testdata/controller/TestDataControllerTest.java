@@ -103,12 +103,14 @@ class TestDataControllerTest {
     @Captor
     private ArgumentCaptor<PublicCompanySpec> publicSpecCaptor;
 
+    public static String companyUri = "http://localhost:1234/company/12345678";
+
     @Test
     void createCompanyInternal() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(request);
@@ -120,7 +122,7 @@ class TestDataControllerTest {
     @Test
     void createCompanyInternalNoRequest() throws Exception {
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(any())).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(null);
@@ -138,7 +140,7 @@ class TestDataControllerTest {
     void createCompanyInternalDefaultJurisdiction() throws Exception {
         CompanySpec request = new CompanySpec();
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(request);
@@ -166,7 +168,7 @@ class TestDataControllerTest {
         var request = new PublicCompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         var company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
@@ -176,9 +178,9 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createPublicCompanyInternalNoRequest() throws Exception {
+    void createPublicCompanyWithNullRequest() throws Exception {
         var company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createPublicCompanyData(any())).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompany(null);
@@ -196,7 +198,7 @@ class TestDataControllerTest {
     void createCompanyPublicDefaultJurisdiction() throws Exception {
         var request = new PublicCompanySpec();
         var company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);

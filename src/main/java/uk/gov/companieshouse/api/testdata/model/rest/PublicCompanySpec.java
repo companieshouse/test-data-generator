@@ -17,9 +17,6 @@ public class PublicCompanySpec {
     @JsonProperty
     private Jurisdiction jurisdiction;
 
-    @JsonIgnore
-    private String companyNumber;
-
     @JsonProperty("company_status")
     @Pattern(regexp = "active|inactive|closed|dissolved|administration|open|insolvency-proceedings|liquidation|converted-closed|receivership|registered|removed|voluntary-arrangement", message = "Invalid company status")
     private String companyStatus;
@@ -37,9 +34,6 @@ public class PublicCompanySpec {
 
     @JsonProperty("is_secure_officer")
     private Boolean isSecureOfficer;
-
-    @JsonProperty("no_default_officer")
-    private Boolean noDefaultOfficer;
 
     @JsonProperty
     @Valid
@@ -269,14 +263,6 @@ public class PublicCompanySpec {
         isSecureOfficer = secureOfficer;
     }
 
-    public Boolean getNoDefaultOfficer() {
-        return noDefaultOfficer;
-    }
-
-    public void setNoDefaultOfficer(Boolean defaultOfficerActive) {
-        this.noDefaultOfficer = defaultOfficerActive;
-    }
-
     public Boolean getForeignCompanyLegalForm() {
         return foreignCompanyLegalForm;
     }
@@ -284,14 +270,5 @@ public class PublicCompanySpec {
     public void setForeignCompanyLegalForm(Boolean foreignCompanyLegalForm) {
         this.foreignCompanyLegalForm = foreignCompanyLegalForm;
     }
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
-    }
-
 }
 

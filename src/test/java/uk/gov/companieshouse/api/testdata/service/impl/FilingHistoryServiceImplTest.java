@@ -1,6 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -10,8 +16,8 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,8 +34,24 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+
+import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
+import uk.gov.companieshouse.api.testdata.model.entity.Capital;
+import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+
+import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.DescriptionValuesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.ResolutionDescriptionType;
+import uk.gov.companieshouse.api.testdata.model.rest.ResolutionType;
+import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.SubcategoryType;
+
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -62,7 +84,7 @@ class FilingHistoryServiceImplTest {
 
     private ResolutionsSpec buildResolution(String category, ResolutionDescriptionType description, String subCategory, ResolutionType type)
     {
-        ResolutionsSpec res = new ResolutionsSpec();
+        var res = new ResolutionsSpec();
         res.setCategory(category);
         res.setDescription(description);
         res.setSubCategory(subCategory);
