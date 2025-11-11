@@ -178,7 +178,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createPublicCompanyWithNullRequest() throws Exception {
+    void createDefaultPublicCompanyWithEmptyRequest() throws Exception {
         var company =
                 new CompanyData("12345678", "123456", companyUri);
 
