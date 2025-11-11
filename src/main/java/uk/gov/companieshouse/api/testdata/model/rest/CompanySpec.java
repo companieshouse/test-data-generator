@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -44,6 +45,7 @@ public class CompanySpec {
 
     @JsonProperty
     @Valid
+    @Size(max = 20, message = "Registers must not exceed 20")
     private List<RegistersSpec> registers;
 
     @JsonProperty("company_status_detail")
@@ -51,6 +53,8 @@ public class CompanySpec {
             message = "Invalid company status detail")
     private String companyStatusDetail;
 
+    @Size(max = 20, message = "Filing history items must not exceed 20")
+    @Valid
     @JsonProperty("filing_history")
     private List<FilingHistorySpec> filingHistoryList;
 
@@ -59,9 +63,13 @@ public class CompanySpec {
     @JsonProperty("number_of_appointments")
     private int numberOfAppointments = 1;
 
+    @Size(max = 20, message = "Officer roles must not exceed 20")
+    @Valid
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
 
+    @Size(max = 20, message = "Disqualified officers must not exceed 20")
+    @Valid
     @JsonProperty("disqualified_officers")
     private List<DisqualificationsSpec> disqualifiedOfficers;
 
@@ -74,6 +82,8 @@ public class CompanySpec {
     @JsonProperty("number_of_psc")
     private Integer numberOfPsc;
 
+    @Size(max = 20, message = "PSC types must not exceed 20")
+    @Valid
     @JsonProperty("psc_type")
     private List<PscType> pscType;
 
