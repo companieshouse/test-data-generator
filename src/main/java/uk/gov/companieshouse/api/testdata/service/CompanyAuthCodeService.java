@@ -22,4 +22,6 @@ public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, Com
      */
     boolean verifyAuthCode(String companyNumber, String authCode) throws NoDataFoundException, DataException;
 
+    CompanyAuthCode findOrCreate(String companyNumber) throws DataException;
+
 }

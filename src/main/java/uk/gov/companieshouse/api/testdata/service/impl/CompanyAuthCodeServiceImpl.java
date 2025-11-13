@@ -44,6 +44,34 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         return repository.save(companyAuthCode);
     }
 
+    /**
+     * Finds a CompanyAuthCode by company number. If it does not exist,
+     * it creates a new one, saves it, and returns it.
+     *
+     * @param companyNumber The company number (ID)
+     * @return The existing or newly created CompanyAuthCode
+     * @throws DataException if hashing fails
+     */
+    @Override
+    public CompanyAuthCode findOrCreate(String companyNumber) throws DataException {
+        Optional<CompanyAuthCode> existingAuthCode = repository.findById(companyNumber);
+
+        if (existingAuthCode.isPresent()) {
+            return existingAuthCode.get();
+        }
+
+        final String authCode = String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH));
+
+        CompanyAuthCode companyAuthCode = new CompanyAuthCode();
+
+        companyAuthCode.setId(companyNumber);
+        companyAuthCode.setAuthCode(authCode);
+        companyAuthCode.setEncryptedAuthCode(encrypt(authCode));
+        companyAuthCode.setIsActive(true);
+
+        return repository.save(companyAuthCode);
+    }
+
     private String encrypt(final String authCode) throws DataException {
         return BCrypt.hashpw(sha256(authCode), BCrypt.gensalt());
     }
