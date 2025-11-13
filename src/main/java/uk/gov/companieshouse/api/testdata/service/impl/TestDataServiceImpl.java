@@ -1,11 +1,19 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -35,6 +43,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -62,12 +71,6 @@ import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
@@ -810,5 +813,43 @@ public class TestDataServiceImpl implements TestDataService {
         } catch (Exception ex) {
             throw new DataException("Error deleting transaction", ex);
         }
+    }
+
+    @Override
+    public CompanyData createPublicCompanyData(PublicCompanySpec publicCompanySpec) throws DataException {
+        var companySpec = new CompanySpec();
+
+        // Only set allowed fields from PublicCompanySpec
+        companySpec.setJurisdiction(publicCompanySpec.getJurisdiction());
+        companySpec.setCompanyType(publicCompanySpec.getCompanyType());
+        companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
+        companySpec.setSubType(publicCompanySpec.getSubType());
+        companySpec.setHasSuperSecurePscs(publicCompanySpec.getHasSuperSecurePscs());
+        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        companySpec.setSecureOfficer(publicCompanySpec.getSecureOfficer());
+        companySpec.setRegisters(publicCompanySpec.getRegisters());
+        companySpec.setCompanyStatusDetail(publicCompanySpec.getCompanyStatusDetail());
+        companySpec.setFilingHistoryList(publicCompanySpec.getFilingHistoryList());
+        if (!CollectionUtils.isEmpty(publicCompanySpec.getFilingHistoryList())) {
+            companySpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
+        }
+        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        companySpec.setOfficerRoles(publicCompanySpec.getOfficerRoles());
+        companySpec.setAccountsDueStatus(publicCompanySpec.getAccountsDueStatus());
+        companySpec.setNumberOfPsc(publicCompanySpec.getNumberOfPsc());
+        companySpec.setPscType(publicCompanySpec.getPscType());
+        companySpec.setPscActive(publicCompanySpec.getPscActive());
+        companySpec.setWithdrawnStatements(publicCompanySpec.getWithdrawnStatements());
+        companySpec.setActiveStatements(publicCompanySpec.getActiveStatements());
+        companySpec.setHasUkEstablishment(publicCompanySpec.getHasUkEstablishment());
+        companySpec.setRegisteredOfficeIsInDispute(publicCompanySpec.getRegisteredOfficeIsInDispute());
+        companySpec.setUndeliverableRegisteredOfficeAddress(
+                publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
+        if (publicCompanySpec.getForeignCompanyLegalForm() != null
+                && publicCompanySpec.getForeignCompanyLegalForm()) {
+            companySpec.setForeignCompanyLegalForm("legal form for company "
+                    + randomService.getString(10));
+        }
+        return createCompanyData(companySpec);
     }
 }

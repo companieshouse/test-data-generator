@@ -51,6 +51,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
@@ -2216,5 +2217,33 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting appeals data", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
+    }
+
+    @Test
+    void createPublicCompany() throws DataException {
+        PublicCompanySpec spec = new PublicCompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        testPublicCompanySpec(spec);
+    }
+
+    @Test
+    void createPublicCompanyWithNullSpec() throws DataException {
+        PublicCompanySpec spec = new PublicCompanySpec();
+        testPublicCompanySpec(spec);
+    }
+
+    private void testPublicCompanySpec(PublicCompanySpec spec) throws DataException{
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+
+        when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        CompanyData createdCompany = testDataService.createPublicCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.ENGLAND_WALES);
     }
 }

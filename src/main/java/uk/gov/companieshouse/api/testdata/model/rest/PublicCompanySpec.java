@@ -1,26 +1,20 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
 import java.util.List;
 
 /**
- * Requirements a new company must meet.
+ * Requirements a new company must meet for public.
  */
-public class CompanySpec {
+public class PublicCompanySpec {
 
     @JsonProperty
     private Jurisdiction jurisdiction;
-
-    @JsonIgnore
-    private String companyNumber;
 
     @JsonProperty("company_status")
     @Pattern(regexp = "active|inactive|closed|dissolved|administration|open|insolvency-proceedings|liquidation|converted-closed|receivership|registered|removed|voluntary-arrangement", message = "Invalid company status")
@@ -39,9 +33,6 @@ public class CompanySpec {
 
     @JsonProperty("is_secure_officer")
     private Boolean isSecureOfficer;
-
-    @JsonProperty("no_default_officer")
-    private Boolean noDefaultOfficer;
 
     @JsonProperty
     @Valid
@@ -67,11 +58,6 @@ public class CompanySpec {
     @Valid
     @JsonProperty("officer_roles")
     private List<OfficerRoles> officerRoles;
-
-    @Size(max = 20, message = "Disqualified officers must not exceed 20")
-    @Valid
-    @JsonProperty("disqualified_officers")
-    private List<DisqualificationsSpec> disqualifiedOfficers;
 
     @JsonProperty("accounts_due_status")
     @Pattern(regexp = "overdue|due-soon", message = "Invalid accounts due status")
@@ -109,22 +95,10 @@ public class CompanySpec {
     @JsonProperty("undeliverable_registered_office_address")
     private Boolean undeliverableRegisteredOfficeAddress;
 
-    @JsonProperty("company_name")
-    private String companyName;
-
-    @JsonProperty("is_company_number_padding")
-    private Boolean isPaddingCompanyNumber;
-
-    @JsonProperty("alphabetical_search")
-    private Boolean alphabeticalSearch;
-
-    @JsonProperty("advanced_search")
-    private Boolean advancedSearch;
-
     @JsonProperty("foreign_company_legal_form")
-    private String foreignCompanyLegalForm;
+    private Boolean foreignCompanyLegalForm;
 
-    public CompanySpec() {
+    public PublicCompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
 
@@ -134,14 +108,6 @@ public class CompanySpec {
 
     public void setJurisdiction(Jurisdiction jurisdiction) {
         this.jurisdiction = jurisdiction;
-    }
-
-    public String getCompanyNumber() {
-        return companyNumber;
-    }
-
-    public void setCompanyNumber(String companyNumber) {
-        this.companyNumber = companyNumber;
     }
 
     public String getCompanyStatus() {
@@ -190,14 +156,6 @@ public class CompanySpec {
 
     public void setOfficerRoles(List<OfficerRoles> officerRoles) {
         this.officerRoles = officerRoles;
-    }
-
-    public List<DisqualificationsSpec> getDisqualifiedOfficers() {
-        return disqualifiedOfficers;
-    }
-
-    public void setDisqualifiedOfficers(List<DisqualificationsSpec> disqualifiedOfficers) {
-        this.disqualifiedOfficers = disqualifiedOfficers;
     }
 
     public List<RegistersSpec> getRegisters() {
@@ -296,38 +254,6 @@ public class CompanySpec {
         this.activeStatements = activeStatements;
     }
 
-    public String getCompanyName() {
-        return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
-
-    public Boolean getIsPaddingCompanyNumber() {
-        return isPaddingCompanyNumber;
-    }
-
-    public void setIsPaddingCompanyNumber(Boolean isPaddingCompanyNumber) {
-        this.isPaddingCompanyNumber = isPaddingCompanyNumber;
-    }
-
-    public Boolean getAlphabeticalSearch() {
-        return alphabeticalSearch;
-    }
-
-    public void setAlphabeticalSearch(Boolean alphabeticalSearch) {
-        this.alphabeticalSearch = alphabeticalSearch;
-    }
-
-    public Boolean getAdvancedSearch() {
-        return advancedSearch;
-    }
-
-    public void setAdvancedSearch(Boolean advancedSearch) {
-        this.advancedSearch = advancedSearch;
-    }
-
     public Boolean getSecureOfficer() {
         return isSecureOfficer;
     }
@@ -336,20 +262,12 @@ public class CompanySpec {
         isSecureOfficer = secureOfficer;
     }
 
-    public Boolean getNoDefaultOfficer() {
-        return noDefaultOfficer;
-    }
-
-    public void setNoDefaultOfficer(Boolean defaultOfficerActive) {
-        this.noDefaultOfficer = defaultOfficerActive;
-    }
-
-    public String getForeignCompanyLegalForm() {
+    public Boolean getForeignCompanyLegalForm() {
         return foreignCompanyLegalForm;
     }
 
-    public void setForeignCompanyLegalForm(String foreignComapnyLegalForm) {
-        this.foreignCompanyLegalForm = foreignComapnyLegalForm;
+    public void setForeignCompanyLegalForm(Boolean foreignCompanyLegalForm) {
+        this.foreignCompanyLegalForm = foreignCompanyLegalForm;
     }
 }
 

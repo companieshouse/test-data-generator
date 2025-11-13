@@ -18,6 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -264,4 +265,14 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAdminPermissionsData(String id) throws DataException;
+
+    /**
+     * Create public company data with given {@code companySpec}.
+     *
+     * @param companySpec The specification the new public company must adhere to
+     * @return A {@link CompanyData}
+     * @throws DataException If any error occurs
+     */
+    CompanyData createPublicCompanyData(PublicCompanySpec companySpec) throws DataException;
+
 }

@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -9,17 +11,13 @@ public class FilingHistorySpec {
     private String type;
 
     @JsonProperty("subcategory")
-    private String subCategory;
+    private SubcategoryType subCategory;
 
     @JsonProperty("category")
-    private String category;
+    private CategoryType category;
 
-    @JsonProperty("description")
-    private String description;
-
-    @JsonProperty("original_description")
-    private String originalDescription;
-
+    @Size(max = 20, message = "Resolutions must not exceed 20")
+    @Valid
     @JsonProperty("resolutions")
     private List<ResolutionsSpec> resolutions;
 
@@ -34,36 +32,27 @@ public class FilingHistorySpec {
     }
 
     public void setType(String type) {
+        if (type != null && !AllowedFilingTypes.ALL.contains(type.trim().toUpperCase())) {
+            throw new IllegalArgumentException("Invalid filing type: " + type);
+        }
         this.type = type;
     }
 
-    public String getCategory() {
+    public CategoryType getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(CategoryType category) {
         this.category = category;
     }
 
-    public String getDescription() {
-        return description;
+    public SubcategoryType getSubCategory() {
+        return subCategory;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setSubCategory(SubcategoryType subCategory) {
+        this.subCategory = subCategory;
     }
-
-    public String getOriginalDescription() {
-        return originalDescription;
-    }
-
-    public void setOriginalDescription(String originalDescription) {
-        this.originalDescription = originalDescription;
-    }
-
-    public String getSubCategory() { return subCategory; }
-
-    public void setSubCategory(String subCategory) { this.subCategory = subCategory; }
 
     public List<ResolutionsSpec> getResolutions() {
         return resolutions;

@@ -36,6 +36,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -99,27 +100,32 @@ class TestDataControllerTest {
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
 
+    @Captor
+    private ArgumentCaptor<PublicCompanySpec> publicSpecCaptor;
+
+    public static String companyUri = "http://localhost:1234/company/12345678";
+
     @Test
-    void createCompany() throws Exception {
+    void createCompanyInternal() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     @Test
-    void createCompanyNoRequest() throws Exception {
+    void createCompanyInternalNoRequest() throws Exception {
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(any())).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.createCompany(null);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -131,12 +137,70 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyDefaultJurisdiction() throws Exception {
+    void createCompanyInternalDefaultJurisdiction() throws Exception {
         CompanySpec request = new CompanySpec();
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        // england/wales is the default jurisdiction
+        assertEquals(Jurisdiction.ENGLAND_WALES, request.getJurisdiction());
+    }
+
+    @Test
+    void createCompanyInternalException() throws Exception {
+        CompanySpec request = new CompanySpec();
+        request.setJurisdiction(Jurisdiction.NI);
+        Throwable exception = new DataException("Error message");
+        when(this.testDataService.createCompanyData(request)).thenThrow(exception);
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createCompanyInternal(request));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createCompanyPublic() throws Exception {
+        var request = new PublicCompanySpec();
+        request.setJurisdiction(Jurisdiction.SCOTLAND);
+        var company =
+                new CompanyData("12345678", "123456", companyUri);
+
+        when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createDefaultPublicCompanyWithEmptyRequest() throws Exception {
+        var company =
+                new CompanyData("12345678", "123456", companyUri);
+
+        when(this.testDataService.createPublicCompanyData(any())).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompany(null);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        verify(testDataService).createPublicCompanyData(publicSpecCaptor.capture());
+        var usedSpec = publicSpecCaptor.getValue();
+
+        assertEquals(Jurisdiction.ENGLAND_WALES, usedSpec.getJurisdiction());
+    }
+
+    @Test
+    void createCompanyPublicDefaultJurisdiction() throws Exception {
+        var request = new PublicCompanySpec();
+        var company =
+                new CompanyData("12345678", "123456", companyUri);
+
+        when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -147,15 +211,16 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyException() throws Exception {
-        CompanySpec request = new CompanySpec();
+    void createCompanyPublicException() throws Exception {
+        var request = new PublicCompanySpec();
         request.setJurisdiction(Jurisdiction.NI);
         Throwable exception = new DataException("Error message");
-        when(this.testDataService.createCompanyData(request)).thenThrow(exception);
+        when(this.testDataService.createPublicCompanyData(request)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
                 this.testDataController.createCompany(request));
         assertEquals(exception, thrown);
     }
+
 
     @Test
     void deleteCompany() throws Exception {
@@ -938,7 +1003,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyWithDisqualifications() throws Exception {
+    void createCompanyInternalWithDisqualifications() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
@@ -948,7 +1013,7 @@ class TestDataControllerTest {
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyData> response = testDataController.createCompany(request);
+        ResponseEntity<CompanyData> response = testDataController.createCompanyInternal(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
