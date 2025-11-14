@@ -121,7 +121,7 @@ class FilingHistoryServiceImplTest {
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
         assertEquals("incorporation", filingHistory.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
+        assertEquals("incorporation-company", filingHistory.getDescription());
         assertNotNull(filingHistory.getDate());
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
@@ -211,12 +211,11 @@ class FilingHistoryServiceImplTest {
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
         assertEquals(CategoryType.INCORPORATION.getValue(), filingHistory.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
+        assertEquals("incorporation-company", filingHistory.getDescription());
         assertNotNull(filingHistory.getDate());
         assertEquals("REC1", filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
         assertEquals(ENTITY_ID_PREFIX + UN_ENCODED_ID, filingHistory.getEntityId());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
         assertEquals(BARCODE, filingHistory.getBarcode());
 
         List<AssociatedFiling> associatedFilings = filingHistory.getAssociatedFilings();
@@ -273,16 +272,15 @@ class FilingHistoryServiceImplTest {
         FilingHistory first = capturedHistories.getFirst();
         assertEquals(TEST_ID + "_1", first.getId());
         assertEquals(CategoryType.ACCOUNTS.getValue(), first.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), first.getDescription());
+        assertEquals("incorporation-company", first.getDescription());
         assertEquals("PSC01", first.getType());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), first.getDescription());
         assertEquals(COMPANY_NUMBER, first.getCompanyNumber());
         assertEquals(BARCODE, first.getBarcode());
 
         FilingHistory second = capturedHistories.get(1);
         assertEquals(TEST_ID + "_2", second.getId());
         assertEquals(CategoryType.ADDRESS.getValue(), second.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), second.getDescription());
+        assertEquals("incorporation-company", second.getDescription());
         assertEquals("PSC02", second.getType());
         assertEquals("Certificate of incorporation general company details & statements of; "
                 + "officers, capital & shareholdings, guarantee, "
@@ -317,7 +315,7 @@ class FilingHistoryServiceImplTest {
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
         assertEquals("incorporation", filingHistory.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
+        assertEquals("incorporation-company", filingHistory.getDescription());
         assertNotNull(filingHistory.getDate());
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
@@ -389,7 +387,7 @@ class FilingHistoryServiceImplTest {
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
         assertEquals("incorporation", filingHistory.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
+        assertEquals("incorporation-company", filingHistory.getDescription());
         assertNotNull(filingHistory.getDate());
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
@@ -428,7 +426,7 @@ class FilingHistoryServiceImplTest {
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
         assertEquals("incorporation", filingHistory.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
+        assertEquals("incorporation-company", filingHistory.getDescription());
         assertNotNull(filingHistory.getDate());
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
@@ -467,7 +465,7 @@ class FilingHistoryServiceImplTest {
         assertEquals(COMPANY_NUMBER, filingHistory.getCompanyNumber());
         assertNotNull(filingHistory.getLinks());
         assertEquals("incorporation", filingHistory.getCategory());
-        assertEquals("description filing history entry for " + spec.getCompanyNumber(), filingHistory.getDescription());
+        assertEquals("incorporation-company", filingHistory.getDescription());
         assertNotNull(filingHistory.getDate());
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
@@ -534,7 +532,7 @@ class FilingHistoryServiceImplTest {
 
     private void validateAp01Filing(FilingHistory ap01) {
         assertEquals("AP01", ap01.getType());
-        assertEquals("description filing history entry for " + ap01.getCompanyNumber(), ap01.getDescription());
+        assertEquals("incorporation-company", ap01.getDescription());
         assertEquals(CategoryType.CAPITAL.getValue(), ap01.getCategory());
         assertNotNull(ap01.getDescriptionValues());
         assertNotNull(ap01.getOriginalValues());
@@ -543,7 +541,7 @@ class FilingHistoryServiceImplTest {
 
     private void validateMr01Filing(FilingHistory mr01) {
         assertEquals("MR01", mr01.getType());
-        assertEquals("description filing history entry for " + mr01.getCompanyNumber(), mr01.getDescription());
+        assertEquals("incorporation-company", mr01.getDescription());
         assertEquals(CategoryType.MORTGAGE.getValue(), mr01.getCategory());
         assertTrue(mr01.isPaperFiled());
         assertEquals(LocalDate.of(2003, 2, 28).atStartOfDay(ZoneOffset.UTC).toInstant(), mr01.getDate());
@@ -570,7 +568,7 @@ class FilingHistoryServiceImplTest {
 
     private void validateAaFiling(FilingHistory aa) {
         assertEquals("AA", aa.getType());
-        assertEquals("description filing history entry for " + aa.getCompanyNumber(), aa.getDescription());
+        assertEquals("incorporation-company", aa.getDescription());
         assertEquals(CategoryType.ACCOUNTS.getValue(), aa.getCategory());
         assertNotNull(aa.getDescriptionValues());
         assertNotNull(aa.getDescriptionValues().getMadeUpDate());
@@ -578,7 +576,7 @@ class FilingHistoryServiceImplTest {
 
     private void validateCs01Filing(FilingHistory cs01) {
         assertEquals("CS01", cs01.getType());
-        assertEquals("description filing history entry for " + cs01.getCompanyNumber(), cs01.getDescription());
+        assertEquals("incorporation-company", cs01.getDescription());
         assertEquals(CategoryType.CONFIRMATION_STATEMENT.getValue(), cs01.getCategory());
         assertNotNull(cs01.getDescriptionValues());
         assertNotNull(cs01.getDescriptionValues().getMadeUpDate());
