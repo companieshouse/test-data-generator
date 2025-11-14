@@ -92,6 +92,7 @@ public enum PenaltiesTransactionSubType {
     SX("SX", "1", List.of(), List.of()),
     SY("SY", "1", List.of(), List.of()),
     S1("S1", "1", List.of("E1", "S1", "N1"), List.of("CS01")),
+    S3("S3", "1", List.of("E1", "S1", "N1"), List.of("CS01 IDV")),
     A2("A2", "1", List.of("FU"), List.of("PENU"));
 
     private final String value;

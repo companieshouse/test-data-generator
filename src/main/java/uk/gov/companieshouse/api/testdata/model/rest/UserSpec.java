@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -27,6 +29,8 @@ public class UserSpec {
     private Boolean isAdmin;
 
     @JsonProperty("identity_verification")
+    @Size(min = 1, message = "identity_verification list, if provided, cannot be empty")
+    @Valid
     private List<IdentityVerificationSpec> identityVerification;
 
     public String getPassword() {

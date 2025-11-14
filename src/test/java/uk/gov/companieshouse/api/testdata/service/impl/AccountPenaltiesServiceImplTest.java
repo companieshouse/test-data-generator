@@ -447,6 +447,7 @@ class AccountPenaltiesServiceImplTest {
         assertNotNull(subType);
         assertFalse(subType.isBlank());
         assertNotEquals("S1", subType);
+        assertNotEquals("S3", subType);
         assertNotEquals("A2", subType);
     }
 
@@ -507,13 +508,15 @@ class AccountPenaltiesServiceImplTest {
         assertTrue(penalties.get(1).getAmount() >= 10.0 && penalties.get(1).getAmount() <= 99.0);
     }
 
-    @Test
-    void generateTransactionReference_shouldUseCorrectPrefix() {
+    @ParameterizedTest
+    @MethodSource("penaltyReferencePrefixProvider")
+    void generateTransactionReference_shouldUseCorrectPrefix(
+            String companyCode, String transactionSubType, String expectedPrefix) throws DataException {
         try {
             var method = AccountPenaltiesServiceImpl.class.getDeclaredMethod("generateTransactionReference", String.class, String.class);
             method.setAccessible(true);
-            String ref = (String) method.invoke(service, "C1", "S1");
-            assertTrue(ref.startsWith("P"));
+            String ref = (String) method.invoke(service, companyCode, transactionSubType);
+            assertTrue(ref.startsWith(expectedPrefix));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -640,6 +643,7 @@ class AccountPenaltiesServiceImplTest {
         return Stream.of(
                 Arguments.of("LP", null, "A"),
                 Arguments.of("C1", "S1", "P"),
+                Arguments.of("C1", "S3", "P"),
                 Arguments.of("C1", "A2", "U"),
                 Arguments.of("C1", "NH", "A"),
                 Arguments.of("CS", "S1", "A"),
