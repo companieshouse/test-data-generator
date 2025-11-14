@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum FilingHistoryDescriptionType {
 
     ACCOUNTS_BALANCE_SHEET("accounts-balance-sheet"),
@@ -86,6 +88,7 @@ public enum FilingHistoryDescriptionType {
         this.value = value;
     }
 
+    @JsonValue
     public String getValue() {
         return value;
     }
