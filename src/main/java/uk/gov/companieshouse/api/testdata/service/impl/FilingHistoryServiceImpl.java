@@ -31,6 +31,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CategoryType;
 import uk.gov.companieshouse.api.testdata.model.rest.SubcategoryType;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionType;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
 
@@ -128,7 +129,12 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         filingHistory.setType(type);
         filingHistory.setOriginalDescription(ORIGINAL_DESCRIPTION);
         filingHistory.setBarcode(barcode);
-        filingHistory.setDescription("description filing history entry for " + spec.getCompanyNumber());
+        if (fhSpec != null && fhSpec.getDescription() != null) {
+            filingHistory.setDescription(fhSpec.getDescription().getValue());
+        }
+        else {
+            filingHistory.setDescription(FilingHistoryDescriptionType.INCORPORATION_COMPANY.getValue());
+        }
         applyTypeSpecificLogic(filingHistory, fhSpec, type, dayNow, dayTimeNow, barcode);
 
         if (!"MR01".equals(type)) {

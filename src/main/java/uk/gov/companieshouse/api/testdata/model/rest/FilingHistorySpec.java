@@ -16,6 +16,9 @@ public class FilingHistorySpec {
     @JsonProperty("category")
     private CategoryType category;
 
+    @JsonProperty("description")
+    private FilingHistoryDescriptionType description;
+
     @Size(max = 20, message = "Resolutions must not exceed 20")
     @Valid
     @JsonProperty("resolutions")
@@ -76,5 +79,13 @@ public class FilingHistorySpec {
 
     public void setDocumentMetadata(Boolean documentMetadata) {
         this.documentMetadata = documentMetadata;
+    }
+
+    public FilingHistoryDescriptionType getDescription() {
+        return description;
+    }
+
+    public void setDescription(FilingHistoryDescriptionType description) {
+        this.description = description;
     }
 }
