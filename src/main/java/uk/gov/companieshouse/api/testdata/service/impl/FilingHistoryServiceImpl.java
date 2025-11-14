@@ -27,7 +27,13 @@ import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
 
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.SubcategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionType;
+import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
 
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;

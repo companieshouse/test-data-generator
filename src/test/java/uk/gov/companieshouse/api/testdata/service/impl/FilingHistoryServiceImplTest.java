@@ -46,6 +46,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CategoryType;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DescriptionValuesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionType;
 import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionDescriptionType;
 import uk.gov.companieshouse.api.testdata.model.rest.ResolutionType;
@@ -750,4 +751,58 @@ class FilingHistoryServiceImplTest {
         assertTrue(capital.getDescriptionValues().containsKey("capital"));
         assertTrue(capital.getDescriptionValues().containsKey("date"));
     }
+
+    // 7. Description is set from FilingHistorySpec if present
+    @Test
+    void createWithDescription_setsCustomDescription() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        FilingHistorySpec fhSpec = new FilingHistorySpec();
+        fhSpec.setType("REC1");
+
+        // Mock a description type
+        var customDescription = FilingHistoryDescriptionType.APPOINT_PERSON_DIRECTOR_COMPANY_WITH_NAME;
+        fhSpec.setDescription(customDescription);
+
+        spec.setFilingHistoryList(List.of(fhSpec));
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UN_ENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UN_ENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+
+        FilingHistory savedHistory = new FilingHistory();
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
+
+        filingHistoryService.create(spec);
+
+        ArgumentCaptor<FilingHistory> captor = ArgumentCaptor.forClass(FilingHistory.class);
+        verify(filingHistoryRepository).save(captor.capture());
+        assertEquals(customDescription.getValue(), captor.getValue().getDescription());
+    }
+
+    // 8. Description falls back to default if not set in FilingHistorySpec
+    @Test
+    void createWithNullDescription_setsDefaultDescription() throws DataException, BarcodeServiceException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        FilingHistorySpec fhSpec = new FilingHistorySpec();
+        fhSpec.setType("REC1");
+        fhSpec.setDescription(null); // Explicitly null
+
+        spec.setFilingHistoryList(List.of(fhSpec));
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UN_ENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UN_ENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+
+        FilingHistory savedHistory = new FilingHistory();
+        when(filingHistoryRepository.save(Mockito.any())).thenReturn(savedHistory);
+
+        filingHistoryService.create(spec);
+
+        ArgumentCaptor<FilingHistory> captor = ArgumentCaptor.forClass(FilingHistory.class);
+        verify(filingHistoryRepository).save(captor.capture());
+        assertEquals(FilingHistoryDescriptionType.INCORPORATION_COMPANY.getValue(), captor.getValue().getDescription());
+    }
+
 }
