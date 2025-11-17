@@ -76,7 +76,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
 
         final String authCode = DEFAULT_AUTH_CODE;
 
-        CompanyAuthCode companyAuthCode = new CompanyAuthCode();
+        var companyAuthCode = new CompanyAuthCode();
 
         companyAuthCode.setId(companyNumber);
         companyAuthCode.setAuthCode(authCode);

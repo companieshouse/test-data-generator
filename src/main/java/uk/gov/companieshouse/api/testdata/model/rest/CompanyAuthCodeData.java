@@ -10,9 +10,6 @@ public class CompanyAuthCodeData {
     @JsonProperty("authCode")
     private String authCode;
 
-//    public CompanyAuthCodeData() {
-//    }
-
     public CompanyAuthCodeData(String id, String authCode) {
         this.id = id;
         this.authCode = authCode;
