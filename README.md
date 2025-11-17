@@ -103,6 +103,9 @@ In order to use the generator, there are different possible endpoints that can b
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}` will delete the test company. There is a required parameter that is Authcode which needs to be included in the request body to be allowed to delete the test company. A usage example looks like this: `{"auth_code":"222222"}`
 - Health Check: Sending a GET request on the endpoint `{Base URL}/test-data/healthcheck` will return a status code and an empty response body.
 
+#### Getting authcode for a company without an authcode
+- GET: Sending a GET request on the endpoint `{Base URL}/test-data/internal/company/authcode?{companyNumber}` will return the default authcode for a company if it does not have an existing authcode or will return a `null` if the company has a valid existing `authcode`.
+
 #### Creating test users
 - POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/user` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
     - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.

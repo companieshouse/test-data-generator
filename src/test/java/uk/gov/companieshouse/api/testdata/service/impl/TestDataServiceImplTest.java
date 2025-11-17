@@ -83,6 +83,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -2245,5 +2246,42 @@ class TestDataServiceImplTest {
         CompanySpec capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 Jurisdiction.ENGLAND_WALES);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_successReturnsAuthCode() throws Exception {
+        CompanyAuthCode expected = new CompanyAuthCode();
+        expected.setId(COMPANY_NUMBER);
+        expected.setAuthCode("999999");
+
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenReturn(expected);
+
+        CompanyAuthCode actual = testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER);
+
+        assertSame(expected, actual);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_profileNotFoundIsMappedToNoDataFoundException() throws Exception {
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER))
+                .thenThrow(new NoDataFoundException("profile missing"));
+
+        NoDataFoundException ex = assertThrows(NoDataFoundException.class,
+                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+
+        assertEquals("Company profile not found when finding or creating auth code", ex.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_otherExceptionIsWrappedInDataException() throws Exception {
+        RuntimeException cause = new RuntimeException("boom");
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(cause);
+
+        DataException ex = assertThrows(DataException.class,
+                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+
+        assertEquals("Error finding or creating company auth code", ex.getMessage());
+        // ensure original cause is preserved
+        assertSame(cause, ex.getCause());
     }
 }
