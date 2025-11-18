@@ -7,7 +7,7 @@ public class CompanyAuthCodeData {
     @JsonProperty("authCode")
     private String authCode;
 
-    public CompanyAuthCodeData(String id, String authCode) {
+    public CompanyAuthCodeData(String authCode) {
         this.authCode = authCode;
     }
 

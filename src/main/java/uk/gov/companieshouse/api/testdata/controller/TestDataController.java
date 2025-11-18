@@ -144,7 +144,7 @@ public class TestDataController {
         }
 
         var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
-        var defaultAuthCode = new CompanyAuthCodeData(authCode.getId(), authCode.getAuthCode());
+        var defaultAuthCode = new CompanyAuthCodeData(authCode.getAuthCode());
         return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
     }
 
