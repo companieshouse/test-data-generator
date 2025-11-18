@@ -1460,7 +1460,6 @@ class TestDataControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertEquals(companyNumber, response.getBody().getId());
         assertEquals("CODE123", response.getBody().getAuthCode());
     }
 

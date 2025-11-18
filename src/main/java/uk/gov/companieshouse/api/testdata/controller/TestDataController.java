@@ -144,8 +144,8 @@ public class TestDataController {
         }
 
         var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
-        var dto = new CompanyAuthCodeData(authCode.getId(), authCode.getAuthCode());
-        return new ResponseEntity<>(dto, HttpStatus.OK);
+        var defaultAuthCode = new CompanyAuthCodeData(authCode.getId(), authCode.getAuthCode());
+        return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
     }
 
     @PostMapping("/internal/user")

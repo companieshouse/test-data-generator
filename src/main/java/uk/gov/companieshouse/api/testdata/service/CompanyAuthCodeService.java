@@ -7,7 +7,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 
 public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, CompanySpec> {
 
-    /**.
+    /**
      * Verify the given {@code authCode} against the company with {@code
      * companyNumber}
      * 
