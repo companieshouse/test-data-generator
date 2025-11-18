@@ -17,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -395,6 +396,19 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
+    public CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
+            throws DataException, NoDataFoundException {
+        try {
+            return companyAuthCodeService.findOrCreate(companyNumber);
+        } catch (NoDataFoundException ex) {
+            throw new NoDataFoundException(
+                    "Company profile not found when finding or creating auth code");
+        } catch (Exception ex) {
+            throw new DataException("Error finding or creating company auth code", ex);
+        }
+    }
+
+    @Override
     public UserData createUserData(UserSpec userSpec) throws DataException {
         final String password = userSpec.getPassword();
         if (password == null || password.isEmpty()) {
@@ -710,7 +724,9 @@ public class TestDataServiceImpl implements TestDataService {
             var postcodeData = new PostcodesData(
                     postcode.getBuildingNumber() != null ? postcode
                             .getBuildingNumber().intValue() : null,
-                    postcode.getThoroughfare().getName() + " " + (postcode.getThoroughfare().getDescriptor() != null ? postcode.getThoroughfare().getDescriptor() : ""),
+                    postcode.getThoroughfare().getName() + " "
+                            + (postcode.getThoroughfare().getDescriptor()
+                            != null ? postcode.getThoroughfare().getDescriptor() : ""),
                     postcode.getLocality().getDependentLocality(),
                     postcode.getLocality().getPostTown(),
                     postcode.getPostcode().getPretty()
@@ -816,7 +832,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyData createPublicCompanyData(PublicCompanySpec publicCompanySpec) throws DataException {
+    public CompanyData createPublicCompanyData(PublicCompanySpec publicCompanySpec)
+            throws DataException {
         var companySpec = new CompanySpec();
 
         // Only set allowed fields from PublicCompanySpec
@@ -842,7 +859,8 @@ public class TestDataServiceImpl implements TestDataService {
         companySpec.setWithdrawnStatements(publicCompanySpec.getWithdrawnStatements());
         companySpec.setActiveStatements(publicCompanySpec.getActiveStatements());
         companySpec.setHasUkEstablishment(publicCompanySpec.getHasUkEstablishment());
-        companySpec.setRegisteredOfficeIsInDispute(publicCompanySpec.getRegisteredOfficeIsInDispute());
+        companySpec.setRegisteredOfficeIsInDispute(
+                publicCompanySpec.getRegisteredOfficeIsInDispute());
         companySpec.setUndeliverableRegisteredOfficeAddress(
                 publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
         if (publicCompanySpec.getForeignCompanyLegalForm() != null

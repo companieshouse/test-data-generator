@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -97,7 +98,8 @@ public interface TestDataService {
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createCertifiedCopiesData(CertifiedCopiesSpec certifiedCopiesSpec) throws DataException;
+    CertificatesData createCertifiedCopiesData(
+            CertifiedCopiesSpec certifiedCopiesSpec) throws DataException;
 
     /**
      * Adds a new missing image deliveries test data based on the provided user specifications.
@@ -106,7 +108,8 @@ public interface TestDataService {
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createMissingImageDeliveriesData(MissingImageDeliveriesSpec missingImageDeliveriesSpec) throws DataException;
+    CertificatesData createMissingImageDeliveriesData(
+            MissingImageDeliveriesSpec missingImageDeliveriesSpec) throws DataException;
 
     /**
      * Adds a new sic code test data based on the provided user specifications.
@@ -115,7 +118,8 @@ public interface TestDataService {
      * @return the created sic code with keyword test data
      * @throws DataException if there is an error during user creation
      */
-    CombinedSicActivitiesData createCombinedSicActivitiesData(CombinedSicActivitiesSpec combinedSicActivitiesSpec) throws DataException;
+    CombinedSicActivitiesData createCombinedSicActivitiesData(
+            CombinedSicActivitiesSpec  combinedSicActivitiesSpec)  throws DataException;
 
     /**
      * Deletes the certificates test data for the given id.
@@ -175,7 +179,7 @@ public interface TestDataService {
     AccountPenaltiesData getAccountPenaltiesData(String customerCode, String companyCode)
             throws NoDataFoundException;
 
-    /**
+    /**.
      * Updates the account penalties data for a given penalty reference and
      * {@link UpdateAccountPenaltiesRequest}
      *
@@ -274,5 +278,16 @@ public interface TestDataService {
      * @throws DataException If any error occurs
      */
     CompanyData createPublicCompanyData(PublicCompanySpec companySpec) throws DataException;
+
+    /**
+     * Find an existing CompanyAuthCode for the given company number
+     * or create a default one if none exists.
+     * @param companyNumber the company number
+     * @return the existing or newly created CompanyAuthCode
+     * @throws DataException on general errors
+     * @throws NoDataFoundException if the company profile is not found
+     */
+    CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
+            throws DataException, NoDataFoundException;
 
 }

@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -24,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -1442,5 +1444,58 @@ class TestDataControllerTest {
         assertEquals("No identity verification found for email: " + email, thrown.getMessage());
 
         verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_success() throws Exception {
+        String companyNumber = "12345678";
+        var authCode = new CompanyAuthCode();
+        authCode.setId(companyNumber);
+        authCode.setAuthCode("CODE123");
+
+        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenReturn(authCode);
+
+        ResponseEntity<CompanyAuthCodeData> response =
+                testDataController.findOrCreateCompanyAuthCode(companyNumber);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("CODE123", response.getBody().getAuthCode());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_nullCompanyNumber_throwsDataException() {
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(null));
+        assertEquals("companyNumber query parameter is required", thrown.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_emptyCompanyNumber_throwsDataException() {
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(""));
+        assertEquals("companyNumber query parameter is required", thrown.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_serviceThrowsDataException() throws Exception {
+        String companyNumber = "12345678";
+        DataException ex = new DataException("Service error");
+        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(companyNumber));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_serviceThrowsNoDataFoundException() throws Exception {
+        String companyNumber = "12345678";
+        NoDataFoundException ex = new NoDataFoundException("Not found");
+        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(companyNumber));
+        assertEquals(ex, thrown);
     }
 }

@@ -34,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
@@ -131,6 +132,20 @@ public class TestDataController {
         data.put(COMPANY_NUMBER_DATA, companyNumber);
         LOG.info("Company deleted", data);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("internal/company/authcode")
+    public ResponseEntity<CompanyAuthCodeData> findOrCreateCompanyAuthCode(
+            @RequestParam("companyNumber") final String companyNumber)
+            throws DataException, NoDataFoundException {
+
+        if (companyNumber == null || companyNumber.isEmpty()) {
+            throw new DataException("companyNumber query parameter is required");
+        }
+
+        var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
+        var defaultAuthCode = new CompanyAuthCodeData(authCode.getAuthCode());
+        return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
     }
 
     @PostMapping("/internal/user")

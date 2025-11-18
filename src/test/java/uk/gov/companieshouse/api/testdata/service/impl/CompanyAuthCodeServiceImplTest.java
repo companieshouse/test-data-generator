@@ -31,8 +31,10 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,12 +42,19 @@ class CompanyAuthCodeServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final Long COMPANY_AUTH_CODE = 123456L;
+    private static final String DEFAULT_AUTH_CODE = "222222";
 
     @Mock
     private CompanyAuthCodeRepository repository;
 
     @Mock
+    private CompanyProfileRepository companyProfileRepository;
+
+    @Mock
     private RandomService randomService;
+
+    @Mock
+    private CompanyProfile mockCompanyProfile;
 
     @InjectMocks
     private CompanyAuthCodeServiceImpl companyAuthCodeServiceImpl;
@@ -79,8 +88,36 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
+    void verifyAuthCodeCompanyProfileNotFound() {
+        final String plainCode = "222";
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        assertThrows(NoDataFoundException.class,
+                () -> companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
+
+        verify(repository, never()).findById(any());
+    }
+
+    @Test
+    void verifyAuthCodeDefaultCodeCorrect() throws NoDataFoundException, DataException {
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        assertTrue(companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, DEFAULT_AUTH_CODE));
+    }
+
+    @Test
+    void verifyAuthCodeDefaultCodeIncorrect() throws NoDataFoundException, DataException {
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        assertFalse(companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, "111111"));
+    }
+
+    @Test
     void verifyAuthCodeCorrect() throws NoSuchAlgorithmException, NoDataFoundException, DataException {
         final String plainCode = "222";
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
 
         final String encryptedAuthCode = BCrypt.hashpw(MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
                 .digest(plainCode.getBytes(StandardCharsets.UTF_8)), BCrypt.gensalt());
@@ -88,7 +125,7 @@ class CompanyAuthCodeServiceImplTest {
         CompanyAuthCode authCode = new CompanyAuthCode();
         authCode.setAuthCode(plainCode);
         authCode.setEncryptedAuthCode(encryptedAuthCode);
-        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(authCode));
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(authCode));
 
         assertTrue(companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
     }
@@ -96,24 +133,16 @@ class CompanyAuthCodeServiceImplTest {
     @Test
     void verifyAuthCodeIncorrect() throws NoDataFoundException, DataException {
         final String plainCode = "222";
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
+
         final String encryptedAuthCode = "$2a$10$randomrandomrandomrandomrandomrandomrandomrandom12345";
 
         CompanyAuthCode authCode = new CompanyAuthCode();
         authCode.setAuthCode(plainCode);
         authCode.setEncryptedAuthCode(encryptedAuthCode);
-        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(authCode));
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(authCode));
 
         assertFalse(companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
-    }
-
-    @Test
-    void verifyAuthCodeNotFound() {
-        final String plainCode = "222";
-        CompanyAuthCode authCode = null;
-        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.ofNullable(authCode));
-
-        assertThrows(NoDataFoundException.class,
-                () -> companyAuthCodeServiceImpl.verifyAuthCode(COMPANY_NUMBER, plainCode));
     }
 
     @Test
@@ -194,6 +223,8 @@ class CompanyAuthCodeServiceImplTest {
     @Test
     void verifyAuthCodeThrowsDataExceptionWhenSha256Fails() throws Exception {
         final String plainCode = "222";
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
+
         CompanyAuthCode authCode = new CompanyAuthCode();
         authCode.setAuthCode(plainCode);
         authCode.setEncryptedAuthCode("$2a$10$randomrandomrandomrandomrandomrandomrandomrandom12345");
@@ -210,6 +241,60 @@ class CompanyAuthCodeServiceImplTest {
         repositoryField.setAccessible(true);
         repositoryField.set(brokenService, repository);
 
+        var companyProfileRepoField = CompanyAuthCodeServiceImpl.class.getDeclaredField("companyProfileRepository");
+        companyProfileRepoField.setAccessible(true);
+        companyProfileRepoField.set(brokenService, companyProfileRepository);
+
         assertThrows(DataException.class, () -> brokenService.verifyAuthCode(COMPANY_NUMBER, plainCode));
+    }
+
+    @Test
+    void findOrCreateCompanyProfileNotFound() {
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        assertThrows(NoDataFoundException.class,
+                () -> companyAuthCodeServiceImpl.findOrCreate(COMPANY_NUMBER));
+
+        verify(repository, never()).findById(any());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void findOrCreateAuthCodeExists() throws DataException, NoDataFoundException {
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
+
+        CompanyAuthCode existingAuthCode = new CompanyAuthCode();
+        existingAuthCode.setId(COMPANY_NUMBER);
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(existingAuthCode));
+
+        CompanyAuthCode result = companyAuthCodeServiceImpl.findOrCreate(COMPANY_NUMBER);
+
+        assertEquals(existingAuthCode, result);
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void findOrCreateCreatesDefaultAuthCode() throws Exception {
+        when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        CompanyAuthCode savedAuthCode = new CompanyAuthCode();
+        when(repository.save(any())).thenReturn(savedAuthCode);
+
+        final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
+                .digest(DEFAULT_AUTH_CODE.getBytes(StandardCharsets.UTF_8));
+
+        CompanyAuthCode result = companyAuthCodeServiceImpl.findOrCreate(COMPANY_NUMBER);
+
+        assertEquals(savedAuthCode, result);
+
+        ArgumentCaptor<CompanyAuthCode> captor = ArgumentCaptor.forClass(CompanyAuthCode.class);
+        verify(repository).save(captor.capture());
+
+        CompanyAuthCode captured = captor.getValue();
+        assertEquals(COMPANY_NUMBER, captured.getId());
+        assertEquals(DEFAULT_AUTH_CODE, captured.getAuthCode());
+        assertTrue(captured.getIsActive());
+        assertTrue(BCrypt.checkpw(password, captured.getEncryptedAuthCode()));
     }
 }
