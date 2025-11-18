@@ -22,7 +22,6 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
 
-    private static final String COMPANY_AUTH_DATA_NOT_FOUND = "company auth data not found";
     private static final String COMPANY_PROFILE_NOT_FOUND = "company profile not found";
     private static final String DEFAULT_AUTH_CODE = "222222";
 
@@ -94,7 +93,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         try {
             var sha256Digest = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256);
             return sha256Digest.digest(authCode.getBytes(StandardCharsets.UTF_8));
-        } catch (NoSuchAlgorithmException er) {
+        } catch (NoSuchAlgorithmException ex) {
             throw new DataException("SHA-256 algorithm not found when hashing auth code.");
         }
     }
