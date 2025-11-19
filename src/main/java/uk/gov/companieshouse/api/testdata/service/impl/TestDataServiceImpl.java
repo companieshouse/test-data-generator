@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -215,20 +217,7 @@ public class TestDataServiceImpl implements TestDataService {
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
-            if (isElasticSearchDeployed) {
-                if(spec.getElasticSearch() != null && spec.getElasticSearch()) {
-                    LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
-                    this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
-                }
-                if (spec.getAlphabeticalSearch() != null) {
-                    this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-                }
-                if (spec.getAdvancedSearch() != null) {
-                    this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-                }
-                LOG.info("Successfully added company to ElasticSearch index");
-            }
-
+            addCompanyToElasticSearchIndexes(spec, companyData);
             LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
             return companyData;
         } catch (Exception ex) {
@@ -871,5 +860,21 @@ public class TestDataServiceImpl implements TestDataService {
                     + randomService.getString(10));
         }
         return createCompanyData(companySpec);
+    }
+
+    private void addCompanyToElasticSearchIndexes(CompanySpec spec, CompanyData companyData) throws DataException, ApiErrorResponseException, URIValidationException {
+        if (isElasticSearchDeployed) {
+            if (spec.getUpdateElasticSearchIndex() != null && spec.getUpdateElasticSearchIndex()) {
+                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
+                this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+            }
+            if (spec.getAlphabeticalSearch() != null) {
+                this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+            }
+            if (spec.getAdvancedSearch() != null) {
+                this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+            }
+            LOG.info("Successfully added company to ElasticSearch index");
+        }
     }
 }
