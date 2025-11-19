@@ -1520,6 +1520,7 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
+        spec.setElasticSearch(true);
         spec.setAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
@@ -1820,6 +1821,7 @@ class TestDataServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAdvancedSearch(true);
+        spec.setElasticSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
@@ -1843,6 +1845,7 @@ class TestDataServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAlphabeticalSearch(true);
+        spec.setElasticSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 

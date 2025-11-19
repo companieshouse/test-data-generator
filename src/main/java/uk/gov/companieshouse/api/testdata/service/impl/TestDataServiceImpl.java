@@ -216,8 +216,10 @@ public class TestDataServiceImpl implements TestDataService {
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
             if (isElasticSearchDeployed) {
-                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
-                this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+                if(spec.getElasticSearch() != null && spec.getElasticSearch()) {
+                    LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
+                    this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+                }
                 if (spec.getAlphabeticalSearch() != null) {
                     this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
                 }

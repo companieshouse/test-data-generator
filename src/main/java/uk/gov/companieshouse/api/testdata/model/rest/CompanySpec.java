@@ -124,6 +124,9 @@ public class CompanySpec {
     @JsonProperty("foreign_company_legal_form")
     private String foreignCompanyLegalForm;
 
+    @JsonProperty("elastic_search")
+    private Boolean elasticSearch;
+
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
     }
@@ -350,6 +353,14 @@ public class CompanySpec {
 
     public void setForeignCompanyLegalForm(String foreignComapnyLegalForm) {
         this.foreignCompanyLegalForm = foreignComapnyLegalForm;
+    }
+
+    public Boolean getElasticSearch() {
+        return elasticSearch;
+    }
+
+    public void setElasticSearch(Boolean elasticSearch) {
+        this.elasticSearch = elasticSearch;
     }
 }
 
