@@ -862,19 +862,44 @@ public class TestDataServiceImpl implements TestDataService {
         return createCompanyData(companySpec);
     }
 
-    private void addCompanyToElasticSearchIndexes(CompanySpec spec, CompanyData companyData) throws DataException, ApiErrorResponseException, URIValidationException {
-        if (isElasticSearchDeployed) {
-            if (spec.getUpdateElasticSearchIndex() != null && spec.getUpdateElasticSearchIndex()) {
-                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
-                this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
-            }
-            if (spec.getAlphabeticalSearch() != null) {
-                this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-            }
-            if (spec.getAdvancedSearch() != null) {
-                this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-            }
-            LOG.info("Successfully added company to ElasticSearch index");
+    private void addCompanyToElasticSearchIndexes(CompanySpec spec,
+                                                  CompanyData companyData)
+            throws DataException, ApiErrorResponseException, URIValidationException {
+
+        // This variable is set from environment to allow disabling ES indexing in certain environments
+        if (!isElasticSearchDeployed) {
+            LOG.debug("Elasticsearch not deployed; skipping indexing for company " + spec.getCompanyNumber());
+            return;
         }
+
+        // Decide which indexes to update
+        boolean addMainIndex =
+                Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())
+                        || spec.getAlphabeticalSearch() != null
+                        || spec.getAdvancedSearch() != null;
+
+        boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
+        boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
+
+        // Main company index (ensure present if any specialised index is requested)
+        if (addMainIndex) {
+            LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
+            companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        // Alphabetical index
+        if (addAlphabeticalIndex) {
+            LOG.info("Adding company to Alphabetical ElasticSearch index: " + spec.getCompanyNumber());
+            alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        // Advanced index
+        if (addAdvancedIndex) {
+            LOG.info("Adding company to Advanced ElasticSearch index: " + spec.getCompanyNumber());
+            advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
     }
+
 }
