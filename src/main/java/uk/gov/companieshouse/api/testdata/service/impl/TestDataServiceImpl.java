@@ -873,7 +873,7 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         // Decide which indexes to update
-        boolean addMainIndex =
+        boolean addCompanyIndex =
                 Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())
                         || spec.getAlphabeticalSearch() != null
                         || spec.getAdvancedSearch() != null;
@@ -881,8 +881,8 @@ public class TestDataServiceImpl implements TestDataService {
         boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
         boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
 
-        // Main company index (ensure present if any specialised index is requested)
-        if (addMainIndex) {
+        // Company index (ensure present if any specialised index is requested)
+        if (addCompanyIndex) {
             LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
             companySearchService.addCompanyIntoElasticSearchIndex(companyData);
         }
