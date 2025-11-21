@@ -127,7 +127,7 @@ In order to use the generator, there are different possible endpoints that can b
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/admin-permission/{id}` will delete the test admin permission. `id` is required to delete the admin permission; This is generated as response when an admin permission is created.
 
 #### Getting Identity_Id and Uvid for a user
-- GET: Sending a GET request on the endpoint `{Base URL}/test-data/identity/?email=email@email.com` will return the identity id and uvid for the user. `userId` is required to get the identity id and uvid.
+- GET: Sending a GET request on the endpoint `{Base URL}/test-data/identity/?email=email@email.com` will return the `identity_id`, `uvid`, `firstname` and `lastname` for the user. `userId` is required to get the identity id and uvid.
     
     A usage example response looks like this: `{"identity_id": "d4b5f5e2-5f4e-4c3a-9f3e-2b5f5e25f4e4", "uvid": "XX4YBV22223"}`
 

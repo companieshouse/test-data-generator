@@ -1,22 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.NullSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.testdata.model.entity.Identity;
-import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
-import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
-import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
@@ -25,8 +10,36 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import uk.gov.companieshouse.api.testdata.model.entity.Identity;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
+import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
+
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class IdentityVerificationServiceImplTest {
+
+    private static final String EMAIL = "user@example.com";
+    private static final String IDENTITY_ID = "identity-id-123";
+    private static final String UVID_VALUE = "UVID-ABC";
+    private static final String USER_ID = "user-999";
+    private static final String FIRST_NAME = "John";
+    private static final String LAST_NAME = "Doe";
 
     @Mock
     private IdentityRepository identityRepository;
@@ -34,74 +47,154 @@ class IdentityVerificationServiceImplTest {
     @Mock
     private UvidRepository uvidRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private IdentityVerificationServiceImpl service;
 
+    private Identity identityMock;
+    private Uvid uvid;
+    private User user;
+
+    @BeforeEach
+    void setUp() {
+        identityMock = mock(Identity.class);
+        when(identityMock.getId()).thenReturn(IDENTITY_ID);
+        when(identityMock.getUserId()).thenReturn(USER_ID);
+
+        uvid = new Uvid();
+        uvid.setValue(UVID_VALUE);
+        uvid.setIdentityId(IDENTITY_ID);
+
+        user = new User();
+        user.setForename(FIRST_NAME);
+        user.setSurname(LAST_NAME);
+    }
+
     @Test
     void getIdentityVerification_whenIdentityNotFound_returnsNull() {
-        String email = "missing@example.com";
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        when(identityRepository.findByEmail(email)).thenReturn(Optional.empty());
-
-        IdentityVerificationData result = service.getIdentityVerificationData(email);
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
 
         assertNull(result);
-        verify(identityRepository, times(1)).findByEmail(email);
-        verifyNoInteractions(uvidRepository);
+        verify(identityRepository, times(1)).findByEmail(EMAIL);
+        verifyNoInteractions(uvidRepository, userRepository);
     }
 
     @Test
     void getIdentityVerification_whenUvidNotFound_returnsNull() {
-        String email = "user@example.com";
-        String identityId = "identity-id-123";
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.empty());
 
-        Identity identityMock = mock(Identity.class);
-        when(identityMock.getId()).thenReturn(identityId);
-
-        when(identityRepository.findByEmail(email)).thenReturn(Optional.of(identityMock));
-        when(uvidRepository.findByIdentityId(identityId)).thenReturn(Optional.empty());
-
-        IdentityVerificationData result = service.getIdentityVerificationData(email);
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
 
         assertNull(result);
-        verify(identityRepository, times(1)).findByEmail(email);
-        verify(uvidRepository, times(1)).findByIdentityId(identityId);
+
+        verify(identityRepository, times(1)).findByEmail(EMAIL);
+        verify(uvidRepository, times(1)).findByIdentityId(IDENTITY_ID);
+        verifyNoInteractions(userRepository);
     }
 
     @Test
-    void getIdentityVerification_whenBothFound_returnsData() {
-        String email = "user@example.com";
-        String identityId = "identity-id-123";
-        String uvidValue = "UVID-ABC";
+    void getIdentityVerification_whenAllFound_returnsFullData() {
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-        Identity identityMock = mock(Identity.class);
-        when(identityMock.getId()).thenReturn(identityId);
-
-        Uvid uvid = new Uvid();
-        uvid.setValue(uvidValue);
-        uvid.setIdentityId(identityId);
-
-        when(identityRepository.findByEmail(email)).thenReturn(Optional.of(identityMock));
-        when(uvidRepository.findByIdentityId(identityId)).thenReturn(Optional.of(uvid));
-
-        IdentityVerificationData result = service.getIdentityVerificationData(email);
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
-        assertEquals(identityId, result.getIdentityId());
-        assertEquals(uvidValue, result.getUvid());
+        assertEquals(IDENTITY_ID, result.getIdentityId());
+        assertEquals(UVID_VALUE, result.getUvid());
+        assertEquals(FIRST_NAME, result.getFirstName());
+        assertEquals(LAST_NAME, result.getLastName());
 
-        verify(identityRepository, times(1)).findByEmail(email);
-        verify(uvidRepository, times(1)).findByIdentityId(identityId);
+        verify(userRepository, times(1)).findById(USER_ID);
     }
 
     @ParameterizedTest
     @NullSource
     @ValueSource(strings = {"", "  ", "\t"})
     void getIdentityVerification_whenEmailIsBlankOrNull_returnsNull(String invalidEmail) {
+
         IdentityVerificationData result = service.getIdentityVerificationData(invalidEmail);
 
         assertNull(result, "Service should return null for invalid email input");
-        verifyNoInteractions(identityRepository);
-        verifyNoInteractions(uvidRepository);
+        verifyNoInteractions(identityRepository, uvidRepository, userRepository);
+    }
+
+    @Test
+    void getIdentityVerification_userIdIsNull_returnsEmptyNames() {
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
+        when(identityMock.getUserId()).thenReturn(null);
+
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+
+        assertNotNull(result);
+        assertEquals("", result.getFirstName());
+        assertEquals("", result.getLastName());
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void getIdentityVerification_userIdIsBlank_returnsEmptyNames() {
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
+        when(identityMock.getUserId()).thenReturn("  ");
+
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+
+        assertNotNull(result);
+        assertEquals("", result.getFirstName());
+        assertEquals("", result.getLastName());
+        verifyNoInteractions(userRepository);
+    }
+
+    @Test
+    void getIdentityVerification_userNotFound_returnsEmptyNames() {
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
+
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+
+        assertNotNull(result);
+        assertEquals("", result.getFirstName());
+        assertEquals("", result.getLastName());
+        verify(userRepository, times(1)).findById(USER_ID);
+    }
+
+    @Test
+    void getIdentityVerification_userFound_withNullNames_returnsEmptyNames() {
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
+
+        user.setForename(null);
+        user.setSurname(null);
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+
+        assertNotNull(result);
+        assertEquals("", result.getFirstName());
+        assertEquals("", result.getLastName());
+        verify(userRepository, times(1)).findById(USER_ID);
+    }
+
+    @Test
+    void getIdentityVerification_userFound_withNames_returnsNames() {
+        when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
+        when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+
+        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+
+        assertNotNull(result);
+        assertEquals(FIRST_NAME, result.getFirstName());
+        assertEquals(LAST_NAME, result.getLastName());
+        verify(userRepository, times(1)).findById(USER_ID);
     }
 }

@@ -1418,7 +1418,7 @@ class TestDataControllerTest {
     @Test
     void getIdentityVerification_serviceReturnsData_returnsOk() throws Exception {
         final String email = "user@example.com";
-        var data = new IdentityVerificationData("identity-id-123", "UVID-ABC");
+        var data = new IdentityVerificationData("identity-id-123", "UVID-ABC", "Firstname", "Lastname");
 
         when(this.verifiedIdentityService.getIdentityVerificationData(email))
                 .thenReturn(data);

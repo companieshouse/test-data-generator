@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
@@ -19,10 +21,13 @@ public class IdentityVerificationServiceImpl implements
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
-    private IdentityRepository repository;
+    private IdentityRepository identityRepository;
 
     @Autowired
     private UvidRepository uvidRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public IdentityVerificationData getIdentityVerificationData(String email) {
@@ -34,7 +39,7 @@ public class IdentityVerificationServiceImpl implements
             return null;
         }
 
-        Optional<Identity> identityOpt = repository.findByEmail(email);
+        Optional<Identity> identityOpt = identityRepository.findByEmail(email);
         if (identityOpt.isEmpty()) {
             LOG.debug("No identity found for email= "
                     + email);
@@ -54,7 +59,29 @@ public class IdentityVerificationServiceImpl implements
         var uvid = uvidOpt.get();
         LOG.debug("Found UVID value= " + uvid.getValue() + " for identityId= " + identity.getId());
 
-        var data = new IdentityVerificationData(identity.getId(), uvid.getValue());
+        String firstName = "";
+        String lastName = "";
+        String userId = identity.getUserId();
+        if (userId != null && !userId.isBlank()) {
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                User user = userOpt.get();
+                firstName = user.getForename() != null ? user.getForename() : "";
+                lastName = user.getSurname() != null ? user.getSurname() : "";
+            } else {
+                LOG.debug("User not found for userId= " + userId + "; falling back to empty names");
+            }
+        } else {
+            LOG.debug("Identity has no userId; falling back to empty names");
+        }
+
+        var data = new IdentityVerificationData(
+                identity.getId(),
+                uvid.getValue(),
+                firstName,
+                lastName
+        );
+
         LOG.debug("Returning IdentityVerificationData for email "
                 + email + " and identityId= " + identity.getId());
         return data;
