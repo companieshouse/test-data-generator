@@ -41,14 +41,12 @@ public class IdentityVerificationServiceImpl implements
 
         Optional<Identity> identityOpt = identityRepository.findByEmail(email);
         if (identityOpt.isEmpty()) {
-            LOG.debug("No identity found for email= "
-                    + email);
+            LOG.debug("No identity found for email= " + email);
             return null;
         }
 
         var identity = identityOpt.get();
-        LOG.debug("Found identity id= "
-                + identity.getId() + " for email= " + email);
+        LOG.debug("Found identity id= " + identity.getId() + " for email= " + email);
 
         var uvidOpt = uvidRepository.findByIdentityId(identity.getId());
         if (uvidOpt.isEmpty()) {
@@ -59,15 +57,32 @@ public class IdentityVerificationServiceImpl implements
         var uvid = uvidOpt.get();
         LOG.debug("Found UVID value= " + uvid.getValue() + " for identityId= " + identity.getId());
 
+        String[] names = getUserNames(identity);
+
+        var data = new IdentityVerificationData(
+                identity.getId(),
+                uvid.getValue(),
+                names[0],
+                names[1]
+        );
+
+        LOG.debug("Returning IdentityVerificationData for email "
+                + email + " and identityId= " + identity.getId());
+        return data;
+    }
+
+    private String[] getUserNames(Identity identity) {
         String firstName = "";
         String lastName = "";
         String userId = identity.getUserId();
+
         if (userId != null && !userId.isBlank()) {
             Optional<User> userOpt = userRepository.findById(userId);
+
             if (userOpt.isPresent()) {
-                User user = userOpt.get();
-                firstName = user.getForename() != null ? user.getForename() : "";
-                lastName = user.getSurname() != null ? user.getSurname() : "";
+                var user = userOpt.get();
+                firstName = Optional.ofNullable(user.getForename()).orElse("");
+                lastName = Optional.ofNullable(user.getSurname()).orElse("");
             } else {
                 LOG.debug("User not found for userId= " + userId + "; falling back to empty names");
             }
@@ -75,15 +90,6 @@ public class IdentityVerificationServiceImpl implements
             LOG.debug("Identity has no userId; falling back to empty names");
         }
 
-        var data = new IdentityVerificationData(
-                identity.getId(),
-                uvid.getValue(),
-                firstName,
-                lastName
-        );
-
-        LOG.debug("Returning IdentityVerificationData for email "
-                + email + " and identityId= " + identity.getId());
-        return data;
+        return new String[]{firstName, lastName};
     }
 }
