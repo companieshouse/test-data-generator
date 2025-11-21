@@ -72,9 +72,9 @@ public class IdentityVerificationServiceImpl implements
     }
 
     private String[] getUserNames(Identity identity) {
-        String firstName = "";
-        String lastName = "";
-        String userId = identity.getUserId();
+        var firstName = "";
+        var lastName = "";
+        var userId = identity.getUserId();
 
         if (userId != null && !userId.isBlank()) {
             Optional<User> userOpt = userRepository.findById(userId);
