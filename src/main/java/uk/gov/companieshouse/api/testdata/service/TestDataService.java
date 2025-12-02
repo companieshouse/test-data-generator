@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -15,11 +16,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -27,7 +27,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-
 
 
 public interface TestDataService {
@@ -67,23 +66,6 @@ public interface TestDataService {
     boolean deleteUserData(String userId) throws DataException;
 
     /**
-     * Creates a new identity test data based on the provided identity specifications.
-     *
-     * @param identitySpec the specifications of the identity to create
-     * @return the created identity's test data
-     * @throws DataException if there is an error during identity creation
-     */
-    IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException;
-
-    /**
-     * Deletes an identity test data by their identity ID.
-     *
-     * @param identityId the ID of the identity to delete
-     * @throws DataException if there is an error during identity deletion
-     */
-    boolean deleteIdentityData(String identityId) throws DataException;
-
-    /**
      * Creates a new acsp member test data based on the provided user specifications.
      *
      * @param acspMembersSpec the specifications of the acsp member to create
@@ -116,7 +98,8 @@ public interface TestDataService {
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createCertifiedCopiesData(CertifiedCopiesSpec certifiedCopiesSpec) throws DataException;
+    CertificatesData createCertifiedCopiesData(
+            CertifiedCopiesSpec certifiedCopiesSpec) throws DataException;
 
     /**
      * Adds a new missing image deliveries test data based on the provided user specifications.
@@ -125,7 +108,8 @@ public interface TestDataService {
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createMissingImageDeliveriesData(MissingImageDeliveriesSpec missingImageDeliveriesSpec) throws DataException;
+    CertificatesData createMissingImageDeliveriesData(
+            MissingImageDeliveriesSpec missingImageDeliveriesSpec) throws DataException;
 
     /**
      * Adds a new sic code test data based on the provided user specifications.
@@ -134,7 +118,8 @@ public interface TestDataService {
      * @return the created sic code with keyword test data
      * @throws DataException if there is an error during user creation
      */
-    CombinedSicActivitiesData createCombinedSicActivitiesData(CombinedSicActivitiesSpec combinedSicActivitiesSpec) throws DataException;
+    CombinedSicActivitiesData createCombinedSicActivitiesData(
+            CombinedSicActivitiesSpec  combinedSicActivitiesSpec)  throws DataException;
 
     /**
      * Deletes the certificates test data for the given id.
@@ -194,7 +179,7 @@ public interface TestDataService {
     AccountPenaltiesData getAccountPenaltiesData(String customerCode, String companyCode)
             throws NoDataFoundException;
 
-    /**
+    /**.
      * Updates the account penalties data for a given penalty reference and
      * {@link UpdateAccountPenaltiesRequest}
      *
@@ -284,4 +269,25 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAdminPermissionsData(String id) throws DataException;
+
+    /**
+     * Create public company data with given {@code companySpec}.
+     *
+     * @param companySpec The specification the new public company must adhere to
+     * @return A {@link CompanyData}
+     * @throws DataException If any error occurs
+     */
+    CompanyData createPublicCompanyData(PublicCompanySpec companySpec) throws DataException;
+
+    /**
+     * Find an existing CompanyAuthCode for the given company number
+     * or create a default one if none exists.
+     * @param companyNumber the company number
+     * @return the existing or newly created CompanyAuthCode
+     * @throws DataException on general errors
+     * @throws NoDataFoundException if the company profile is not found
+     */
+    CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
+            throws DataException, NoDataFoundException;
+
 }

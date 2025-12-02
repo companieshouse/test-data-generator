@@ -1,34 +1,23 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Pattern;
 
 public class ResolutionsSpec {
 
-    @JsonProperty("barcode")
-    private String barcode;
-
     @JsonProperty("category")
+    @Pattern(regexp = "auditors|capital|change-of-name|incorporation|insolvency|liquidation|miscellaneous|other|resolution", message = "Invalid resolution category")
     private String category;
 
-    @JsonProperty("delta_at")
-    private String deltaAt;
-
     @JsonProperty("description")
-    private String description;
+    private ResolutionDescriptionType description;
 
     @JsonProperty("subcategory")
+    @Pattern(regexp = "resolution|voluntary", message = "Invalid resolution subcategory")
     private String subCategory;
 
     @JsonProperty("type")
-    private String type;
-
-    public String getBarcode() {
-        return barcode;
-    }
-
-    public void setBarcode(String barcode) {
-        this.barcode = barcode;
-    }
+    private ResolutionType type;
 
     public String getCategory() {
         return category;
@@ -38,19 +27,11 @@ public class ResolutionsSpec {
         this.category = category;
     }
 
-    public String getDeltaAt() {
-        return deltaAt;
-    }
-
-    public void setDeltaAt(String deltaAt) {
-        this.deltaAt = deltaAt;
-    }
-
-    public String getDescription() {
+    public ResolutionDescriptionType getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
+    public void setDescription(ResolutionDescriptionType description) {
         this.description = description;
     }
 
@@ -62,11 +43,11 @@ public class ResolutionsSpec {
         this.subCategory = subCategory;
     }
 
-    public String getType() {
+    public ResolutionType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(ResolutionType type) {
         this.type = type;
     }
 }

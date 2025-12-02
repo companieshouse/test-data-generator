@@ -31,6 +31,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -42,19 +43,20 @@ import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -65,6 +67,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -94,30 +97,38 @@ class TestDataControllerTest {
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
 
+    @Mock
+    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
 
+    @Captor
+    private ArgumentCaptor<PublicCompanySpec> publicSpecCaptor;
+
+    public static String companyUri = "http://localhost:1234/company/12345678";
+
     @Test
-    void createCompany() throws Exception {
+    void createCompanyInternal() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
     @Test
-    void createCompanyNoRequest() throws Exception {
+    void createCompanyInternalNoRequest() throws Exception {
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(any())).thenReturn(company);
-        ResponseEntity<CompanyData> response = this.testDataController.createCompany(null);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -129,12 +140,70 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyDefaultJurisdiction() throws Exception {
+    void createCompanyInternalDefaultJurisdiction() throws Exception {
         CompanySpec request = new CompanySpec();
         CompanyData company =
-                new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+                new CompanyData("12345678", "123456", companyUri);
 
         when(this.testDataService.createCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompanyInternal(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        // england/wales is the default jurisdiction
+        assertEquals(Jurisdiction.ENGLAND_WALES, request.getJurisdiction());
+    }
+
+    @Test
+    void createCompanyInternalException() throws Exception {
+        CompanySpec request = new CompanySpec();
+        request.setJurisdiction(Jurisdiction.NI);
+        Throwable exception = new DataException("Error message");
+        when(this.testDataService.createCompanyData(request)).thenThrow(exception);
+        DataException thrown = assertThrows(DataException.class, () ->
+                this.testDataController.createCompanyInternal(request));
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createCompanyPublic() throws Exception {
+        var request = new PublicCompanySpec();
+        request.setJurisdiction(Jurisdiction.SCOTLAND);
+        var company =
+                new CompanyData("12345678", "123456", companyUri);
+
+        when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createDefaultPublicCompanyWithEmptyRequest() throws Exception {
+        var company =
+                new CompanyData("12345678", "123456", companyUri);
+
+        when(this.testDataService.createPublicCompanyData(any())).thenReturn(company);
+        ResponseEntity<CompanyData> response = this.testDataController.createCompany(null);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+
+        verify(testDataService).createPublicCompanyData(publicSpecCaptor.capture());
+        var usedSpec = publicSpecCaptor.getValue();
+
+        assertEquals(Jurisdiction.ENGLAND_WALES, usedSpec.getJurisdiction());
+    }
+
+    @Test
+    void createCompanyPublicDefaultJurisdiction() throws Exception {
+        var request = new PublicCompanySpec();
+        var company =
+                new CompanyData("12345678", "123456", companyUri);
+
+        when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
         ResponseEntity<CompanyData> response = this.testDataController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -145,15 +214,16 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyException() throws Exception {
-        CompanySpec request = new CompanySpec();
+    void createCompanyPublicException() throws Exception {
+        var request = new PublicCompanySpec();
         request.setJurisdiction(Jurisdiction.NI);
         Throwable exception = new DataException("Error message");
-        when(this.testDataService.createCompanyData(request)).thenThrow(exception);
+        when(this.testDataService.createPublicCompanyData(request)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
                 this.testDataController.createCompany(request));
         assertEquals(exception, thrown);
     }
+
 
     @Test
     void deleteCompany() throws Exception {
@@ -293,74 +363,6 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
         verify(testDataService).deleteUserData(userId);
-    }
-
-    @Test
-    void createIdentity() throws Exception {
-        IdentitySpec request = new IdentitySpec();
-        when(this.testDataService.createIdentityData(request))
-                .thenReturn(new IdentityData("identityId"));
-
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.createIdentity(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals("identityId", Objects.requireNonNull(response.getBody()).get("identity id"));
-    }
-
-    @Test
-    void createIdentityException() throws Exception {
-        IdentitySpec request = new IdentitySpec();
-        DataException exception = new DataException("Error message");
-
-        when(this.testDataService.createIdentityData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createIdentity(request));
-        assertEquals(exception.getMessage(), thrown.getMessage()); // Match message
-    }
-
-    @Test
-    void deleteIdentity() throws Exception {
-        final String identityId = "identityId";
-
-        when(this.testDataService.deleteIdentityData(identityId)).thenReturn(true);
-
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteIdentity(identityId);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-
-        verify(testDataService).deleteIdentityData(identityId);
-    }
-
-    @Test
-    void deleteIdentityException() throws Exception {
-        final String identityId = "identityId";
-        DataException exception = new DataException("Error message");
-
-        when(this.testDataService.deleteIdentityData(identityId)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.deleteIdentity(identityId));
-        assertEquals(exception.getMessage(), thrown.getMessage()); // Match message
-    }
-
-    @Test
-    void deleteIdentityNotFound() throws Exception {
-        final String identityId = "identityId";
-
-        when(this.testDataService.deleteIdentityData(identityId)).thenReturn(false);
-
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteIdentity(identityId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("identityId", response.getBody().get("identity id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-
-        verify(testDataService).deleteIdentityData(identityId);
     }
 
     @Test
@@ -997,7 +999,7 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyWithDisqualifications() throws Exception {
+    void createCompanyInternalWithDisqualifications() throws Exception {
         CompanySpec request = new CompanySpec();
         request.setJurisdiction(Jurisdiction.SCOTLAND);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
@@ -1007,7 +1009,7 @@ class TestDataControllerTest {
         CompanyData company = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyData> response = testDataController.createCompany(request);
+        ResponseEntity<CompanyData> response = testDataController.createCompanyInternal(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -1404,5 +1406,89 @@ class TestDataControllerTest {
         );
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
+    }
+
+    @Test
+    void getIdentityVerification_serviceReturnsData_returnsOk() throws Exception {
+        final String email = "user@example.com";
+        var data = new IdentityVerificationData("identity-id-123", "UVID-ABC", "Firstname", "Lastname");
+
+        when(this.verifiedIdentityService.getIdentityVerificationData(email))
+                .thenReturn(data);
+
+        ResponseEntity<IdentityVerificationData> response = this.testDataController.getIdentityVerification(email);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(data, response.getBody());
+
+        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void getIdentityVerification_serviceReturnsNull_throwsNoDataFoundException() throws Exception {
+        final String email = "missing@example.com";
+
+        when(this.verifiedIdentityService.getIdentityVerificationData(email))
+                .thenReturn(null);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                this.testDataController.getIdentityVerification(email));
+
+        assertEquals("No identity verification found for email: " + email, thrown.getMessage());
+
+        verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_success() throws Exception {
+        String companyNumber = "12345678";
+        var authCode = new CompanyAuthCode();
+        authCode.setId(companyNumber);
+        authCode.setAuthCode("CODE123");
+
+        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenReturn(authCode);
+
+        ResponseEntity<CompanyAuthCodeData> response =
+                testDataController.findOrCreateCompanyAuthCode(companyNumber);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("CODE123", response.getBody().getAuthCode());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_nullCompanyNumber_throwsDataException() {
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(null));
+        assertEquals("companyNumber query parameter is required", thrown.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_emptyCompanyNumber_throwsDataException() {
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(""));
+        assertEquals("companyNumber query parameter is required", thrown.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_serviceThrowsDataException() throws Exception {
+        String companyNumber = "12345678";
+        DataException ex = new DataException("Service error");
+        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(companyNumber));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_serviceThrowsNoDataFoundException() throws Exception {
+        String companyNumber = "12345678";
+        NoDataFoundException ex = new NoDataFoundException("Not found");
+        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.findOrCreateCompanyAuthCode(companyNumber));
+        assertEquals(ex, thrown);
     }
 }

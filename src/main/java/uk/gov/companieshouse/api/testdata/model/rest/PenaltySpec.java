@@ -32,7 +32,7 @@ public class PenaltySpec {
     private Double amount;
 
     @JsonProperty("type_description")
-    @Pattern(regexp = "EOCFP|EOJSD|PENU|CS01}",
+    @Pattern(regexp = "EOCFP|EOJSD|PENU|CS01|CS01 IDV",
             message = "Invalid type description")
     private String typeDescription;
 

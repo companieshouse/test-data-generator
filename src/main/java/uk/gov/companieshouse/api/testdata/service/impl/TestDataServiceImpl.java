@@ -13,10 +13,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
@@ -40,11 +44,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
@@ -68,6 +71,7 @@ import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
@@ -108,8 +112,6 @@ public class TestDataServiceImpl implements TestDataService {
     private final AdminPermissionsRepository adminPermissionsRepository;
     
     private final DataService<TransactionsData, TransactionsSpec> transactionService;
-    
-    private final DataService<IdentityData, IdentitySpec> identityService;
     
     private final DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     
@@ -167,7 +169,6 @@ public class TestDataServiceImpl implements TestDataService {
             AcspMembersRepository acspMembersRepository, 
             AdminPermissionsRepository adminPermissionsRepository,
             DataService<TransactionsData, TransactionsSpec> transactionService,
-            DataService<IdentityData, IdentitySpec> identityService,
             DataService<AcspProfileData, AcspProfileSpec> acspProfileService,
             CompanyAuthAllowListService companyAuthAllowListService,
             AppealsService appealsService,
@@ -198,7 +199,6 @@ public class TestDataServiceImpl implements TestDataService {
         this.acspMembersRepository = acspMembersRepository;
         this.adminPermissionsRepository = adminPermissionsRepository;
         this.transactionService = transactionService;
-        this.identityService = identityService;
         this.acspProfileService = acspProfileService;
         this.companyAuthAllowListService = companyAuthAllowListService;
         this.appealsService = appealsService;
@@ -265,18 +265,7 @@ public class TestDataServiceImpl implements TestDataService {
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
             var companyData = new CompanyData(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
-            if (isElasticSearchDeployed) {
-                LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
-                this.companySearchService.addCompanyIntoElasticSearchIndex(companyData);
-                if (spec.getAlphabeticalSearch() != null) {
-                    this.alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-                }
-                if (spec.getAdvancedSearch() != null) {
-                    this.advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-                }
-                LOG.info("Successfully added company to ElasticSearch index");
-            }
-
+            addCompanyToElasticSearchIndexes(spec, companyData);
             LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
             return companyData;
         } catch (Exception ex) {
@@ -446,6 +435,19 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
+    public CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
+            throws DataException, NoDataFoundException {
+        try {
+            return companyAuthCodeService.findOrCreate(companyNumber);
+        } catch (NoDataFoundException ex) {
+            throw new NoDataFoundException(
+                    "Company profile not found when finding or creating auth code");
+        } catch (Exception ex) {
+            throw new DataException("Error finding or creating company auth code", ex);
+        }
+    }
+
+    @Override
     public UserData createUserData(UserSpec userSpec) throws DataException {
         final String password = userSpec.getPassword();
         if (password == null || password.isEmpty()) {
@@ -494,35 +496,6 @@ public class TestDataServiceImpl implements TestDataService {
         return this.userService.delete(userId);
     }
 
-    @Override
-    public IdentityData createIdentityData(IdentitySpec identitySpec) throws DataException {
-        if (identitySpec.getUserId() == null || identitySpec.getUserId().isEmpty()) {
-            throw new DataException("User Id is required to create an identity");
-        }
-        if (identitySpec.getEmail() == null || identitySpec.getEmail().isEmpty()) {
-            throw new DataException("Email is required to create an identity");
-        }
-        if (identitySpec.getVerificationSource() == null
-                || identitySpec.getVerificationSource().isEmpty()) {
-            throw new DataException("Verification source is required to create an identity");
-        }
-        try {
-            var identityData = identityService.create(identitySpec);
-            userService.updateUserWithOneLogin(identitySpec.getUserId());
-            return identityData;
-        } catch (Exception ex) {
-            throw new DataException("Error creating identity", ex);
-        }
-    }
-
-    @Override
-    public boolean deleteIdentityData(String identityId) throws DataException {
-        try {
-            return identityService.delete(identityId);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting identity", ex);
-        }
-    }
 
     @Override
     public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {
@@ -790,10 +763,12 @@ public class TestDataServiceImpl implements TestDataService {
             var postcodeData = new PostcodesData(
                     postcode.getBuildingNumber() != null ? postcode
                             .getBuildingNumber().intValue() : null,
-                    postcode.getThoroughfareName() + " " + postcode.getThoroughfareDescriptor(),
-                    postcode.getDependentLocality(),
-                    postcode.getLocalityPostTown(),
-                    postcode.getPretty()
+                    postcode.getThoroughfare().getName() + " "
+                            + (postcode.getThoroughfare().getDescriptor()
+                            != null ? postcode.getThoroughfare().getDescriptor() : ""),
+                    postcode.getLocality().getDependentLocality(),
+                    postcode.getLocality().getPostTown(),
+                    postcode.getPostcode().getPretty()
             );
             postcodesDataList.add(postcodeData);
         }
@@ -894,4 +869,85 @@ public class TestDataServiceImpl implements TestDataService {
             throw new DataException("Error deleting transaction", ex);
         }
     }
+
+    @Override
+    public CompanyData createPublicCompanyData(PublicCompanySpec publicCompanySpec)
+            throws DataException {
+        var companySpec = new CompanySpec();
+
+        // Only set allowed fields from PublicCompanySpec
+        companySpec.setJurisdiction(publicCompanySpec.getJurisdiction());
+        companySpec.setCompanyType(publicCompanySpec.getCompanyType());
+        companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
+        companySpec.setSubType(publicCompanySpec.getSubType());
+        companySpec.setHasSuperSecurePscs(publicCompanySpec.getHasSuperSecurePscs());
+        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        companySpec.setSecureOfficer(publicCompanySpec.getSecureOfficer());
+        companySpec.setRegisters(publicCompanySpec.getRegisters());
+        companySpec.setCompanyStatusDetail(publicCompanySpec.getCompanyStatusDetail());
+        companySpec.setFilingHistoryList(publicCompanySpec.getFilingHistoryList());
+        if (!CollectionUtils.isEmpty(publicCompanySpec.getFilingHistoryList())) {
+            companySpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
+        }
+        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        companySpec.setOfficerRoles(publicCompanySpec.getOfficerRoles());
+        companySpec.setAccountsDueStatus(publicCompanySpec.getAccountsDueStatus());
+        companySpec.setNumberOfPsc(publicCompanySpec.getNumberOfPsc());
+        companySpec.setPscType(publicCompanySpec.getPscType());
+        companySpec.setPscActive(publicCompanySpec.getPscActive());
+        companySpec.setWithdrawnStatements(publicCompanySpec.getWithdrawnStatements());
+        companySpec.setActiveStatements(publicCompanySpec.getActiveStatements());
+        companySpec.setHasUkEstablishment(publicCompanySpec.getHasUkEstablishment());
+        companySpec.setRegisteredOfficeIsInDispute(
+                publicCompanySpec.getRegisteredOfficeIsInDispute());
+        companySpec.setUndeliverableRegisteredOfficeAddress(
+                publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
+        if (publicCompanySpec.getForeignCompanyLegalForm() != null
+                && publicCompanySpec.getForeignCompanyLegalForm()) {
+            companySpec.setForeignCompanyLegalForm("legal form for company "
+                    + randomService.getString(10));
+        }
+        return createCompanyData(companySpec);
+    }
+
+    private void addCompanyToElasticSearchIndexes(CompanySpec spec,
+                                                  CompanyData companyData)
+            throws DataException, ApiErrorResponseException, URIValidationException {
+
+        // This variable is set from environment to allow disabling ES indexing in certain environments
+        if (!isElasticSearchDeployed) {
+            LOG.debug("Elasticsearch not deployed; skipping indexing for company " + spec.getCompanyNumber());
+            return;
+        }
+
+        // Decide which indexes to update
+        boolean addCompanyIndex =
+                Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())
+                        || spec.getAlphabeticalSearch() != null
+                        || spec.getAdvancedSearch() != null;
+
+        boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
+        boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
+
+        // Company index (ensure present if any specialised index is requested)
+        if (addCompanyIndex) {
+            LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
+            companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        // Alphabetical index
+        if (addAlphabeticalIndex) {
+            LOG.info("Adding company to Alphabetical ElasticSearch index: " + spec.getCompanyNumber());
+            alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        // Advanced index
+        if (addAdvancedIndex) {
+            LOG.info("Adding company to Advanced ElasticSearch index: " + spec.getCompanyNumber());
+            advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
+    }
+
 }

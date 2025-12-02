@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -69,12 +70,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityData;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentitySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
+import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
@@ -160,8 +160,6 @@ class TestDataServiceImplTest {
     @Mock 
     private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Mock
-    private DataService<IdentityData, IdentitySpec> identityService;
-    @Mock
     private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
@@ -213,7 +211,6 @@ class TestDataServiceImplTest {
                 acspMembersRepository, 
                 adminPermissionsRepository,
                 transactionService,
-                identityService,
                 acspProfileService,
                 companyAuthAllowListService,
                 appealsService,
@@ -867,114 +864,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createIdentityData() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        IdentityData mockIdentityData = new IdentityData("identityId");
-
-        when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
-
-        IdentityData createdIdentityData = testDataService.createIdentityData(identitySpec);
-
-        assertEquals(mockIdentityData, createdIdentityData);
-
-        verify(identityService, times(1)).create(identitySpec);
-    }
-
-    @Test
-    void createIdentityDataWithMissingUserId() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-        assertEquals("User Id is required to create an identity", exception.getMessage());
-        verify(identityService, never()).create(any());
-    }
-
-    @Test
-    void createIdentityDataWithMissingEmail() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setVerificationSource("source");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-        assertEquals("Email is required to create an identity", exception.getMessage());
-        verify(identityService, never()).create(any());
-    }
-
-    @Test
-    void createIdentityDataWithMissingVerificationSource() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setUserId("userId");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-        assertEquals("Verification source is required to create an identity",
-                exception.getMessage());
-        verify(identityService, never()).create(any());
-    }
-
-    @Test
-    void createIdentityDataThrowsException() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createIdentityData(identitySpec));
-
-        assertEquals("Error creating identity", exception.getMessage());
-        verify(identityService, times(1)).create(identitySpec);
-    }
-
-    @Test
-    void deleteIdentityData() throws DataException {
-        String identityId = "identityId";
-        when(identityService.delete(identityId)).thenReturn(true);
-
-        boolean result = testDataService.deleteIdentityData(identityId);
-
-        assertTrue(result);
-        verify(identityService, times(1)).delete(identityId);
-    }
-
-    @Test
-    void deleteIdentityDataWhenIdentityNotFound() throws DataException {
-        String identityId = "identityId";
-        when(identityService.delete(identityId)).thenReturn(false);
-
-        boolean result = testDataService.deleteIdentityData(identityId);
-
-        assertFalse(result);
-        verify(identityService, times(1)).delete(identityId);
-    }
-
-    @Test
-    void deleteIdentityDataThrowsException() {
-        String identityId = "identityId";
-        RuntimeException ex = new RuntimeException("error");
-
-        when(identityService.delete(identityId)).thenThrow(ex);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.deleteIdentityData(identityId));
-
-        assertEquals("Error deleting identity", exception.getMessage());
-        assertEquals(ex, exception.getCause());
-        verify(identityService, times(1)).delete(identityId);
-    }
-
-    @Test
     void createAcspMembersData() throws DataException {
         AcspProfileSpec profileSpec = new AcspProfileSpec();
         profileSpec.setAcspNumber("acspNumber");
@@ -1586,36 +1475,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void testUpdateUserWithOneLoginCalled() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        IdentityData mockIdentityData = new IdentityData("identityId");
-        when(identityService.create(identitySpec)).thenReturn(mockIdentityData);
-        IdentityData result = testDataService.createIdentityData(identitySpec);
-
-        assertEquals(mockIdentityData, result);
-        verify(userService, times(1)).updateUserWithOneLogin("userId");
-    }
-
-    @Test
-    void testUpdateUserWithOneLoginNotCalledOnException() throws DataException {
-        IdentitySpec identitySpec = new IdentitySpec();
-        identitySpec.setUserId("userId");
-        identitySpec.setEmail("email@example.com");
-        identitySpec.setVerificationSource("source");
-
-        when(identityService.create(identitySpec)).thenThrow(new RuntimeException("error"));
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createIdentityData(identitySpec));
-        assertEquals("Error creating identity", exception.getMessage());
-        verify(userService, never()).updateUserWithOneLogin(anyString());
-    }
-
-    @Test
     void testCreateCompanyWithElasticSearchDeployed()
             throws DataException, ApiErrorResponseException, URIValidationException {
         testCreateCompanyWithElasticSearch(true, 1);
@@ -1634,6 +1493,7 @@ class TestDataServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
+        spec.setAddToCompanyElasticSearchIndex(true);
         spec.setAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
@@ -1934,6 +1794,7 @@ class TestDataServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAdvancedSearch(true);
+        spec.setAddToCompanyElasticSearchIndex(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
@@ -1957,6 +1818,7 @@ class TestDataServiceImplTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAlphabeticalSearch(true);
+        spec.setAddToCompanyElasticSearchIndex(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
@@ -1974,25 +1836,35 @@ class TestDataServiceImplTest {
 
     @Test
     void testGetPostcodesValidCountry() throws DataException {
-        String country = "England";
+        var country = "England";
+        var streetName = "First Avenue";
+        var streetDescriptor = "High Street";
+        var dependentLocality = "London Road";
+        var postTown = "London";
+        var postcodePretty = "EC1 1BB";
+        var buildingNumber = 12;
         Postcodes mockPostcode = new Postcodes();
-        mockPostcode.setBuildingNumber(12);
-        mockPostcode.setThoroughfareName("First Avenue");
-        mockPostcode.setThoroughfareDescriptor("High Street");
-        mockPostcode.setDependentLocality("Central");
-        mockPostcode.setLocalityPostTown("London");
-        mockPostcode.setPretty("EC1 1BB");
+        mockPostcode.setBuildingNumber(buildingNumber);
+        Postcodes.Thoroughfare thoroughfare = new Postcodes.Thoroughfare();
+        thoroughfare.setName(streetName);
+        thoroughfare.setDescriptor(streetDescriptor);
+        mockPostcode.setThoroughfare(thoroughfare);
+        Postcodes.Locality locality = new Postcodes.Locality();
+        locality.setDependentLocality(dependentLocality);
+        locality.setPostTown(postTown);
+        mockPostcode.setLocality(locality);
+        Postcodes.PostcodeDetails postcodeDetails = new Postcodes.PostcodeDetails();
+        postcodeDetails.setPretty(postcodePretty);
+        mockPostcode.setPostcode(postcodeDetails);
         mockPostcode.setCountry(country);
 
         when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of(mockPostcode));
-
         PostcodesData result = testDataService.getPostcodes(country);
-
-        assertEquals(12, result.getBuildingNumber());
-        assertEquals("First Avenue High Street", result.getFirstLine());
-        assertEquals("Central", result.getDependentLocality());
-        assertEquals("London", result.getPostTown());
-        assertEquals("EC1 1BB", result.getPostcode());
+        assertEquals(buildingNumber, result.getBuildingNumber());
+        assertEquals(streetName + " " + streetDescriptor, result.getFirstLine());
+        assertEquals(dependentLocality, result.getDependentLocality());
+        assertEquals(postTown, result.getPostTown());
+        assertEquals(postcodePretty, result.getPostcode());
         verify(postcodeService, times(1)).getPostcodeByCountry(country);
     }
 
@@ -2322,5 +2194,105 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting appeals data", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
+    }
+
+    @Test
+    void createPublicCompany() throws DataException {
+        PublicCompanySpec spec = new PublicCompanySpec();
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        testPublicCompanySpec(spec);
+    }
+
+    @Test
+    void createPublicCompanyWithNullSpec() throws DataException {
+        PublicCompanySpec spec = new PublicCompanySpec();
+        testPublicCompanySpec(spec);
+    }
+
+    private void testPublicCompanySpec(PublicCompanySpec spec) throws DataException{
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+
+        when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        CompanyData createdCompany = testDataService.createPublicCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
+                Jurisdiction.ENGLAND_WALES);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_successReturnsAuthCode() throws Exception {
+        CompanyAuthCode expected = new CompanyAuthCode();
+        expected.setId(COMPANY_NUMBER);
+        expected.setAuthCode("999999");
+
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenReturn(expected);
+
+        CompanyAuthCode actual = testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER);
+
+        assertSame(expected, actual);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_profileNotFoundIsMappedToNoDataFoundException() throws Exception {
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER))
+                .thenThrow(new NoDataFoundException("profile missing"));
+
+        NoDataFoundException ex = assertThrows(NoDataFoundException.class,
+                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+
+        assertEquals("Company profile not found when finding or creating auth code", ex.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCode_otherExceptionIsWrappedInDataException() throws Exception {
+        RuntimeException cause = new RuntimeException("boom");
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(cause);
+
+        DataException ex = assertThrows(DataException.class,
+                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+
+        assertEquals("Error finding or creating company auth code", ex.getMessage());
+        // ensure original cause is preserved
+        assertSame(cause, ex.getCause());
+    }
+
+    @Test
+    void testCreateCompanyElasticSearchIndexAsFalse()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        spec.setAddToCompanyElasticSearchIndex(false);
+        validateElasticSearch(spec);
+    }
+
+    @Test
+    void testCreateCompanyWithoutElasticSearchIndex()
+            throws DataException, ApiErrorResponseException, URIValidationException {
+        testDataService.setElasticSearchDeployed(true);
+        CompanySpec spec = new CompanySpec();
+        validateElasticSearch(spec);
+    }
+
+    private void validateElasticSearch(CompanySpec spec) throws DataException, ApiErrorResponseException, URIValidationException {
+        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        spec.setCompanyStatus("administration");
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanySpec capturedSpec = captureCompanySpec();
+        verifyCommonCompanyCreation(capturedSpec, createdCompany,
+                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+        verify(companySearchService, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(alphabeticalCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
+        verify(advancedCompanySearch, times(0))
+                .addCompanyIntoElasticSearchIndex(createdCompany);
     }
 }

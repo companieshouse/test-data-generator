@@ -1,9 +1,11 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Pattern;
 
 public class DisqualificationsSpec {
 
+    @Pattern(regexp = "court-order|undertaking|sanction", message = "Invalid disqualification type")
     @JsonProperty("disqualification_type")
     private String disqualificationType;
 

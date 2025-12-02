@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.config;
 
 import com.mongodb.client.MongoClients;
-import java.io.Serializable;
 import org.springframework.boot.autoconfigure.mongo.MongoProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +14,6 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
-
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
@@ -38,10 +36,12 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.repository.PostcodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
+
+import java.io.Serializable;
 
 @Configuration
 @EnableConfigurationProperties(MongoProperties.class)
@@ -50,6 +50,7 @@ public class MongoConfig {
     private static final String ACCOUNT_DATABASE = "account";
     private static final String ITEMS_DATABASE = "items";
     private static final String SIC_CODE_DATABASE = "sic_code";
+    private static final String IDENTITY_VERIFICATION = "identity_verification";
 
     private final MongoProperties mongoProperties;
 
@@ -126,7 +127,12 @@ public class MongoConfig {
 
     @Bean
     public IdentityRepository identityRepository() {
-        return getMongoRepositoryBean(IdentityRepository.class, "identity_verification");
+        return getMongoRepositoryBean(IdentityRepository.class, IDENTITY_VERIFICATION);
+    }
+
+    @Bean
+    public UvidRepository uvidRepository() {
+        return getMongoRepositoryBean(UvidRepository.class, IDENTITY_VERIFICATION);
     }
 
     @Bean
@@ -163,11 +169,6 @@ public class MongoConfig {
     @Bean
     public AccountPenaltiesRepository accountPenaltiesRepository() {
         return getMongoRepositoryBean(AccountPenaltiesRepository.class, "financial_penalties");
-    }
-
-    @Bean
-    public PostcodeRepository postcodeRepository() {
-        return getMongoRepositoryBean(PostcodeRepository.class, "postcodes");
     }
 
     @Bean
