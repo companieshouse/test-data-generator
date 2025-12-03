@@ -65,8 +65,8 @@ public class PublicCompanySpec {
 
     @Min(value = 1, message = "Number of PSCs must be at least 1")
     @Max(value = 20, message = "Number of PSCs must not exceed 20")
-    @JsonProperty("number_of_psc")
-    private Integer numberOfPsc;
+    @JsonProperty("number_of_pscs")
+    private Integer numberOfPscs;
 
     @Size(max = 20, message = "PSC types must not exceed 20")
     @Valid
@@ -190,12 +190,12 @@ public class PublicCompanySpec {
         this.accountsDueStatus = accountsDueStatus;
     }
 
-    public Integer getNumberOfPsc() {
-        return numberOfPsc;
+    public Integer getNumberOfPscs() {
+        return numberOfPscs;
     }
 
-    public void setNumberOfPsc(Integer numberOfPsc) {
-        this.numberOfPsc = numberOfPsc;
+    public void setNumberOfPscs(Integer numberOfPscs) {
+        this.numberOfPscs = numberOfPscs;
     }
 
     public List<PscType> getPscType() {

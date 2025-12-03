@@ -79,7 +79,7 @@ public class CompanyPscStatementServiceImpl implements
 
         Integer withdrawnPscStatementsCount = spec.getWithdrawnStatements();
         Integer activePscStatementsCount = spec.getActiveStatements();
-        Integer numberOfPsc = spec.getNumberOfPsc();
+        Integer numberOfPsc = spec.getNumberOfPscs();
 
         boolean specificWithdrawnRequested = withdrawnPscStatementsCount
                 != null && withdrawnPscStatementsCount > 0;
@@ -129,7 +129,7 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(1);
-            tempSpec.setNumberOfPsc(0);
+            tempSpec.setNumberOfPscs(0);
             tempSpec.setPscActive(false);
             generatedList.add(this.create(tempSpec));
         }
@@ -150,7 +150,7 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(0);
-            tempSpec.setNumberOfPsc(1);
+            tempSpec.setNumberOfPscs(1);
             tempSpec.setPscActive(true);
             generatedList.add(this.create(tempSpec));
         }

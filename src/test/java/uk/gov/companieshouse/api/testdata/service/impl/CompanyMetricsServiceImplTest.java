@@ -108,7 +108,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPsc(2);
+        spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER, PscType.CORPORATE_BENEFICIAL_OWNER));
         when(randomService.getEtag()).thenReturn(ETAG);
 
@@ -188,7 +188,7 @@ class CompanyMetricsServiceImplTest {
     void createWithNumberOfPsc() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPsc(5);
+        spec.setNumberOfPscs(5);
 
         when(randomService.getEtag()).thenReturn(ETAG);
 
@@ -318,7 +318,7 @@ class CompanyMetricsServiceImplTest {
     void createWithActivePscStatementsCountFromNumberOfPsc() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPsc(2);
+        spec.setNumberOfPscs(2);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
@@ -387,7 +387,7 @@ class CompanyMetricsServiceImplTest {
     @Test
     void setPscCount_WhenPscActiveFalse_ShouldSetCorrectCount() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
         spec.setPscActive(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
@@ -399,7 +399,7 @@ class CompanyMetricsServiceImplTest {
     @Test
     void setPscCount_WhenPscActiveTrue_ShouldSetCorrectCount() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
         spec.setPscActive(true);
 
         CompanyMetrics metrics = new CompanyMetrics();
@@ -411,7 +411,7 @@ class CompanyMetricsServiceImplTest {
     @Test
     void setPscCount_WhenPscActiveNull_ShouldSetCorrectCount() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
         spec.setPscActive(null);
 
         CompanyMetrics metrics = new CompanyMetrics();
@@ -445,7 +445,7 @@ class CompanyMetricsServiceImplTest {
     void setPscActiveToFalse_ShouldSetCeasedPscCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPsc(5);
+        spec.setNumberOfPscs(5);
         spec.setPscActive(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -464,7 +464,7 @@ class CompanyMetricsServiceImplTest {
     void create_WithPscActiveFalse_ShouldSetCorrectCounts() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPsc(4);
+        spec.setNumberOfPscs(4);
         spec.setPscActive(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -484,7 +484,7 @@ class CompanyMetricsServiceImplTest {
     void create_WithPscActiveTrue_ShouldSetCorrectCounts() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPsc(4);
+        spec.setNumberOfPscs(4);
         spec.setPscActive(true);
 
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -504,7 +504,7 @@ class CompanyMetricsServiceImplTest {
     void create_WithPscActiveNull_ShouldSetCorrectCounts() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPsc(4);
+        spec.setNumberOfPscs(4);
         spec.setPscActive(null);
 
         when(randomService.getEtag()).thenReturn(ETAG);

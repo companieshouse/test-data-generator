@@ -128,7 +128,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     private boolean hasPscTypesWithoutCount(CompanySpec spec) {
         return spec.getPscType() != null
                 && !spec.getPscType().isEmpty()
-                && (spec.getNumberOfPsc() == null || spec.getNumberOfPsc() <= 0);
+                && (spec.getNumberOfPscs() == null || spec.getNumberOfPscs() <= 0);
     }
 
     private boolean hasInvalidBeneficialOwnerType(CompanySpec spec) {
@@ -142,7 +142,7 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     }
 
     private int getNumberOfPsc(CompanySpec spec) {
-        int numberOfPsc = Optional.ofNullable(spec.getNumberOfPsc()).orElse(DEFAULT_NUMBER_OF_PSC);
+        int numberOfPsc = Optional.ofNullable(spec.getNumberOfPscs()).orElse(DEFAULT_NUMBER_OF_PSC);
         LOG.debug("Number of PSCs determined: " + numberOfPsc);
         return numberOfPsc;
     }

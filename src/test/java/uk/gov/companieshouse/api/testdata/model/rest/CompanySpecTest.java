@@ -98,28 +98,28 @@ class CompanySpecTest {
     @Test
     void testNumberOfPscMinValid() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(1);
+        spec.setNumberOfPscs(1);
         assertNoViolations(spec);
     }
 
     @Test
     void testNumberOfPscMaxValid() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(20);
+        spec.setNumberOfPscs(20);
         assertNoViolations(spec);
     }
 
     @Test
     void testNumberOfPscTooLow() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
         validateCompanySpec(spec, "Number of PSCs must be at least 1");
     }
 
     @Test
     void testNumberOfPscTooHigh() {
         CompanySpec spec = new CompanySpec();
-        spec.setNumberOfPsc(21);
+        spec.setNumberOfPscs(21);
         validateCompanySpec(spec, "Number of PSCs must not exceed 20");
     }
 

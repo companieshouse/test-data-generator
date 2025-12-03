@@ -18,7 +18,6 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -253,7 +252,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPsc(1);
+        spec.setNumberOfPscs(1);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
@@ -274,7 +273,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
         spec.setWithdrawnStatements(0);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
@@ -295,7 +294,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(1);
+        spec.setNumberOfPscs(1);
         spec.setWithdrawnStatements(0);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -317,7 +316,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
         spec.setWithdrawnStatements(0);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
@@ -382,11 +381,11 @@ class CompanyPscStatementServiceImplTest {
 
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
         assertEquals(1, capturedSpecs.get(0).getWithdrawnStatements());
-        assertEquals(0, capturedSpecs.get(0).getNumberOfPsc());
+        assertEquals(0, capturedSpecs.get(0).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
 
         assertEquals(1, capturedSpecs.get(1).getWithdrawnStatements());
-        assertEquals(0, capturedSpecs.get(1).getNumberOfPsc());
+        assertEquals(0, capturedSpecs.get(1).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(1).getCompanyNumber());
     }
 
@@ -410,9 +409,9 @@ class CompanyPscStatementServiceImplTest {
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
         assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
         assertEquals(0, capturedSpecs.get(1).getWithdrawnStatements());
-        assertEquals(1, capturedSpecs.get(1).getNumberOfPsc());
+        assertEquals(1, capturedSpecs.get(1).getNumberOfPscs());
         assertEquals(0, capturedSpecs.get(2).getWithdrawnStatements());
-        assertEquals(1, capturedSpecs.get(2).getNumberOfPsc());
+        assertEquals(1, capturedSpecs.get(2).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
     }
 
@@ -436,15 +435,15 @@ class CompanyPscStatementServiceImplTest {
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
 
         assertEquals(1, capturedSpecs.get(0).getWithdrawnStatements());
-        assertEquals(0, capturedSpecs.get(0).getNumberOfPsc());
+        assertEquals(0, capturedSpecs.get(0).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
 
         assertEquals(0, capturedSpecs.get(1).getWithdrawnStatements());
-        assertEquals(1, capturedSpecs.get(1).getNumberOfPsc());
+        assertEquals(1, capturedSpecs.get(1).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(1).getCompanyNumber());
 
         assertEquals(0, capturedSpecs.get(2).getWithdrawnStatements());
-        assertEquals(1, capturedSpecs.get(2).getNumberOfPsc());
+        assertEquals(1, capturedSpecs.get(2).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(2).getCompanyNumber());
     }
 
@@ -474,7 +473,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setWithdrawnStatements(0);
-        spec.setNumberOfPsc(5);
+        spec.setNumberOfPscs(5);
 
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
@@ -496,7 +495,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setHasSuperSecurePscs(true);
-        spec.setNumberOfPsc(5);
+        spec.setNumberOfPscs(5);
 
         doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
 
@@ -509,7 +508,7 @@ class CompanyPscStatementServiceImplTest {
         verify(companyPscStatementService, times(1)).create(specCaptor.capture());
         CompanySpec capturedSpec = specCaptor.getValue();
         assertEquals(0, capturedSpec.getWithdrawnStatements());
-        assertEquals(1, capturedSpec.getNumberOfPsc());
+        assertEquals(1, capturedSpec.getNumberOfPscs());
         assertTrue(capturedSpec.getPscActive());
     }
 
@@ -518,7 +517,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setActiveStatements(2);
-        spec.setNumberOfPsc(5);
+        spec.setNumberOfPscs(5);
 
         doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
 
@@ -532,7 +531,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
         assertEquals(2, capturedSpecs.size());
         assertTrue(capturedSpecs.get(0).getPscActive());
-        assertEquals(1, capturedSpecs.get(0).getNumberOfPsc());
+        assertEquals(1, capturedSpecs.get(0).getNumberOfPscs());
         assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
     }
 
@@ -541,7 +540,7 @@ class CompanyPscStatementServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setActiveStatements(null);
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
 
         doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
 
@@ -555,7 +554,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
         assertEquals(3, capturedSpecs.size());
         assertTrue(capturedSpecs.get(0).getPscActive());
-        assertEquals(1, capturedSpecs.get(0).getNumberOfPsc());
+        assertEquals(1, capturedSpecs.get(0).getNumberOfPscs());
         assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
     }
 
@@ -565,7 +564,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setWithdrawnStatements(0);
         spec.setActiveStatements(0);
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
@@ -579,7 +578,7 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setWithdrawnStatements(null);
         spec.setActiveStatements(null);
-        spec.setNumberOfPsc(null);
+        spec.setNumberOfPscs(null);
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
