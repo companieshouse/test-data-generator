@@ -59,7 +59,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
@@ -79,7 +79,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setHasSuperSecurePscs(true);
         spec.setPscType(null);
-        spec.setNumberOfPsc(null);
+        spec.setNumberOfPscs(null);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -137,7 +137,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
-        spec.setNumberOfPsc(1);
+        spec.setNumberOfPscs(1);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
         LocalDate dueDate = LocalDate.now().plusDays(10);
 
@@ -182,7 +182,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -222,7 +222,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(2);
+        spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
 
         DataException exception = assertThrows(DataException.class,
@@ -238,7 +238,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(2);
+        spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
@@ -256,7 +256,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPsc(2);
+        spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.CORPORATE_BENEFICIAL_OWNER));
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
@@ -274,7 +274,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
 
         assertThrows(DataException.class, () -> companyPscsService.create(spec));
@@ -286,7 +286,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(null);
+        spec.setNumberOfPscs(null);
 
         CompanyPscs result = companyPscsService.create(spec);
 
@@ -299,7 +299,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(3);
+        spec.setNumberOfPscs(3);
         spec.setPscType(List.of(PscType.INDIVIDUAL, PscType.LEGAL_PERSON));
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
@@ -317,7 +317,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
         spec.setPscType(null); // PscType is null
 
         CompanyPscs result = companyPscsService.create(spec);
@@ -331,7 +331,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPsc(0);
+        spec.setNumberOfPscs(0);
         spec.setPscType(Collections.emptyList()); // PscType is an empty list
 
         CompanyPscs result = companyPscsService.create(spec);
