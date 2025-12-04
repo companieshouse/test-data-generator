@@ -225,13 +225,14 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     private AccountPenalty createPenalty(PenaltySpec penaltySpec, String companyCode,
                                          String transactionSubType, Random random,
                                          int index, boolean isPaid) {
+
         var penalty = new AccountPenalty();
         penalty.setCompanyCode(companyCode);
         penalty.setCustomerCode(penaltySpec.getCustomerCode());
 
         configurePenaltyBasedOnCompanyAndSubType(penalty, companyCode, transactionSubType, random, penaltySpec);
         configurePenaltyAmount(penalty, penaltySpec, index);
-        configurePenaltyDatesAndStatus(penalty, isPaid, penaltySpec);
+        configurePenaltyDatesAndStatus(penalty, isPaid, penaltySpec, index);
 
         return penalty;
     }
@@ -385,11 +386,19 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         penalty.setAmount(amount);
     }
 
-    private void configurePenaltyDatesAndStatus(AccountPenalty penalty, boolean isPaid, PenaltySpec penaltySpec) {
+    private void configurePenaltyDatesAndStatus(AccountPenalty penalty, boolean isPaid,
+                                                PenaltySpec penaltySpec, int index) {
         penalty.setTransactionDate(getFormattedDate(1));
         penalty.setMadeUpDate(getFormattedDate(2));
-        penalty.setIsPaid(isPaid);
-        penalty.setOutstandingAmount(isPaid ? 0.0 : penalty.getAmount());
+
+        if (Boolean.TRUE.equals(penaltySpec.getPartPaid()) && index == 0) {
+            penalty.setIsPaid(false);
+            penalty.setOutstandingAmount(roundToTwoDecimals(penalty.getAmount() / 2));
+        } else {
+            penalty.setIsPaid(isPaid);
+            penalty.setOutstandingAmount(isPaid ? 0.0 : penalty.getAmount());
+        }
+
         penalty.setDueDate(getFormattedDate(0, 6));
         penalty.setAccountStatus(getDefaultIfBlank(penaltySpec.getAccountStatus(), "CHS"));
         penalty.setDunningStatus(getDefaultIfBlank(penaltySpec.getDunningStatus(), "PEN1"));

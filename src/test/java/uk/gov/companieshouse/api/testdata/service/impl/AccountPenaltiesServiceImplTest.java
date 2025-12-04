@@ -38,6 +38,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesTransactionSubType;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
@@ -615,6 +616,82 @@ class AccountPenaltiesServiceImplTest {
         assertEquals(3, penalties.size());
         String transactionRef = penalties.get(0).getTransactionReference();
         assertTrue(penalties.stream().allMatch(p -> p.getTransactionReference().equals(transactionRef)));
+    }
+
+    @Test
+    void createPenaltiesList_partPaid_setsOutstandingAmountLessThanAmount() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(100.0);
+        penaltySpec.setPartPaid(true);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(1, penalties.size());
+        AccountPenalty penalty = penalties.get(0);
+        assertTrue(penalty.getOutstandingAmount() < penalty.getAmount());
+        assertTrue(penalty.getOutstandingAmount() > 0);
+    }
+
+    @Test
+    void createPenaltiesList_amountNull_usesRandomAmount() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(null);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(1, penalties.size());
+        AccountPenalty penalty = penalties.get(0);
+        assertTrue(penalty.getAmount() >= 10.0 && penalty.getAmount() <= 99.0);
+    }
+
+    @Test
+    void createPenaltiesList_isPaid_setsOutstandingAmountZero() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(50.0);
+        penaltySpec.setIsPaid(true);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(1, penalties.size());
+        AccountPenalty penalty = penalties.get(0);
+        assertEquals(0.0, penalty.getOutstandingAmount());
+        assertTrue(penalty.isPaid());
+    }
+
+    @Test
+    void updateAccountPenalties_updatesAmountOutstandingAmountAndIsPaid() throws Exception {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode("LP");
+        request.setCustomerCode(CUSTOMER_CODE);
+        request.setIsPaid(true);
+        request.setAmount(200.0);
+        request.setOutstandingAmount(0.0);
+
+        AccountPenalties accountPenalties = AccountPenaltiesServiceImplTest.createAccountPenalties();
+
+        when(repository.findPenalty("LP", "12345678", "A1234567"))
+                .thenReturn(Optional.of(accountPenalties));
+        when(repository.save(accountPenalties)).thenReturn(accountPenalties);
+
+        AccountPenaltiesData result = service.updateAccountPenalties("A1234567", request);
+
+        assertNotNull(result);
+        PenaltyData penalty = result.getPenalties().get(0);
+        assertEquals(200.0, penalty.getAmount());
+        assertEquals(0.0, penalty.getOutstandingAmount());
+        assertTrue(penalty.getIsPaid());
     }
 
     @Test

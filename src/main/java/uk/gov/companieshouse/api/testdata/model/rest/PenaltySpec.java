@@ -31,6 +31,9 @@ public class PenaltySpec {
     @Positive(message = "Amount must be a positive number")
     private Double amount;
 
+    @JsonProperty("part_payment")
+    private Boolean partPaid;
+
     @JsonProperty("type_description")
     @Pattern(regexp = "EOCFP|EOJSD|PENU|CS01|CS01 IDV",
             message = "Invalid type description")
@@ -119,6 +122,14 @@ public class PenaltySpec {
 
     public void setIsPaid(Boolean isPaid) {
         this.isPaid = isPaid;
+    }
+
+    public Boolean getPartPaid() {
+        return partPaid;
+    }
+
+    public void setPartPaid(Boolean partPaid) {
+        this.partPaid = partPaid;
     }
 
     public String getTransactionType() {
