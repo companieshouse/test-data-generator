@@ -45,6 +45,7 @@ public class PenaltySpec {
     private String ledgerCode;
 
     @JsonProperty("dunning_status")
+    @Pattern(regexp = "PEN1|DCA", message = "invalid dunning status option")
     private String dunningStatus;
 
     @JsonProperty("closed_at")

@@ -322,7 +322,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `outstanding_amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `type_description`: The type description of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `ledger_code`: The ledger code of the Penalty being created in the Account Penalties data in the account_penalties db collection.
-  - `dunning_status`: The dunning status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `dunning_status`: The dunning status of the Penalty being created. Defaults to `PEN1` and also accepts `DCA`.
   - `account_status`: The account status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_type`: The transaction type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_sub_type`: The transaction sub-type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
