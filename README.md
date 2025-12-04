@@ -317,6 +317,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `number_of_penalties`: The number of penalties to be created in the Account Penalties data in the account_penalties db collection. Mandatory field.
   - `created_at`: The Created At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `closed_at`: The Closed At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
+  - `part_payment`: The Part Payment amount of the Penalty being created. Boolean, when set to true, the outstanding amount will be less than the total amount and the `is_paid` flag will be false.
   - `is_paid`: The Is Paid flag of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `outstanding_amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `type_description`: The type description of the Penalty being created in the Account Penalties data in the account_penalties db collection.
