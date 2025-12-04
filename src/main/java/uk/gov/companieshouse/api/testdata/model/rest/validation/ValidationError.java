@@ -98,7 +98,7 @@ public class ValidationError {
             return Collections.unmodifiableMap(errorValues);
         }
 
-        return null;
+        return Collections.emptyMap();
     }
 
     public String getLocation() {

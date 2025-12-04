@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -13,8 +12,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import jakarta.validation.ConstraintViolationException;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +29,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import jakarta.validation.ConstraintViolationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
@@ -433,7 +432,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldDefaultCompanyCodeAndTransactionSubTypeIfBlank() throws DataException {
+    void createPenaltiesList_shouldDefaultCompanyCodeAndTransactionSubTypeIfBlank() {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("");
         penaltySpec.setTransactionSubType(null);
@@ -452,7 +451,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldDefaultLedgerCodeAndTypeDescriptionIfConfigNotPresent() throws DataException {
+    void createPenaltiesList_shouldDefaultLedgerCodeAndTypeDescriptionIfConfigNotPresent() {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("ZZ");
         penaltySpec.setTransactionSubType(null);
@@ -468,7 +467,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldDefaultTransactionTypeIfNull() throws DataException {
+    void createPenaltiesList_shouldDefaultTransactionTypeIfNull() {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("ZZ");
         penaltySpec.setTransactionType(null);
@@ -481,7 +480,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldRoundAmountToTwoDecimals() throws DataException{
+    void createPenaltiesList_shouldRoundAmountToTwoDecimals(){
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("C1");
         penaltySpec.setCustomerCode("12345678");
@@ -494,7 +493,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldGenerateDifferentAmountsForMultiplePenalties() throws DataException {
+    void createPenaltiesList_shouldGenerateDifferentAmountsForMultiplePenalties() {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("C1");
         penaltySpec.setCustomerCode("12345678");
@@ -511,7 +510,7 @@ class AccountPenaltiesServiceImplTest {
     @ParameterizedTest
     @MethodSource("penaltyReferencePrefixProvider")
     void generateTransactionReference_shouldUseCorrectPrefix(
-            String companyCode, String transactionSubType, String expectedPrefix) throws DataException {
+            String companyCode, String transactionSubType, String expectedPrefix) {
         try {
             var method = AccountPenaltiesServiceImpl.class.getDeclaredMethod("generateTransactionReference", String.class, String.class);
             method.setAccessible(true);
@@ -525,7 +524,7 @@ class AccountPenaltiesServiceImplTest {
     @ParameterizedTest
     @MethodSource("penaltyReferencePrefixProvider")
     void createPenaltiesList_transactionReferencePrefix(
-            String companyCode, String transactionSubType, String expectedPrefix) throws DataException {
+            String companyCode, String transactionSubType, String expectedPrefix) {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode(companyCode);
 
@@ -618,7 +617,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createDuplicatePenalties_shouldGenerateMultiplePenaltiesWithSameTransactionReference() throws DataException {
+    void createDuplicatePenalties_shouldGenerateMultiplePenaltiesWithSameTransactionReference() {
         PenaltySpec penaltySpec = new PenaltySpec();
         penaltySpec.setCompanyCode("LP");
         penaltySpec.setCustomerCode("12345678");

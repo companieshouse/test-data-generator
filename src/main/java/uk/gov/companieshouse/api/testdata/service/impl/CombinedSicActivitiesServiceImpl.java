@@ -17,11 +17,16 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> {
 
-  @Autowired
-  private CombinedSicActivitiesRepository repository;
+  private final CombinedSicActivitiesRepository repository;
+
+  private final RandomService randomService;
 
   @Autowired
-  public RandomService randomService;
+  public CombinedSicActivitiesServiceImpl(CombinedSicActivitiesRepository repository, RandomService randomService) {
+    super();
+    this.repository = repository;
+    this.randomService = randomService;
+  }
 
   @Override
   public CombinedSicActivitiesData create(CombinedSicActivitiesSpec spec) throws DataException {

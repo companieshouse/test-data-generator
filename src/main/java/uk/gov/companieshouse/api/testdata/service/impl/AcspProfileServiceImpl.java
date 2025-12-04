@@ -23,12 +23,19 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class AcspProfileServiceImpl implements DataService<AcspProfileData, AcspProfileSpec> {
     private static final String LINK_STEM = "/authorised-corporate-service-providers/";
 
+    private final AcspProfileRepository repository;
+    
+    private final RandomService randomService;
+
+    private final AddressService addressService;
+
     @Autowired
-    private AcspProfileRepository repository;
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private AddressService addressService;
+    public AcspProfileServiceImpl(AcspProfileRepository repository, RandomService randomService, AddressService addressService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+        this.addressService = addressService;
+    }
 
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
         var soleTraderForename = "Forename ";

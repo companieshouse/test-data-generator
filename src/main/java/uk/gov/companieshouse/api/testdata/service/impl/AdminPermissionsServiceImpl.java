@@ -18,8 +18,13 @@ public class AdminPermissionsServiceImpl implements DataService<
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AdminPermissionsServiceImpl.class));
 
+    private final AdminPermissionsRepository repository;
+
     @Autowired
-    private AdminPermissionsRepository repository;
+    public AdminPermissionsServiceImpl(AdminPermissionsRepository repository) {
+        super();
+        this.repository = repository;
+    }
 
     @Override
     public AdminPermissionsData create(AdminPermissionsSpec spec) {
