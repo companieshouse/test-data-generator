@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -777,6 +776,26 @@ class AccountPenaltiesServiceImplTest {
 
         assertEquals("CS01", savedPenalty.getTypeDescription());
         assertTrue(savedPenalty.getTransactionReference().startsWith("P"));
+    }
+
+    @Test
+    void createAccountPenalties_DuplicateTrue_NumberOfPenaltiesLessThanTwo_ReturnsEmptyList() throws DataException {
+        PenaltySpec spec = new PenaltySpec();
+        spec.setDuplicate(true);
+        spec.setNumberOfPenalties(1);
+        spec.setCompanyCode("LP");
+        spec.setCustomerCode(CUSTOMER_CODE);
+
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
+
+        AccountPenaltiesData result = service.createAccountPenalties(spec);
+
+        assertNotNull(result);
+        assertTrue(result.getPenalties().isEmpty(), "Penalties list should be empty when duplicate is true and count < 2");
+
+        ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
+        verify(repository).save(captor.capture());
+        assertTrue(captor.getValue().getPenalties().isEmpty());
     }
 
     @Test
