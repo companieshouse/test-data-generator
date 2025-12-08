@@ -319,10 +319,9 @@ In order to use the generator, there are different possible endpoints that can b
   - `closed_at`: The Closed At date of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `part_payment`: The Part Payment amount of the Penalty being created. Boolean, when set to true, the outstanding amount will be less than the total amount and the `is_paid` flag will be false.
   - `is_paid`: The Is Paid flag of the Penalty being created in the Account Penalties data in the account_penalties db collection.
-  - `outstanding_amount`: The Amount of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `type_description`: The type description of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `ledger_code`: The ledger code of the Penalty being created in the Account Penalties data in the account_penalties db collection.
-  - `dunning_status`: The dunning status of the Penalty being created. Defaults to `PEN1` and also accepts `DCA`.
+  - `dunning_status`: The dunning status of the Penalty being created. Defaults to `PEN1`.
   - `account_status`: The account status of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_type`: The transaction type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
   - `transaction_sub_type`: The transaction sub-type of the Penalty being created in the Account Penalties data in the account_penalties db collection.
