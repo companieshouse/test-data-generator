@@ -47,12 +47,20 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
             .atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String PERM_PURPOSE = "ALPHABET";
 
+    private final DisqualificationsRepository repository;
+
+    private final RandomService randomService;
+    
+    private final AddressService addressService;
+
     @Autowired
-    private DisqualificationsRepository repository;
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private AddressService addressService;
+    public DisqualificationsServiceImpl(DisqualificationsRepository repository, RandomService randomService,
+            AddressService addressService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+        this.addressService = addressService;
+    }
 
     @Override
     public Disqualifications create(CompanySpec spec) throws DataException {

@@ -19,14 +19,20 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 @Service
 public class TransactionServiceImpl implements DataService<TransactionsData, TransactionsSpec>  {
 
-    @Autowired
-    private TransactionsRepository repository;
+    private final TransactionsRepository repository;
+
+    private final AcspApplicationRepository acsprepository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private AcspApplicationRepository acsprepository;
-
-    @Autowired
-    private RandomService randomService;
+    public TransactionServiceImpl(TransactionsRepository repository, AcspApplicationRepository acsprepository,
+            RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.acsprepository = acsprepository;
+        this.randomService = randomService;
+    }
 
     public TransactionsData create(TransactionsSpec txnSpec) throws DataException {
         var randomId = randomService.getTransactionId();

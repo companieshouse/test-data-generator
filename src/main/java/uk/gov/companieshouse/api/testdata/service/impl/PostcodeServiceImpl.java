@@ -4,12 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.companieshouse.api.testdata.Application;
+import uk.gov.companieshouse.api.testdata.exception.PostcodeServiceException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -19,10 +21,15 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class PostcodeServiceImpl implements PostcodeService {
 
-    @Autowired
-    private RandomService randomService;
-
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+
+    private final RandomService randomService;
+
+    @Autowired
+    public PostcodeServiceImpl(RandomService randomService) {
+        super();
+        this.randomService = randomService;
+    }
 
     @Override
     public List<Postcodes> getPostcodeByCountry(String country) {
@@ -106,7 +113,7 @@ public class PostcodeServiceImpl implements PostcodeService {
                 .filter(p -> p.getPostcode() != null && p.getPostcode().getStripped().startsWith(prefix))
                 .filter(p -> p.getBuildingNumber() != null)
                 .limit(10)
-                .collect(java.util.stream.Collectors.toList());
+                .toList();
     }
 
     List<Postcodes> loadAllPostcodes() {
@@ -119,7 +126,7 @@ public class PostcodeServiceImpl implements PostcodeService {
             return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
         } catch (IOException e) {
             LOG.error("Failed to read postcodes.json", e);
-            throw new RuntimeException(e);
+            throw new PostcodeServiceException(e);
         }
     }
 

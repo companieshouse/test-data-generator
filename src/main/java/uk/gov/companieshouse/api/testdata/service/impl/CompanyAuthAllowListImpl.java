@@ -15,11 +15,16 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CompanyAuthAllowListImpl implements CompanyAuthAllowListService {
 
-    @Autowired
-    private CompanyAuthAllowListRepository repository;
+    private final CompanyAuthAllowListRepository repository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private RandomService randomService;
+    public CompanyAuthAllowListImpl(CompanyAuthAllowListRepository repository, RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public CompanyAuthAllowListData create(CompanyAuthAllowListSpec spec) throws DataException {

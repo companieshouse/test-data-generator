@@ -11,8 +11,13 @@ import uk.gov.companieshouse.api.testdata.service.AppealsService;
 @Service
 public class AppealsServiceImpl implements AppealsService {
 
+    private final AppealsRepository repository;
+
     @Autowired
-    private AppealsRepository repository;
+    public AppealsServiceImpl(AppealsRepository repository) {
+        super();
+        this.repository = repository;
+    }
 
     @Override
     public boolean delete(String companyNumber, String penaltyReference) {

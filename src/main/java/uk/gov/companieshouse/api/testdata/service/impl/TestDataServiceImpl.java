@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
@@ -56,9 +57,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
-import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
-import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
-import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
@@ -81,75 +79,63 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
-    @Autowired
-    private CompanyProfileService companyProfileService;
-    @Autowired
-    private DataService<FilingHistory, CompanySpec> filingHistoryService;
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
-    @Autowired
-    private AppointmentService appointmentService;
-    @Autowired
-    private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
-    @Autowired
-    private CompanyPscStatementServiceImpl companyPscStatementService;
-    @Autowired
-    private DataService<CompanyPscs, CompanySpec> companyPscsService;
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
-    @Autowired
-    private DataService<CertificatesData, CertificatesSpec> certificatesService;
-    @Autowired
-    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
-    @Autowired
-    private DataService<CombinedSicActivitiesData,
-            CombinedSicActivitiesSpec> combinedSicActivitiesService;
-    @Autowired
-    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
-    @Autowired
-    private AcspMembersRepository acspMembersRepository;
-    @Autowired
-    private AdminPermissionsRepository adminPermissionsRepository;
-    @Autowired
-    private CertificatesRepository certificatesRepository;
-    @Autowired
-    private CertifiedCopiesRepository certifiedCopiesRepository;
-    @Autowired
-    private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
-    @Autowired
-    private DataService<TransactionsData, TransactionsSpec> transactionService;
-    @Autowired
-    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
-    @Autowired
-    private CompanyAuthAllowListService companyAuthAllowListService;
-    @Autowired
-    AppealsService appealsService;
-    @Autowired
-    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
-    @Autowired
-    @Qualifier("companySearchService")
-    private CompanySearchService companySearchService;
-    @Autowired
-    private AccountPenaltiesService accountPenaltiesService;
-    @Autowired
-    @Qualifier("alphabeticalCompanySearchService")
-    private CompanySearchService alphabeticalCompanySearch;
-    @Autowired
-    @Qualifier("advancedCompanySearchService")
-    private CompanySearchService advancedCompanySearch;
-    @Autowired
-    private PostcodeService postcodeService;
-    @Autowired
-    private DataService<Disqualifications, CompanySpec> disqualificationsService;
-    @Autowired
-    private DataService<UserCompanyAssociationData,
-            UserCompanyAssociationSpec> userCompanyAssociationService;
-    @Autowired
-    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+    private final CompanyProfileService companyProfileService;
+    
+    private final DataService<FilingHistory, CompanySpec> filingHistoryService;
+    
+    private final CompanyAuthCodeService companyAuthCodeService;
+    
+    private final AppointmentService appointmentService;
+    
+    private final DataService<CompanyMetrics, CompanySpec> companyMetricsService;
+    
+    private final CompanyPscStatementServiceImpl companyPscStatementService;
+    
+    private final DataService<CompanyPscs, CompanySpec> companyPscsService;
+    
+    private final RandomService randomService;
+    
+    private final UserService userService;
+    
+    private final DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    
+    private final DataService<CertificatesData, CertificatesSpec> certificatesService;
+    
+    private final DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    
+    private final DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    
+    private final DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
+    
+    private final AcspMembersRepository acspMembersRepository;
+    
+    private final AdminPermissionsRepository adminPermissionsRepository;
+    
+    private final DataService<TransactionsData, TransactionsSpec> transactionService;
+    
+    private final DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    
+    private final CompanyAuthAllowListService companyAuthAllowListService;
+    
+    private final AppealsService appealsService;
+    
+    private final DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    
+    private final CompanySearchService companySearchService;
+    
+    private final AccountPenaltiesService accountPenaltiesService;
+    
+    private final CompanySearchService alphabeticalCompanySearch;
+    
+    private final CompanySearchService advancedCompanySearch;
+    
+    private final PostcodeService postcodeService;
+    
+    private final DataService<Disqualifications, CompanySpec> disqualificationsService;
+    
+    private final DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService;
+    
+    private final DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -163,6 +149,68 @@ public class TestDataServiceImpl implements TestDataService {
 
     void setElasticSearchDeployed(Boolean isElasticSearchDeployed) {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
+    }
+
+    @Autowired
+    public TestDataServiceImpl(CompanyProfileService companyProfileService,
+            DataService<FilingHistory, CompanySpec> filingHistoryService, 
+            CompanyAuthCodeService companyAuthCodeService,
+            AppointmentService appointmentService, 
+            DataService<CompanyMetrics, CompanySpec> companyMetricsService,
+            CompanyPscStatementServiceImpl companyPscStatementService, 
+            DataService<CompanyPscs, CompanySpec> companyPscsService,
+            RandomService randomService, 
+            UserService userService,
+            DataService<AcspMembersData, AcspMembersSpec> acspMembersService,
+            DataService<CertificatesData, CertificatesSpec> certificatesService,
+            DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService,
+            DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService,
+            DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService,
+            AcspMembersRepository acspMembersRepository, 
+            AdminPermissionsRepository adminPermissionsRepository,
+            DataService<TransactionsData, TransactionsSpec> transactionService,
+            DataService<AcspProfileData, AcspProfileSpec> acspProfileService,
+            CompanyAuthAllowListService companyAuthAllowListService,
+            AppealsService appealsService,
+            DataService<CompanyRegisters, CompanySpec> companyRegistersService,
+            @Qualifier("companySearchService") CompanySearchService companySearchService,
+            AccountPenaltiesService accountPenaltiesService,
+            @Qualifier("alphabeticalCompanySearchService") CompanySearchService alphabeticalCompanySearch,
+            @Qualifier("advancedCompanySearchService") CompanySearchService advancedCompanySearch,
+            PostcodeService postcodeService,
+            DataService<Disqualifications, CompanySpec> disqualificationsService,
+            DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService,
+            DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService) {
+        super();
+        this.companyProfileService = companyProfileService;
+        this.filingHistoryService = filingHistoryService;
+        this.companyAuthCodeService = companyAuthCodeService;
+        this.appointmentService = appointmentService;
+        this.companyMetricsService = companyMetricsService;
+        this.companyPscStatementService = companyPscStatementService;
+        this.companyPscsService = companyPscsService;
+        this.randomService = randomService;
+        this.userService = userService;
+        this.acspMembersService = acspMembersService;
+        this.certificatesService = certificatesService;
+        this.certifiedCopiesService = certifiedCopiesService;
+        this.combinedSicActivitiesService = combinedSicActivitiesService;
+        this.missingImageDeliveriesService = missingImageDeliveriesService;
+        this.acspMembersRepository = acspMembersRepository;
+        this.adminPermissionsRepository = adminPermissionsRepository;
+        this.transactionService = transactionService;
+        this.acspProfileService = acspProfileService;
+        this.companyAuthAllowListService = companyAuthAllowListService;
+        this.appealsService = appealsService;
+        this.companyRegistersService = companyRegistersService;
+        this.companySearchService = companySearchService;
+        this.accountPenaltiesService = accountPenaltiesService;
+        this.alphabeticalCompanySearch = alphabeticalCompanySearch;
+        this.advancedCompanySearch = advancedCompanySearch;
+        this.postcodeService = postcodeService;
+        this.disqualificationsService = disqualificationsService;
+        this.userCompanyAssociationService = userCompanyAssociationService;
+        this.adminPermissionsService = adminPermissionsService;
     }
 
     @Override
