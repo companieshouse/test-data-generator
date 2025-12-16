@@ -83,8 +83,8 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscStatementsCount(1);
         } else if (spec.getActiveStatements() == null) {
-            metrics.setActivePscStatementsCount(spec.getNumberOfPsc()
-                    == null ? 0 : spec.getNumberOfPsc());
+            metrics.setActivePscStatementsCount(spec.getNumberOfPscs()
+                    == null ? 0 : spec.getNumberOfPscs());
         } else {
             metrics.setActivePscStatementsCount(spec.getActiveStatements());
         }
@@ -102,10 +102,10 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
-        } else if (spec.getNumberOfPsc() != null) {
-            int activeCount = spec.getNumberOfPsc();
+        } else if (spec.getNumberOfPscs() != null) {
+            int activeCount = spec.getNumberOfPscs();
             if (Boolean.FALSE.equals(spec.getPscActive())) {
-                activeCount = Math.max(0, spec.getNumberOfPsc() - 1);
+                activeCount = Math.max(0, spec.getNumberOfPscs() - 1);
             }
             metrics.setActivePscCount(activeCount);
             LOG.debug("Set active PSC count to " + activeCount);
@@ -136,9 +136,9 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setPscCount(1);
             LOG.debug("Company has super secure PSCs. Set PSC count to 1.");
-        } else if (spec.getNumberOfPsc() != null) {
-            metrics.setPscCount(spec.getNumberOfPsc());
-            LOG.debug("Set PSC count to " + spec.getNumberOfPsc());
+        } else if (spec.getNumberOfPscs() != null) {
+            metrics.setPscCount(spec.getNumberOfPscs());
+            LOG.debug("Set PSC count to " + spec.getNumberOfPscs());
         } else {
             metrics.setPscCount(0);
             LOG.debug("No PSC count provided. Set PSC count to 0.");

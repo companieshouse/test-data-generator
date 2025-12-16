@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -37,6 +38,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesTransactionSubType;
+import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
@@ -547,7 +549,6 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void testUpdateAccountPenalties_updatesCorrectPenaltyByReference() throws Exception {
-        // Arrange
         String penaltyRef = "REF123";
         String otherRef = "REF456";
         AccountPenalty penalty1 = new AccountPenalty();
@@ -577,10 +578,8 @@ class AccountPenaltiesServiceImplTest {
                 .thenReturn(Optional.of(accountPenalties));
         when(repository.save(any(AccountPenalties.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        // Act
         AccountPenaltiesData result = service.updateAccountPenalties(penaltyRef, request);
 
-        // Assert
         assertEquals(2, result.getPenalties().size());
         assertEquals(10.0, result.getPenalties().get(0).getAmount());
         assertEquals(99.0, result.getPenalties().get(1).getAmount());
@@ -606,7 +605,7 @@ class AccountPenaltiesServiceImplTest {
         penaltySpec.setCompanyCode("LP");
         penaltySpec.setCustomerCode(CUSTOMER_CODE);
         penaltySpec.setNumberOfPenalties(3);
-        penaltySpec.setDuplicate(true); // important!
+        penaltySpec.setDuplicate(true);
 
         List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
 
@@ -614,6 +613,189 @@ class AccountPenaltiesServiceImplTest {
         assertEquals(3, penalties.size());
         String transactionRef = penalties.get(0).getTransactionReference();
         assertTrue(penalties.stream().allMatch(p -> p.getTransactionReference().equals(transactionRef)));
+    }
+
+    @Test
+    void createPenaltiesList_partPaid_setsOutstandingAmountLessThanAmount() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(100.0);
+        penaltySpec.setPartPaid(true);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(1, penalties.size());
+        AccountPenalty penalty = penalties.get(0);
+        assertTrue(penalty.getOutstandingAmount() < penalty.getAmount());
+        assertTrue(penalty.getOutstandingAmount() > 0);
+    }
+
+    @Test
+    void createPenaltiesList_amountNull_usesRandomAmount() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(null);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(1, penalties.size());
+        AccountPenalty penalty = penalties.get(0);
+        assertTrue(penalty.getAmount() >= 10.0 && penalty.getAmount() <= 99.0);
+    }
+
+    @Test
+    void createPenaltiesList_isPaid_setsOutstandingAmountZero() {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("LP");
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+        penaltySpec.setAmount(50.0);
+        penaltySpec.setIsPaid(true);
+
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+
+        assertNotNull(penalties);
+        assertEquals(1, penalties.size());
+        AccountPenalty penalty = penalties.get(0);
+        assertEquals(0.0, penalty.getOutstandingAmount());
+        assertTrue(penalty.isPaid());
+    }
+
+    @Test
+    void updateAccountPenalties_updatesAmountOutstandingAmountAndIsPaid() throws Exception {
+        UpdateAccountPenaltiesRequest request = new UpdateAccountPenaltiesRequest();
+        request.setCompanyCode("LP");
+        request.setCustomerCode(CUSTOMER_CODE);
+        request.setIsPaid(true);
+        request.setAmount(200.0);
+        request.setOutstandingAmount(0.0);
+
+        AccountPenalties accountPenalties = AccountPenaltiesServiceImplTest.createAccountPenalties();
+
+        when(repository.findPenalty("LP", "12345678", "A1234567"))
+                .thenReturn(Optional.of(accountPenalties));
+        when(repository.save(accountPenalties)).thenReturn(accountPenalties);
+
+        AccountPenaltiesData result = service.updateAccountPenalties("A1234567", request);
+
+        assertNotNull(result);
+        PenaltyData penalty = result.getPenalties().get(0);
+        assertEquals(200.0, penalty.getAmount());
+        assertEquals(0.0, penalty.getOutstandingAmount());
+        assertTrue(penalty.getIsPaid());
+    }
+
+    @Test
+    void testCreateAccountPenalties_Standard_LP() throws DataException {
+        PenaltySpec spec = new PenaltySpec();
+        spec.setCompanyCode("LP");
+        spec.setCustomerCode("123456");
+        spec.setNumberOfPenalties(1);
+        spec.setAmount(100.0);
+
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
+
+        AccountPenaltiesData result = service.createAccountPenalties(spec);
+        assertNotNull(result);
+        assertEquals(1, result.getPenalties().size());
+        assertEquals(100.0, result.getPenalties().get(0).getAmount());
+        assertEquals("LP", result.getPenalties().get(0).getCompanyCode());
+
+        ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
+        verify(repository).save(captor.capture());
+
+        AccountPenalty savedPenalty = captor.getValue().getPenalties().get(0);
+        assertEquals("1", savedPenalty.getTransactionType());
+        assertNotNull(savedPenalty.getLedgerCode());
+    }
+
+    @Test
+    void createAccountPenalties_C1_A2_Configuration() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setTransactionSubType(PenaltiesTransactionSubType.A2);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.createAccountPenalties(penaltySpec);
+
+        ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
+        verify(repository).save(captor.capture());
+
+        AccountPenalty savedPenalty = captor.getValue().getPenalties().get(0);
+
+        assertEquals("FU", savedPenalty.getLedgerCode());
+        assertEquals("PENU", savedPenalty.getTypeDescription());
+        assertEquals("U", savedPenalty.getTransactionReference().substring(0, 1));
+    }
+
+    @Test
+    void createAccountPenalties_C1_S3_Configuration() throws DataException {
+        PenaltySpec penaltySpec = new PenaltySpec();
+        penaltySpec.setCompanyCode("C1");
+        penaltySpec.setTransactionSubType(PenaltiesTransactionSubType.S3);
+        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        penaltySpec.setNumberOfPenalties(1);
+
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.createAccountPenalties(penaltySpec);
+
+        ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
+        verify(repository).save(captor.capture());
+
+        AccountPenalty savedPenalty = captor.getValue().getPenalties().get(0);
+
+        assertEquals("CS01 IDV", savedPenalty.getTypeDescription());
+        assertTrue(List.of("E1", "S1", "N1").contains(savedPenalty.getLedgerCode()));
+        assertEquals("P", savedPenalty.getTransactionReference().substring(0, 1));
+    }
+
+    @Test
+    void testCreateAccountPenalties_C1_S1() throws DataException {
+        PenaltySpec spec = new PenaltySpec();
+        spec.setCompanyCode("C1");
+        spec.setTransactionSubType(PenaltiesTransactionSubType.S1);
+
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
+
+        service.createAccountPenalties(spec);
+
+        ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
+        verify(repository).save(captor.capture());
+
+        AccountPenalty savedPenalty = captor.getValue().getPenalties().get(0);
+
+        assertEquals("CS01", savedPenalty.getTypeDescription());
+        assertTrue(savedPenalty.getTransactionReference().startsWith("P"));
+    }
+
+    @Test
+    void createAccountPenalties_DuplicateTrue_NumberOfPenaltiesLessThanTwo_ReturnsEmptyList() throws DataException {
+        PenaltySpec spec = new PenaltySpec();
+        spec.setDuplicate(true);
+        spec.setNumberOfPenalties(1);
+        spec.setCompanyCode("LP");
+        spec.setCustomerCode(CUSTOMER_CODE);
+
+        when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
+
+        AccountPenaltiesData result = service.createAccountPenalties(spec);
+
+        assertNotNull(result);
+        assertTrue(result.getPenalties().isEmpty(), "Penalties list should be empty when duplicate is true and count < 2");
+
+        ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
+        verify(repository).save(captor.capture());
+        assertTrue(captor.getValue().getPenalties().isEmpty());
     }
 
     @Test
