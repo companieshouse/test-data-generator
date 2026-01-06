@@ -85,6 +85,22 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         return repository.save(companyAuthCode);
     }
 
+    @Override
+    public CompanyAuthCode createNewAuthCode(String companyNumber)
+            throws DataException, NoDataFoundException {
+        if (companyProfileRepository.findById(companyNumber).isEmpty()) {
+            throw new NoDataFoundException(COMPANY_PROFILE_NOT_FOUND);
+        }
+
+        Optional<CompanyAuthCode> existingAuthCode = repository.findById(companyNumber);
+        if (existingAuthCode.isPresent()) {
+            return existingAuthCode.get();
+        }
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(companyNumber);
+        return create(spec);
+    }
+
     private String encrypt(final String authCode) throws DataException {
         return BCrypt.hashpw(sha256(authCode), BCrypt.gensalt());
     }

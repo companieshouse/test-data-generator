@@ -27,50 +27,13 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
-import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.AppointmentService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.PostcodeService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.*;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -150,6 +113,9 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationSpec> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+
+    @Autowired
+    private CompanyProfileInternalService companyProfileInternalService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -900,6 +866,24 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
+    }
+
+    public CompanyData createCompanyProfile(CompanySpecInternal spec, String apiKey) throws DataException {
+        try {
+            companyProfileInternalService.create(spec, apiKey);
+            LOG.info("Successfully created company profile for internal spec");
+            // creating Auth code
+            var companyNumber = spec.getData().getCompanyNumber();
+            var authCode = companyAuthCodeService.createNewAuthCode(companyNumber);
+            String companyUri = this.apiUrl + "/company/" + companyNumber;
+            return new CompanyData(companyNumber,
+                    authCode.getAuthCode(), companyUri);
+        } catch (Exception ex) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("company number", spec.getData().getCompanyName());
+            data.put("error message", ex.getMessage());
+            throw new DataException("Failed to create company profile in service", ex);
+        }
     }
 
 }

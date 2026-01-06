@@ -10,12 +10,12 @@ public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, Com
     /**
      * Verify the given {@code authCode} against the company with {@code
      * companyNumber}
-     * 
+     *
      * @param companyNumber The company number for the company we are verifying the
      *                      authorisation code
      * @param authCode      The authorisation code to be verified
      * @return True if the {@code authCode} matches the one of the given company.
-     *         False if it does not match.
+     * False if it does not match.
      * @throws NoDataFoundException If no authorisation code was found for the given
      *                              {@code companyNumber}
      * @throws DataException        If there is a general fault setting the auth code.
@@ -24,6 +24,9 @@ public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, Com
             throws NoDataFoundException, DataException;
 
     CompanyAuthCode findOrCreate(String companyNumber)
+            throws DataException, NoDataFoundException;
+
+    CompanyAuthCode createNewAuthCode(String companyNumber)
             throws DataException, NoDataFoundException;
 
 }
