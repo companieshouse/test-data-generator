@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,8 +22,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.api.handler.company.PrivateCompanyResourceHandler;
-import uk.gov.companieshouse.api.handler.company.request.PrivateCompanyFullProfileGet;
+import uk.gov.companieshouse.api.handler.company.PrivateCompanyLinksResourceHandler;
+import uk.gov.companieshouse.api.handler.company.request.PrivateCompanyProfileGet;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.handler.search.PrivateSearchResourceHandler;
 import uk.gov.companieshouse.api.handler.search.company.PrivateCompanySearchHandler;
@@ -58,29 +57,31 @@ class CompanySearchServiceImplTest {
     @Mock
     private PrivateCompanySearchDelete privateCompanySearchDelete;
     @Mock
-    private ApiResponse<Data> apiResponse;
-    @Mock
-    private PrivateCompanyResourceHandler privateCompanyResourceHandler;
-    @Mock
-    private PrivateCompanyFullProfileGet privateCompanyFullProfileGet;
+    private ApiResponse<uk.gov.companieshouse.api.company.CompanyProfile> apiResponse;
     @Mock
     private CompanyProfileService companyProfileService;
     @Mock
     private Data companyProfileData;
-
+    @Mock
+    uk.gov.companieshouse.api.company.CompanyProfile companyProfile;
+    @Mock
+    private PrivateCompanyLinksResourceHandler privateCompanyLinksResourceHandler;
+    @Mock
+    private PrivateCompanyProfileGet privateCompanyProfileGet;
     @InjectMocks
     private CompanySearchServiceImpl service;
 
     @BeforeEach
     void setUp() throws ApiErrorResponseException, URIValidationException {
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
-        Mockito.lenient().when(internalApiClient.privateCompanyResourceHandler()).thenReturn(privateCompanyResourceHandler);
+        Mockito.lenient().when(internalApiClient.privateCompanyLinksResourceHandler()).thenReturn(privateCompanyLinksResourceHandler);
         Mockito.lenient().when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
         Mockito.lenient().when(privateSearchResourceHandler.companySearch()).thenReturn(privateCompanySearchHandler);
-        Mockito.lenient().when(privateCompanyResourceHandler.getCompanyFullProfile(anyString()))
-                .thenReturn(privateCompanyFullProfileGet);
-        Mockito.lenient().when(privateCompanyFullProfileGet.execute()).thenReturn(apiResponse);
-        Mockito.lenient().when(apiResponse.getData()).thenReturn(companyProfileData);
+        Mockito.lenient().when(privateCompanyLinksResourceHandler.getCompanyProfile(anyString()))
+                .thenReturn(privateCompanyProfileGet);
+        Mockito.lenient().when(privateCompanyProfileGet.execute()).thenReturn(apiResponse);
+        Mockito.lenient().when(apiResponse.getData()).thenReturn(companyProfile);
+        Mockito.lenient().when(companyProfile.getData()).thenReturn(companyProfileData);
     }
 
     @Test
