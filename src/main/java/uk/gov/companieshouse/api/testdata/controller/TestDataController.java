@@ -24,34 +24,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -553,4 +526,34 @@ public class TestDataController {
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
+    /* Internal endpoint to create company data */
+    @PostMapping("/internal/company-profile")
+    public ResponseEntity<InternalCompanyData> createCompanyCompanyInternal(
+            @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+
+        Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
+        CompanySpec spec = optionalRequest.orElse(new CompanySpec());
+
+        InternalCompanyData createdCompany = testDataService.createInternalCompanyData(spec);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
+        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        LOG.info(NEW_COMPANY_CREATED, data);
+        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/internal/company-profile/{companyNumber}")
+    public ResponseEntity<Void> deleteInternalCompany(
+            @PathVariable("companyNumber") String companyNumber,
+            @RequestParam("deltaAt") String deltaAt)
+            throws DataException, NoDataFoundException {
+
+        testDataService.deleteInternalCompanyData(companyNumber, deltaAt);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, companyNumber);
+        LOG.info("Internal Company deleted", data);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
