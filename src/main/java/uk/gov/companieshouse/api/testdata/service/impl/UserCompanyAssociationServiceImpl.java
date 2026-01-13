@@ -1,101 +1,170 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.function.Supplier;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.accounts.associations.model.Association;
+import uk.gov.companieshouse.api.accounts.associations.model.ResponseBodyPost;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
-import uk.gov.companieshouse.api.testdata.model.entity.PreviousState;
-import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
-import uk.gov.companieshouse.api.testdata.model.rest.InvitationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PreviousStateSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service
+@Service("userCompanyAssociationServiceImpl")
 public class UserCompanyAssociationServiceImpl implements
         DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> {
-    private static final String AUTH_CODE = "auth_code";
-    private static final String CONFIRMED_STATUS = "confirmed";
 
-    @Autowired
-    private UserCompanyAssociationRepository repository;
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(UserCompanyAssociationServiceImpl.class));
 
-    @Autowired
-    private RandomService randomService;
+    // Use the same supplier as AdvancedCompanySearchImpl
+    private final Supplier<InternalApiClient> internalApiClientSupplier;
+
+    public UserCompanyAssociationServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
+        this.internalApiClientSupplier = internalApiClientSupplier;
+    }
 
     @Override
     public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {
-        var randomId = randomService.generateId();
-        var association = new UserCompanyAssociation();
-        var currentDate = randomService.getCurrentDateTime();
+        LOG.info("Creating association via SDK for company: {} and user: {}" + spec.getCompanyNumber() +spec.getUserId());
 
-        association.setId(randomId);
-        association.setCompanyNumber(spec.getCompanyNumber());
-        association.setUserId(spec.getUserId());
-        association.setUserEmail(spec.getUserEmail());
-        association.setStatus(Objects.requireNonNullElse(spec.getStatus(),
-                CONFIRMED_STATUS));
-        association.setCreatedAt(currentDate);
-        association.setApprovalRoute(Objects.requireNonNullElse(spec.getApprovalRoute(),
-                AUTH_CODE));
-        association.setInvitations(spec.getInvitations() != null ? createInvitations(spec) : null);
-        association.setApprovalExpiryAt(spec.getInvitations() != null
-                ? Objects.requireNonNullElse(spec.getApprovalExpiryAt(),
-                    currentDate.plus(7,
-                            ChronoUnit.DAYS)) : null);
-        association.setPreviousStates(spec.getPreviousStates() != null
-                ? createPreviousStates(spec) : null);
+        try {
+            ResponseBodyPost sdkResponse = internalApiClientSupplier.get()
+                    .privateAccountsAssociationResourceHandler()
+                    .addAssociation("/associations", spec.getCompanyNumber(), spec.getUserId())
+                    .execute()
+                    .getData();
 
-        repository.save(association);
+            String associationId = sdkResponse.getAssociationLink();
+            LOG.info("Successfully created association. ID: " + associationId + " for company: " + spec.getCompanyNumber());
 
-        return new UserCompanyAssociationData(
-                association.getId(),
-                association.getCompanyNumber(),
-                association.getUserId(),
-                association.getUserEmail(),
-                association.getStatus(),
-                association.getApprovalRoute(),
-                association.getInvitations());
+            UserCompanyAssociationData response = new UserCompanyAssociationData();
+            response.setId(associationId);
+            response.setCompanyNumber(spec.getCompanyNumber());
+            response.setUserId(spec.getUserId());
+            response.setAssociationLink("/associations/" + associationId);
+
+            return response;
+
+        } catch (ApiErrorResponseException | URIValidationException e) {
+            LOG.error("Error creating association for company :" + spec.getCompanyNumber() + e.getMessage(), e);
+            throw new DataException("Error creating association: " + e.getMessage(), e);
+        }
     }
 
     @Override
     public boolean delete(String id) {
-        var association =
-                repository.findById(id);
-        association.ifPresent(repository::delete);
-        return association.isPresent();
+        LOG.info("Deleting association with ID: {}");
+
+        try {
+            // Update association status to REMOVED in SDK
+            internalApiClientSupplier.get()
+                    .privateAccountsAssociationResourceHandler()
+                    .updateAssociationStatusForId(
+                            "/associations/" + id,
+                            uk.gov.companieshouse.api.accounts.associations.model.RequestBodyPut.StatusEnum.REMOVED)
+                    .execute();
+
+            LOG.info("Successfully updated association status to REMOVED for ID: {}");
+            return true;
+
+        } catch (Exception e) {
+            LOG.error("Error deleting association with ID: {}");
+            return false;
+        }
     }
 
-    private List<Invitation> createInvitations(UserCompanyAssociationSpec spec) {
-        List<Invitation> invitationList = new ArrayList<>();
-        for (InvitationSpec invite : spec.getInvitations()) {
-            var invitation = new Invitation();
-            invitation.setInvitedAt(invite.getInvitedAt());
-            invitation.setInvitedBy(invite.getInvitedBy());
-            invitationList.add(invitation);
+    /**
+     * Search for association by company number and user
+     */
+    public Association searchAssociation(String companyNumber, String userId, String userEmail)
+            throws DataException {
+        LOG.info("Searching for association for company: {} and user/email: {}/{}"
+        );
+
+        try {
+            Association association = internalApiClientSupplier.get()
+                    .privateAccountsAssociationResourceHandler()
+                    .searchForAssociation(
+                            "/associations/companies/" + companyNumber + "/search",
+                            userId,
+                            userEmail,
+                            "confirmed", "awaiting-approval", "migrated", "unauthorised")
+                    .execute()
+                    .getData();
+
+            if (association != null) {
+                LOG.info("Found association with ID: {} for company: {}"
+                );
+            } else {
+                LOG.info("No association found for company: {}");
+            }
+
+            return association;
+
+        } catch (ApiErrorResponseException | URIValidationException e) {
+            String errorMessage = String.format(
+                    "Error searching for association for company %s", companyNumber);
+            LOG.error(errorMessage, e);
+            throw new DataException(errorMessage, e);
         }
-        return invitationList;
     }
 
-    private List<PreviousState> createPreviousStates(UserCompanyAssociationSpec spec) {
-        List<PreviousState> previousStateList = new ArrayList<>();
-        for (PreviousStateSpec prevState :
-                spec.getPreviousStates()) {
-            var previousState = new PreviousState();
-            previousState.setChangedBy(prevState.getChangedBy());
-            previousState.setChangedAt(prevState.getChangedAt());
-            previousState.setStatus(prevState.getStatus());
-            previousStateList.add(previousState);
+    // ========== PRIVATE HELPER METHODS ==========
+
+    /**
+     * Create simple response with just the association ID
+     */
+    private UserCompanyAssociationData createSimpleResponse(String associationId, UserCompanyAssociationSpec spec) {
+        UserCompanyAssociationData response = new UserCompanyAssociationData();
+        response.setId(associationId); // SDK-generated association ID
+        response.setCompanyNumber(spec.getCompanyNumber());
+        response.setUserId(spec.getUserId());
+        response.setUserEmail(spec.getUserEmail());
+        // Set the association link as expected
+        response.setAssociationLink("/associations/" + associationId);
+        return response;
+    }
+
+    private String getUserIdForSdk(UserCompanyAssociationSpec spec) {
+        if (spec.getUserId() != null && !spec.getUserId().trim().isEmpty()) {
+            return spec.getUserId();
+        } else if (spec.getUserEmail() != null && !spec.getUserEmail().trim().isEmpty()) {
+            return spec.getUserEmail();
+        } else {
+            throw new IllegalArgumentException("Either userId or userEmail must be provided");
         }
-        return previousStateList;
+    }
+
+    /**
+     * Debug method to check API client configuration
+     */
+    public void debugApiClient() {
+        try {
+            InternalApiClient apiClient = internalApiClientSupplier.get();
+            LOG.debug("API Client Configuration:");
+            LOG.debug("  - Base Path: " + getBasePath(apiClient));
+            LOG.debug("  - HTTP Client Class: " + apiClient.getHttpClient().getClass().getName());
+        } catch (Exception e) {
+            LOG.error("Error debugging API client", e);
+        }
+    }
+
+    // Add reflection to get base path (since it's private in InternalApiClient)
+    private String getBasePath(InternalApiClient apiClient) {
+        try {
+            java.lang.reflect.Field basePathField = InternalApiClient.class.getDeclaredField("basePath");
+            basePathField.setAccessible(true);
+            return (String) basePathField.get(apiClient);
+        } catch (Exception e) {
+            return "Cannot access base path: " + e.getMessage();
+        }
     }
 }

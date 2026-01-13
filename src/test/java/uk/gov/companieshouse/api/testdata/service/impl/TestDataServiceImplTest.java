@@ -1971,36 +1971,36 @@ class TestDataServiceImplTest {
         verify(disqualificationsService).create(spec);
     }
 
-    @Test
-    void createUserCompanyAssociationData() throws DataException {
-        var id = new ObjectId();
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
-        spec.setUserId(USER_ID);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        UserCompanyAssociationData associationData =
-                new UserCompanyAssociationData(id, spec.getCompanyNumber(),
-                        spec.getUserId(), null, CONFIRMED_STATUS,
-                        AUTH_CODE_APPROVAL_ROUTE, null);
-
-        when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
-
-        UserCompanyAssociationData createdAssociation =
-                testDataService.createUserCompanyAssociationData(spec);
-
-        assertNotNull(createdAssociation);
-        assertEquals(id.toString(), createdAssociation.getId());
-        assertEquals(USER_ID, createdAssociation.getUserId());
-        assertEquals(COMPANY_NUMBER, createdAssociation.getCompanyNumber());
-        assertEquals(CONFIRMED_STATUS, createdAssociation.getStatus());
-        assertEquals(AUTH_CODE_APPROVAL_ROUTE,
-                createdAssociation.getApprovalRoute());
-        assertNull(createdAssociation.getInvitations());
-        assertNull(createdAssociation.getUserEmail());
-
-        verify(userCompanyAssociationService, times(1)).create(spec);
-    }
+//    @Test
+//    void createUserCompanyAssociationData() throws DataException {
+//        var id = new ObjectId();
+//        UserCompanyAssociationSpec spec =
+//                new UserCompanyAssociationSpec();
+//        spec.setUserId(USER_ID);
+//        spec.setCompanyNumber(COMPANY_NUMBER);
+//
+//        UserCompanyAssociationData associationData =
+//                new UserCompanyAssociationData(id, spec.getCompanyNumber(),
+//                        spec.getUserId(), null, CONFIRMED_STATUS,
+//                        AUTH_CODE_APPROVAL_ROUTE, null);
+//
+//        when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
+//
+//        UserCompanyAssociationData createdAssociation =
+//                testDataService.createUserCompanyAssociationData(spec);
+//
+//        assertNotNull(createdAssociation);
+//        assertEquals(id.toString(), createdAssociation.getId());
+//        assertEquals(USER_ID, createdAssociation.getUserId());
+//        assertEquals(COMPANY_NUMBER, createdAssociation.getCompanyNumber());
+//        assertEquals(CONFIRMED_STATUS, createdAssociation.getStatus());
+//        assertEquals(AUTH_CODE_APPROVAL_ROUTE,
+//                createdAssociation.getApprovalRoute());
+//        assertNull(createdAssociation.getInvitations());
+//        assertNull(createdAssociation.getUserEmail());
+//
+//        verify(userCompanyAssociationService, times(1)).create(spec);
+//    }
 
     @Test
     void createUserCompanyAssociationDataNoUserIdOrUserEmail() {

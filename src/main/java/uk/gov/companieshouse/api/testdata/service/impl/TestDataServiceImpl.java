@@ -771,42 +771,41 @@ public class TestDataServiceImpl implements TestDataService {
     public UserCompanyAssociationData createUserCompanyAssociationData(
             UserCompanyAssociationSpec spec)
             throws DataException {
-        if (spec.getUserId() == null
-                && spec.getUserEmail() == null) {
-            throw new DataException("A user_id or a user_email is "
-                    + "required to create an association");
+        if (spec.getUserId() == null && spec.getUserEmail() == null) {
+            throw new DataException("A user_id or a user_email is required to create an association");
         }
 
         if (spec.getCompanyNumber() == null || spec.getCompanyNumber().isEmpty()) {
-            throw new DataException("Company number is "
-                    + "required to create an association");
+            throw new DataException("Company number is required to create an association");
         }
 
         try {
-            UserCompanyAssociationData createdAssociation =
-                    userCompanyAssociationService.create(spec);
-
-            return new UserCompanyAssociationData(
-                    new ObjectId(createdAssociation.getId()),
-                    createdAssociation.getCompanyNumber(),
-                    createdAssociation.getUserId(),
-                    createdAssociation.getUserEmail(),
-                    createdAssociation.getStatus(),
-                    createdAssociation.getApprovalRoute(),
-                    createdAssociation.getInvitations()
+            LOG.info("Creating association via SDK for company: {} and user/email: {}/{}"
             );
+
+            // Simply delegate to the service - it will use SDK
+            UserCompanyAssociationData createdAssociation = userCompanyAssociationService.create(spec);
+
+            LOG.info("Successfully created association via SDK with ID: {} for company: {}"
+            );
+
+            return createdAssociation;
+
         } catch (Exception ex) {
-            throw new DataException("Error creating the association",
-                    ex);
+            LOG.error("Error creating association via SDK for company: {} and user: {}"
+            );
+            throw new DataException("Error creating the association via SDK: " + ex.getMessage(), ex);
         }
     }
 
     @Override
     public boolean deleteUserCompanyAssociationData(String id) throws DataException {
         try {
+            LOG.info("Deleting association with ID: {}");
             return userCompanyAssociationService.delete(id);
         } catch (Exception ex) {
-            throw new DataException("Error deleting association", ex);
+            LOG.error("Error deleting association with ID: {}");
+            throw new DataException("Error deleting association: " + ex.getMessage(), ex);
         }
     }
 

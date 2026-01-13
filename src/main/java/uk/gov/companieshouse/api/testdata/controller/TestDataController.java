@@ -456,30 +456,27 @@ public class TestDataController {
     @PostMapping("/internal/associations")
     public ResponseEntity<UserCompanyAssociationData> createAssociation(
             @Valid @RequestBody UserCompanyAssociationSpec request) throws DataException {
-        var createdAssociation =
-                testDataService.createUserCompanyAssociationData(request);
+        var createdAssociation = testDataService.createUserCompanyAssociationData(request);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("association_id",
-                createdAssociation.getId());
+        data.put("association_id", createdAssociation.getId());
         LOG.info("New association created", data);
         return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/internal/associations/{associationId}")
-    public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId")
-                                                                 String associationId)
+    public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId") String associationId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("association_id", associationId);
-        boolean deleteAssociation =
-                testDataService.deleteUserCompanyAssociationData(associationId);
+
+        boolean deleteAssociation = testDataService.deleteUserCompanyAssociationData(associationId);
 
         if (deleteAssociation) {
             LOG.info("Association is deleted", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
+            response.put("status", HttpStatus.NOT_FOUND);
             LOG.info("Association is not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
