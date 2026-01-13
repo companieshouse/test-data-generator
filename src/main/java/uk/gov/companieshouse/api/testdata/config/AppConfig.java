@@ -23,8 +23,10 @@ public class AppConfig implements WebMvcConfigurer {
      */
     private final String chsApiKey;
     private final String apiUrl;
+    //private final String accountApiUrl;
 
     public AppConfig(@Value("${api-key}") String chsApiKey, @Value("${api-url}") String apiUrl) {
+        //this.accountApiUrl = accountApiUrl;
         this.chsApiKey = chsApiKey;
         this.apiUrl = apiUrl;
     }
@@ -46,5 +48,18 @@ public class AppConfig implements WebMvcConfigurer {
             return internalApiClient;
         };
     }
+
+//    @Bean
+//    public Supplier<InternalApiClient> internalApiClientAccountSupplier() {
+//        return () -> {
+//            var apiKeyHttpClient = new ApiKeyHttpClient(chsApiKey);
+//            apiKeyHttpClient.setRequestId(DataMapHolder.getRequestId());
+//
+//            var internalApiClient = new InternalApiClient(apiKeyHttpClient);
+//            internalApiClient.setBasePath(accountApiUrl); // Use account API URL
+//
+//            return internalApiClient;
+//        };
+//    }
 
 }

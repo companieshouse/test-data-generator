@@ -2,71 +2,85 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-
-import org.bson.types.ObjectId;
-import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
-
 public class UserCompanyAssociationData {
-    @JsonProperty("id")
-    private final String id;
 
-    @JsonProperty("company_number")
-    private final String companyNumber;
+    private String id;
+    private String companyNumber;
+    private String userId;
+    private String userEmail;
+    private String status;
+    private String approvalRoute;
+    private Object invitations;
 
-    @JsonProperty("user_id")
-    private final String userId;
+    @JsonProperty("association_link")
+    private String associationLink;
 
-    @JsonProperty("user_email")
-    private final String userEmail;
+    // Simple constructor for SDK response
+    public UserCompanyAssociationData() {}
 
-    @JsonProperty("status")
-    private final String status;
-
-    @JsonProperty("approval_route")
-    private final String approvalRoute;
-
-    @JsonProperty("invitations")
-    private final List<Invitation> invitations;
-
-    public UserCompanyAssociationData(ObjectId id,
-                                      String companyNumber, String userId,
-                                      String userEmail, String status,
-                                      String approvalRoute, List<Invitation> invitations) {
-        this.id = id.toString();
-        this.companyNumber = companyNumber;
-        this.userId = userId;
-        this.userEmail = userEmail;
-        this.status = status;
-        this.approvalRoute = approvalRoute;
-        this.invitations = invitations;
-    }
-
+    // Getters and Setters
     public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+        this.associationLink = "/associations/" + id;
     }
 
     public String getCompanyNumber() {
         return companyNumber;
     }
 
+    public void setCompanyNumber(String companyNumber) {
+        this.companyNumber = companyNumber;
+    }
+
     public String getUserId() {
         return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUserEmail() {
         return userEmail;
     }
 
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
     public String getStatus() {
         return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getApprovalRoute() {
         return approvalRoute;
     }
 
-    public List<Invitation> getInvitations() {
+    public void setApprovalRoute(String approvalRoute) {
+        this.approvalRoute = approvalRoute;
+    }
+
+    public Object getInvitations() {
         return invitations;
+    }
+
+    public void setInvitations(Object invitations) {
+        this.invitations = invitations;
+    }
+
+    public String getAssociationLink() {
+        return associationLink;
+    }
+
+    public void setAssociationLink(String associationLink) {
+        this.associationLink = associationLink;
     }
 }
