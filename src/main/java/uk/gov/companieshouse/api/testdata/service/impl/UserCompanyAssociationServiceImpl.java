@@ -28,19 +28,15 @@ public class UserCompanyAssociationServiceImpl implements
     @Autowired
     private final ApiClientService apiClientService;
 
-    private InternalApiClient internalClient;
-
     public UserCompanyAssociationServiceImpl(ApiClientService apiClientService) {
         this.apiClientService = apiClientService;
-        this.internalClient = apiClientService.getInternalApiClientForPrivateAccountApiUrl();
     }
 
     @Override
     public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {
         LOG.info("Creating association via SDK for company: {} and user: {}" + spec.getCompanyNumber() +spec.getUserId());
-        internalClient = apiClientService.getInternalApiClientForPrivateAccountApiUrl();
         try {
-            var sdkResponse = internalClient
+            var sdkResponse = apiClientService.getInternalApiClientForPrivateAccountApiUrl()
                     .privateAccountsAssociationResourceHandler()
                     .addAssociation("/associations", spec.getCompanyNumber(), spec.getUserId())
                     .execute()
@@ -66,10 +62,9 @@ public class UserCompanyAssociationServiceImpl implements
     @Override
     public boolean delete(String id) {
         LOG.info("Deleting association with ID: {}");
-
         try {
             // Update association status to REMOVED in SDK
-            internalClient
+            apiClientService.getInternalApiClientForPrivateAccountApiUrl()
                     .privateAccountsAssociationResourceHandler()
                     .updateAssociationStatusForId(
                             "/associations/" + id,
@@ -94,7 +89,7 @@ public class UserCompanyAssociationServiceImpl implements
         );
 
         try {
-            Association association = internalClient
+            Association association = apiClientService.getInternalApiClientForPrivateAccountApiUrl()
                     .privateAccountsAssociationResourceHandler()
                     .searchForAssociation(
                             "/associations/companies/" + companyNumber + "/search",
