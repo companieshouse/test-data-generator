@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
+import uk.gov.companieshouse.api.testdata.service.ApiClientService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -24,19 +25,22 @@ public class UserCompanyAssociationServiceImpl implements
 
     private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(UserCompanyAssociationServiceImpl.class));
 
-    // Use the same supplier as AdvancedCompanySearchImpl
-    private final Supplier<InternalApiClient> internalApiClientSupplier;
+    @Autowired
+    private final ApiClientService apiClientService;
 
-    public UserCompanyAssociationServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
-        this.internalApiClientSupplier = internalApiClientSupplier;
+    private InternalApiClient internalClient;
+
+    public UserCompanyAssociationServiceImpl(ApiClientService apiClientService) {
+        this.apiClientService = apiClientService;
+        this.internalClient = apiClientService.getInternalApiClientForPrivateAccountApiUrl();
     }
 
     @Override
     public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {
         LOG.info("Creating association via SDK for company: {} and user: {}" + spec.getCompanyNumber() +spec.getUserId());
-
+        internalClient = apiClientService.getInternalApiClientForPrivateAccountApiUrl();
         try {
-            ResponseBodyPost sdkResponse = internalApiClientSupplier.get()
+            var sdkResponse = internalClient
                     .privateAccountsAssociationResourceHandler()
                     .addAssociation("/associations", spec.getCompanyNumber(), spec.getUserId())
                     .execute()
@@ -65,7 +69,7 @@ public class UserCompanyAssociationServiceImpl implements
 
         try {
             // Update association status to REMOVED in SDK
-            internalApiClientSupplier.get()
+            internalClient
                     .privateAccountsAssociationResourceHandler()
                     .updateAssociationStatusForId(
                             "/associations/" + id,
@@ -90,7 +94,7 @@ public class UserCompanyAssociationServiceImpl implements
         );
 
         try {
-            Association association = internalApiClientSupplier.get()
+            Association association = internalClient
                     .privateAccountsAssociationResourceHandler()
                     .searchForAssociation(
                             "/associations/companies/" + companyNumber + "/search",
@@ -140,31 +144,6 @@ public class UserCompanyAssociationServiceImpl implements
             return spec.getUserEmail();
         } else {
             throw new IllegalArgumentException("Either userId or userEmail must be provided");
-        }
-    }
-
-    /**
-     * Debug method to check API client configuration
-     */
-    public void debugApiClient() {
-        try {
-            InternalApiClient apiClient = internalApiClientSupplier.get();
-            LOG.debug("API Client Configuration:");
-            LOG.debug("  - Base Path: " + getBasePath(apiClient));
-            LOG.debug("  - HTTP Client Class: " + apiClient.getHttpClient().getClass().getName());
-        } catch (Exception e) {
-            LOG.error("Error debugging API client", e);
-        }
-    }
-
-    // Add reflection to get base path (since it's private in InternalApiClient)
-    private String getBasePath(InternalApiClient apiClient) {
-        try {
-            java.lang.reflect.Field basePathField = InternalApiClient.class.getDeclaredField("basePath");
-            basePathField.setAccessible(true);
-            return (String) basePathField.get(apiClient);
-        } catch (Exception e) {
-            return "Cannot access base path: " + e.getMessage();
         }
     }
 }
