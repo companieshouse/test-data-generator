@@ -10,7 +10,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.apache.commons.lang.BooleanUtils;
+import org.apache.juli.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -184,6 +187,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         setSubType(profile, companyParams.getSubType());
         setCompanyStatusDetail(profile, companyParams.getCompanyStatusDetail(), companyTypeValue);
 
+        if (spec.getCombinedTdg()) {
+            return profile;
+        }
         return repository.save(profile);
     }
 
@@ -317,6 +323,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         overseasEntity.setLinks(createOverseaLinks(
                 companyNumber, companyType, spec, jurisdiction, dateParams));
+
+        if (spec.getCombinedTdg()) {
+            return overseasEntity;
+        }
 
         repository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);

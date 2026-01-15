@@ -206,12 +206,18 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
     private CompanyPscs createSuperSecureBeneficialOwner(CompanySpec spec) {
         CompanyPscs superSecureBo = createBasePsc(spec, true);
         buildSuperSecureBeneficialOwner(superSecureBo);
+        if (spec.getCombinedTdg()) {
+            return superSecureBo;
+        }
         return repository.save(superSecureBo);
     }
 
     private CompanyPscs createSuperSecurePsc(CompanySpec spec) {
         CompanyPscs superSecurePsc = createBasePsc(spec, true);
         buildSuperSecurePsc(superSecurePsc);
+        if (spec.getCombinedTdg()) {
+            return superSecurePsc;
+        }
         return repository.save(superSecurePsc);
     }
 
@@ -292,6 +298,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
             default:
                 throw new IllegalArgumentException("Unsupported PSC type: " + pscType);
         }
+        if (spec.getCombinedTdg()) {
+            return companyPscs;
+        }
         return repository.save(companyPscs);
     }
 
@@ -306,6 +315,9 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported beneficial owner type: " + pscType);
+        }
+        if (spec.getCombinedTdg()) {
+            return beneficialOwner;
         }
         return repository.save(beneficialOwner);
     }

@@ -45,7 +45,9 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
             LOG.debug("Registers are provided. Creating registers for the company.");
             metrics.setRegisters(createRegisters(spec.getRegisters()));
         }
-
+        if (spec.getCombinedTdg()) {
+            return metrics;
+        }
         CompanyMetrics savedMetrics = repository.save(metrics);
         LOG.info("Successfully created and saved CompanyMetrics for company number: "
                 + spec.getCompanyNumber());

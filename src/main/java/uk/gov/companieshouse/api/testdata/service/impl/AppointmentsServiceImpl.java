@@ -59,11 +59,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Autowired
     private OfficerRepository officerRepository;
 
-    public void createAppointment(CompanySpec spec) {
+    public AppointmentsData createAppointment(CompanySpec spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
                     + spec.getCompanyNumber());
-            return;
+            return null;
         }
 
         LOG.info("Starting creation of appointments with matching IDs for company number: "
@@ -164,6 +164,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointmentsData.setLinks(dataLinks);
 
             var savedData = appointmentsDataRepository.save(appointmentsData);
+            if (spec.getCombinedTdg()) {
+                return savedData;
+            }
             createdAppointmentsData.add(savedData);
             LOG.info("AppointmentsData saved with ID: " + savedData.getId());
         }
@@ -171,6 +174,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
                 + createdAppointmentsData.size()
                 + " appointments data with matching IDs for company number: " + companyNumber);
+        return createdAppointmentsData.getFirst();
     }
 
     @Override

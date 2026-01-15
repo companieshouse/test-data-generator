@@ -251,6 +251,7 @@ public class AppointmentsData {
     public static class Links {
         @Field("officer")
         private OfficerLinks officer;
+
         @Field("self")
         private String self;
 
@@ -260,6 +261,14 @@ public class AppointmentsData {
 
         public void setSelf(String self) {
             this.self = self;
+        }
+
+        public String getSelf() {
+            return self;
+        }
+
+        public OfficerLinks getOfficer() {
+            return officer;
         }
     }
 
@@ -275,6 +284,14 @@ public class AppointmentsData {
 
         public void setSelf(String self) {
             this.self = self;
+        }
+
+        public String getAppointments() {
+            return appointments;
+        }
+
+        public String getSelf() {
+            return self;
         }
     }
 }

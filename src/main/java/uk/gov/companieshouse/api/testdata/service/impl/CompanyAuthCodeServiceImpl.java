@@ -46,7 +46,9 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
         companyAuthCode.setAuthCode(authCode);
         companyAuthCode.setEncryptedAuthCode(encrypt(authCode));
         companyAuthCode.setIsActive(true);
-
+        if (spec.getCombinedTdg()) {
+            return companyAuthCode;
+        }
         return repository.save(companyAuthCode);
     }
 
