@@ -91,6 +91,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         List<Appointment> createdAppointments = new ArrayList<>();
         List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
+        List<OfficerAppointment> createdOfficerAppointments = new ArrayList<>();
 
         for (var i = 0; i < numberOfAppointments; i++) {
             OfficerRoles currentRoleEnum = officerRoleList.get(i);
@@ -137,7 +138,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setLinks(links);
 
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
-            this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
+            OfficerAppointment officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
+            createdOfficerAppointments.add(officerAppointment);
             if (!spec.getCombinedTdg()) {
                 Appointment savedAppointment = appointmentsRepository.save(appointment);
                 LOG.info("Appointment saved with ID: " + savedAppointment.getId());
@@ -167,8 +169,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             createdAppointmentsData.add(appointmentsData);
         }
         AppointmentsResultData appointmentsResultData = new AppointmentsResultData();
-        appointmentsResultData.setAppointmentList(createdAppointments);
-        appointmentsResultData.setAppointmentsDataList(createdAppointmentsData);
+        appointmentsResultData.setAppointment(createdAppointments);
+        appointmentsResultData.setAppointmentsData(createdAppointmentsData);
+        appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
         if (spec.getCombinedTdg()) {
             return appointmentsResultData;
         }
@@ -297,7 +300,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
     }
 
-    private void createOfficerAppointment(
+    private OfficerAppointment createOfficerAppointment(
             CompanySpec spec, String officerId, String appointmentId, String role) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
@@ -325,8 +328,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setOfficerAppointmentItems(
                 createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow, role)
         );
-
+        if (spec.getCombinedTdg()) {
+            return officerAppointment;
+        }
         officerRepository.save(officerAppointment);
+        return officerAppointment;
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(

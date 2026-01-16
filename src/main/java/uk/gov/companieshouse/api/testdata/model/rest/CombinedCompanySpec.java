@@ -11,7 +11,7 @@ public class CombinedCompanySpec {
     private CompanyProfile companyProfile;
 
     @JsonProperty("appointmentsData")
-    private AppointmentsData appointmentsData;
+    private AppointmentsResultData appointmentsData;
 
     @JsonProperty("companyAuthCode")
     private CompanyAuthCode companyAuthCode;
@@ -26,7 +26,7 @@ public class CombinedCompanySpec {
     private List<CompanyPscStatement> companyPscStatement;
 
     @JsonProperty("companyPscs")
-    private CompanyPscs companyPscs;
+    private List<CompanyPscs> companyPscs;
 
     @JsonProperty("companyRegisters")
     private CompanyRegisters companyRegisters;
@@ -42,11 +42,11 @@ public class CombinedCompanySpec {
         this.companyProfile = companyProfile;
     }
 
-    public AppointmentsData getAppointmentsData() {
+    public AppointmentsResultData getAppointmentsData() {
         return appointmentsData;
     }
 
-    public void setAppointmentsData(AppointmentsData appointmentsData) {
+    public void setAppointmentsData(AppointmentsResultData appointmentsData) {
         this.appointmentsData = appointmentsData;
     }
 
@@ -82,13 +82,6 @@ public class CombinedCompanySpec {
         this.companyPscStatement = companyPscStatement;
     }
 
-    public CompanyPscs getCompanyPscs() {
-        return companyPscs;
-    }
-
-    public void setCompanyPscs(CompanyPscs companyPscs) {
-        this.companyPscs = companyPscs;
-    }
 
     public CompanyRegisters getCompanyRegisters() {
         return companyRegisters;
@@ -104,5 +97,13 @@ public class CombinedCompanySpec {
 
     public void setDisqualifications(Disqualifications disqualifications) {
         this.disqualifications = disqualifications;
+    }
+
+    public List<CompanyPscs> getCompanyPscs() {
+        return companyPscs;
+    }
+
+    public void setCompanyPscs(List<CompanyPscs> companyPscs) {
+        this.companyPscs = companyPscs;
     }
 }
