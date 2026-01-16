@@ -26,18 +26,7 @@ import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
-import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.AppointmentService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.PostcodeService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.*;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -61,7 +50,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Autowired
-    private DataService<CompanyPscs, CompanySpec> companyPscsService;
+    private CompanyPscsService companyPscsService;
     @Autowired
     private RandomService randomService;
     @Autowired
@@ -117,6 +106,9 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationSpec> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+
+    @Autowired
+    private CombinedTdgCompanyService combinedTdgCompanyService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -943,6 +935,17 @@ public class TestDataServiceImpl implements TestDataService {
             deleteCompanyData(spec.getCompanyNumber());
             throw new DataException("Failed to create company data in service", ex);
         }
+    }
+
+    @Override
+    public CompanyData createCompanyWithStructure(CombinedCompanySpec companySpec) throws DataException {
+
+        var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
+        var authCode = companySpec.getCompanyAuthCode().getAuthCode();
+        combinedTdgCompanyService.createCombinedCompany(companySpec);
+        String companyUri = this.apiUrl + "/company/" + companyNumber;
+        return new CompanyData(companyNumber,
+                authCode, companyUri);
     }
 
 }

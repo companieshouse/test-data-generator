@@ -66,7 +66,7 @@ class CompanyPscsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
@@ -85,7 +85,7 @@ class CompanyPscsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNotNull(result);
 
@@ -108,7 +108,7 @@ class CompanyPscsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNotNull(result);
 
@@ -126,7 +126,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNull(result);
         verify(repository, never()).save(any());
@@ -245,7 +245,7 @@ class CompanyPscsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNotNull(result);
         verify(repository, times(2)).save(any(CompanyPscs.class));
@@ -263,7 +263,7 @@ class CompanyPscsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNotNull(result);
         verify(repository, times(2)).save(any(CompanyPscs.class));
@@ -288,7 +288,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(null);
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNull(result);
         verify(repository, never()).save(any());
@@ -306,7 +306,7 @@ class CompanyPscsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
@@ -320,7 +320,7 @@ class CompanyPscsServiceImplTest {
         spec.setNumberOfPscs(0);
         spec.setPscType(null); // PscType is null
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNull(result);
         verify(repository, never()).save(any());
@@ -334,7 +334,7 @@ class CompanyPscsServiceImplTest {
         spec.setNumberOfPscs(0);
         spec.setPscType(Collections.emptyList()); // PscType is an empty list
 
-        CompanyPscs result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(spec);
 
         assertNull(result);
         verify(repository, never()).save(any());

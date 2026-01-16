@@ -134,6 +134,9 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setWithdrawnStatements(1);
             tempSpec.setNumberOfPscs(0);
             tempSpec.setPscActive(false);
+            if (spec.getCombinedTdg() != null) {
+                tempSpec.setCombinedTdg(spec.getCombinedTdg());
+            }
             generatedList.add(this.create(tempSpec));
         }
         return generatedList;
@@ -155,6 +158,9 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setWithdrawnStatements(0);
             tempSpec.setNumberOfPscs(1);
             tempSpec.setPscActive(true);
+            if (spec.getCombinedTdg() != null) {
+                tempSpec.setCombinedTdg(spec.getCombinedTdg());
+            }
             generatedList.add(this.create(tempSpec));
         }
         return generatedList;

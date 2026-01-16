@@ -270,4 +270,6 @@ public interface TestDataService {
             throws DataException, NoDataFoundException;
 
     CompanyDetailsResponse getCompanyProfile(CompanySpec spec) throws DataException;
+
+    CompanyData createCompanyWithStructure(CombinedCompanySpec companySpec) throws DataException;
 }

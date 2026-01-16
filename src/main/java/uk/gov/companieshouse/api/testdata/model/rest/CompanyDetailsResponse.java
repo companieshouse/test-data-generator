@@ -6,12 +6,12 @@ import java.util.List;
 
 public class CompanyDetailsResponse {
     private CompanyProfile companyProfile;
-    private AppointmentsData appointmentsData;
+    private AppointmentsResultData appointmentsData;
     private CompanyAuthCode companyAuthCode;
     private FilingHistory filingHistory;
     private CompanyMetrics companyMetrics;
     private List<CompanyPscStatement> companyPscStatement;
-    private CompanyPscs companyPscs;
+    private List<CompanyPscs> companyPscs;
     private CompanyRegisters companyRegisters;
     private Disqualifications disqualifications;
 
@@ -19,7 +19,7 @@ public class CompanyDetailsResponse {
         this.companyProfile = companyProfile;
     }
 
-    public void setAppointmentsData(AppointmentsData appointmentsData) {
+    public void setAppointmentsData(AppointmentsResultData appointmentsData) {
         this.appointmentsData = appointmentsData;
     }
 
@@ -27,7 +27,7 @@ public class CompanyDetailsResponse {
         return companyProfile;
     }
 
-    public AppointmentsData getAppointmentsData() {
+    public AppointmentsResultData getAppointmentsData() {
         return appointmentsData;
     }
 
@@ -47,11 +47,11 @@ public class CompanyDetailsResponse {
         this.companyRegisters = companyRegisters;
     }
 
-    public CompanyPscs getCompanyPscs() {
+    public List<CompanyPscs> getCompanyPscs() {
         return companyPscs;
     }
 
-    public void setCompanyPscs(CompanyPscs companyPscs) {
+    public void setCompanyPscs(List<CompanyPscs> companyPscs) {
         this.companyPscs = companyPscs;
     }
 

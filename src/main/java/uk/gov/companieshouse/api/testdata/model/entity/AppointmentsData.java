@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
 import java.time.Instant;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -225,6 +226,54 @@ public class AppointmentsData {
         this.updated = updated;
     }
 
+    public String getInternalId() {
+        return internalId;
+    }
+
+    public String getAppointmentId() {
+        return appointmentId;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public String getOccupation() {
+        return occupation;
+    }
+
+    public boolean isServiceAddressIsSameAsRegisteredOfficeAddress() {
+        return serviceAddressIsSameAsRegisteredOfficeAddress;
+    }
+
+    public Instant getAppointedOn() {
+        return appointedOn;
+    }
+
+    public String getOfficerRole() {
+        return officerRole;
+    }
+
+    public Boolean getIsSecureOfficer() {
+        return isSecureOfficer;
+    }
+
+    public Address getServiceAddress() {
+        return serviceAddress;
+    }
+
+    public String getDataCompanyNumber() {
+        return dataCompanyNumber;
+    }
+
+    public Instant getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public String getOfficerId() {
+        return officerId;
+    }
+
     public static class ServiceAddress {
         @Field("address_line_1")
         private String addressLine1;
@@ -245,6 +294,26 @@ public class AppointmentsData {
 
         public void setCountry(String country) {
             this.country = country;
+        }
+
+        public String getPostalCode() {
+            return postalCode;
+        }
+
+        public void setPostalCode(String postalCode) {
+            this.postalCode = postalCode;
+        }
+
+        public String getLocality() {
+            return locality;
+        }
+
+        public String getRegion() {
+            return region;
+        }
+
+        public String getPremises() {
+            return premises;
         }
     }
 

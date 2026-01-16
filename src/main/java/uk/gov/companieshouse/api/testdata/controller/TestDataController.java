@@ -537,4 +537,16 @@ public class TestDataController {
         return new ResponseEntity<>(companyData, HttpStatus.OK);
     }
 
+    @PostMapping("/internal/create-company-with-structure")
+    public ResponseEntity<CompanyData> createCompanyWithStructure(
+            @Valid @RequestBody(required = false) CombinedCompanySpec request) throws DataException {
+        Optional<CombinedCompanySpec> optionalRequest = Optional.ofNullable(request);
+        CombinedCompanySpec spec = optionalRequest.orElse(new CombinedCompanySpec());
+        var createdCompany = testDataService.createCompanyWithStructure(spec);
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
+        LOG.info(NEW_COMPANY_CREATED, data);
+        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+    }
+
 }
