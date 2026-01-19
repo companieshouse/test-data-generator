@@ -55,6 +55,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
@@ -780,19 +781,19 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         try {
-            LOG.info("Creating association via SDK for company: {} and user/email: {}/{}"
+            LOG.info("Creating association via SDK for company: " + spec.getCompanyNumber()
+                    + "and user id: " + spec.getUserId()
             );
 
             // Simply delegate to the service - it will use SDK
             UserCompanyAssociationData createdAssociation = userCompanyAssociationService.create(spec);
 
-            LOG.info("Successfully created association via SDK with ID: {} for company: {}"
-            );
+            LOG.info("Successfully created association via SDK with ID: " + spec.getUserId() + " for company: " + spec.getCompanyNumber()  );
 
             return createdAssociation;
 
         } catch (Exception ex) {
-            LOG.error("Error creating association via SDK for company: {} and user: {}"
+            LOG.error("Error creating association via SDK for company: " + spec.getCompanyNumber() + " and user: " + spec.getUserId()
             );
             throw new DataException("Error creating the association via SDK: " + ex.getMessage(), ex);
         }
@@ -801,10 +802,10 @@ public class TestDataServiceImpl implements TestDataService {
     @Override
     public boolean deleteUserCompanyAssociationData(String id) throws DataException {
         try {
-            LOG.info("Deleting association with ID: {}");
+            LOG.info("Deleting association with ID: " + id);
             return userCompanyAssociationService.delete(id);
         } catch (Exception ex) {
-            LOG.error("Error deleting association with ID: {}");
+            LOG.error("Error deleting association with ID: " + id);
             throw new DataException("Error deleting association: " + ex.getMessage(), ex);
         }
     }
@@ -1010,4 +1011,31 @@ public class TestDataServiceImpl implements TestDataService {
                 authCode, companyUri);
     }
 
+    @Override
+    public UserCompanyAssociationSearchData searchUserCompanyAssociation(String companyNumber, String userId, String userEmail) throws DataException {
+        var association = ((UserCompanyAssociationServiceImpl) userCompanyAssociationService)
+                .searchAssociation(companyNumber, userId, userEmail);
+        if (association == null || association.getLinks() == null) {
+            return null;
+        }
+        String associationLink = String.valueOf(association.getLinks());
+        String id;
+        if (associationLink != null && associationLink.contains("/")) {
+            id = associationLink.substring(associationLink.lastIndexOf("/") + 1);
+        } else {
+            id = associationLink;
+        }
+        // Build response with all fields, invitations set to null (method not found)
+        return new UserCompanyAssociationSearchData(
+            id,
+            association.getCompanyNumber(),
+            association.getUserId(),
+                association.getStatus() != null ? association.getStatus().name() : null,
+                association.getApprovalRoute() != null ? association.getApprovalRoute().name() : null,
+            null,
+            associationLink
+        );
+    }
+
 }
+

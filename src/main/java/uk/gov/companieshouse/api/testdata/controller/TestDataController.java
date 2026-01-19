@@ -52,6 +52,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -59,6 +60,8 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.impl.UserCompanyAssociationServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -77,6 +80,9 @@ public class TestDataController {
 
     @Autowired
     private AccountPenaltiesService accountPenaltyService;
+
+    @Autowired
+    private UserCompanyAssociationServiceImpl userCompanyAssociationService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
@@ -480,6 +486,39 @@ public class TestDataController {
             LOG.info("Association is not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/internal/associations/search")
+    public ResponseEntity<UserCompanyAssociationSearchData> searchAssociation(
+            @RequestParam("companyNumber") String companyNumber,
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "userEmail", required = false) String userEmail) throws DataException {
+        var association = userCompanyAssociationService.searchAssociation(companyNumber, userId, userEmail);
+        if (association == null || association.getLinks() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // Extract association link and id
+        String associationLink = String.valueOf(association.getLinks());
+        String associationId;
+        if (associationLink != null && associationLink.contains("/")) {
+            associationId = associationLink.substring(associationLink.lastIndexOf("/") + 1);
+        } else {
+            associationId = associationLink;
+        }
+        // Convert enums to String if not null
+        String status = association.getStatus() != null ? association.getStatus().name() : null;
+        String approvalRoute = association.getApprovalRoute() != null ? association.getApprovalRoute().name() : null;
+        // Build response with all fields, invitations set to null (method not found)
+        UserCompanyAssociationSearchData response = new UserCompanyAssociationSearchData(
+            associationId,
+            association.getCompanyNumber(),
+            association.getUserId(),
+            status,
+            approvalRoute,
+            null,
+            associationLink
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/health-check")
