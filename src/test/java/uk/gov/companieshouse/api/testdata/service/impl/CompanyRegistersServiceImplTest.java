@@ -293,6 +293,7 @@ class CompanyRegistersServiceImplTest {
     private void setCompanySpec(String registerType, String registerMovedTo) {
         companySpec = new CompanySpec();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
+        companySpec.setCombinedTdg(false);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);

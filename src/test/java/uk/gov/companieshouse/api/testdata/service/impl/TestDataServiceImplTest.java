@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -63,16 +64,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
-import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.AppointmentService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.PostcodeService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
+import uk.gov.companieshouse.api.testdata.service.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -138,7 +130,7 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock
-    private DataService<CompanyPscs, CompanySpec> companyPscsService;
+    private CompanyPscsService companyPscsService;
     @Mock
     private RandomService randomService;
     @Mock

@@ -61,6 +61,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(3);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -80,6 +81,7 @@ class CompanyPscsServiceImplTest {
         spec.setHasSuperSecurePscs(true);
         spec.setPscType(null);
         spec.setNumberOfPscs(null);
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -103,6 +105,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setHasSuperSecurePscs(true);
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -125,6 +128,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
+        spec.setCombinedTdg(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -139,6 +143,8 @@ class CompanyPscsServiceImplTest {
         spec.setAccountsDueStatus("due-soon");
         spec.setNumberOfPscs(1);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
+        spec.setCombinedTdg(false);
+
         LocalDate dueDate = LocalDate.now().plusDays(10);
 
         when(randomService.generateAccountsDueDateByStatus("due-soon")).thenReturn(dueDate);
@@ -183,6 +189,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(3);
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -209,6 +216,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
+        spec.setCombinedTdg(false);
 
         DataException exception = assertThrows(DataException.class,
                 () -> companyPscsService.create(spec));
@@ -224,6 +232,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+        spec.setCombinedTdg(false);
 
         DataException exception = assertThrows(DataException.class,
                 () -> companyPscsService.create(spec));
@@ -240,6 +249,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -258,6 +268,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.CORPORATE_BENEFICIAL_OWNER));
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -276,6 +287,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
+        spec.setCombinedTdg(false);
 
         assertThrows(DataException.class, () -> companyPscsService.create(spec));
         verify(repository, never()).save(any());
@@ -287,6 +299,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(null);
+        spec.setCombinedTdg(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -301,6 +314,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(3);
         spec.setPscType(List.of(PscType.INDIVIDUAL, PscType.LEGAL_PERSON));
+        spec.setCombinedTdg(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -319,6 +333,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
         spec.setPscType(null); // PscType is null
+        spec.setCombinedTdg(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -333,6 +348,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
         spec.setPscType(Collections.emptyList()); // PscType is an empty list
+        spec.setCombinedTdg(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 

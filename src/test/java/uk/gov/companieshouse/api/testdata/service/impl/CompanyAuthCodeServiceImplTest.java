@@ -63,6 +63,7 @@ class CompanyAuthCodeServiceImplTest {
     void create() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCombinedTdg(false);
 
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
@@ -190,7 +191,7 @@ class CompanyAuthCodeServiceImplTest {
     void createThrowsDataExceptionWhenEncryptFails() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-
+        spec.setCombinedTdg(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
         CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {

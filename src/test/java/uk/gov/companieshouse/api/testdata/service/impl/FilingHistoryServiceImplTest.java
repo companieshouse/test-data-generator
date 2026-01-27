@@ -96,6 +96,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void create() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
@@ -152,6 +153,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createBarcodeServiceException() throws BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         final String exceptionMessage = "Barcode error";
@@ -188,6 +190,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
         filingHistorySpec.setCategory(CategoryType.INCORPORATION);
@@ -240,6 +243,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithMultipleFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         FilingHistorySpec filingHistorySpec1 = new FilingHistorySpec();
@@ -293,6 +297,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithNullFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         spec.setFilingHistoryList(Collections.emptyList());
@@ -365,6 +370,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWhenAccountsDueStatusIsNull() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus(null);
 
@@ -400,6 +406,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWhenAccountsDueStatusIsDueSoon() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
 
@@ -439,6 +446,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWhenAccountsDueStatusIsOverdue() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("overdue");
 
@@ -478,6 +486,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithMultipleFilingHistoryTypes() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         FilingHistorySpec ap01Spec = new FilingHistorySpec();
@@ -516,6 +525,7 @@ class FilingHistoryServiceImplTest {
         for (FilingHistorySpec fhSpec : spec.getFilingHistoryList()) {
             createdHistories.add(filingHistoryService.create(new CompanySpec() {{
                 setCompanyNumber(COMPANY_NUMBER);
+                setCombinedTdg(false);
                 setFilingHistoryList(List.of(fhSpec));
             }}));
         }
@@ -648,6 +658,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithSubCategory_setsSubCategory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -685,6 +696,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithUnknownType_setsAssociatedFilings() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -709,6 +721,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithAP01_setsOriginalValues() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("AP01");
@@ -756,6 +769,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithDescription_setsCustomDescription() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -784,6 +798,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithNullDescription_setsDefaultDescription() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
