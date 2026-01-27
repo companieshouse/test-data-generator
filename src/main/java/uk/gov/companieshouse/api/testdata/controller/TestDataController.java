@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -217,6 +218,26 @@ public class TestDataController {
         LOG.info("New acsp member created", data);
         return new ResponseEntity<>(createdAcspMember, HttpStatus.CREATED);
     }
+
+    @GetMapping("/internal/acsp-profile")
+    public ResponseEntity<AcspProfile> getAcspProfile(
+            @RequestParam("acspNumber") String acspNumber)
+            throws DataException, NoDataFoundException {
+
+        if (acspNumber == null || acspNumber.isBlank()) {
+            throw new DataException("acspNumber query parameter is required");
+        }
+
+        AcspProfile profile = testDataService.getAcspProfileEntity(acspNumber);
+
+        if (profile == null) {
+            throw new NoDataFoundException(
+                    "No ACSP profile found for acspNumber: " + acspNumber);
+        }
+
+        return ResponseEntity.ok(profile);
+    }
+
 
     @PostMapping("/internal/certificates")
     public ResponseEntity<CertificatesData> createCertificates(

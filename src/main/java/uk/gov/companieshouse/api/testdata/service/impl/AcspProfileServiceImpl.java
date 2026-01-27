@@ -73,6 +73,12 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         return new AcspProfileData(savedProfile.getAcspNumber(), savedProfile.getName());
     }
 
+    public AcspProfile getById(String acspNumber) throws DataException {
+        return repository.findById(acspNumber)
+                .orElseThrow(() ->
+                        new DataException("ACSP profile not found: " + acspNumber));
+    }
+
     @Override
     public boolean delete(String acspNumber) {
         var existingProfile = repository.findById(acspNumber);
