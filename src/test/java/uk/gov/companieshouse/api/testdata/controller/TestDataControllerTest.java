@@ -1,5 +1,22 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +40,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CombinedCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -50,23 +69,6 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -1498,4 +1500,79 @@ class TestDataControllerTest {
                 testDataController.findOrCreateCompanyAuthCode(companyNumber));
         assertEquals(ex, thrown);
     }
+
+    @Test
+    void getCompanyWithStructure_success() throws Exception {
+        CompanySpec request = new CompanySpec();
+        CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
+        when(testDataService.getCompanyProfile(request)).thenReturn(responseObj);
+
+        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithStructure(request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseObj, response.getBody());
+        verify(testDataService, times(1)).getCompanyProfile(request);
+    }
+
+    @Test
+    void getCompanyWithStructure_nullRequest_usesDefault() throws Exception {
+        CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
+        when(testDataService.getCompanyProfile(any(CompanySpec.class))).thenReturn(responseObj);
+
+        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithStructure(null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseObj, response.getBody());
+        verify(testDataService, times(1)).getCompanyProfile(any(CompanySpec.class));
+    }
+
+    @Test
+    void getCompanyWithStructure_throwsDataException() throws Exception {
+        CompanySpec request = new CompanySpec();
+        DataException exception = new DataException("error");
+        when(testDataService.getCompanyProfile(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.getCompanyWithStructure(request)
+        );
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createCompanyWithStructure_success() throws Exception {
+        CombinedCompanySpec request = new CombinedCompanySpec();
+        CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+        when(testDataService.createCompanyWithStructure(request)).thenReturn(companyData);
+
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithStructure(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(companyData, response.getBody());
+        verify(testDataService, times(1)).createCompanyWithStructure(request);
+    }
+
+    @Test
+    void createCompanyWithStructure_nullRequest_usesDefault() throws Exception {
+        CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+        when(testDataService.createCompanyWithStructure(any(CombinedCompanySpec.class))).thenReturn(companyData);
+
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithStructure(null);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(companyData, response.getBody());
+        verify(testDataService, times(1)).createCompanyWithStructure(any(CombinedCompanySpec.class));
+    }
+
+    @Test
+    void createCompanyWithStructure_throwsDataException() throws Exception {
+        CombinedCompanySpec request = new CombinedCompanySpec();
+        DataException exception = new DataException("error");
+        when(testDataService.createCompanyWithStructure(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createCompanyWithStructure(request)
+        );
+        assertEquals(exception, thrown);
+    }
+
 }
