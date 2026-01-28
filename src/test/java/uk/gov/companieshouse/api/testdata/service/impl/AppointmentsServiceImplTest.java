@@ -531,6 +531,29 @@ class AppointmentsServiceImplTest {
         assertFalse(items.getFirst().isSecureOfficer());
     }
 
+    @Test
+    void createAppointment_shouldNotSaveEntitiesWhenCombinedTdgIsTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCombinedTdg(true);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        var result = appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository, never()).save(any());
+        verify(appointmentsDataRepository, never()).save(any());
+        assertNotNull(result);
+        assertNotNull(result.getAppointment());
+        assertNotNull(result.getAppointmentsData());
+        assertNotNull(result.getOfficerAppointment());
+    }
+
     private AppointmentCreationRequest buildAppointmentCreationRequest(CompanySpec spec) {
         return AppointmentCreationRequest.builder()
                 .spec(spec)
