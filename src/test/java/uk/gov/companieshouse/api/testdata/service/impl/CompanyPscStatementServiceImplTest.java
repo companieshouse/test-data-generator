@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -24,15 +23,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
-import uk.gov.companieshouse.api.testdata.service.CompanyPscsService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -602,4 +599,22 @@ class CompanyPscStatementServiceImplTest {
         assertTrue(result.isEmpty());
         verify(companyPscStatementService, never()).create(any(CompanySpec.class));
     }
+
+    @Test
+    void createReturnsUnsavedPscStatementWhenCombinedTdgIsTrue() {
+        spec.setWithdrawnStatements(0);
+        spec.setCombinedTdg(true);
+        when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(this.randomService.getEtag()).thenReturn(ETAG);
+        CompanyPscStatement savedStatement = new CompanyPscStatement();
+
+        CompanyPscStatement result = this.companyPscStatementService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(ENCODED_VALUE, result.getId());
+        assertEquals(ETAG, result.getEtag());
+        verify(repository, never()).save(any());
+    }
+
 }

@@ -550,4 +550,21 @@ class CompanyMetricsServiceImplTest {
         assertEquals(0, metrics.getActiveDirectorsCount());
         assertEquals(savedMetrics, result);
     }
+
+    @Test
+    void createReturnsUnsavedMetricsWhenCombinedTdgIsTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCombinedTdg(true);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        CompanyMetrics result = metricsService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        assertEquals(ETAG, result.getEtag());
+        verify(repository, never()).save(any());
+    }
+
 }

@@ -835,6 +835,23 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
     }
 
+    @Test
+    void createReturnsUnsavedProfileWhenCombinedTdgIsTrue() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES, CompanyType.LTD);
+        spec.setCombinedTdg(true);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        Address mockAddress = new Address("", "", "", "", "", "");
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
+
+        CompanyProfile result = companyProfileService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", result.getCompanyName());
+        verify(repository, never()).save(any());
+    }
+
     @ParameterizedTest
     @MethodSource("legalFormProvider")
     void setsLegalFormBasedOnForeignCompanyLegalForm(String inputLegalForm, String expectedLegalForm) {

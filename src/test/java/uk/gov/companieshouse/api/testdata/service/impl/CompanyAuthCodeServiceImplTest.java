@@ -298,4 +298,22 @@ class CompanyAuthCodeServiceImplTest {
         assertTrue(captured.getIsActive());
         assertTrue(BCrypt.checkpw(password, captured.getEncryptedAuthCode()));
     }
+
+    @Test
+    void createReturnsUnsavedAuthCodeWhenCombinedTdgIsTrue() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCombinedTdg(true);
+
+        when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+
+        CompanyAuthCode result = companyAuthCodeServiceImpl.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        assertEquals(String.valueOf(COMPANY_AUTH_CODE), result.getAuthCode());
+        assertTrue(result.getIsActive());
+        assertNotNull(result.getEncryptedAuthCode());
+        verify(repository, never()).save(any());
+    }
 }

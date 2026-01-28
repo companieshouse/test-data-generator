@@ -83,8 +83,7 @@ class FilingHistoryServiceImplTest {
             = "Certificate of incorporation general company details & statements of; "
             + "officers, capital & shareholdings, guarantee, compliance memorandum of association";
 
-    private ResolutionsSpec buildResolution(String category, ResolutionDescriptionType description, String subCategory, ResolutionType type)
-    {
+    private ResolutionsSpec buildResolution(String category, ResolutionDescriptionType description, String subCategory, ResolutionType type) {
         var res = new ResolutionsSpec();
         res.setCategory(category);
         res.setDescription(description);
@@ -399,7 +398,7 @@ class FilingHistoryServiceImplTest {
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
         assertEquals(ENTITY_ID_PREFIX + UN_ENCODED_ID, filingHistory.getEntityId());
-        assertEquals(CERTIFICATE_DESCRIPTION ,filingHistory.getOriginalDescription());
+        assertEquals(CERTIFICATE_DESCRIPTION, filingHistory.getOriginalDescription());
         assertEquals(BARCODE, filingHistory.getBarcode());
     }
 
@@ -503,7 +502,7 @@ class FilingHistoryServiceImplTest {
         resolutionsSpec.setCategory(CategoryType.RESOLUTION);
         resolutionsSpec.setResolutions(List.of(
                 buildResolution("resolution-cat-1", ResolutionDescriptionType.ELECTIVE_RESOLUTION, "sub-cat-1", ResolutionType.ELRES),
-                buildResolution("resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND,  "sub-cat-2", ResolutionType.RES01)
+                buildResolution("resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND, "sub-cat-2", ResolutionType.RES01)
         ));
 
         FilingHistorySpec aaSpec = new FilingHistorySpec();
@@ -565,8 +564,8 @@ class FilingHistoryServiceImplTest {
         assertNotNull(res.getResolutions());
         assertEquals(2, res.getResolutions().size());
 
-        validateResolution(res.getResolutions().get(0),  "resolution-cat-1", ResolutionDescriptionType.ELECTIVE_RESOLUTION, "sub-cat-1", ResolutionType.ELRES);
-        validateResolution(res.getResolutions().get(1),  "resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND, "sub-cat-2", ResolutionType.RES01);
+        validateResolution(res.getResolutions().get(0), "resolution-cat-1", ResolutionDescriptionType.ELECTIVE_RESOLUTION, "sub-cat-1", ResolutionType.ELRES);
+        validateResolution(res.getResolutions().get(1), "resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND, "sub-cat-2", ResolutionType.RES01);
     }
 
     private void validateResolution(Resolutions r, String cat, ResolutionDescriptionType desc, String subCat, ResolutionType type) {
@@ -820,4 +819,25 @@ class FilingHistoryServiceImplTest {
         assertEquals(FilingHistoryDescriptionType.INCORPORATION_COMPANY.getValue(), captor.getValue().getDescription());
     }
 
+    @Test
+    void createReturnsUnsavedFilingHistoryWhenCombinedTdgIsTrue() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCombinedTdg(true);
+
+        FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
+        spec.setFilingHistoryList(List.of(filingHistorySpec));
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UN_ENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UN_ENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+
+        FilingHistory result = filingHistoryService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(TEST_ID, result.getId());
+        assertEquals(BARCODE, result.getBarcode());
+        verify(filingHistoryRepository, never()).save(any());
+    }
 }

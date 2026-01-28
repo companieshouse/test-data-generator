@@ -355,4 +355,26 @@ class CompanyPscsServiceImplTest {
         assertNull(result);
         verify(repository, never()).save(any());
     }
+
+    @Test
+    void createReturnsUnsavedPscsWhenCombinedTdgIsTrue() throws DataException {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPscs(1);
+        spec.setPscType(List.of(PscType.INDIVIDUAL));
+        spec.setCombinedTdg(true);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        List<CompanyPscs> result = companyPscsService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(COMPANY_NUMBER, result.get(0).getCompanyNumber());
+        assertEquals(ENCODED_ID, result.get(0).getId());
+        verify(repository, never()).save(any());
+    }
+
 }
