@@ -70,7 +70,7 @@ public class CompanyPscStatementServiceImpl implements
             pscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         }
-        if (spec.getCombinedTdg()) {
+        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
             return pscStatement;
         }
 

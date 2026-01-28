@@ -877,7 +877,7 @@ public class TestDataServiceImpl implements TestDataService {
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            CompanyDetailsResponse response = new CompanyDetailsResponse();
+            var response = new CompanyDetailsResponse();
             spec.setCombinedTdg(true);
 
             var companyProfile = companyProfileService.create(spec);

@@ -64,7 +64,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         companyRegisters.setEtag(randomService.getEtag());
         companyRegisters.setSelfLink(generateSelfLink(companySpec.getCompanyNumber()));
         companyRegisters.setRegisters(createRegisters(companySpec.getRegisters(), companySpec.getCompanyNumber()));
-        if (companySpec.getCombinedTdg()) {
+        if (Boolean.TRUE.equals(companySpec.getCombinedTdg())) {
             return companyRegisters;
         }
         return repository.save(companyRegisters);

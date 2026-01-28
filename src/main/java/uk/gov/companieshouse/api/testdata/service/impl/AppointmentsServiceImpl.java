@@ -138,9 +138,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setLinks(links);
 
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
-            OfficerAppointment officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
+            var officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
             createdOfficerAppointments.add(officerAppointment);
-            if (!spec.getCombinedTdg()) {
+            if (Boolean.FALSE.equals(spec.getCombinedTdg())) {
                 Appointment savedAppointment = appointmentsRepository.save(appointment);
                 LOG.info("Appointment saved with ID: " + savedAppointment.getId());
             }
@@ -162,17 +162,17 @@ public class AppointmentsServiceImpl implements AppointmentService {
             dataLinks.setSelf(COMPANY_LINK
                     + spec.getCompanyNumber() + "/appointments/" + appointmentId);
             appointmentsData.setLinks(dataLinks);
-            if (!spec.getCombinedTdg()) {
+            if (Boolean.FALSE.equals(spec.getCombinedTdg())) {
                 var savedData = appointmentsDataRepository.save(appointmentsData);
                 LOG.info("AppointmentsData saved with ID: " + savedData.getId());
             }
             createdAppointmentsData.add(appointmentsData);
         }
-        AppointmentsResultData appointmentsResultData = new AppointmentsResultData();
+        var appointmentsResultData = new AppointmentsResultData();
         appointmentsResultData.setAppointment(createdAppointments);
         appointmentsResultData.setAppointmentsData(createdAppointmentsData);
         appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
-        if (spec.getCombinedTdg()) {
+        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
             return appointmentsResultData;
         }
         LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
@@ -328,7 +328,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setOfficerAppointmentItems(
                 createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow, role)
         );
-        if (spec.getCombinedTdg()) {
+        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
             return officerAppointment;
         }
         officerRepository.save(officerAppointment);
