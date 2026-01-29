@@ -1,18 +1,19 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -121,6 +122,13 @@ class CompanySpecTest {
         CompanySpec spec = new CompanySpec();
         spec.setNumberOfPscs(21);
         validateCompanySpec(spec, "Number of PSCs must not exceed 20");
+    }
+
+    @Test
+    void testDefaultPscValuesAreSet() {
+        CompanySpec spec = new CompanySpec();
+        assertEquals(1, spec.getNumberOfPscs());
+        assertEquals(List.of(PscType.INDIVIDUAL), spec.getPscType());
     }
 
     @Test
