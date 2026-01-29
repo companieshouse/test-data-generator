@@ -7,8 +7,6 @@ public class UserCompanyAssociationSearchData {
     private String companyNumber;
     private String userId;
     private String status;
-    private String approvalRoute;
-    private List<String> invitations;
     private String associationLink;
 
     public UserCompanyAssociationSearchData() {}
@@ -18,8 +16,6 @@ public class UserCompanyAssociationSearchData {
         this.companyNumber = companyNumber;
         this.userId = userId;
         this.status = status;
-        this.approvalRoute = approvalRoute;
-        this.invitations = invitations;
         this.associationLink = associationLink;
     }
 
@@ -55,21 +51,6 @@ public class UserCompanyAssociationSearchData {
         this.status = status;
     }
 
-    public String getApprovalRoute() {
-        return approvalRoute;
-    }
-
-    public void setApprovalRoute(String approvalRoute) {
-        this.approvalRoute = approvalRoute;
-    }
-
-    public List<String> getInvitations() {
-        return invitations;
-    }
-
-    public void setInvitations(List<String> invitations) {
-        this.invitations = invitations;
-    }
 
     public String getAssociationLink() {
         return associationLink;

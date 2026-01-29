@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -470,7 +471,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/internal/associations/{associationId}")
+    @PatchMapping("/internal/associations/{associationId}") // Changed from @DeleteMapping
     public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId") String associationId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
@@ -479,11 +480,11 @@ public class TestDataController {
         boolean deleteAssociation = testDataService.deleteUserCompanyAssociationData(associationId);
 
         if (deleteAssociation) {
-            LOG.info("Association is deleted", response);
+            LOG.info("Association status updated to removed", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             response.put("status", HttpStatus.NOT_FOUND);
-            LOG.info("Association is not found", response);
+            LOG.info("Association not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }

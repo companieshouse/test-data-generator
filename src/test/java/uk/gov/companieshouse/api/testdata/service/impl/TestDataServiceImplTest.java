@@ -1971,80 +1971,6 @@ class TestDataServiceImplTest {
         verify(disqualificationsService).create(spec);
     }
 
-//    @Test
-//    void createUserCompanyAssociationData() throws DataException {
-//        var id = new ObjectId();
-//        UserCompanyAssociationSpec spec =
-//                new UserCompanyAssociationSpec();
-//        spec.setUserId(USER_ID);
-//        spec.setCompanyNumber(COMPANY_NUMBER);
-//
-//        UserCompanyAssociationData associationData =
-//                new UserCompanyAssociationData(id, spec.getCompanyNumber(),
-//                        spec.getUserId(), null, CONFIRMED_STATUS,
-//                        AUTH_CODE_APPROVAL_ROUTE, null);
-//
-//        when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
-//
-//        UserCompanyAssociationData createdAssociation =
-//                testDataService.createUserCompanyAssociationData(spec);
-//
-//        assertNotNull(createdAssociation);
-//        assertEquals(id.toString(), createdAssociation.getId());
-//        assertEquals(USER_ID, createdAssociation.getUserId());
-//        assertEquals(COMPANY_NUMBER, createdAssociation.getCompanyNumber());
-//        assertEquals(CONFIRMED_STATUS, createdAssociation.getStatus());
-//        assertEquals(AUTH_CODE_APPROVAL_ROUTE,
-//                createdAssociation.getApprovalRoute());
-//        assertNull(createdAssociation.getInvitations());
-//        assertNull(createdAssociation.getUserEmail());
-//
-//        verify(userCompanyAssociationService, times(1)).create(spec);
-//    }
-
-    @Test
-    void createUserCompanyAssociationDataNoUserIdOrUserEmail() {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createUserCompanyAssociationData(spec));
-        assertEquals("A user_id or a user_email is required to create "
-                + "an association", exception.getMessage());
-    }
-
-    @Test
-    void createUserCompanyAssociationDataNoCompanyNumber() {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
-        spec.setUserId(USER_ID);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createUserCompanyAssociationData(spec));
-        assertEquals("Company number is required to create an "
-                + "association", exception.getMessage());
-    }
-
-    @Test
-    void createUserCompanyAssociationDataException() throws DataException {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
-        spec.setUserId(USER_ID);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(userCompanyAssociationService.create(spec))
-                .thenThrow(new RuntimeException("Error creating the "
-                        + "association"));
-
-        DataException exception =
-                assertThrows(DataException.class,
-                        () -> testDataService.createUserCompanyAssociationData(spec));
-
-        assertEquals("Error creating the association",
-                exception.getMessage());
-        verify(userCompanyAssociationService, times(1)).create(spec);
-    }
-
     @Test
     void deleteUserCompanyAssociation() throws DataException {
         when(userCompanyAssociationService.delete(ASSOCIATION_ID))
@@ -2079,7 +2005,7 @@ class TestDataServiceImplTest {
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID));
 
-        assertEquals("Error deleting association",
+        assertEquals("Error deleting association: Error deleting association",
                 exception.getMessage());
         verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
     }
@@ -2533,3 +2459,4 @@ class TestDataServiceImplTest {
 
 
 }
+

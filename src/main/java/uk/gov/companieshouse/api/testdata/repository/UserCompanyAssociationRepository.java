@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.repository.NoRepositoryBean;
+import org.springframework.stereotype.Repository;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 
-@NoRepositoryBean
-public interface UserCompanyAssociationRepository extends
-        MongoRepository<UserCompanyAssociation, String> {
+@Repository
+public interface UserCompanyAssociationRepository extends MongoRepository<UserCompanyAssociation, String> {
+
 }

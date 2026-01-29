@@ -1,51 +1,24 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
-import java.time.Instant;
-import java.util.List;
-
-import org.bson.types.ObjectId;
+import java.util.Date;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "user_company_associations")
 public class UserCompanyAssociation {
     @Id
-    @Field("_id")
-    private ObjectId id;
-
-    @Field("company_number")
+    private String id;
     private String companyNumber;
-
-    @Field("user_id")
+    private Date createdAt;
+    private String status;
+    private String etag;
     private String userId;
 
-    @Field("user_email")
-    private String userEmail;
-
-    @Field("status")
-    private String status;
-
-    @Field("approval_route")
-    private String approvalRoute;
-
-    @Field("invitations")
-    private List<Invitation> invitations;
-
-    @Field("approval_expiry_at")
-    private Instant approvalExpiryAt;
-
-    @Field("previous_states")
-    private List<PreviousState> previousStates;
-
-    @Field("created_at")
-    private Instant createdAt;
-
-    public ObjectId getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(ObjectId id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -57,20 +30,12 @@ public class UserCompanyAssociation {
         this.companyNumber = companyNumber;
     }
 
-    public String getUserId() {
-        return userId;
+    public Date getCreatedAt() {
+        return createdAt;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public void setUserEmail(String userEmail) {
-        this.userEmail = userEmail;
+    public void setCreatedAt(Date createdAt) {
+        this.createdAt = createdAt;
     }
 
     public String getStatus() {
@@ -81,43 +46,31 @@ public class UserCompanyAssociation {
         this.status = status;
     }
 
-    public String getApprovalRoute() {
-        return approvalRoute;
+    public String getEtag() {
+        return etag;
     }
 
-    public void setApprovalRoute(String approvalRoute) {
-        this.approvalRoute = approvalRoute;
+    public void setEtag(String etag) {
+        this.etag = etag;
     }
 
-    public List<Invitation> getInvitations() {
-        return invitations;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setInvitations(List<Invitation> invitations) {
-        this.invitations = invitations;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
-    public Instant getApprovalExpiryAt() {
-        return approvalExpiryAt;
-    }
+    public static class PreviousState {
+        private String status;
 
-    public void setApprovalExpiryAt(Instant approvalExpiryAt) {
-        this.approvalExpiryAt = approvalExpiryAt;
-    }
+        public String getStatus() {
+            return status;
+        }
 
-    public List<PreviousState> getPreviousStates() {
-        return previousStates;
-    }
-
-    public void setPreviousStates(List<PreviousState> previousStates) {
-        this.previousStates = previousStates;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Instant createdAt) {
-        this.createdAt = createdAt;
+        public void setStatus(String status) {
+            this.status = status;
+        }
     }
 }

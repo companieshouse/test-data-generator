@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.accounts.associations.model.Association;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -10,8 +9,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.service.ApiClientService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
+import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import java.util.Optional;
 
 @Service("userCompanyAssociationServiceImpl")
 public class UserCompanyAssociationServiceImpl implements
@@ -20,11 +23,12 @@ public class UserCompanyAssociationServiceImpl implements
     private static final Logger LOG
             = LoggerFactory.getLogger(String.valueOf(UserCompanyAssociationServiceImpl.class));
 
-    @Autowired
+    private final UserCompanyAssociationRepository userCompanyAssociationRepository;
     private final ApiClientService apiClientService;
 
-    public UserCompanyAssociationServiceImpl(ApiClientService apiClientService) {
+    public UserCompanyAssociationServiceImpl(ApiClientService apiClientService, UserCompanyAssociationRepository userCompanyAssociationRepository) {
         this.apiClientService = apiClientService;
+        this.userCompanyAssociationRepository = userCompanyAssociationRepository;
     }
 
     @Override
@@ -63,20 +67,15 @@ public class UserCompanyAssociationServiceImpl implements
     @Override
     public boolean delete(String id) {
         LOG.info("Deleting association with ID: " + id);
-        try {
-            apiClientService.getInternalApiClientForPrivateAccountApiUrl()
-                    .privateAccountsAssociationResourceHandler()
-                    .updateAssociationStatusForId(
-                            "/associations/" + id,
-                            uk.gov.companieshouse.api.accounts.associations.model
-                                    .RequestBodyPut.StatusEnum.REMOVED)
-                    .execute();
-
+        Optional<UserCompanyAssociation> optional = userCompanyAssociationRepository.findById(id);
+        if (optional.isPresent()) {
+            UserCompanyAssociation association = optional.get();
+            association.setStatus("REMOVED");
+            userCompanyAssociationRepository.save(association);
             LOG.info("Successfully updated association status to REMOVED for ID: " + id);
             return true;
-
-        } catch (Exception error) {
-            LOG.error("Error deleting association with ID: " + error);
+        } else {
+            LOG.error("Association not found with ID: " + id);
             return false;
         }
     }
