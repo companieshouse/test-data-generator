@@ -86,7 +86,7 @@ public class UserCompanyAssociationServiceImpl implements
                 + companyNumber + "and user/email: " + userEmail);
 
         try {
-            Association association = apiClientService.getInternalApiClientForPrivateAccountApiUrl()
+            var association = apiClientService.getInternalApiClientForPrivateAccountApiUrl()
                     .privateAccountsAssociationResourceHandler()
                     .searchForAssociation(
                             "/associations/companies/" + companyNumber + "/search",
@@ -106,7 +106,7 @@ public class UserCompanyAssociationServiceImpl implements
             return association;
 
         } catch (ApiErrorResponseException | URIValidationException error) {
-            String errorMessage = String.format(
+            var errorMessage = String.format(
                     "Error searching for association for company %s", companyNumber);
             LOG.error(errorMessage, error);
             throw new DataException(errorMessage, error);

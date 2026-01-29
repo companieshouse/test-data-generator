@@ -54,8 +54,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
@@ -773,7 +773,8 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationSpec spec)
             throws DataException {
         if (spec.getUserId() == null && spec.getUserEmail() == null) {
-            throw new DataException("A user_id or a user_email is required to create an association");
+            throw new DataException(
+                    "A user_id or a user_email is required to create an association");
         }
 
         if (spec.getCompanyNumber() == null || spec.getCompanyNumber().isEmpty()) {
@@ -785,17 +786,20 @@ public class TestDataServiceImpl implements TestDataService {
                     + "and user id: " + spec.getUserId()
             );
 
-            // Simply delegate to the service - it will use SDK
-            UserCompanyAssociationData createdAssociation = userCompanyAssociationService.create(spec);
+            UserCompanyAssociationData createdAssociation
+                    = userCompanyAssociationService.create(spec);
 
-            LOG.info("Successfully created association via SDK with ID: " + spec.getUserId() + " for company: " + spec.getCompanyNumber()  );
+            LOG.info("Successfully created association via SDK with ID: "
+                    + spec.getUserId() + " for company: " + spec.getCompanyNumber());
 
             return createdAssociation;
 
         } catch (Exception ex) {
-            LOG.error("Error creating association via SDK for company: " + spec.getCompanyNumber() + " and user: " + spec.getUserId()
+            LOG.error("Error creating association via SDK for company: "
+                    + spec.getCompanyNumber() + " and user: " + spec.getUserId()
             );
-            throw new DataException("Error creating the association via SDK: " + ex.getMessage(), ex);
+            throw new DataException("Error creating the association via SDK: "
+                    + ex.getMessage(), ex);
         }
     }
 
@@ -890,9 +894,11 @@ public class TestDataServiceImpl implements TestDataService {
                                                   CompanyData companyData)
             throws DataException, ApiErrorResponseException, URIValidationException {
 
-        // This variable is set from environment to allow disabling ES indexing in certain environments
+        // This variable is set from environment to allow disabling
+        // ES indexing in certain environments
         if (!isElasticSearchDeployed) {
-            LOG.debug("Elasticsearch not deployed; skipping indexing for company " + spec.getCompanyNumber());
+            LOG.debug("Elasticsearch not deployed; skipping indexing for company "
+                    + spec.getCompanyNumber());
             return;
         }
 
@@ -913,7 +919,8 @@ public class TestDataServiceImpl implements TestDataService {
 
         // Alphabetical index
         if (addAlphabeticalIndex) {
-            LOG.info("Adding company to Alphabetical ElasticSearch index: " + spec.getCompanyNumber());
+            LOG.info("Adding company to Alphabetical ElasticSearch index: "
+                    + spec.getCompanyNumber());
             alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
         }
 
@@ -923,7 +930,8 @@ public class TestDataServiceImpl implements TestDataService {
             advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
         }
 
-        LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
+        LOG.info("Successfully added company to configured ElasticSearch indexes : "
+                + spec.getCompanyNumber());
     }
 
     @Override
@@ -1012,13 +1020,14 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public UserCompanyAssociationSearchData searchUserCompanyAssociation(String companyNumber, String userId, String userEmail) throws DataException {
+    public UserCompanyAssociationSearchData searchUserCompanyAssociation(
+            String companyNumber, String userId, String userEmail) throws DataException {
         var association = ((UserCompanyAssociationServiceImpl) userCompanyAssociationService)
                 .searchAssociation(companyNumber, userId, userEmail);
         if (association == null || association.getLinks() == null) {
             return null;
         }
-        String associationLink = String.valueOf(association.getLinks());
+        var associationLink = String.valueOf(association.getLinks());
         String id;
         if (associationLink != null && associationLink.contains("/")) {
             id = associationLink.substring(associationLink.lastIndexOf("/") + 1);
@@ -1027,13 +1036,14 @@ public class TestDataServiceImpl implements TestDataService {
         }
         // Build response with all fields, invitations set to null (method not found)
         return new UserCompanyAssociationSearchData(
-            id,
-            association.getCompanyNumber(),
-            association.getUserId(),
+                id,
+                association.getCompanyNumber(),
+                association.getUserId(),
                 association.getStatus() != null ? association.getStatus().name() : null,
-                association.getApprovalRoute() != null ? association.getApprovalRoute().name() : null,
-            null,
-            associationLink
+                association.getApprovalRoute()
+                        != null ? association.getApprovalRoute().name() : null,
+                null,
+                associationLink
         );
     }
 

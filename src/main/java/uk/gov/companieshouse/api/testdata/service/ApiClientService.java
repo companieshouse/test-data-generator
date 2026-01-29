@@ -2,8 +2,6 @@ package uk.gov.companieshouse.api.testdata.service;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-
-import uk.gov.companieshouse.api.ApiClient;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 

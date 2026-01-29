@@ -61,7 +61,6 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.impl.UserCompanyAssociationServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -471,8 +470,9 @@ public class TestDataController {
         return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/internal/associations/{associationId}") // Changed from @DeleteMapping
-    public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId") String associationId)
+    @PatchMapping("/internal/associations/{associationId}")
+    public ResponseEntity<Map<String,
+            Object>> deleteAssociation(@PathVariable("associationId") String associationId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("association_id", associationId);
@@ -483,7 +483,7 @@ public class TestDataController {
             LOG.info("Association status updated to removed", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
-            response.put("status", HttpStatus.NOT_FOUND);
+            response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Association not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
@@ -493,13 +493,15 @@ public class TestDataController {
     public ResponseEntity<UserCompanyAssociationSearchData> searchAssociation(
             @RequestParam("companyNumber") String companyNumber,
             @RequestParam(value = "userId", required = false) String userId,
-            @RequestParam(value = "userEmail", required = false) String userEmail) throws DataException {
-        var association = userCompanyAssociationService.searchAssociation(companyNumber, userId, userEmail);
+            @RequestParam(value = "userEmail", required = false)
+            String userEmail) throws DataException {
+        var association = userCompanyAssociationService.searchAssociation(companyNumber,
+                userId, userEmail);
         if (association == null || association.getLinks() == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         // Extract association link and id
-        String associationLink = String.valueOf(association.getLinks());
+        var associationLink = String.valueOf(association.getLinks());
         String associationId;
         if (associationLink != null && associationLink.contains("/")) {
             associationId = associationLink.substring(associationLink.lastIndexOf("/") + 1);
@@ -508,16 +510,17 @@ public class TestDataController {
         }
         // Convert enums to String if not null
         String status = association.getStatus() != null ? association.getStatus().name() : null;
-        String approvalRoute = association.getApprovalRoute() != null ? association.getApprovalRoute().name() : null;
+        var approvalRoute = association.getApprovalRoute()
+                != null ? association.getApprovalRoute().name() : null;
         // Build response with all fields, invitations set to null (method not found)
-        UserCompanyAssociationSearchData response = new UserCompanyAssociationSearchData(
-            associationId,
-            association.getCompanyNumber(),
-            association.getUserId(),
-            status,
-            approvalRoute,
-            null,
-            associationLink
+        var response = new UserCompanyAssociationSearchData(
+                associationId,
+                association.getCompanyNumber(),
+                association.getUserId(),
+                status,
+                approvalRoute,
+                null,
+                associationLink
         );
         return ResponseEntity.ok(response);
     }
