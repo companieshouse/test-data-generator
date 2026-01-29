@@ -250,11 +250,14 @@ public class CompanyPscsServiceImpl implements DataService<CompanyPscs, CompanyS
         return LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 
+    /**
+     * Assigns a single, randomly selected nature of control from the predefined
+     * NATURES_OF_CONTROL array to the given CompanyPscs instance.
+     */
     private void setNaturesOfControl(CompanyPscs companyPsc) {
         List<String> nocList = Arrays.asList(NATURES_OF_CONTROL);
-        Collections.shuffle(nocList);
-        long num = randomService.getNumberInRange(0, NATURES_OF_CONTROL.length).orElse(0);
-        companyPsc.setNaturesOfControl(new ArrayList<>(nocList.subList(0, (int) num + 1)));
+        int index = (int) randomService.getNumberInRange(0, nocList.size() - 1).orElse(0);
+        companyPsc.setNaturesOfControl(List.of(nocList.get(index)));
     }
 
     private void buildSuperSecureBeneficialOwner(CompanyPscs companyPscs) {

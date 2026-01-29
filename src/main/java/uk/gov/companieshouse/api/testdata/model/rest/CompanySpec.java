@@ -80,12 +80,12 @@ public class CompanySpec {
     @Min(value = 1, message = "Number of PSCs must be at least 1")
     @Max(value = 20, message = "Number of PSCs must not exceed 20")
     @JsonProperty("number_of_pscs")
-    private Integer numberOfPscs;
+    private Integer numberOfPscs = 1;
 
     @Size(max = 20, message = "PSC types must not exceed 20")
     @Valid
     @JsonProperty("psc_type")
-    private List<PscType> pscType;
+    private List<PscType> pscType = List.of(PscType.INDIVIDUAL);
 
     @JsonProperty("psc_active")
     private Boolean pscActive;
