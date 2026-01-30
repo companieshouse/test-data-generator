@@ -6,15 +6,22 @@ public class UserCompanyAssociationSearchData {
     private String id;
     private String companyNumber;
     private String userId;
+    private String approvalRoute;
+    private List<String> invitations;
     private String status;
     private String associationLink;
 
-    public UserCompanyAssociationSearchData() {}
+    public UserCompanyAssociationSearchData() {
+    }
 
-    public UserCompanyAssociationSearchData(String id, String companyNumber, String userId, String status, String approvalRoute, List<String> invitations, String associationLink) {
+    public UserCompanyAssociationSearchData(
+            String id, String companyNumber, String userId, String status,
+            String approvalRoute, List<String> invitations, String associationLink) {
         this.id = id;
         this.companyNumber = companyNumber;
         this.userId = userId;
+        this.approvalRoute = approvalRoute;
+        this.invitations = invitations;
         this.status = status;
         this.associationLink = associationLink;
     }
@@ -43,6 +50,9 @@ public class UserCompanyAssociationSearchData {
         this.userId = userId;
     }
 
+    public void setApprovalRoute(String approvalRoute) {
+        this.approvalRoute = approvalRoute;}
+
     public String getStatus() {
         return status;
     }
@@ -51,9 +61,8 @@ public class UserCompanyAssociationSearchData {
         this.status = status;
     }
 
-
-    public String getAssociationLink() {
-        return associationLink;
+    public void setInvitations(List<String> invitations) {
+        this.invitations = invitations;
     }
 
     public void setAssociationLink(String associationLink) {

@@ -52,10 +52,11 @@ public class UserCompanyAssociationServiceImpl implements
             LOG.info("Successfully created association. ID: "
                     + associationId + " for company: " + spec.getCompanyNumber());
 
-            // Only return id and associationLink
-            var response = new UserCompanyAssociationData(associationId,
-                    "/associations/" + associationId);
-            return response;
+            return new UserCompanyAssociationData(
+                    associationId,
+                    "/associations/" + associationId
+            );
+
 
         } catch (ApiErrorResponseException | URIValidationException error) {
             LOG.error("Error creating association for company :"
