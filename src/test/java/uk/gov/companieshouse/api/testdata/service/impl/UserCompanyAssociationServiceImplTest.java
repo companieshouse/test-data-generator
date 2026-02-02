@@ -70,7 +70,6 @@ class UserCompanyAssociationServiceImplTest {
     @Mock
     private ApiResponse<ResponseBodyPost> apiResponseCreate;
 
-    // FIXED: Changed generic type to Association
     @Mock
     private ApiResponse<Association> apiResponseSearch;
 
@@ -79,8 +78,6 @@ class UserCompanyAssociationServiceImplTest {
 
     @InjectMocks
     private UserCompanyAssociationServiceImpl service;
-
-    // --- Create Tests ---
 
     @Test
     void create_ReturnsAssociationData_WhenLinkContainsSlash() throws Exception {
@@ -126,8 +123,6 @@ class UserCompanyAssociationServiceImplTest {
         when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
-
-        // FIXED: Mocking the exception instance instead of creating new one
         when(associationPost.execute()).thenThrow(mock(ApiErrorResponseException.class));
 
         DataException exception = assertThrows(DataException.class, () -> service.create(spec));
@@ -148,8 +143,6 @@ class UserCompanyAssociationServiceImplTest {
         DataException exception = assertThrows(DataException.class, () -> service.create(spec));
         assertTrue(exception.getMessage().contains("Error creating association"));
     }
-
-    // --- Delete Tests ---
 
     @Test
     void deleteAssociation_UpdatesStatusToRemoved_WhenAssociationExists() {
@@ -194,15 +187,12 @@ class UserCompanyAssociationServiceImplTest {
         assertEquals("etag123", association.getEtag());
     }
 
-    // --- Search Tests ---
-
     @Test
     void searchAssociation_ReturnsAssociation_WhenFound() throws Exception {
         Association mockAssociation = new Association();
         mockAssociation.setId(ASSOCIATION_ID);
 
         mockApiClientChainForSearch();
-        // FIXED: This line should now work because apiResponseSearch is typed as <Association>
         when(apiResponseSearch.getData()).thenReturn(mockAssociation);
 
         Association result = service.searchAssociation(COMPANY_NUMBER, USER_ID, USER_EMAIL);
@@ -227,8 +217,6 @@ class UserCompanyAssociationServiceImplTest {
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.searchForAssociation(anyString(), eq(USER_ID), eq(USER_EMAIL), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(associationSearch);
-
-        // FIXED: Mocking the exception instance
         when(associationSearch.execute()).thenThrow(mock(ApiErrorResponseException.class));
 
         DataException exception = assertThrows(DataException.class, () ->
@@ -251,13 +239,12 @@ class UserCompanyAssociationServiceImplTest {
         when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.searchForAssociation(
-                eq("/associations/companies/" + COMPANY_NUMBER + "/search"),
-                eq(USER_ID),
-                eq(USER_EMAIL),
-                eq("confirmed"), eq("awaiting-approval"), eq("migrated"), eq("unauthorised"))
+                "/associations/companies/" + COMPANY_NUMBER + "/search",
+                USER_ID,
+                USER_EMAIL,
+                "confirmed", "awaiting-approval", "migrated", "unauthorised")
         ).thenReturn(associationSearch);
 
-        // FIXED: apiResponseSearch matches the return type of execute() now
         when(associationSearch.execute()).thenReturn(apiResponseSearch);
     }
 }

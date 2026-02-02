@@ -10,8 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,7 +61,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
@@ -110,29 +109,6 @@ import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
 
@@ -153,9 +129,6 @@ class TestDataServiceImplTest {
     private static final String API_URL = "http://localhost:4001";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
     private static final String CERTIFICATES_ID = "CRT-123456-789012";
-    private static final String AUTH_CODE_APPROVAL_ROUTE =
-            "auth_code";
-    private static final String CONFIRMED_STATUS = "confirmed";
     private static final String ASSOCIATION_ID = "associationId";
     private static final String CERTIFIED_COPIES_ID = "CCD-123456-789012";
     private static final String MISSING_IMAGE_DELIVERIES_ID = "MID-123456-789012";
@@ -220,7 +193,6 @@ class TestDataServiceImplTest {
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
 
-    // Updated to concrete implementation to allow casting in search method
     @Mock
     private UserCompanyAssociationServiceImpl userCompanyAssociationService;
 
@@ -2007,7 +1979,6 @@ class TestDataServiceImplTest {
     void createUserCompanyAssociationData_ThrowsException_WhenUserIdAndEmailNull() throws DataException {
         UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        // UserId and UserEmail are null by default
 
         DataException ex = assertThrows(DataException.class, () ->
                 testDataService.createUserCompanyAssociationData(spec));
@@ -2059,7 +2030,6 @@ class TestDataServiceImplTest {
 
     @Test
     void searchUserCompanyAssociation_ReturnsNull_WhenAssociationNotFound() throws DataException {
-        // Fix: Use any() instead of anyString() for the 3rd argument because userEmail is passed as null
         when(userCompanyAssociationService.searchAssociation(anyString(), anyString(), any()))
                 .thenReturn(null);
 
@@ -2074,7 +2044,6 @@ class TestDataServiceImplTest {
         Association association = mock(Association.class);
         when(association.getLinks()).thenReturn(null);
 
-        // Fix: Use any() instead of anyString() for the 3rd argument
         when(userCompanyAssociationService.searchAssociation(anyString(), anyString(), any()))
                 .thenReturn(association);
 
@@ -2089,7 +2058,6 @@ class TestDataServiceImplTest {
         Association association = mock(Association.class);
         var links = mock(AssociationLinks.class);
 
-        // FIXED: Mock getLinks() returning object, and toString() returning the string value
         when(links.toString()).thenReturn("/associations/" + ASSOCIATION_ID);
         when(association.getLinks()).thenReturn(links);
 
@@ -2112,10 +2080,9 @@ class TestDataServiceImplTest {
 
     @Test
     void searchUserCompanyAssociation_Success_NoSlashInLink() throws DataException {
-        Association association = mock(Association.class);
+        var association = mock(Association.class);
         var links = mock(AssociationLinks.class);
 
-        // FIXED: Mocking toString for the scenario where the link is just the ID
         when(links.toString()).thenReturn(ASSOCIATION_ID);
         when(association.getLinks()).thenReturn(links);
 
@@ -2168,8 +2135,6 @@ class TestDataServiceImplTest {
                 exception.getMessage());
         verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
     }
-
-    // Existing Delete Tests (ensuring they still work with concrete mock)
 
     @Test
     void createTransactionData() throws DataException {
@@ -2403,7 +2368,6 @@ class TestDataServiceImplTest {
                 () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
 
         assertEquals("Error finding or creating company auth code", ex.getMessage());
-        // ensure original cause is preserved
         assertSame(cause, ex.getCause());
     }
 
