@@ -72,24 +72,28 @@ public class TestDataController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
 
-    @Autowired
-    private TestDataService testDataService;
-
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
-
-    @Autowired
-    private AccountPenaltiesService accountPenaltyService;
-
-    @Autowired
-    private UserCompanyAssociationServiceImpl userCompanyAssociationService;
-
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
 
+    private final TestDataService testDataService;
+    private final CompanyAuthCodeService companyAuthCodeService;
+    private final AccountPenaltiesService accountPenaltyService;
+    private final UserCompanyAssociationServiceImpl userCompanyAssociationService;
+    private final VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+
     @Autowired
-    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+    public TestDataController(TestDataService testDataService,
+                              CompanyAuthCodeService companyAuthCodeService,
+                              AccountPenaltiesService accountPenaltyService,
+                              UserCompanyAssociationServiceImpl userCompanyAssociationService,
+                              VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService) {
+        this.testDataService = testDataService;
+        this.companyAuthCodeService = companyAuthCodeService;
+        this.accountPenaltyService = accountPenaltyService;
+        this.userCompanyAssociationService = userCompanyAssociationService;
+        this.verifiedIdentityService = verifiedIdentityService;
+    }
 
     /* Public endpoint to create company data */
     @PostMapping("/company")
