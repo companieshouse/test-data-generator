@@ -73,22 +73,6 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import uk.gov.companieshouse.api.accounts.associations.model.Association;
 import uk.gov.companieshouse.api.accounts.associations.model.AssociationLinks;
 import uk.gov.companieshouse.api.testdata.service.impl.UserCompanyAssociationServiceImpl;
@@ -940,7 +924,7 @@ class TestDataControllerTest {
         PenaltySpec request = new PenaltySpec();
         request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode(CUSTOMER_CODE);
-        request.setDuplicate(true); // simulate duplicate request
+        request.setDuplicate(true);
 
         AccountPenaltiesData createdPenalties = new AccountPenaltiesData();
         createdPenalties.setPenalties(Collections.emptyList()); // empty list simulates failure
@@ -1154,8 +1138,6 @@ class TestDataControllerTest {
         verify(testDataService).createUserCompanyAssociationData(spec);
     }
 
-    // --- Search Association Tests ---
-
     @Test
     void searchAssociation_Success_WithSlashInLink() throws Exception {
         String link = "/associations/" + ASSOCIATION_ID;
@@ -1163,7 +1145,7 @@ class TestDataControllerTest {
         AssociationLinks links = mock(AssociationLinks.class);
 
         when(association.getLinks()).thenReturn(links);
-        when(links.toString()).thenReturn(link); // String.valueOf() calls toString()
+        when(links.toString()).thenReturn(link);
         when(association.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
         when(association.getUserId()).thenReturn(USER_ID);
         when(association.getStatus()).thenReturn(Association.StatusEnum.CONFIRMED);
@@ -1182,7 +1164,6 @@ class TestDataControllerTest {
 
     @Test
     void searchAssociation_Success_NoSlashInLink() throws Exception {
-        // Test logic where ID is returned directly if no slash exists
         String link = ASSOCIATION_ID;
         Association association = mock(Association.class);
         AssociationLinks links = mock(AssociationLinks.class);
