@@ -68,7 +68,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
@@ -2383,7 +2383,7 @@ class TestDataServiceImplTest {
         when(companyRegistersService.create(any(CompanySpec.class))).thenReturn(companyRegisters);
         when(disqualificationsService.create(any(CompanySpec.class))).thenReturn(disqualifications);
 
-        CompanyDetailsResponse response = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
+        PopulatedCompanyDetailsResponse response = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
 
         // Capture the spec that was used for creation
         CompanySpec capturedSpec = captureCompanySpec();

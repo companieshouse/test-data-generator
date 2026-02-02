@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructu
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -296,10 +296,10 @@ public interface TestDataService {
      * Get the company data structure before saving in MongoDB.
      *
      * @param spec The specification the new company must adhere to
-     * @return A {@link CompanyDetailsResponse}
+     * @return A {@link PopulatedCompanyDetailsResponse}
      * @throws DataException If any error occurs
      */
-    CompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec)
+    PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec)
             throws DataException;
 
     /**

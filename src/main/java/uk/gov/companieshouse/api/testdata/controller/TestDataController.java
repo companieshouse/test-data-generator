@@ -32,19 +32,19 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
@@ -556,7 +556,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/get-populated-company-structure")
-    public ResponseEntity<CompanyDetailsResponse> getCompanyWithPopulatedStructure(
+    public ResponseEntity<PopulatedCompanyDetailsResponse> getCompanyWithPopulatedStructure(
             @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
         Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);

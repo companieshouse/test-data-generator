@@ -41,12 +41,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
@@ -181,16 +181,21 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
+
         String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+
         if (spec.getIsPaddingCompanyNumber() != null) {
             companyNumberPrefix = companyNumberPrefix + "000";
         }
+
         do {
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
         spec.setCompanyWithPopulatedStructureOnly(false);
+
         try {
             companyProfileService.create(spec);
             LOG.info("Successfully created company profile");
@@ -914,7 +919,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
+    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
@@ -929,7 +934,7 @@ public class TestDataServiceImpl implements TestDataService {
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         try {
-            var response = new CompanyDetailsResponse();
+            var response = new PopulatedCompanyDetailsResponse();
             spec.setCompanyWithPopulatedStructureOnly(true);
 
             var companyProfile = companyProfileService.create(spec);

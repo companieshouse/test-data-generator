@@ -45,7 +45,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -1504,10 +1504,10 @@ class TestDataControllerTest {
     @Test
     void getCompanyWithPopulatedStructure_success() throws Exception {
         CompanySpec request = new CompanySpec();
-        CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
+        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
         when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenReturn(responseObj);
 
-        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(request);
+        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
@@ -1516,10 +1516,10 @@ class TestDataControllerTest {
 
     @Test
     void getCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
-        CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
+        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
         when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class))).thenReturn(responseObj);
 
-        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(null);
+        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());

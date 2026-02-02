@@ -1,10 +1,17 @@
 package uk.gov.companieshouse.api.testdata.model.rest;
 
-import uk.gov.companieshouse.api.testdata.model.entity.*;
-
 import java.util.List;
 
-public class CompanyDetailsResponse {
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+
+public class PopulatedCompanyDetailsResponse {
     private CompanyProfile companyProfile;
     private AppointmentsResultData appointmentsData;
     private CompanyAuthCode companyAuthCode;
