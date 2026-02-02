@@ -144,7 +144,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
             var officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
             createdOfficerAppointments.add(officerAppointment);
-            if (Boolean.FALSE.equals(spec.getCombinedTdg())) {
+            if (Boolean.FALSE.equals(spec.getCompanyWithDataStructureOnly())) {
                 Appointment savedAppointment = appointmentsRepository.save(appointment);
                 LOG.info("Appointment saved with ID: " + savedAppointment.getId());
             }
@@ -166,7 +166,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             dataLinks.setSelf(COMPANY_LINK
                     + spec.getCompanyNumber() + "/appointments/" + appointmentId);
             appointmentsData.setLinks(dataLinks);
-            if (Boolean.FALSE.equals(spec.getCombinedTdg())) {
+            if (Boolean.FALSE.equals(spec.getCompanyWithDataStructureOnly())) {
                 var savedData = appointmentsDataRepository.save(appointmentsData);
                 LOG.info("AppointmentsData saved with ID: " + savedData.getId());
             }
@@ -176,7 +176,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsResultData.setAppointment(createdAppointments);
         appointmentsResultData.setAppointmentsData(createdAppointmentsData);
         appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
-        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return appointmentsResultData;
         }
         LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
@@ -332,7 +332,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setOfficerAppointmentItems(
                 createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow, role)
         );
-        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return officerAppointment;
         }
         officerRepository.save(officerAppointment);

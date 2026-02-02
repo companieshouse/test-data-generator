@@ -40,7 +40,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedCompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
@@ -1505,32 +1505,32 @@ class TestDataControllerTest {
     void getCompanyWithStructure_success() throws Exception {
         CompanySpec request = new CompanySpec();
         CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
-        when(testDataService.getCompanyProfile(request)).thenReturn(responseObj);
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenReturn(responseObj);
 
         ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithStructure(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
-        verify(testDataService, times(1)).getCompanyProfile(request);
+        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(request);
     }
 
     @Test
     void getCompanyWithStructure_nullRequest_usesDefault() throws Exception {
         CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
-        when(testDataService.getCompanyProfile(any(CompanySpec.class))).thenReturn(responseObj);
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class))).thenReturn(responseObj);
 
         ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithStructure(null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
-        verify(testDataService, times(1)).getCompanyProfile(any(CompanySpec.class));
+        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class));
     }
 
     @Test
     void getCompanyWithStructure_throwsDataException() throws Exception {
         CompanySpec request = new CompanySpec();
         DataException exception = new DataException("error");
-        when(testDataService.getCompanyProfile(request)).thenThrow(exception);
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataController.getCompanyWithStructure(request)
@@ -1540,7 +1540,7 @@ class TestDataControllerTest {
 
     @Test
     void createCompanyWithStructure_success() throws Exception {
-        CombinedCompanySpec request = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
         CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
         when(testDataService.createCompanyWithStructure(request)).thenReturn(companyData);
 
@@ -1554,18 +1554,18 @@ class TestDataControllerTest {
     @Test
     void createCompanyWithStructure_nullRequest_usesDefault() throws Exception {
         CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(testDataService.createCompanyWithStructure(any(CombinedCompanySpec.class))).thenReturn(companyData);
+        when(testDataService.createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class))).thenReturn(companyData);
 
         ResponseEntity<CompanyData> response = testDataController.createCompanyWithStructure(null);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
-        verify(testDataService, times(1)).createCompanyWithStructure(any(CombinedCompanySpec.class));
+        verify(testDataService, times(1)).createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class));
     }
 
     @Test
     void createCompanyWithStructure_throwsDataException() throws Exception {
-        CombinedCompanySpec request = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
         DataException exception = new DataException("error");
         when(testDataService.createCompanyWithStructure(request)).thenThrow(exception);
 

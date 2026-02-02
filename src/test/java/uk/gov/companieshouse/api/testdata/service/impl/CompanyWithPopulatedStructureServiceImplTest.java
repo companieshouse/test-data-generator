@@ -1,23 +1,20 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.*;
 import uk.gov.companieshouse.api.testdata.repository.*;
-import uk.gov.companieshouse.api.testdata.service.impl.CombinedTdgCompanyServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
-class CombinedTdgCompanyServiceImplTest {
+class CompanyWithPopulatedStructureServiceImplTest {
 
     @Mock
     private CompanyProfileRepository companyProfileRepository;
@@ -43,11 +40,11 @@ class CombinedTdgCompanyServiceImplTest {
     private OfficerRepository officerRepository;
 
     @InjectMocks
-    private CombinedTdgCompanyServiceImpl service;
+    private CompanyWithPopulatedStructureServiceImpl service;
 
     @Test
     void createCombinedCompany_savesAllEntities() {
-        CombinedCompanySpec spec = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
 
         CompanyProfile profile = new CompanyProfile();
         spec.setCompanyProfile(profile);
@@ -102,7 +99,7 @@ class CombinedTdgCompanyServiceImplTest {
 
     @Test
     void createCombinedCompany_handlesNullsGracefully() {
-        CombinedCompanySpec spec = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         // All other fields are null
 
@@ -117,7 +114,7 @@ class CombinedTdgCompanyServiceImplTest {
 
     @Test
     void createCombinedCompany_appointmentsDataWithNullLists_doesNotSave() {
-        CombinedCompanySpec spec = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         AppointmentsResultData appointmentsData = new AppointmentsResultData();
         // All sublists are null
@@ -131,7 +128,7 @@ class CombinedTdgCompanyServiceImplTest {
 
     @Test
     void createCombinedCompany_emptyLists_doesNotSave() {
-        CombinedCompanySpec spec = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         AppointmentsResultData appointmentsData = new AppointmentsResultData();
         appointmentsData.setAppointmentsData(List.of());
@@ -150,7 +147,7 @@ class CombinedTdgCompanyServiceImplTest {
 
     @Test
     void createCombinedCompany_multiplePscStatementsAndPscs_allSaved() {
-        CombinedCompanySpec spec = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         CompanyPscStatement s1 = new CompanyPscStatement();
         CompanyPscStatement s2 = new CompanyPscStatement();

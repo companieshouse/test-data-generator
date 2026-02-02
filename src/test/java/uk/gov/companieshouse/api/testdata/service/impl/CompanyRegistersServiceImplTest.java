@@ -284,14 +284,14 @@ class CompanyRegistersServiceImplTest {
     }
 
     @Test
-    void createReturnsUnsavedRegistersWhenCombinedTdgIsTrue() throws DataException {
+    void createReturnsUnsavedRegistersWhenCompanyWithDataStructureIsTrue() throws DataException {
         companySpec = new CompanySpec();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType(DIRECTORS_TEXT);
         register.setRegisterMovedTo(PUBLIC_REGISTER);
         companySpec.setRegisters(List.of(register));
-        companySpec.setCombinedTdg(true);
+        companySpec.setCompanyWithDataStructureOnly(true);
 
         FilingHistory filingHistory = new FilingHistory();
         filingHistory.setId("filing-history-id");
@@ -315,7 +315,7 @@ class CompanyRegistersServiceImplTest {
     private void setCompanySpec(String registerType, String registerMovedTo) {
         companySpec = new CompanySpec();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
-        companySpec.setCombinedTdg(false);
+        companySpec.setCompanyWithDataStructureOnly(false);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);

@@ -63,7 +63,7 @@ class CompanyAuthCodeServiceImplTest {
     void create() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
 
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
@@ -191,7 +191,7 @@ class CompanyAuthCodeServiceImplTest {
     void createThrowsDataExceptionWhenEncryptFails() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
         CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
@@ -300,10 +300,10 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void createReturnsUnsavedAuthCodeWhenCombinedTdgIsTrue() throws Exception {
+    void createReturnsUnsavedAuthCodeWhenCompanyWithDataStructureIsTrue() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(true);
+        spec.setCompanyWithDataStructureOnly(true);
 
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 

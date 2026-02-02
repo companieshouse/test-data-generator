@@ -52,7 +52,7 @@ class DisqualificationsServiceImplTest {
     void createDisqualificationSuccess() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
@@ -78,7 +78,7 @@ class DisqualificationsServiceImplTest {
     void createMultipleDisqualifications() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
         DisqualificationsSpec disqSpec1 = new DisqualificationsSpec();
         disqSpec1.setCorporateOfficer(false);
         DisqualificationsSpec disqSpec2 = new DisqualificationsSpec();
@@ -106,7 +106,7 @@ class DisqualificationsServiceImplTest {
     void createDisqualificationCorporateOfficer() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
         disqSpec.setCorporateOfficer(true);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
@@ -132,7 +132,7 @@ class DisqualificationsServiceImplTest {
     void createDisqualificationNoSpecCreatesDefault() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
 
         Disqualifications savedEntity = new Disqualifications();
         savedEntity.setId(ID);
@@ -211,10 +211,10 @@ class DisqualificationsServiceImplTest {
     }
 
     @Test
-    void createReturnsUnsavedDisqualificationWhenCombinedTdgIsTrue() throws DataException {
+    void createReturnsUnsavedDisqualificationWhenCompanyWithDataStructureIsTrue() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(true);
+        spec.setCompanyWithDataStructureOnly(true);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));

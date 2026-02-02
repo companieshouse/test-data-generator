@@ -25,7 +25,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscsService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -210,7 +209,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
     private CompanyPscs createSuperSecureBeneficialOwner(CompanySpec spec) {
         CompanyPscs superSecureBo = createBasePsc(spec, true);
         buildSuperSecureBeneficialOwner(superSecureBo);
-        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return superSecureBo;
         }
         return repository.save(superSecureBo);
@@ -219,7 +218,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
     private CompanyPscs createSuperSecurePsc(CompanySpec spec) {
         CompanyPscs superSecurePsc = createBasePsc(spec, true);
         buildSuperSecurePsc(superSecurePsc);
-        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return superSecurePsc;
         }
         return repository.save(superSecurePsc);
@@ -302,7 +301,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
             default:
                 throw new IllegalArgumentException("Unsupported PSC type: " + pscType);
         }
-        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return companyPscs;
         }
         return repository.save(companyPscs);
@@ -320,7 +319,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
             default:
                 throw new IllegalArgumentException("Unsupported beneficial owner type: " + pscType);
         }
-        if (Boolean.TRUE.equals(spec.getCombinedTdg())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return beneficialOwner;
         }
         return repository.save(beneficialOwner);

@@ -5,7 +5,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.*;
 
 import java.util.List;
 
-public class CombinedCompanySpec {
+public class CompanyWithPopulatedStructureSpec {
 
     @JsonProperty("companyProfile")
     private CompanyProfile companyProfile;

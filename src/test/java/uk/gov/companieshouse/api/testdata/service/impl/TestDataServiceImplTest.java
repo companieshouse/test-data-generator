@@ -63,7 +63,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedCompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
@@ -92,7 +92,7 @@ import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepos
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
-import uk.gov.companieshouse.api.testdata.service.CombinedTdgCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -196,7 +196,7 @@ class TestDataServiceImplTest {
     private TestDataServiceImpl testDataService;
 
     @Mock
-    private CombinedTdgCompanyService combinedTdgCompanyService;
+    private CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
     @BeforeEach
     void setUp() {
@@ -2382,12 +2382,12 @@ class TestDataServiceImplTest {
         when(companyRegistersService.create(any(CompanySpec.class))).thenReturn(companyRegisters);
         when(disqualificationsService.create(any(CompanySpec.class))).thenReturn(disqualifications);
 
-        CompanyDetailsResponse response = testDataService.getCompanyProfile(spec);
+        CompanyDetailsResponse response = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
 
         // Capture the spec that was used for creation
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
-        assertEquals(Boolean.TRUE, capturedSpec.getCombinedTdg());
+        assertEquals(Boolean.TRUE, capturedSpec.getCompanyWithDataStructureOnly());
 
         // Verify calls
         verify(filingHistoryService, times(1)).create(capturedSpec);
@@ -2412,7 +2412,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void getCompanyProfile_noDefaultOfficerTrue_doesNotCreateAppointments() throws Exception {
+    void getCompanyDataStructureBeforeSavingInMongoDb_noDefaultOfficerTrue_doesNotCreateAppointments() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
         spec.setNoDefaultOfficer(true);
@@ -2432,7 +2432,7 @@ class TestDataServiceImplTest {
                 .thenReturn(Collections.emptyList());
         when(companyPscsService.create(any(CompanySpec.class))).thenReturn(Collections.emptyList());
 
-        testDataService.getCompanyProfile(spec);
+        testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
 
         CompanySpec capturedSpec = captureCompanySpec();
         verify(appointmentService, never()).createAppointment(capturedSpec);
@@ -2440,7 +2440,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() throws Exception {
-        CombinedCompanySpec spec = new CombinedCompanySpec();
+        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
 
         CompanyProfile profile = new CompanyProfile();
         profile.setCompanyNumber(COMPANY_NUMBER);
@@ -2452,7 +2452,7 @@ class TestDataServiceImplTest {
 
         CompanyData result = testDataService.createCompanyWithStructure(spec);
 
-        verify(combinedTdgCompanyService, times(1)).createCombinedCompany(spec);
+        verify(companyWithPopulatedStructureService, times(1)).createCombinedCompany(spec);
         assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals(AUTH_CODE, result.getAuthCode());
         assertEquals(API_URL + "/company/" + COMPANY_NUMBER, result.getCompanyUri());

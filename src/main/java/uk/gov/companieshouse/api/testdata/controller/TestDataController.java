@@ -32,7 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedCompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
@@ -562,15 +562,15 @@ public class TestDataController {
         Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
         CompanySpec spec = optionalRequest.orElse(new CompanySpec());
 
-        var companyData = testDataService.getCompanyProfile(spec);
+        var companyData = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
         return new ResponseEntity<>(companyData, HttpStatus.OK);
     }
 
     @PostMapping("/internal/create-company-with-populated-structure")
     public ResponseEntity<CompanyData> createCompanyWithStructure(
-            @Valid @RequestBody(required = false) CombinedCompanySpec request) throws DataException {
-        Optional<CombinedCompanySpec> optionalRequest = Optional.ofNullable(request);
-        CombinedCompanySpec spec = optionalRequest.orElse(new CombinedCompanySpec());
+            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request) throws DataException {
+        Optional<CompanyWithPopulatedStructureSpec> optionalRequest = Optional.ofNullable(request);
+        CompanyWithPopulatedStructureSpec spec = optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());
         var createdCompany = testDataService.createCompanyWithStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());

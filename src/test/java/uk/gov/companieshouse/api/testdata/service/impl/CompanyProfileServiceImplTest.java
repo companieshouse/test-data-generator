@@ -91,14 +91,14 @@ class CompanyProfileServiceImplTest {
         overseaCompanySpec = new CompanySpec();
         overseasSpec.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
         overseasSpec.setCompanyType(OVERSEAS_ENTITY_TYPE);
-        overseasSpec.setCombinedTdg(false);
+        overseasSpec.setCompanyWithDataStructureOnly(false);
         overseaCompanySpec.setCompanyType(OVERSEA_COMPANY_TYPE);
-        overseaCompanySpec.setCombinedTdg(false);
+        overseaCompanySpec.setCompanyWithDataStructureOnly(false);
         overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
         overseasSpec.setHasSuperSecurePscs(Boolean.TRUE);
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
         savedProfile = new CompanyProfile();
     }
 
@@ -389,7 +389,7 @@ class CompanyProfileServiceImplTest {
         overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         overseasSpec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
-        overseasSpec.setCombinedTdg(false);
+        overseasSpec.setCompanyWithDataStructureOnly(false);
 
         Address overseasAddress = new Address("1", "Gordon Cummins Hwy", "Grantley Adams International Airport", "Barbados", "Christ Church", "123125");
         when(addressService.getOverseasAddress()).thenReturn(overseasAddress);
@@ -836,9 +836,9 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createReturnsUnsavedProfileWhenCombinedTdgIsTrue() {
+    void createReturnsUnsavedProfileWhenCompanyWithDataStructureIsTrue() {
         setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES, CompanyType.LTD);
-        spec.setCombinedTdg(true);
+        spec.setCompanyWithDataStructureOnly(true);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         Address mockAddress = new Address("", "", "", "", "", "");

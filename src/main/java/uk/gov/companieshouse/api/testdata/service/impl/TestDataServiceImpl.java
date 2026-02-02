@@ -37,7 +37,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedCompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
@@ -64,7 +64,7 @@ import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepos
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
-import uk.gov.companieshouse.api.testdata.service.CombinedTdgCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -156,7 +156,7 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @Autowired
-    private CombinedTdgCompanyService combinedTdgCompanyService;
+    private CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -186,7 +186,7 @@ public class TestDataServiceImpl implements TestDataService {
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
         try {
             companyProfileService.create(spec);
             LOG.info("Successfully created company profile");
@@ -910,7 +910,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyDetailsResponse getCompanyProfile(CompanySpec spec) throws DataException {
+    public CompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
@@ -926,7 +926,7 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             var response = new CompanyDetailsResponse();
-            spec.setCombinedTdg(true);
+            spec.setCompanyWithDataStructureOnly(true);
 
             var companyProfile = companyProfileService.create(spec);
             LOG.info("Successfully get company profile");
@@ -977,20 +977,18 @@ public class TestDataServiceImpl implements TestDataService {
             Map<String, Object> data = new HashMap<>();
             data.put("company number", spec.getCompanyNumber());
             data.put("error message", ex.getMessage());
-            LOG.error("Failed to create company data for company number: "
+            LOG.error("Failed to get company data for company number: "
                     + spec.getCompanyNumber(), ex, data);
-            // Rollback all successful insertions
-            deleteCompanyData(spec.getCompanyNumber());
-            throw new DataException("Failed to create company data in service", ex);
+            throw new DataException("Failed to get company data from service", ex);
         }
     }
 
     @Override
-    public CompanyData createCompanyWithStructure(CombinedCompanySpec companySpec) throws DataException {
+    public CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException {
 
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
-        combinedTdgCompanyService.createCombinedCompany(companySpec);
+        companyWithPopulatedStructureService.createCombinedCompany(companySpec);
         String companyUri = this.apiUrl + "/company/" + companyNumber;
         return new CompanyData(companyNumber,
                 authCode, companyUri);

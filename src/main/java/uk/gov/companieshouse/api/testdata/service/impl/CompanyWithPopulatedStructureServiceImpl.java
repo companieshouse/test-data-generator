@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedCompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
@@ -17,10 +17,11 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.service.CombinedTdgCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 
 @Service
-public class CombinedTdgCompanyServiceImpl implements CombinedTdgCompanyService {
+public class CompanyWithPopulatedStructureServiceImpl
+        implements CompanyWithPopulatedStructureService {
 
     @Autowired
     private CompanyProfileRepository companyProfileRepository;
@@ -32,10 +33,10 @@ public class CombinedTdgCompanyServiceImpl implements CombinedTdgCompanyService 
     FilingHistoryRepository filingHistoryRepository;
 
     @Autowired
-    AppointmentsDataRepository appointmentsDataRepository;
+    private AppointmentsDataRepository appointmentsDataRepository;
 
     @Autowired
-    AppointmentsRepository appointmentRepository;
+    private AppointmentsRepository appointmentRepository;
 
     @Autowired
     private CompanyMetricsRepository companyMetricsRepository;
@@ -56,7 +57,7 @@ public class CombinedTdgCompanyServiceImpl implements CombinedTdgCompanyService 
     private OfficerRepository officerRepository;
 
     @Override
-    public void createCombinedCompany(CombinedCompanySpec companySpec) {
+    public void createCombinedCompany(CompanyWithPopulatedStructureSpec companySpec) {
         saveCompanyProfile(companySpec);
         saveAuthCode(companySpec);
         saveFilingHistory(companySpec);
@@ -70,58 +71,61 @@ public class CombinedTdgCompanyServiceImpl implements CombinedTdgCompanyService 
         saveDisqualifications(companySpec);
     }
 
-    private void saveCompanyProfile(CombinedCompanySpec companySpec) {
+    private void saveCompanyProfile(CompanyWithPopulatedStructureSpec companySpec) {
         var companyProfile = companySpec.getCompanyProfile();
         companyProfileRepository.save(companyProfile);
     }
 
-    private void saveAuthCode(CombinedCompanySpec companySpec) {
+    private void saveAuthCode(CompanyWithPopulatedStructureSpec companySpec) {
         var companyAuthCode = companySpec.getCompanyAuthCode();
         if (companyAuthCode != null) {
             authCodeRepository.save(companyAuthCode);
         }
     }
 
-    private void saveFilingHistory(CombinedCompanySpec companySpec) {
+    private void saveFilingHistory(CompanyWithPopulatedStructureSpec companySpec) {
         if (companySpec.getFilingHistory() != null) {
             filingHistoryRepository.save(companySpec.getFilingHistory());
         }
     }
 
-    private void saveAppointmentsData(CombinedCompanySpec companySpec) {
+    private void saveAppointmentsData(CompanyWithPopulatedStructureSpec companySpec) {
         var appointmentsDataContainer = companySpec.getAppointmentsData();
-        if (appointmentsDataContainer != null && appointmentsDataContainer.getAppointmentsData() != null) {
+        if (appointmentsDataContainer != null
+                && appointmentsDataContainer.getAppointmentsData() != null) {
             for (AppointmentsData data : appointmentsDataContainer.getAppointmentsData()) {
                 appointmentsDataRepository.save(data);
             }
         }
     }
 
-    private void saveAppointments(CombinedCompanySpec companySpec) {
+    private void saveAppointments(CompanyWithPopulatedStructureSpec companySpec) {
         var appointmentsDataContainer = companySpec.getAppointmentsData();
-        if (appointmentsDataContainer != null && appointmentsDataContainer.getAppointment() != null) {
+        if (appointmentsDataContainer != null
+                && appointmentsDataContainer.getAppointment() != null) {
             for (var appointment : appointmentsDataContainer.getAppointment()) {
                 appointmentRepository.save(appointment);
             }
         }
     }
 
-    private void saveOfficerAppointments(CombinedCompanySpec companySpec) {
+    private void saveOfficerAppointments(CompanyWithPopulatedStructureSpec companySpec) {
         var appointmentsDataContainer = companySpec.getAppointmentsData();
-        if (appointmentsDataContainer != null && appointmentsDataContainer.getOfficerAppointment() != null) {
+        if (appointmentsDataContainer != null
+                && appointmentsDataContainer.getOfficerAppointment() != null) {
             for (var officerAppointment : appointmentsDataContainer.getOfficerAppointment()) {
                 officerRepository.save(officerAppointment);
             }
         }
     }
 
-    private void saveCompanyMetrics(CombinedCompanySpec companySpec) {
+    private void saveCompanyMetrics(CompanyWithPopulatedStructureSpec companySpec) {
         if (companySpec.getCompanyMetrics() != null) {
             companyMetricsRepository.save(companySpec.getCompanyMetrics());
         }
     }
 
-    private void saveCompanyPscStatements(CombinedCompanySpec companySpec) {
+    private void saveCompanyPscStatements(CompanyWithPopulatedStructureSpec companySpec) {
         var companyPscStatements = companySpec.getCompanyPscStatement();
         if (companyPscStatements != null) {
             for (CompanyPscStatement companyPscStatement : companyPscStatements) {
@@ -130,7 +134,7 @@ public class CombinedTdgCompanyServiceImpl implements CombinedTdgCompanyService 
         }
     }
 
-    private void saveCompanyPscs(CombinedCompanySpec companySpec) {
+    private void saveCompanyPscs(CompanyWithPopulatedStructureSpec companySpec) {
         var companyPscsList = companySpec.getCompanyPscs();
         if (companyPscsList != null) {
             for (CompanyPscs companyPscs : companyPscsList) {
@@ -139,13 +143,13 @@ public class CombinedTdgCompanyServiceImpl implements CombinedTdgCompanyService 
         }
     }
 
-    private void saveCompanyRegisters(CombinedCompanySpec companySpec) {
+    private void saveCompanyRegisters(CompanyWithPopulatedStructureSpec companySpec) {
         if (companySpec.getCompanyRegisters() != null) {
             companyRegistersRepository.save(companySpec.getCompanyRegisters());
         }
     }
 
-    private void saveDisqualifications(CombinedCompanySpec companySpec) {
+    private void saveDisqualifications(CompanyWithPopulatedStructureSpec companySpec) {
         if (companySpec.getDisqualifications() != null) {
             disqualificationsRepository.save(companySpec.getDisqualifications());
         }

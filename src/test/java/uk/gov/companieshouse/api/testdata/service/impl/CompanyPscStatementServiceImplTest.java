@@ -60,7 +60,7 @@ class CompanyPscStatementServiceImplTest {
     void setUp() {
         spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCombinedTdg(false);
+        spec.setCompanyWithDataStructureOnly(false);
     }
 
     @Test
@@ -601,9 +601,9 @@ class CompanyPscStatementServiceImplTest {
     }
 
     @Test
-    void createReturnsUnsavedPscStatementWhenCombinedTdgIsTrue() {
+    void createReturnsUnsavedPscStatementWhenCompanyWithDataStructureIsTrue() {
         spec.setWithdrawnStatements(0);
-        spec.setCombinedTdg(true);
+        spec.setCompanyWithDataStructureOnly(true);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
         CompanyPscStatement savedStatement = new CompanyPscStatement();

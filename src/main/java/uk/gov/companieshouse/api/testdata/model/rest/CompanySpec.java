@@ -127,8 +127,7 @@ public class CompanySpec {
     @JsonProperty("add_to_company_elastic_search_index")
     private Boolean addToCompanyElasticSearchIndex;
 
-    @JsonProperty("combined_tdg")
-    private Boolean combinedTdg;
+    private Boolean companyWithDataStructureOnly;
 
     public CompanySpec() {
         jurisdiction = Jurisdiction.ENGLAND_WALES;
@@ -366,12 +365,12 @@ public class CompanySpec {
         this.addToCompanyElasticSearchIndex = addToCompanyElasticSearchIndex;
     }
 
-    public Boolean getCombinedTdg() {
-        return combinedTdg;
+    public Boolean getCompanyWithDataStructureOnly() {
+        return companyWithDataStructureOnly;
     }
 
-    public void setCombinedTdg(Boolean combinedTdg) {
-        this.combinedTdg = combinedTdg;
+    public void setCompanyWithDataStructureOnly(Boolean companyWithDataStructureOnly) {
+        this.companyWithDataStructureOnly = companyWithDataStructureOnly;
     }
 }
 
