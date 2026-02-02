@@ -12,9 +12,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -290,4 +292,22 @@ public interface TestDataService {
     CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
             throws DataException, NoDataFoundException;
 
+    /**
+     * Get the company data structure before saving in MongoDB.
+     *
+     * @param spec The specification the new company must adhere to
+     * @return A {@link PopulatedCompanyDetailsResponse}
+     * @throws DataException If any error occurs
+     */
+    PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec)
+            throws DataException;
+
+    /**
+     * Create company with full structure based on the given {@code companySpec}.
+     *
+     * @param companySpec The specification the new company must adhere to
+     * @return A {@link CompanyData}
+     * @throws DataException If any error occurs
+     */
+    CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException;
 }

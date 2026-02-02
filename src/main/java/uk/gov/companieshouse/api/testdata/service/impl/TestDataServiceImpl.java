@@ -22,7 +22,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
@@ -43,8 +43,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
@@ -65,7 +67,9 @@ import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -94,7 +98,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Autowired
-    private DataService<CompanyPscs, CompanySpec> companyPscsService;
+    private CompanyPscService companyPscService;
     @Autowired
     private RandomService randomService;
     @Autowired
@@ -151,6 +155,8 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
+    private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
+
     @Value("${api.url}")
     private String apiUrl;
 
@@ -165,20 +171,30 @@ public class TestDataServiceImpl implements TestDataService {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
+    public TestDataServiceImpl(
+            CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
+        this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
+    }
+
     @Override
     public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
+
         String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+
         if (spec.getIsPaddingCompanyNumber() != null) {
             companyNumberPrefix = companyNumberPrefix + "000";
         }
+
         do {
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
             companyProfileService.create(spec);
@@ -201,7 +217,7 @@ public class TestDataServiceImpl implements TestDataService {
             companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            companyPscsService.create(spec);
+            companyPscService.create(spec);
             LOG.info("Successfully created PSCs");
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
@@ -340,7 +356,7 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
         try {
-            this.companyPscsService.delete(companyId);
+            this.companyPscService.delete(companyId);
             LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
@@ -900,6 +916,91 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
+    }
+
+    @Override
+    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
+        if (spec == null) {
+            throw new IllegalArgumentException("CompanySpec can not be null");
+        }
+        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        if (spec.getIsPaddingCompanyNumber() != null) {
+            companyNumberPrefix = companyNumberPrefix + "000";
+        }
+        do {
+            spec.setCompanyNumber(companyNumberPrefix
+                    + randomService
+                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
+        try {
+            var response = new PopulatedCompanyDetailsResponse();
+            spec.setCompanyWithPopulatedStructureOnly(true);
+
+            var companyProfile = companyProfileService.create(spec);
+            LOG.info("Successfully get company profile");
+            response.setCompanyProfile(companyProfile);
+
+            var filingHistory = filingHistoryService.create(spec);
+            LOG.info("Successfully get filing history");
+            response.setFilingHistory(filingHistory);
+
+            if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
+                var appointments = appointmentService.createAppointment(spec);
+                LOG.info("Successfully get appointments ");
+                response.setAppointmentsData(appointments);
+            }
+
+            var authCode = companyAuthCodeService.create(spec);
+            LOG.info("Successfully get auth code: " + authCode.getAuthCode());
+            response.setCompanyAuthCode(authCode);
+
+
+            var companyMetrics = companyMetricsService.create(spec);
+            LOG.info("Successfully get company metrics");
+            response.setCompanyMetrics(companyMetrics);
+
+            List<CompanyPscStatement> companyPscStatements = companyPscStatementService.createPscStatements(spec);
+            LOG.info("Successfully get all PSC statements based on spec counts.");
+            response.setCompanyPscStatement(companyPscStatements);
+
+            var companyPscs = companyPscService.create(spec);
+            LOG.info("Successfully get PSCs");
+            response.setCompanyPscs(companyPscs);
+
+            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                var companyRegisters = this.companyRegistersService.create(spec);
+                LOG.info("Successfully get company registers");
+                response.setCompanyRegisters(companyRegisters);
+            }
+
+            if (spec.getDisqualifiedOfficers()
+                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+                var disqualifications = disqualificationsService.create(spec);
+                LOG.info("Successfully get disqualifications");
+                response.setDisqualifications(disqualifications);
+            }
+
+            return response;
+        } catch (Exception ex) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("company number", spec.getCompanyNumber());
+            data.put("error message", ex.getMessage());
+            LOG.error("Failed to get company data for company number: "
+                    + spec.getCompanyNumber(), ex, data);
+            throw new DataException("Failed to get company data from service", ex);
+        }
+    }
+
+    @Override
+    public CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException {
+
+        var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
+        var authCode = companySpec.getCompanyAuthCode().getAuthCode();
+        companyWithPopulatedStructureService.createCompanyWithPopulatedStructure(companySpec);
+        String companyUri = this.apiUrl + "/company/" + companyNumber;
+        return new CompanyData(companyNumber,
+                authCode, companyUri);
     }
 
 }

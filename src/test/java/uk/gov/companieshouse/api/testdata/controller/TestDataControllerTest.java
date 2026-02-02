@@ -1,5 +1,22 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,10 +40,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -50,23 +69,6 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -1498,4 +1500,79 @@ class TestDataControllerTest {
                 testDataController.findOrCreateCompanyAuthCode(companyNumber));
         assertEquals(ex, thrown);
     }
+
+    @Test
+    void getCompanyWithPopulatedStructure_success() throws Exception {
+        CompanySpec request = new CompanySpec();
+        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenReturn(responseObj);
+
+        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseObj, response.getBody());
+        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(request);
+    }
+
+    @Test
+    void getCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
+        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class))).thenReturn(responseObj);
+
+        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseObj, response.getBody());
+        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class));
+    }
+
+    @Test
+    void getCompanyWithPopulatedStructure_throwsDataException() throws Exception {
+        CompanySpec request = new CompanySpec();
+        DataException exception = new DataException("error");
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.getCompanyWithPopulatedStructure(request)
+        );
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createCompanyWithPopulatedStructure_success() throws Exception {
+        CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
+        CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+        when(testDataService.createCompanyWithStructure(request)).thenReturn(companyData);
+
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithPopulatedStructure(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(companyData, response.getBody());
+        verify(testDataService, times(1)).createCompanyWithStructure(request);
+    }
+
+    @Test
+    void createCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
+        CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+        when(testDataService.createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class))).thenReturn(companyData);
+
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithPopulatedStructure(null);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(companyData, response.getBody());
+        verify(testDataService, times(1)).createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class));
+    }
+
+    @Test
+    void createCompanyWithPopulatedStructure_throwsDataException() throws Exception {
+        CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
+        DataException exception = new DataException("error");
+        when(testDataService.createCompanyWithStructure(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createCompanyWithPopulatedStructure(request)
+        );
+        assertEquals(exception, thrown);
+    }
+
 }
