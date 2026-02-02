@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import uk.gov.companieshouse.api.accounts.associations.model.Association;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -62,6 +63,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
+import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
+import uk.gov.companieshouse.api.accounts.associations.model.AssociationLinks;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
@@ -84,6 +88,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -104,6 +109,29 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataServiceImplTest {
@@ -191,11 +219,15 @@ class TestDataServiceImplTest {
     @Mock private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Mock
     private DataService<Disqualifications, CompanySpec> disqualificationsService;
+
+    // Updated to concrete implementation to allow casting in search method
     @Mock
-    private DataService<UserCompanyAssociationData,
-            UserCompanyAssociationSpec> userCompanyAssociationService;
+    private UserCompanyAssociationServiceImpl userCompanyAssociationService;
+
     @Mock
     private UserCompanyAssociationRepository userCompanyAssociationRepository;
+    @Mock
+    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -1972,10 +2004,140 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void createUserCompanyAssociationData_ThrowsException_WhenUserIdAndEmailNull() throws DataException {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        // UserId and UserEmail are null by default
+
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.createUserCompanyAssociationData(spec));
+        assertTrue(ex.getMessage().contains("user_id or a user_email is required"));
+        verify(userCompanyAssociationService, never()).create(any());
+    }
+
+    @Test
+    void createUserCompanyAssociationData_ThrowsException_WhenCompanyNumberMissing() throws DataException {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(null);
+
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.createUserCompanyAssociationData(spec));
+        assertTrue(ex.getMessage().contains("Company number is required"));
+        verify(userCompanyAssociationService, never()).create(any());
+    }
+
+    @Test
+    void createUserCompanyAssociationData_Success() throws DataException {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        UserCompanyAssociationData expectedData = new UserCompanyAssociationData(ASSOCIATION_ID, "link");
+        when(userCompanyAssociationService.create(spec)).thenReturn(expectedData);
+
+        UserCompanyAssociationData result = testDataService.createUserCompanyAssociationData(spec);
+
+        assertNotNull(result);
+        assertEquals(expectedData, result);
+        verify(userCompanyAssociationService).create(spec);
+    }
+
+    @Test
+    void createUserCompanyAssociationData_WrapsException() throws DataException {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
+        spec.setUserId(USER_ID);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(userCompanyAssociationService.create(spec))
+                .thenThrow(new DataException("Inner error"));
+
+        DataException ex = assertThrows(DataException.class, () ->
+                testDataService.createUserCompanyAssociationData(spec));
+        assertTrue(ex.getMessage().contains("Error creating the association via SDK"));
+    }
+
+    @Test
+    void searchUserCompanyAssociation_ReturnsNull_WhenAssociationNotFound() throws DataException {
+        // Fix: Use any() instead of anyString() for the 3rd argument because userEmail is passed as null
+        when(userCompanyAssociationService.searchAssociation(anyString(), anyString(), any()))
+                .thenReturn(null);
+
+        UserCompanyAssociationSearchData result =
+                testDataService.searchUserCompanyAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertNull(result);
+    }
+
+    @Test
+    void searchUserCompanyAssociation_ReturnsNull_WhenLinksNull() throws DataException {
+        Association association = mock(Association.class);
+        when(association.getLinks()).thenReturn(null);
+
+        // Fix: Use any() instead of anyString() for the 3rd argument
+        when(userCompanyAssociationService.searchAssociation(anyString(), anyString(), any()))
+                .thenReturn(association);
+
+        UserCompanyAssociationSearchData result =
+                testDataService.searchUserCompanyAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertNull(result);
+    }
+
+    @Test
+    void searchUserCompanyAssociation_Success_WithSlashInLink() throws DataException {
+        Association association = mock(Association.class);
+        var links = mock(AssociationLinks.class);
+
+        // FIXED: Mock getLinks() returning object, and toString() returning the string value
+        when(links.toString()).thenReturn("/associations/" + ASSOCIATION_ID);
+        when(association.getLinks()).thenReturn(links);
+
+        when(association.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
+        when(association.getUserId()).thenReturn(USER_ID);
+        when(association.getStatus()).thenReturn(Association.StatusEnum.CONFIRMED);
+
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(association);
+
+        UserCompanyAssociationSearchData result =
+                testDataService.searchUserCompanyAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertNotNull(result);
+        assertEquals(ASSOCIATION_ID, result.getId());
+        assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(USER_ID, result.getUserId());
+        assertEquals("CONFIRMED", result.getStatus());
+    }
+
+    @Test
+    void searchUserCompanyAssociation_Success_NoSlashInLink() throws DataException {
+        Association association = mock(Association.class);
+        var links = mock(AssociationLinks.class);
+
+        // FIXED: Mocking toString for the scenario where the link is just the ID
+        when(links.toString()).thenReturn(ASSOCIATION_ID);
+        when(association.getLinks()).thenReturn(links);
+
+        when(association.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
+        when(association.getUserId()).thenReturn(USER_ID);
+        when(association.getStatus()).thenReturn(Association.StatusEnum.AWAITING_APPROVAL);
+
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(association);
+
+        UserCompanyAssociationSearchData result =
+                testDataService.searchUserCompanyAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertNotNull(result);
+        assertEquals(ASSOCIATION_ID, result.getId());
+        assertEquals("AWAITING_APPROVAL", result.getStatus());
+    }
+
+    @Test
     void deleteUserCompanyAssociation() throws DataException {
         when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenReturn(true);
-
         boolean result =
                 testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
 
@@ -1987,7 +2149,6 @@ class TestDataServiceImplTest {
     void deleteUserCompanyAssociationNotFound() throws DataException {
         when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenReturn(false);
-
         boolean result =
                 testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
 
@@ -2001,14 +2162,14 @@ class TestDataServiceImplTest {
                 + "association");
         when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenThrow(ex);
-
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID));
-
         assertEquals("Error deleting association: Error deleting association",
                 exception.getMessage());
         verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
     }
+
+    // Existing Delete Tests (ensuring they still work with concrete mock)
 
     @Test
     void createTransactionData() throws DataException {

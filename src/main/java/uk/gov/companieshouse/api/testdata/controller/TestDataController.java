@@ -500,7 +500,7 @@ public class TestDataController {
         if (association == null || association.getLinks() == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        // Extract association link and id
+
         var associationLink = String.valueOf(association.getLinks());
         String associationId;
         if (associationLink != null && associationLink.contains("/")) {
@@ -508,19 +508,13 @@ public class TestDataController {
         } else {
             associationId = associationLink;
         }
-        // Convert enums to String if not null
-        String status = association.getStatus() != null ? association.getStatus().name() : null;
-        var approvalRoute = association.getApprovalRoute()
-                != null ? association.getApprovalRoute().name() : null;
-        // Build response with all fields, invitations set to null (method not found)
+
+        var status = association.getStatus() != null ? association.getStatus().name() : null;
         var response = new UserCompanyAssociationSearchData(
                 associationId,
                 association.getCompanyNumber(),
                 association.getUserId(),
-                status,
-                approvalRoute,
-                null,
-                associationLink
+                status
         );
         return ResponseEntity.ok(response);
     }

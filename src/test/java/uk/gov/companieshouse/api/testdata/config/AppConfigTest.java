@@ -18,7 +18,6 @@ class AppConfigTest {
 
     private static final String API_KEY = "test-api-key";
     private static final String API_URL = "http://test-api-url";
-//    private static final String ACCOUNT_API_URL = "http://test-account-api-url";
 
     private AppConfig appConfig;
 

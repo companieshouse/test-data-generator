@@ -1039,11 +1039,7 @@ public class TestDataServiceImpl implements TestDataService {
                 id,
                 association.getCompanyNumber(),
                 association.getUserId(),
-                association.getStatus() != null ? association.getStatus().name() : null,
-                association.getApprovalRoute()
-                        != null ? association.getApprovalRoute().name() : null,
-                null,
-                associationLink
+                association.getStatus() != null ? association.getStatus().name() : null
         );
     }
 
