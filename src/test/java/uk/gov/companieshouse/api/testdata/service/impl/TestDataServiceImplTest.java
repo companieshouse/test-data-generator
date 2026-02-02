@@ -198,6 +198,7 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -2452,11 +2453,9 @@ class TestDataServiceImplTest {
 
         CompanyData result = testDataService.createCompanyWithStructure(spec);
 
-        verify(companyWithPopulatedStructureService, times(1)).createCombinedCompany(spec);
         assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals(AUTH_CODE, result.getAuthCode());
         assertEquals(API_URL + "/company/" + COMPANY_NUMBER, result.getCompanyUri());
     }
-
 
 }

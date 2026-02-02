@@ -37,7 +37,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
@@ -45,6 +44,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
@@ -64,12 +64,12 @@ import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepos
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
-import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscsService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -155,8 +155,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
 
-    @Autowired
-    private CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
+    private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -170,6 +169,11 @@ public class TestDataServiceImpl implements TestDataService {
 
     void setElasticSearchDeployed(Boolean isElasticSearchDeployed) {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
+    }
+
+    public TestDataServiceImpl(
+            CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
+        this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
     }
 
     @Override

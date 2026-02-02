@@ -1,6 +1,9 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
@@ -9,9 +12,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.testdata.model.entity.*;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
-import uk.gov.companieshouse.api.testdata.repository.*;
+import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
+
+import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
+
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
+import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
+import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
+import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 
 @ExtendWith(MockitoExtension.class)
 class CompanyWithPopulatedStructureServiceImplTest {
@@ -106,7 +132,8 @@ class CompanyWithPopulatedStructureServiceImplTest {
         service.createCombinedCompany(spec);
 
         verify(companyProfileRepository).save(any(CompanyProfile.class));
-        verifyNoInteractions(authCodeRepository, filingHistoryRepository, appointmentsDataRepository,
+        verifyNoInteractions(authCodeRepository, filingHistoryRepository,
+                appointmentsDataRepository,
                 appointmentRepository, officerRepository, companyMetricsRepository,
                 companyPscStatementRepository, companyPscsRepository, companyRegistersRepository,
                 disqualificationsRepository);
