@@ -606,7 +606,6 @@ class CompanyPscStatementServiceImplTest {
         spec.setCompanyWithDataStructureOnly(true);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
-        CompanyPscStatement savedStatement = new CompanyPscStatement();
 
         CompanyPscStatement result = this.companyPscStatementService.create(spec);
 

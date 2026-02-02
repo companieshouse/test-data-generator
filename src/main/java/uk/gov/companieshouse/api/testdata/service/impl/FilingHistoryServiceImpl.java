@@ -142,7 +142,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
             filingHistory.setPages(10);
             filingHistory.setDate(dayTimeNow);
         }
-        if (spec.getCompanyWithDataStructureOnly()) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
             return filingHistory;
         }
         LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());

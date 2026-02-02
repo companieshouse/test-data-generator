@@ -23,38 +23,43 @@ import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureS
 public class CompanyWithPopulatedStructureServiceImpl
         implements CompanyWithPopulatedStructureService {
 
-    @Autowired
-    private CompanyProfileRepository companyProfileRepository;
+    private final CompanyProfileRepository companyProfileRepository;
+    private final CompanyAuthCodeRepository authCodeRepository;
+    private final FilingHistoryRepository filingHistoryRepository;
+    private final AppointmentsDataRepository appointmentsDataRepository;
+    private final AppointmentsRepository appointmentRepository;
+    private final CompanyMetricsRepository companyMetricsRepository;
+    private final CompanyPscStatementRepository companyPscStatementRepository;
+    private final CompanyPscsRepository companyPscsRepository;
+    private final CompanyRegistersRepository companyRegistersRepository;
+    private final DisqualificationsRepository disqualificationsRepository;
+    private final OfficerRepository officerRepository;
 
     @Autowired
-    private CompanyAuthCodeRepository authCodeRepository;
-
-    @Autowired
-    FilingHistoryRepository filingHistoryRepository;
-
-    @Autowired
-    private AppointmentsDataRepository appointmentsDataRepository;
-
-    @Autowired
-    private AppointmentsRepository appointmentRepository;
-
-    @Autowired
-    private CompanyMetricsRepository companyMetricsRepository;
-
-    @Autowired
-    private CompanyPscStatementRepository companyPscStatementRepository;
-
-    @Autowired
-    private CompanyPscsRepository companyPscsRepository;
-
-    @Autowired
-    private CompanyRegistersRepository companyRegistersRepository;
-
-    @Autowired
-    private DisqualificationsRepository disqualificationsRepository;
-
-    @Autowired
-    private OfficerRepository officerRepository;
+    public CompanyWithPopulatedStructureServiceImpl(
+            CompanyProfileRepository companyProfileRepository,
+            CompanyAuthCodeRepository authCodeRepository,
+            FilingHistoryRepository filingHistoryRepository,
+            AppointmentsDataRepository appointmentsDataRepository,
+            AppointmentsRepository appointmentRepository,
+            CompanyMetricsRepository companyMetricsRepository,
+            CompanyPscStatementRepository companyPscStatementRepository,
+            CompanyPscsRepository companyPscsRepository,
+            CompanyRegistersRepository companyRegistersRepository,
+            DisqualificationsRepository disqualificationsRepository,
+            OfficerRepository officerRepository) {
+        this.companyProfileRepository = companyProfileRepository;
+        this.authCodeRepository = authCodeRepository;
+        this.filingHistoryRepository = filingHistoryRepository;
+        this.appointmentsDataRepository = appointmentsDataRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.companyMetricsRepository = companyMetricsRepository;
+        this.companyPscStatementRepository = companyPscStatementRepository;
+        this.companyPscsRepository = companyPscsRepository;
+        this.companyRegistersRepository = companyRegistersRepository;
+        this.disqualificationsRepository = disqualificationsRepository;
+        this.officerRepository = officerRepository;
+    }
 
     @Override
     public void createCombinedCompany(CompanyWithPopulatedStructureSpec companySpec) {
