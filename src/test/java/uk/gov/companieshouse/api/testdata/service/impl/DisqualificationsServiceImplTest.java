@@ -52,7 +52,7 @@ class DisqualificationsServiceImplTest {
     void createDisqualificationSuccess() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
@@ -78,7 +78,7 @@ class DisqualificationsServiceImplTest {
     void createMultipleDisqualifications() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         DisqualificationsSpec disqSpec1 = new DisqualificationsSpec();
         disqSpec1.setCorporateOfficer(false);
         DisqualificationsSpec disqSpec2 = new DisqualificationsSpec();
@@ -106,7 +106,7 @@ class DisqualificationsServiceImplTest {
     void createDisqualificationCorporateOfficer() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
         disqSpec.setCorporateOfficer(true);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
@@ -132,7 +132,7 @@ class DisqualificationsServiceImplTest {
     void createDisqualificationNoSpecCreatesDefault() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         Disqualifications savedEntity = new Disqualifications();
         savedEntity.setId(ID);
@@ -214,7 +214,7 @@ class DisqualificationsServiceImplTest {
     void createReturnsUnsavedDisqualificationWhenCompanyWithDataStructureIsTrue() throws DataException {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(true);
+        spec.setCompanyWithPopulatedStructureOnly(true);
         DisqualificationsSpec disqSpec = new DisqualificationsSpec();
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));

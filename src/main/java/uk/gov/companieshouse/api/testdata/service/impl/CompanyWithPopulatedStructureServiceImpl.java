@@ -62,7 +62,7 @@ public class CompanyWithPopulatedStructureServiceImpl
     }
 
     @Override
-    public void createCombinedCompany(CompanyWithPopulatedStructureSpec companySpec) {
+    public void createCompanyWithPopulatedStructure(CompanyWithPopulatedStructureSpec companySpec) {
         saveCompanyProfile(companySpec);
         saveAuthCode(companySpec);
         saveFilingHistory(companySpec);

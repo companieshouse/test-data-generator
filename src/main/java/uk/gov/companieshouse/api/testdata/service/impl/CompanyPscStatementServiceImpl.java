@@ -70,7 +70,7 @@ public class CompanyPscStatementServiceImpl implements
             pscStatement.setStatement(
                     PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
         }
-        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return pscStatement;
         }
 
@@ -134,8 +134,8 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setWithdrawnStatements(1);
             tempSpec.setNumberOfPscs(0);
             tempSpec.setPscActive(false);
-            if (spec.getCompanyWithDataStructureOnly() != null) {
-                tempSpec.setCompanyWithDataStructureOnly(spec.getCompanyWithDataStructureOnly());
+            if (spec.getCompanyWithPopulatedStructureOnly() != null) {
+                tempSpec.setCompanyWithPopulatedStructureOnly(spec.getCompanyWithPopulatedStructureOnly());
             }
             generatedList.add(this.create(tempSpec));
         }
@@ -158,8 +158,8 @@ public class CompanyPscStatementServiceImpl implements
             tempSpec.setWithdrawnStatements(0);
             tempSpec.setNumberOfPscs(1);
             tempSpec.setPscActive(true);
-            if (spec.getCompanyWithDataStructureOnly() != null) {
-                tempSpec.setCompanyWithDataStructureOnly(spec.getCompanyWithDataStructureOnly());
+            if (spec.getCompanyWithPopulatedStructureOnly() != null) {
+                tempSpec.setCompanyWithPopulatedStructureOnly(spec.getCompanyWithPopulatedStructureOnly());
             }
             generatedList.add(this.create(tempSpec));
         }

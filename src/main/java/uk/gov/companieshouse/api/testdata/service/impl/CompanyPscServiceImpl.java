@@ -24,15 +24,15 @@ import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
-import uk.gov.companieshouse.api.testdata.service.CompanyPscsService;
+import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class CompanyPscsServiceImpl implements CompanyPscsService {
+public class CompanyPscServiceImpl implements CompanyPscService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(CompanyPscsServiceImpl.class));
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(CompanyPscServiceImpl.class));
 
     static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent",
             "ownership-of-shares-50-to-75-percent",
@@ -61,9 +61,9 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
     private final AddressService addressService;
 
     @Autowired
-    public CompanyPscsServiceImpl(RandomService randomService,
-                                  CompanyPscsRepository repository,
-                                  AddressService addressService) {
+    public CompanyPscServiceImpl(RandomService randomService,
+                                 CompanyPscsRepository repository,
+                                 AddressService addressService) {
         this.randomService = randomService;
         this.repository = repository;
         this.addressService = addressService;
@@ -209,7 +209,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
     private CompanyPscs createSuperSecureBeneficialOwner(CompanySpec spec) {
         CompanyPscs superSecureBo = createBasePsc(spec, true);
         buildSuperSecureBeneficialOwner(superSecureBo);
-        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return superSecureBo;
         }
         return repository.save(superSecureBo);
@@ -218,7 +218,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
     private CompanyPscs createSuperSecurePsc(CompanySpec spec) {
         CompanyPscs superSecurePsc = createBasePsc(spec, true);
         buildSuperSecurePsc(superSecurePsc);
-        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return superSecurePsc;
         }
         return repository.save(superSecurePsc);
@@ -301,7 +301,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
             default:
                 throw new IllegalArgumentException("Unsupported PSC type: " + pscType);
         }
-        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return companyPscs;
         }
         return repository.save(companyPscs);
@@ -319,7 +319,7 @@ public class CompanyPscsServiceImpl implements CompanyPscsService {
             default:
                 throw new IllegalArgumentException("Unsupported beneficial owner type: " + pscType);
         }
-        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return beneficialOwner;
         }
         return repository.save(beneficialOwner);

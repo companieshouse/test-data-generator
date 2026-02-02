@@ -45,7 +45,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
             LOG.debug("Registers are provided. Creating registers for the company.");
             metrics.setRegisters(createRegisters(spec.getRegisters()));
         }
-        if (Boolean.TRUE.equals(spec.getCompanyWithDataStructureOnly())) {
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return metrics;
         }
         CompanyMetrics savedMetrics = repository.save(metrics);

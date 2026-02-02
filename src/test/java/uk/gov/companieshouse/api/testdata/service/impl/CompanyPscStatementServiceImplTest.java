@@ -60,7 +60,7 @@ class CompanyPscStatementServiceImplTest {
     void setUp() {
         spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
     }
 
     @Test
@@ -603,7 +603,7 @@ class CompanyPscStatementServiceImplTest {
     @Test
     void createReturnsUnsavedPscStatementWhenCompanyWithDataStructureIsTrue() {
         spec.setWithdrawnStatements(0);
-        spec.setCompanyWithDataStructureOnly(true);
+        spec.setCompanyWithPopulatedStructureOnly(true);
         when(this.randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
         when(this.randomService.getEtag()).thenReturn(ETAG);
 

@@ -52,7 +52,7 @@ class CompanyMetricsServiceImplTest {
         var publicRegisterText = "public-register";
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         RegistersSpec registersSpec = new RegistersSpec();
         registersSpec.setRegisterType(directorsText);
@@ -111,7 +111,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER, PscType.CORPORATE_BENEFICIAL_OWNER));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
@@ -131,7 +131,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setHasSuperSecurePscs(Boolean.TRUE);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
@@ -150,7 +150,7 @@ class CompanyMetricsServiceImplTest {
     void createWithDefaultActivePscCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
@@ -170,7 +170,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setHasSuperSecurePscs(true);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
@@ -191,7 +191,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(5);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
@@ -211,7 +211,7 @@ class CompanyMetricsServiceImplTest {
     void createWithRegisters() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("public-register");
@@ -241,7 +241,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setNumberOfAppointments(5);
         spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("public-register");
@@ -268,7 +268,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setNumberOfAppointments(5);
         spec.setOfficerRoles(List.of(OfficerRoles.CIC_MANAGER));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         metricsService.create(spec);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -304,7 +304,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setActiveStatements(3);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
@@ -322,7 +322,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(2);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
@@ -339,7 +339,7 @@ class CompanyMetricsServiceImplTest {
     void createWithDefaultActivePscStatementsCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
@@ -357,7 +357,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setWithdrawnStatements(4);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
@@ -374,7 +374,7 @@ class CompanyMetricsServiceImplTest {
     void createWithDefaultWithdrawnPscStatementsCount() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
@@ -392,7 +392,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setNumberOfPscs(3);
         spec.setPscActive(false);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
 
@@ -404,7 +404,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setNumberOfPscs(3);
         spec.setPscActive(true);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
@@ -417,7 +417,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setNumberOfPscs(3);
         spec.setPscActive(null);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
@@ -429,7 +429,7 @@ class CompanyMetricsServiceImplTest {
     void setPscCount_WhenSuperSecurePscs_ShouldSetCountToOne() {
         CompanySpec spec = new CompanySpec();
         spec.setHasSuperSecurePscs(true);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
@@ -440,7 +440,7 @@ class CompanyMetricsServiceImplTest {
     @Test
     void setPscCount_WhenNoPscCount_ShouldSetCountToZero() {
         CompanySpec spec = new CompanySpec();
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
 
@@ -453,7 +453,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(5);
         spec.setPscActive(false);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
@@ -473,7 +473,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(4);
         spec.setPscActive(false);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
@@ -494,7 +494,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(4);
         spec.setPscActive(true);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
@@ -515,7 +515,7 @@ class CompanyMetricsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(4);
         spec.setPscActive(null);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
@@ -535,7 +535,7 @@ class CompanyMetricsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNoDefaultOfficer(true);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         CompanyMetrics savedMetrics = new CompanyMetrics();
@@ -555,7 +555,7 @@ class CompanyMetricsServiceImplTest {
     void createReturnsUnsavedMetricsWhenCompanyWithDataStructureIsTrue() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithDataStructureOnly(true);
+        spec.setCompanyWithPopulatedStructureOnly(true);
 
         when(randomService.getEtag()).thenReturn(ETAG);
 

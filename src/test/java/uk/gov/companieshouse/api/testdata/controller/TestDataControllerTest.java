@@ -1502,12 +1502,12 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getCompanyWithStructure_success() throws Exception {
+    void getCompanyWithPopulatedStructure_success() throws Exception {
         CompanySpec request = new CompanySpec();
         CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
         when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenReturn(responseObj);
 
-        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithStructure(request);
+        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
@@ -1515,11 +1515,11 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getCompanyWithStructure_nullRequest_usesDefault() throws Exception {
+    void getCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
         CompanyDetailsResponse responseObj = new CompanyDetailsResponse();
         when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class))).thenReturn(responseObj);
 
-        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithStructure(null);
+        ResponseEntity<CompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
@@ -1527,24 +1527,24 @@ class TestDataControllerTest {
     }
 
     @Test
-    void getCompanyWithStructure_throwsDataException() throws Exception {
+    void getCompanyWithPopulatedStructure_throwsDataException() throws Exception {
         CompanySpec request = new CompanySpec();
         DataException exception = new DataException("error");
         when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.getCompanyWithStructure(request)
+                testDataController.getCompanyWithPopulatedStructure(request)
         );
         assertEquals(exception, thrown);
     }
 
     @Test
-    void createCompanyWithStructure_success() throws Exception {
+    void createCompanyWithPopulatedStructure_success() throws Exception {
         CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
         CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
         when(testDataService.createCompanyWithStructure(request)).thenReturn(companyData);
 
-        ResponseEntity<CompanyData> response = testDataController.createCompanyWithStructure(request);
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithPopulatedStructure(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
@@ -1552,11 +1552,11 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyWithStructure_nullRequest_usesDefault() throws Exception {
+    void createCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
         CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
         when(testDataService.createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class))).thenReturn(companyData);
 
-        ResponseEntity<CompanyData> response = testDataController.createCompanyWithStructure(null);
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithPopulatedStructure(null);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
@@ -1564,13 +1564,13 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createCompanyWithStructure_throwsDataException() throws Exception {
+    void createCompanyWithPopulatedStructure_throwsDataException() throws Exception {
         CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
         DataException exception = new DataException("error");
         when(testDataService.createCompanyWithStructure(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.createCompanyWithStructure(request)
+                testDataController.createCompanyWithPopulatedStructure(request)
         );
         assertEquals(exception, thrown);
     }

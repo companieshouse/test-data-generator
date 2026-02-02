@@ -291,7 +291,7 @@ class CompanyRegistersServiceImplTest {
         register.setRegisterType(DIRECTORS_TEXT);
         register.setRegisterMovedTo(PUBLIC_REGISTER);
         companySpec.setRegisters(List.of(register));
-        companySpec.setCompanyWithDataStructureOnly(true);
+        companySpec.setCompanyWithPopulatedStructureOnly(true);
 
         FilingHistory filingHistory = new FilingHistory();
         filingHistory.setId("filing-history-id");
@@ -315,7 +315,7 @@ class CompanyRegistersServiceImplTest {
     private void setCompanySpec(String registerType, String registerMovedTo) {
         companySpec = new CompanySpec();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
-        companySpec.setCompanyWithDataStructureOnly(false);
+        companySpec.setCompanyWithPopulatedStructureOnly(false);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);

@@ -96,7 +96,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureS
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanyPscsService;
+import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -144,7 +144,7 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock
-    private CompanyPscsService companyPscsService;
+    private CompanyPscService companyPscService;
     @Mock
     private RandomService randomService;
     @Mock
@@ -259,7 +259,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).createAppointment(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
-        verify(companyPscsService, times(1)).create(capturedSpec);
+        verify(companyPscService, times(1)).create(capturedSpec);
 
         assertEquals(expectedFullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + expectedFullCompanyNumber,
@@ -323,7 +323,7 @@ class TestDataServiceImplTest {
         verify(appointmentService).deleteAllAppointments(companyNumber);
         verify(companyPscStatementService).delete(companyNumber);
         verify(metricsService).delete(companyNumber);
-        verify(companyPscsService).delete(companyNumber);
+        verify(companyPscService).delete(companyNumber);
         verify(companyRegistersService).delete(companyNumber);
     }
 
@@ -349,7 +349,7 @@ class TestDataServiceImplTest {
         verify(appointmentService, times(1)).deleteAllAppointments(COMPANY_NUMBER);
         verify(companyPscStatementService, times(1)).delete(COMPANY_NUMBER);
         verify(metricsService, times(1)).delete(COMPANY_NUMBER);
-        verify(companyPscsService, times(1)).delete(COMPANY_NUMBER);
+        verify(companyPscService, times(1)).delete(COMPANY_NUMBER);
         verify(companyRegistersService, times(1)).delete(COMPANY_NUMBER);
         verify(disqualificationsService, times(1)).delete(COMPANY_NUMBER);
     }
@@ -507,7 +507,7 @@ class TestDataServiceImplTest {
         verify(appointmentService).createAppointment(capturedSpec);
         verify(companyPscStatementService).createPscStatements(capturedSpec);
         verify(metricsService).create(capturedSpec);
-        verify(companyPscsService).create(capturedSpec);
+        verify(companyPscService).create(capturedSpec);
         assertEquals(fullCompanyNumber, createdCompany.getCompanyNumber());
         assertEquals(API_URL + "/company/" + fullCompanyNumber, createdCompany.getCompanyUri());
         assertEquals(AUTH_CODE, createdCompany.getAuthCode());
@@ -527,7 +527,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
         verify(appointmentService, never()).deleteAllAppointments(anyString());
         verify(companyPscStatementService, never()).delete(COMPANY_NUMBER);
-        verify(companyPscsService, never()).delete(COMPANY_NUMBER);
+        verify(companyPscService, never()).delete(COMPANY_NUMBER);
         verify(metricsService, never()).delete(COMPANY_NUMBER);
     }
 
@@ -574,7 +574,7 @@ class TestDataServiceImplTest {
     @Test
     void deleteCompanyDataPscsException() {
         RuntimeException ex = new RuntimeException("exception");
-        when(companyPscsService.delete(COMPANY_NUMBER)).thenThrow(ex);
+        when(companyPscService.delete(COMPANY_NUMBER)).thenThrow(ex);
 
         assertDeleteCompanyDataException(ex);
     }
@@ -2379,7 +2379,7 @@ class TestDataServiceImplTest {
         when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(authCode);
         when(metricsService.create(any(CompanySpec.class))).thenReturn(companyMetrics);
         when(companyPscStatementService.createPscStatements(any(CompanySpec.class))).thenReturn(pscStatements);
-        when(companyPscsService.create(any(CompanySpec.class))).thenReturn(companyPscs);
+        when(companyPscService.create(any(CompanySpec.class))).thenReturn(companyPscs);
         when(companyRegistersService.create(any(CompanySpec.class))).thenReturn(companyRegisters);
         when(disqualificationsService.create(any(CompanySpec.class))).thenReturn(disqualifications);
 
@@ -2388,7 +2388,7 @@ class TestDataServiceImplTest {
         // Capture the spec that was used for creation
         CompanySpec capturedSpec = captureCompanySpec();
         assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
-        assertEquals(Boolean.TRUE, capturedSpec.getCompanyWithDataStructureOnly());
+        assertEquals(Boolean.TRUE, capturedSpec.getCompanyWithPopulatedStructureOnly());
 
         // Verify calls
         verify(filingHistoryService, times(1)).create(capturedSpec);
@@ -2396,7 +2396,7 @@ class TestDataServiceImplTest {
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
-        verify(companyPscsService, times(1)).create(capturedSpec);
+        verify(companyPscService, times(1)).create(capturedSpec);
         verify(companyRegistersService, times(1)).create(capturedSpec);
         verify(disqualificationsService, times(1)).create(capturedSpec);
 
@@ -2431,7 +2431,7 @@ class TestDataServiceImplTest {
         when(metricsService.create(any(CompanySpec.class))).thenReturn(new CompanyMetrics());
         when(companyPscStatementService.createPscStatements(any(CompanySpec.class)))
                 .thenReturn(Collections.emptyList());
-        when(companyPscsService.create(any(CompanySpec.class))).thenReturn(Collections.emptyList());
+        when(companyPscService.create(any(CompanySpec.class))).thenReturn(Collections.emptyList());
 
         testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
 

@@ -37,7 +37,7 @@ import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
-class CompanyPscsServiceImplTest {
+class CompanyPscServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_ID = "encoded123";
@@ -52,7 +52,7 @@ class CompanyPscsServiceImplTest {
     private AddressService addressService;
 
     @InjectMocks
-    private CompanyPscsServiceImpl companyPscsService;
+    private CompanyPscServiceImpl companyPscsService;
 
     @Test
     void create_OverseasEntity_CreatesBeneficialOwners() throws DataException {
@@ -61,7 +61,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(3);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -81,7 +81,7 @@ class CompanyPscsServiceImplTest {
         spec.setHasSuperSecurePscs(true);
         spec.setPscType(null);
         spec.setNumberOfPscs(null);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -105,7 +105,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setHasSuperSecurePscs(true);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -128,7 +128,7 @@ class CompanyPscsServiceImplTest {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -143,7 +143,7 @@ class CompanyPscsServiceImplTest {
         spec.setAccountsDueStatus("due-soon");
         spec.setNumberOfPscs(1);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         LocalDate dueDate = LocalDate.now().plusDays(10);
 
@@ -189,7 +189,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(3);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -216,7 +216,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         DataException exception = assertThrows(DataException.class,
                 () -> companyPscsService.create(spec));
@@ -232,7 +232,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         DataException exception = assertThrows(DataException.class,
                 () -> companyPscsService.create(spec));
@@ -249,7 +249,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -268,7 +268,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(2);
         spec.setPscType(List.of(PscType.CORPORATE_BENEFICIAL_OWNER));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -287,7 +287,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         assertThrows(DataException.class, () -> companyPscsService.create(spec));
         verify(repository, never()).save(any());
@@ -299,7 +299,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(null);
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -314,7 +314,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(3);
         spec.setPscType(List.of(PscType.INDIVIDUAL, PscType.LEGAL_PERSON));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -333,7 +333,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
         spec.setPscType(null); // PscType is null
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -348,7 +348,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
         spec.setPscType(Collections.emptyList()); // PscType is an empty list
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
@@ -363,7 +363,7 @@ class CompanyPscsServiceImplTest {
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(1);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithDataStructureOnly(true);
+        spec.setCompanyWithPopulatedStructureOnly(true);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);

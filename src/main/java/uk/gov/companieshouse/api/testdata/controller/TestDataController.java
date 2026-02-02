@@ -556,7 +556,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/get-populated-company-structure")
-    public ResponseEntity<CompanyDetailsResponse> getCompanyWithStructure(
+    public ResponseEntity<CompanyDetailsResponse> getCompanyWithPopulatedStructure(
             @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
 
         Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
@@ -567,7 +567,7 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/create-company-with-populated-structure")
-    public ResponseEntity<CompanyData> createCompanyWithStructure(
+    public ResponseEntity<CompanyData> createCompanyWithPopulatedStructure(
             @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request) throws DataException {
         Optional<CompanyWithPopulatedStructureSpec> optionalRequest = Optional.ofNullable(request);
         CompanyWithPopulatedStructureSpec spec = optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());

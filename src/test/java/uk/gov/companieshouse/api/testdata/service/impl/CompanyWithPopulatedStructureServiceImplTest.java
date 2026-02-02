@@ -69,7 +69,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
     private CompanyWithPopulatedStructureServiceImpl service;
 
     @Test
-    void createCombinedCompany_savesAllEntities() {
+    void createCompany_WithPopulatedStructure_savesAllEntities() {
         CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
 
         CompanyProfile profile = new CompanyProfile();
@@ -108,7 +108,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         Disqualifications disqualifications = new Disqualifications();
         spec.setDisqualifications(disqualifications);
 
-        service.createCombinedCompany(spec);
+        service.createCompanyWithPopulatedStructure(spec);
 
         verify(companyProfileRepository).save(profile);
         verify(authCodeRepository).save(authCode);
@@ -124,12 +124,12 @@ class CompanyWithPopulatedStructureServiceImplTest {
     }
 
     @Test
-    void createCombinedCompany_handlesNullsGracefully() {
+    void createCompany_WithPopulatedStructure_handlesNullsGracefully() {
         CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         // All other fields are null
 
-        service.createCombinedCompany(spec);
+        service.createCompanyWithPopulatedStructure(spec);
 
         verify(companyProfileRepository).save(any(CompanyProfile.class));
         verifyNoInteractions(authCodeRepository, filingHistoryRepository,
@@ -140,21 +140,21 @@ class CompanyWithPopulatedStructureServiceImplTest {
     }
 
     @Test
-    void createCombinedCompany_appointmentsDataWithNullLists_doesNotSave() {
+    void createCompany_WithPopulatedStructure_appointmentsDataWithNullLists_doesNotSave() {
         CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         AppointmentsResultData appointmentsData = new AppointmentsResultData();
         // All sublists are null
         spec.setAppointmentsData(appointmentsData);
 
-        service.createCombinedCompany(spec);
+        service.createCompanyWithPopulatedStructure(spec);
 
         verify(companyProfileRepository).save(any());
         verifyNoInteractions(appointmentsDataRepository, appointmentRepository, officerRepository);
     }
 
     @Test
-    void createCombinedCompany_emptyLists_doesNotSave() {
+    void createCompany_WithPopulatedStructure_emptyLists_doesNotSave() {
         CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         AppointmentsResultData appointmentsData = new AppointmentsResultData();
@@ -165,7 +165,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         spec.setCompanyPscStatement(List.of());
         spec.setCompanyPscs(List.of());
 
-        service.createCombinedCompany(spec);
+        service.createCompanyWithPopulatedStructure(spec);
 
         verify(companyProfileRepository).save(any());
         verifyNoInteractions(appointmentsDataRepository, appointmentRepository, officerRepository,
@@ -173,7 +173,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
     }
 
     @Test
-    void createCombinedCompany_multiplePscStatementsAndPscs_allSaved() {
+    void createCompany_WithPopulatedStructure_multiplePscStatementsAndPscs_allSaved() {
         CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
         spec.setCompanyProfile(new CompanyProfile());
         CompanyPscStatement s1 = new CompanyPscStatement();
@@ -183,7 +183,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         CompanyPscs p2 = new CompanyPscs();
         spec.setCompanyPscs(List.of(p1, p2));
 
-        service.createCombinedCompany(spec);
+        service.createCompanyWithPopulatedStructure(spec);
 
         verify(companyPscStatementRepository).save(s1);
         verify(companyPscStatementRepository).save(s2);

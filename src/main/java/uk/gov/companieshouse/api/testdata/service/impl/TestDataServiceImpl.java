@@ -67,7 +67,7 @@ import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanyPscsService;
+import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -98,7 +98,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Autowired
-    private CompanyPscsService companyPscsService;
+    private CompanyPscService companyPscService;
     @Autowired
     private RandomService randomService;
     @Autowired
@@ -190,7 +190,7 @@ public class TestDataServiceImpl implements TestDataService {
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
-        spec.setCompanyWithDataStructureOnly(false);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         try {
             companyProfileService.create(spec);
             LOG.info("Successfully created company profile");
@@ -212,7 +212,7 @@ public class TestDataServiceImpl implements TestDataService {
             companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            companyPscsService.create(spec);
+            companyPscService.create(spec);
             LOG.info("Successfully created PSCs");
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
@@ -351,7 +351,7 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
         try {
-            this.companyPscsService.delete(companyId);
+            this.companyPscService.delete(companyId);
             LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
@@ -930,7 +930,7 @@ public class TestDataServiceImpl implements TestDataService {
 
         try {
             var response = new CompanyDetailsResponse();
-            spec.setCompanyWithDataStructureOnly(true);
+            spec.setCompanyWithPopulatedStructureOnly(true);
 
             var companyProfile = companyProfileService.create(spec);
             LOG.info("Successfully get company profile");
@@ -959,7 +959,7 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
 
-            var companyPscs = companyPscsService.create(spec);
+            var companyPscs = companyPscService.create(spec);
             LOG.info("Successfully get PSCs");
             response.setCompanyPscs(companyPscs);
 
@@ -992,7 +992,7 @@ public class TestDataServiceImpl implements TestDataService {
 
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
-        companyWithPopulatedStructureService.createCombinedCompany(companySpec);
+        companyWithPopulatedStructureService.createCompanyWithPopulatedStructure(companySpec);
         String companyUri = this.apiUrl + "/company/" + companyNumber;
         return new CompanyData(companyNumber,
                 authCode, companyUri);
