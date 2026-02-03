@@ -107,10 +107,6 @@ public class AcspProfileData {
         return type;
     }
 
-    public String getBusinessSector() {
-        return businessSector;
-    }
-
     public String getEtag() {
         return etag;
     }
@@ -119,28 +115,8 @@ public class AcspProfileData {
         return linksSelf;
     }
 
-    public List<AmlDetails> getAmlDetails() {
-        return amlDetails;
-    }
-
-    public SoleTraderDetails getSoleTraderDetails() {
-        return soleTraderDetails;
-    }
-
-    public Address getRegisteredOfficeAddress() {
-        return registeredOfficeAddress;
-    }
-
-    public Address getServiceAddress() {
-        return serviceAddress;
-    }
-
     public String getEmail() {
         return email;
-    }
-
-    public Instant getNotifiedFrom() {
-        return notifiedFrom;
     }
 
     public AuditDetails getCreated() {
@@ -151,11 +127,4 @@ public class AcspProfileData {
         return updated;
     }
 
-    public String getDeltaAt() {
-        return deltaAt;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
 }

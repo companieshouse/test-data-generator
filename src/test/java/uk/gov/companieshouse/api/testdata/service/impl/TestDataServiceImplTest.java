@@ -2482,4 +2482,54 @@ class TestDataServiceImplTest {
         assertEquals(API_URL + "/company/" + COMPANY_NUMBER, result.getCompanyUri());
     }
 
+    @Test
+    void getAcspProfileDataReturnsProfile() throws NoDataFoundException {
+        String acspNumber = "AP000036";
+
+        // Prepare the mock AcspProfile
+        AcspProfile profile = new AcspProfile();
+        profile.setId(acspNumber);
+        profile.setAcspNumber(acspNumber);
+        profile.setName("Test ACSP Company");
+        profile.setStatus("active");
+
+        // Mock the acspProfileService
+        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
+
+        // Call the service method
+        Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
+
+        // Verify results
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+
+        AcspProfile returnedProfile = result.get();
+        assertEquals(acspNumber, returnedProfile.getId());
+        assertEquals(acspNumber, returnedProfile.getAcspNumber());
+        assertEquals("Test ACSP Company", returnedProfile.getName());
+        assertEquals("active", returnedProfile.getStatus());
+
+        // Verify interaction with the mock
+        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
+    }
+
+    @Test
+    void getAcspProfileDataReturnsEmpty() throws NoDataFoundException {
+        String acspNumber = "NON_EXISTENT";
+
+        // Mock empty response
+        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
+
+        // Call the service method
+        Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
+
+        // Verify results
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // Verify interaction with the mock
+        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
+    }
+
+
 }
