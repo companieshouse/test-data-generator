@@ -78,7 +78,6 @@ public class TestDataController {
 
     private final TestDataService testDataService;
     private final CompanyAuthCodeService companyAuthCodeService;
-    private final AccountPenaltiesService accountPenaltyService;
     private final UserCompanyAssociationServiceImpl userCompanyAssociationService;
     private final VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
 
@@ -90,7 +89,6 @@ public class TestDataController {
                               VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService) {
         this.testDataService = testDataService;
         this.companyAuthCodeService = companyAuthCodeService;
-        this.accountPenaltyService = accountPenaltyService;
         this.userCompanyAssociationService = userCompanyAssociationService;
         this.verifiedIdentityService = verifiedIdentityService;
     }
