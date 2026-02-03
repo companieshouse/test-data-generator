@@ -371,5 +371,4 @@ class AcspProfileServiceImplTest {
         assertFalse(result.isPresent());
         verify(repository).findById("AP123456");
     }
-
 }
