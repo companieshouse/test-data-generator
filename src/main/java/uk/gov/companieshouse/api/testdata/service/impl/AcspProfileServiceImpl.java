@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
+import uk.gov.companieshouse.api.testdata.model.entity.AuditDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SoleTraderDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
@@ -74,6 +76,18 @@ public class AcspProfileServiceImpl implements AcspProfileService {
                     addressService.getCountryOfResidence(Jurisdiction.ENGLAND));
             profile.setSoleTraderDetails(soleTraderDetails);
         }
+        AuditDetails created = new AuditDetails();
+        created.setAt(Instant.now());
+        created.setBy("TestDataGenerator");
+        created.setType("acsp_delta");
+        profile.setCreated(created);
+
+        AuditDetails updated = new AuditDetails();
+        updated.setAt(Instant.now());
+        updated.setBy("TestDataGenerator");
+        updated.setType("acsp_delta");
+        profile.setUpdated(updated);
+
         AcspProfile savedProfile = repository.save(profile);
         return new AcspProfileData(savedProfile);
     }

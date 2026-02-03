@@ -371,4 +371,32 @@ class AcspProfileServiceImplTest {
         assertFalse(result.isPresent());
         verify(repository).findById("AP123456");
     }
+
+    @Test
+    void createAcspProfileSetsAuditDetails() throws DataException {
+        acspProfileSpec.setStatus("active");
+        acspProfileSpec.setType("ltd");
+
+        when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AcspProfileData result = service.create(acspProfileSpec);
+
+        assertNotNull(result);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNotNull(captured.getCreated());
+        assertNotNull(captured.getCreated().getAt());
+        assertNotNull(captured.getCreated().getBy());
+        assertNotNull(captured.getCreated().getType());
+
+        assertNotNull(captured.getUpdated());
+        assertNotNull(captured.getUpdated().getAt());
+        assertNotNull(captured.getUpdated().getBy());
+        assertNotNull(captured.getUpdated().getType());
+    }
 }
