@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +32,7 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
@@ -1573,6 +1576,52 @@ class TestDataControllerTest {
                 testDataController.createCompanyWithPopulatedStructure(request)
         );
         assertEquals(exception, thrown);
+    }
+
+    @Test
+    void getAcspProfileFound() throws Exception {
+        String acspNumber = "AP000036";
+
+        AcspProfile profile = new AcspProfile();
+        profile.setId(acspNumber);
+        profile.setAcspNumber(acspNumber);
+        profile.setName("Test ACSP Company");
+        profile.setStatus("active");
+
+        when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.of(profile));
+
+        ResponseEntity<Optional<AcspProfile>> response =
+                testDataController.getAcspProfile(acspNumber);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isPresent());
+
+        AcspProfile returnedProfile = response.getBody().get();
+        assertEquals(acspNumber, returnedProfile.getId());
+        assertEquals(acspNumber, returnedProfile.getAcspNumber());
+        assertEquals("Test ACSP Company", returnedProfile.getName());
+        assertEquals("active", returnedProfile.getStatus());
+
+        verify(testDataService, times(1)).getAcspProfileData(acspNumber);
+    }
+
+    @Test
+    void getAcspProfileNotFound() throws Exception {
+        String acspNumber = "NON_EXISTENT";
+
+        when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.empty());
+
+        ResponseEntity<Optional<AcspProfile>> response =
+                testDataController.getAcspProfile(acspNumber);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+
+        verify(testDataService, times(1)).getAcspProfileData(acspNumber);
     }
 
 }

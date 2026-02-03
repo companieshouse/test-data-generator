@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -38,6 +39,7 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
@@ -90,6 +92,7 @@ import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
@@ -156,7 +159,9 @@ class TestDataServiceImplTest {
     @Mock
     private AcspMembersRepository acspMembersRepository;
     @Mock
-    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    private AcspProfileService acspProfileService;
+    @Captor
+    private ArgumentCaptor<CompanySpec> specCaptor;
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Mock
@@ -857,8 +862,13 @@ class TestDataServiceImplTest {
         profileSpec.setStatus("active");
         profileSpec.setType("limited-company");
 
+        AcspProfile profileEntity = new AcspProfile();
+        profileEntity.setAcspNumber(profileSpec.getAcspNumber());
+        profileEntity.setName(profileSpec.getName());
+        profileEntity.setVersion(1L);
+
         AcspProfileData acspProfileData =
-                new AcspProfileData(profileSpec.getAcspNumber(),profileSpec.getName());
+                new AcspProfileData(profileEntity);
         AcspMembersData expectedMembersData =
                 new AcspMembersData(new ObjectId(),
                         profileSpec.getAcspNumber(), "userId", "active", "role");
@@ -898,8 +908,12 @@ class TestDataServiceImplTest {
     void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
+       AcspProfile profileEntity = new AcspProfile();
+        profileEntity.setAcspNumber("acspNumber");
+        profileEntity.setName("name");
+        profileEntity.setVersion(1L);
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
+        AcspProfileData acspProfileData = new AcspProfileData(profileEntity);
         AcspMembersData acspMembersData =
                 new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(),"userId",
                         "active", "role");
@@ -940,7 +954,12 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
+        AcspProfile profileEntity = new AcspProfile();
+        profileEntity.setAcspNumber("acspNumber");
+        profileEntity.setName("name");
+        profileEntity.setVersion(1L);
+
+        AcspProfileData acspProfileData = new AcspProfileData(profileEntity);
         AcspMembersData acspMembersData = new AcspMembersData(new ObjectId(),
                 "acspNumber", "userId", "active", "role");
         spec.setAcspProfile(null);
@@ -983,7 +1002,12 @@ class TestDataServiceImplTest {
         AcspMembersSpec spec = new AcspMembersSpec();
         spec.setUserId("userId");
 
-        AcspProfileData acspProfileData = new AcspProfileData("acspNumber","name");
+        AcspProfile profileEntity = new AcspProfile();
+        profileEntity.setAcspNumber("acspNumber");
+        profileEntity.setName("name");
+        profileEntity.setVersion(1L);
+
+        AcspProfileData acspProfileData = new AcspProfileData(profileEntity);
         when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
         when(acspMembersService.create(any(AcspMembersSpec.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
@@ -2457,5 +2481,55 @@ class TestDataServiceImplTest {
         assertEquals(AUTH_CODE, result.getAuthCode());
         assertEquals(API_URL + "/company/" + COMPANY_NUMBER, result.getCompanyUri());
     }
+
+    @Test
+    void getAcspProfileDataReturnsProfile() throws NoDataFoundException {
+        String acspNumber = "AP000036";
+
+        // Prepare the mock AcspProfile
+        AcspProfile profile = new AcspProfile();
+        profile.setId(acspNumber);
+        profile.setAcspNumber(acspNumber);
+        profile.setName("Test ACSP Company");
+        profile.setStatus("active");
+
+        // Mock the acspProfileService
+        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
+
+        // Call the service method
+        Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
+
+        // Verify results
+        assertNotNull(result);
+        assertTrue(result.isPresent());
+
+        AcspProfile returnedProfile = result.get();
+        assertEquals(acspNumber, returnedProfile.getId());
+        assertEquals(acspNumber, returnedProfile.getAcspNumber());
+        assertEquals("Test ACSP Company", returnedProfile.getName());
+        assertEquals("active", returnedProfile.getStatus());
+
+        // Verify interaction with the mock
+        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
+    }
+
+    @Test
+    void getAcspProfileDataReturnsEmpty() throws NoDataFoundException {
+        String acspNumber = "NON_EXISTENT";
+
+        // Mock empty response
+        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
+
+        // Call the service method
+        Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
+
+        // Verify results
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        // Verify interaction with the mock
+        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
+    }
+
 
 }

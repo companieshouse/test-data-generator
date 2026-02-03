@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -440,6 +441,16 @@ public class TestDataController {
         }
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
+    }
+
+    @GetMapping("/internal/acsp-profile/{acspNumber}")
+    public ResponseEntity<Optional<AcspProfile>> getAcspProfile(
+            @PathVariable String acspNumber) throws NoDataFoundException {
+
+        Optional<AcspProfile> acspProfile =
+                testDataService.getAcspProfileData(acspNumber);
+
+        return new ResponseEntity<>(acspProfile, HttpStatus.OK);
     }
 
     @PostMapping("/internal/associations")

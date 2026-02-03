@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.entity;
 
+import java.time.Instant;
 import java.util.List;
 
 import org.springframework.data.annotation.Id;
@@ -18,6 +19,9 @@ public class AcspProfile {
 
     @Field("data.acsp_number")
     private String acspNumber;
+
+    @Field("data.notified_from")
+    private Instant notifiedFrom;
 
     @Field("data.name")
     private String name;
@@ -51,6 +55,15 @@ public class AcspProfile {
 
     @Field("sensitive_data.email")
     private String email;
+
+    @Field("created")
+    private AuditDetails created;
+
+    @Field("updated")
+    private AuditDetails updated;
+
+    @Field("delta_at")
+    private String deltaAt;
 
     public String getId() {
         return id;
@@ -144,9 +157,13 @@ public class AcspProfile {
         this.registeredOfficeAddress = registeredOfficeAddress;
     }
 
+    public Address getRegisteredOfficeAddress() { return registeredOfficeAddress; }
+
     public void setServiceAddress(Address serviceAddress) {
         this.serviceAddress = serviceAddress;
     }
+
+    public Address getServiceAddress() { return serviceAddress; }
 
     public void setBusinessSector(String businessSector) {
         this.businessSector = businessSector;
@@ -155,4 +172,24 @@ public class AcspProfile {
     public String getBusinessSector() {
         return businessSector;
     }
+
+    public Instant getNotifiedFrom() { return notifiedFrom; }
+
+    public void setNotifiedFrom(Instant notifiedFrom) { this.notifiedFrom = notifiedFrom; }
+
+    public AuditDetails getCreated() {
+        return created;
+    }
+
+    public void setCreated(AuditDetails created) { this.created = created; }
+
+    public AuditDetails getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(AuditDetails updated) { this.updated = updated; }
+
+    public String getDeltaAt() { return deltaAt; }
+
+    public void setDeltaAt(String deltaAt) { this.deltaAt = deltaAt; }
 }

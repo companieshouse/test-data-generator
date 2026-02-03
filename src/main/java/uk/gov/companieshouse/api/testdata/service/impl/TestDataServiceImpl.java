@@ -19,6 +19,7 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
@@ -62,6 +63,7 @@ import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -127,7 +129,7 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<TransactionsData, TransactionsSpec> transactionService;
     @Autowired
-    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    private AcspProfileService acspProfileService;
     @Autowired
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Autowired
@@ -741,6 +743,12 @@ public class TestDataServiceImpl implements TestDataService {
             postcodesDataList.add(postcodeData);
         }
         return postcodesDataList;
+    }
+
+    public Optional<AcspProfile> getAcspProfileData(String acspNumber)
+            throws NoDataFoundException {
+
+        return acspProfileService.getAcspProfile(acspNumber);
     }
 
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
