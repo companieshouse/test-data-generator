@@ -91,11 +91,14 @@ class CompanyProfileServiceImplTest {
         overseaCompanySpec = new CompanySpec();
         overseasSpec.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
         overseasSpec.setCompanyType(OVERSEAS_ENTITY_TYPE);
+        overseasSpec.setCompanyWithPopulatedStructureOnly(false);
         overseaCompanySpec.setCompanyType(OVERSEA_COMPANY_TYPE);
+        overseaCompanySpec.setCompanyWithPopulatedStructureOnly(false);
         overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
         overseasSpec.setHasSuperSecurePscs(Boolean.TRUE);
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(false);
         savedProfile = new CompanyProfile();
     }
 
@@ -386,6 +389,7 @@ class CompanyProfileServiceImplTest {
         overseasSpec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
         overseasSpec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
+        overseasSpec.setCompanyWithPopulatedStructureOnly(false);
 
         Address overseasAddress = new Address("1", "Gordon Cummins Hwy", "Grantley Adams International Airport", "Barbados", "Christ Church", "123125");
         when(addressService.getOverseasAddress()).thenReturn(overseasAddress);
@@ -829,6 +833,23 @@ class CompanyProfileServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+    }
+
+    @Test
+    void createReturnsUnsavedProfileWhenCompanyWithDataStructureIsTrue() {
+        setCompanyJurisdictionAndType(Jurisdiction.ENGLAND_WALES, CompanyType.LTD);
+        spec.setCompanyWithPopulatedStructureOnly(true);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        Address mockAddress = new Address("", "", "", "", "", "");
+        when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
+
+        CompanyProfile result = companyProfileService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", result.getCompanyName());
+        verify(repository, never()).save(any());
     }
 
     @ParameterizedTest

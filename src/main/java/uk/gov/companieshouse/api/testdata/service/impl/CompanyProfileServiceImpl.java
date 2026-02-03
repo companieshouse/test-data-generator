@@ -184,6 +184,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         setSubType(profile, companyParams.getSubType());
         setCompanyStatusDetail(profile, companyParams.getCompanyStatusDetail(), companyTypeValue);
 
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return profile;
+        }
         return repository.save(profile);
     }
 
@@ -317,6 +320,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         overseasEntity.setLinks(createOverseaLinks(
                 companyNumber, companyType, spec, jurisdiction, dateParams));
+
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return overseasEntity;
+        }
 
         repository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);

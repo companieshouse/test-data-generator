@@ -83,8 +83,7 @@ class FilingHistoryServiceImplTest {
             = "Certificate of incorporation general company details & statements of; "
             + "officers, capital & shareholdings, guarantee, compliance memorandum of association";
 
-    private ResolutionsSpec buildResolution(String category, ResolutionDescriptionType description, String subCategory, ResolutionType type)
-    {
+    private ResolutionsSpec buildResolution(String category, ResolutionDescriptionType description, String subCategory, ResolutionType type) {
         var res = new ResolutionsSpec();
         res.setCategory(category);
         res.setDescription(description);
@@ -96,6 +95,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void create() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
@@ -152,6 +152,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createBarcodeServiceException() throws BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         final String exceptionMessage = "Barcode error";
@@ -188,6 +189,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
         filingHistorySpec.setCategory(CategoryType.INCORPORATION);
@@ -240,6 +242,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithMultipleFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         FilingHistorySpec filingHistorySpec1 = new FilingHistorySpec();
@@ -293,6 +296,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithNullFilingHistory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         spec.setFilingHistoryList(Collections.emptyList());
@@ -365,6 +369,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWhenAccountsDueStatusIsNull() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus(null);
 
@@ -393,13 +398,14 @@ class FilingHistoryServiceImplTest {
         assertEquals(NEW_INC, filingHistory.getType());
         assertEquals(Integer.valueOf(10), filingHistory.getPages());
         assertEquals(ENTITY_ID_PREFIX + UN_ENCODED_ID, filingHistory.getEntityId());
-        assertEquals(CERTIFICATE_DESCRIPTION ,filingHistory.getOriginalDescription());
+        assertEquals(CERTIFICATE_DESCRIPTION, filingHistory.getOriginalDescription());
         assertEquals(BARCODE, filingHistory.getBarcode());
     }
 
     @Test
     void createWhenAccountsDueStatusIsDueSoon() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
 
@@ -439,6 +445,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWhenAccountsDueStatusIsOverdue() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("overdue");
 
@@ -478,6 +485,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithMultipleFilingHistoryTypes() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         FilingHistorySpec ap01Spec = new FilingHistorySpec();
@@ -494,7 +502,7 @@ class FilingHistoryServiceImplTest {
         resolutionsSpec.setCategory(CategoryType.RESOLUTION);
         resolutionsSpec.setResolutions(List.of(
                 buildResolution("resolution-cat-1", ResolutionDescriptionType.ELECTIVE_RESOLUTION, "sub-cat-1", ResolutionType.ELRES),
-                buildResolution("resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND,  "sub-cat-2", ResolutionType.RES01)
+                buildResolution("resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND, "sub-cat-2", ResolutionType.RES01)
         ));
 
         FilingHistorySpec aaSpec = new FilingHistorySpec();
@@ -516,6 +524,7 @@ class FilingHistoryServiceImplTest {
         for (FilingHistorySpec fhSpec : spec.getFilingHistoryList()) {
             createdHistories.add(filingHistoryService.create(new CompanySpec() {{
                 setCompanyNumber(COMPANY_NUMBER);
+                setCompanyWithPopulatedStructureOnly(false);
                 setFilingHistoryList(List.of(fhSpec));
             }}));
         }
@@ -555,8 +564,8 @@ class FilingHistoryServiceImplTest {
         assertNotNull(res.getResolutions());
         assertEquals(2, res.getResolutions().size());
 
-        validateResolution(res.getResolutions().get(0),  "resolution-cat-1", ResolutionDescriptionType.ELECTIVE_RESOLUTION, "sub-cat-1", ResolutionType.ELRES);
-        validateResolution(res.getResolutions().get(1),  "resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND, "sub-cat-2", ResolutionType.RES01);
+        validateResolution(res.getResolutions().get(0), "resolution-cat-1", ResolutionDescriptionType.ELECTIVE_RESOLUTION, "sub-cat-1", ResolutionType.ELRES);
+        validateResolution(res.getResolutions().get(1), "resolution-cat-2", ResolutionDescriptionType.LIQUIDATION_SPECIAL_RESOLUTION_TO_WIND_UP_NORTHERN_IRELAND, "sub-cat-2", ResolutionType.RES01);
     }
 
     private void validateResolution(Resolutions r, String cat, ResolutionDescriptionType desc, String subCat, ResolutionType type) {
@@ -648,6 +657,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithSubCategory_setsSubCategory() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -685,6 +695,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithUnknownType_setsAssociatedFilings() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -709,6 +720,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithAP01_setsOriginalValues() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("AP01");
@@ -756,6 +768,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithDescription_setsCustomDescription() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -784,6 +797,7 @@ class FilingHistoryServiceImplTest {
     @Test
     void createWithNullDescription_setsDefaultDescription() throws DataException, BarcodeServiceException {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistorySpec fhSpec = new FilingHistorySpec();
         fhSpec.setType("REC1");
@@ -805,4 +819,25 @@ class FilingHistoryServiceImplTest {
         assertEquals(FilingHistoryDescriptionType.INCORPORATION_COMPANY.getValue(), captor.getValue().getDescription());
     }
 
+    @Test
+    void createReturnsUnsavedFilingHistoryWhenCompanyWithDataStructureIsTrue() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(true);
+
+        FilingHistorySpec filingHistorySpec = new FilingHistorySpec();
+        spec.setFilingHistoryList(List.of(filingHistorySpec));
+
+        when(randomService.getNumber(ENTITY_ID_LENGTH)).thenReturn(UN_ENCODED_ID);
+        when(randomService.addSaltAndEncode(ENTITY_ID_PREFIX + UN_ENCODED_ID, 8)).thenReturn(TEST_ID);
+        when(barcodeService.getBarcode()).thenReturn(BARCODE);
+
+        FilingHistory result = filingHistoryService.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
+        assertEquals(TEST_ID, result.getId());
+        assertEquals(BARCODE, result.getBarcode());
+        verify(filingHistoryRepository, never()).save(any());
+    }
 }
