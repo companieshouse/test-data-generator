@@ -334,4 +334,42 @@ class AcspProfileServiceImplTest {
         assertFalse(result);
         verify(repository, never()).delete(any(AcspProfile.class));
     }
+
+    @Test
+    void getAcspProfileFound() {
+        AcspProfile savedProfile = new AcspProfile();
+        savedProfile.setAcspNumber("AP123456");
+        savedProfile.setId("AP123456");
+
+        when(repository.findById("AP123456")).thenReturn(Optional.of(savedProfile));
+
+        Optional<AcspProfile> result = service.getAcspProfile("AP123456");
+
+        assertTrue(result.isPresent());
+        assertEquals("AP123456", result.get().getAcspNumber());
+        assertEquals("AP123456", result.get().getId());
+
+        verify(repository).findById("AP123456");
+    }
+
+    @Test
+    void getAcspProfileNotFound() {
+        when(repository.findById("AP123456")).thenReturn(Optional.empty());
+
+        Optional<AcspProfile> result = service.getAcspProfile("AP123456");
+
+        assertFalse(result.isPresent());
+        verify(repository).findById("AP123456");
+    }
+
+    @Test
+    void getAcspProfileRepositoryThrowsException() {
+        when(repository.findById("AP123456")).thenThrow(new RuntimeException("DB error"));
+
+        Optional<AcspProfile> result = service.getAcspProfile("AP123456");
+
+        assertFalse(result.isPresent());
+        verify(repository).findById("AP123456");
+    }
+
 }
