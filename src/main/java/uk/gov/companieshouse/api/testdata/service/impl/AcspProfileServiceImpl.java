@@ -8,7 +8,6 @@ import java.util.Objects;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
@@ -28,7 +27,8 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class AcspProfileServiceImpl implements AcspProfileService {
     private static final String LINK_STEM = "/authorised-corporate-service-providers/";
-    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(AcspProfileServiceImpl.class));
 
     @Autowired
     private AcspProfileRepository repository;
