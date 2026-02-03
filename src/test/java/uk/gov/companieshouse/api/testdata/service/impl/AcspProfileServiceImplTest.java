@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -399,4 +400,22 @@ class AcspProfileServiceImplTest {
         assertNotNull(captured.getUpdated().getBy());
         assertNotNull(captured.getUpdated().getType());
     }
+
+    @Test
+    void acspProfileSetters_updateValues() {
+        AcspProfile profile = new AcspProfile();
+
+        String etagValue = "W/\"123456\"";
+        profile.setEtag(etagValue);
+        assertEquals(etagValue, profile.getEtag());
+
+        Instant notifiedFromValue = Instant.now();
+        profile.setNotifiedFrom(notifiedFromValue);
+        assertEquals(notifiedFromValue, profile.getNotifiedFrom());
+
+        String deltaAtValue = "2026-02-03T12:00:00Z";
+        profile.setDeltaAt(deltaAtValue);
+        assertEquals(deltaAtValue, profile.getDeltaAt());
+    }
+
 }
