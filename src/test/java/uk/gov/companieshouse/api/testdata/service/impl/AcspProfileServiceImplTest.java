@@ -94,7 +94,8 @@ class AcspProfileServiceImplTest {
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -121,7 +122,8 @@ class AcspProfileServiceImplTest {
     void createAcspProfileWithDefaultValues() throws DataException {
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -154,7 +156,8 @@ class AcspProfileServiceImplTest {
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -193,7 +196,8 @@ class AcspProfileServiceImplTest {
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -224,7 +228,8 @@ class AcspProfileServiceImplTest {
         savedProfileWithAcsp.setAcspNumber(acspProfileSpec.getAcspNumber());
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         when(randomService.getString(8)).thenReturn("randomId");
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfileWithAcsp);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -241,7 +246,8 @@ class AcspProfileServiceImplTest {
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         when(addressService
                 .getCountryOfResidence(Jurisdiction.ENGLAND)).thenReturn("England");
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -263,7 +269,8 @@ class AcspProfileServiceImplTest {
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         when(addressService
                 .getCountryOfResidence(Jurisdiction.ENGLAND)).thenReturn("England");
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -287,7 +294,8 @@ class AcspProfileServiceImplTest {
         savedProfileWithAcsp.setName(acspProfileSpec.getName());
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 

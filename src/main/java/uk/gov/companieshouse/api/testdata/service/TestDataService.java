@@ -1,12 +1,15 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -225,6 +228,16 @@ public interface TestDataService {
      * @throws DataException if there is an error retrieving the postcodes
      */
     PostcodesData getPostcodes(String country) throws DataException;
+
+    /**
+     * Gets the ACSP profile data for a given ACSP number.
+     *
+     * @param acspNumber the ACSP number
+     * @return the {@link AcspProfileData}
+     * @throws NoDataFoundException if the profile cannot be found
+     */
+    Optional<AcspProfile> getAcspProfileData(String acspNumber)
+            throws NoDataFoundException;
 
     /**
      * Adds a new transaction and acsp application test data based on the provided specifications.
