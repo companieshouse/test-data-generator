@@ -935,7 +935,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
+    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(
+            CompanySpec spec) throws DataException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
@@ -976,7 +977,8 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.info("Successfully get company metrics");
             response.setCompanyMetrics(companyMetrics);
 
-            List<CompanyPscStatement> companyPscStatements = companyPscStatementService.createPscStatements(spec);
+            List<CompanyPscStatement> companyPscStatements =
+                    companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
 
@@ -1009,7 +1011,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException {
+    public CompanyData createCompanyWithStructure(
+            CompanyWithPopulatedStructureSpec companySpec) throws DataException {
 
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();

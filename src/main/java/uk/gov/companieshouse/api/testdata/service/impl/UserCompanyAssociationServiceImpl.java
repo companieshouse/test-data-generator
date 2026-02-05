@@ -1,20 +1,19 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.accounts.associations.model.Association;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.service.ApiClientService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
+import uk.gov.companieshouse.api.testdata.service.AccountsApiService;
+import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-
-import java.util.Optional;
 
 @Service("userCompanyAssociationServiceImpl")
 public class UserCompanyAssociationServiceImpl implements
@@ -24,10 +23,12 @@ public class UserCompanyAssociationServiceImpl implements
             = LoggerFactory.getLogger(String.valueOf(UserCompanyAssociationServiceImpl.class));
 
     private final UserCompanyAssociationRepository userCompanyAssociationRepository;
-    private final ApiClientService apiClientService;
+    private final AccountsApiService accountsApiService;
 
-    public UserCompanyAssociationServiceImpl(ApiClientService apiClientService, UserCompanyAssociationRepository userCompanyAssociationRepository) {
-        this.apiClientService = apiClientService;
+    public UserCompanyAssociationServiceImpl(
+            AccountsApiService accountsApiService,
+            UserCompanyAssociationRepository userCompanyAssociationRepository) {
+        this.accountsApiService = accountsApiService;
         this.userCompanyAssociationRepository = userCompanyAssociationRepository;
     }
 
@@ -36,7 +37,7 @@ public class UserCompanyAssociationServiceImpl implements
         LOG.info("Creating association via SDK for company: "
                 + spec.getCompanyNumber() + "and user: "  + spec.getUserId());
         try {
-            var sdkResponse = apiClientService.getInternalApiClientForPrivateAccountApiUrl()
+            var sdkResponse = accountsApiService.getInternalApiClientForPrivateAccountApiUrl()
                     .privateAccountsAssociationResourceHandler()
                     .addAssociation("/associations", spec.getCompanyNumber(), spec.getUserId())
                     .execute()
@@ -87,7 +88,7 @@ public class UserCompanyAssociationServiceImpl implements
                 + companyNumber + "and user/email: " + userEmail);
 
         try {
-            var association = apiClientService.getInternalApiClientForPrivateAccountApiUrl()
+            var association = accountsApiService.getInternalApiClientForPrivateAccountApiUrl()
                     .privateAccountsAssociationResourceHandler()
                     .searchForAssociation(
                             "/associations/companies/" + companyNumber + "/search",

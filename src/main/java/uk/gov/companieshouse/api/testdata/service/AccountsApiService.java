@@ -6,11 +6,11 @@ import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.sdk.manager.ApiSdkManager;
 
 @Service
-public class ApiClientService {
+public class AccountsApiService {
 
     private final String privateAccountUrl;
 
-    public ApiClientService(@Value("${account.api.url}") String privateAccountUrl) {
+    public AccountsApiService(@Value("${account.api.url}") String privateAccountUrl) {
         this.privateAccountUrl = privateAccountUrl;
     }
 

@@ -35,7 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
-import uk.gov.companieshouse.api.testdata.service.ApiClientService;
+import uk.gov.companieshouse.api.testdata.service.AccountsApiService;
 
 @ExtendWith(MockitoExtension.class)
 class UserCompanyAssociationServiceImplTest {
@@ -53,7 +53,7 @@ class UserCompanyAssociationServiceImplTest {
     private UserCompanyAssociationRepository repository;
 
     @Mock
-    private ApiClientService apiClientService;
+    private AccountsApiService accountsApiService;
 
     @Mock
     private InternalApiClient internalApiClient;
@@ -120,7 +120,7 @@ class UserCompanyAssociationServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId(USER_ID);
 
-        when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
         when(associationPost.execute()).thenThrow(mock(ApiErrorResponseException.class));
@@ -135,7 +135,7 @@ class UserCompanyAssociationServiceImplTest {
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId(USER_ID);
 
-        when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
         when(associationPost.execute()).thenThrow(new URIValidationException("URI Error"));
@@ -213,7 +213,7 @@ class UserCompanyAssociationServiceImplTest {
 
     @Test
     void searchAssociation_ThrowsDataException_WhenApiErrorOccurs() throws Exception {
-        when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.searchForAssociation(anyString(), eq(USER_ID), eq(USER_EMAIL), anyString(), anyString(), anyString(), anyString()))
                 .thenReturn(associationSearch);
@@ -228,7 +228,7 @@ class UserCompanyAssociationServiceImplTest {
     // --- Helpers ---
 
     private void mockApiClientChainForCreate() throws Exception {
-        when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
         when(associationPost.execute()).thenReturn(apiResponseCreate);
@@ -236,7 +236,7 @@ class UserCompanyAssociationServiceImplTest {
     }
 
     private void mockApiClientChainForSearch() throws Exception {
-        when(apiClientService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
         when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
         when(resourceHandler.searchForAssociation(
                 "/associations/companies/" + COMPANY_NUMBER + "/search",

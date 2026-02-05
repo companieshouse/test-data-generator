@@ -86,7 +86,8 @@ public class TestDataController {
                               CompanyAuthCodeService companyAuthCodeService,
                               AccountPenaltiesService accountPenaltyService,
                               UserCompanyAssociationServiceImpl userCompanyAssociationService,
-                              VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService) {
+                              VerifiedIdentityService<IdentityVerificationData>
+                                          verifiedIdentityService) {
         this.testDataService = testDataService;
         this.companyAuthCodeService = companyAuthCodeService;
         this.userCompanyAssociationService = userCompanyAssociationService;
@@ -615,9 +616,11 @@ public class TestDataController {
 
     @PostMapping("/internal/create-company-with-populated-structure")
     public ResponseEntity<CompanyData> createCompanyWithPopulatedStructure(
-            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request) throws DataException {
+            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request)
+            throws DataException {
         Optional<CompanyWithPopulatedStructureSpec> optionalRequest = Optional.ofNullable(request);
-        CompanyWithPopulatedStructureSpec spec = optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());
+        CompanyWithPopulatedStructureSpec spec =
+                optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());
         var createdCompany = testDataService.createCompanyWithStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
