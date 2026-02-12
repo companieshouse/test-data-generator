@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,10 +29,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
@@ -41,10 +43,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
@@ -847,6 +851,15 @@ class TestDataControllerTest {
         assertEquals(exception, thrown);
     }
 
+    private static AccountPenaltiesData createAccountPenaltiesData(String companyCode,
+                                                                   PenaltyData penalty) {
+        AccountPenaltiesData accountPenaltiesData = new AccountPenaltiesData();
+        accountPenaltiesData.setCreatedAt(Instant.now());
+        accountPenaltiesData.setCompanyCode(companyCode);
+        accountPenaltiesData.setPenalties(Collections.singletonList(penalty));
+        return accountPenaltiesData;
+    }
+
     private PenaltyData createPenaltyData(String companyCode, String customerCode,
                                           String penaltyRef, double amount, boolean paid) {
         PenaltyData penalty = new PenaltyData();
@@ -909,10 +922,9 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
 
-        ResponseEntity<Object> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = testDataController.createPenalty(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
         assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
@@ -928,10 +940,9 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(null);
 
-        ResponseEntity<Object> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = testDataController.createPenalty(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        @SuppressWarnings("unchecked")
         Map<String, Object> body = (Map<String, Object>) response.getBody();
         assertNotNull(body);
         assertEquals("number_of_penalties should be greater than 1 for duplicate penalties", body.get("error"));
@@ -1050,7 +1061,8 @@ class TestDataControllerTest {
 
         // Use LinkedList to support getFirst()
         List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
-        return new CertificatesData(entries);
+        CertificatesData certificateData = new CertificatesData(entries);
+        return certificateData;
     }
 
 
@@ -1350,7 +1362,7 @@ class TestDataControllerTest {
 
         ResponseEntity<AdminPermissionsData> response = testDataController.createAdminPermissions(spec);
 
-        assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
+        assertEquals(HttpStatus.CREATED.value(), response.getStatusCodeValue());
         assertEquals(data, response.getBody());
         verify(testDataService, times(1)).createAdminPermissionsData(spec);
     }
@@ -1376,7 +1388,7 @@ class TestDataControllerTest {
 
         ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
 
-        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCode().value());
+        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCodeValue());
         assertNull(response.getBody());
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
     }
@@ -1388,7 +1400,7 @@ class TestDataControllerTest {
 
         ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
 
-        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCodeValue());
         assertNotNull(response.getBody());
         assertEquals(id, response.getBody().get("admin-permissions-id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
@@ -1491,4 +1503,125 @@ class TestDataControllerTest {
                 testDataController.findOrCreateCompanyAuthCode(companyNumber));
         assertEquals(ex, thrown);
     }
+
+    @Test
+    void getCompanyWithPopulatedStructure_success() throws Exception {
+        CompanySpec request = new CompanySpec();
+        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenReturn(responseObj);
+
+        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseObj, response.getBody());
+        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(request);
+    }
+
+    @Test
+    void getCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
+        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class))).thenReturn(responseObj);
+
+        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseObj, response.getBody());
+        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(any(CompanySpec.class));
+    }
+
+    @Test
+    void getCompanyWithPopulatedStructure_throwsDataException() throws Exception {
+        CompanySpec request = new CompanySpec();
+        DataException exception = new DataException("error");
+        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.getCompanyWithPopulatedStructure(request)
+        );
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void createCompanyWithPopulatedStructure_success() throws Exception {
+        CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
+        CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+        when(testDataService.createCompanyWithStructure(request)).thenReturn(companyData);
+
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithPopulatedStructure(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(companyData, response.getBody());
+        verify(testDataService, times(1)).createCompanyWithStructure(request);
+    }
+
+    @Test
+    void createCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
+        CompanyData companyData = new CompanyData("12345678", "123456", "http://localhost:4001/company/12345678");
+        when(testDataService.createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class))).thenReturn(companyData);
+
+        ResponseEntity<CompanyData> response = testDataController.createCompanyWithPopulatedStructure(null);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(companyData, response.getBody());
+        verify(testDataService, times(1)).createCompanyWithStructure(any(CompanyWithPopulatedStructureSpec.class));
+    }
+
+    @Test
+    void createCompanyWithPopulatedStructure_throwsDataException() throws Exception {
+        CompanyWithPopulatedStructureSpec request = new CompanyWithPopulatedStructureSpec();
+        DataException exception = new DataException("error");
+        when(testDataService.createCompanyWithStructure(request)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.createCompanyWithPopulatedStructure(request)
+        );
+        assertEquals(exception, thrown);
+    }
+
+    @Test
+    void getAcspProfileFound() throws Exception {
+        String acspNumber = "AP000036";
+
+        AcspProfile profile = new AcspProfile();
+        profile.setId(acspNumber);
+        profile.setAcspNumber(acspNumber);
+        profile.setName("Test ACSP Company");
+        profile.setStatus("active");
+
+        when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.of(profile));
+
+        ResponseEntity<Optional<AcspProfile>> response =
+                testDataController.getAcspProfile(acspNumber);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isPresent());
+
+        AcspProfile returnedProfile = response.getBody().get();
+        assertEquals(acspNumber, returnedProfile.getId());
+        assertEquals(acspNumber, returnedProfile.getAcspNumber());
+        assertEquals("Test ACSP Company", returnedProfile.getName());
+        assertEquals("active", returnedProfile.getStatus());
+
+        verify(testDataService, times(1)).getAcspProfileData(acspNumber);
+    }
+
+    @Test
+    void getAcspProfileNotFound() throws Exception {
+        String acspNumber = "NON_EXISTENT";
+
+        when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.empty());
+
+        ResponseEntity<Optional<AcspProfile>> response =
+                testDataController.getAcspProfile(acspNumber);
+
+        assertNotNull(response);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertTrue(response.getBody().isEmpty());
+
+        verify(testDataService, times(1)).getAcspProfileData(acspNumber);
+    }
+
 }

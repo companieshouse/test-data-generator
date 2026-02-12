@@ -23,6 +23,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
@@ -36,12 +37,14 @@ import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthCodeData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
@@ -440,6 +443,16 @@ public class TestDataController {
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
 
+    @GetMapping("/internal/acsp-profile/{acspNumber}")
+    public ResponseEntity<Optional<AcspProfile>> getAcspProfile(
+            @PathVariable String acspNumber) throws NoDataFoundException {
+
+        Optional<AcspProfile> acspProfile =
+                testDataService.getAcspProfileData(acspNumber);
+
+        return new ResponseEntity<>(acspProfile, HttpStatus.OK);
+    }
+
     @PostMapping("/internal/associations")
     public ResponseEntity<UserCompanyAssociationData> createAssociation(
             @Valid @RequestBody UserCompanyAssociationSpec request) throws DataException {
@@ -551,6 +564,29 @@ public class TestDataController {
         }
 
         return new ResponseEntity<>(data, HttpStatus.OK);
+    }
+
+    @GetMapping("/internal/get-populated-company-structure")
+    public ResponseEntity<PopulatedCompanyDetailsResponse> getCompanyWithPopulatedStructure(
+            @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+
+        Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
+        CompanySpec spec = optionalRequest.orElse(new CompanySpec());
+
+        var companyData = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
+        return new ResponseEntity<>(companyData, HttpStatus.OK);
+    }
+
+    @PostMapping("/internal/create-company-with-populated-structure")
+    public ResponseEntity<CompanyData> createCompanyWithPopulatedStructure(
+            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request) throws DataException {
+        Optional<CompanyWithPopulatedStructureSpec> optionalRequest = Optional.ofNullable(request);
+        CompanyWithPopulatedStructureSpec spec = optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());
+        var createdCompany = testDataService.createCompanyWithStructure(spec);
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
+        LOG.info(NEW_COMPANY_CREATED, data);
+        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
 }

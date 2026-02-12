@@ -151,7 +151,9 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setDisqDisqualificationType(spec.getDisqualificationType());
 
         setTimestamps(disqualifications);
-
+        if (Boolean.TRUE.equals(companySpec.getCompanyWithPopulatedStructureOnly())) {
+            return disqualifications;
+        }
         var savedDisqualifications = repository.save(disqualifications);
         LOG.info("Successfully created and saved Disqualifications for company: "
                 + companySpec.getCompanyNumber());

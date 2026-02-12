@@ -15,6 +15,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.AppointmentCreationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
@@ -70,11 +71,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
         this.officerRepository = officerRepository;
     }
 
-    public void createAppointment(CompanySpec spec) {
+    public AppointmentsResultData createAppointment(CompanySpec spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
                     + spec.getCompanyNumber());
-            return;
+            return null;
         }
 
         LOG.info("Starting creation of appointments with matching IDs for company number: "
@@ -105,6 +106,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         List<Appointment> createdAppointments = new ArrayList<>();
         List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
+        List<OfficerAppointment> createdOfficerAppointments = new ArrayList<>();
 
         for (var i = 0; i < numberOfAppointments; i++) {
             OfficerRoles currentRoleEnum = officerRoleList.get(i);
@@ -151,11 +153,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setLinks(links);
 
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
-            this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
-
-            Appointment savedAppointment = appointmentsRepository.save(appointment);
-            LOG.info("Appointment saved with ID: " + savedAppointment.getId());
-            createdAppointments.add(savedAppointment);
+            var officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
+            createdOfficerAppointments.add(officerAppointment);
+            if (Boolean.FALSE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+                Appointment savedAppointment = appointmentsRepository.save(appointment);
+                LOG.info("Appointment saved with ID: " + savedAppointment.getId());
+            }
+            createdAppointments.add(appointment);
 
             // Create AppointmentsData with same appointmentId
             var appointmentsData = createBaseAppointmentsData(
@@ -173,15 +177,23 @@ public class AppointmentsServiceImpl implements AppointmentService {
             dataLinks.setSelf(COMPANY_LINK
                     + spec.getCompanyNumber() + "/appointments/" + appointmentId);
             appointmentsData.setLinks(dataLinks);
-
-            var savedData = appointmentsDataRepository.save(appointmentsData);
-            createdAppointmentsData.add(savedData);
-            LOG.info("AppointmentsData saved with ID: " + savedData.getId());
+            if (Boolean.FALSE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+                var savedData = appointmentsDataRepository.save(appointmentsData);
+                LOG.info("AppointmentsData saved with ID: " + savedData.getId());
+            }
+            createdAppointmentsData.add(appointmentsData);
         }
-
+        var appointmentsResultData = new AppointmentsResultData();
+        appointmentsResultData.setAppointment(createdAppointments);
+        appointmentsResultData.setAppointmentsData(createdAppointmentsData);
+        appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return appointmentsResultData;
+        }
         LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
                 + createdAppointmentsData.size()
                 + " appointments data with matching IDs for company number: " + companyNumber);
+        return appointmentsResultData;
     }
 
     @Override
@@ -303,7 +315,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
     }
 
-    private void createOfficerAppointment(
+    private OfficerAppointment createOfficerAppointment(
             CompanySpec spec, String officerId, String appointmentId, String role) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
@@ -331,8 +343,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setOfficerAppointmentItems(
                 createOfficerAppointmentItems(spec, appointmentId, dayNow, dayTimeNow, role)
         );
-
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return officerAppointment;
+        }
         officerRepository.save(officerAppointment);
+        return officerAppointment;
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(

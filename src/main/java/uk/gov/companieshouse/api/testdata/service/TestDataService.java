@@ -1,20 +1,25 @@
 package uk.gov.companieshouse.api.testdata.service;
 
+import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
@@ -227,6 +232,16 @@ public interface TestDataService {
     PostcodesData getPostcodes(String country) throws DataException;
 
     /**
+     * Gets the ACSP profile data for a given ACSP number.
+     *
+     * @param acspNumber the ACSP number
+     * @return the {@link AcspProfileData}
+     * @throws NoDataFoundException if the profile cannot be found
+     */
+    Optional<AcspProfile> getAcspProfileData(String acspNumber)
+            throws NoDataFoundException;
+
+    /**
      * Adds a new transaction and acsp application test data based on the provided specifications.
      *
      * @param transactionsSpec the specifications of the transactions
@@ -290,4 +305,22 @@ public interface TestDataService {
     CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
             throws DataException, NoDataFoundException;
 
+    /**
+     * Get the company data structure before saving in MongoDB.
+     *
+     * @param spec The specification the new company must adhere to
+     * @return A {@link PopulatedCompanyDetailsResponse}
+     * @throws DataException If any error occurs
+     */
+    PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec)
+            throws DataException;
+
+    /**
+     * Create company with full structure based on the given {@code companySpec}.
+     *
+     * @param companySpec The specification the new company must adhere to
+     * @return A {@link CompanyData}
+     * @throws DataException If any error occurs
+     */
+    CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException;
 }

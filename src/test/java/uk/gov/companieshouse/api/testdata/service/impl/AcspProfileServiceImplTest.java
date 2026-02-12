@@ -10,6 +10,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -94,7 +95,8 @@ class AcspProfileServiceImplTest {
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -121,7 +123,8 @@ class AcspProfileServiceImplTest {
     void createAcspProfileWithDefaultValues() throws DataException {
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -154,7 +157,8 @@ class AcspProfileServiceImplTest {
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -193,7 +197,8 @@ class AcspProfileServiceImplTest {
 
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -224,7 +229,8 @@ class AcspProfileServiceImplTest {
         savedProfileWithAcsp.setAcspNumber(acspProfileSpec.getAcspNumber());
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         when(randomService.getString(8)).thenReturn("randomId");
-        when(repository.save(any(AcspProfile.class))).thenReturn(savedProfileWithAcsp);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -241,7 +247,8 @@ class AcspProfileServiceImplTest {
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
         when(addressService
                 .getCountryOfResidence(Jurisdiction.ENGLAND)).thenReturn("England");
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -255,6 +262,28 @@ class AcspProfileServiceImplTest {
                 "Surname randomId");
     }
 
+    @Test
+    void createAcspProfileAsSoleTraderWithDefaultValues() throws DataException {
+        acspProfileSpec.setType("sole-trader");
+
+        when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
+        when(addressService
+                .getCountryOfResidence(Jurisdiction.ENGLAND)).thenReturn("England");
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AcspProfileData result = service.create(acspProfileSpec);
+
+        assertNotNull(result);
+        assertEquals(acspProfile.getAcspNumber(), result.getAcspNumber());
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertCommonProfileDetails(captured, "sole-trader", "Forename randomId",
+                "Surname randomId");
+    }
      @Test
     void createAcspProfileWithName() throws DataException {
         acspProfileSpec.setName("Business Test");
@@ -266,7 +295,8 @@ class AcspProfileServiceImplTest {
         savedProfileWithAcsp.setName(acspProfileSpec.getName());
         when(randomService.getString(8)).thenReturn("randomId");
         when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
-        when(repository.save(any(AcspProfile.class))).thenReturn(acspProfile);
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         AcspProfileData result = service.create(acspProfileSpec);
 
@@ -287,6 +317,7 @@ class AcspProfileServiceImplTest {
 
     @Test
     void deleteAcspProfile() {
+        AcspProfile acspProfile = new AcspProfile();
         when(repository.findById("profileId")).thenReturn(Optional.of(acspProfile));
 
         boolean result = service.delete("profileId");
@@ -304,4 +335,87 @@ class AcspProfileServiceImplTest {
         assertFalse(result);
         verify(repository, never()).delete(any(AcspProfile.class));
     }
+
+    @Test
+    void getAcspProfileFound() {
+        AcspProfile savedProfile = new AcspProfile();
+        savedProfile.setAcspNumber("AP123456");
+        savedProfile.setId("AP123456");
+
+        when(repository.findById("AP123456")).thenReturn(Optional.of(savedProfile));
+
+        Optional<AcspProfile> result = service.getAcspProfile("AP123456");
+
+        assertTrue(result.isPresent());
+        assertEquals("AP123456", result.get().getAcspNumber());
+        assertEquals("AP123456", result.get().getId());
+
+        verify(repository).findById("AP123456");
+    }
+
+    @Test
+    void getAcspProfileNotFound() {
+        when(repository.findById("AP123456")).thenReturn(Optional.empty());
+
+        Optional<AcspProfile> result = service.getAcspProfile("AP123456");
+
+        assertFalse(result.isPresent());
+        verify(repository).findById("AP123456");
+    }
+
+    @Test
+    void getAcspProfileRepositoryThrowsException() {
+        when(repository.findById("AP123456")).thenThrow(new RuntimeException("DB error"));
+
+        Optional<AcspProfile> result = service.getAcspProfile("AP123456");
+
+        assertFalse(result.isPresent());
+        verify(repository).findById("AP123456");
+    }
+
+    @Test
+    void createAcspProfileSetsAuditDetails() throws DataException {
+        acspProfileSpec.setStatus("active");
+        acspProfileSpec.setType("ltd");
+
+        when(randomService.getString(8)).thenReturn("randomId");
+        when(addressService.getAddress(Jurisdiction.UNITED_KINGDOM)).thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AcspProfileData result = service.create(acspProfileSpec);
+
+        assertNotNull(result);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNotNull(captured.getCreated());
+        assertNotNull(captured.getCreated().getAt());
+        assertNotNull(captured.getCreated().getBy());
+        assertNotNull(captured.getCreated().getType());
+
+        assertNotNull(captured.getUpdated());
+        assertNotNull(captured.getUpdated().getAt());
+        assertNotNull(captured.getUpdated().getBy());
+        assertNotNull(captured.getUpdated().getType());
+    }
+
+    @Test
+    void acspProfileSetters_updateValues() {
+        AcspProfile profile = new AcspProfile();
+
+        String etagValue = "W/\"123456\"";
+        profile.setEtag(etagValue);
+        assertEquals(etagValue, profile.getEtag());
+
+        Instant notifiedFromValue = Instant.now();
+        profile.setNotifiedFrom(notifiedFromValue);
+        assertEquals(notifiedFromValue, profile.getNotifiedFrom());
+
+        String deltaAtValue = "2026-02-03T12:00:00Z";
+        profile.setDeltaAt(deltaAtValue);
+        assertEquals(deltaAtValue, profile.getDeltaAt());
+    }
+
 }

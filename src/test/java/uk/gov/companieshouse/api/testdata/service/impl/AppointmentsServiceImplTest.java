@@ -78,6 +78,7 @@ class AppointmentsServiceImplTest {
     void create() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
         when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
@@ -129,6 +130,7 @@ class AppointmentsServiceImplTest {
     void createScottish() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(Jurisdiction.SCOTLAND);
         spec.setOfficerRoles(Collections.singletonList(OfficerRoles.DIRECTOR));
@@ -183,6 +185,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createWithInvalidOfficerRole() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         OfficerRoles invalidRole = Mockito.spy(OfficerRoles.DIRECTOR);
         when(invalidRole.getValue()).thenReturn("invalid_role");
@@ -198,6 +201,7 @@ class AppointmentsServiceImplTest {
     void createWithDefaultOfficerRole() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfAppointments(2);
 
@@ -224,6 +228,7 @@ class AppointmentsServiceImplTest {
     void createWithMultipleAppointments() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfAppointments(3);
         spec.setOfficerRoles(Collections.singletonList(OfficerRoles.DIRECTOR));
@@ -364,6 +369,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createAppointment_shouldHandleMultipleOfficerRoles() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR, OfficerRoles.SECRETARY));
         spec.setNumberOfAppointments(2);
@@ -385,6 +391,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createAppointment_shouldNotCreateAppointmentIfNoDefaultOfficerTrue() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setNoDefaultOfficer(true);
 
@@ -396,6 +403,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerTrue() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(true);
 
@@ -409,6 +417,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerFalse() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(false);
 
@@ -422,6 +431,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createAppointment_shouldCreateAppointmentIfNoDefaultOfficerFalse() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNoDefaultOfficer(false);
 
@@ -443,6 +453,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createBaseAppointment_shouldSetSecureOfficerTrue() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setSecureOfficer(true);
 
         var request = buildAppointmentCreationRequest(spec);
@@ -454,6 +465,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createBaseAppointment_shouldSetSecureOfficerFalse() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setSecureOfficer(false);
 
         var request = buildAppointmentCreationRequest(spec);
@@ -465,6 +477,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createBaseAppointment_shouldSetSecureOfficerFalseWhenNull() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setSecureOfficer(null);
 
         var request = buildAppointmentCreationRequest(spec);
@@ -476,6 +489,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerTrueAndReturnSingleItem() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(true);
 
@@ -490,6 +504,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerFalseAndReturnSingleItem() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(false);
 
@@ -504,6 +519,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerFalseWhenNullAndReturnSingleItem() {
         CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(null);
 
@@ -513,6 +529,29 @@ class AppointmentsServiceImplTest {
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(spec, "APPT_ID", Instant.now(), Instant.now(), "director");
         assertEquals(1, items.size());
         assertFalse(items.getFirst().isSecureOfficer());
+    }
+
+    @Test
+    void createAppointment_shouldNotSaveEntitiesWhenCompanyWithPopulatedStructureIsTrue() {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyWithPopulatedStructureOnly(true);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        var result = appointmentsService.createAppointment(spec);
+
+        verify(appointmentsRepository, never()).save(any());
+        verify(appointmentsDataRepository, never()).save(any());
+        assertNotNull(result);
+        assertNotNull(result.getAppointment());
+        assertNotNull(result.getAppointmentsData());
+        assertNotNull(result.getOfficerAppointment());
     }
 
     private AppointmentCreationRequest buildAppointmentCreationRequest(CompanySpec spec) {

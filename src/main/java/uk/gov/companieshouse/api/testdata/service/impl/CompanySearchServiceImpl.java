@@ -20,7 +20,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class CompanySearchServiceImpl implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
-    private static final String COMPANY_PROFILE_URI = "/company/%s";
+    private static final String COMPANY_PROFILE_URI = "/company/%s/links";
     private static final String OVERSEA_COMPANY_TYPE = "oversea-company";
 
     private final Supplier<InternalApiClient> internalApiClientSupplier;
@@ -37,7 +37,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
     @Override
     public void addCompanyIntoElasticSearchIndex(CompanyData data)
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException {
         String companyNumber = data.getCompanyNumber();
         String formattedCompanySearchUri = formatUri(COMPANY_SEARCH_URI, companyNumber);
         String formattedCompanyProfileUri = formatUri(COMPANY_PROFILE_URI, companyNumber);
@@ -105,14 +105,14 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         deleteCompanyProfile(searchUri, companyNumber);
     }
 
-    private void upsertCompanyProfile(String uri, Object profileData, String companyNumber)
+    private void upsertCompanyProfile(String uri, Data profileData, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
         LOG.info("Upserting company profile into ElasticSearch for company number: "
                 + companyNumber);
         internalApiClientSupplier.get()
                 .privateSearchResourceHandler()
                 .companySearch()
-                .upsertCompanyProfile(uri, (Data) profileData)
+                .upsertCompanyProfile(uri, profileData)
                 .execute();
         LOG.info("Company profile upsert successful for company number: " + companyNumber);
     }
@@ -132,11 +132,14 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     private Data fetchCompanyProfile(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
         LOG.info("Fetching company profile for company number: " + companyNumber);
-        return internalApiClientSupplier.get()
-                .privateCompanyResourceHandler()
-                .getCompanyFullProfile(uri)
+        var responseData  = internalApiClientSupplier.get()
+                .privateCompanyLinksResourceHandler()
+                .getCompanyProfile(uri)
                 .execute()
-                .getData();
+                .getData().getData();
+        LOG.info("Company profile fetched successfully for company number: "
+                + responseData.getCompanyNumber());
+        return responseData;
     }
 
     private String formatUri(String template, String value) {

@@ -5,7 +5,7 @@ import java.util.Objects;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 public class Address {
-    @Field("premise")
+    @Field("premises")
     private String premise;
     @Field("address_line_1")
     private String addressLine1;
@@ -23,7 +23,7 @@ public class Address {
     }
 
     @ConstructorProperties({
-            "premise", "address_line_1", "address_line_2", "country", "locality", "postal_code"})
+            "premises", "address_line_1", "address_line_2", "country", "locality", "postal_code"})
     public Address(String premise,
                    String addressLine1,
                    String addressLine2,

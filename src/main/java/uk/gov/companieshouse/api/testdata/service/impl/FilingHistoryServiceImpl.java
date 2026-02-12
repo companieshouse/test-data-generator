@@ -150,7 +150,9 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
             filingHistory.setPages(10);
             filingHistory.setDate(dayTimeNow);
         }
-
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return filingHistory;
+        }
         LOG.info("FilingHistory object created for company number: " + spec.getCompanyNumber());
         var savedFilingHistory = filingHistoryRepository.save(filingHistory);
         LOG.info("FilingHistory successfully saved with ID: " + savedFilingHistory.getId());

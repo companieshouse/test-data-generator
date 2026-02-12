@@ -1,27 +1,34 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
+import uk.gov.companieshouse.api.testdata.model.entity.AuditDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SoleTraderDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class AcspProfileServiceImpl implements DataService<AcspProfileData, AcspProfileSpec> {
+public class AcspProfileServiceImpl implements AcspProfileService {
     private static final String LINK_STEM = "/authorised-corporate-service-providers/";
+    private static final Logger LOG =
+            LoggerFactory.getLogger(String.valueOf(AcspProfileServiceImpl.class));
 
     private final AcspProfileRepository repository;
     
@@ -76,8 +83,20 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
                     addressService.getCountryOfResidence(Jurisdiction.ENGLAND));
             profile.setSoleTraderDetails(soleTraderDetails);
         }
+        AuditDetails created = new AuditDetails();
+        created.setAt(Instant.now());
+        created.setBy("TestDataGenerator");
+        created.setType("acsp_delta");
+        profile.setCreated(created);
+
+        AuditDetails updated = new AuditDetails();
+        updated.setAt(Instant.now());
+        updated.setBy("TestDataGenerator");
+        updated.setType("acsp_delta");
+        profile.setUpdated(updated);
+
         AcspProfile savedProfile = repository.save(profile);
-        return new AcspProfileData(savedProfile.getAcspNumber(), savedProfile.getName());
+        return new AcspProfileData(savedProfile);
     }
 
     @Override
@@ -87,4 +106,13 @@ public class AcspProfileServiceImpl implements DataService<AcspProfileData, Acsp
         return existingProfile.isPresent();
     }
 
+    @Override
+    public Optional<AcspProfile> getAcspProfile(String acspNumber) {
+        try {
+            return repository.findById(acspNumber);
+        } catch (Exception ex) {
+            LOG.error("Error retrieving ACSP profile for acspNumber: {} " + acspNumber, ex);
+            return Optional.empty();
+        }
+    }
 }

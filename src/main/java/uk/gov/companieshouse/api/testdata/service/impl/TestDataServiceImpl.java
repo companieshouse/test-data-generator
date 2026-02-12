@@ -14,16 +14,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
@@ -44,8 +44,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
 import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
@@ -57,13 +59,19 @@ import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
+import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
+import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -79,63 +87,77 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
-    private final CompanyProfileService companyProfileService;
-    
-    private final DataService<FilingHistory, CompanySpec> filingHistoryService;
-    
-    private final CompanyAuthCodeService companyAuthCodeService;
-    
-    private final AppointmentService appointmentService;
-    
-    private final DataService<CompanyMetrics, CompanySpec> companyMetricsService;
-    
-    private final CompanyPscStatementServiceImpl companyPscStatementService;
-    
-    private final DataService<CompanyPscs, CompanySpec> companyPscsService;
-    
-    private final RandomService randomService;
-    
-    private final UserService userService;
-    
-    private final DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
-    
-    private final DataService<CertificatesData, CertificatesSpec> certificatesService;
-    
-    private final DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
-    
-    private final DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
-    
-    private final DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
-    
-    private final AcspMembersRepository acspMembersRepository;
-    
-    private final AdminPermissionsRepository adminPermissionsRepository;
-    
-    private final DataService<TransactionsData, TransactionsSpec> transactionService;
-    
-    private final DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
-    
-    private final CompanyAuthAllowListService companyAuthAllowListService;
-    
-    private final AppealsService appealsService;
-    
-    private final DataService<CompanyRegisters, CompanySpec> companyRegistersService;
-    
-    private final CompanySearchService companySearchService;
-    
-    private final AccountPenaltiesService accountPenaltiesService;
-    
-    private final CompanySearchService alphabeticalCompanySearch;
-    
-    private final CompanySearchService advancedCompanySearch;
-    
-    private final PostcodeService postcodeService;
-    
-    private final DataService<Disqualifications, CompanySpec> disqualificationsService;
-    
-    private final DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService;
-    
-    private final DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+    @Autowired
+    private CompanyProfileService companyProfileService;
+    @Autowired
+    private DataService<FilingHistory, CompanySpec> filingHistoryService;
+    @Autowired
+    private CompanyAuthCodeService companyAuthCodeService;
+    @Autowired
+    private AppointmentService appointmentService;
+    @Autowired
+    private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
+    @Autowired
+    private CompanyPscStatementServiceImpl companyPscStatementService;
+    @Autowired
+    private CompanyPscService companyPscService;
+    @Autowired
+    private RandomService randomService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    @Autowired
+    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    @Autowired
+    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    @Autowired
+    private DataService<CombinedSicActivitiesData,
+            CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    @Autowired
+    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
+    @Autowired
+    private AcspMembersRepository acspMembersRepository;
+    @Autowired
+    private AdminPermissionsRepository adminPermissionsRepository;
+    @Autowired
+    private CertificatesRepository certificatesRepository;
+    @Autowired
+    private CertifiedCopiesRepository certifiedCopiesRepository;
+    @Autowired
+    private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
+    @Autowired
+    private DataService<TransactionsData, TransactionsSpec> transactionService;
+    @Autowired
+    private AcspProfileService acspProfileService;
+    @Autowired
+    private CompanyAuthAllowListService companyAuthAllowListService;
+    @Autowired
+    AppealsService appealsService;
+    @Autowired
+    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    @Autowired
+    @Qualifier("companySearchService")
+    private CompanySearchService companySearchService;
+    @Autowired
+    private AccountPenaltiesService accountPenaltiesService;
+    @Autowired
+    @Qualifier("alphabeticalCompanySearchService")
+    private CompanySearchService alphabeticalCompanySearch;
+    @Autowired
+    @Qualifier("advancedCompanySearchService")
+    private CompanySearchService advancedCompanySearch;
+    @Autowired
+    private PostcodeService postcodeService;
+    @Autowired
+    private DataService<Disqualifications, CompanySpec> disqualificationsService;
+    @Autowired
+    private DataService<UserCompanyAssociationData,
+            UserCompanyAssociationSpec> userCompanyAssociationService;
+    @Autowired
+    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+
+    private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -151,66 +173,9 @@ public class TestDataServiceImpl implements TestDataService {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
-    @Autowired
-    public TestDataServiceImpl(CompanyProfileService companyProfileService,
-            DataService<FilingHistory, CompanySpec> filingHistoryService, 
-            CompanyAuthCodeService companyAuthCodeService,
-            AppointmentService appointmentService, 
-            DataService<CompanyMetrics, CompanySpec> companyMetricsService,
-            CompanyPscStatementServiceImpl companyPscStatementService, 
-            DataService<CompanyPscs, CompanySpec> companyPscsService,
-            RandomService randomService, 
-            UserService userService,
-            DataService<AcspMembersData, AcspMembersSpec> acspMembersService,
-            DataService<CertificatesData, CertificatesSpec> certificatesService,
-            DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService,
-            DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService,
-            DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService,
-            AcspMembersRepository acspMembersRepository, 
-            AdminPermissionsRepository adminPermissionsRepository,
-            DataService<TransactionsData, TransactionsSpec> transactionService,
-            DataService<AcspProfileData, AcspProfileSpec> acspProfileService,
-            CompanyAuthAllowListService companyAuthAllowListService,
-            AppealsService appealsService,
-            DataService<CompanyRegisters, CompanySpec> companyRegistersService,
-            @Qualifier("companySearchService") CompanySearchService companySearchService,
-            AccountPenaltiesService accountPenaltiesService,
-            @Qualifier("alphabeticalCompanySearchService") CompanySearchService alphabeticalCompanySearch,
-            @Qualifier("advancedCompanySearchService") CompanySearchService advancedCompanySearch,
-            PostcodeService postcodeService,
-            DataService<Disqualifications, CompanySpec> disqualificationsService,
-            DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> userCompanyAssociationService,
-            DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService) {
-        super();
-        this.companyProfileService = companyProfileService;
-        this.filingHistoryService = filingHistoryService;
-        this.companyAuthCodeService = companyAuthCodeService;
-        this.appointmentService = appointmentService;
-        this.companyMetricsService = companyMetricsService;
-        this.companyPscStatementService = companyPscStatementService;
-        this.companyPscsService = companyPscsService;
-        this.randomService = randomService;
-        this.userService = userService;
-        this.acspMembersService = acspMembersService;
-        this.certificatesService = certificatesService;
-        this.certifiedCopiesService = certifiedCopiesService;
-        this.combinedSicActivitiesService = combinedSicActivitiesService;
-        this.missingImageDeliveriesService = missingImageDeliveriesService;
-        this.acspMembersRepository = acspMembersRepository;
-        this.adminPermissionsRepository = adminPermissionsRepository;
-        this.transactionService = transactionService;
-        this.acspProfileService = acspProfileService;
-        this.companyAuthAllowListService = companyAuthAllowListService;
-        this.appealsService = appealsService;
-        this.companyRegistersService = companyRegistersService;
-        this.companySearchService = companySearchService;
-        this.accountPenaltiesService = accountPenaltiesService;
-        this.alphabeticalCompanySearch = alphabeticalCompanySearch;
-        this.advancedCompanySearch = advancedCompanySearch;
-        this.postcodeService = postcodeService;
-        this.disqualificationsService = disqualificationsService;
-        this.userCompanyAssociationService = userCompanyAssociationService;
-        this.adminPermissionsService = adminPermissionsService;
+    public TestDataServiceImpl(
+            CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
+        this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
     }
 
     @Override
@@ -218,15 +183,20 @@ public class TestDataServiceImpl implements TestDataService {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
+
         String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+
         if (spec.getIsPaddingCompanyNumber() != null) {
             companyNumberPrefix = companyNumberPrefix + "000";
         }
+
         do {
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
             companyProfileService.create(spec);
@@ -249,7 +219,7 @@ public class TestDataServiceImpl implements TestDataService {
             companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            companyPscsService.create(spec);
+            companyPscService.create(spec);
             LOG.info("Successfully created PSCs");
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
@@ -388,7 +358,7 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
         try {
-            this.companyPscsService.delete(companyId);
+            this.companyPscService.delete(companyId);
             LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
@@ -775,6 +745,12 @@ public class TestDataServiceImpl implements TestDataService {
         return postcodesDataList;
     }
 
+    public Optional<AcspProfile> getAcspProfileData(String acspNumber)
+            throws NoDataFoundException {
+
+        return acspProfileService.getAcspProfile(acspNumber);
+    }
+
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
         try {
             acspMembersService.delete(acspMemberId);
@@ -948,6 +924,91 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
+    }
+
+    @Override
+    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
+        if (spec == null) {
+            throw new IllegalArgumentException("CompanySpec can not be null");
+        }
+        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        if (spec.getIsPaddingCompanyNumber() != null) {
+            companyNumberPrefix = companyNumberPrefix + "000";
+        }
+        do {
+            spec.setCompanyNumber(companyNumberPrefix
+                    + randomService
+                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
+        try {
+            var response = new PopulatedCompanyDetailsResponse();
+            spec.setCompanyWithPopulatedStructureOnly(true);
+
+            var companyProfile = companyProfileService.create(spec);
+            LOG.info("Successfully get company profile");
+            response.setCompanyProfile(companyProfile);
+
+            var filingHistory = filingHistoryService.create(spec);
+            LOG.info("Successfully get filing history");
+            response.setFilingHistory(filingHistory);
+
+            if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
+                var appointments = appointmentService.createAppointment(spec);
+                LOG.info("Successfully get appointments ");
+                response.setAppointmentsData(appointments);
+            }
+
+            var authCode = companyAuthCodeService.create(spec);
+            LOG.info("Successfully get auth code: " + authCode.getAuthCode());
+            response.setCompanyAuthCode(authCode);
+
+
+            var companyMetrics = companyMetricsService.create(spec);
+            LOG.info("Successfully get company metrics");
+            response.setCompanyMetrics(companyMetrics);
+
+            List<CompanyPscStatement> companyPscStatements = companyPscStatementService.createPscStatements(spec);
+            LOG.info("Successfully get all PSC statements based on spec counts.");
+            response.setCompanyPscStatement(companyPscStatements);
+
+            var companyPscs = companyPscService.create(spec);
+            LOG.info("Successfully get PSCs");
+            response.setCompanyPscs(companyPscs);
+
+            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                var companyRegisters = this.companyRegistersService.create(spec);
+                LOG.info("Successfully get company registers");
+                response.setCompanyRegisters(companyRegisters);
+            }
+
+            if (spec.getDisqualifiedOfficers()
+                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+                var disqualifications = disqualificationsService.create(spec);
+                LOG.info("Successfully get disqualifications");
+                response.setDisqualifications(disqualifications);
+            }
+
+            return response;
+        } catch (Exception ex) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("company number", spec.getCompanyNumber());
+            data.put("error message", ex.getMessage());
+            LOG.error("Failed to get company data for company number: "
+                    + spec.getCompanyNumber(), ex, data);
+            throw new DataException("Failed to get company data from service", ex);
+        }
+    }
+
+    @Override
+    public CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException {
+
+        var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
+        var authCode = companySpec.getCompanyAuthCode().getAuthCode();
+        companyWithPopulatedStructureService.createCompanyWithPopulatedStructure(companySpec);
+        String companyUri = this.apiUrl + "/company/" + companyNumber;
+        return new CompanyData(companyNumber,
+                authCode, companyUri);
     }
 
 }

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -282,6 +283,27 @@ class CompanyRegistersServiceImplTest {
         verify(filingHistoryRepository, times(1)).findAllByCompanyNumber(COMPANY_NUMBER);
     }
 
+    @Test
+    void createReturnsUnsavedRegistersWhenCompanyWithDataStructureIsTrue() throws DataException {
+        companySpec = new CompanySpec();
+        companySpec.setCompanyNumber(COMPANY_NUMBER);
+        RegistersSpec register = new RegistersSpec();
+        register.setRegisterType(DIRECTORS_TEXT);
+        register.setRegisterMovedTo(PUBLIC_REGISTER);
+        companySpec.setRegisters(List.of(register));
+        companySpec.setCompanyWithPopulatedStructureOnly(true);
+
+        FilingHistory filingHistory = new FilingHistory();
+        filingHistory.setId("filing-history-id");
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(List.of(filingHistory)));
+
+        CompanyRegisters result = service.create(companySpec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        verify(repository, never()).save(any());
+    }
 
     private void setRegister(String registerType, String registerMovedTo) {
         setCompanySpec(registerType, registerMovedTo);
@@ -293,6 +315,7 @@ class CompanyRegistersServiceImplTest {
     private void setCompanySpec(String registerType, String registerMovedTo) {
         companySpec = new CompanySpec();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
+        companySpec.setCompanyWithPopulatedStructureOnly(false);
         RegistersSpec register = new RegistersSpec();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);

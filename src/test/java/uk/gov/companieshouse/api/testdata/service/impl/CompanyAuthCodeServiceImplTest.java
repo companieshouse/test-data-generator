@@ -63,6 +63,7 @@ class CompanyAuthCodeServiceImplTest {
     void create() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
@@ -190,7 +191,7 @@ class CompanyAuthCodeServiceImplTest {
     void createThrowsDataExceptionWhenEncryptFails() throws Exception {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
         CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl(randomService, repository, companyProfileRepository) {
@@ -296,5 +297,23 @@ class CompanyAuthCodeServiceImplTest {
         assertEquals(DEFAULT_AUTH_CODE, captured.getAuthCode());
         assertTrue(captured.getIsActive());
         assertTrue(BCrypt.checkpw(password, captured.getEncryptedAuthCode()));
+    }
+
+    @Test
+    void createReturnsUnsavedAuthCodeWhenCompanyWithDataStructureIsTrue() throws Exception {
+        CompanySpec spec = new CompanySpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(true);
+
+        when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+
+        CompanyAuthCode result = companyAuthCodeServiceImpl.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        assertEquals(String.valueOf(COMPANY_AUTH_CODE), result.getAuthCode());
+        assertTrue(result.getIsActive());
+        assertNotNull(result.getEncryptedAuthCode());
+        verify(repository, never()).save(any());
     }
 }
