@@ -22,7 +22,7 @@
         <junit-jupiter-engine.version>5.2.0</junit-jupiter-engine.version>
         <mockito-junit-jupiter.version>2.18.0</mockito-junit-jupiter.version>
         <jackson-xml.version>2.9.6</jackson-xml.version>
-        <api-helper-java.version>3.0.1</api-helper-java.version>
+        <api-helper-java.version>3.0.3</api-helper-java.version>
         <structured-logging.version>3.0.20</structured-logging.version>
 
         <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
