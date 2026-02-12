@@ -52,6 +52,7 @@
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
         <logback.version>1.5.28</logback.version>
+        <guava.version>33.5.0-android</guava.version>
     </properties>
 
     <dependencyManagement>
@@ -85,6 +86,12 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback.version}</version>
+                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
                 <scope>compile</scope>
             </dependency>
         </dependencies>
