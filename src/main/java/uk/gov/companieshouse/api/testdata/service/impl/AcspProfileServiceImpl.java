@@ -30,12 +30,19 @@ public class AcspProfileServiceImpl implements AcspProfileService {
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AcspProfileServiceImpl.class));
 
+    private final AcspProfileRepository repository;
+    
+    private final RandomService randomService;
+
+    private final AddressService addressService;
+
     @Autowired
-    private AcspProfileRepository repository;
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private AddressService addressService;
+    public AcspProfileServiceImpl(AcspProfileRepository repository, RandomService randomService, AddressService addressService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+        this.addressService = addressService;
+    }
 
     public AcspProfileData create(AcspProfileSpec spec) throws DataException {
         var soleTraderForename = "Forename ";

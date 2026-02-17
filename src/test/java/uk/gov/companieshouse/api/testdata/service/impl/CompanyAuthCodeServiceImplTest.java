@@ -182,7 +182,7 @@ class CompanyAuthCodeServiceImplTest {
             mocked.when(() -> MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256))
                     .thenThrow(new NoSuchAlgorithmException());
 
-            CompanyAuthCodeServiceImpl service = new CompanyAuthCodeServiceImpl();
+            CompanyAuthCodeServiceImpl service = new CompanyAuthCodeServiceImpl(randomService, repository, companyProfileRepository);
             assertThrows(DataException.class, () -> service.sha256("test"));
         }
     }
@@ -194,7 +194,7 @@ class CompanyAuthCodeServiceImplTest {
         spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
-        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
+        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl(randomService, repository, companyProfileRepository) {
             @Override
             public CompanyAuthCode create(CompanySpec spec) throws DataException {
                 final String authCode = String.valueOf(randomService.getNumber(6));
@@ -231,7 +231,7 @@ class CompanyAuthCodeServiceImplTest {
         authCode.setEncryptedAuthCode("$2a$10$randomrandomrandomrandomrandomrandomrandomrandom12345");
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(authCode));
 
-        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
+        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl(randomService, repository, companyProfileRepository) {
             @Override
             byte[] sha256(final String authCode) throws DataException {
                 throw new DataException("SHA-256 failed");

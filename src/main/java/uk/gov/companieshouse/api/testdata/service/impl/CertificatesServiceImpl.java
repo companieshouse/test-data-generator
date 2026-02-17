@@ -29,17 +29,23 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CertificatesServiceImpl implements DataService<CertificatesData, CertificatesSpec> {
 
-    @Autowired
-    public CertificatesRepository certificatesRepository;
+    private final CertificatesRepository certificatesRepository;
+
+    private final BasketRepository basketRepository;
+
+    private final AddressService addressService;
+
+    private final RandomService randomService;
 
     @Autowired
-    public BasketRepository basketRepository;
-
-    @Autowired
-    public AddressService addressService;
-
-    @Autowired
-    public RandomService randomService;
+    public CertificatesServiceImpl(CertificatesRepository certificatesRepository, BasketRepository basketRepository,
+            AddressService addressService, RandomService randomService) {
+        super();
+        this.certificatesRepository = certificatesRepository;
+        this.basketRepository = basketRepository;
+        this.addressService = addressService;
+        this.randomService = randomService;
+    }
 
     @Override
     public CertificatesData create(CertificatesSpec spec) throws DataException {

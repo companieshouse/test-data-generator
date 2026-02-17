@@ -29,11 +29,16 @@ public class CompanyPscStatementServiceImpl implements
     private static final String PSC_SUFFIX = "/persons-with-significant-control-statements/";
     private static final String URL_PREFIX = "/company/";
 
-    @Autowired
-    private CompanyPscStatementRepository repository;
+    private final CompanyPscStatementRepository repository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private RandomService randomService;
+    public CompanyPscStatementServiceImpl(CompanyPscStatementRepository repository, RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public CompanyPscStatement create(CompanySpec spec) {

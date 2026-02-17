@@ -1,42 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validation;
-import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
-import uk.gov.companieshouse.api.testdata.model.entity.Identity;
-import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
-import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
-import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
-import uk.gov.companieshouse.api.testdata.repository.UserRepository;
-import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import java.lang.reflect.Method;
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.regex.Pattern;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,6 +15,43 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.regex.Pattern;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
+import uk.gov.companieshouse.api.testdata.model.entity.Identity;
+import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
+import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.UserData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
+import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.UserRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
@@ -279,7 +279,7 @@ class UserServiceImplTest {
         spec.setPassword("pass");
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserData result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -298,7 +298,7 @@ class UserServiceImplTest {
         spec.setRoles(null);
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserData result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -315,7 +315,7 @@ class UserServiceImplTest {
         spec.setRoles(List.of());
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserData result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -504,7 +504,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testGetUserRoleWithCaseSensitiveRoleName() throws DataException {
+    void testGetUserRoleWithCaseSensitiveRoleName() {
         String lowercaseRoleName = "chs_admin_supervisor";
 
         DataException ex = assertThrows(DataException.class,

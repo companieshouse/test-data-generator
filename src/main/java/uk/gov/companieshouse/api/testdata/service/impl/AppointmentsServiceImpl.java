@@ -49,16 +49,27 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final Instant DOB_INSTANT
             = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
 
+    private final AddressService addressService;
+
+    private final RandomService randomService;
+    
+    private final AppointmentsRepository appointmentsRepository;
+    
+    private final AppointmentsDataRepository appointmentsDataRepository;
+    
+    private final OfficerRepository officerRepository;
+
     @Autowired
-    private AddressService addressService;
-    @Autowired
-    private RandomService randomService;
-    @Autowired
-    private AppointmentsRepository appointmentsRepository;
-    @Autowired
-    private AppointmentsDataRepository appointmentsDataRepository;
-    @Autowired
-    private OfficerRepository officerRepository;
+    public AppointmentsServiceImpl(AddressService addressService, RandomService randomService,
+            AppointmentsRepository appointmentsRepository, AppointmentsDataRepository appointmentsDataRepository,
+            OfficerRepository officerRepository) {
+        super();
+        this.addressService = addressService;
+        this.randomService = randomService;
+        this.appointmentsRepository = appointmentsRepository;
+        this.appointmentsDataRepository = appointmentsDataRepository;
+        this.officerRepository = officerRepository;
+    }
 
     public AppointmentsResultData createAppointment(CompanySpec spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {

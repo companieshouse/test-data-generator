@@ -266,7 +266,6 @@ class CertifiedCopiesServiceImplTest {
         basketSpec.setEnrolled(true);
         certifiedCopiesSpec.setBasketSpec(basketSpec);
 
-        Basket basket = new Basket();
         basket.setForename(basketSpec.getForename());
         basket.setSurname(basketSpec.getSurname());
         basket.setEnrolled(true);
@@ -338,7 +337,6 @@ class CertifiedCopiesServiceImplTest {
         itemOption1.setDeliveryMethod("standard");
         itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
 
-        FilingHistoryDocumentsSpec filingHistoryDocument2 = new FilingHistoryDocumentsSpec();
         filingHistoryDocument1.setFilingHistoryDate("2019-11-23");
         filingHistoryDocument1.setFilingHistoryDescription("incorporation-company");
         filingHistoryDocument1.setFilingHistoryId("MzE0OTM3MTQxNmFkaXF6a2N4");
@@ -525,7 +523,6 @@ class CertifiedCopiesServiceImplTest {
     @Test
     void validateBasketNotDeletedWhenNull() {
         String basketId = "user123";
-        Basket basket = new Basket();
         basket.setId(null);
 
         when(basketRepository.findById(basketId)).thenReturn(Optional.of(basket));

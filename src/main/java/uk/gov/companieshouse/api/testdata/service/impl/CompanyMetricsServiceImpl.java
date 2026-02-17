@@ -23,12 +23,18 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service
 public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, CompanySpec> {
 
-    private static final Logger LOG =
-            LoggerFactory.getLogger(String.valueOf(CompanyMetricsServiceImpl.class));
+    private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(CompanyMetricsServiceImpl.class));
+
+    private final CompanyMetricsRepository repository;
+
+    private final RandomService randomService;
+
     @Autowired
-    private CompanyMetricsRepository repository;
-    @Autowired
-    private RandomService randomService;
+    public CompanyMetricsServiceImpl(CompanyMetricsRepository repository, RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public CompanyMetrics create(CompanySpec spec) {

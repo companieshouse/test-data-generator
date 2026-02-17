@@ -20,14 +20,20 @@ public class IdentityVerificationServiceImpl implements
         VerifiedIdentityService<IdentityVerificationData> {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @Autowired
-    private IdentityRepository identityRepository;
+    private final IdentityRepository identityRepository;
+
+    private final UvidRepository uvidRepository;
+
+    private final UserRepository userRepository;
 
     @Autowired
-    private UvidRepository uvidRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    public IdentityVerificationServiceImpl(IdentityRepository identityRepository, UvidRepository uvidRepository,
+            UserRepository userRepository) {
+        super();
+        this.identityRepository = identityRepository;
+        this.uvidRepository = uvidRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public IdentityVerificationData getIdentityVerificationData(String email) {

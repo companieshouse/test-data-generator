@@ -2,13 +2,12 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,18 +65,24 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER =
             "full-data-available-from-financial-conduct-authority-mutuals-public-register";
 
-    @Autowired
-    private RandomService randomService;
+    private final RandomService randomService;
 
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
 
-    @Autowired
-    private CompanyProfileRepository repository;
+    private final CompanyProfileRepository repository;
 
     private boolean hasCompanyRegisters = false;
 
     private boolean isCompanyTypeHasNoFilingHistory = true;
+
+    @Autowired
+    public CompanyProfileServiceImpl(RandomService randomService, AddressService addressService,
+            CompanyProfileRepository repository) {
+        super();
+        this.randomService = randomService;
+        this.addressService = addressService;
+        this.repository = repository;
+    }
 
     @Override
     public CompanyProfile create(CompanySpec spec) {
@@ -373,7 +378,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
             Jurisdiction companyJurisdiction) {
-        Map<CompanyType, String> partialDataOptions = new HashMap<>();
+        EnumMap<CompanyType, String> partialDataOptions = new EnumMap<>(CompanyType.class);
         partialDataOptions.put(CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL,
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
         partialDataOptions.put(CompanyType.ASSURANCE_COMPANY,
@@ -550,7 +555,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return repository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
                 .stream()
                 .map(CompanyProfile::getCompanyNumber)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override

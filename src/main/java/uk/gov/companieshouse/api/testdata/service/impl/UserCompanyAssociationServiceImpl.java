@@ -26,11 +26,16 @@ public class UserCompanyAssociationServiceImpl implements
     private static final String AUTH_CODE = "auth_code";
     private static final String CONFIRMED_STATUS = "confirmed";
 
-    @Autowired
-    private UserCompanyAssociationRepository repository;
+    private final UserCompanyAssociationRepository repository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private RandomService randomService;
+    public UserCompanyAssociationServiceImpl(UserCompanyAssociationRepository repository, RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {

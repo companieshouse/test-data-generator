@@ -42,10 +42,8 @@ class CompanySpecTest {
         spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
 
         String invalidCompanyType = "invalid-company-type";
-        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            CompanyType companyType = CompanyType.valueOf(invalidCompanyType);
-            spec.setCompanyType(companyType);
-        });
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> 
+            CompanyType.valueOf(invalidCompanyType));
 
         assertTrue(exception.getMessage().contains("No enum constant"));
     }
@@ -59,8 +57,6 @@ class CompanySpecTest {
     }
 
     private void validateCompanySpec(CompanySpec spec, String expectedViolationMessage) {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
         Set<ConstraintViolation<CompanySpec>> violations = validator.validate(spec);
         assertTrue(violations.stream().anyMatch(v ->
                 expectedViolationMessage.equals(v.getMessage())),

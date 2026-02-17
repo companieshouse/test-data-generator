@@ -11,7 +11,7 @@ class HealthCheckControllerTest {
     private HealthCheckController controller = new HealthCheckController();
 
     @Test
-    void isHealthy() throws Exception {
+    void isHealthy() {
         ResponseEntity<Void> response = controller.isHealthy();
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
