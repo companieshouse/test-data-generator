@@ -5,6 +5,7 @@ import org.springframework.data.repository.NoRepositoryBean;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 
 @NoRepositoryBean
-public interface UserCompanyAssociationRepository extends
-        MongoRepository<UserCompanyAssociation, String> {
+public interface UserCompanyAssociationRepository extends MongoRepository<
+        UserCompanyAssociation, String> {
+
 }

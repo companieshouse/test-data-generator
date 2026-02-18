@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -52,6 +53,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -59,6 +61,7 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
+import uk.gov.companieshouse.api.testdata.service.impl.UserCompanyAssociationServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -69,21 +72,27 @@ public class TestDataController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
 
-    @Autowired
-    private TestDataService testDataService;
-
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
-
-    @Autowired
-    private AccountPenaltiesService accountPenaltyService;
-
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
 
+    private final TestDataService testDataService;
+    private final CompanyAuthCodeService companyAuthCodeService;
+    private final UserCompanyAssociationServiceImpl userCompanyAssociationService;
+    private final VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+
     @Autowired
-    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+    public TestDataController(TestDataService testDataService,
+                              CompanyAuthCodeService companyAuthCodeService,
+                              AccountPenaltiesService accountPenaltyService,
+                              UserCompanyAssociationServiceImpl userCompanyAssociationService,
+                              VerifiedIdentityService<IdentityVerificationData>
+                                          verifiedIdentityService) {
+        this.testDataService = testDataService;
+        this.companyAuthCodeService = companyAuthCodeService;
+        this.userCompanyAssociationService = userCompanyAssociationService;
+        this.verifiedIdentityService = verifiedIdentityService;
+    }
 
     /* Public endpoint to create company data */
     @PostMapping("/company")
@@ -456,33 +465,61 @@ public class TestDataController {
     @PostMapping("/internal/associations")
     public ResponseEntity<UserCompanyAssociationData> createAssociation(
             @Valid @RequestBody UserCompanyAssociationSpec request) throws DataException {
-        var createdAssociation =
-                testDataService.createUserCompanyAssociationData(request);
+        var createdAssociation = testDataService.createUserCompanyAssociationData(request);
 
         Map<String, Object> data = new HashMap<>();
-        data.put("association_id",
-                createdAssociation.getId());
+        data.put("association_id", createdAssociation.getId());
         LOG.info("New association created", data);
         return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/internal/associations/{associationId}")
-    public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId")
-                                                                 String associationId)
+    @PatchMapping("/internal/associations/{associationId}")
+    public ResponseEntity<Map<String,
+            Object>> deleteAssociation(@PathVariable("associationId") String associationId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("association_id", associationId);
-        boolean deleteAssociation =
-                testDataService.deleteUserCompanyAssociationData(associationId);
+
+        boolean deleteAssociation = testDataService.deleteUserCompanyAssociationData(associationId);
 
         if (deleteAssociation) {
-            LOG.info("Association is deleted", response);
+            LOG.info("Association status updated to removed", response);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Association is not found", response);
+            LOG.info("Association not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
+    }
+
+    @GetMapping("/internal/associations/search")
+    public ResponseEntity<UserCompanyAssociationSearchData> searchAssociation(
+            @RequestParam("companyNumber") String companyNumber,
+            @RequestParam(value = "userId", required = false) String userId,
+            @RequestParam(value = "userEmail", required = false)
+            String userEmail) throws DataException {
+        var association = userCompanyAssociationService.searchAssociation(companyNumber,
+                userId, userEmail);
+        if (association == null || association.getLinks() == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        var associationLink = String.valueOf(association.getLinks());
+        String associationId;
+        if (associationLink != null && associationLink.contains("/")) {
+            associationId = associationLink.substring(associationLink.lastIndexOf("/") + 1);
+        } else {
+            associationId = associationLink;
+        }
+
+        var status = association.getStatus() != null ? association.getStatus().name() : null;
+        var response = new UserCompanyAssociationSearchData(
+                associationId,
+                association.getCompanyNumber(),
+                association.getUserId(),
+                status
+        );
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/health-check")
@@ -579,9 +616,11 @@ public class TestDataController {
 
     @PostMapping("/internal/create-company-with-populated-structure")
     public ResponseEntity<CompanyData> createCompanyWithPopulatedStructure(
-            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request) throws DataException {
+            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureSpec request)
+            throws DataException {
         Optional<CompanyWithPopulatedStructureSpec> optionalRequest = Optional.ofNullable(request);
-        CompanyWithPopulatedStructureSpec spec = optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());
+        CompanyWithPopulatedStructureSpec spec =
+                optionalRequest.orElse(new CompanyWithPopulatedStructureSpec());
         var createdCompany = testDataService.createCompanyWithStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());

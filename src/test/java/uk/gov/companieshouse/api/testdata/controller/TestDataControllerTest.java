@@ -73,6 +73,12 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 
+import uk.gov.companieshouse.api.accounts.associations.model.Association;
+import uk.gov.companieshouse.api.accounts.associations.model.AssociationLinks;
+import uk.gov.companieshouse.api.testdata.service.impl.UserCompanyAssociationServiceImpl;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
+import static org.mockito.Mockito.mock;
+
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
 
@@ -103,6 +109,9 @@ class TestDataControllerTest {
 
     @Mock
     private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+
+    @Mock
+    private UserCompanyAssociationServiceImpl userCompanyAssociationService;
 
     @Captor
     private ArgumentCaptor<CompanySpec> specCaptor;
@@ -915,7 +924,7 @@ class TestDataControllerTest {
         PenaltySpec request = new PenaltySpec();
         request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode(CUSTOMER_CODE);
-        request.setDuplicate(true); // simulate duplicate request
+        request.setDuplicate(true);
 
         AccountPenaltiesData createdPenalties = new AccountPenaltiesData();
         createdPenalties.setPenalties(Collections.emptyList()); // empty list simulates failure
@@ -1111,84 +1120,128 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createUserCompanyAssociation() throws Exception {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
-        spec.setUserId(USER_ID);
+    void createAssociation_Success() throws Exception {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setStatus(CONFIRMED_STATUS);
-        spec.setApprovalRoute(AUTH_CODE_APPROVAL_ROUTE);
+        spec.setUserId(USER_ID);
 
-        UserCompanyAssociationData association =
-                new UserCompanyAssociationData(
-                new ObjectId(), COMPANY_NUMBER, USER_ID,
-                        null, CONFIRMED_STATUS, AUTH_CODE_APPROVAL_ROUTE,
-                        null);
+        UserCompanyAssociationData associationData = new UserCompanyAssociationData();
+        associationData.setId(ASSOCIATION_ID);
 
-        when(this.testDataService.createUserCompanyAssociationData(spec))
-                .thenReturn(association);
-        ResponseEntity<UserCompanyAssociationData> response
-                = this.testDataController.createAssociation(spec);
+        when(testDataService.createUserCompanyAssociationData(spec)).thenReturn(associationData);
 
-        assertEquals(association, response.getBody());
+        ResponseEntity<UserCompanyAssociationData> response =
+                testDataController.createAssociation(spec);
+
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(associationData, response.getBody());
+        verify(testDataService).createUserCompanyAssociationData(spec);
     }
 
     @Test
-    void createUserCompanyAssociationException() throws Exception {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
-        Throwable exception = new DataException("Error creating an "
-                + "association");
+    void searchAssociation_Success_WithSlashInLink() throws Exception {
+        String link = "/associations/" + ASSOCIATION_ID;
+        Association association = mock(Association.class);
+        AssociationLinks links = mock(AssociationLinks.class);
 
-        when(this.testDataService.createUserCompanyAssociationData(spec))
-                .thenThrow(exception);
+        when(association.getLinks()).thenReturn(links);
+        when(links.toString()).thenReturn(link);
+        when(association.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
+        when(association.getUserId()).thenReturn(USER_ID);
+        when(association.getStatus()).thenReturn(Association.StatusEnum.CONFIRMED);
 
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createAssociation(spec));
-        assertEquals(exception, thrown);
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(association);
+
+        ResponseEntity<UserCompanyAssociationSearchData> response =
+                testDataController.searchAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(ASSOCIATION_ID, response.getBody().getId());
+        assertEquals("CONFIRMED", response.getBody().getStatus());
     }
 
     @Test
-    void deleteUserCompanyAssociation() throws Exception {
-        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
-                .thenReturn(true);
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
+    void searchAssociation_Success_NoSlashInLink() throws Exception {
+        String link = ASSOCIATION_ID;
+        Association association = mock(Association.class);
+        AssociationLinks links = mock(AssociationLinks.class);
 
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteUserCompanyAssociationData(ASSOCIATION_ID);
+        when(association.getLinks()).thenReturn(links);
+        when(links.toString()).thenReturn(link);
+        when(association.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
+        when(association.getUserId()).thenReturn(USER_ID);
+        when(association.getStatus()).thenReturn(Association.StatusEnum.AWAITING_APPROVAL);
+
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(association);
+
+        ResponseEntity<UserCompanyAssociationSearchData> response =
+                testDataController.searchAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals(ASSOCIATION_ID, response.getBody().getId());
+        assertEquals("AWAITING_APPROVAL", response.getBody().getStatus());
     }
 
     @Test
-    void deleteUserCompanyAssociationNotFound() throws Exception {
-        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
-                .thenReturn(false);
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
+    void searchAssociation_Success_NullStatus() throws Exception {
+        String link = "/associations/" + ASSOCIATION_ID;
+        Association association = mock(Association.class);
+        AssociationLinks links = mock(AssociationLinks.class);
+
+        when(association.getLinks()).thenReturn(links);
+        when(links.toString()).thenReturn(link);
+        when(association.getCompanyNumber()).thenReturn(COMPANY_NUMBER);
+        when(association.getUserId()).thenReturn(USER_ID);
+        when(association.getStatus()).thenReturn(null);
+
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(association);
+
+        ResponseEntity<UserCompanyAssociationSearchData> response =
+                testDataController.searchAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertNull(response.getBody().getStatus());
+    }
+
+    @Test
+    void searchAssociation_NotFound_NullAssociation() throws Exception {
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(null);
+
+        ResponseEntity<UserCompanyAssociationSearchData> response =
+                testDataController.searchAssociation(COMPANY_NUMBER, USER_ID, null);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals(ASSOCIATION_ID,
-                Objects.requireNonNull(response.getBody()).get(
-                        "association_id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-
-        verify(testDataService, times(1)).deleteUserCompanyAssociationData(ASSOCIATION_ID);
     }
 
     @Test
-    void deleteUserCompanyAssociationException() throws Exception {
-        Throwable exception = new DataException("Error deleting "
-                + "association");
+    void searchAssociation_NotFound_NullLinks() throws Exception {
+        Association association = mock(Association.class);
+        when(association.getLinks()).thenReturn(null);
 
-        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
+                .thenReturn(association);
+
+        ResponseEntity<UserCompanyAssociationSearchData> response =
+                testDataController.searchAssociation(COMPANY_NUMBER, USER_ID, null);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void searchAssociation_ThrowsException() throws Exception {
+        DataException exception = new DataException("Error searching");
+        when(userCompanyAssociationService.searchAssociation(COMPANY_NUMBER, USER_ID, null))
                 .thenThrow(exception);
 
-        DataException thrown = assertThrows(
-                DataException.class,
-                () -> this.testDataController.deleteAssociation(ASSOCIATION_ID));
-        assertEquals(exception, thrown);
+        assertThrows(DataException.class, () ->
+                testDataController.searchAssociation(COMPANY_NUMBER, USER_ID, null));
     }
 
     @Test

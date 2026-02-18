@@ -1,101 +1,117 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
-
+import uk.gov.companieshouse.api.accounts.associations.model.Association;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
-import uk.gov.companieshouse.api.testdata.model.entity.PreviousState;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
-import uk.gov.companieshouse.api.testdata.model.rest.InvitationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PreviousStateSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
+import uk.gov.companieshouse.api.testdata.service.AccountsApiService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service
+@Service("userCompanyAssociationServiceImpl")
 public class UserCompanyAssociationServiceImpl implements
         DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> {
-    private static final String AUTH_CODE = "auth_code";
-    private static final String CONFIRMED_STATUS = "confirmed";
 
-    @Autowired
-    private UserCompanyAssociationRepository repository;
+    private static final Logger LOG
+            = LoggerFactory.getLogger(String.valueOf(UserCompanyAssociationServiceImpl.class));
 
-    @Autowired
-    private RandomService randomService;
+    private final UserCompanyAssociationRepository userCompanyAssociationRepository;
+    private final AccountsApiService accountsApiService;
+
+    public UserCompanyAssociationServiceImpl(
+            AccountsApiService accountsApiService,
+            UserCompanyAssociationRepository userCompanyAssociationRepository) {
+        this.accountsApiService = accountsApiService;
+        this.userCompanyAssociationRepository = userCompanyAssociationRepository;
+    }
 
     @Override
     public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {
-        var randomId = randomService.generateId();
-        var association = new UserCompanyAssociation();
-        var currentDate = randomService.getCurrentDateTime();
+        LOG.info("Creating association via SDK for company: "
+                + spec.getCompanyNumber() + "and user: "  + spec.getUserId());
+        try {
+            var sdkResponse = accountsApiService.getInternalApiClientForPrivateAccountApiUrl()
+                    .privateAccountsAssociationResourceHandler()
+                    .addAssociation("/associations", spec.getCompanyNumber(), spec.getUserId())
+                    .execute()
+                    .getData();
 
-        association.setId(randomId);
-        association.setCompanyNumber(spec.getCompanyNumber());
-        association.setUserId(spec.getUserId());
-        association.setUserEmail(spec.getUserEmail());
-        association.setStatus(Objects.requireNonNullElse(spec.getStatus(),
-                CONFIRMED_STATUS));
-        association.setCreatedAt(currentDate);
-        association.setApprovalRoute(Objects.requireNonNullElse(spec.getApprovalRoute(),
-                AUTH_CODE));
-        association.setInvitations(spec.getInvitations() != null ? createInvitations(spec) : null);
-        association.setApprovalExpiryAt(spec.getInvitations() != null
-                ? Objects.requireNonNullElse(spec.getApprovalExpiryAt(),
-                    currentDate.plus(7,
-                            ChronoUnit.DAYS)) : null);
-        association.setPreviousStates(spec.getPreviousStates() != null
-                ? createPreviousStates(spec) : null);
+            var associationLink = sdkResponse.getAssociationLink();
+            String associationId;
+            if (associationLink != null && associationLink.contains("/")) {
+                associationId = associationLink.substring(associationLink.lastIndexOf("/") + 1);
+            } else {
+                associationId = associationLink;
+            }
+            LOG.info("Successfully created association. ID: "
+                    + associationId + " for company: " + spec.getCompanyNumber());
 
-        repository.save(association);
+            return new UserCompanyAssociationData(
+                    associationId,
+                    "/associations/" + associationId
+            );
 
-        return new UserCompanyAssociationData(
-                association.getId(),
-                association.getCompanyNumber(),
-                association.getUserId(),
-                association.getUserEmail(),
-                association.getStatus(),
-                association.getApprovalRoute(),
-                association.getInvitations());
+
+        } catch (ApiErrorResponseException | URIValidationException error) {
+            LOG.error("Error creating association for company :"
+                    + spec.getCompanyNumber() + error.getMessage(), error);
+            throw new DataException("Error creating association: " + error.getMessage(), error);
+        }
     }
 
     @Override
     public boolean delete(String id) {
-        var association =
-                repository.findById(id);
-        association.ifPresent(repository::delete);
-        return association.isPresent();
+        LOG.info("Deleting association with ID: " + id);
+        Optional<UserCompanyAssociation> optional = userCompanyAssociationRepository.findById(id);
+        if (optional.isPresent()) {
+            UserCompanyAssociation association = optional.get();
+            association.setStatus("REMOVED");
+            userCompanyAssociationRepository.save(association);
+            LOG.info("Successfully updated association status to REMOVED for ID: " + id);
+            return true;
+        } else {
+            LOG.error("Association not found with ID: " + id);
+            return false;
+        }
     }
 
-    private List<Invitation> createInvitations(UserCompanyAssociationSpec spec) {
-        List<Invitation> invitationList = new ArrayList<>();
-        for (InvitationSpec invite : spec.getInvitations()) {
-            var invitation = new Invitation();
-            invitation.setInvitedAt(invite.getInvitedAt());
-            invitation.setInvitedBy(invite.getInvitedBy());
-            invitationList.add(invitation);
-        }
-        return invitationList;
-    }
+    public Association searchAssociation(String companyNumber, String userId, String userEmail)
+            throws DataException {
+        LOG.info("Searching for association for company: "
+                + companyNumber + "and user/email: " + userEmail);
 
-    private List<PreviousState> createPreviousStates(UserCompanyAssociationSpec spec) {
-        List<PreviousState> previousStateList = new ArrayList<>();
-        for (PreviousStateSpec prevState :
-                spec.getPreviousStates()) {
-            var previousState = new PreviousState();
-            previousState.setChangedBy(prevState.getChangedBy());
-            previousState.setChangedAt(prevState.getChangedAt());
-            previousState.setStatus(prevState.getStatus());
-            previousStateList.add(previousState);
+        try {
+            var association = accountsApiService.getInternalApiClientForPrivateAccountApiUrl()
+                    .privateAccountsAssociationResourceHandler()
+                    .searchForAssociation(
+                            "/associations/companies/" + companyNumber + "/search",
+                            userId,
+                            userEmail,
+                            "confirmed", "awaiting-approval", "migrated", "unauthorised")
+                    .execute()
+                    .getData();
+
+            if (association != null) {
+                LOG.info("Found association with ID: {} for company: {}"
+                );
+            } else {
+                LOG.info("No association found for company: {}");
+            }
+
+            return association;
+
+        } catch (ApiErrorResponseException | URIValidationException error) {
+            var errorMessage = String.format(
+                    "Error searching for association for company %s", companyNumber);
+            LOG.error(errorMessage, error);
+            throw new DataException(errorMessage, error);
         }
-        return previousStateList;
     }
 }

@@ -3,223 +3,248 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
 import java.util.Optional;
-import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import uk.gov.companieshouse.api.InternalApiClient;
+import uk.gov.companieshouse.api.accounts.associations.model.Association;
+import uk.gov.companieshouse.api.accounts.associations.model.ResponseBodyPost;
+import uk.gov.companieshouse.api.error.ApiErrorResponseException;
+import uk.gov.companieshouse.api.handler.accountsassociation.PrivateAccountsAssociationResourceHandler;
+import uk.gov.companieshouse.api.handler.accountsassociation.request.PrivateAccountsAssociationAddPost;
+import uk.gov.companieshouse.api.handler.accountsassociation.request.PrivateAccountsAssociationSearchGet;
+import uk.gov.companieshouse.api.handler.exception.URIValidationException;
+import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
-import uk.gov.companieshouse.api.testdata.model.rest.InvitationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PreviousStateSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.AccountsApiService;
 
 @ExtendWith(MockitoExtension.class)
 class UserCompanyAssociationServiceImplTest {
+
     private static final String COMPANY_NUMBER = "TC123456";
-    private static final String AUTH_CODE_APPROVAL_ROUTE =
-            "auth_code";
-    private static final String CONFIRMED_STATUS = "confirmed";
-    private static final String AWAITING_APPROVAL_STATUS =
-            "awaiting-approval";
-    private static final String INVITATION_APPROVAL_ROUTE = "invitation";
     private static final String USER_ID = "userId";
+    private static final String USER_EMAIL = "user@test.com";
     private static final String ASSOCIATION_ID = "associationId";
+    private static final String STATUS_CONFIRMED = "confirmed";
+    private static final String STATUS_REMOVED = "REMOVED";
+    private static final String ASSOCIATION_LINK_WITH_SLASH = "/associations/" + ASSOCIATION_ID;
+    private static final String ASSOCIATION_LINK_NO_SLASH = ASSOCIATION_ID;
 
     @Mock
     private UserCompanyAssociationRepository repository;
 
     @Mock
-    private RandomService randomService;
+    private AccountsApiService accountsApiService;
+
+    @Mock
+    private InternalApiClient internalApiClient;
+
+    @Mock
+    private PrivateAccountsAssociationResourceHandler resourceHandler;
+
+    @Mock
+    private PrivateAccountsAssociationAddPost associationPost;
+
+    @Mock
+    private PrivateAccountsAssociationSearchGet associationSearch;
+
+    @Mock
+    private ApiResponse<ResponseBodyPost> apiResponseCreate;
+
+    @Mock
+    private ApiResponse<Association> apiResponseSearch;
+
+    @Mock
+    private ResponseBodyPost associationResponse;
 
     @InjectMocks
-    @Spy
     private UserCompanyAssociationServiceImpl service;
 
     @Test
-    void createDefaultAssociation() throws DataException {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+    void create_ReturnsAssociationData_WhenLinkContainsSlash() throws Exception {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId(USER_ID);
 
-        var createdDate = Instant.now();
-        when(randomService.getCurrentDateTime()).thenReturn(createdDate);
+        mockApiClientChainForCreate();
 
-        var id = new ObjectId();
-        when(randomService.generateId()).thenReturn(id);
+        when(associationResponse.getAssociationLink()).thenReturn(ASSOCIATION_LINK_WITH_SLASH);
 
-        UserCompanyAssociationData association = service.create(spec);
-        assertNotNull(association);
-        assertEquals(id.toString(), association.getId());
-        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
-        assertEquals(USER_ID, association.getUserId());
+        UserCompanyAssociationData result = service.create(spec);
 
-        ArgumentCaptor<UserCompanyAssociation> captor =
-                ArgumentCaptor.forClass(UserCompanyAssociation.class);
-        verify(repository).save(captor.capture());
-
-        UserCompanyAssociation captured = captor.getValue();
-        assertEquals(id, captured.getId());
-        assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
-        assertEquals(USER_ID, captured.getUserId());
-        assertEquals(CONFIRMED_STATUS, captured.getStatus());
-        assertEquals(AUTH_CODE_APPROVAL_ROUTE, captured.getApprovalRoute());
-        assertNull(captured.getUserEmail());
-        assertNull(captured.getInvitations());
-        assertNull(captured.getApprovalExpiryAt());
-        assertNull(captured.getPreviousStates());
-        assertEquals(createdDate, captured.getCreatedAt());
+        assertNotNull(result);
+        assertEquals(ASSOCIATION_ID, result.getId());
+        assertEquals(ASSOCIATION_LINK_WITH_SLASH, result.getAssociationLink());
+        verify(associationPost).execute();
     }
 
     @Test
-    void createAssociationWithInvitationAndPreviousState() throws DataException {
-        var invitationTime = Instant.now();
-        InvitationSpec invitationSpec = new InvitationSpec();
-        invitationSpec.setInvitedAt(invitationTime);
-        invitationSpec.setInvitedBy("userC");
-
-        PreviousStateSpec previousStateSpec = new PreviousStateSpec();
-        previousStateSpec.setStatus("removed");
-        previousStateSpec.setChangedBy("userB");
-        previousStateSpec.setChangedAt(invitationTime);
-
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+    void create_ReturnsAssociationData_WhenLinkContainsNoSlash() throws Exception {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId(USER_ID);
-        spec.setApprovalRoute(INVITATION_APPROVAL_ROUTE);
-        spec.setStatus(AWAITING_APPROVAL_STATUS);
-        spec.setInvitations(List.of(invitationSpec));
-        spec.setApprovalExpiryAt(invitationTime.plus(7,
-                ChronoUnit.DAYS));
-        spec.setPreviousStates(List.of(previousStateSpec));
 
-        var createdDate = Instant.now();
-        when(randomService.getCurrentDateTime()).thenReturn(createdDate);
+        mockApiClientChainForCreate();
 
-        var id = new ObjectId();
-        when(randomService.generateId()).thenReturn(id);
+        when(associationResponse.getAssociationLink()).thenReturn(ASSOCIATION_LINK_NO_SLASH);
 
-        UserCompanyAssociationData association = service.create(spec);
-        assertNotNull(association);
-        assertEquals(id.toString(), association.getId());
-        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
-        assertEquals(USER_ID, association.getUserId());
-        assertEquals(AWAITING_APPROVAL_STATUS, association.getStatus());
-        assertEquals(INVITATION_APPROVAL_ROUTE, association.getApprovalRoute());
+        UserCompanyAssociationData result = service.create(spec);
 
-        ArgumentCaptor<UserCompanyAssociation> captor =
-                ArgumentCaptor.forClass(UserCompanyAssociation.class);
-        verify(repository).save(captor.capture());
-
-        UserCompanyAssociation captured = captor.getValue();
-        assertEquals(id, captured.getId());
-        assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
-        assertEquals(USER_ID, captured.getUserId());
-        assertEquals(AWAITING_APPROVAL_STATUS, captured.getStatus());
-        assertEquals(INVITATION_APPROVAL_ROUTE, captured.getApprovalRoute());
-        assertNull(captured.getUserEmail());
-        assertEquals(invitationSpec.getInvitedAt(),
-                captured.getInvitations().getFirst().getInvitedAt());
-        assertEquals(invitationSpec.getInvitedBy(),
-                captured.getInvitations().getFirst().getInvitedBy());
-        assertEquals(previousStateSpec.getStatus(),
-                captured.getPreviousStates().getFirst().getStatus());
-        assertEquals(previousStateSpec.getChangedBy(),
-                captured.getPreviousStates().getFirst().getChangedBy());
-        assertEquals(previousStateSpec.getChangedAt(),
-                captured.getPreviousStates().getFirst().getChangedAt());
-        assertEquals(createdDate, captured.getCreatedAt());
-        assertEquals(invitationTime
-                .plus(7, ChronoUnit.DAYS), captured.getApprovalExpiryAt());
+        assertNotNull(result);
+        assertEquals(ASSOCIATION_ID, result.getId());
+        assertEquals("/associations/" + ASSOCIATION_ID, result.getAssociationLink());
     }
 
     @Test
-    void createAssociationWithEmail() throws DataException {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+    void create_ThrowsDataException_WhenApiReturnsError() throws Exception {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setUserEmail("test@example.com");
+        spec.setUserId(USER_ID);
 
-        var createdDate = Instant.now();
-        when(randomService.getCurrentDateTime()).thenReturn(createdDate);
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
+        when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
+        when(associationPost.execute()).thenThrow(mock(ApiErrorResponseException.class));
 
-        var id = new ObjectId();
-        when(randomService.generateId()).thenReturn(id);
-
-        UserCompanyAssociationData association = service.create(spec);
-        assertNotNull(association);
-        assertEquals(id.toString(), association.getId());
-        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
-        assertEquals("test@example.com", association.getUserEmail());
-
-        ArgumentCaptor<UserCompanyAssociation> captor =
-                ArgumentCaptor.forClass(UserCompanyAssociation.class);
-        verify(repository).save(captor.capture());
-
-        UserCompanyAssociation captured = captor.getValue();
-        assertEquals(id, captured.getId());
-        assertEquals(COMPANY_NUMBER, captured.getCompanyNumber());
-        assertEquals("test@example.com", captured.getUserEmail());
-        assertEquals(CONFIRMED_STATUS, captured.getStatus());
-        assertEquals(AUTH_CODE_APPROVAL_ROUTE, captured.getApprovalRoute());
-        assertNull(captured.getUserId());
-        assertNull(captured.getInvitations());
-        assertNull(captured.getApprovalExpiryAt());
-        assertNull(captured.getPreviousStates());
-        assertEquals(createdDate, captured.getCreatedAt());
+        DataException exception = assertThrows(DataException.class, () -> service.create(spec));
+        assertTrue(exception.getMessage().contains("Error creating association"));
     }
-    
+
     @Test
-    void deleteAssociation() {
-        UserCompanyAssociation userCompanyAssociation =
-                new UserCompanyAssociation();
-        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(userCompanyAssociation));
+    void create_ThrowsDataException_WhenUriValidationErrorOccurs() throws Exception {
+        UserCompanyAssociationSpec spec = new UserCompanyAssociationSpec();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setUserId(USER_ID);
+
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
+        when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
+        when(associationPost.execute()).thenThrow(new URIValidationException("URI Error"));
+
+        DataException exception = assertThrows(DataException.class, () -> service.create(spec));
+        assertTrue(exception.getMessage().contains("Error creating association"));
+    }
+
+    @Test
+    void deleteAssociation_UpdatesStatusToRemoved_WhenAssociationExists() {
+        UserCompanyAssociation association = new UserCompanyAssociation();
+        association.setId(ASSOCIATION_ID);
+        association.setStatus(STATUS_CONFIRMED);
+        association.setCompanyNumber(COMPANY_NUMBER);
+        association.setUserId(USER_ID);
+        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
+
         boolean result = service.delete(ASSOCIATION_ID);
+
         assertTrue(result);
-        verify(repository).delete(userCompanyAssociation);
+        assertEquals(STATUS_REMOVED, association.getStatus());
+        verify(repository, times(1)).save(association);
     }
 
     @Test
-    void deleteAssociationNotFound() {
+    void deleteAssociation_ReturnsFalse_WhenAssociationDoesNotExist() {
         when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.empty());
+
         boolean result = service.delete(ASSOCIATION_ID);
+
         assertFalse(result);
-        verify(repository, never()).delete(any(UserCompanyAssociation.class));
+        verify(repository, never()).save(any());
     }
 
     @Test
-    void deleteAssociationException() {
-        UserCompanyAssociation userCompanyAssociation =
-                new UserCompanyAssociation();
+    void deleteAssociation_DoesNotChangeOtherFields() {
+        UserCompanyAssociation association = new UserCompanyAssociation();
+        association.setId(ASSOCIATION_ID);
+        association.setStatus(STATUS_CONFIRMED);
+        association.setCompanyNumber(COMPANY_NUMBER);
+        association.setUserId(USER_ID);
+        association.setEtag("etag123");
+        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(association));
 
-        when(repository.findById(ASSOCIATION_ID)).thenReturn(Optional.of(userCompanyAssociation));
-        doThrow(new RuntimeException("Error deleting association"))
-                .when(repository).delete(userCompanyAssociation);
+        service.delete(ASSOCIATION_ID);
 
-        RuntimeException exception =
-                assertThrows(RuntimeException.class,
-                        () -> service.delete(ASSOCIATION_ID));
-        assertEquals("Error deleting association", exception.getMessage());
+        assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
+        assertEquals(USER_ID, association.getUserId());
+        assertEquals("etag123", association.getEtag());
+    }
+
+    @Test
+    void searchAssociation_ReturnsAssociation_WhenFound() throws Exception {
+        Association mockAssociation = new Association();
+        mockAssociation.setId(ASSOCIATION_ID);
+
+        mockApiClientChainForSearch();
+        when(apiResponseSearch.getData()).thenReturn(mockAssociation);
+
+        Association result = service.searchAssociation(COMPANY_NUMBER, USER_ID, USER_EMAIL);
+
+        assertNotNull(result);
+        assertEquals(ASSOCIATION_ID, result.getId());
+    }
+
+    @Test
+    void searchAssociation_ReturnsNull_WhenNotFound() throws Exception {
+        mockApiClientChainForSearch();
+        when(apiResponseSearch.getData()).thenReturn(null);
+
+        Association result = service.searchAssociation(COMPANY_NUMBER, USER_ID, USER_EMAIL);
+
+        assertEquals(null, result);
+    }
+
+    @Test
+    void searchAssociation_ThrowsDataException_WhenApiErrorOccurs() throws Exception {
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
+        when(resourceHandler.searchForAssociation(anyString(), eq(USER_ID), eq(USER_EMAIL), anyString(), anyString(), anyString(), anyString()))
+                .thenReturn(associationSearch);
+        when(associationSearch.execute()).thenThrow(mock(ApiErrorResponseException.class));
+
+        DataException exception = assertThrows(DataException.class, () ->
+                service.searchAssociation(COMPANY_NUMBER, USER_ID, USER_EMAIL)
+        );
+        assertTrue(exception.getMessage().contains("Error searching for association"));
+    }
+
+    // --- Helpers ---
+
+    private void mockApiClientChainForCreate() throws Exception {
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
+        when(resourceHandler.addAssociation(anyString(), eq(COMPANY_NUMBER), eq(USER_ID))).thenReturn(associationPost);
+        when(associationPost.execute()).thenReturn(apiResponseCreate);
+        when(apiResponseCreate.getData()).thenReturn(associationResponse);
+    }
+
+    private void mockApiClientChainForSearch() throws Exception {
+        when(accountsApiService.getInternalApiClientForPrivateAccountApiUrl()).thenReturn(internalApiClient);
+        when(internalApiClient.privateAccountsAssociationResourceHandler()).thenReturn(resourceHandler);
+        when(resourceHandler.searchForAssociation(
+                "/associations/companies/" + COMPANY_NUMBER + "/search",
+                USER_ID,
+                USER_EMAIL,
+                "confirmed", "awaiting-approval", "migrated", "unauthorised")
+        ).thenReturn(associationSearch);
+
+        when(associationSearch.execute()).thenReturn(apiResponseSearch);
     }
 }

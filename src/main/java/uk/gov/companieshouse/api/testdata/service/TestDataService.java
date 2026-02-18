@@ -29,6 +29,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -273,6 +274,16 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
+
+    /**
+     * Search for a user-company association by company number, userId, or userEmail.
+     * @param companyNumber the company number
+     * @param userId the user id (optional)
+     * @param userEmail the user email (optional)
+     * @return the association search response
+     * @throws DataException if an error occurs
+     */
+    UserCompanyAssociationSearchData searchUserCompanyAssociation(String companyNumber, String userId, String userEmail) throws DataException;
 
     AdminPermissionsData createAdminPermissionsData(AdminPermissionsSpec spec) throws DataException;
 

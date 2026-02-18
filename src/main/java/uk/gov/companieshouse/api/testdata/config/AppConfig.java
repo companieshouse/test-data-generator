@@ -46,5 +46,4 @@ public class AppConfig implements WebMvcConfigurer {
             return internalApiClient;
         };
     }
-
 }

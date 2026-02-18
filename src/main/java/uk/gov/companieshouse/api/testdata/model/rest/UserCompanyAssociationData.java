@@ -2,71 +2,31 @@ package uk.gov.companieshouse.api.testdata.model.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.List;
-
-import org.bson.types.ObjectId;
-import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
-
 public class UserCompanyAssociationData {
-    @JsonProperty("id")
-    private final String id;
+    private String id;
+    @JsonProperty("association_link")
+    private String associationLink;
 
-    @JsonProperty("company_number")
-    private final String companyNumber;
+    public UserCompanyAssociationData() {}
 
-    @JsonProperty("user_id")
-    private final String userId;
-
-    @JsonProperty("user_email")
-    private final String userEmail;
-
-    @JsonProperty("status")
-    private final String status;
-
-    @JsonProperty("approval_route")
-    private final String approvalRoute;
-
-    @JsonProperty("invitations")
-    private final List<Invitation> invitations;
-
-    public UserCompanyAssociationData(ObjectId id,
-                                      String companyNumber, String userId,
-                                      String userEmail, String status,
-                                      String approvalRoute, List<Invitation> invitations) {
-        this.id = id.toString();
-        this.companyNumber = companyNumber;
-        this.userId = userId;
-        this.userEmail = userEmail;
-        this.status = status;
-        this.approvalRoute = approvalRoute;
-        this.invitations = invitations;
+    public UserCompanyAssociationData(String id, String associationLink) {
+        this.id = id;
+        this.associationLink = associationLink;
     }
 
     public String getId() {
         return id;
     }
 
-    public String getCompanyNumber() {
-        return companyNumber;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getAssociationLink() {
+        return associationLink;
     }
 
-    public String getUserEmail() {
-        return userEmail;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getApprovalRoute() {
-        return approvalRoute;
-    }
-
-    public List<Invitation> getInvitations() {
-        return invitations;
+    public void setAssociationLink(String associationLink) {
+        this.associationLink = associationLink;
     }
 }

@@ -54,6 +54,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
+import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSearchData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.UserData;
 import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
@@ -771,42 +772,45 @@ public class TestDataServiceImpl implements TestDataService {
     public UserCompanyAssociationData createUserCompanyAssociationData(
             UserCompanyAssociationSpec spec)
             throws DataException {
-        if (spec.getUserId() == null
-                && spec.getUserEmail() == null) {
-            throw new DataException("A user_id or a user_email is "
-                    + "required to create an association");
+        if (spec.getUserId() == null && spec.getUserEmail() == null) {
+            throw new DataException(
+                    "A user_id or a user_email is required to create an association");
         }
 
         if (spec.getCompanyNumber() == null || spec.getCompanyNumber().isEmpty()) {
-            throw new DataException("Company number is "
-                    + "required to create an association");
+            throw new DataException("Company number is required to create an association");
         }
 
         try {
-            UserCompanyAssociationData createdAssociation =
-                    userCompanyAssociationService.create(spec);
-
-            return new UserCompanyAssociationData(
-                    new ObjectId(createdAssociation.getId()),
-                    createdAssociation.getCompanyNumber(),
-                    createdAssociation.getUserId(),
-                    createdAssociation.getUserEmail(),
-                    createdAssociation.getStatus(),
-                    createdAssociation.getApprovalRoute(),
-                    createdAssociation.getInvitations()
+            LOG.info("Creating association via SDK for company: " + spec.getCompanyNumber()
+                    + "and user id: " + spec.getUserId()
             );
+
+            UserCompanyAssociationData createdAssociation
+                    = userCompanyAssociationService.create(spec);
+
+            LOG.info("Successfully created association via SDK with ID: "
+                    + spec.getUserId() + " for company: " + spec.getCompanyNumber());
+
+            return createdAssociation;
+
         } catch (Exception ex) {
-            throw new DataException("Error creating the association",
-                    ex);
+            LOG.error("Error creating association via SDK for company: "
+                    + spec.getCompanyNumber() + " and user: " + spec.getUserId()
+            );
+            throw new DataException("Error creating the association via SDK: "
+                    + ex.getMessage(), ex);
         }
     }
 
     @Override
     public boolean deleteUserCompanyAssociationData(String id) throws DataException {
         try {
+            LOG.info("Deleting association with ID: " + id);
             return userCompanyAssociationService.delete(id);
         } catch (Exception ex) {
-            throw new DataException("Error deleting association", ex);
+            LOG.error("Error deleting association with ID: " + id);
+            throw new DataException("Error deleting association: " + ex.getMessage(), ex);
         }
     }
 
@@ -890,9 +894,11 @@ public class TestDataServiceImpl implements TestDataService {
                                                   CompanyData companyData)
             throws DataException, ApiErrorResponseException, URIValidationException {
 
-        // This variable is set from environment to allow disabling ES indexing in certain environments
+        // This variable is set from environment to allow disabling
+        // ES indexing in certain environments
         if (!isElasticSearchDeployed) {
-            LOG.debug("Elasticsearch not deployed; skipping indexing for company " + spec.getCompanyNumber());
+            LOG.debug("Elasticsearch not deployed; skipping indexing for company "
+                    + spec.getCompanyNumber());
             return;
         }
 
@@ -913,7 +919,8 @@ public class TestDataServiceImpl implements TestDataService {
 
         // Alphabetical index
         if (addAlphabeticalIndex) {
-            LOG.info("Adding company to Alphabetical ElasticSearch index: " + spec.getCompanyNumber());
+            LOG.info("Adding company to Alphabetical ElasticSearch index: "
+                    + spec.getCompanyNumber());
             alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
         }
 
@@ -923,11 +930,13 @@ public class TestDataServiceImpl implements TestDataService {
             advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
         }
 
-        LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
+        LOG.info("Successfully added company to configured ElasticSearch indexes : "
+                + spec.getCompanyNumber());
     }
 
     @Override
-    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec) throws DataException {
+    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(
+            CompanySpec spec) throws DataException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
         }
@@ -968,7 +977,8 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.info("Successfully get company metrics");
             response.setCompanyMetrics(companyMetrics);
 
-            List<CompanyPscStatement> companyPscStatements = companyPscStatementService.createPscStatements(spec);
+            List<CompanyPscStatement> companyPscStatements =
+                    companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
 
@@ -1001,7 +1011,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException {
+    public CompanyData createCompanyWithStructure(
+            CompanyWithPopulatedStructureSpec companySpec) throws DataException {
 
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
@@ -1011,4 +1022,29 @@ public class TestDataServiceImpl implements TestDataService {
                 authCode, companyUri);
     }
 
+    @Override
+    public UserCompanyAssociationSearchData searchUserCompanyAssociation(
+            String companyNumber, String userId, String userEmail) throws DataException {
+        var association = ((UserCompanyAssociationServiceImpl) userCompanyAssociationService)
+                .searchAssociation(companyNumber, userId, userEmail);
+        if (association == null || association.getLinks() == null) {
+            return null;
+        }
+        var associationLink = String.valueOf(association.getLinks());
+        String id;
+        if (associationLink != null && associationLink.contains("/")) {
+            id = associationLink.substring(associationLink.lastIndexOf("/") + 1);
+        } else {
+            id = associationLink;
+        }
+        // Build response with all fields, invitations set to null (method not found)
+        return new UserCompanyAssociationSearchData(
+                id,
+                association.getCompanyNumber(),
+                association.getUserId(),
+                association.getStatus() != null ? association.getStatus().name() : null
+        );
+    }
+
 }
+
