@@ -7,7 +7,7 @@ import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -26,7 +26,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     }
 
     @Override
-    public void addCompanyIntoElasticSearchIndex(CompanyData data) throws
+    public void addCompanyIntoElasticSearchIndex(CompanyProfileResponse data) throws
             ApiErrorResponseException, URIValidationException {
         String companyNumber = data.getCompanyNumber();
         var formattedAlphabeticalSearchUri = String.format(ALPHABETICAL_SEARCH_URI,

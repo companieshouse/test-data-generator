@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 
 
 class AddressServiceImplTest {
@@ -19,28 +19,28 @@ class AddressServiceImplTest {
 
     @Test
     void getAddressForJurisdictionEnglandWales() {
-        Address address = addressService.getAddress(Jurisdiction.ENGLAND_WALES);
+        Address address = addressService.getAddress(JurisdictionType.ENGLAND_WALES);
         assertAddress(address, "Companies House", "Crownway",
                 "United Kingdom", "Cardiff", "CF14 3UZ");
     }
 
     @Test
     void getAddressForJurisdictionScotland() {
-        Address address = addressService.getAddress(Jurisdiction.SCOTLAND);
+        Address address = addressService.getAddress(JurisdictionType.SCOTLAND);
         assertAddress(address, "4th Floor Edinburgh Quay 2", "139 Fountain Bridge",
                 "United Kingdom", "Edinburgh", "EH3 9FF");
     }
 
     @Test
     void getAddressForJurisdictionNI() {
-        Address address = addressService.getAddress(Jurisdiction.NI);
+        Address address = addressService.getAddress(JurisdictionType.NI);
         assertAddress(address, "Second Floor The Linenhall", "32 - 38 Linenhall Street",
                 "United Kingdom", "Belfast", "BT2 8BG");
     }
 
     @Test
     void getAddressForJurisdictionUnitedKingdom() {
-        Address address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
+        Address address = addressService.getAddress(JurisdictionType.UNITED_KINGDOM);
         assertAddress(address, "Gordon Cummins Hwy", "Grantley Adams International Airport",
                 "Barbados", "Christ Church", "123125");
     }
@@ -48,48 +48,48 @@ class AddressServiceImplTest {
     @Test
     void getCountryOfResidenceEnglandWales() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.ENGLAND_WALES);
+                = addressService.getCountryOfResidence(JurisdictionType.ENGLAND_WALES);
         assertEquals("Wales", addressServiceCountryOfResidence);
     }
 
     @Test
     void getCountryOfResidenceScotland() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.SCOTLAND);
+                = addressService.getCountryOfResidence(JurisdictionType.SCOTLAND);
         assertEquals("Scotland", addressServiceCountryOfResidence);
     }
 
     @Test
     void getCountryOfResidenceNI() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.NI);
+                = addressService.getCountryOfResidence(JurisdictionType.NI);
         assertEquals("Northern Ireland", addressServiceCountryOfResidence);
     }
 
     @Test
     void getCountryOfResidenceUnitedKingdom() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.UNITED_KINGDOM);
+                = addressService.getCountryOfResidence(JurisdictionType.UNITED_KINGDOM);
         assertEquals("Barbados", addressServiceCountryOfResidence);
     }
 
     @Test
     void getAddressForJurisdictionEngland() {
-        Address address = addressService.getAddress(Jurisdiction.ENGLAND);
+        Address address = addressService.getAddress(JurisdictionType.ENGLAND);
         assertAddress(address, "Companies House,4th Floor, The Linen Hall",
                 "162-168 Regent Street", "United Kingdom", "London", "W1B 5TF");
     }
 
     @Test
     void getAddressForJurisdictionEuropeanUnion() {
-        Address address = addressService.getAddress(Jurisdiction.EUROPEAN_UNION);
+        Address address = addressService.getAddress(JurisdictionType.EUROPEAN_UNION);
         assertAddress(address, "Schiphol Boulevard Tower 403 Tower C-4",
                 "1118bk Schiphol", "Netherlands", "Amsterdam", "123123");
     }
 
     @Test
     void getAddressForJurisdictionNonEu() {
-        Address address = addressService.getAddress(Jurisdiction.NON_EU);
+        Address address = addressService.getAddress(JurisdictionType.NON_EU);
         assertAddress(address, "Edificio Salduba Tercer Piso", "Calle 53 Este",
                 "Panama", "Marbella", "123124");
     }
@@ -97,21 +97,21 @@ class AddressServiceImplTest {
     @Test
     void getCountryOfResidenceEngland() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.ENGLAND);
+                = addressService.getCountryOfResidence(JurisdictionType.ENGLAND);
         assertEquals("England", addressServiceCountryOfResidence);
     }
 
     @Test
     void getCountryOfResidenceEuropeanUnion() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.EUROPEAN_UNION);
+                = addressService.getCountryOfResidence(JurisdictionType.EUROPEAN_UNION);
         assertEquals("Netherlands", addressServiceCountryOfResidence);
     }
 
     @Test
     void getCountryOfResidenceNonEu() {
         String addressServiceCountryOfResidence
-                = addressService.getCountryOfResidence(Jurisdiction.NON_EU);
+                = addressService.getCountryOfResidence(JurisdictionType.NON_EU);
         assertEquals("Panama", addressServiceCountryOfResidence);
     }
 

@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 
 class AdminPermissionsServiceImplTest {
@@ -38,7 +38,7 @@ class AdminPermissionsServiceImplTest {
 
     @Test
     void create_shouldSaveAndReturnData() {
-        AdminPermissionsSpec spec = new AdminPermissionsSpec();
+        AdminPermissionsRequest spec = new AdminPermissionsRequest();
         spec.setGroupId("group123");
         spec.setGroupName("Test Group");
         spec.setRoles(List.of("role1", "role2"));
@@ -51,7 +51,7 @@ class AdminPermissionsServiceImplTest {
 
         when(repository.save(any(AdminPermissions.class))).thenReturn(saved);
 
-        AdminPermissionsData result = adminPermissionsService.create(spec);
+        AdminPermissionsResponse result = adminPermissionsService.create(spec);
 
         ArgumentCaptor<AdminPermissions> captor = ArgumentCaptor.forClass(AdminPermissions.class);
         verify(repository).save(captor.capture());

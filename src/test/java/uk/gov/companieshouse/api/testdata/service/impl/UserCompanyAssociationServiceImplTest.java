@@ -26,10 +26,10 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
-import uk.gov.companieshouse.api.testdata.model.rest.InvitationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PreviousStateSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InvitationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -57,8 +57,8 @@ class UserCompanyAssociationServiceImplTest {
 
     @Test
     void createDefaultAssociation() throws DataException {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId(USER_ID);
 
@@ -68,7 +68,7 @@ class UserCompanyAssociationServiceImplTest {
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
 
-        UserCompanyAssociationData association = service.create(spec);
+        UserCompanyAssociationResponse association = service.create(spec);
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
         assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
@@ -94,22 +94,22 @@ class UserCompanyAssociationServiceImplTest {
     @Test
     void createAssociationWithInvitationAndPreviousState() throws DataException {
         var invitationTime = Instant.now();
-        InvitationSpec invitationSpec = new InvitationSpec();
-        invitationSpec.setInvitedAt(invitationTime);
-        invitationSpec.setInvitedBy("userC");
+        InvitationRequest invitationRequest = new InvitationRequest();
+        invitationRequest.setInvitedAt(invitationTime);
+        invitationRequest.setInvitedBy("userC");
 
         PreviousStateSpec previousStateSpec = new PreviousStateSpec();
         previousStateSpec.setStatus("removed");
         previousStateSpec.setChangedBy("userB");
         previousStateSpec.setChangedAt(invitationTime);
 
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserId(USER_ID);
         spec.setApprovalRoute(INVITATION_APPROVAL_ROUTE);
         spec.setStatus(AWAITING_APPROVAL_STATUS);
-        spec.setInvitations(List.of(invitationSpec));
+        spec.setInvitations(List.of(invitationRequest));
         spec.setApprovalExpiryAt(invitationTime.plus(7,
                 ChronoUnit.DAYS));
         spec.setPreviousStates(List.of(previousStateSpec));
@@ -120,7 +120,7 @@ class UserCompanyAssociationServiceImplTest {
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
 
-        UserCompanyAssociationData association = service.create(spec);
+        UserCompanyAssociationResponse association = service.create(spec);
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
         assertEquals(COMPANY_NUMBER, association.getCompanyNumber());
@@ -139,9 +139,9 @@ class UserCompanyAssociationServiceImplTest {
         assertEquals(AWAITING_APPROVAL_STATUS, captured.getStatus());
         assertEquals(INVITATION_APPROVAL_ROUTE, captured.getApprovalRoute());
         assertNull(captured.getUserEmail());
-        assertEquals(invitationSpec.getInvitedAt(),
+        assertEquals(invitationRequest.getInvitedAt(),
                 captured.getInvitations().getFirst().getInvitedAt());
-        assertEquals(invitationSpec.getInvitedBy(),
+        assertEquals(invitationRequest.getInvitedBy(),
                 captured.getInvitations().getFirst().getInvitedBy());
         assertEquals(previousStateSpec.getStatus(),
                 captured.getPreviousStates().getFirst().getStatus());
@@ -156,8 +156,8 @@ class UserCompanyAssociationServiceImplTest {
 
     @Test
     void createAssociationWithEmail() throws DataException {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setUserEmail("test@example.com");
 
@@ -167,7 +167,7 @@ class UserCompanyAssociationServiceImplTest {
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
 
-        UserCompanyAssociationData association = service.create(spec);
+        UserCompanyAssociationResponse association = service.create(spec);
         assertNotNull(association);
         assertEquals(id.toString(), association.getId());
         assertEquals(COMPANY_NUMBER, association.getCompanyNumber());

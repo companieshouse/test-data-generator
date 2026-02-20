@@ -25,7 +25,7 @@ import org.mockito.quality.Strictness;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
@@ -76,7 +76,7 @@ class IdentityVerificationServiceImplTest {
     void getIdentityVerification_whenIdentityNotFound_returnsNull() {
         when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNull(result);
         verify(identityRepository, times(1)).findByEmail(EMAIL);
@@ -88,7 +88,7 @@ class IdentityVerificationServiceImplTest {
         when(identityRepository.findByEmail(EMAIL)).thenReturn(Optional.of(identityMock));
         when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.empty());
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNull(result);
 
@@ -103,7 +103,7 @@ class IdentityVerificationServiceImplTest {
         when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
         assertEquals(IDENTITY_ID, result.getIdentityId());
@@ -119,7 +119,7 @@ class IdentityVerificationServiceImplTest {
     @ValueSource(strings = {"", "  ", "\t"})
     void getIdentityVerification_whenEmailIsBlankOrNull_returnsNull(String invalidEmail) {
 
-        IdentityVerificationData result = service.getIdentityVerificationData(invalidEmail);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(invalidEmail);
 
         assertNull(result, "Service should return null for invalid email input");
         verifyNoInteractions(identityRepository, uvidRepository, userRepository);
@@ -131,7 +131,7 @@ class IdentityVerificationServiceImplTest {
         when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
         when(identityMock.getUserId()).thenReturn(null);
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
         assertEquals("", result.getFirstName());
@@ -145,7 +145,7 @@ class IdentityVerificationServiceImplTest {
         when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
         when(identityMock.getUserId()).thenReturn("  ");
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
         assertEquals("", result.getFirstName());
@@ -159,7 +159,7 @@ class IdentityVerificationServiceImplTest {
         when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.empty());
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
         assertEquals("", result.getFirstName());
@@ -176,7 +176,7 @@ class IdentityVerificationServiceImplTest {
         user.setSurname(null);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
         assertEquals("", result.getFirstName());
@@ -190,7 +190,7 @@ class IdentityVerificationServiceImplTest {
         when(uvidRepository.findByIdentityId(IDENTITY_ID)).thenReturn(Optional.of(uvid));
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
 
-        IdentityVerificationData result = service.getIdentityVerificationData(EMAIL);
+        IdentityVerificationResponse result = service.getIdentityVerificationData(EMAIL);
 
         assertNotNull(result);
         assertEquals(FIRST_NAME, result.getFirstName());

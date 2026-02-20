@@ -1,10 +1,10 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 
 public interface AppointmentService {
-    AppointmentsResultData createAppointment(CompanySpec spec);
+    AppointmentsResultResponse createAppointment(CompanyRequest spec);
 
     boolean deleteAllAppointments(String companyNumber);
 }

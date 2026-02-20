@@ -1,6 +1,6 @@
 package uk.gov.companieshouse.api.testdata.model.dto;
 
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 
 public class CompanyDetailsParameters {
     private final CompanyType companyType;

@@ -15,12 +15,12 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionV
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemCostsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -30,7 +30,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class MissingImageDeliveriesImpl implements DataService<CertificatesData, MissingImageDeliveriesSpec> {
+public class MissingImageDeliveriesImpl implements DataService<CertificatesResponse, MissingImageDeliveriesRequest> {
     private static final Logger LOG =
         LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
@@ -50,19 +50,19 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
     private CertificatesServiceImpl certificatesService;
 
     @Override
-    public CertificatesData create(MissingImageDeliveriesSpec spec) throws DataException {
-        final List<ItemOptionsSpec> optionsList = spec.getItemOptions();
-        final List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
+    public CertificatesResponse create(MissingImageDeliveriesRequest spec) throws DataException {
+        final List<ItemOptionsRequest> optionsList = spec.getItemOptions();
+        final List<CertificatesResponse.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
         final List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
 
-        for (ItemOptionsSpec optionSpec : optionsList) {
+        for (ItemOptionsRequest optionSpec : optionsList) {
             final Long firstPart = randomService.getNumber(6);
             final Long secondPart = randomService.getNumber(6);
             final var randomId = "MID-" + firstPart + "-" + secondPart;
             final var missingImageDeliveries = getMissingImageDeliveries(spec, optionSpec, randomId);
             missingImageDeliveriesRepository.save(missingImageDeliveries);
             final var now = getCurrentDateTime().toString();
-            certificateEntries.add(new CertificatesData.CertificateEntry(
+            certificateEntries.add(new CertificatesResponse.CertificateEntry(
                 missingImageDeliveries.getId(), now, now
             ));
 
@@ -77,10 +77,10 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
             basketRepository.save(basket);
         }
 
-        return new CertificatesData(certificateEntries);
+        return new CertificatesResponse(certificateEntries);
     }
 
-    protected FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesSpec spec) {
+    protected FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesRequest spec) {
         var filingHistoryDescriptionValues = new FilingHistoryDescriptionValues();
         Optional.ofNullable(spec.getDate()).ifPresent(filingHistoryDescriptionValues::setDate);
         Optional.ofNullable(spec.getChargeNumber()).ifPresent(filingHistoryDescriptionValues::setChargeNumber);
@@ -102,7 +102,7 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
         return filingHistoryDescriptionValues;
     }
 
-    private MissingImageDeliveries getMissingImageDeliveries(MissingImageDeliveriesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
+    private MissingImageDeliveries getMissingImageDeliveries(MissingImageDeliveriesRequest spec, ItemOptionsRequest optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
         itemOptions.setFilingHistoryCategory(optionsSpec.getFilingHistoryCategory());
         itemOptions.setFilingHistoryDate(optionsSpec.getFilingHistoryDate());
@@ -120,8 +120,8 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
         return getMissingImageDeliveries(spec, randomId, itemOptions);
     }
 
-    private MissingImageDeliveries getMissingImageDeliveries(MissingImageDeliveriesSpec spec, String randomId,
-        ItemOptions itemOptions) {
+    private MissingImageDeliveries getMissingImageDeliveries(MissingImageDeliveriesRequest spec, String randomId,
+                                                             ItemOptions itemOptions) {
         var missingImageDeliveries = new MissingImageDeliveries();
         var url = "/orderable/missing-image-deliveries/";
         var currentDate = getCurrentDateTime().toString();
@@ -140,12 +140,12 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
         missingImageDeliveries.setEtag(randomService.getEtag());
         if (spec.getItemCosts() != null) {
             List<ItemCosts> itemCostsList = new ArrayList<>();
-            for (ItemCostsSpec itemCostsSpec : spec.getItemCosts()) {
+            for (ItemCostsRequest itemCostsRequest : spec.getItemCosts()) {
                 var itemCosts = new ItemCosts();
-                itemCosts.setDiscountApplied(itemCostsSpec.getDiscountApplied());
-                itemCosts.setItemCost(itemCostsSpec.getItemCost());
-                itemCosts.setCalculatedCost(itemCostsSpec.getCalculatedCost());
-                itemCosts.setProductType(itemCostsSpec.getProductType());
+                itemCosts.setDiscountApplied(itemCostsRequest.getDiscountApplied());
+                itemCosts.setItemCost(itemCostsRequest.getItemCost());
+                itemCosts.setCalculatedCost(itemCostsRequest.getCalculatedCost());
+                itemCosts.setProductType(itemCostsRequest.getProductType());
                 itemCostsList.add(itemCosts);
             }
             missingImageDeliveries.setItemCosts(itemCostsList);
@@ -162,13 +162,13 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesData,
         return missingImageDeliveries;
     }
 
-    private Basket createBasket(MissingImageDeliveriesSpec spec, List<Basket.Item> items) {
+    private Basket createBasket(MissingImageDeliveriesRequest spec, List<Basket.Item> items) {
         var certSpec = mapMissingImageDeliveriesToCertificatesSpec(spec);
         return certificatesService.createBasket(certSpec, items);
     }
 
-    private CertificatesSpec mapMissingImageDeliveriesToCertificatesSpec(MissingImageDeliveriesSpec spec) {
-        var certificatesSpec = new CertificatesSpec();
+    private CertificatesRequest mapMissingImageDeliveriesToCertificatesSpec(MissingImageDeliveriesRequest spec) {
+        var certificatesSpec = new CertificatesRequest();
         certificatesSpec.setUserId(spec.getUserId());
         certificatesSpec.setBasketSpec(spec.getBasketSpec());
         return certificatesSpec;

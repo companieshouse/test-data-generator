@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -21,7 +21,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, CompanySpec> {
+public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, CompanyRequest> {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanyMetricsServiceImpl.class));
@@ -31,7 +31,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     private RandomService randomService;
 
     @Override
-    public CompanyMetrics create(CompanySpec spec) {
+    public CompanyMetrics create(CompanyRequest spec) {
         LOG.info("Starting creation of CompanyMetrics for company number: "
                 + spec.getCompanyNumber());
         CompanyMetrics metrics = initializeMetrics(spec);
@@ -71,7 +71,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    private CompanyMetrics initializeMetrics(CompanySpec spec) {
+    private CompanyMetrics initializeMetrics(CompanyRequest spec) {
         var metrics = new CompanyMetrics();
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
@@ -94,7 +94,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         return metrics;
     }
 
-    public void setActivePscCount(CompanyMetrics metrics, CompanySpec spec) {
+    public void setActivePscCount(CompanyMetrics metrics, CompanyRequest spec) {
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
@@ -111,7 +111,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    private void setActiveDirectorsCount(CompanyMetrics metrics, CompanySpec spec) {
+    private void setActiveDirectorsCount(CompanyMetrics metrics, CompanyRequest spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             metrics.setActiveDirectorsCount(0);
             LOG.debug("No default officer specified. Set active directors count to 0.");
@@ -128,7 +128,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    public void setPscCount(CompanyMetrics metrics, CompanySpec spec) {
+    public void setPscCount(CompanyMetrics metrics, CompanyRequest spec) {
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setPscCount(1);
             LOG.debug("Company has super secure PSCs. Set PSC count to 1.");
@@ -141,7 +141,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    public void setCeasedPscCount(CompanyMetrics metrics, CompanySpec spec) {
+    public void setCeasedPscCount(CompanyMetrics metrics, CompanyRequest spec) {
         var ceasedCount = 0;
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             LOG.debug("Company has super secure PSCs. Ceased PSC count remains 0.");
@@ -153,10 +153,10 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         metrics.setCeasedPscCount(ceasedCount);
     }
 
-    private Map<String, RegisterItem> createRegisters(List<RegistersSpec> registers) {
+    private Map<String, RegisterItem> createRegisters(List<RegistersRequest> registers) {
         LOG.info("Creating registers for the provided list of " + registers.size() + " registers.");
         Map<String, RegisterItem> registerMap = registers.stream().collect(Collectors.toMap(
-                RegistersSpec::getRegisterType,
+                RegistersRequest::getRegisterType,
                 reg -> {
                     LOG.debug("Processing register type: " + reg.getRegisterType());
                     var item = new RegisterItem();

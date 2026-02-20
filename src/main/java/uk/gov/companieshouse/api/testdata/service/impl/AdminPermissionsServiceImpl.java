@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.logging.Logger;
@@ -13,7 +13,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class AdminPermissionsServiceImpl implements DataService<
-        AdminPermissionsData, AdminPermissionsSpec> {
+        AdminPermissionsResponse, AdminPermissionsRequest> {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AdminPermissionsServiceImpl.class));
@@ -22,7 +22,7 @@ public class AdminPermissionsServiceImpl implements DataService<
     private AdminPermissionsRepository repository;
 
     @Override
-    public AdminPermissionsData create(AdminPermissionsSpec spec) {
+    public AdminPermissionsResponse create(AdminPermissionsRequest spec) {
         LOG.info("Starting creation of admin permissions for group: " + spec.getGroupName());
 
         var adminPermissions = new AdminPermissions();
@@ -34,7 +34,7 @@ public class AdminPermissionsServiceImpl implements DataService<
 
         LOG.info("Successfully created admin permissions with ID: " + savedPermissions.getId());
 
-        return new AdminPermissionsData(
+        return new AdminPermissionsResponse(
                 savedPermissions.getId(),
                 savedPermissions.getGroupName());
     }

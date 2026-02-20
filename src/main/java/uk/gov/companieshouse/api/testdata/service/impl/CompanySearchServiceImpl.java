@@ -10,7 +10,7 @@ import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
@@ -36,7 +36,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     }
 
     @Override
-    public void addCompanyIntoElasticSearchIndex(CompanyData data)
+    public void addCompanyIntoElasticSearchIndex(CompanyProfileResponse data)
             throws DataException {
         String companyNumber = data.getCompanyNumber();
         String formattedCompanySearchUri = formatUri(COMPANY_SEARCH_URI, companyNumber);

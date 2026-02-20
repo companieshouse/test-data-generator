@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CompanyProfileService extends DataService<CompanyProfile, CompanySpec> {
+public interface CompanyProfileService extends DataService<CompanyProfile, CompanyRequest> {
 
     /**
      * Checks whether a company with the given {@code companyNumber} is present

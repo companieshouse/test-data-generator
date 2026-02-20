@@ -20,9 +20,9 @@ import uk.gov.companieshouse.api.testdata.model.dto.DateParameters;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -80,9 +80,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private boolean isCompanyTypeHasNoFilingHistory = true;
 
     @Override
-    public CompanyProfile create(CompanySpec spec) {
+    public CompanyProfile create(CompanyRequest spec) {
         final String companyNumber = spec.getCompanyNumber();
-        final Jurisdiction jurisdiction = spec.getJurisdiction();
+        final JurisdictionType jurisdiction = spec.getJurisdiction();
         final CompanyType companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
@@ -110,8 +110,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private CompanyProfile createDefaultCompanyProfile(String companyNumber,
-                                                       Jurisdiction jurisdiction,
-                                                       CompanySpec spec,
+                                                       JurisdictionType jurisdiction,
+                                                       CompanyRequest spec,
                                                        DateParameters dateParams,
                                                        CompanyDetailsParameters companyParams,
                                                        AccountParameters accountParams) {
@@ -191,7 +191,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private OverseasEntity createOverseasEntity(String companyNumber,
-                                                Jurisdiction jurisdiction, CompanySpec spec,
+                                                JurisdictionType jurisdiction, CompanyRequest spec,
                                                 DateParameters dateParams,
                                                 String entityType, CompanyType companyType,
                                                 Boolean isRegisteredOfficeIsInDispute) {
@@ -331,7 +331,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     protected String createUkEstablishment(String parentCompanyNumber,
-                                           Jurisdiction jurisdiction,
+                                           JurisdictionType jurisdiction,
                                            DateParameters dateParams) {
         String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
         LOG.info("Creating UK establishment for parent company " + parentCompanyNumber);
@@ -372,7 +372,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
-            Jurisdiction companyJurisdiction) {
+            JurisdictionType companyJurisdiction) {
         Map<CompanyType, String> partialDataOptions = new HashMap<>();
         partialDataOptions.put(CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL,
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
@@ -381,7 +381,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         partialDataOptions.put(CompanyType.ROYAL_CHARTER, FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
         partialDataOptions.put(CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL,
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
-        if (Jurisdiction.NI.equals(companyJurisdiction)) {
+        if (JurisdictionType.NI.equals(companyJurisdiction)) {
             partialDataOptions.put(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY,
                     FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY);
         } else {
@@ -430,8 +430,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private Links createOverseaLinks(String companyNumber,
-                                     CompanyType companyType, CompanySpec spec,
-                                     Jurisdiction jurisdiction, DateParameters dateParams) {
+                                     CompanyType companyType, CompanyRequest spec,
+                                     JurisdictionType jurisdiction, DateParameters dateParams) {
         var links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
 
@@ -451,7 +451,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return links;
     }
 
-    private String checkNonJurisdictionTypes(Jurisdiction jurisdiction, String companyType) {
+    private String checkNonJurisdictionTypes(JurisdictionType jurisdiction, String companyType) {
         Set<String> noJurisdictionTypes = Set.of(
                 CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue(),
                 CompanyType.ROYAL_CHARTER.getValue(),
@@ -465,7 +465,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void setPartialDataOptions(CompanyProfile profile,
-                                       Jurisdiction jurisdiction,
+                                       JurisdictionType jurisdiction,
                                        CompanyType companyType) {
         Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
         if (partialDataOptions.containsKey(companyType)) {
@@ -492,7 +492,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void setJurisdictionAndAddress(CompanyProfile profile,
-                                           Jurisdiction jurisdiction,
+                                           JurisdictionType jurisdiction,
                                            String nonJurisdictionType) {
         if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
             profile.setJurisdiction(jurisdiction.toString());
@@ -500,7 +500,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setCompanyHasRegisters(CompanySpec spec) {
+    private void setCompanyHasRegisters(CompanyRequest spec) {
         hasCompanyRegisters = spec.getRegisters() != null && !spec.getRegisters().isEmpty();
     }
 
