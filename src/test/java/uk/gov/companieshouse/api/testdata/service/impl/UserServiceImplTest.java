@@ -278,7 +278,7 @@ class UserServiceImplTest {
         spec.setPassword("pass");
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserResponse result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -297,7 +297,7 @@ class UserServiceImplTest {
         spec.setRoles(null);
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserResponse result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -314,7 +314,7 @@ class UserServiceImplTest {
         spec.setRoles(List.of());
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserResponse result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());

@@ -213,13 +213,12 @@ class TestDataServiceImplTest {
     /**
      * Sets up common mocks for creating a company.
      *
-     * @param spec                      the CompanyRequest to be created.
      * @param companyNumber             the raw company number (as string) to be returned by
      *                                  randomService.
      * @param numberDigits              the number of digits to request from randomService.
      * @param expectedFullCompanyNumber the full company number expected in the created spec.
      */
-    private void setupCompanyCreationMocks(CompanyRequest spec, String companyNumber, int numberDigits,
+    private void setupCompanyCreationMocks(String companyNumber, int numberDigits,
                                            String expectedFullCompanyNumber) throws DataException {
         when(randomService.getNumber(numberDigits)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
@@ -249,9 +248,7 @@ class TestDataServiceImplTest {
     }
 
     private CompanyRequest captureCreatedSpec() throws DataException {
-        ArgumentCaptor<CompanyRequest> captor = ArgumentCaptor.forClass(CompanyRequest.class);
-        verify(companyProfileService, times(1)).create(captor.capture());
-        return captor.getValue();
+        return captureCompanySpec();
     }
 
     private void verifyCommonCompanyCreation(CompanyRequest capturedSpec, CompanyProfileResponse createdCompany,
@@ -366,7 +363,7 @@ class TestDataServiceImplTest {
         spec.setCompanyStatus("administration");
 
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -379,7 +376,7 @@ class TestDataServiceImplTest {
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 6, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -392,7 +389,7 @@ class TestDataServiceImplTest {
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.NI);
         String expectedFullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 6, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -452,7 +449,7 @@ class TestDataServiceImplTest {
         directorsRegister.setRegisterType("directors");
         directorsRegister.setRegisterMovedTo("Companies House");
         spec.setRegisters(List.of(directorsRegister));
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -1556,7 +1553,7 @@ class TestDataServiceImplTest {
         spec.setAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -1837,7 +1834,7 @@ class TestDataServiceImplTest {
         // Use anyInt() to allow flexibility in the argument
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(companyNumber));
 
-        setupCompanyCreationMocks(spec, companyNumber, 3, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(companyNumber, 3, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -1855,7 +1852,7 @@ class TestDataServiceImplTest {
         spec.setAdvancedSearch(true);
         spec.setAddToCompanyElasticSearchIndex(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -1879,7 +1876,7 @@ class TestDataServiceImplTest {
         spec.setAlphabeticalSearch(true);
         spec.setAddToCompanyElasticSearchIndex(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
@@ -1959,7 +1956,7 @@ class TestDataServiceImplTest {
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         Disqualifications disqEntity = new Disqualifications();
         disqEntity.setId("D123");
@@ -2341,7 +2338,7 @@ class TestDataServiceImplTest {
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
         CompanyRequest capturedSpec = captureCompanySpec();
