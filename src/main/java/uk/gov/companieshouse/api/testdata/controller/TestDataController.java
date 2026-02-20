@@ -25,8 +25,8 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -356,7 +356,7 @@ public class TestDataController {
 
     @PostMapping("/internal/penalties")
     public ResponseEntity<Object> createPenalty(
-            @Valid @RequestBody PenaltySpec request) throws DataException {
+            @Valid @RequestBody PenaltyRequest request) throws DataException {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
                 + " and customer code: " + request.getCustomerCode());
 
@@ -420,7 +420,7 @@ public class TestDataController {
     @DeleteMapping("/internal/penalties/{id}")
     public ResponseEntity<Void> deleteAccountPenalties(
             @PathVariable("id") String id,
-            @RequestBody(required = false) PenaltyRequest request)
+            @RequestBody(required = false) PenaltyDeleteRequest request)
             throws DataException, NoDataFoundException {
 
         if (request == null || request.getTransactionReference() == null) {

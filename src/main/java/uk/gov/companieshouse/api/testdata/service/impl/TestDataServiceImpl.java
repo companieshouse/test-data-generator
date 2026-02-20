@@ -46,7 +46,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
@@ -698,15 +698,15 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesResponse createPenaltyData(PenaltySpec penaltySpec) throws DataException {
+    public AccountPenaltiesResponse createPenaltyData(PenaltyRequest penaltyRequest) throws DataException {
         try {
-            LOG.info("Creating account penalties for company code: " + penaltySpec.getCompanyCode()
-                    + " and customer code: " + penaltySpec.getCustomerCode());
-            return accountPenaltiesService.createAccountPenalties(penaltySpec);
+            LOG.info("Creating account penalties for company code: " + penaltyRequest.getCompanyCode()
+                    + " and customer code: " + penaltyRequest.getCustomerCode());
+            return accountPenaltiesService.createAccountPenalties(penaltyRequest);
         } catch (Exception ex) {
             LOG.error("Failed to create account penalties for company code: "
-                    + penaltySpec.getCompanyCode()
-                    + " and customer code: " + penaltySpec.getCustomerCode(), ex);
+                    + penaltyRequest.getCompanyCode()
+                    + " and customer code: " + penaltyRequest.getCustomerCode(), ex);
             throw new DataException("Error creating account penalties", ex);
         }
     }

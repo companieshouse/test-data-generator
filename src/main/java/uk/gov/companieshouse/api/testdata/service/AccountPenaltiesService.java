@@ -5,7 +5,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 
 public interface AccountPenaltiesService {
@@ -79,5 +79,5 @@ public interface AccountPenaltiesService {
     ResponseEntity<Void> deleteAccountPenaltyByReference(String id, String penaltyRef)
             throws NoDataFoundException;
 
-    AccountPenaltiesResponse createAccountPenalties(PenaltySpec penaltySpec) throws DataException;
+    AccountPenaltiesResponse createAccountPenalties(PenaltyRequest penaltyRequest) throws DataException;
 }

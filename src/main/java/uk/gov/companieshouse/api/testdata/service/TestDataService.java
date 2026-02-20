@@ -22,7 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
@@ -220,7 +220,7 @@ public interface TestDataService {
     ResponseEntity<Void> deleteAccountPenaltyByReference(String id, String transactionReference)
             throws NoDataFoundException, DataException;
 
-    AccountPenaltiesResponse createPenaltyData(PenaltySpec penaltySpec) throws DataException;
+    AccountPenaltiesResponse createPenaltyData(PenaltyRequest penaltyRequest) throws DataException;
 
     /**
      * Retrieves postcodes for a given country.

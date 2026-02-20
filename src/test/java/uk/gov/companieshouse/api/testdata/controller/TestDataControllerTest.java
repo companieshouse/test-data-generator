@@ -59,8 +59,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificati
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
@@ -647,7 +647,7 @@ class TestDataControllerTest {
 
     @Test
     void getAccountPenalties() throws Exception {
-        PenaltyRequest request = new PenaltyRequest();
+        PenaltyDeleteRequest request = new PenaltyDeleteRequest();
         request.setId(PENALTY_ID);
 
         AccountPenaltiesResponse accountPenaltiesResponse = new AccountPenaltiesResponse();
@@ -754,7 +754,7 @@ class TestDataControllerTest {
 
     @Test
     void deleteAccountPenaltyByReferenceSuccess() throws Exception {
-        PenaltyRequest request = new PenaltyRequest();
+        PenaltyDeleteRequest request = new PenaltyDeleteRequest();
         request.setTransactionReference(PENALTY_REFERENCE);
 
         when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
@@ -768,7 +768,7 @@ class TestDataControllerTest {
 
     @Test
     void deleteAccountPenaltyByReferenceNotFound() throws Exception {
-        PenaltyRequest request = new PenaltyRequest();
+        PenaltyDeleteRequest request = new PenaltyDeleteRequest();
         request.setTransactionReference(PENALTY_REFERENCE);
 
         NoDataFoundException exception = new NoDataFoundException("penalty not found");
@@ -783,7 +783,7 @@ class TestDataControllerTest {
 
     @Test
     void deleteAccountPenaltyByReferenceOtherError() throws Exception {
-        PenaltyRequest request = new PenaltyRequest();
+        PenaltyDeleteRequest request = new PenaltyDeleteRequest();
         request.setTransactionReference(PENALTY_REFERENCE);
 
         DataException exception = new DataException("error during deletion");
@@ -869,7 +869,7 @@ class TestDataControllerTest {
 
     @Test
     void createPenaltySuccess() throws Exception {
-        PenaltySpec request = new PenaltySpec();
+        PenaltyRequest request = new PenaltyRequest();
         request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode(CUSTOMER_CODE);
 
@@ -888,7 +888,7 @@ class TestDataControllerTest {
 
     @Test
     void createPenaltyThrowsDataException() throws Exception {
-        PenaltySpec request = new PenaltySpec();
+        PenaltyRequest request = new PenaltyRequest();
         request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode(CUSTOMER_CODE);
 
@@ -903,7 +903,7 @@ class TestDataControllerTest {
 
     @Test
     void createPenaltyDuplicateButNoPenalties() throws Exception {
-        PenaltySpec request = new PenaltySpec();
+        PenaltyRequest request = new PenaltyRequest();
         request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode(CUSTOMER_CODE);
         request.setDuplicate(true); // simulate duplicate request
@@ -924,7 +924,7 @@ class TestDataControllerTest {
 
     @Test
     void createPenaltyDuplicateButNoCreatedPenalties() throws Exception {
-        PenaltySpec request = new PenaltySpec();
+        PenaltyRequest request = new PenaltyRequest();
         request.setCompanyCode(COMPANY_CODE);
         request.setCustomerCode(CUSTOMER_CODE);
         request.setDuplicate(true);

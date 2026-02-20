@@ -76,7 +76,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
@@ -1699,36 +1699,36 @@ class TestDataServiceImplTest {
 
     @Test
     void createPenaltyDataSuccess() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("NI23456");
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode("NI23456");
 
         AccountPenaltiesResponse expectedData = new AccountPenaltiesResponse();
         expectedData.setCompanyCode("LP");
         expectedData.setCustomerCode("NI23456");
 
-        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenReturn(expectedData);
+        when(accountPenaltiesService.createAccountPenalties(penaltyRequest)).thenReturn(expectedData);
 
-        AccountPenaltiesResponse result = testDataService.createPenaltyData(penaltySpec);
+        AccountPenaltiesResponse result = testDataService.createPenaltyData(penaltyRequest);
 
         assertEquals(expectedData, result);
-        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltyRequest);
     }
 
     @Test
     void createPenaltyDataThrowsException() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("NI23456");
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode("NI23456");
 
         DataException ex = new DataException("creation failed");
-        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenThrow(ex);
+        when(accountPenaltiesService.createAccountPenalties(penaltyRequest)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.createPenaltyData(penaltySpec));
+                testDataService.createPenaltyData(penaltyRequest));
         assertEquals("Error creating account penalties", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
-        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltyRequest);
     }
 
     @Test
@@ -1751,7 +1751,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createPenaltyDataDelegatesToService() throws Exception {
-        PenaltySpec spec = new PenaltySpec();
+        PenaltyRequest spec = new PenaltyRequest();
         AccountPenaltiesResponse data = new AccountPenaltiesResponse();
         when(accountPenaltiesService.createAccountPenalties(spec)).thenReturn(data);
         AccountPenaltiesResponse result = testDataService.createPenaltyData(spec);
@@ -1761,7 +1761,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createPenaltyDataThrowsDataException() throws Exception {
-        PenaltySpec spec = new PenaltySpec();
+        PenaltyRequest spec = new PenaltyRequest();
         when(accountPenaltiesService.createAccountPenalties(spec))
                 .thenThrow(new DataException("fail"));
         DataException ex = assertThrows(DataException.class, () ->
