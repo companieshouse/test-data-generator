@@ -283,8 +283,8 @@ class CompanyProfileServiceImplTest {
     @Test
     void testCreateOverseaLinks() throws Exception {
         CompanyType companyType = CompanyType.OVERSEA_COMPANY;
-        CompanyRequest spec = new CompanyRequest();
-        spec.setHasUkEstablishment(true);
+        CompanyRequest request = new CompanyRequest();
+        request.setHasUkEstablishment(true);
         JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
         DateParameters dateParams = new DateParameters(LocalDate.now());
 
@@ -292,7 +292,7 @@ class CompanyProfileServiceImplTest {
                 "createOverseaLinks", String.class, CompanyType.class, CompanyRequest.class, JurisdictionType.class, DateParameters.class);
         method.setAccessible(true);
 
-        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, spec, jurisdiction, dateParams);
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, dateParams);
 
         assertNotNull(links);
         assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());

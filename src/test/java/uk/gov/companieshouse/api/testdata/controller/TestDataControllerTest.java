@@ -851,15 +851,6 @@ class TestDataControllerTest {
         assertEquals(exception, thrown);
     }
 
-    private static AccountPenaltiesResponse createAccountPenaltiesData(String companyCode,
-                                                                       PenaltyResponse penalty) {
-        AccountPenaltiesResponse accountPenaltiesResponse = new AccountPenaltiesResponse();
-        accountPenaltiesResponse.setCreatedAt(Instant.now());
-        accountPenaltiesResponse.setCompanyCode(companyCode);
-        accountPenaltiesResponse.setPenalties(Collections.singletonList(penalty));
-        return accountPenaltiesResponse;
-    }
-
     private PenaltyResponse createPenaltyData(String companyCode, String customerCode,
                                               String penaltyRef, double amount, boolean paid) {
         PenaltyResponse penalty = new PenaltyResponse();
@@ -1059,10 +1050,8 @@ class TestDataControllerTest {
             "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
         );
 
-        // Use LinkedList to support getFirst()
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
-        CertificatesResponse certificateData = new CertificatesResponse(entries);
-        return certificateData;
+        return new CertificatesResponse(entries);
     }
 
 

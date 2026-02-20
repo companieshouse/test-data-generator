@@ -129,8 +129,8 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(MissingImageDeliveries.class))).thenReturn(missingImageDeliveries);
 
-        MissingImageDeliveriesRequest missingImageDeliveriesRequest = new MissingImageDeliveriesRequest();
-        missingImageDeliveriesRequest.setCustomerReference("Test");
+        MissingImageDeliveriesRequest optionalRequest = new MissingImageDeliveriesRequest();
+        optionalRequest.setCustomerReference("Test");
 
         CapitalRequest capitalSpec = new CapitalRequest();
         capitalSpec.setFigure("34,253,377");
@@ -146,9 +146,9 @@ class MissingImageDeliveriesServiceImplTest {
         itemOptionsRequest.setFilingHistoryBarcode("L72QXI0Y");
         itemOptionsRequest.setFilingHistoryDescriptionValues(descriptionValuesSpec);
 
-        missingImageDeliveriesRequest.setItemOptions(List.of(itemOptionsRequest));
+        optionalRequest.setItemOptions(List.of(itemOptionsRequest));
 
-        CertificatesResponse result = service.create(missingImageDeliveriesRequest);
+        CertificatesResponse result = service.create(optionalRequest);
 
         assertNotNull(result);
         assertEquals(missingImageDeliveries.getId(), result.getCertificates().getFirst().getId());
@@ -157,13 +157,13 @@ class MissingImageDeliveriesServiceImplTest {
         MissingImageDeliveries captured = missingImageDeliveriesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsRequest expectedOptions = missingImageDeliveriesRequest.getItemOptions().getFirst();
+        ItemOptionsRequest expectedOptions = optionalRequest.getItemOptions().getFirst();
         FilingHistoryDescriptionValues caturedFilingHistoryDescriptionValues = capturedOptions.getFilingHistoryDescriptionValues();
         FilingHistoryDescriptionValuesRequest expectedFilingHistoryDescriptionValues = expectedOptions.getFilingHistoryDescriptionValues();
         List<Capital> capturedCapital = caturedFilingHistoryDescriptionValues.getCapital();
         List<CapitalRequest> expectedCapital = expectedFilingHistoryDescriptionValues.getCapital();
 
-        assertEquals(missingImageDeliveriesRequest.getCustomerReference(), captured.getCustomerReference());
+        assertEquals(optionalRequest.getCustomerReference(), captured.getCustomerReference());
         assertEquals(expectedOptions.getFilingHistoryBarcode(), capturedOptions.getFilingHistoryBarcode());
         assertEquals(expectedCapital.getFirst().getCurrency(), capturedCapital.getFirst().getCurrency());
         assertEquals(expectedCapital.getFirst().getFigure(), capturedCapital.getFirst().getFigure());
