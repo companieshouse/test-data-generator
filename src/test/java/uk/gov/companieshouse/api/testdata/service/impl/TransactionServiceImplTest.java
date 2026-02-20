@@ -8,9 +8,8 @@ import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 
-import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
 import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AcspApplicationRequest;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
@@ -18,7 +17,6 @@ import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -46,10 +44,9 @@ class TransactionServiceImplTest {
 
     private AcspApplication acspApplication;
 
-    private AcspApplicationRequest acspSpec;
     private TransactionsRequest txnSpec;
-    @Mock
 
+    @Mock
     private RandomService randomService;
 
 
@@ -58,8 +55,6 @@ class TransactionServiceImplTest {
         transactions = new Transactions();
         txnSpec = new TransactionsRequest();
         acspApplication = new AcspApplication();
-        acspSpec = new AcspApplicationRequest();
-
     }
 
     @Test

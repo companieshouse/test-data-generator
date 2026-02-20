@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.dto.AccountParameters;
 import uk.gov.companieshouse.api.testdata.model.dto.CompanyDetailsParameters;
 import uk.gov.companieshouse.api.testdata.model.dto.DateParameters;
-//import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
