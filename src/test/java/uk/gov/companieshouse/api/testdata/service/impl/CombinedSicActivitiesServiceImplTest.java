@@ -22,8 +22,8 @@ import org.mockito.MockitoAnnotations;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CombinedSicActivities;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.CombinedSicActivitiesRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -46,14 +46,14 @@ class CombinedSicActivitiesServiceImplTest {
 
   @Test
   void createSicCodesWithKeyword() throws DataException {
-    CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+    CombinedSicActivitiesRequest spec = new CombinedSicActivitiesRequest();
     spec.setActivityDescription("Test Activity");
     spec.setSicDescription("Test SIC");
     spec.setIsChActivity(true);
     spec.setActivityDescriptionSearchField("test activity");
 
     when(randomService.getNumber(5)).thenReturn(12345L);
-    CombinedSicActivitiesData result = service.create(spec);
+    CombinedSicActivitiesResponse result = service.create(spec);
 
     assertNotNull(result);
     assertEquals("12345", result.getSicCode());
@@ -65,7 +65,7 @@ class CombinedSicActivitiesServiceImplTest {
 
   @Test
   void createSicCodesWithoutMandatoryThrowsException() {
-    CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+    CombinedSicActivitiesRequest spec = new CombinedSicActivitiesRequest();
     spec.setActivityDescription("Failing Activity");
     spec.setSicDescription("Failing SIC");
     spec.setIsChActivity(false);

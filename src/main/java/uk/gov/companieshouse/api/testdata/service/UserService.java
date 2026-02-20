@@ -3,10 +3,10 @@ package uk.gov.companieshouse.api.testdata.service;
 import java.util.Optional;
 
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 
-public interface UserService extends DataService<UserData, UserSpec> {
+public interface UserService extends DataService<UserResponse, UserRequest> {
     /**
      * Retrieves the roles associated with a given user ID.
      *

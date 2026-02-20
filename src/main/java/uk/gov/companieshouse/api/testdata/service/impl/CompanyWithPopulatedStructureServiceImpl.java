@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
@@ -62,7 +62,7 @@ public class CompanyWithPopulatedStructureServiceImpl
     }
 
     @Override
-    public void createCompanyWithPopulatedStructure(CompanyWithPopulatedStructureSpec companySpec) {
+    public void createCompanyWithPopulatedStructure(CompanyWithPopulatedStructureRequest companySpec) {
         saveCompanyProfile(companySpec);
         saveAuthCode(companySpec);
         saveFilingHistory(companySpec);
@@ -76,25 +76,25 @@ public class CompanyWithPopulatedStructureServiceImpl
         saveDisqualifications(companySpec);
     }
 
-    private void saveCompanyProfile(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveCompanyProfile(CompanyWithPopulatedStructureRequest companySpec) {
         var companyProfile = companySpec.getCompanyProfile();
         companyProfileRepository.save(companyProfile);
     }
 
-    private void saveAuthCode(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveAuthCode(CompanyWithPopulatedStructureRequest companySpec) {
         var companyAuthCode = companySpec.getCompanyAuthCode();
         if (companyAuthCode != null) {
             authCodeRepository.save(companyAuthCode);
         }
     }
 
-    private void saveFilingHistory(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveFilingHistory(CompanyWithPopulatedStructureRequest companySpec) {
         if (companySpec.getFilingHistory() != null) {
             filingHistoryRepository.save(companySpec.getFilingHistory());
         }
     }
 
-    private void saveAppointmentsData(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveAppointmentsData(CompanyWithPopulatedStructureRequest companySpec) {
         var appointmentsDataContainer = companySpec.getAppointmentsData();
         if (appointmentsDataContainer != null
                 && appointmentsDataContainer.getAppointmentsData() != null) {
@@ -104,7 +104,7 @@ public class CompanyWithPopulatedStructureServiceImpl
         }
     }
 
-    private void saveAppointments(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveAppointments(CompanyWithPopulatedStructureRequest companySpec) {
         var appointmentsDataContainer = companySpec.getAppointmentsData();
         if (appointmentsDataContainer != null
                 && appointmentsDataContainer.getAppointment() != null) {
@@ -114,7 +114,7 @@ public class CompanyWithPopulatedStructureServiceImpl
         }
     }
 
-    private void saveOfficerAppointments(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveOfficerAppointments(CompanyWithPopulatedStructureRequest companySpec) {
         var appointmentsDataContainer = companySpec.getAppointmentsData();
         if (appointmentsDataContainer != null
                 && appointmentsDataContainer.getOfficerAppointment() != null) {
@@ -124,13 +124,13 @@ public class CompanyWithPopulatedStructureServiceImpl
         }
     }
 
-    private void saveCompanyMetrics(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveCompanyMetrics(CompanyWithPopulatedStructureRequest companySpec) {
         if (companySpec.getCompanyMetrics() != null) {
             companyMetricsRepository.save(companySpec.getCompanyMetrics());
         }
     }
 
-    private void saveCompanyPscStatements(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveCompanyPscStatements(CompanyWithPopulatedStructureRequest companySpec) {
         var companyPscStatements = companySpec.getCompanyPscStatement();
         if (companyPscStatements != null) {
             for (CompanyPscStatement companyPscStatement : companyPscStatements) {
@@ -139,7 +139,7 @@ public class CompanyWithPopulatedStructureServiceImpl
         }
     }
 
-    private void saveCompanyPscs(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveCompanyPscs(CompanyWithPopulatedStructureRequest companySpec) {
         var companyPscsList = companySpec.getCompanyPscs();
         if (companyPscsList != null) {
             for (CompanyPscs companyPscs : companyPscsList) {
@@ -148,13 +148,13 @@ public class CompanyWithPopulatedStructureServiceImpl
         }
     }
 
-    private void saveCompanyRegisters(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveCompanyRegisters(CompanyWithPopulatedStructureRequest companySpec) {
         if (companySpec.getCompanyRegisters() != null) {
             companyRegistersRepository.save(companySpec.getCompanyRegisters());
         }
     }
 
-    private void saveDisqualifications(CompanyWithPopulatedStructureSpec companySpec) {
+    private void saveDisqualifications(CompanyWithPopulatedStructureRequest companySpec) {
         if (companySpec.getDisqualifications() != null) {
             disqualificationsRepository.save(companySpec.getDisqualifications());
         }

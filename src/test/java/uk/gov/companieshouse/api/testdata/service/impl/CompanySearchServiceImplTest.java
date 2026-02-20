@@ -31,7 +31,7 @@ import uk.gov.companieshouse.api.handler.search.company.request.PrivateCompanySe
 import uk.gov.companieshouse.api.handler.search.company.request.PrivateCompanySearchUpsert;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,7 +97,7 @@ class CompanySearchServiceImplTest {
         when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
                 .thenReturn(ukEstablishments);
 
-        CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
+        CompanyProfileResponse companyData = new CompanyProfileResponse(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
         verify(privateCompanySearchHandler).upsertCompanyProfile(URI, companyProfileData);
@@ -114,7 +114,7 @@ class CompanySearchServiceImplTest {
                 .thenReturn(privateCompanySearchUpsert);
         when(privateCompanySearchUpsert.execute()).thenReturn(SUCCESS_RESPONSE);
 
-        CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
+        CompanyProfileResponse companyData = new CompanyProfileResponse(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
         verify(privateCompanySearchHandler).upsertCompanyProfile(URI, companyProfileData);
@@ -152,7 +152,7 @@ class CompanySearchServiceImplTest {
         when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
                 .thenReturn(Collections.emptyList());
 
-        CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
+        CompanyProfileResponse companyData = new CompanyProfileResponse(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
         verify(privateCompanySearchHandler).upsertCompanyProfile(URI, companyProfileData);

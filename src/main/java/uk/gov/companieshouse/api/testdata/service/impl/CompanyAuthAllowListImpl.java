@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthAllowList;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthAllowListResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthAllowListRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -22,13 +22,13 @@ public class CompanyAuthAllowListImpl implements CompanyAuthAllowListService {
     private RandomService randomService;
 
     @Override
-    public CompanyAuthAllowListData create(CompanyAuthAllowListSpec spec) throws DataException {
+    public CompanyAuthAllowListResponse create(CompanyAuthAllowListRequest spec) throws DataException {
         var randomId = randomService.getString(24).toLowerCase();
         var companyAuthAllowList = new CompanyAuthAllowList();
         companyAuthAllowList.setId(randomId);
         companyAuthAllowList.setEmailAddress(spec.getEmailAddress());
         repository.save(companyAuthAllowList);
-        return new CompanyAuthAllowListData(companyAuthAllowList.getId());
+        return new CompanyAuthAllowListResponse(companyAuthAllowList.getId());
     }
 
     @Override

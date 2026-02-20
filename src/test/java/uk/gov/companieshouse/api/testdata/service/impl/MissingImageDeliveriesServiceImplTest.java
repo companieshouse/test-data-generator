@@ -29,14 +29,14 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionV
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
-import uk.gov.companieshouse.api.testdata.model.rest.BasketSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemCostsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -63,7 +63,7 @@ class MissingImageDeliveriesServiceImplTest {
     private ArgumentCaptor<MissingImageDeliveries> missingImageDeliveriesCaptor;
 
     private MissingImageDeliveries missingImageDeliveries;
-    private MissingImageDeliveriesSpec missingImageDeliveriesSpec;
+    private MissingImageDeliveriesRequest missingImageDeliveriesRequest;
 
     private Basket basket;
 
@@ -73,34 +73,34 @@ class MissingImageDeliveriesServiceImplTest {
         missingImageDeliveries.setId("MID-123456-789012");
         var companyNumber = "12345678";
 
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest descriptionValuesSpec = new FilingHistoryDescriptionValuesRequest();
         descriptionValuesSpec.setMadeUpDate("2019-11-10");
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryCategory("accounts");
-        itemOptionsSpec.setFilingHistoryDate("2018-04-06");
-        itemOptionsSpec.setFilingHistoryDescription("accounts-with-accounts-type-small");
-        itemOptionsSpec.setFilingHistoryId("MzIwMTkzODk1NGFkaXF6a2N6");
-        itemOptionsSpec.setFilingHistoryType("AA");
-        itemOptionsSpec.setFilingHistoryDescriptionValues(descriptionValuesSpec);
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setFilingHistoryCategory("accounts");
+        itemOptionsRequest.setFilingHistoryDate("2018-04-06");
+        itemOptionsRequest.setFilingHistoryDescription("accounts-with-accounts-type-small");
+        itemOptionsRequest.setFilingHistoryId("MzIwMTkzODk1NGFkaXF6a2N6");
+        itemOptionsRequest.setFilingHistoryType("AA");
+        itemOptionsRequest.setFilingHistoryDescriptionValues(descriptionValuesSpec);
 
-        ItemCostsSpec itemCostsSpec = new ItemCostsSpec();
-        itemCostsSpec.setDiscountApplied("0");
-        itemCostsSpec.setItemCost("15");
-        itemCostsSpec.setCalculatedCost("15");
-        itemCostsSpec.setProductType("missing-image-delivery-accounts");
+        ItemCostsRequest itemCostsRequest = new ItemCostsRequest();
+        itemCostsRequest.setDiscountApplied("0");
+        itemCostsRequest.setItemCost("15");
+        itemCostsRequest.setCalculatedCost("15");
+        itemCostsRequest.setProductType("missing-image-delivery-accounts");
 
-        missingImageDeliveriesSpec = new MissingImageDeliveriesSpec();
-        missingImageDeliveriesSpec.setCompanyName("Test Company");
-        missingImageDeliveriesSpec.setCompanyNumber(companyNumber);
-        missingImageDeliveriesSpec.setItemCosts(List.of(itemCostsSpec));
-        missingImageDeliveriesSpec.setItemOptions(List.of(itemOptionsSpec));
-        missingImageDeliveriesSpec.setKind("certified-copy-kind");
-        missingImageDeliveriesSpec.setPostalDelivery(true);
-        missingImageDeliveriesSpec.setQuantity(1);
-        missingImageDeliveriesSpec.setUserId("user123");
-        missingImageDeliveriesSpec.setPostageCost("0");
-        missingImageDeliveriesSpec.setTotalItemCost("30");
+        missingImageDeliveriesRequest = new MissingImageDeliveriesRequest();
+        missingImageDeliveriesRequest.setCompanyName("Test Company");
+        missingImageDeliveriesRequest.setCompanyNumber(companyNumber);
+        missingImageDeliveriesRequest.setItemCosts(List.of(itemCostsRequest));
+        missingImageDeliveriesRequest.setItemOptions(List.of(itemOptionsRequest));
+        missingImageDeliveriesRequest.setKind("certified-copy-kind");
+        missingImageDeliveriesRequest.setPostalDelivery(true);
+        missingImageDeliveriesRequest.setQuantity(1);
+        missingImageDeliveriesRequest.setUserId("user123");
+        missingImageDeliveriesRequest.setPostageCost("0");
+        missingImageDeliveriesRequest.setTotalItemCost("30");
 
         basket = new Basket();
         basket.setId("user123");
@@ -112,7 +112,7 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(MissingImageDeliveries.class))).thenReturn(missingImageDeliveries);
 
-        CertificatesData result = service.create(missingImageDeliveriesSpec);
+        CertificatesResponse result = service.create(missingImageDeliveriesRequest);
 
         assertNotNull(result);
         assertEquals(missingImageDeliveries.getId(), result.getCertificates().getFirst().getId());
@@ -120,7 +120,7 @@ class MissingImageDeliveriesServiceImplTest {
         verify(repository).save(missingImageDeliveriesCaptor.capture());
         MissingImageDeliveries captured = missingImageDeliveriesCaptor.getValue();
 
-        assertMandatoryFields(missingImageDeliveriesSpec, captured);
+        assertMandatoryFields(missingImageDeliveriesRequest, captured);
     }
 
     @Test
@@ -129,26 +129,26 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(MissingImageDeliveries.class))).thenReturn(missingImageDeliveries);
 
-        MissingImageDeliveriesSpec missingImageDeliveriesSpec = new MissingImageDeliveriesSpec();
-        missingImageDeliveriesSpec.setCustomerReference("Test");
+        MissingImageDeliveriesRequest missingImageDeliveriesRequest = new MissingImageDeliveriesRequest();
+        missingImageDeliveriesRequest.setCustomerReference("Test");
 
-        CapitalSpec capitalSpec = new CapitalSpec();
+        CapitalRequest capitalSpec = new CapitalRequest();
         capitalSpec.setFigure("34,253,377");
         capitalSpec.setCurrency("GBP");
 
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest descriptionValuesSpec = new FilingHistoryDescriptionValuesRequest();
         descriptionValuesSpec.setDate("2019-11-10");
         descriptionValuesSpec.setCapital(List.of(capitalSpec));
         descriptionValuesSpec.setOfficerName("John Test");
         descriptionValuesSpec.setChargeNumber("21321312");
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryBarcode("L72QXI0Y");
-        itemOptionsSpec.setFilingHistoryDescriptionValues(descriptionValuesSpec);
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setFilingHistoryBarcode("L72QXI0Y");
+        itemOptionsRequest.setFilingHistoryDescriptionValues(descriptionValuesSpec);
 
-        missingImageDeliveriesSpec.setItemOptions(List.of(itemOptionsSpec));
+        missingImageDeliveriesRequest.setItemOptions(List.of(itemOptionsRequest));
 
-        CertificatesData result = service.create(missingImageDeliveriesSpec);
+        CertificatesResponse result = service.create(missingImageDeliveriesRequest);
 
         assertNotNull(result);
         assertEquals(missingImageDeliveries.getId(), result.getCertificates().getFirst().getId());
@@ -157,13 +157,13 @@ class MissingImageDeliveriesServiceImplTest {
         MissingImageDeliveries captured = missingImageDeliveriesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = missingImageDeliveriesSpec.getItemOptions().getFirst();
+        ItemOptionsRequest expectedOptions = missingImageDeliveriesRequest.getItemOptions().getFirst();
         FilingHistoryDescriptionValues caturedFilingHistoryDescriptionValues = capturedOptions.getFilingHistoryDescriptionValues();
-        FilingHistoryDescriptionValuesSpec expectedFilingHistoryDescriptionValues = expectedOptions.getFilingHistoryDescriptionValues();
+        FilingHistoryDescriptionValuesRequest expectedFilingHistoryDescriptionValues = expectedOptions.getFilingHistoryDescriptionValues();
         List<Capital> capturedCapital = caturedFilingHistoryDescriptionValues.getCapital();
-        List<CapitalSpec> expectedCapital = expectedFilingHistoryDescriptionValues.getCapital();
+        List<CapitalRequest> expectedCapital = expectedFilingHistoryDescriptionValues.getCapital();
 
-        assertEquals(missingImageDeliveriesSpec.getCustomerReference(), captured.getCustomerReference());
+        assertEquals(missingImageDeliveriesRequest.getCustomerReference(), captured.getCustomerReference());
         assertEquals(expectedOptions.getFilingHistoryBarcode(), capturedOptions.getFilingHistoryBarcode());
         assertEquals(expectedCapital.getFirst().getCurrency(), capturedCapital.getFirst().getCurrency());
         assertEquals(expectedCapital.getFirst().getFigure(), capturedCapital.getFirst().getFigure());
@@ -177,15 +177,15 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
 
-        BasketSpec basketSpec = new BasketSpec();
-        basketSpec.setForename("John");
-        basketSpec.setSurname("Doe");
-        basketSpec.setEnrolled(true);
-        missingImageDeliveriesSpec.setBasketSpec(basketSpec);
+        BasketRequest basketRequest = new BasketRequest();
+        basketRequest.setForename("John");
+        basketRequest.setSurname("Doe");
+        basketRequest.setEnrolled(true);
+        missingImageDeliveriesRequest.setBasketSpec(basketRequest);
 
         Basket basket = new Basket();
-        basket.setForename(basketSpec.getForename());
-        basket.setSurname(basketSpec.getSurname());
+        basket.setForename(basketRequest.getForename());
+        basket.setSurname(basketRequest.getSurname());
         basket.setEnrolled(true);
 
         when(repository.save(any(MissingImageDeliveries.class))).thenAnswer(invocation -> {
@@ -195,9 +195,9 @@ class MissingImageDeliveriesServiceImplTest {
         });
 
         when(basketRepository.save(any(Basket.class))).thenReturn(basket);
-        when(certificatesService.createBasket(any(CertificatesSpec.class), anyList())).thenReturn(basket);
+        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
 
-        CertificatesData result = service.create(missingImageDeliveriesSpec);
+        CertificatesResponse result = service.create(missingImageDeliveriesRequest);
 
         assertNotNull(result);
         assertEquals(missingImageDeliveries.getId(), result.getCertificates().getFirst().getId());
@@ -205,13 +205,13 @@ class MissingImageDeliveriesServiceImplTest {
         verify(repository).save(missingImageDeliveriesCaptor.capture());
         MissingImageDeliveries captured = missingImageDeliveriesCaptor.getValue();
 
-        assertMandatoryFields(missingImageDeliveriesSpec, captured);
+        assertMandatoryFields(missingImageDeliveriesRequest, captured);
 
         assertNotNull(captured.getBasket());
         Basket capturedBasket = captured.getBasket();
 
-        assertEquals(basketSpec.getForename(), capturedBasket.getForename());  // Now should pass
-        assertEquals(basketSpec.getSurname(), capturedBasket.getSurname());
+        assertEquals(basketRequest.getForename(), capturedBasket.getForename());  // Now should pass
+        assertEquals(basketRequest.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
     }
 
@@ -222,14 +222,14 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getEtag())
             .thenReturn("etag1", "etag2");
 
-        CapitalSpec capitalSpec = new CapitalSpec();
+        CapitalRequest capitalSpec = new CapitalRequest();
         capitalSpec.setFigure("34,253,377");
         capitalSpec.setCurrency("GBP");
 
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec1 = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest descriptionValuesSpec1 = new FilingHistoryDescriptionValuesRequest();
         descriptionValuesSpec1.setOfficerName("John test");
 
-        ItemOptionsSpec itemOption1 = new ItemOptionsSpec();
+        ItemOptionsRequest itemOption1 = new ItemOptionsRequest();
         itemOption1.setFilingHistoryDate("2019-11-23");
         itemOption1.setFilingHistoryDescription("appoint-person-director-company-with-name");
         itemOption1.setFilingHistoryDescriptionValues(descriptionValuesSpec1);
@@ -237,10 +237,10 @@ class MissingImageDeliveriesServiceImplTest {
         itemOption1.setFilingHistoryType("AP01");
         itemOption1.setFilingHistoryCategory("officers");
 
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec2 = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest descriptionValuesSpec2 = new FilingHistoryDescriptionValuesRequest();
         descriptionValuesSpec2.setMadeUpDate("2017-12-31");
 
-        ItemOptionsSpec itemOption2 = new ItemOptionsSpec();
+        ItemOptionsRequest itemOption2 = new ItemOptionsRequest();
         itemOption2.setFilingHistoryDate("2016-11-23");
         itemOption2.setFilingHistoryDescription("accounts-with-accounts-type-small");
         itemOption2.setFilingHistoryDescriptionValues(descriptionValuesSpec2);
@@ -249,13 +249,13 @@ class MissingImageDeliveriesServiceImplTest {
         itemOption2.setFilingHistoryCategory("accounts");
         itemOption2.setFilingHistoryBarcode("L72QXI0Y");
 
-        missingImageDeliveriesSpec.setItemOptions(List.of(itemOption1, itemOption2));
+        missingImageDeliveriesRequest.setItemOptions(List.of(itemOption1, itemOption2));
 
-        BasketSpec basketSpec = new BasketSpec();
-        basketSpec.setForename("John");
-        basketSpec.setSurname("Doe");
-        basketSpec.setEnrolled(true);
-        missingImageDeliveriesSpec.setBasketSpec(basketSpec);
+        BasketRequest basketRequest = new BasketRequest();
+        basketRequest.setForename("John");
+        basketRequest.setSurname("Doe");
+        basketRequest.setEnrolled(true);
+        missingImageDeliveriesRequest.setBasketSpec(basketRequest);
 
         // Capture each certificate saved
         when(repository.save(any(MissingImageDeliveries.class))).thenAnswer(invocation -> {
@@ -265,9 +265,9 @@ class MissingImageDeliveriesServiceImplTest {
         });
 
         when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
-        when(certificatesService.createBasket(any(CertificatesSpec.class), anyList())).thenReturn(basket);
+        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
 
-        CertificatesData results = service.create(missingImageDeliveriesSpec);
+        CertificatesResponse results = service.create(missingImageDeliveriesRequest);
 
         assertEquals(2, results.getCertificates().size());
 
@@ -278,21 +278,21 @@ class MissingImageDeliveriesServiceImplTest {
 
         for (int i = 0; i < capturedCertificates.size(); i++) {
             MissingImageDeliveries cert = capturedCertificates.get(i);
-            ItemOptionsSpec expectedOptions = missingImageDeliveriesSpec.getItemOptions().get(i);
+            ItemOptionsRequest expectedOptions = missingImageDeliveriesRequest.getItemOptions().get(i);
 
-            assertEquals(missingImageDeliveriesSpec.getCompanyName(), cert.getCompanyName());
-            assertEquals(missingImageDeliveriesSpec.getCompanyNumber(), cert.getCompanyNumber());
-            assertEquals("missing image delivery for company " + missingImageDeliveriesSpec.getCompanyNumber(), cert.getDescription());
+            assertEquals(missingImageDeliveriesRequest.getCompanyName(), cert.getCompanyName());
+            assertEquals(missingImageDeliveriesRequest.getCompanyNumber(), cert.getCompanyNumber());
+            assertEquals("missing image delivery for company " + missingImageDeliveriesRequest.getCompanyNumber(), cert.getDescription());
             assertEquals("missing-image-delivery", cert.getDescriptionIdentifier());
-            assertEquals(missingImageDeliveriesSpec.getCompanyNumber(), cert.getDescriptionCompanyNumber());
-            assertEquals("missing image delivery for company " + missingImageDeliveriesSpec.getCompanyNumber(), cert.getDescriptionMissingImageDelivery());
+            assertEquals(missingImageDeliveriesRequest.getCompanyNumber(), cert.getDescriptionCompanyNumber());
+            assertEquals("missing image delivery for company " + missingImageDeliveriesRequest.getCompanyNumber(), cert.getDescriptionMissingImageDelivery());
 
             assertEquals(expectedOptions.getCertificateType(), cert.getItemOptions().getCertificateType());
             assertEquals(expectedOptions.getCompanyType(), cert.getItemOptions().getCompanyType());
             assertEquals(expectedOptions.getCompanyStatus(), cert.getItemOptions().getCompanyStatus());
-            assertEquals(missingImageDeliveriesSpec.getKind(), cert.getKind());
-            assertEquals(missingImageDeliveriesSpec.getQuantity(), cert.getQuantity());
-            assertEquals(missingImageDeliveriesSpec.getUserId(), cert.getUserId());
+            assertEquals(missingImageDeliveriesRequest.getKind(), cert.getKind());
+            assertEquals(missingImageDeliveriesRequest.getQuantity(), cert.getQuantity());
+            assertEquals(missingImageDeliveriesRequest.getUserId(), cert.getUserId());
         }
     }
 
@@ -311,7 +311,7 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(MissingImageDeliveries.class))).thenReturn(missingImageDeliveries);
 
-        CertificatesData result = service.create(missingImageDeliveriesSpec);
+        CertificatesResponse result = service.create(missingImageDeliveriesRequest);
 
         assertNotNull(result);
         assertEquals(missingImageDeliveries.getId(), result.getCertificates().getFirst().getId());
@@ -320,13 +320,13 @@ class MissingImageDeliveriesServiceImplTest {
         MissingImageDeliveries captured = missingImageDeliveriesCaptor.getValue();
 
         assertEquals("MID-123456-789012", captured.getId());
-        assertEquals(missingImageDeliveriesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(missingImageDeliveriesSpec.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals(missingImageDeliveriesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(missingImageDeliveriesRequest.getCompanyNumber(), captured.getCompanyNumber());
     }
 
     @Test
     void validateCaptialIsNotPresent() {
-        FilingHistoryDescriptionValuesSpec spec = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest spec = new FilingHistoryDescriptionValuesRequest();
         spec.setDate("2024-05-01");
         spec.setCapital(null);
 
@@ -339,16 +339,16 @@ class MissingImageDeliveriesServiceImplTest {
     @Test
     void validateFilingHistoryDescriptionValuesIsNull() throws DataException {
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryId("abc123");
-        itemOptionsSpec.setFilingHistoryDescription("desc");
-        itemOptionsSpec.setFilingHistoryDescriptionValues(null); // NULL branch
-        itemOptionsSpec.setFilingHistoryDate("2024-01-01");
-        itemOptionsSpec.setFilingHistoryType("type");
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setFilingHistoryId("abc123");
+        itemOptionsRequest.setFilingHistoryDescription("desc");
+        itemOptionsRequest.setFilingHistoryDescriptionValues(null); // NULL branch
+        itemOptionsRequest.setFilingHistoryDate("2024-01-01");
+        itemOptionsRequest.setFilingHistoryType("type");
 
 
-        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
-        spec.setItemOptions(List.of(itemOptionsSpec));
+        MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
+        spec.setItemOptions(List.of(itemOptionsRequest));
         spec.setCompanyName("Test Ltd");
         spec.setCompanyNumber("12345678");
         spec.setUserId("user123");
@@ -360,7 +360,7 @@ class MissingImageDeliveriesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(MissingImageDeliveries.class))).thenReturn(missingImageDeliveries);
 
-        CertificatesData result = service.create(spec);
+        CertificatesResponse result = service.create(spec);
 
         assertNotNull(result);
         assertFalse(result.getCertificates().isEmpty());
@@ -368,11 +368,11 @@ class MissingImageDeliveriesServiceImplTest {
 
     @Test
     void validateItemCostsIsNull() throws DataException {
-        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
         spec.setCompanyName("Null Cost Co");
         spec.setCompanyNumber("00011122");
         spec.setUserId("user123");
-        spec.setItemOptions(List.of(new ItemOptionsSpec()));
+        spec.setItemOptions(List.of(new ItemOptionsRequest()));
         spec.setItemCosts(null); // 👈 This is the key path
         spec.setKind("certified-copy");
         spec.setQuantity(1);
@@ -383,7 +383,7 @@ class MissingImageDeliveriesServiceImplTest {
 
         when(repository.save(any(MissingImageDeliveries.class))).thenReturn(missingImageDeliveries);
 
-        CertificatesData result = service.create(spec);
+        CertificatesResponse result = service.create(spec);
 
         assertNotNull(result);
         assertFalse(result.getCertificates().isEmpty());
@@ -431,7 +431,7 @@ class MissingImageDeliveriesServiceImplTest {
         verify(basketRepository, never()).delete(any());
     }
 
-    private void assertMandatoryFields(MissingImageDeliveriesSpec spec, MissingImageDeliveries captured) {
+    private void assertMandatoryFields(MissingImageDeliveriesRequest spec, MissingImageDeliveries captured) {
         assertEquals("MID-123456-789012", captured.getId());
         assertEquals(spec.getCompanyName(), captured.getCompanyName());
         assertEquals(spec.getCompanyNumber(), captured.getCompanyNumber());
@@ -451,14 +451,14 @@ class MissingImageDeliveriesServiceImplTest {
         assertEquals(spec.getTotalItemCost(), captured.getTotalItemCost());
     }
 
-    private void assertItemCosts(List<ItemCosts> capturedCosts, ItemCostsSpec expectedCosts) {
+    private void assertItemCosts(List<ItemCosts> capturedCosts, ItemCostsRequest expectedCosts) {
         assertEquals(expectedCosts.getDiscountApplied(), capturedCosts.getFirst().getDiscountApplied());
         assertEquals(expectedCosts.getItemCost(), capturedCosts.getFirst().getItemCost());
         assertEquals(expectedCosts.getCalculatedCost(), capturedCosts.getFirst().getCalculatedCost());
         assertEquals(expectedCosts.getProductType(), capturedCosts.getFirst().getProductType());
     }
 
-    private void assertItemOptionsAndFilingHistory(ItemOptions capturedOptions, ItemOptionsSpec expectedOptions) {
+    private void assertItemOptionsAndFilingHistory(ItemOptions capturedOptions, ItemOptionsRequest expectedOptions) {
 
         assertEquals(expectedOptions.getFilingHistoryCategory(), capturedOptions.getFilingHistoryCategory());
         assertEquals(expectedOptions.getFilingHistoryDate(), capturedOptions.getFilingHistoryDate());

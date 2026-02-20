@@ -12,17 +12,17 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
 import uk.gov.companieshouse.api.testdata.model.entity.PreviousState;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
-import uk.gov.companieshouse.api.testdata.model.rest.InvitationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PreviousStateSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InvitationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class UserCompanyAssociationServiceImpl implements
-        DataService<UserCompanyAssociationData, UserCompanyAssociationSpec> {
+        DataService<UserCompanyAssociationResponse, UserCompanyAssociationRequest> {
     private static final String AUTH_CODE = "auth_code";
     private static final String CONFIRMED_STATUS = "confirmed";
 
@@ -33,7 +33,7 @@ public class UserCompanyAssociationServiceImpl implements
     private RandomService randomService;
 
     @Override
-    public UserCompanyAssociationData create(UserCompanyAssociationSpec spec) throws DataException {
+    public UserCompanyAssociationResponse create(UserCompanyAssociationRequest spec) throws DataException {
         var randomId = randomService.generateId();
         var association = new UserCompanyAssociation();
         var currentDate = randomService.getCurrentDateTime();
@@ -57,7 +57,7 @@ public class UserCompanyAssociationServiceImpl implements
 
         repository.save(association);
 
-        return new UserCompanyAssociationData(
+        return new UserCompanyAssociationResponse(
                 association.getId(),
                 association.getCompanyNumber(),
                 association.getUserId(),
@@ -75,9 +75,9 @@ public class UserCompanyAssociationServiceImpl implements
         return association.isPresent();
     }
 
-    private List<Invitation> createInvitations(UserCompanyAssociationSpec spec) {
+    private List<Invitation> createInvitations(UserCompanyAssociationRequest spec) {
         List<Invitation> invitationList = new ArrayList<>();
-        for (InvitationSpec invite : spec.getInvitations()) {
+        for (InvitationRequest invite : spec.getInvitations()) {
             var invitation = new Invitation();
             invitation.setInvitedAt(invite.getInvitedAt());
             invitation.setInvitedBy(invite.getInvitedBy());
@@ -86,7 +86,7 @@ public class UserCompanyAssociationServiceImpl implements
         return invitationList;
     }
 
-    private List<PreviousState> createPreviousStates(UserCompanyAssociationSpec spec) {
+    private List<PreviousState> createPreviousStates(UserCompanyAssociationRequest spec) {
         List<PreviousState> previousStateList = new ArrayList<>();
         for (PreviousStateSpec prevState :
                 spec.getPreviousStates()) {

@@ -19,21 +19,21 @@ import org.springframework.util.StringUtils;
 
 import uk.gov.companieshouse.api.testdata.exception.BarcodeServiceException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
-import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
-import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+
 import uk.gov.companieshouse.api.testdata.model.entity.AssociatedFiling;
 import uk.gov.companieshouse.api.testdata.model.entity.Capital;
-
-import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CategoryType;
-import uk.gov.companieshouse.api.testdata.model.rest.SubcategoryType;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionType;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistorySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ResolutionsSpec;
+import uk.gov.companieshouse.api.testdata.model.entity.DescriptionValues;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Links;
+import uk.gov.companieshouse.api.testdata.model.entity.OriginalValues;
+import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.SubcategoryType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.FilingHistoryDescriptionType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ResolutionsRequest;
 
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
@@ -43,7 +43,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanySpec> {
+public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanyRequest> {
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
@@ -64,8 +64,8 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
     private BarcodeService barcodeService;
 
     @Override
-    public FilingHistory create(CompanySpec spec) throws DataException {
-        List<FilingHistorySpec> filingHistorySpecs = spec.getFilingHistoryList(); // New array-style getter
+    public FilingHistory create(CompanyRequest spec) throws DataException {
+        List<FilingHistoryRequest> filingHistorySpecs = spec.getFilingHistoryList(); // New array-style getter
         List<FilingHistory> savedHistories = new ArrayList<>();
         LOG.info("Starting creation of FilingHistory for company number: "
                 + spec.getCompanyNumber());
@@ -94,7 +94,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
 
         if (filingHistorySpecs != null && !filingHistorySpecs.isEmpty()) {
-            for (FilingHistorySpec fhSpec : filingHistorySpecs) {
+            for (FilingHistoryRequest fhSpec : filingHistorySpecs) {
                 savedHistories.add(createFilingHistoryFromSpec(spec, fhSpec, dayNow, dayTimeNow));
             }
         } else {
@@ -104,7 +104,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return savedHistories.get(savedHistories.size() - 1);
     }
 
-    private FilingHistory createFilingHistoryFromSpec(CompanySpec spec, FilingHistorySpec fhSpec, Instant dayNow, Instant dayTimeNow) throws DataException {
+    private FilingHistory createFilingHistoryFromSpec(CompanyRequest spec, FilingHistoryRequest fhSpec, Instant dayNow, Instant dayTimeNow) throws DataException {
         String barcode = getBarcode();
         String entityId = ENTITY_ID_PREFIX + randomService.getNumber(ENTITY_ID_LENGTH);
         LOG.debug("Generated entity ID: " + entityId);
@@ -160,7 +160,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         }
     }
 
-    private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistorySpec fhSpec, String type, Instant dayNow, Instant dayTimeNow, String barcode) {
+    private void applyTypeSpecificLogic(FilingHistory filingHistory, FilingHistoryRequest fhSpec, String type, Instant dayNow, Instant dayTimeNow, String barcode) {
         switch (type) {
             case "AP01" -> {
                 filingHistory.setDescriptionValues(createDescriptionValues(type, dayNow, fhSpec));
@@ -237,7 +237,7 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return links;
     }
 
-    DescriptionValues createDescriptionValues(String type, Instant dayNow, FilingHistorySpec fhspec) {
+    DescriptionValues createDescriptionValues(String type, Instant dayNow, FilingHistoryRequest fhspec) {
         var descriptionValues = new DescriptionValues();
         LOG.debug("TYPE " + type);
         switch (type) {
@@ -246,10 +246,10 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
                 descriptionValues.setOfficerName("Mr John Test");
             }
             case "SH01" -> {
-                List<CapitalSpec> capitalSpecs = fhspec.getDescriptionValues().getCapital();
+                List<CapitalRequest> capitalSpecs = fhspec.getDescriptionValues().getCapital();
                 List<Capital> capitalList = new ArrayList<>(capitalSpecs.size());
 
-                for (CapitalSpec capitalSpec : capitalSpecs) {
+                for (CapitalRequest capitalSpec : capitalSpecs) {
                     var capital = new Capital();
                     capital.setCurrency(capitalSpec.getCurrency());
                     capital.setFigure(capitalSpec.getFigure());
@@ -282,11 +282,11 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         return base + microseconds;
     }
 
-    private List<Resolutions> createResolutions(FilingHistorySpec fhSpec, Instant dayTimeNow, String barcode) {
+    private List<Resolutions> createResolutions(FilingHistoryRequest fhSpec, Instant dayTimeNow, String barcode) {
         List<Resolutions> resolutionsList = new ArrayList<>();
 
         if (fhSpec.getResolutions() != null) {
-            for (ResolutionsSpec resSpec : fhSpec.getResolutions()) {
+            for (ResolutionsRequest resSpec : fhSpec.getResolutions()) {
                 var resolution = new Resolutions();
                 resolution.setBarcode(barcode);
                 resolution.setCategory(resSpec.getCategory());

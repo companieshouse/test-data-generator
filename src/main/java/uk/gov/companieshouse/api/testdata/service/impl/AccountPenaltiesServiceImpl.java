@@ -21,11 +21,11 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesTransactionSubType;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PenaltiesTransactionSubType;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.logging.Logger;
@@ -54,8 +54,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     @Override
-    public AccountPenaltiesData getAccountPenalty(String companyCode, String customerCode,
-                                                  String penaltyRef) throws NoDataFoundException {
+    public AccountPenaltiesResponse getAccountPenalty(String companyCode, String customerCode,
+                                                      String penaltyRef) throws NoDataFoundException {
         var accountPenalties =
                 repository.findPenalty(companyCode, customerCode, penaltyRef)
                         .orElseThrow(() -> PENALTY_NOT_FOUND_EX);
@@ -73,7 +73,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenalties(String id)
+    public AccountPenaltiesResponse getAccountPenalties(String id)
             throws NoDataFoundException {
         var accountPenalties =
                 repository.findAllById(id)
@@ -83,7 +83,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenalties(String customerCode, String companyCode)
+    public AccountPenaltiesResponse getAccountPenalties(String customerCode, String companyCode)
             throws NoDataFoundException {
         // CustomerCode and CompanyCode together form a composite unique key,
         // so this would return a list of a single AccountPenalties or an empty list
@@ -97,7 +97,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
     }
 
     @Override
-    public AccountPenaltiesData updateAccountPenalties(
+    public AccountPenaltiesResponse updateAccountPenalties(
             String penaltyRef, UpdateAccountPenaltiesRequest request)
             throws NoDataFoundException, DataException {
 
@@ -169,7 +169,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return ResponseEntity.noContent().build();
     }
 
-    public AccountPenaltiesData createAccountPenalties(PenaltySpec penaltySpec)
+    public AccountPenaltiesResponse createAccountPenalties(PenaltySpec penaltySpec)
             throws DataException {
 
         List<AccountPenalty> penalties = createPenaltiesList(penaltySpec);
@@ -439,15 +439,15 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return updatedPenalty;
     }
 
-    private AccountPenaltiesData mapToAccountPenaltiesData(AccountPenalties accountPenalties) {
-        var accountPenaltiesData = new AccountPenaltiesData();
+    private AccountPenaltiesResponse mapToAccountPenaltiesData(AccountPenalties accountPenalties) {
+        var accountPenaltiesData = new AccountPenaltiesResponse();
         accountPenaltiesData.setId(accountPenalties.getId());
         accountPenaltiesData.setCompanyCode(accountPenalties.getCompanyCode());
         accountPenaltiesData.setCustomerCode(accountPenalties.getCustomerCode());
         accountPenaltiesData.setCreatedAt(accountPenalties.getCreatedAt());
         accountPenaltiesData.setClosedAt(accountPenalties.getClosedAt());
 
-        List<PenaltyData> penalties = accountPenalties.getPenalties().stream()
+        List<PenaltyResponse> penalties = accountPenalties.getPenalties().stream()
                 .map(this::mapToAccountPenaltyData)
                 .collect(Collectors.toList());
 
@@ -456,8 +456,8 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
         return accountPenaltiesData;
     }
 
-    private PenaltyData mapToAccountPenaltyData(AccountPenalty penalty) {
-        var penaltyData = new PenaltyData();
+    private PenaltyResponse mapToAccountPenaltyData(AccountPenalty penalty) {
+        var penaltyData = new PenaltyResponse();
         penaltyData.setCompanyCode(penalty.getCompanyCode());
         penaltyData.setCustomerCode(penalty.getCustomerCode());
         penaltyData.setTransactionReference(penalty.getTransactionReference());

@@ -30,13 +30,13 @@ import uk.gov.companieshouse.api.testdata.model.entity.DirectorDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SecretaryDetails;
-import uk.gov.companieshouse.api.testdata.model.rest.BasketSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DirectorDetailsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RegisteredOfficeAddressDetailsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.SecretaryDetailsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DirectorDetailsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegisteredOfficeAddressDetailsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.SecretaryDetailsSpec;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -64,7 +64,7 @@ class CertificatesServiceImplTest {
     private ArgumentCaptor<Certificates> certificatesCaptor;
 
     private Certificates certificates;
-    private CertificatesSpec certificatesSpec;
+    private CertificatesRequest certificatesRequest;
 
     private Basket basket;
 
@@ -74,22 +74,22 @@ class CertificatesServiceImplTest {
         certificates = new Certificates();
         certificates.setId("CRT-123456-789012");
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setCertificateType("incorporation-with-all-name-changes");
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setCertificateType("incorporation-with-all-name-changes");
 
-        certificatesSpec = new CertificatesSpec();
-        certificatesSpec.setCompanyName("Test Company");
-        certificatesSpec.setCompanyNumber(companyNumber);
-        certificatesSpec.setDescription("certificate for company " + companyNumber);
-        certificatesSpec.setDescriptionIdentifier("certificate");
-        certificatesSpec.setItemOptions(List.of(itemOptionsSpec));
-        certificatesSpec.setKind("certificate-kind");
-        certificatesSpec.setPostalDelivery(true);
-        certificatesSpec.setQuantity(1);
-        certificatesSpec.setUserId("user123");
+        certificatesRequest = new CertificatesRequest();
+        certificatesRequest.setCompanyName("Test Company");
+        certificatesRequest.setCompanyNumber(companyNumber);
+        certificatesRequest.setDescription("certificate for company " + companyNumber);
+        certificatesRequest.setDescriptionIdentifier("certificate");
+        certificatesRequest.setItemOptions(List.of(itemOptionsRequest));
+        certificatesRequest.setKind("certificate-kind");
+        certificatesRequest.setPostalDelivery(true);
+        certificatesRequest.setQuantity(1);
+        certificatesRequest.setUserId("user123");
 
         basket = new Basket();
-        basket.setId(certificatesSpec.getUserId()); // Set basket ID to user ID
+        basket.setId(certificatesRequest.getUserId()); // Set basket ID to user ID
     }
 
     @Test
@@ -98,7 +98,7 @@ class CertificatesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(Certificates.class))).thenReturn(certificates);
 
-        CertificatesData result = service.create(certificatesSpec);
+        CertificatesResponse result = service.create(certificatesRequest);
 
         assertNotNull(result);
         assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
@@ -107,25 +107,25 @@ class CertificatesServiceImplTest {
         Certificates captured = certificatesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().getFirst();
+        ItemOptionsRequest expectedOptions = certificatesRequest.getItemOptions().getFirst();
 
         assertEquals("CRT-123456-789012", captured.getId());
-        assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
-        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescription());
-        assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
-        assertEquals(certificatesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
-        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescriptionCertificate());
+        assertEquals(certificatesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certificatesRequest.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certificate for company " + certificatesRequest.getCompanyNumber(), captured.getDescription());
+        assertEquals(certificatesRequest.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
+        assertEquals(certificatesRequest.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certificate for company " + certificatesRequest.getCompanyNumber(), captured.getDescriptionCertificate());
         assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
         assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
         assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
         assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
         assertEquals("etag123", captured.getEtag());
-        assertEquals(certificatesSpec.getKind(), captured.getKind());
+        assertEquals(certificatesRequest.getKind(), captured.getKind());
         assertEquals("/orderable/certificates/CRT-123456-789012", captured.getLinksSelf());
         assertTrue(captured.isPostalDelivery());
-        assertEquals(certificatesSpec.getQuantity(), captured.getQuantity());
-        assertEquals(certificatesSpec.getUserId(), captured.getUserId());
+        assertEquals(certificatesRequest.getQuantity(), captured.getQuantity());
+        assertEquals(certificatesRequest.getUserId(), captured.getUserId());
     }
 
     @Test
@@ -134,14 +134,14 @@ class CertificatesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(Certificates.class))).thenReturn(certificates);
 
-        DirectorDetailsSpec directorDetailsSpec = new DirectorDetailsSpec();
-        directorDetailsSpec.setIncludeAddress(true);
-        directorDetailsSpec.setIncludeAppointmentDate(true);
-        directorDetailsSpec.setIncludeBasicInformation(true);
-        directorDetailsSpec.setIncludeCountryOfResidence(true);
-        directorDetailsSpec.setIncludeDobType("partial");
-        directorDetailsSpec.setIncludeNationality(true);
-        directorDetailsSpec.setIncludeOccupation(true);
+        DirectorDetailsRequest directorDetailsRequest = new DirectorDetailsRequest();
+        directorDetailsRequest.setIncludeAddress(true);
+        directorDetailsRequest.setIncludeAppointmentDate(true);
+        directorDetailsRequest.setIncludeBasicInformation(true);
+        directorDetailsRequest.setIncludeCountryOfResidence(true);
+        directorDetailsRequest.setIncludeDobType("partial");
+        directorDetailsRequest.setIncludeNationality(true);
+        directorDetailsRequest.setIncludeOccupation(true);
 
         SecretaryDetailsSpec secretaryDetailsSpec = new SecretaryDetailsSpec();
         secretaryDetailsSpec.setIncludeAddress(true);
@@ -156,22 +156,22 @@ class CertificatesServiceImplTest {
         registeredOfficeAddressDetailsSpec.setIncludeAddressRecordsType("all");
         registeredOfficeAddressDetailsSpec.setIncludeDates(false);
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setCompanyStatus("active");
-        itemOptionsSpec.setCompanyType("ltd");
-        itemOptionsSpec.setDeliveryMethod("postal");
-        itemOptionsSpec.setDeliveryTimescale("standard");
-        itemOptionsSpec.setDirectorDetails(directorDetailsSpec);
-        itemOptionsSpec.setForeName("test");
-        itemOptionsSpec.setIncludeCompanyObjectsInformation(true);
-        itemOptionsSpec.setIncludeEmailCopy(false);
-        itemOptionsSpec.setIncludeGoodStandingInformation(true);
-        itemOptionsSpec.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetailsSpec);
-        itemOptionsSpec.setSecretaryDetails(secretaryDetailsSpec);
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setCompanyStatus("active");
+        itemOptionsRequest.setCompanyType("ltd");
+        itemOptionsRequest.setDeliveryMethod("postal");
+        itemOptionsRequest.setDeliveryTimescale("standard");
+        itemOptionsRequest.setDirectorDetails(directorDetailsRequest);
+        itemOptionsRequest.setForeName("test");
+        itemOptionsRequest.setIncludeCompanyObjectsInformation(true);
+        itemOptionsRequest.setIncludeEmailCopy(false);
+        itemOptionsRequest.setIncludeGoodStandingInformation(true);
+        itemOptionsRequest.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetailsSpec);
+        itemOptionsRequest.setSecretaryDetails(secretaryDetailsSpec);
 
-        certificatesSpec.setItemOptions(List.of(itemOptionsSpec));
+        certificatesRequest.setItemOptions(List.of(itemOptionsRequest));
 
-        CertificatesData result = service.create(certificatesSpec);
+        CertificatesResponse result = service.create(certificatesRequest);
 
         assertNotNull(result);
         assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
@@ -179,14 +179,14 @@ class CertificatesServiceImplTest {
         verify(repository).save(certificatesCaptor.capture());
         Certificates captured = certificatesCaptor.getValue();
 
-        assertCoreCertificateFields(certificatesSpec, captured);
-        assertItemOptionFields(itemOptionsSpec, captured.getItemOptions());
-        assertDirectorFields(directorDetailsSpec, captured.getItemOptions().getDirectorDetails());
+        assertCoreCertificateFields(certificatesRequest, captured);
+        assertItemOptionFields(itemOptionsRequest, captured.getItemOptions());
+        assertDirectorFields(directorDetailsRequest, captured.getItemOptions().getDirectorDetails());
         assertSecretaryFields(secretaryDetailsSpec, captured.getItemOptions().getSecretaryDetails());
         assertROAddressFields(registeredOfficeAddressDetailsSpec, captured.getItemOptions().getRegisteredOfficeAddressDetails());
     }
 
-    private void assertCoreCertificateFields(CertificatesSpec spec, Certificates cert) {
+    private void assertCoreCertificateFields(CertificatesRequest spec, Certificates cert) {
         assertEquals("CRT-123456-789012", cert.getId());
         assertEquals(spec.getCompanyName(), cert.getCompanyName());
         assertEquals(spec.getCompanyNumber(), cert.getCompanyNumber());
@@ -202,7 +202,7 @@ class CertificatesServiceImplTest {
         assertEquals(spec.getUserId(), cert.getUserId());
     }
 
-    private void assertItemOptionFields(ItemOptionsSpec expected, ItemOptions actual) {
+    private void assertItemOptionFields(ItemOptionsRequest expected, ItemOptions actual) {
         assertEquals(expected.getCertificateType(), actual.getCertificateType());
         assertEquals(expected.getDeliveryTimescale(), actual.getDeliveryTimescale());
         assertEquals(expected.getIncludeEmailCopy(), actual.getIncludeEmailCopy());
@@ -214,7 +214,7 @@ class CertificatesServiceImplTest {
         assertEquals(expected.getIncludeGoodStandingInformation(), actual.getIncludeGoodStandingInformation());
     }
 
-    private void assertDirectorFields(DirectorDetailsSpec expected, DirectorDetails actual) {
+    private void assertDirectorFields(DirectorDetailsRequest expected, DirectorDetails actual) {
         assertEquals(expected.getIncludeAddress(), actual.getIncludeAddress());
         assertEquals(expected.getIncludeAppointmentDate(), actual.getIncludeAppointmentDate());
         assertEquals(expected.getIncludeBasicInformation(), actual.getIncludeBasicInformation());
@@ -244,15 +244,15 @@ class CertificatesServiceImplTest {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
 
-        BasketSpec basketSpec = new BasketSpec();
-        basketSpec.setForename("John");
-        basketSpec.setSurname("Doe");
-        basketSpec.setEnrolled(true);
-        certificatesSpec.setBasketSpec(basketSpec);
+        BasketRequest basketRequest = new BasketRequest();
+        basketRequest.setForename("John");
+        basketRequest.setSurname("Doe");
+        basketRequest.setEnrolled(true);
+        certificatesRequest.setBasketSpec(basketRequest);
 
         Basket basket = new Basket();
-        basket.setForename(basketSpec.getForename());
-        basket.setSurname(basketSpec.getSurname());
+        basket.setForename(basketRequest.getForename());
+        basket.setSurname(basketRequest.getSurname());
         basket.setEnrolled(true);
 
         when(repository.save(any(Certificates.class))).thenAnswer(invocation -> {
@@ -263,7 +263,7 @@ class CertificatesServiceImplTest {
 
         when(basketRepository.save(any(Basket.class))).thenReturn(basket);
 
-        CertificatesData result = service.create(certificatesSpec);
+        CertificatesResponse result = service.create(certificatesRequest);
 
         assertNotNull(result);
         assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
@@ -272,31 +272,31 @@ class CertificatesServiceImplTest {
         Certificates captured = certificatesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().getFirst();
+        ItemOptionsRequest expectedOptions = certificatesRequest.getItemOptions().getFirst();
 
         assertEquals("CRT-123456-789012", captured.getId());
-        assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
-        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescription());
-        assertEquals(certificatesSpec.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
-        assertEquals(certificatesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
-        assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), captured.getDescriptionCertificate());
+        assertEquals(certificatesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certificatesRequest.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certificate for company " + certificatesRequest.getCompanyNumber(), captured.getDescription());
+        assertEquals(certificatesRequest.getDescriptionIdentifier(), captured.getDescriptionIdentifier());
+        assertEquals(certificatesRequest.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certificate for company " + certificatesRequest.getCompanyNumber(), captured.getDescriptionCertificate());
         assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
         assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
         assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
         assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
         assertEquals("etag123", captured.getEtag());
-        assertEquals(certificatesSpec.getKind(), captured.getKind());
+        assertEquals(certificatesRequest.getKind(), captured.getKind());
         assertEquals("/orderable/certificates/CRT-123456-789012", captured.getLinksSelf());
         assertTrue(captured.isPostalDelivery());
-        assertEquals(certificatesSpec.getQuantity(), captured.getQuantity());
-        assertEquals(certificatesSpec.getUserId(), captured.getUserId());
+        assertEquals(certificatesRequest.getQuantity(), captured.getQuantity());
+        assertEquals(certificatesRequest.getUserId(), captured.getUserId());
 
         assertNotNull(captured.getBasket());
         Basket capturedBasket = captured.getBasket();
 
-        assertEquals(basketSpec.getForename(), capturedBasket.getForename());  // Now should pass
-        assertEquals(basketSpec.getSurname(), capturedBasket.getSurname());
+        assertEquals(basketRequest.getForename(), capturedBasket.getForename());  // Now should pass
+        assertEquals(basketRequest.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
     }
 
@@ -310,9 +310,9 @@ class CertificatesServiceImplTest {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
 
-        var itemOptions = new ItemOptionsSpec();
+        var itemOptions = new ItemOptionsRequest();
         itemOptions.setCertificateType("incorporation");
-        var spec = new CertificatesSpec();
+        var spec = new CertificatesRequest();
         spec.setUserId("user-123");
         spec.setCompanyName("Test Company");
         spec.setCompanyNumber("12345678");
@@ -320,9 +320,9 @@ class CertificatesServiceImplTest {
         spec.setQuantity(1);
         spec.setPostalDelivery(true);
         spec.setItemOptions(List.of(itemOptions));
-        spec.setBasketSpec(new BasketSpec());
+        spec.setBasketSpec(new BasketRequest());
 
-        CertificatesData result = service.create(spec);
+        CertificatesResponse result = service.create(spec);
 
         ArgumentCaptor<Basket> basketCaptor = ArgumentCaptor.forClass(Basket.class);
         verify(basketRepository).save(basketCaptor.capture());
@@ -334,9 +334,9 @@ class CertificatesServiceImplTest {
 
     @Test
     void createBasketShouldInitializeItemsWhenNull() {
-        var spec = new CertificatesSpec();
+        var spec = new CertificatesRequest();
         spec.setUserId("user-456");
-        var basketSpec = new BasketSpec();
+        var basketSpec = new BasketRequest();
         basketSpec.setForename("John");
         basketSpec.setSurname("Doe");
         basketSpec.setEnrolled(true);
@@ -365,27 +365,27 @@ class CertificatesServiceImplTest {
         when(randomService.getEtag())
             .thenReturn("etag1", "etag2");
 
-        ItemOptionsSpec itemOption1 = new ItemOptionsSpec();
+        ItemOptionsRequest itemOption1 = new ItemOptionsRequest();
         itemOption1.setCertificateType("incorporation-with-all-name-changes");
         itemOption1.setDeliveryTimescale("standard");
         itemOption1.setIncludeEmailCopy(true);
         itemOption1.setCompanyType("ltd");
         itemOption1.setCompanyStatus("active");
 
-        ItemOptionsSpec itemOption2 = new ItemOptionsSpec();
+        ItemOptionsRequest itemOption2 = new ItemOptionsRequest();
         itemOption2.setCertificateType("incorporation-with-all-name-changes");
         itemOption2.setDeliveryTimescale("standard");
         itemOption2.setIncludeEmailCopy(false);
         itemOption2.setCompanyType("ltd");
         itemOption2.setCompanyStatus("active");
 
-        certificatesSpec.setItemOptions(List.of(itemOption1, itemOption2));
+        certificatesRequest.setItemOptions(List.of(itemOption1, itemOption2));
 
-        BasketSpec basketSpec = new BasketSpec();
-        basketSpec.setForename("John");
-        basketSpec.setSurname("Doe");
-        basketSpec.setEnrolled(true);
-        certificatesSpec.setBasketSpec(basketSpec);
+        BasketRequest basketRequest = new BasketRequest();
+        basketRequest.setForename("John");
+        basketRequest.setSurname("Doe");
+        basketRequest.setEnrolled(true);
+        certificatesRequest.setBasketSpec(basketRequest);
 
         // Capture each certificate saved
         when(repository.save(any(Certificates.class))).thenAnswer(invocation -> {
@@ -396,7 +396,7 @@ class CertificatesServiceImplTest {
 
         when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
 
-        CertificatesData results = service.create(certificatesSpec);
+        CertificatesResponse results = service.create(certificatesRequest);
 
         assertEquals(2, results.getCertificates().size());
 
@@ -407,14 +407,14 @@ class CertificatesServiceImplTest {
 
         for (int i = 0; i < capturedCertificates.size(); i++) {
             Certificates cert = capturedCertificates.get(i);
-            ItemOptionsSpec expectedOptions = certificatesSpec.getItemOptions().get(i);
+            ItemOptionsRequest expectedOptions = certificatesRequest.getItemOptions().get(i);
 
-            assertEquals(certificatesSpec.getCompanyName(), cert.getCompanyName());
-            assertEquals(certificatesSpec.getCompanyNumber(), cert.getCompanyNumber());
-            assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), cert.getDescription());
-            assertEquals(certificatesSpec.getDescriptionIdentifier(), cert.getDescriptionIdentifier());
-            assertEquals(certificatesSpec.getCompanyNumber(), cert.getDescriptionCompanyNumber());
-            assertEquals("certificate for company " + certificatesSpec.getCompanyNumber(), cert.getDescriptionCertificate());
+            assertEquals(certificatesRequest.getCompanyName(), cert.getCompanyName());
+            assertEquals(certificatesRequest.getCompanyNumber(), cert.getCompanyNumber());
+            assertEquals("certificate for company " + certificatesRequest.getCompanyNumber(), cert.getDescription());
+            assertEquals(certificatesRequest.getDescriptionIdentifier(), cert.getDescriptionIdentifier());
+            assertEquals(certificatesRequest.getCompanyNumber(), cert.getDescriptionCompanyNumber());
+            assertEquals("certificate for company " + certificatesRequest.getCompanyNumber(), cert.getDescriptionCertificate());
 
             assertEquals(expectedOptions.getCertificateType(), cert.getItemOptions().getCertificateType());
             assertEquals(expectedOptions.getDeliveryTimescale(), cert.getItemOptions().getDeliveryTimescale());
@@ -422,9 +422,9 @@ class CertificatesServiceImplTest {
             assertEquals(expectedOptions.getCompanyType(), cert.getItemOptions().getCompanyType());
             assertEquals(expectedOptions.getCompanyStatus(), cert.getItemOptions().getCompanyStatus());
 
-            assertEquals(certificatesSpec.getKind(), cert.getKind());
-            assertEquals(certificatesSpec.getQuantity(), cert.getQuantity());
-            assertEquals(certificatesSpec.getUserId(), cert.getUserId());
+            assertEquals(certificatesRequest.getKind(), cert.getKind());
+            assertEquals(certificatesRequest.getQuantity(), cert.getQuantity());
+            assertEquals(certificatesRequest.getUserId(), cert.getUserId());
         }
     }
 
@@ -443,7 +443,7 @@ class CertificatesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(Certificates.class))).thenReturn(certificates);
 
-        CertificatesData result = service.create(certificatesSpec);
+        CertificatesResponse result = service.create(certificatesRequest);
 
         assertNotNull(result);
         assertEquals(certificates.getId(), result.getCertificates().getFirst().getId());
@@ -452,8 +452,8 @@ class CertificatesServiceImplTest {
         Certificates captured = certificatesCaptor.getValue();
 
         assertEquals("CRT-123456-789012", captured.getId());
-        assertEquals(certificatesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certificatesSpec.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals(certificatesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certificatesRequest.getCompanyNumber(), captured.getCompanyNumber());
     }
 
     @Test

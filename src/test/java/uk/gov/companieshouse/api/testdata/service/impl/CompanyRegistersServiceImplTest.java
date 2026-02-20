@@ -29,8 +29,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -50,7 +50,7 @@ class CompanyRegistersServiceImplTest {
     @InjectMocks
     private CompanyRegistersServiceImpl service;
 
-    private CompanySpec companySpec;
+    private CompanyRequest companySpec;
 
     private static final String DIRECTORS_TEXT = "directors";
     private static final String DIRECTORS_REGISTER_TYPE = "directors_register";
@@ -101,7 +101,7 @@ class CompanyRegistersServiceImplTest {
     @Test
     void testCreateCompanyRegistersWithMultipleRegisters() throws DataException {
         setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
-        RegistersSpec secretariesRegister = new RegistersSpec();
+        RegistersRequest secretariesRegister = new RegistersRequest();
         secretariesRegister.setRegisterType("secretaries");
         secretariesRegister.setRegisterMovedTo("Companies House");
 
@@ -285,9 +285,9 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void createReturnsUnsavedRegistersWhenCompanyWithDataStructureIsTrue() throws DataException {
-        companySpec = new CompanySpec();
+        companySpec = new CompanyRequest();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
-        RegistersSpec register = new RegistersSpec();
+        RegistersRequest register = new RegistersRequest();
         register.setRegisterType(DIRECTORS_TEXT);
         register.setRegisterMovedTo(PUBLIC_REGISTER);
         companySpec.setRegisters(List.of(register));
@@ -313,10 +313,10 @@ class CompanyRegistersServiceImplTest {
     }
 
     private void setCompanySpec(String registerType, String registerMovedTo) {
-        companySpec = new CompanySpec();
+        companySpec = new CompanyRequest();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
         companySpec.setCompanyWithPopulatedStructureOnly(false);
-        RegistersSpec register = new RegistersSpec();
+        RegistersRequest register = new RegistersRequest();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);
         companySpec.setRegisters(List.of(register));

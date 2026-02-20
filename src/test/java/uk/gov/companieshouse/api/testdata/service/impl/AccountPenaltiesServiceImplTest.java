@@ -36,11 +36,11 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesTransactionSubType;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PenaltiesTransactionSubType;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +67,7 @@ class AccountPenaltiesServiceImplTest {
                 COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE,
+        AccountPenaltiesResponse result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE,
                 PENALTY_REF);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
@@ -97,7 +97,7 @@ class AccountPenaltiesServiceImplTest {
         when(repository.findAllById(PENALTY_ID))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalties(PENALTY_ID);
+        AccountPenaltiesResponse result = service.getAccountPenalties(PENALTY_ID);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
@@ -124,7 +124,7 @@ class AccountPenaltiesServiceImplTest {
         when(repository.findByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE))
                 .thenReturn(Optional.of(List.of(accountPenalties)));
 
-        AccountPenaltiesData result = service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
+        AccountPenaltiesResponse result = service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
@@ -194,7 +194,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(accountPenalties)).thenReturn(accountPenalties);
 
-        AccountPenaltiesData result = service.updateAccountPenalties(PENALTY_REF, request);
+        AccountPenaltiesResponse result = service.updateAccountPenalties(PENALTY_REF, request);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
@@ -262,7 +262,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
 
-        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(penaltySpec);
 
         assertNotNull(result);
         assertEquals(savedEntity.getCompanyCode(), result.getCompanyCode());
@@ -338,7 +338,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
 
-        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(penaltySpec);
 
         assertNotNull(result);
     }
@@ -357,7 +357,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
 
-        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(penaltySpec);
 
         assertNotNull(result);
     }
@@ -378,7 +378,7 @@ class AccountPenaltiesServiceImplTest {
         when(repository.findPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+        AccountPenaltiesResponse result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
 
         assertEquals(1, result.getPenalties().size());
         assertEquals(PENALTY_REF, result.getPenalties().get(0).getTransactionReference());
@@ -578,7 +578,7 @@ class AccountPenaltiesServiceImplTest {
                 .thenReturn(Optional.of(accountPenalties));
         when(repository.save(any(AccountPenalties.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AccountPenaltiesData result = service.updateAccountPenalties(penaltyRef, request);
+        AccountPenaltiesResponse result = service.updateAccountPenalties(penaltyRef, request);
 
         assertEquals(2, result.getPenalties().size());
         assertEquals(10.0, result.getPenalties().get(0).getAmount());
@@ -594,7 +594,7 @@ class AccountPenaltiesServiceImplTest {
         AccountPenaltiesServiceImpl spyService = Mockito.spy(service);
         Mockito.doReturn(null).when(spyService).createPenaltiesList(penaltySpec);
 
-        AccountPenaltiesData result = spyService.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = spyService.createAccountPenalties(penaltySpec);
 
         assertNull(result);
     }
@@ -682,10 +682,10 @@ class AccountPenaltiesServiceImplTest {
                 .thenReturn(Optional.of(accountPenalties));
         when(repository.save(accountPenalties)).thenReturn(accountPenalties);
 
-        AccountPenaltiesData result = service.updateAccountPenalties("A1234567", request);
+        AccountPenaltiesResponse result = service.updateAccountPenalties("A1234567", request);
 
         assertNotNull(result);
-        PenaltyData penalty = result.getPenalties().get(0);
+        PenaltyResponse penalty = result.getPenalties().get(0);
         assertEquals(200.0, penalty.getAmount());
         assertEquals(0.0, penalty.getOutstandingAmount());
         assertTrue(penalty.getIsPaid());
@@ -701,7 +701,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
 
-        AccountPenaltiesData result = service.createAccountPenalties(spec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(spec);
         assertNotNull(result);
         assertEquals(1, result.getPenalties().size());
         assertEquals(100.0, result.getPenalties().get(0).getAmount());
@@ -788,7 +788,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
 
-        AccountPenaltiesData result = service.createAccountPenalties(spec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(spec);
 
         assertNotNull(result);
         assertTrue(result.getPenalties().isEmpty(), "Penalties list should be empty when duplicate is true and count < 2");

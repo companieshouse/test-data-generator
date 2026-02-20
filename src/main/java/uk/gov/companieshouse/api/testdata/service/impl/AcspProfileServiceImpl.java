@@ -13,10 +13,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.AuditDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SoleTraderDetails;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -37,7 +37,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
     @Autowired
     private AddressService addressService;
 
-    public AcspProfileData create(AcspProfileSpec spec) throws DataException {
+    public AcspProfileResponse create(AcspProfileRequest spec) throws DataException {
         var soleTraderForename = "Forename ";
         var soleTraderSurname = "Surname ";
         var nationality = "British";
@@ -50,16 +50,16 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         profile.setType(Objects.requireNonNullElse(spec.getType(), "limited-company"));
         profile.setAcspNumber(acspNumber);
         profile.setBusinessSector(Objects.requireNonNullElse(spec.getBusinessSector(), "financial-institutions"));
-        profile.setRegisteredOfficeAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
-        profile.setServiceAddress(addressService.getAddress(Jurisdiction.UNITED_KINGDOM));
+        profile.setRegisteredOfficeAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
+        profile.setServiceAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
         profile.setName(Objects.requireNonNullElse(spec.getName(),"Test Data Generator " + acspNumber + " Company Ltd"));
         profile.setLinksSelf(LINK_STEM + acspNumber);
         if (spec.getAmlDetails() != null) {
             List<AmlDetails> amlDetailsList = new ArrayList<>();
-            for (AmlSpec amlSpec : spec.getAmlDetails()) {
+            for (AmlRequest amlRequest : spec.getAmlDetails()) {
                 var amlDetails = new AmlDetails();
-                amlDetails.setSupervisoryBody(amlSpec.getSupervisoryBody());
-                amlDetails.setMembershipDetails(amlSpec.getMembershipDetails());
+                amlDetails.setSupervisoryBody(amlRequest.getSupervisoryBody());
+                amlDetails.setMembershipDetails(amlRequest.getMembershipDetails());
                 amlDetailsList.add(amlDetails);
             }
             profile.setAmlDetails(amlDetailsList);
@@ -73,7 +73,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
             soleTraderDetails.setSurname(soleTraderSurname + acspNumber);
             soleTraderDetails.setNationality(nationality);
             soleTraderDetails.setUsualResidentialCountry(
-                    addressService.getCountryOfResidence(Jurisdiction.ENGLAND));
+                    addressService.getCountryOfResidence(JurisdictionType.ENGLAND));
             profile.setSoleTraderDetails(soleTraderDetails);
         }
         AuditDetails created = new AuditDetails();
@@ -89,7 +89,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         profile.setUpdated(updated);
 
         AcspProfile savedProfile = repository.save(profile);
-        return new AcspProfileData(savedProfile);
+        return new AcspProfileResponse(savedProfile);
     }
 
     @Override

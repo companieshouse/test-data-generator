@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
@@ -23,9 +24,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
-
-import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
@@ -70,7 +70,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
 
     @Test
     void createCompany_WithPopulatedStructure_savesAllEntities() {
-        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
+        CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
 
         CompanyProfile profile = new CompanyProfile();
         spec.setCompanyProfile(profile);
@@ -87,7 +87,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         Appointment appointment2 = new Appointment();
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
-        AppointmentsResultData appointmentsDataList = new AppointmentsResultData();
+        AppointmentsResultResponse appointmentsDataList = new AppointmentsResultResponse();
         appointmentsDataList.setAppointmentsData(List.of(data1, data2));
         appointmentsDataList.setAppointment(List.of(appointment1, appointment2));
         appointmentsDataList.setOfficerAppointment(List.of(officerAppointment));
@@ -125,7 +125,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
 
     @Test
     void createCompany_WithPopulatedStructure_handlesNullsGracefully() {
-        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
+        CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
         spec.setCompanyProfile(new CompanyProfile());
         // All other fields are null
 
@@ -141,9 +141,9 @@ class CompanyWithPopulatedStructureServiceImplTest {
 
     @Test
     void createCompany_WithPopulatedStructure_appointmentsDataWithNullLists_doesNotSave() {
-        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
+        CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
         spec.setCompanyProfile(new CompanyProfile());
-        AppointmentsResultData appointmentsData = new AppointmentsResultData();
+        AppointmentsResultResponse appointmentsData = new AppointmentsResultResponse();
         // All sublists are null
         spec.setAppointmentsData(appointmentsData);
 
@@ -155,9 +155,9 @@ class CompanyWithPopulatedStructureServiceImplTest {
 
     @Test
     void createCompany_WithPopulatedStructure_emptyLists_doesNotSave() {
-        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
+        CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
         spec.setCompanyProfile(new CompanyProfile());
-        AppointmentsResultData appointmentsData = new AppointmentsResultData();
+        AppointmentsResultResponse appointmentsData = new AppointmentsResultResponse();
         appointmentsData.setAppointmentsData(List.of());
         appointmentsData.setAppointment(List.of());
         appointmentsData.setOfficerAppointment(List.of());
@@ -174,7 +174,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
 
     @Test
     void createCompany_WithPopulatedStructure_multiplePscStatementsAndPscs_allSaved() {
-        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
+        CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
         spec.setCompanyProfile(new CompanyProfile());
         CompanyPscStatement s1 = new CompanyPscStatement();
         CompanyPscStatement s2 = new CompanyPscStatement();

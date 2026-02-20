@@ -30,15 +30,15 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionV
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
-import uk.gov.companieshouse.api.testdata.model.rest.BasketSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CapitalSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemCostsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDocumentsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemCostsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -72,7 +72,7 @@ class CertifiedCopiesServiceImplTest {
     private ArgumentCaptor<Basket> basketCaptor;
 
     private CertifiedCopies certifiedCopies;
-    private CertifiedCopiesSpec certifiedCopiesSpec;
+    private CertifiedCopiesRequest certifiedCopiesRequest;
 
     private Basket basket;
 
@@ -82,36 +82,36 @@ class CertifiedCopiesServiceImplTest {
         certifiedCopies.setId("CCD-123456-789012");
         var companyNumber = "12345678";
 
-        FilingHistoryDocumentsSpec filingHistoryDocument = getFilingHistoryDocumentsSpec();
+        FilingHistoryDocumentsRequest filingHistoryDocument = getFilingHistoryDocumentsSpec();
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setDeliveryMethod("standard");
-        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument));
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setDeliveryMethod("standard");
+        itemOptionsRequest.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument));
 
-        ItemCostsSpec itemCostsSpec = new ItemCostsSpec();
-        itemCostsSpec.setDiscountApplied("0");
-        itemCostsSpec.setItemCost("15");
-        itemCostsSpec.setCalculatedCost("15");
-        itemCostsSpec.setProductType("certified-copy");
+        ItemCostsRequest itemCostsRequest = new ItemCostsRequest();
+        itemCostsRequest.setDiscountApplied("0");
+        itemCostsRequest.setItemCost("15");
+        itemCostsRequest.setCalculatedCost("15");
+        itemCostsRequest.setProductType("certified-copy");
 
-        certifiedCopiesSpec = new CertifiedCopiesSpec();
-        certifiedCopiesSpec.setCompanyName("Test Company");
-        certifiedCopiesSpec.setCompanyNumber(companyNumber);
-        certifiedCopiesSpec.setItemCosts(List.of(itemCostsSpec));
-        certifiedCopiesSpec.setItemOptions(List.of(itemOptionsSpec));
-        certifiedCopiesSpec.setKind("certified-copy-kind");
-        certifiedCopiesSpec.setPostalDelivery(true);
-        certifiedCopiesSpec.setQuantity(1);
-        certifiedCopiesSpec.setUserId("user123");
-        certifiedCopiesSpec.setPostageCost("0");
-        certifiedCopiesSpec.setTotalItemCost("30");
+        certifiedCopiesRequest = new CertifiedCopiesRequest();
+        certifiedCopiesRequest.setCompanyName("Test Company");
+        certifiedCopiesRequest.setCompanyNumber(companyNumber);
+        certifiedCopiesRequest.setItemCosts(List.of(itemCostsRequest));
+        certifiedCopiesRequest.setItemOptions(List.of(itemOptionsRequest));
+        certifiedCopiesRequest.setKind("certified-copy-kind");
+        certifiedCopiesRequest.setPostalDelivery(true);
+        certifiedCopiesRequest.setQuantity(1);
+        certifiedCopiesRequest.setUserId("user123");
+        certifiedCopiesRequest.setPostageCost("0");
+        certifiedCopiesRequest.setTotalItemCost("30");
 
         basket = new Basket();
         basket.setId("user123");
     }
 
-    private static FilingHistoryDocumentsSpec getFilingHistoryDocumentsSpec() {
-        FilingHistoryDocumentsSpec filingHistoryDocument = new FilingHistoryDocumentsSpec();
+    private static FilingHistoryDocumentsRequest getFilingHistoryDocumentsSpec() {
+        FilingHistoryDocumentsRequest filingHistoryDocument = new FilingHistoryDocumentsRequest();
         filingHistoryDocument.setFilingHistoryDate("2019-11-23");
         filingHistoryDocument.setFilingHistoryDescription("capital-allotment-shares");
         filingHistoryDocument.setFilingHistoryId("OTAwMzQ1NjM2M2FkaXF6a6N4");
@@ -126,7 +126,7 @@ class CertifiedCopiesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
 
-        CertificatesData result = service.create(certifiedCopiesSpec);
+        CertificatesResponse result = service.create(certifiedCopiesRequest);
 
         assertNotNull(result);
         assertEquals(certifiedCopies.getId(), result.getCertificates().getFirst().getId());
@@ -135,22 +135,22 @@ class CertifiedCopiesServiceImplTest {
         CertifiedCopies captured = certifiedCopiesCaptor.getValue();
 
         assertEquals("CCD-123456-789012", captured.getId());
-        assertEquals(certifiedCopiesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getCompanyNumber());
-        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescription());
+        assertEquals(certifiedCopiesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certifiedCopiesRequest.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), captured.getDescription());
         assertEquals("certified-copy", captured.getDescriptionIdentifier());
-        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
-        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescriptionCertifiedCopy());
-        assertItemCosts(captured.getItemCosts(), certifiedCopiesSpec.getItemCosts().getFirst());
-        assertItemOptionsAndFilingHistory(captured.getItemOptions(), certifiedCopiesSpec.getItemOptions().getFirst());
+        assertEquals(certifiedCopiesRequest.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), captured.getDescriptionCertifiedCopy());
+        assertItemCosts(captured.getItemCosts(), certifiedCopiesRequest.getItemCosts().getFirst());
+        assertItemOptionsAndFilingHistory(captured.getItemOptions(), certifiedCopiesRequest.getItemOptions().getFirst());
         assertEquals("etag123", captured.getEtag());
-        assertEquals(certifiedCopiesSpec.getKind(), captured.getKind());
+        assertEquals(certifiedCopiesRequest.getKind(), captured.getKind());
         assertEquals("/orderable/certified-copies/CCD-123456-789012", captured.getLinksSelf());
         assertTrue(captured.isPostalDelivery());
-        assertEquals(certifiedCopiesSpec.getQuantity(), captured.getQuantity());
-        assertEquals(certifiedCopiesSpec.getUserId(), captured.getUserId());
-        assertEquals(certifiedCopiesSpec.getPostageCost(), captured.getPostageCost());
-        assertEquals(certifiedCopiesSpec.getTotalItemCost(), captured.getTotalItemCost());
+        assertEquals(certifiedCopiesRequest.getQuantity(), captured.getQuantity());
+        assertEquals(certifiedCopiesRequest.getUserId(), captured.getUserId());
+        assertEquals(certifiedCopiesRequest.getPostageCost(), captured.getPostageCost());
+        assertEquals(certifiedCopiesRequest.getTotalItemCost(), captured.getTotalItemCost());
     }
 
     @Test
@@ -159,32 +159,32 @@ class CertifiedCopiesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
 
-        CapitalSpec capitalSpec = new CapitalSpec();
+        CapitalRequest capitalSpec = new CapitalRequest();
         capitalSpec.setFigure("34,253,377");
         capitalSpec.setCurrency("GBP");
 
-        FilingHistoryDescriptionValuesSpec filingHistoryDescriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest filingHistoryDescriptionValuesSpec = new FilingHistoryDescriptionValuesRequest();
         filingHistoryDescriptionValuesSpec.setCapital(List.of(capitalSpec));
         filingHistoryDescriptionValuesSpec.setChargeNumber("029231400009");
         filingHistoryDescriptionValuesSpec.setDate("2019-11-10");
         filingHistoryDescriptionValuesSpec.setMadeUpDate("2017-12-31");
         filingHistoryDescriptionValuesSpec.setOfficerName("Officer Test");
 
-        FilingHistoryDocumentsSpec filingHistoryDocumentsSpec = new FilingHistoryDocumentsSpec();
+        FilingHistoryDocumentsRequest filingHistoryDocumentsSpec = new FilingHistoryDocumentsRequest();
         filingHistoryDocumentsSpec.setFilingHistoryDescriptionValues(filingHistoryDescriptionValuesSpec);
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setCollectionLocation("wales");
-        itemOptionsSpec.setContactNumber("844740192");
-        itemOptionsSpec.setDeliveryTimescale("same-day");
-        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocumentsSpec));
-        itemOptionsSpec.setForeName("John");
-        itemOptionsSpec.setSurName("Test");
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setCollectionLocation("wales");
+        itemOptionsRequest.setContactNumber("844740192");
+        itemOptionsRequest.setDeliveryTimescale("same-day");
+        itemOptionsRequest.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocumentsSpec));
+        itemOptionsRequest.setForeName("John");
+        itemOptionsRequest.setSurName("Test");
 
-        certifiedCopiesSpec.setCustomerReference("CustomerReference");
-        certifiedCopiesSpec.setItemOptions(List.of(itemOptionsSpec));
+        certifiedCopiesRequest.setCustomerReference("CustomerReference");
+        certifiedCopiesRequest.setItemOptions(List.of(itemOptionsRequest));
 
-        CertificatesData result = service.create(certifiedCopiesSpec);
+        CertificatesResponse result = service.create(certifiedCopiesRequest);
 
         assertNotNull(result);
         assertEquals(certifiedCopies.getId(), result.getCertificates().getFirst().getId());
@@ -193,24 +193,24 @@ class CertifiedCopiesServiceImplTest {
         CertifiedCopies captured = certifiedCopiesCaptor.getValue();
 
         assertEquals("CCD-123456-789012", captured.getId());
-        assertEquals(certifiedCopiesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getCompanyNumber());
-        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescription());
+        assertEquals(certifiedCopiesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certifiedCopiesRequest.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), captured.getDescription());
         assertEquals("certified-copy", captured.getDescriptionIdentifier());
-        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getDescriptionCompanyNumber());
-        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescriptionCertifiedCopy());
-        assertItemCosts(captured.getItemCosts(), certifiedCopiesSpec.getItemCosts().getFirst());
-        assertItemOptionsAndFilingHistory(captured.getItemOptions(), certifiedCopiesSpec.getItemOptions().getFirst());
+        assertEquals(certifiedCopiesRequest.getCompanyNumber(), captured.getDescriptionCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), captured.getDescriptionCertifiedCopy());
+        assertItemCosts(captured.getItemCosts(), certifiedCopiesRequest.getItemCosts().getFirst());
+        assertItemOptionsAndFilingHistory(captured.getItemOptions(), certifiedCopiesRequest.getItemOptions().getFirst());
         assertEquals("etag123", captured.getEtag());
-        assertEquals(certifiedCopiesSpec.getKind(), captured.getKind());
+        assertEquals(certifiedCopiesRequest.getKind(), captured.getKind());
         assertEquals("/orderable/certified-copies/CCD-123456-789012", captured.getLinksSelf());
         assertTrue(captured.isPostalDelivery());
-        assertEquals(certifiedCopiesSpec.getQuantity(), captured.getQuantity());
-        assertEquals(certifiedCopiesSpec.getUserId(), captured.getUserId());
-        assertEquals(certifiedCopiesSpec.getPostageCost(), captured.getPostageCost());
-        assertEquals(certifiedCopiesSpec.getTotalItemCost(), captured.getTotalItemCost());
+        assertEquals(certifiedCopiesRequest.getQuantity(), captured.getQuantity());
+        assertEquals(certifiedCopiesRequest.getUserId(), captured.getUserId());
+        assertEquals(certifiedCopiesRequest.getPostageCost(), captured.getPostageCost());
+        assertEquals(certifiedCopiesRequest.getTotalItemCost(), captured.getTotalItemCost());
 
-        var expectedItemOptions = certifiedCopiesSpec.getItemOptions().getFirst();
+        var expectedItemOptions = certifiedCopiesRequest.getItemOptions().getFirst();
         var capturedItemOptions = captured.getItemOptions();
         var expectedFilingHistoryDescriptionValues = expectedItemOptions.getFilingHistoryDocuments().getFirst().getFilingHistoryDescriptionValues();
         var capturedFilingHistoryDescriptionValues = capturedItemOptions.getFilingHistoryDocuments().getFirst().getFilingHistoryDescriptionValues();
@@ -220,7 +220,7 @@ class CertifiedCopiesServiceImplTest {
 
     }
 
-    private void assertOptionalItems(ItemOptionsSpec expectedItemOptions, ItemOptions capturedItemOptions, CapitalSpec expectedCapital, Capital capturedCapital, FilingHistoryDescriptionValuesSpec expectedFilingHistoryDescriptionValues, FilingHistoryDescriptionValues capturedFilingHistoryDescriptionValues) {
+    private void assertOptionalItems(ItemOptionsRequest expectedItemOptions, ItemOptions capturedItemOptions, CapitalRequest expectedCapital, Capital capturedCapital, FilingHistoryDescriptionValuesRequest expectedFilingHistoryDescriptionValues, FilingHistoryDescriptionValues capturedFilingHistoryDescriptionValues) {
         assertEquals(expectedItemOptions.getCollectionLocation(), capturedItemOptions.getCollectionLocation());
         assertEquals(expectedItemOptions.getContactNumber(), capturedItemOptions.getContactNumber());
         assertEquals(expectedItemOptions.getDeliveryTimescale(), capturedItemOptions.getDeliveryTimescale());
@@ -234,19 +234,19 @@ class CertifiedCopiesServiceImplTest {
         assertEquals(expectedItemOptions.getSurName(), capturedItemOptions.getSurName());
     }
 
-    private void assertItemCosts(List<ItemCosts> capturedCosts, ItemCostsSpec expectedCosts) {
+    private void assertItemCosts(List<ItemCosts> capturedCosts, ItemCostsRequest expectedCosts) {
         assertEquals(expectedCosts.getDiscountApplied(), capturedCosts.getFirst().getDiscountApplied());
         assertEquals(expectedCosts.getItemCost(), capturedCosts.getFirst().getItemCost());
         assertEquals(expectedCosts.getCalculatedCost(), capturedCosts.getFirst().getCalculatedCost());
         assertEquals(expectedCosts.getProductType(), capturedCosts.getFirst().getProductType());
     }
 
-    private void assertItemOptionsAndFilingHistory(ItemOptions capturedOptions, ItemOptionsSpec expectedOptions) {
+    private void assertItemOptionsAndFilingHistory(ItemOptions capturedOptions, ItemOptionsRequest expectedOptions) {
         assertEquals(expectedOptions.getDeliveryMethod(), capturedOptions.getDeliveryMethod());
         assertEquals(expectedOptions.getDeliveryTimescale(), capturedOptions.getDeliveryTimescale());
 
         List<FilingHistoryDocument> capturedFilingHistoryDocument = capturedOptions.getFilingHistoryDocuments();
-        List<FilingHistoryDocumentsSpec> expectedFilingHistoryDocument = expectedOptions.getFilingHistoryDocuments();
+        List<FilingHistoryDocumentsRequest> expectedFilingHistoryDocument = expectedOptions.getFilingHistoryDocuments();
 
         assertEquals(expectedFilingHistoryDocument.getFirst().getFilingHistoryDate(), capturedFilingHistoryDocument.getFirst().getFilingHistoryDate());
         assertEquals(expectedFilingHistoryDocument.getFirst().getFilingHistoryDescription(), capturedFilingHistoryDocument.getFirst().getFilingHistoryDescription());
@@ -260,15 +260,15 @@ class CertifiedCopiesServiceImplTest {
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
 
-        BasketSpec basketSpec = new BasketSpec();
-        basketSpec.setForename("John");
-        basketSpec.setSurname("Doe");
-        basketSpec.setEnrolled(true);
-        certifiedCopiesSpec.setBasketSpec(basketSpec);
+        BasketRequest basketRequest = new BasketRequest();
+        basketRequest.setForename("John");
+        basketRequest.setSurname("Doe");
+        basketRequest.setEnrolled(true);
+        certifiedCopiesRequest.setBasketSpec(basketRequest);
 
         Basket basket = new Basket();
-        basket.setForename(basketSpec.getForename());
-        basket.setSurname(basketSpec.getSurname());
+        basket.setForename(basketRequest.getForename());
+        basket.setSurname(basketRequest.getSurname());
         basket.setEnrolled(true);
 
         when(repository.save(any(CertifiedCopies.class))).thenAnswer(invocation -> {
@@ -278,9 +278,9 @@ class CertifiedCopiesServiceImplTest {
         });
 
         when(basketRepository.save(any(Basket.class))).thenReturn(basket);
-        when(certificatesService.createBasket(any(CertificatesSpec.class), anyList())).thenReturn(basket);
+        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
 
-        CertificatesData result = service.create(certifiedCopiesSpec);
+        CertificatesResponse result = service.create(certifiedCopiesRequest);
 
         assertNotNull(result);
         assertEquals(certifiedCopies.getId(), result.getCertificates().getFirst().getId());
@@ -289,12 +289,12 @@ class CertifiedCopiesServiceImplTest {
         CertifiedCopies captured = certifiedCopiesCaptor.getValue();
 
         ItemOptions capturedOptions = captured.getItemOptions();
-        ItemOptionsSpec expectedOptions = certifiedCopiesSpec.getItemOptions().getFirst();
+        ItemOptionsRequest expectedOptions = certifiedCopiesRequest.getItemOptions().getFirst();
 
         assertEquals("CCD-123456-789012", captured.getId());
-        assertEquals(certifiedCopiesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getCompanyNumber());
-        assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), captured.getDescription());
+        assertEquals(certifiedCopiesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certifiedCopiesRequest.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), captured.getDescription());
         assertEquals("certified-copy", captured.getDescriptionIdentifier());
         assertEquals("CCD-123456-789012", captured.getDataId());
         assertEquals(expectedOptions.getCertificateType(), capturedOptions.getCertificateType());
@@ -302,17 +302,17 @@ class CertifiedCopiesServiceImplTest {
         assertEquals(expectedOptions.getCompanyType(), capturedOptions.getCompanyType());
         assertEquals(expectedOptions.getCompanyStatus(), capturedOptions.getCompanyStatus());
         assertEquals("etag123", captured.getEtag());
-        assertEquals(certifiedCopiesSpec.getKind(), captured.getKind());
+        assertEquals(certifiedCopiesRequest.getKind(), captured.getKind());
         assertEquals("/orderable/certified-copies/CCD-123456-789012", captured.getLinksSelf());
         assertTrue(captured.isPostalDelivery());
-        assertEquals(certifiedCopiesSpec.getQuantity(), captured.getQuantity());
-        assertEquals(certifiedCopiesSpec.getUserId(), captured.getUserId());
+        assertEquals(certifiedCopiesRequest.getQuantity(), captured.getQuantity());
+        assertEquals(certifiedCopiesRequest.getUserId(), captured.getUserId());
 
         assertNotNull(captured.getBasket());
         Basket capturedBasket = captured.getBasket();
 
-        assertEquals(basketSpec.getForename(), capturedBasket.getForename());  // Now should pass
-        assertEquals(basketSpec.getSurname(), capturedBasket.getSurname());
+        assertEquals(basketRequest.getForename(), capturedBasket.getForename());  // Now should pass
+        assertEquals(basketRequest.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
     }
 
@@ -323,40 +323,40 @@ class CertifiedCopiesServiceImplTest {
         when(randomService.getEtag())
             .thenReturn("etag1", "etag2");
 
-        CapitalSpec capitalSpec = new CapitalSpec();
+        CapitalRequest capitalSpec = new CapitalRequest();
         capitalSpec.setFigure("34,253,377");
         capitalSpec.setCurrency("GBP");
 
-        FilingHistoryDescriptionValuesSpec descriptionValuesSpec = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest descriptionValuesSpec = new FilingHistoryDescriptionValuesRequest();
         descriptionValuesSpec.setDate("2019-11-10");
         descriptionValuesSpec.setCapital(List.of(capitalSpec));
 
-        FilingHistoryDocumentsSpec filingHistoryDocument1 = getFilingHistoryDocumentsSpec();
+        FilingHistoryDocumentsRequest filingHistoryDocument1 = getFilingHistoryDocumentsSpec();
 
-        ItemOptionsSpec itemOption1 = new ItemOptionsSpec();
+        ItemOptionsRequest itemOption1 = new ItemOptionsRequest();
         itemOption1.setDeliveryTimescale("postal");
         itemOption1.setDeliveryMethod("standard");
         itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
 
-        FilingHistoryDocumentsSpec filingHistoryDocument2 = new FilingHistoryDocumentsSpec();
+        FilingHistoryDocumentsRequest filingHistoryDocument2 = new FilingHistoryDocumentsRequest();
         filingHistoryDocument1.setFilingHistoryDate("2019-11-23");
         filingHistoryDocument1.setFilingHistoryDescription("incorporation-company");
         filingHistoryDocument1.setFilingHistoryId("MzE0OTM3MTQxNmFkaXF6a2N4");
         filingHistoryDocument1.setFilingHistoryType("NEWINC");
         filingHistoryDocument1.setFilingHistoryCost("30");
 
-        ItemOptionsSpec itemOption2 = new ItemOptionsSpec();
+        ItemOptionsRequest itemOption2 = new ItemOptionsRequest();
         itemOption1.setDeliveryTimescale("postal");
         itemOption1.setDeliveryMethod("standard");
         itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
 
-        certifiedCopiesSpec.setItemOptions(List.of(itemOption1, itemOption2));
+        certifiedCopiesRequest.setItemOptions(List.of(itemOption1, itemOption2));
 
-        BasketSpec basketSpec = new BasketSpec();
-        basketSpec.setForename("John");
-        basketSpec.setSurname("Doe");
-        basketSpec.setEnrolled(true);
-        certifiedCopiesSpec.setBasketSpec(basketSpec);
+        BasketRequest basketRequest = new BasketRequest();
+        basketRequest.setForename("John");
+        basketRequest.setSurname("Doe");
+        basketRequest.setEnrolled(true);
+        certifiedCopiesRequest.setBasketSpec(basketRequest);
 
         // Capture each certificate saved
         when(repository.save(any(CertifiedCopies.class))).thenAnswer(invocation -> {
@@ -366,9 +366,9 @@ class CertifiedCopiesServiceImplTest {
         });
 
         when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
-        when(certificatesService.createBasket(any(CertificatesSpec.class), anyList())).thenReturn(basket);
+        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
 
-        CertificatesData results = service.create(certifiedCopiesSpec);
+        CertificatesResponse results = service.create(certifiedCopiesRequest);
 
         assertEquals(2, results.getCertificates().size());
 
@@ -379,22 +379,22 @@ class CertifiedCopiesServiceImplTest {
 
         for (int i = 0; i < capturedCertificates.size(); i++) {
             CertifiedCopies cert = capturedCertificates.get(i);
-            ItemOptionsSpec expectedOptions = certifiedCopiesSpec.getItemOptions().get(i);
+            ItemOptionsRequest expectedOptions = certifiedCopiesRequest.getItemOptions().get(i);
 
-            assertEquals(certifiedCopiesSpec.getCompanyName(), cert.getCompanyName());
-            assertEquals(certifiedCopiesSpec.getCompanyNumber(), cert.getCompanyNumber());
-            assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), cert.getDescription());
+            assertEquals(certifiedCopiesRequest.getCompanyName(), cert.getCompanyName());
+            assertEquals(certifiedCopiesRequest.getCompanyNumber(), cert.getCompanyNumber());
+            assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), cert.getDescription());
             assertEquals("certified-copy", cert.getDescriptionIdentifier());
-            assertEquals(certifiedCopiesSpec.getCompanyNumber(), cert.getDescriptionCompanyNumber());
-            assertEquals("certified copy for company " + certifiedCopiesSpec.getCompanyNumber(), cert.getDescriptionCertifiedCopy());
+            assertEquals(certifiedCopiesRequest.getCompanyNumber(), cert.getDescriptionCompanyNumber());
+            assertEquals("certified copy for company " + certifiedCopiesRequest.getCompanyNumber(), cert.getDescriptionCertifiedCopy());
 
             assertEquals(expectedOptions.getCertificateType(), cert.getItemOptions().getCertificateType());
             assertEquals(expectedOptions.getDeliveryTimescale(), cert.getItemOptions().getDeliveryTimescale());
             assertEquals(expectedOptions.getCompanyType(), cert.getItemOptions().getCompanyType());
             assertEquals(expectedOptions.getCompanyStatus(), cert.getItemOptions().getCompanyStatus());
-            assertEquals(certifiedCopiesSpec.getKind(), cert.getKind());
-            assertEquals(certifiedCopiesSpec.getQuantity(), cert.getQuantity());
-            assertEquals(certifiedCopiesSpec.getUserId(), cert.getUserId());
+            assertEquals(certifiedCopiesRequest.getKind(), cert.getKind());
+            assertEquals(certifiedCopiesRequest.getQuantity(), cert.getQuantity());
+            assertEquals(certifiedCopiesRequest.getUserId(), cert.getUserId());
         }
     }
 
@@ -413,7 +413,7 @@ class CertifiedCopiesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
 
-        CertificatesData result = service.create(certifiedCopiesSpec);
+        CertificatesResponse result = service.create(certifiedCopiesRequest);
 
         assertNotNull(result);
         assertEquals(certifiedCopies.getId(), result.getCertificates().getFirst().getId());
@@ -422,13 +422,13 @@ class CertifiedCopiesServiceImplTest {
         CertifiedCopies captured = certifiedCopiesCaptor.getValue();
 
         assertEquals("CCD-123456-789012", captured.getId());
-        assertEquals(certifiedCopiesSpec.getCompanyName(), captured.getCompanyName());
-        assertEquals(certifiedCopiesSpec.getCompanyNumber(), captured.getCompanyNumber());
+        assertEquals(certifiedCopiesRequest.getCompanyName(), captured.getCompanyName());
+        assertEquals(certifiedCopiesRequest.getCompanyNumber(), captured.getCompanyNumber());
     }
 
     @Test
     void validateCaptialIsNotPresent() {
-        FilingHistoryDescriptionValuesSpec spec = new FilingHistoryDescriptionValuesSpec();
+        FilingHistoryDescriptionValuesRequest spec = new FilingHistoryDescriptionValuesRequest();
         spec.setDate("2024-05-01");
         spec.setCapital(null);
 
@@ -440,7 +440,7 @@ class CertifiedCopiesServiceImplTest {
 
     @Test
     void validateFilingHistoryDescriptionValuesIsNull() throws DataException {
-        FilingHistoryDocumentsSpec docSpec = new FilingHistoryDocumentsSpec();
+        FilingHistoryDocumentsRequest docSpec = new FilingHistoryDocumentsRequest();
         docSpec.setFilingHistoryId("abc123");
         docSpec.setFilingHistoryDescription("desc");
         docSpec.setFilingHistoryDescriptionValues(null); // NULL branch
@@ -448,11 +448,11 @@ class CertifiedCopiesServiceImplTest {
         docSpec.setFilingHistoryType("type");
         docSpec.setFilingHistoryCost("1");
 
-        ItemOptionsSpec itemOptionsSpec = new ItemOptionsSpec();
-        itemOptionsSpec.setFilingHistoryDocumentsSpec(List.of(docSpec));
+        ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
+        itemOptionsRequest.setFilingHistoryDocumentsSpec(List.of(docSpec));
 
-        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
-        spec.setItemOptions(List.of(itemOptionsSpec));
+        CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
+        spec.setItemOptions(List.of(itemOptionsRequest));
         spec.setCompanyName("Test Ltd");
         spec.setCompanyNumber("12345678");
         spec.setUserId("user123");
@@ -464,7 +464,7 @@ class CertifiedCopiesServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag123");
         when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
 
-        CertificatesData result = service.create(spec);
+        CertificatesResponse result = service.create(spec);
 
         assertNotNull(result);
         assertFalse(result.getCertificates().isEmpty());
@@ -472,11 +472,11 @@ class CertifiedCopiesServiceImplTest {
 
     @Test
     void validateItemCostsIsNull() throws DataException {
-        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         spec.setCompanyName("Null Cost Co");
         spec.setCompanyNumber("00011122");
         spec.setUserId("user123");
-        spec.setItemOptions(List.of(new ItemOptionsSpec()));
+        spec.setItemOptions(List.of(new ItemOptionsRequest()));
         spec.setItemCosts(null); // 👈 This is the key path
         spec.setKind("certified-copy");
         spec.setQuantity(1);
@@ -487,7 +487,7 @@ class CertifiedCopiesServiceImplTest {
 
         when(repository.save(any(CertifiedCopies.class))).thenReturn(certifiedCopies);
 
-        CertificatesData result = service.create(spec);
+        CertificatesResponse result = service.create(spec);
 
         assertNotNull(result);
         assertFalse(result.getCertificates().isEmpty());

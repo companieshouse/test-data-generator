@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
@@ -17,7 +17,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
 public class IdentityVerificationServiceImpl implements
-        VerifiedIdentityService<IdentityVerificationData> {
+        VerifiedIdentityService<IdentityVerificationResponse> {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
@@ -30,7 +30,7 @@ public class IdentityVerificationServiceImpl implements
     private UserRepository userRepository;
 
     @Override
-    public IdentityVerificationData getIdentityVerificationData(String email) {
+    public IdentityVerificationResponse getIdentityVerificationData(String email) {
         LOG.debug("getIdentityVerificationData called with email= "
                 + email);
 
@@ -59,7 +59,7 @@ public class IdentityVerificationServiceImpl implements
 
         String[] names = getUserNames(identity);
 
-        var data = new IdentityVerificationData(
+        var data = new IdentityVerificationResponse(
                 identity.getId(),
                 uvid.getValue(),
                 names[0],

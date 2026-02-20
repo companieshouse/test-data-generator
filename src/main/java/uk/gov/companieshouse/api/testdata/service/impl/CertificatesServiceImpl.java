@@ -16,10 +16,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.DirectorDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SecretaryDetails;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CertificatesServiceImpl implements DataService<CertificatesData, CertificatesSpec> {
+public class CertificatesServiceImpl implements DataService<CertificatesResponse, CertificatesRequest> {
 
     @Autowired
     public CertificatesRepository certificatesRepository;
@@ -42,19 +42,19 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
     public RandomService randomService;
 
     @Override
-    public CertificatesData create(CertificatesSpec spec) throws DataException {
-        List<ItemOptionsSpec> optionsList = spec.getItemOptions();
-        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
+    public CertificatesResponse create(CertificatesRequest spec) throws DataException {
+        List<ItemOptionsRequest> optionsList = spec.getItemOptions();
+        List<CertificatesResponse.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
         List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
 
-        for (ItemOptionsSpec optionSpec : optionsList) {
+        for (ItemOptionsRequest optionSpec : optionsList) {
             Long firstPart = randomService.getNumber(6);
             Long secondPart = randomService.getNumber(6);
             var randomId = "CRT-" + firstPart + "-" + secondPart;
             var certificate = getCertificates(spec, optionSpec, randomId);
             certificatesRepository.save(certificate);
             var now = getCurrentDateTime().toString();
-            certificateEntries.add(new CertificatesData.CertificateEntry(
+            certificateEntries.add(new CertificatesResponse.CertificateEntry(
                 certificate.getId(), now, now
             ));
 
@@ -68,10 +68,10 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
             basketRepository.save(basket);
         }
 
-        return new CertificatesData(certificateEntries);
+        return new CertificatesResponse(certificateEntries);
     }
 
-    private Certificates getCertificates(CertificatesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
+    private Certificates getCertificates(CertificatesRequest spec, ItemOptionsRequest optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
         itemOptions.setCertificateType(optionsSpec.getCertificateType());
         Optional.ofNullable(optionsSpec.getCompanyStatus()).ifPresent(itemOptions::setCompanyStatus);
@@ -117,7 +117,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return certificates;
     }
 
-    private DirectorDetails buildDirectorDetails(ItemOptionsSpec optionsSpec) {
+    private DirectorDetails buildDirectorDetails(ItemOptionsRequest optionsSpec) {
         var details = new DirectorDetails();
         var director = optionsSpec.getDirectorDetails();
 
@@ -132,7 +132,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return details;
     }
 
-    private SecretaryDetails buildSecretaryDetails(ItemOptionsSpec optionsSpec) {
+    private SecretaryDetails buildSecretaryDetails(ItemOptionsRequest optionsSpec) {
         var details = new SecretaryDetails();
         var secretary = optionsSpec.getSecretaryDetails();
 
@@ -147,7 +147,7 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return details;
     }
 
-    private RegisteredOfficeAddressDetails buildRegisteredOfficeAddressDetails(ItemOptionsSpec optionsSpec) {
+    private RegisteredOfficeAddressDetails buildRegisteredOfficeAddressDetails(ItemOptionsRequest optionsSpec) {
         var details = new RegisteredOfficeAddressDetails();
         var address = optionsSpec.getRegisteredOfficeAddressDetails();
 
@@ -157,9 +157,9 @@ public class CertificatesServiceImpl implements DataService<CertificatesData, Ce
         return details;
     }
 
-    Basket createBasket(CertificatesSpec spec, List<Basket.Item> items) {
+    Basket createBasket(CertificatesRequest spec, List<Basket.Item> items) {
         Instant now = getCurrentDateTime();
-        var address = addressService.getAddress(Jurisdiction.UNITED_KINGDOM);
+        var address = addressService.getAddress(JurisdictionType.UNITED_KINGDOM);
 
         // Check if basket already exists for the user
         Optional<Basket> existingBasketOpt = basketRepository.findById(spec.getUserId());
