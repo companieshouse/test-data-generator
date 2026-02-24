@@ -42,7 +42,6 @@ class CompanyPscServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_ID = "encoded123";
     private static final String ETAG = "etag123";
-    private static final Instant NOW = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
     @Mock
     private CompanyPscsRepository repository;
@@ -281,7 +280,7 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_NumberZeroWithPscType_ReturnsNull() throws DataException {
+    void create_NumberZeroWithPscType_ReturnsNull() {
         CompanySpec spec = new CompanySpec();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);

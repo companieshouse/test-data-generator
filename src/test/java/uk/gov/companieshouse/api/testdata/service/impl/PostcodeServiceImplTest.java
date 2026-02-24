@@ -1,5 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.OptionalLong;
@@ -10,11 +18,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostcodeServiceImplTest {
@@ -121,7 +127,7 @@ class PostcodeServiceImplTest {
 
     @Test
     void testIOExceptionWhenReadingPostcodesJsonReturnsException() {
-        PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
+        PostcodeServiceImpl service = spy(new PostcodeServiceImpl(randomService));
         // Create an InputStream that throws IOException on read
         var faultyStream = new java.io.InputStream() {
             @Override
@@ -139,7 +145,7 @@ class PostcodeServiceImplTest {
 
     @Test
     void testLoadAllPostcodesReturnsEmptyListWhenInputStreamIsNull() {
-        PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
+        PostcodeServiceImpl service = spy(new PostcodeServiceImpl(randomService));
         doReturn(null).when(service).getPostcodesResourceStream();
 
         List<Postcodes> result = service.loadAllPostcodes();

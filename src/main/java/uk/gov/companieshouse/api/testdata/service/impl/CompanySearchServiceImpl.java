@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
+
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
-
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;

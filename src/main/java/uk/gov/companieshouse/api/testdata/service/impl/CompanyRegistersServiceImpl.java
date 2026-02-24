@@ -24,14 +24,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
 @Service
 public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters, CompanySpec> {
-    @Autowired
-    private RandomService randomService;
-
-    @Autowired
-    private CompanyRegistersRepository repository;
-
-    @Autowired
-    private FilingHistoryRepository filingHistoryRepository;
 
     private static final String LINK_STEM = "/company/";
     private static final String DIRECTORS_LINK = "/company/%s/officers?register_view=true&register_type=directors";
@@ -50,6 +42,20 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String PSC_REGISTER_TYPE = "persons_with_significant_control";
     private static final String PUBLIC_REGISTER = "public-register";
 
+    private final RandomService randomService;
+
+    private final CompanyRegistersRepository repository;
+
+    private final FilingHistoryRepository filingHistoryRepository;
+
+    @Autowired
+    public CompanyRegistersServiceImpl(RandomService randomService, CompanyRegistersRepository repository,
+            FilingHistoryRepository filingHistoryRepository) {
+        super();
+        this.randomService = randomService;
+        this.repository = repository;
+        this.filingHistoryRepository = filingHistoryRepository;
+    }
 
     @Override
     public CompanyRegisters create(CompanySpec companySpec) throws DataException {
