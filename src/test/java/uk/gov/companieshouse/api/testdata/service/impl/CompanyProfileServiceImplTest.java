@@ -33,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import uk.gov.companieshouse.api.testdata.model.dto.DateParameters;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
@@ -286,13 +285,13 @@ class CompanyProfileServiceImplTest {
         CompanyRequest request = new CompanyRequest();
         request.setHasUkEstablishment(true);
         JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
-        DateParameters dateParams = new DateParameters(LocalDate.now());
+        LocalDate accountingReferenceDate = LocalDate.now();
 
         var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
-                "createOverseaLinks", String.class, CompanyType.class, CompanyRequest.class, JurisdictionType.class, DateParameters.class);
+                "createOverseaLinks", String.class, CompanyType.class, CompanyRequest.class, JurisdictionType.class, LocalDate.class);
         method.setAccessible(true);
 
-        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, dateParams);
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
 
         assertNotNull(links);
         assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
@@ -762,7 +761,7 @@ class CompanyProfileServiceImplTest {
     void createUkEstablishment() {
         String parentCompanyNumber = "12345678";
         JurisdictionType jurisdiction = JurisdictionType.ENGLAND_WALES;
-        DateParameters dateParams = new DateParameters(LocalDate.now());
+        LocalDate accountingReferenceDate = LocalDate.now();
         String expectedUkEstablishmentNumber = "BR123456";
 
         Address mockAddress = new Address("Line1", "Line2", "City", "Region", "Country", "Postcode");
@@ -772,7 +771,7 @@ class CompanyProfileServiceImplTest {
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         String ukEstablishmentNumber = companyProfileService.createUkEstablishment(
-                parentCompanyNumber, jurisdiction, dateParams);
+                parentCompanyNumber, jurisdiction, accountingReferenceDate);
 
         assertEquals(expectedUkEstablishmentNumber, ukEstablishmentNumber);
 
@@ -797,7 +796,7 @@ class CompanyProfileServiceImplTest {
         String parentCompanyNumber = "FC123456";
         String expectedUkEstablishmentNumber = "BR654321";
         JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
-        DateParameters dateParams = new DateParameters(LocalDate.now());
+        LocalDate accountingReferenceDate = LocalDate.now();
 
         Address mockAddress = new Address("Line1", "Line2", "City", "Region", "Country", "Postcode");
         when(randomService.getNumber(6)).thenReturn(654321L);
@@ -806,7 +805,7 @@ class CompanyProfileServiceImplTest {
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         String ukEstablishmentNumber = companyProfileService.createUkEstablishment(
-                parentCompanyNumber, jurisdiction, dateParams);
+                parentCompanyNumber, jurisdiction, accountingReferenceDate);
 
         assertEquals(expectedUkEstablishmentNumber, ukEstablishmentNumber);
 

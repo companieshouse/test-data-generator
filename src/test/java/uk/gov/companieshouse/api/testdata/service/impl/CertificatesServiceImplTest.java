@@ -31,12 +31,13 @@ import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisteredOfficeAddressDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SecretaryDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.SecretaryDetailsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DirectorDetailsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegisteredOfficeAddressDetailsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.request.SecretaryDetailsSpec;
+
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -143,14 +144,14 @@ class CertificatesServiceImplTest {
         directorDetailsRequest.setIncludeNationality(true);
         directorDetailsRequest.setIncludeOccupation(true);
 
-        SecretaryDetailsSpec secretaryDetailsSpec = new SecretaryDetailsSpec();
-        secretaryDetailsSpec.setIncludeAddress(true);
-        secretaryDetailsSpec.setIncludeAppointmentDate(true);
-        secretaryDetailsSpec.setIncludeBasicInformation(true);
-        secretaryDetailsSpec.setIncludeCountryOfResidence(true);
-        secretaryDetailsSpec.setIncludeDobType("partial");
-        secretaryDetailsSpec.setIncludeNationality(true);
-        secretaryDetailsSpec.setIncludeOccupation(true);
+        SecretaryDetailsRequest secretaryDetailsRequest = new SecretaryDetailsRequest();
+        secretaryDetailsRequest.setIncludeAddress(true);
+        secretaryDetailsRequest.setIncludeAppointmentDate(true);
+        secretaryDetailsRequest.setIncludeBasicInformation(true);
+        secretaryDetailsRequest.setIncludeCountryOfResidence(true);
+        secretaryDetailsRequest.setIncludeDobType("partial");
+        secretaryDetailsRequest.setIncludeNationality(true);
+        secretaryDetailsRequest.setIncludeOccupation(true);
 
         RegisteredOfficeAddressDetailsSpec registeredOfficeAddressDetailsSpec = new RegisteredOfficeAddressDetailsSpec();
         registeredOfficeAddressDetailsSpec.setIncludeAddressRecordsType("all");
@@ -167,7 +168,7 @@ class CertificatesServiceImplTest {
         itemOptionsRequest.setIncludeEmailCopy(false);
         itemOptionsRequest.setIncludeGoodStandingInformation(true);
         itemOptionsRequest.setRegisteredOfficeAddressDetails(registeredOfficeAddressDetailsSpec);
-        itemOptionsRequest.setSecretaryDetails(secretaryDetailsSpec);
+        itemOptionsRequest.setSecretaryDetails(secretaryDetailsRequest);
 
         certificatesRequest.setItemOptions(List.of(itemOptionsRequest));
 
@@ -182,7 +183,7 @@ class CertificatesServiceImplTest {
         assertCoreCertificateFields(certificatesRequest, captured);
         assertItemOptionFields(itemOptionsRequest, captured.getItemOptions());
         assertDirectorFields(directorDetailsRequest, captured.getItemOptions().getDirectorDetails());
-        assertSecretaryFields(secretaryDetailsSpec, captured.getItemOptions().getSecretaryDetails());
+        assertSecretaryFields(secretaryDetailsRequest, captured.getItemOptions().getSecretaryDetails());
         assertROAddressFields(registeredOfficeAddressDetailsSpec, captured.getItemOptions().getRegisteredOfficeAddressDetails());
     }
 
@@ -224,7 +225,7 @@ class CertificatesServiceImplTest {
         assertEquals(expected.getIncludeOccupation(), actual.getIncludeOccupation());
     }
 
-    private void assertSecretaryFields(SecretaryDetailsSpec expected, SecretaryDetails actual) {
+    private void assertSecretaryFields(SecretaryDetailsRequest expected, SecretaryDetails actual) {
         assertEquals(expected.getIncludeAddress(), actual.getIncludeAddress());
         assertEquals(expected.getIncludeAppointmentDate(), actual.getIncludeAppointmentDate());
         assertEquals(expected.getIncludeBasicInformation(), actual.getIncludeBasicInformation());

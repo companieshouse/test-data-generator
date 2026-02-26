@@ -13,7 +13,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Invitation;
 import uk.gov.companieshouse.api.testdata.model.entity.PreviousState;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InvitationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
@@ -88,7 +88,7 @@ public class UserCompanyAssociationServiceImpl implements
 
     private List<PreviousState> createPreviousStates(UserCompanyAssociationRequest spec) {
         List<PreviousState> previousStateList = new ArrayList<>();
-        for (PreviousStateSpec prevState :
+        for (PreviousStateRequest prevState :
                 spec.getPreviousStates()) {
             var previousState = new PreviousState();
             previousState.setChangedBy(prevState.getChangedBy());

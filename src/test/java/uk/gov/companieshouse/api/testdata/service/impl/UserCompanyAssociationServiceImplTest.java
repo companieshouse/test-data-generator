@@ -27,7 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.UserCompanyAssociation;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InvitationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
@@ -98,7 +98,7 @@ class UserCompanyAssociationServiceImplTest {
         invitationRequest.setInvitedAt(invitationTime);
         invitationRequest.setInvitedBy("userC");
 
-        PreviousStateSpec previousStateSpec = new PreviousStateSpec();
+        PreviousStateRequest previousStateSpec = new PreviousStateRequest();
         previousStateSpec.setStatus("removed");
         previousStateSpec.setChangedBy("userB");
         previousStateSpec.setChangedAt(invitationTime);
