@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -37,7 +37,7 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
     private CompanyProfileRepository companyProfileRepository;
 
     @Override
-    public CompanyAuthCode create(CompanySpec spec) throws DataException {
+    public CompanyAuthCode create(CompanyRequest spec) throws DataException {
         final String authCode = String.valueOf(randomService.getNumber(AUTH_CODE_LENGTH));
 
         CompanyAuthCode companyAuthCode = new CompanyAuthCode();

@@ -17,9 +17,9 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.UserRoles;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -51,21 +51,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserData create(UserSpec userSpec) throws DataException {
+    public UserResponse create(UserRequest userRequest) throws DataException {
         final String randomId = randomService.getString(23).toLowerCase();
         LOG.debug("randomService returned id= " + randomId);
 
-        final String password = userSpec.getPassword();
+        final String password = userRequest.getPassword();
         final var user = new User();
 
-        if (userSpec.getRoles() != null && !userSpec.getRoles().isEmpty()) {
-            user.setRoles(processRoles(userSpec.getRoles()));
+        if (userRequest.getRoles() != null && !userRequest.getRoles().isEmpty()) {
+            user.setRoles(processRoles(userRequest.getRoles()));
         } else {
             LOG.debug("No roles provided for user creation");
         }
 
-        String email = userSpec.getEmail() != null
-                ? userSpec.getEmail() :
+        String email = userRequest.getEmail() != null
+                ? userRequest.getEmail() :
                 "test-data-generated" + randomId + "@chtesttdg.mailosaur.net";
 
         user.setId(randomId);
@@ -76,33 +76,33 @@ public class UserServiceImpl implements UserService {
         user.setPassword(password);
         user.setDirectLoginPrivilege(true);
         user.setCreated(getDateNow());
-        user.setAdminUser(Optional.ofNullable(userSpec.getIsAdmin()).orElse(false));
+        user.setAdminUser(Optional.ofNullable(userRequest.getIsAdmin()).orElse(false));
         user.setTestData(true);
 
-        if (userSpec.getIdentityVerification()
-                != null && !userSpec.getIdentityVerification().isEmpty()) {
+        if (userRequest.getIdentityVerification()
+                != null && !userRequest.getIdentityVerification().isEmpty()) {
             user.setOneLoginUserId(user.getId());
         }
 
         repository.save(user);
 
-        processIdentityVerifications(user, userSpec);
+        processIdentityVerifications(user, userRequest);
 
         LOG.info("User created successfully id= " + user.getId());
-        return new UserData(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
+        return new UserResponse(user.getId(), user.getEmail(), user.getForename(), user.getSurname());
     }
 
-    protected void processIdentityVerifications(User user, UserSpec userSpec) {
-        if (userSpec.getIdentityVerification() == null
-                || userSpec.getIdentityVerification().isEmpty()) {
+    protected void processIdentityVerifications(User user, UserRequest userRequest) {
+        if (userRequest.getIdentityVerification() == null
+                || userRequest.getIdentityVerification().isEmpty()) {
             LOG.debug("No identity verification data provided");
             return;
         }
 
         LOG.debug("Creating identity verification entries: count= "
-                + userSpec.getIdentityVerification().size());
+                + userRequest.getIdentityVerification().size());
 
-        for (var identityVerificationSpec : userSpec.getIdentityVerification()) {
+        for (var identityVerificationSpec : userRequest.getIdentityVerification()) {
 
             if (identityVerificationSpec != null) {
                 var verificationSource = identityVerificationSpec.getVerificationSource();

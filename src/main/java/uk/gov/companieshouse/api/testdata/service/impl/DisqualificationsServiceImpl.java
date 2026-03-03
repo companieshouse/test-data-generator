@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -24,7 +24,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class DisqualificationsServiceImpl implements DataService<Disqualifications, CompanySpec> {
+public class DisqualificationsServiceImpl implements DataService<Disqualifications, CompanyRequest> {
 
     private static final Logger LOG
             = LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
@@ -55,23 +55,23 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     private AddressService addressService;
 
     @Override
-    public Disqualifications create(CompanySpec spec) throws DataException {
+    public Disqualifications create(CompanyRequest spec) throws DataException {
         if (spec == null) {
-            throw new IllegalArgumentException("CompanySpec cannot be null");
+            throw new IllegalArgumentException("CompanyRequest cannot be null");
         }
 
-        List<DisqualificationsSpec> disqualificationsSpecs = spec.getDisqualifiedOfficers();
+        List<DisqualificationsRequest> disqualificationsSpecs = spec.getDisqualifiedOfficers();
         List<Disqualifications> savedDisqualifications = new ArrayList<>();
 
         LOG.info("Starting creation of Disqualifications for company number: "
                 + spec.getCompanyNumber());
 
         if (disqualificationsSpecs != null && !disqualificationsSpecs.isEmpty()) {
-            for (DisqualificationsSpec disqSpec : disqualificationsSpecs) {
+            for (DisqualificationsRequest disqSpec : disqualificationsSpecs) {
                 savedDisqualifications.add(createDisqualificationFromSpec(spec, disqSpec));
             }
         } else {
-            var defaultSpec = new DisqualificationsSpec();
+            var defaultSpec = new DisqualificationsRequest();
             defaultSpec.setDisqualificationType("default-type");
             defaultSpec.setCorporateOfficer(false);
             savedDisqualifications.add(createDisqualificationFromSpec(spec, defaultSpec));
@@ -81,7 +81,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     }
 
     private Disqualifications createDisqualificationFromSpec(
-            CompanySpec companySpec, DisqualificationsSpec spec) {
+            CompanyRequest companySpec, DisqualificationsRequest spec) {
         var disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
         disqualifications.setCompanyNumber(companySpec.getCompanyNumber());

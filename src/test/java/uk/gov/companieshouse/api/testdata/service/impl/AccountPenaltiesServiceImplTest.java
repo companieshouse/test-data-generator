@@ -36,11 +36,11 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalties;
 import uk.gov.companieshouse.api.testdata.model.entity.AccountPenalty;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltiesTransactionSubType;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PenaltiesTransactionSubType;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,7 +67,7 @@ class AccountPenaltiesServiceImplTest {
                 COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE,
+        AccountPenaltiesResponse result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE,
                 PENALTY_REF);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
@@ -97,7 +97,7 @@ class AccountPenaltiesServiceImplTest {
         when(repository.findAllById(PENALTY_ID))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalties(PENALTY_ID);
+        AccountPenaltiesResponse result = service.getAccountPenalties(PENALTY_ID);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
@@ -124,7 +124,7 @@ class AccountPenaltiesServiceImplTest {
         when(repository.findByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE))
                 .thenReturn(Optional.of(List.of(accountPenalties)));
 
-        AccountPenaltiesData result = service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
+        AccountPenaltiesResponse result = service.getAccountPenalties(CUSTOMER_CODE, COMPANY_CODE);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
@@ -194,7 +194,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(accountPenalties)).thenReturn(accountPenalties);
 
-        AccountPenaltiesData result = service.updateAccountPenalties(PENALTY_REF, request);
+        AccountPenaltiesResponse result = service.updateAccountPenalties(PENALTY_REF, request);
 
         assertEquals(accountPenalties.getCustomerCode(), result.getCustomerCode());
         assertEquals(accountPenalties.getCompanyCode(), result.getCompanyCode());
@@ -251,18 +251,18 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createAccountPenalties_success() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(2);
-        penaltySpec.setAmount(100.0);
-        penaltySpec.setIsPaid(false);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(2);
+        penaltyRequest.setAmount(100.0);
+        penaltyRequest.setIsPaid(false);
 
         AccountPenalties savedEntity = createAccountPenalties();
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
 
-        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(penaltyRequest);
 
         assertNotNull(result);
         assertEquals(savedEntity.getCompanyCode(), result.getCompanyCode());
@@ -272,13 +272,13 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createAccountPenalties_repositoryThrowsException() {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
 
         when(repository.save(any(AccountPenalties.class))).thenThrow(new RuntimeException("DB error"));
 
-        DataException ex = assertThrows(DataException.class, () -> service.createAccountPenalties(penaltySpec));
+        DataException ex = assertThrows(DataException.class, () -> service.createAccountPenalties(penaltyRequest));
         assertTrue(ex.getMessage().contains("Failed to create account penalties"));
         verify(repository, times(1)).save(any(AccountPenalties.class));
     }
@@ -328,36 +328,36 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void testCreatePenaltiesListDefaults() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
 
         AccountPenalties savedEntity = new AccountPenalties();
         savedEntity.setPenalties(new ArrayList<>());
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
 
-        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(penaltyRequest);
 
         assertNotNull(result);
     }
 
     @Test
     void testCalculatePenaltyAmountMultiplePenalties() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(3);
-        penaltySpec.setAmount(100.0);
-        penaltySpec.setIsPaid(false);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(3);
+        penaltyRequest.setAmount(100.0);
+        penaltyRequest.setIsPaid(false);
 
         AccountPenalties savedEntity = new AccountPenalties();
         savedEntity.setPenalties(new ArrayList<>());
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(savedEntity);
 
-        AccountPenaltiesData result = service.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(penaltyRequest);
 
         assertNotNull(result);
     }
@@ -378,7 +378,7 @@ class AccountPenaltiesServiceImplTest {
         when(repository.findPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF))
                 .thenReturn(Optional.of(accountPenalties));
 
-        AccountPenaltiesData result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
+        AccountPenaltiesResponse result = service.getAccountPenalty(COMPANY_CODE, CUSTOMER_CODE, PENALTY_REF);
 
         assertEquals(1, result.getPenalties().size());
         assertEquals(PENALTY_REF, result.getPenalties().get(0).getTransactionReference());
@@ -386,10 +386,10 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createAccountPenalties_closedAtIsNullWhenIsPaidFalse() throws Exception {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setIsPaid(false);
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setIsPaid(false);
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
 
         AccountPenalties saved = new AccountPenalties();
         saved.setId(new ObjectId());
@@ -398,17 +398,17 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(saved);
 
-        var result = service.createAccountPenalties(penaltySpec);
+        var result = service.createAccountPenalties(penaltyRequest);
 
         assertNull(result.getClosedAt(), "closedAt should be null when isPaid is false");
     }
 
     @Test
     void createAccountPenalties_closedAtIsSetWhenIsPaidTrue() throws Exception {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setIsPaid(true);
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setIsPaid(true);
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
 
         AccountPenalties saved = new AccountPenalties();
         saved.setId(new ObjectId());
@@ -417,31 +417,31 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenReturn(saved);
 
-        var result = service.createAccountPenalties(penaltySpec);
+        var result = service.createAccountPenalties(penaltyRequest);
 
         assertNotNull(result.getClosedAt(), "closedAt should be set when isPaid is true");
     }
 
     @Test
     void createAccountPenalties_shouldThrowDataExceptionForInvalidCompanyCode() {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("INVALID");
-        penaltySpec.setCustomerCode("12345678");
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("INVALID");
+        penaltyRequest.setCustomerCode("12345678");
 
         DataException ex = assertThrows(DataException.class,
-                () -> service.createAccountPenalties(penaltySpec));
+                () -> service.createAccountPenalties(penaltyRequest));
         assertTrue(ex.getMessage().contains("Failed to create account penalties"));
     }
 
     @Test
     void createPenaltiesList_shouldDefaultCompanyCodeAndTransactionSubTypeIfBlank() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("");
-        penaltySpec.setTransactionSubType(null);
-        penaltySpec.setCustomerCode("12345678");
-        penaltySpec.setNumberOfPenalties(1);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("");
+        penaltyRequest.setTransactionSubType(null);
+        penaltyRequest.setCustomerCode("12345678");
+        penaltyRequest.setNumberOfPenalties(1);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertEquals("LP", penalties.getFirst().getCompanyCode());
         String subType = penalties.getFirst().getTransactionSubType();
@@ -454,15 +454,15 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createPenaltiesList_shouldDefaultLedgerCodeAndTypeDescriptionIfConfigNotPresent() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("ZZ");
-        penaltySpec.setTransactionSubType(null);
-        penaltySpec.setLedgerCode("");
-        penaltySpec.setTypeDescription("");
-        penaltySpec.setCustomerCode("12345678");
-        penaltySpec.setNumberOfPenalties(1);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("ZZ");
+        penaltyRequest.setTransactionSubType(null);
+        penaltyRequest.setLedgerCode("");
+        penaltyRequest.setTypeDescription("");
+        penaltyRequest.setCustomerCode("12345678");
+        penaltyRequest.setNumberOfPenalties(1);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertEquals("SC", penalties.getFirst().getLedgerCode());
         assertEquals("Penalty", penalties.getFirst().getTypeDescription());
@@ -470,39 +470,39 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createPenaltiesList_shouldDefaultTransactionTypeIfNull() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("ZZ");
-        penaltySpec.setTransactionType(null);
-        penaltySpec.setCustomerCode("12345678");
-        penaltySpec.setNumberOfPenalties(1);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("ZZ");
+        penaltyRequest.setTransactionType(null);
+        penaltyRequest.setCustomerCode("12345678");
+        penaltyRequest.setNumberOfPenalties(1);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertEquals("1", penalties.get(0).getTransactionType());
     }
 
     @Test
     void createPenaltiesList_shouldRoundAmountToTwoDecimals() throws DataException{
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setCustomerCode("12345678");
-        penaltySpec.setNumberOfPenalties(1);
-        penaltySpec.setAmount(99.999);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("C1");
+        penaltyRequest.setCustomerCode("12345678");
+        penaltyRequest.setNumberOfPenalties(1);
+        penaltyRequest.setAmount(99.999);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertEquals(100.0, penalties.get(0).getAmount());
     }
 
     @Test
     void createPenaltiesList_shouldGenerateDifferentAmountsForMultiplePenalties() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setCustomerCode("12345678");
-        penaltySpec.setNumberOfPenalties(2);
-        penaltySpec.setAmount(50.0);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("C1");
+        penaltyRequest.setCustomerCode("12345678");
+        penaltyRequest.setNumberOfPenalties(2);
+        penaltyRequest.setAmount(50.0);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertEquals(2, penalties.size());
         assertEquals(50.0, penalties.get(0).getAmount());
@@ -527,8 +527,8 @@ class AccountPenaltiesServiceImplTest {
     @MethodSource("penaltyReferencePrefixProvider")
     void createPenaltiesList_transactionReferencePrefix(
             String companyCode, String transactionSubType, String expectedPrefix) throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(companyCode);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode(companyCode);
 
         PenaltiesTransactionSubType subTypeEnum = null;
         if (transactionSubType != null) {
@@ -538,11 +538,11 @@ class AccountPenaltiesServiceImplTest {
                 subTypeEnum = null;
             }
         }
-        penaltySpec.setTransactionSubType(subTypeEnum);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
+        penaltyRequest.setTransactionSubType(subTypeEnum);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertTrue(penalties.getFirst().getTransactionReference().startsWith(expectedPrefix));
     }
@@ -578,7 +578,7 @@ class AccountPenaltiesServiceImplTest {
                 .thenReturn(Optional.of(accountPenalties));
         when(repository.save(any(AccountPenalties.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AccountPenaltiesData result = service.updateAccountPenalties(penaltyRef, request);
+        AccountPenaltiesResponse result = service.updateAccountPenalties(penaltyRef, request);
 
         assertEquals(2, result.getPenalties().size());
         assertEquals(10.0, result.getPenalties().get(0).getAmount());
@@ -587,27 +587,27 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void testCreateAccountPenalties_whenPenaltiesNull_returnsNull() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode(COMPANY_CODE);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode(COMPANY_CODE);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
 
         AccountPenaltiesServiceImpl spyService = Mockito.spy(service);
-        Mockito.doReturn(null).when(spyService).createPenaltiesList(penaltySpec);
+        Mockito.doReturn(null).when(spyService).createPenaltiesList(penaltyRequest);
 
-        AccountPenaltiesData result = spyService.createAccountPenalties(penaltySpec);
+        AccountPenaltiesResponse result = spyService.createAccountPenalties(penaltyRequest);
 
         assertNull(result);
     }
 
     @Test
     void createPenaltiesList_duplicatePenalties() {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(3);
-        penaltySpec.setDuplicate(true);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(3);
+        penaltyRequest.setDuplicate(true);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertNotNull(penalties);
         assertEquals(3, penalties.size());
@@ -617,14 +617,14 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createPenaltiesList_partPaid_setsOutstandingAmountLessThanAmount() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
-        penaltySpec.setAmount(100.0);
-        penaltySpec.setPartPaid(true);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
+        penaltyRequest.setAmount(100.0);
+        penaltyRequest.setPartPaid(true);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertNotNull(penalties);
         assertEquals(1, penalties.size());
@@ -635,13 +635,13 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createPenaltiesList_amountNull_usesRandomAmount() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
-        penaltySpec.setAmount(null);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
+        penaltyRequest.setAmount(null);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertNotNull(penalties);
         assertEquals(1, penalties.size());
@@ -651,14 +651,14 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createPenaltiesList_isPaid_setsOutstandingAmountZero() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
-        penaltySpec.setAmount(50.0);
-        penaltySpec.setIsPaid(true);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
+        penaltyRequest.setAmount(50.0);
+        penaltyRequest.setIsPaid(true);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertNotNull(penalties);
         assertEquals(1, penalties.size());
@@ -682,10 +682,10 @@ class AccountPenaltiesServiceImplTest {
                 .thenReturn(Optional.of(accountPenalties));
         when(repository.save(accountPenalties)).thenReturn(accountPenalties);
 
-        AccountPenaltiesData result = service.updateAccountPenalties("A1234567", request);
+        AccountPenaltiesResponse result = service.updateAccountPenalties("A1234567", request);
 
         assertNotNull(result);
-        PenaltyData penalty = result.getPenalties().get(0);
+        PenaltyResponse penalty = result.getPenalties().get(0);
         assertEquals(200.0, penalty.getAmount());
         assertEquals(0.0, penalty.getOutstandingAmount());
         assertTrue(penalty.getIsPaid());
@@ -693,7 +693,7 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void testCreateAccountPenalties_Standard_LP() throws DataException {
-        PenaltySpec spec = new PenaltySpec();
+        PenaltyRequest spec = new PenaltyRequest();
         spec.setCompanyCode("LP");
         spec.setCustomerCode("123456");
         spec.setNumberOfPenalties(1);
@@ -701,7 +701,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
 
-        AccountPenaltiesData result = service.createAccountPenalties(spec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(spec);
         assertNotNull(result);
         assertEquals(1, result.getPenalties().size());
         assertEquals(100.0, result.getPenalties().get(0).getAmount());
@@ -717,15 +717,15 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createAccountPenalties_C1_A2_Configuration() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setTransactionSubType(PenaltiesTransactionSubType.A2);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("C1");
+        penaltyRequest.setTransactionSubType(PenaltiesTransactionSubType.A2);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
 
         when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
 
-        service.createAccountPenalties(penaltySpec);
+        service.createAccountPenalties(penaltyRequest);
 
         ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
         verify(repository).save(captor.capture());
@@ -739,15 +739,15 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createAccountPenalties_C1_S3_Configuration() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("C1");
-        penaltySpec.setTransactionSubType(PenaltiesTransactionSubType.S3);
-        penaltySpec.setCustomerCode(CUSTOMER_CODE);
-        penaltySpec.setNumberOfPenalties(1);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("C1");
+        penaltyRequest.setTransactionSubType(PenaltiesTransactionSubType.S3);
+        penaltyRequest.setCustomerCode(CUSTOMER_CODE);
+        penaltyRequest.setNumberOfPenalties(1);
 
         when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
 
-        service.createAccountPenalties(penaltySpec);
+        service.createAccountPenalties(penaltyRequest);
 
         ArgumentCaptor<AccountPenalties> captor = ArgumentCaptor.forClass(AccountPenalties.class);
         verify(repository).save(captor.capture());
@@ -761,7 +761,7 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void testCreateAccountPenalties_C1_S1() throws DataException {
-        PenaltySpec spec = new PenaltySpec();
+        PenaltyRequest spec = new PenaltyRequest();
         spec.setCompanyCode("C1");
         spec.setTransactionSubType(PenaltiesTransactionSubType.S1);
 
@@ -780,7 +780,7 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createAccountPenalties_DuplicateTrue_NumberOfPenaltiesLessThanTwo_ReturnsEmptyList() throws DataException {
-        PenaltySpec spec = new PenaltySpec();
+        PenaltyRequest spec = new PenaltyRequest();
         spec.setDuplicate(true);
         spec.setNumberOfPenalties(1);
         spec.setCompanyCode("LP");
@@ -788,7 +788,7 @@ class AccountPenaltiesServiceImplTest {
 
         when(repository.save(any(AccountPenalties.class))).thenAnswer(i -> i.getArgument(0));
 
-        AccountPenaltiesData result = service.createAccountPenalties(spec);
+        AccountPenaltiesResponse result = service.createAccountPenalties(spec);
 
         assertNotNull(result);
         assertTrue(result.getPenalties().isEmpty(), "Penalties list should be empty when duplicate is true and count < 2");
@@ -800,14 +800,14 @@ class AccountPenaltiesServiceImplTest {
 
     @Test
     void createDuplicatePenalties_shouldGenerateMultiplePenaltiesWithSameTransactionReference() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("12345678");
-        penaltySpec.setNumberOfPenalties(3);
-        penaltySpec.setDuplicate(true);
-        penaltySpec.setIsPaid(false);
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode("12345678");
+        penaltyRequest.setNumberOfPenalties(3);
+        penaltyRequest.setDuplicate(true);
+        penaltyRequest.setIsPaid(false);
 
-        List<AccountPenalty> penalties = service.createPenaltiesList(penaltySpec);
+        List<AccountPenalty> penalties = service.createPenaltiesList(penaltyRequest);
 
         assertNotNull(penalties);
         assertEquals(3, penalties.size(), "Should create 3 duplicate penalties");

@@ -6,32 +6,32 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 
 
 public interface TestDataService {
@@ -40,10 +40,10 @@ public interface TestDataService {
      * Create company data with given {@code companySpec}.
      *
      * @param companySpec The specification the new company must adhere to
-     * @return A {@link CompanyData}
+     * @return A {@link CompanyProfileResponse}
      * @throws DataException If any error occurs
      */
-    CompanyData createCompanyData(CompanySpec companySpec) throws DataException;
+    CompanyProfileResponse createCompanyData(CompanyRequest companySpec) throws DataException;
 
     /**
      * Delete all data for company {@code companyNumber}.
@@ -56,11 +56,11 @@ public interface TestDataService {
     /**
      * Creates a new user test data based on the provided user specifications.
      *
-     * @param userSpec the specifications of the user to create
+     * @param userRequest the specifications of the user to create
      * @return the created user's test data
      * @throws DataException if there is an error during user creation
      */
-    UserData createUserData(UserSpec userSpec) throws DataException;
+    UserResponse createUserData(UserRequest userRequest) throws DataException;
 
     /**
      * Deletes a user test data by their user ID.
@@ -73,11 +73,11 @@ public interface TestDataService {
     /**
      * Creates a new acsp member test data based on the provided user specifications.
      *
-     * @param acspMembersSpec the specifications of the acsp member to create
+     * @param acspMembersRequest the specifications of the acsp member to create
      * @return the created acsp members' test data
      * @throws DataException if there is an error during user creation
      */
-    AcspMembersData createAcspMembersData(AcspMembersSpec acspMembersSpec) throws DataException;
+    AcspMembersResponse createAcspMembersData(AcspMembersRequest acspMembersRequest) throws DataException;
 
     /**
      * Deletes an acsp members' test data by their membership id.
@@ -90,41 +90,41 @@ public interface TestDataService {
     /**
      * Adds a new certificate test data based on the provided user specifications.
      *
-     * @param certificatesSpec the specifications of the certificates to order
+     * @param certificatesRequest the specifications of the certificates to order
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createCertificatesData(CertificatesSpec certificatesSpec) throws DataException;
+    CertificatesResponse createCertificatesData(CertificatesRequest certificatesRequest) throws DataException;
 
     /**
      * Adds a new certified copies test data based on the provided user specifications.
      *
-     * @param certifiedCopiesSpec the specifications of the certified copies to order
+     * @param certifiedCopiesRequest the specifications of the certified copies to order
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createCertifiedCopiesData(
-            CertifiedCopiesSpec certifiedCopiesSpec) throws DataException;
+    CertificatesResponse createCertifiedCopiesData(
+            CertifiedCopiesRequest certifiedCopiesRequest) throws DataException;
 
     /**
      * Adds a new missing image deliveries test data based on the provided user specifications.
      *
-     * @param missingImageDeliveriesSpec the specifications of the missing image deliveries to order
+     * @param missingImageDeliveriesRequest the specifications of the missing image deliveries to order
      * @return the created certificates test data
      * @throws DataException if there is an error during user creation
      */
-    CertificatesData createMissingImageDeliveriesData(
-            MissingImageDeliveriesSpec missingImageDeliveriesSpec) throws DataException;
+    CertificatesResponse createMissingImageDeliveriesData(
+            MissingImageDeliveriesRequest missingImageDeliveriesRequest) throws DataException;
 
     /**
      * Adds a new sic code test data based on the provided user specifications.
      *
-     * @param combinedSicActivitiesSpec the specifications of the sic code
+     * @param combinedSicActivitiesRequest the specifications of the sic code
      * @return the created sic code with keyword test data
      * @throws DataException if there is an error during user creation
      */
-    CombinedSicActivitiesData createCombinedSicActivitiesData(
-            CombinedSicActivitiesSpec  combinedSicActivitiesSpec)  throws DataException;
+    CombinedSicActivitiesResponse createCombinedSicActivitiesData(
+            CombinedSicActivitiesRequest combinedSicActivitiesRequest)  throws DataException;
 
     /**
      * Deletes the certificates test data for the given id.
@@ -167,10 +167,10 @@ public interface TestDataService {
      * Gets the account penalties data for a given company by AccountPenalties ID.
      *
      * @param id  the ID of the AccountPenalties Mongo DB collection
-     * @return @return the {@link AccountPenaltiesData}
+     * @return @return the {@link AccountPenaltiesResponse}
      * @throws NoDataFoundException if the penalty cannot be found
      */
-    AccountPenaltiesData getAccountPenaltiesData(String id)
+    AccountPenaltiesResponse getAccountPenaltiesData(String id)
             throws NoDataFoundException;
 
     /**
@@ -178,10 +178,10 @@ public interface TestDataService {
      *
      * @param customerCode  the customer code
      * @param companyCode  the company code
-     * @return @return the {@link AccountPenaltiesData}
+     * @return @return the {@link AccountPenaltiesResponse}
      * @throws NoDataFoundException if the penalty cannot be found
      */
-    AccountPenaltiesData getAccountPenaltiesData(String customerCode, String companyCode)
+    AccountPenaltiesResponse getAccountPenaltiesData(String customerCode, String companyCode)
             throws NoDataFoundException;
 
     /**.
@@ -190,12 +190,12 @@ public interface TestDataService {
      *
      * @param penaltyRef the penalty reference
      * @param request    the update request
-     * @return the {@link AccountPenaltiesData}
+     * @return the {@link AccountPenaltiesResponse}
      * @throws NoDataFoundException if the requested penalty reference cannot be found
      * @throws DataException if the account penalties cannot be updated
      */
-    AccountPenaltiesData updateAccountPenaltiesData(String penaltyRef,
-            UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
+    AccountPenaltiesResponse updateAccountPenaltiesData(String penaltyRef,
+                                                        UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
 
     /**.
      * Deletes all account penalties data for a given company code and customer code
@@ -220,7 +220,7 @@ public interface TestDataService {
     ResponseEntity<Void> deleteAccountPenaltyByReference(String id, String transactionReference)
             throws NoDataFoundException, DataException;
 
-    AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException;
+    AccountPenaltiesResponse createPenaltyData(PenaltyRequest penaltyRequest) throws DataException;
 
     /**
      * Retrieves postcodes for a given country.
@@ -229,13 +229,13 @@ public interface TestDataService {
      * @return Postcodes object containing the postcodes for the specified country
      * @throws DataException if there is an error retrieving the postcodes
      */
-    PostcodesData getPostcodes(String country) throws DataException;
+    PostcodesResponse getPostcodes(String country) throws DataException;
 
     /**
      * Gets the ACSP profile data for a given ACSP number.
      *
      * @param acspNumber the ACSP number
-     * @return the {@link AcspProfileData}
+     * @return the {@link AcspProfileResponse}
      * @throws NoDataFoundException if the profile cannot be found
      */
     Optional<AcspProfile> getAcspProfileData(String acspNumber)
@@ -244,11 +244,11 @@ public interface TestDataService {
     /**
      * Adds a new transaction and acsp application test data based on the provided specifications.
      *
-     * @param transactionsSpec the specifications of the transactions
+     * @param transactionsRequest the specifications of the transactions
      * @return the transactions and acsp application id
      * @throws DataException if there is an error during transactions or acsp application creation
      */
-    TransactionsData createTransactionData(TransactionsSpec transactionsSpec) throws DataException;
+    TransactionsResponse createTransactionData(TransactionsRequest transactionsRequest) throws DataException;
 
     boolean deleteTransaction(String transactionId) throws DataException;
 
@@ -256,13 +256,13 @@ public interface TestDataService {
      * Creates a new user company association test data based on the
      * provided user specifications.
      *
-     * @param userCompanyAssociationSpec the specifications of the
+     * @param userCompanyAssociationRequest the specifications of the
      *                                   association to create
      * @return the created user company association test data
      * @throws DataException if there is an error during creation
      */
-    UserCompanyAssociationData
-            createUserCompanyAssociationData(UserCompanyAssociationSpec userCompanyAssociationSpec)
+    UserCompanyAssociationResponse
+            createUserCompanyAssociationData(UserCompanyAssociationRequest userCompanyAssociationRequest)
             throws DataException;
 
     /**
@@ -274,7 +274,7 @@ public interface TestDataService {
      */
     boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
 
-    AdminPermissionsData createAdminPermissionsData(AdminPermissionsSpec spec) throws DataException;
+    AdminPermissionsResponse createAdminPermissionsData(AdminPermissionsRequest spec) throws DataException;
 
     /**
      * Deletes admin permissions data by its ID.
@@ -289,10 +289,10 @@ public interface TestDataService {
      * Create public company data with given {@code companySpec}.
      *
      * @param companySpec The specification the new public company must adhere to
-     * @return A {@link CompanyData}
+     * @return A {@link CompanyProfileResponse}
      * @throws DataException If any error occurs
      */
-    CompanyData createPublicCompanyData(PublicCompanySpec companySpec) throws DataException;
+    CompanyProfileResponse createPublicCompanyData(PublicCompanyRequest companySpec) throws DataException;
 
     /**
      * Find an existing CompanyAuthCode for the given company number
@@ -312,15 +312,15 @@ public interface TestDataService {
      * @return A {@link PopulatedCompanyDetailsResponse}
      * @throws DataException If any error occurs
      */
-    PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanySpec spec)
+    PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanyRequest spec)
             throws DataException;
 
     /**
      * Create company with full structure based on the given {@code companySpec}.
      *
      * @param companySpec The specification the new company must adhere to
-     * @return A {@link CompanyData}
+     * @return A {@link CompanyProfileResponse}
      * @throws DataException If any error occurs
      */
-    CompanyData createCompanyWithStructure(CompanyWithPopulatedStructureSpec companySpec) throws DataException;
+    CompanyProfileResponse createCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec) throws DataException;
 }

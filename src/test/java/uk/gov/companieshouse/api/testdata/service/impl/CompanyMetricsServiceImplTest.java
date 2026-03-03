@@ -23,11 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
-import uk.gov.companieshouse.api.testdata.model.rest.PscType;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -50,11 +50,11 @@ class CompanyMetricsServiceImplTest {
     void create() {
         var directorsText = "directors";
         var publicRegisterText = "public-register";
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
 
-        RegistersSpec registersSpec = new RegistersSpec();
+        RegistersRequest registersSpec = new RegistersRequest();
         registersSpec.setRegisterType(directorsText);
         registersSpec.setRegisterMovedTo(publicRegisterText);
         spec.setRegisters(List.of(registersSpec));
@@ -106,7 +106,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWhenCompanyTypeIsRegisteredOverseasEntity() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(2);
@@ -128,7 +128,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWhenHasSuperSecurePscsIsTrue() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setHasSuperSecurePscs(Boolean.TRUE);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -148,7 +148,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithDefaultActivePscCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -167,7 +167,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithSuperSecurePscs() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setHasSuperSecurePscs(true);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -188,7 +188,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithNumberOfPsc() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(5);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -209,10 +209,10 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithRegisters() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
-        RegistersSpec register = new RegistersSpec();
+        RegistersRequest register = new RegistersRequest();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("public-register");
         spec.setRegisters(List.of(register));
@@ -238,11 +238,11 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void testSetActiveDirectorsCountAndRegisters() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNumberOfAppointments(5);
-        spec.setOfficerRoles(List.of(OfficerRoles.DIRECTOR));
+        spec.setOfficerRoles(List.of(OfficerType.DIRECTOR));
         spec.setCompanyWithPopulatedStructureOnly(false);
-        RegistersSpec register = new RegistersSpec();
+        RegistersRequest register = new RegistersRequest();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("public-register");
         spec.setRegisters(List.of(register));
@@ -265,9 +265,9 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void testSetActiveDirectorsCountWithoutDirectorRole() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNumberOfAppointments(5);
-        spec.setOfficerRoles(List.of(OfficerRoles.CIC_MANAGER));
+        spec.setOfficerRoles(List.of(OfficerType.CIC_MANAGER));
         spec.setCompanyWithPopulatedStructureOnly(false);
         metricsService.create(spec);
 
@@ -301,7 +301,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithActivePscStatementsCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setActiveStatements(3);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -319,7 +319,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithActivePscStatementsCountFromNumberOfPsc() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(2);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -337,7 +337,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithDefaultActivePscStatementsCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -354,7 +354,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithGivenWithdrawnPscStatementsCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setWithdrawnStatements(4);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -372,7 +372,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithDefaultWithdrawnPscStatementsCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -389,7 +389,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscCount_WhenPscActiveFalse_ShouldSetCorrectCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNumberOfPscs(3);
         spec.setPscActive(false);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -401,7 +401,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscCount_WhenPscActiveTrue_ShouldSetCorrectCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNumberOfPscs(3);
         spec.setPscActive(true);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -414,7 +414,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscCount_WhenPscActiveNull_ShouldSetCorrectCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNumberOfPscs(3);
         spec.setPscActive(null);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -427,7 +427,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscCount_WhenSuperSecurePscs_ShouldSetCountToOne() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setHasSuperSecurePscs(true);
         spec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -439,7 +439,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscCount_WhenNoPscCount_ShouldSetCountToZero() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
@@ -449,7 +449,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscActiveToFalse_ShouldSetCeasedPscCount() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(5);
         spec.setPscActive(false);
@@ -469,7 +469,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithPscActiveFalse_ShouldSetCorrectCounts() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(4);
         spec.setPscActive(false);
@@ -490,7 +490,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithPscActiveTrue_ShouldSetCorrectCounts() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(4);
         spec.setPscActive(true);
@@ -511,7 +511,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithPscActiveNull_ShouldSetCorrectCounts() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfPscs(4);
         spec.setPscActive(null);
@@ -532,7 +532,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithNoDefaultOfficerTrue_SetsActiveDirectorsCountToZero() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNoDefaultOfficer(true);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -553,7 +553,7 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createReturnsUnsavedMetricsWhenCompanyWithDataStructureIsTrue() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(true);
 

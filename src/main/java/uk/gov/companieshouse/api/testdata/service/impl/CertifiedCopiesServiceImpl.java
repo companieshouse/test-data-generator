@@ -16,12 +16,12 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDescriptionV
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDescriptionValuesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.FilingHistoryDocumentsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.ItemOptionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDocumentsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -29,7 +29,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CertifiedCopiesServiceImpl implements DataService<CertificatesData, CertifiedCopiesSpec> {
+public class CertifiedCopiesServiceImpl implements DataService<CertificatesResponse, CertifiedCopiesRequest> {
 
     @Autowired
     public CertifiedCopiesRepository certifiedCopiesRepository;
@@ -47,19 +47,19 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
     private CertificatesServiceImpl certificatesService;
 
     @Override
-    public CertificatesData create(CertifiedCopiesSpec spec) throws DataException {
-        List<ItemOptionsSpec> optionsList = spec.getItemOptions();
-        List<CertificatesData.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
+    public CertificatesResponse create(CertifiedCopiesRequest spec) throws DataException {
+        List<ItemOptionsRequest> optionsList = spec.getItemOptions();
+        List<CertificatesResponse.CertificateEntry> certificateEntries = new ArrayList<>(optionsList.size());
         List<Basket.Item> basketItems = new ArrayList<>(optionsList.size());
 
-        for (ItemOptionsSpec optionSpec : optionsList) {
+        for (ItemOptionsRequest optionSpec : optionsList) {
             Long firstPart = randomService.getNumber(6);
             Long secondPart = randomService.getNumber(6);
             var randomId = "CCD-" + firstPart + "-" + secondPart;
             var certifiedCopies = getCertifiedCopies(spec, optionSpec, randomId);
             certifiedCopiesRepository.save(certifiedCopies);
             var now = getCurrentDateTime().toString();
-            certificateEntries.add(new CertificatesData.CertificateEntry(
+            certificateEntries.add(new CertificatesResponse.CertificateEntry(
                 certifiedCopies.getId(), now, now
             ));
 
@@ -74,10 +74,10 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
             basketRepository.save(basket);
         }
 
-        return new CertificatesData(certificateEntries);
+        return new CertificatesResponse(certificateEntries);
     }
 
-    protected FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesSpec spec) {
+    protected FilingHistoryDescriptionValues mapToEntity(FilingHistoryDescriptionValuesRequest spec) {
         var filingHistoryDescriptionValues = new FilingHistoryDescriptionValues();
         Optional.ofNullable(spec.getDate()).ifPresent(filingHistoryDescriptionValues::setDate);
         Optional.ofNullable(spec.getOfficerName()).ifPresent(filingHistoryDescriptionValues::setOfficerName);
@@ -99,7 +99,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         return filingHistoryDescriptionValues;
     }
 
-    private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, ItemOptionsSpec optionsSpec, String randomId) {
+    private CertifiedCopies getCertifiedCopies(CertifiedCopiesRequest spec, ItemOptionsRequest optionsSpec, String randomId) {
         var itemOptions = new ItemOptions();
         Optional.ofNullable(optionsSpec.getCollectionLocation()).ifPresent(itemOptions::setCollectionLocation);
         Optional.ofNullable(optionsSpec.getContactNumber()).ifPresent(itemOptions::setContactNumber);
@@ -109,7 +109,7 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         Optional.ofNullable(optionsSpec.getSurName()).ifPresent(itemOptions::setSurName);
         if (optionsSpec.getFilingHistoryDocuments() != null) {
             List<FilingHistoryDocument> filingHistoryDocumentList = new ArrayList<>();
-            for (FilingHistoryDocumentsSpec filingHistoryDocumentsSpec : optionsSpec.getFilingHistoryDocuments() ) {
+            for (FilingHistoryDocumentsRequest filingHistoryDocumentsSpec : optionsSpec.getFilingHistoryDocuments() ) {
                 var filingHistoryDocument = new FilingHistoryDocument();
                 filingHistoryDocument.setFilingHistoryDate(filingHistoryDocumentsSpec.getFilingHistoryDate());
                 filingHistoryDocument.setFilingHistoryDescription(filingHistoryDocumentsSpec.getFilingHistoryDescription());
@@ -129,8 +129,8 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
       return getCertifiedCopies(spec, randomId, itemOptions);
     }
 
-    private CertifiedCopies getCertifiedCopies(CertifiedCopiesSpec spec, String randomId,
-        ItemOptions itemOptions) {
+    private CertifiedCopies getCertifiedCopies(CertifiedCopiesRequest spec, String randomId,
+                                               ItemOptions itemOptions) {
         var url = "/orderable/certified-copies/";
         var certifiedCopies = new CertifiedCopies();
         var currentDate = getCurrentDateTime().toString();
@@ -172,13 +172,13 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesData,
         return certifiedCopies;
     }
 
-    private Basket createBasket(CertifiedCopiesSpec spec, List<Basket.Item> items) {
+    private Basket createBasket(CertifiedCopiesRequest spec, List<Basket.Item> items) {
         var certSpec = mapCertifiedCopiesToCertificatesSpec(spec);
         return certificatesService.createBasket(certSpec, items);
     }
 
-    private CertificatesSpec mapCertifiedCopiesToCertificatesSpec(CertifiedCopiesSpec spec) {
-        var certificatesSpec = new CertificatesSpec();
+    private CertificatesRequest mapCertifiedCopiesToCertificatesSpec(CertifiedCopiesRequest spec) {
+        var certificatesSpec = new CertificatesRequest();
         certificatesSpec.setUserId(spec.getUserId());
         certificatesSpec.setBasketSpec(spec.getBasketSpec());
         return certificatesSpec;

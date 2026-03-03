@@ -75,10 +75,10 @@ public class GlobalExceptionHandlerTest {
         WebRequest request = Mockito.mock(WebRequest.class);
 
         when(cause.getPathReference())
-                .thenReturn("uk.gov.companieshouse.api.testdata.model.rest.CompanySpec[\"jurisdiction\"]");
+                .thenReturn("uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest[\"jurisdiction\"]");
 
         StackTraceElement[] stackTrace = new StackTraceElement[] {
-            new StackTraceElement("CompanySpec", "getJurisdiction", "CompanySpec.java", 123)
+            new StackTraceElement("CompanyRequest", "getJurisdiction", "CompanyRequest.java", 123)
         };
         when(cause.getStackTrace()).thenReturn(stackTrace);
 
@@ -103,7 +103,7 @@ public class GlobalExceptionHandlerTest {
         when(cause.getPathReference()).thenReturn("unrecognised path reference");
 
         StackTraceElement[] stackTrace = new StackTraceElement[] {
-            new StackTraceElement("CompanySpec", "getJurisdiction", "CompanySpec.java", 123)
+            new StackTraceElement("CompanyRequest", "getJurisdiction", "CompanyRequest.java", 123)
         };
         when(cause.getStackTrace()).thenReturn(stackTrace);
 

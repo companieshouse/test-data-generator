@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class AcspMembersServiceImpl implements DataService<AcspMembersData, AcspMembersSpec> {
+public class AcspMembersServiceImpl implements DataService<AcspMembersResponse, AcspMembersRequest> {
 
     @Autowired
     private AcspMembersRepository repository;
@@ -26,17 +26,17 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
 
 
     @Override
-    public AcspMembersData create(AcspMembersSpec acspMembersSpec) throws DataException {
+    public AcspMembersResponse create(AcspMembersRequest acspMembersRequest) throws DataException {
         var randomId = randomService.generateId();
         var acspMembers = new AcspMembers();
         var currentDate = getCurrentDateTime();
 
         acspMembers.setAcspMemberId(randomId);
-        acspMembers.setAcspNumber(acspMembersSpec.getAcspNumber());
-        acspMembers.setUserId(acspMembersSpec.getUserId());
-        acspMembers.setUserRole(Objects.requireNonNullElse(acspMembersSpec.getUserRole(),
+        acspMembers.setAcspNumber(acspMembersRequest.getAcspNumber());
+        acspMembers.setUserId(acspMembersRequest.getUserId());
+        acspMembers.setUserRole(Objects.requireNonNullElse(acspMembersRequest.getUserRole(),
                 "owner"));
-        acspMembers.setStatus(Objects.requireNonNullElse(acspMembersSpec.getStatus(),
+        acspMembers.setStatus(Objects.requireNonNullElse(acspMembersRequest.getStatus(),
                 "active"));
         acspMembers.setCreatedAt(currentDate);
         acspMembers.setAddedAt(currentDate);
@@ -45,7 +45,7 @@ public class AcspMembersServiceImpl implements DataService<AcspMembersData, Acsp
 
         repository.save(acspMembers);
 
-        return new AcspMembersData(
+        return new AcspMembersResponse(
                 acspMembers.getAcspMemberId(),
                 acspMembers.getAcspNumber(),
                 acspMembers.getUserId(),
