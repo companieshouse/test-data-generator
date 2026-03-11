@@ -78,11 +78,10 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
 
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscStatementsCount(1);
-        } else if (spec.getActiveStatements() == null) {
-            metrics.setActivePscStatementsCount(spec.getNumberOfPscs()
-                    == null ? 0 : spec.getNumberOfPscs());
-        } else {
+        } else if (spec.getActiveStatements() != null) {
             metrics.setActivePscStatementsCount(spec.getActiveStatements());
+        } else {
+            metrics.setActivePscStatementsCount(0);
         }
 
         metrics.setWithdrawnPscStatementsCount(
