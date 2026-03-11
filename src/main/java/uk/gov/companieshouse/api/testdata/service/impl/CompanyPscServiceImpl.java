@@ -89,11 +89,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     public List<CompanyPscs> create(CompanyRequest spec) throws DataException {
         LOG.info("Starting creation of PSCs for company number: " + spec.getCompanyNumber());
 
-        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())) {
-            if (spec.getPscType() == null || spec.getPscType().isEmpty() ||
-                spec.getPscType().stream().anyMatch(type -> type == PscType.INDIVIDUAL)) {
-                spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
-            }
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType()) &&
+            (spec.getPscType() == null || spec.getPscType().isEmpty() ||
+             spec.getPscType().stream().anyMatch(type -> type == PscType.INDIVIDUAL))) {
+             spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
         }
 
         if (shouldReturnNullForExcludedCompanies(spec)) {
@@ -474,3 +473,4 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         }
     }
 }
+
