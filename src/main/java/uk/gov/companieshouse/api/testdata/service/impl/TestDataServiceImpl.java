@@ -751,6 +751,24 @@ public class TestDataServiceImpl implements TestDataService {
         return acspProfileService.getAcspProfile(acspNumber);
     }
 
+    @Override
+    public AcspProfileData createAcspProfileData(AcspProfileSpec acspProfileSpec) throws DataException {
+        try {
+            return acspProfileService.create(acspProfileSpec);
+        } catch (Exception ex) {
+            throw new DataException("Error creating acsp profile", ex);
+        }
+    }
+
+    @Override
+    public boolean deleteAcspProfileData(String acspProfileId) throws DataException {
+        try {
+            return acspProfileService.delete(acspProfileId);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting acsp profile", ex);
+        }
+    }
+
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
         try {
             acspMembersService.delete(acspMemberId);

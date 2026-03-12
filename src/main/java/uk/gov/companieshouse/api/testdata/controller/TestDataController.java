@@ -28,6 +28,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -443,6 +445,18 @@ public class TestDataController {
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
 
+    @PostMapping("/internal/acsp-profile")
+    public ResponseEntity<AcspProfileData> createAcspProfile(
+            @Valid @RequestBody AcspProfileSpec request) throws DataException {
+
+        var createdAcspProfile = testDataService.createAcspProfileData(request);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("acsp-profile-id", createdAcspProfile.getAcspNumber());
+        LOG.info("New acsp profile created", data);
+        return new ResponseEntity<>(createdAcspProfile, HttpStatus.CREATED);
+    }
+
     @GetMapping("/internal/acsp-profile/{acspNumber}")
     public ResponseEntity<Optional<AcspProfile>> getAcspProfile(
             @PathVariable String acspNumber) throws NoDataFoundException {
@@ -451,6 +465,24 @@ public class TestDataController {
                 testDataService.getAcspProfileData(acspNumber);
 
         return new ResponseEntity<>(acspProfile, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/internal/acsp-profile/{acspProfileId}")
+    public ResponseEntity<Map<String, Object>> deleteAcspProfile(@PathVariable("acspProfileId")
+    String acspProfileId)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("acsp-profile-id", acspProfileId);
+        boolean deleteAcspProfile = testDataService.deleteAcspProfileData(acspProfileId);
+
+        if (deleteAcspProfile) {
+            LOG.info("Acsp Profile Deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Acsp Profile Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
     }
 
     @PostMapping("/internal/associations")

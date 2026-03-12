@@ -10,6 +10,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
+import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsData;
 import uk.gov.companieshouse.api.testdata.model.rest.AdminPermissionsSpec;
 import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
@@ -240,6 +241,23 @@ public interface TestDataService {
      */
     Optional<AcspProfile> getAcspProfileData(String acspNumber)
             throws NoDataFoundException;
+
+    /**
+     * Creates a new acsp profile test data based on the provided acsp profile specifications.
+     *
+     * @param acspProfileSpec the specifications of the acsp profile to create
+     * @return the created acsp profile' test data
+     * @throws DataException if there is an error during user creation
+     */
+    AcspProfileData createAcspProfileData(AcspProfileSpec acspProfileSpec) throws DataException;
+
+    /**
+     * Deletes an acsp profile' test data by their acsp profile id.
+     *
+     * @param acspProfileId the ID of the acsp profile to delete
+     * @throws DataException if there is an error during user deletion
+     */
+    boolean deleteAcspProfileData(String acspProfileId) throws DataException;
 
     /**
      * Adds a new transaction and acsp application test data based on the provided specifications.
