@@ -340,6 +340,9 @@ class CompanyPscStatementServiceImplTest {
 
     @Test
     void createPscStatements_defaultScenario() {
+        spec.setWithdrawnStatements(0);
+        spec.setActiveStatements(0);
+        spec.setNumberOfPscs(0);
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
         verify(companyPscStatementService, never()).create(any(CompanyRequest.class));

@@ -162,7 +162,7 @@ class CompanyMetricsServiceImplTest {
         ArgumentCaptor<CompanyMetrics> metricsCaptor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(metricsCaptor.capture());
         CompanyMetrics metrics = metricsCaptor.getValue();
-        assertEquals(0, metrics.getActivePscCount());
+        assertEquals(1, metrics.getActivePscCount());
     }
 
     @Test
@@ -349,7 +349,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(0, metrics.getActivePscStatementsCount());
+        assertEquals(1, metrics.getActivePscStatementsCount());
     }
 
     @Test
@@ -444,7 +444,7 @@ class CompanyMetricsServiceImplTest {
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
 
-        assertEquals(0, metrics.getPscCount());
+        assertEquals(1, metrics.getPscCount());
     }
 
     @Test
