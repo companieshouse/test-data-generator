@@ -95,7 +95,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
              spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
         }
 
-        if (shouldReturnNullForExcludedCompanies(spec)) {
+        if (shouldReturnNullForCompaniesThatDoNotNeedPscs(spec)) {
             LOG.info("Company type does not require a PSC. No PSCs will be created.");
             spec.setNumberOfPscs(0);
             return null;
@@ -120,7 +120,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return createPscsBasedOnCompanyType(spec, numberOfPsc);
     }
 
-    private boolean shouldReturnNullForExcludedCompanies(CompanyRequest spec) {
+    private boolean shouldReturnNullForCompaniesThatDoNotNeedPscs(CompanyRequest spec) {
         if (spec == null || spec.getCompanyType() == null) {
             return false;
         }
