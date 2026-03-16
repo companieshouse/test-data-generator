@@ -191,9 +191,13 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         do {
-            spec.setCompanyNumber(companyNumberPrefix
-                    + randomService
-                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+            if (spec.getCompanyNumber() == null || spec.getCompanyNumber().trim().isEmpty()) {
+                spec.setCompanyNumber(companyNumberPrefix
+                        + randomService
+                        .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+            } else {
+                spec.setCompanyNumber(spec.getCompanyNumber());
+            }
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
 
         spec.setCompanyWithPopulatedStructureOnly(false);

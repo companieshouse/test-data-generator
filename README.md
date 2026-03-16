@@ -42,6 +42,7 @@ In order to use the generator, there are different possible endpoints that can b
 
 #### Creating test companies
 - POST: Sending a POST request to `{Base URL}/test-data/company` will generate a new test company and accompanying Authcode. The request body can include an optional `CompanySpec` parameter to customise the generated company.
+  - `company_number`: This is optional, if we dont specify it will auto company. This is added only for internal company creation and for testing purpose where the company number is mapped in the CH Mock service.
   - `jurisdiction`: The jurisdiction of the company (e.g., `england_wales`, `scotland`, `northern_ireland`, `united-kingdom`). Defaults to `england_wales`.
   - `company_status`: The status of the company (e.g., `active`, `dissolved`, `administration`). Defaults to `active`.
   - `type`: The type of the company (e.g., `ltd`, `plc`). Defaults to `ltd`.
@@ -82,6 +83,7 @@ In order to use the generator, there are different possible endpoints that can b
   - `alphabetical_search`: Boolean value to determine if the company is included in the alphabetical search. Defaults to false.
   - `advanced_search`: Boolean value to determine if the company is included in the advanced search. Defaults to false.
 
+  - A usage example for creating `company-number` looks like this: `{"company_number": "12345678"}`, this will create an company with hardcoded values
   - A usage example for creating `registered-overseas-entity` looks like this: `{"registered-overseas-entity}`, this will create an overseas entity with hardcoded values
   - A usage example for creating `registered-overseas-entity` with a user specified legal form looks like this: `{"registered-overseas-entity", "foreign_company_legal_form": "legal-form-123"}`, this will create an overseas entity with specified legal form or it will default to `Plc` when not provided.
   - A usage example for creating `oversea-company` looks like this: `{"overseas-company}`, this will create an overseas entity with hardcoded values
