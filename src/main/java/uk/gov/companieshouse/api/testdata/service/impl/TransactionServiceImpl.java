@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
 import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 
 @Service
-public class TransactionServiceImpl implements DataService<TransactionsData, TransactionsSpec>  {
+public class TransactionServiceImpl implements DataService<TransactionsResponse, TransactionsRequest>  {
 
     @Autowired
     private TransactionsRepository repository;
@@ -28,7 +28,7 @@ public class TransactionServiceImpl implements DataService<TransactionsData, Tra
     @Autowired
     private RandomService randomService;
 
-    public TransactionsData create(TransactionsSpec txnSpec) throws DataException {
+    public TransactionsResponse create(TransactionsRequest txnSpec) throws DataException {
         var randomId = randomService.getTransactionId();
         final var txn = new Transactions();
         final var acspApplication = new AcspApplication();
@@ -56,7 +56,7 @@ public class TransactionServiceImpl implements DataService<TransactionsData, Tra
         acspApplication.setSelf("/transactions/"+randomId+"/authorised-corporate-service-provider-applications/"+acspApplicationId);
         repository.save(txn);
         acsprepository.save(acspApplication);
-        return new TransactionsData(txn.getId(), txn.getEmail(), txn.getUserId(), txn.getReference(), txn.getResumeUri(), txn.getStatus(), acspApplicationId);
+        return new TransactionsResponse(txn.getId(), txn.getEmail(), txn.getUserId(), txn.getReference(), txn.getResumeUri(), txn.getStatus(), acspApplicationId);
     }
 
     @Override

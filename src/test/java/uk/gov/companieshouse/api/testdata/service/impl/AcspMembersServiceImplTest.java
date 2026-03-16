@@ -26,8 +26,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -46,7 +46,7 @@ class AcspMembersServiceImplTest {
 
     @Test
     void createAcspMember() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setAcspNumber("acspNumber");
         spec.setUserId("userId");
         spec.setUserRole("role");
@@ -60,7 +60,7 @@ class AcspMembersServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag");
 
         var stringId = id.toString();
-        AcspMembersData result = service.create(spec);
+        AcspMembersResponse result = service.create(spec);
 
         assertNotNull(result);
         assertEquals(stringId, result.getAcspMemberId());
@@ -86,7 +86,7 @@ class AcspMembersServiceImplTest {
 
     @Test
     void createAcspMemberWithDefaultValues() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setAcspNumber("acspNumber");
         spec.setUserId("userId");
 
@@ -98,7 +98,7 @@ class AcspMembersServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag");
 
         var stringId = id.toString();
-        AcspMembersData result = service.create(spec);
+        AcspMembersResponse result = service.create(spec);
 
         assertNotNull(result);
         assertEquals(stringId, result.getAcspMemberId());

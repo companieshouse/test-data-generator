@@ -25,8 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -50,9 +50,10 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationSuccess() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        DisqualificationsRequest disqSpec = new DisqualificationsRequest();
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
@@ -75,11 +76,12 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createMultipleDisqualifications() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        DisqualificationsSpec disqSpec1 = new DisqualificationsSpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        DisqualificationsRequest disqSpec1 = new DisqualificationsRequest();
         disqSpec1.setCorporateOfficer(false);
-        DisqualificationsSpec disqSpec2 = new DisqualificationsSpec();
+        DisqualificationsRequest disqSpec2 = new DisqualificationsRequest();
         disqSpec2.setCorporateOfficer(true);
         spec.setDisqualifiedOfficers(List.of(disqSpec1, disqSpec2));
 
@@ -102,9 +104,10 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationCorporateOfficer() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        DisqualificationsRequest disqSpec = new DisqualificationsRequest();
         disqSpec.setCorporateOfficer(true);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
@@ -127,8 +130,9 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationNoSpecCreatesDefault() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         Disqualifications savedEntity = new Disqualifications();
         savedEntity.setId(ID);
@@ -151,7 +155,7 @@ class DisqualificationsServiceImplTest {
         List<Disqualifications> result = service.getDisqualifications(COMPANY_NUMBER);
 
         assertEquals(1, result.size());
-        assertEquals(ID, result.get(0).getId());
+        assertEquals(ID, result.getFirst().getId());
     }
 
     @Test
@@ -197,11 +201,36 @@ class DisqualificationsServiceImplTest {
         verify(repository, never()).delete(any());
 
         // Case 2: Optional contains empty list
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(Collections.emptyList()));
+        when(repository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(Collections.emptyList()));
 
         boolean resultEmptyList = service.delete(COMPANY_NUMBER);
 
         assertFalse(resultEmptyList);
         verify(repository, never()).delete(any());
+    }
+
+    @Test
+    void createReturnsUnsavedDisqualificationWhenCompanyWithDataStructureIsTrue() throws DataException {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(true);
+        DisqualificationsRequest disqSpec = new DisqualificationsRequest();
+        disqSpec.setCorporateOfficer(false);
+        spec.setDisqualifiedOfficers(List.of(disqSpec));
+
+        when(randomService.getString(24)).thenReturn("D12345678");
+        when(randomService.getNumber(10)).thenReturn(1234567890L);
+        when(randomService.getEtag()).thenReturn("etag");
+        when(randomService.getString(10)).thenReturn("officerId");
+        when(randomService.getString(8)).thenReturn("officerRaw");
+        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+        when(addressService.getAddress(any())).thenReturn(null);
+
+        Disqualifications result = service.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
+        verify(repository, never()).save(any());
     }
 }

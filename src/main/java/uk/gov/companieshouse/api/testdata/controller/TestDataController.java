@@ -24,7 +24,38 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
+import uk.gov.companieshouse.api.testdata.model.rest.InternalCompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -53,15 +84,15 @@ public class TestDataController {
     private static final String NEW_COMPANY_CREATED = "New company created";
 
     @Autowired
-    private VerifiedIdentityService<IdentityVerificationData> verifiedIdentityService;
+    private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
 
     /* Public endpoint to create company data */
     @PostMapping("/company")
-    public ResponseEntity<CompanyData> createCompany(
-            @Valid @RequestBody(required = false) PublicCompanySpec request) throws DataException {
+    public ResponseEntity<CompanyProfileResponse> createCompany(
+            @Valid @RequestBody(required = false) PublicCompanyRequest request) throws DataException {
 
-        Optional<PublicCompanySpec> optionalRequest = Optional.ofNullable(request);
-        PublicCompanySpec spec = optionalRequest.orElse(new PublicCompanySpec());
+        Optional<PublicCompanyRequest> optionalRequest = Optional.ofNullable(request);
+        PublicCompanyRequest spec = optionalRequest.orElse(new PublicCompanyRequest());
 
         var createdCompany = testDataService.createPublicCompanyData(spec);
 
@@ -74,13 +105,13 @@ public class TestDataController {
 
     /* Internal endpoint to create company data */
     @PostMapping("/internal/company")
-    public ResponseEntity<CompanyData> createCompanyInternal(
-            @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+    public ResponseEntity<CompanyProfileResponse> createCompanyInternal(
+            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
 
-        Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
-        CompanySpec spec = optionalRequest.orElse(new CompanySpec());
+        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
+        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
@@ -108,7 +139,7 @@ public class TestDataController {
     }
 
     @GetMapping("internal/company/authcode")
-    public ResponseEntity<CompanyAuthCodeData> findOrCreateCompanyAuthCode(
+    public ResponseEntity<CompanyAuthCodeResponse> findOrCreateCompanyAuthCode(
             @RequestParam("companyNumber") final String companyNumber)
             throws DataException, NoDataFoundException {
 
@@ -117,12 +148,12 @@ public class TestDataController {
         }
 
         var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
-        var defaultAuthCode = new CompanyAuthCodeData(authCode.getAuthCode());
+        var defaultAuthCode = new CompanyAuthCodeResponse(authCode.getAuthCode());
         return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
     }
 
     @PostMapping("/internal/user")
-    public ResponseEntity<UserData> createUser(@Valid @RequestBody() UserSpec request)
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody() UserRequest request)
             throws DataException {
         var createdUser = testDataService.createUserData(request);
         Map<String, Object> data = new HashMap<>();
@@ -133,8 +164,8 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/admin-permissions")
-    public ResponseEntity<AdminPermissionsData> createAdminPermissions(
-            @Valid @RequestBody AdminPermissionsSpec request) throws DataException {
+    public ResponseEntity<AdminPermissionsResponse> createAdminPermissions(
+            @Valid @RequestBody AdminPermissionsRequest request) throws DataException {
 
         var createdAdminPermissions = testDataService.createAdminPermissionsData(request);
 
@@ -180,8 +211,8 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/acsp-members")
-    public ResponseEntity<AcspMembersData> createAcspMember(
-            @Valid @RequestBody AcspMembersSpec request) throws DataException {
+    public ResponseEntity<AcspMembersResponse> createAcspMember(
+            @Valid @RequestBody AcspMembersRequest request) throws DataException {
 
         var createdAcspMember = testDataService.createAcspMembersData(request);
 
@@ -192,8 +223,8 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/certificates")
-    public ResponseEntity<CertificatesData> createCertificates(
-            @Valid @RequestBody CertificatesSpec request) throws DataException {
+    public ResponseEntity<CertificatesResponse> createCertificates(
+            @Valid @RequestBody CertificatesRequest request) throws DataException {
 
         var createdCertificates = testDataService.createCertificatesData(request);
 
@@ -204,8 +235,8 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/certified-copies")
-    public ResponseEntity<CertificatesData> createCertifiedCopies(
-            @Valid @RequestBody CertifiedCopiesSpec request) throws DataException {
+    public ResponseEntity<CertificatesResponse> createCertifiedCopies(
+            @Valid @RequestBody CertifiedCopiesRequest request) throws DataException {
 
         var createdCertifiedCopies = testDataService.createCertifiedCopiesData(request);
 
@@ -217,8 +248,8 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/missing-image-deliveries")
-    public ResponseEntity<CertificatesData> createMissingImageDeliveries(
-            @Valid @RequestBody MissingImageDeliveriesSpec request) throws DataException {
+    public ResponseEntity<CertificatesResponse> createMissingImageDeliveries(
+            @Valid @RequestBody MissingImageDeliveriesRequest request) throws DataException {
 
         var createdMissingImageDeliveries =
                 testDataService.createMissingImageDeliveriesData(request);
@@ -326,7 +357,7 @@ public class TestDataController {
 
     @PostMapping("/internal/penalties")
     public ResponseEntity<Object> createPenalty(
-            @Valid @RequestBody PenaltySpec request) throws DataException {
+            @Valid @RequestBody PenaltyRequest request) throws DataException {
         LOG.info("Creating new account penalties for company code: " + request.getCompanyCode()
                 + " and customer code: " + request.getCustomerCode());
 
@@ -347,7 +378,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/penalties/{id}")
-    public ResponseEntity<AccountPenaltiesData> getAccountPenalties(
+    public ResponseEntity<AccountPenaltiesResponse> getAccountPenalties(
             @PathVariable("id") String id,
             @RequestParam(name = "transactionReference", required = false)
             String transactionReference) throws NoDataFoundException {
@@ -364,7 +395,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/penalties/query")
-    public ResponseEntity<AccountPenaltiesData> getAccountPenaltiesByCustomerCodeAndCompanyCode(
+    public ResponseEntity<AccountPenaltiesResponse> getAccountPenaltiesByCustomerCodeAndCompanyCode(
             @RequestParam(name = "customerCode") String customerCode,
             @RequestParam(name = "companyCode") String companyCode) throws NoDataFoundException {
 
@@ -375,7 +406,7 @@ public class TestDataController {
     }
 
     @PutMapping("/internal/penalties/{penaltyRef}")
-    public ResponseEntity<AccountPenaltiesData> updateAccountPenalties(
+    public ResponseEntity<AccountPenaltiesResponse> updateAccountPenalties(
             @PathVariable("penaltyRef") String penaltyRef,
             @Valid @RequestBody UpdateAccountPenaltiesRequest request)
             throws NoDataFoundException, DataException {
@@ -390,7 +421,7 @@ public class TestDataController {
     @DeleteMapping("/internal/penalties/{id}")
     public ResponseEntity<Void> deleteAccountPenalties(
             @PathVariable("id") String id,
-            @RequestBody(required = false) PenaltyRequest request)
+            @RequestBody(required = false) PenaltyDeleteRequest request)
             throws DataException, NoDataFoundException {
 
         if (request == null || request.getTransactionReference() == null) {
@@ -402,7 +433,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/postcodes")
-    public ResponseEntity<PostcodesData> getPostcode(
+    public ResponseEntity<PostcodesResponse> getPostcode(
             @RequestParam(value = "country") String country) throws DataException {
         LOG.info("Retrieving postcode for country: " + country);
         var postcode = testDataService.getPostcodes(country);
@@ -413,9 +444,19 @@ public class TestDataController {
         return new ResponseEntity<>(postcode, HttpStatus.OK);
     }
 
+    @GetMapping("/internal/acsp-profile/{acspNumber}")
+    public ResponseEntity<Optional<AcspProfile>> getAcspProfile(
+            @PathVariable String acspNumber) throws NoDataFoundException {
+
+        Optional<AcspProfile> acspProfile =
+                testDataService.getAcspProfileData(acspNumber);
+
+        return new ResponseEntity<>(acspProfile, HttpStatus.OK);
+    }
+
     @PostMapping("/internal/associations")
-    public ResponseEntity<UserCompanyAssociationData> createAssociation(
-            @Valid @RequestBody UserCompanyAssociationSpec request) throws DataException {
+    public ResponseEntity<UserCompanyAssociationResponse> createAssociation(
+            @Valid @RequestBody UserCompanyAssociationRequest request) throws DataException {
         var createdAssociation =
                 testDataService.createUserCompanyAssociationData(request);
 
@@ -452,13 +493,13 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/transactions")
-    public ResponseEntity<TransactionsData> createTransaction(
-            @Valid @RequestBody TransactionsSpec request) throws DataException {
+    public ResponseEntity<TransactionsResponse> createTransaction(
+            @Valid @RequestBody TransactionsRequest request) throws DataException {
 
-        Optional<TransactionsSpec> optionalRequest = Optional.ofNullable(request);
-        TransactionsSpec spec = optionalRequest.orElse(new TransactionsSpec());
+        Optional<TransactionsRequest> optionalRequest = Optional.ofNullable(request);
+        TransactionsRequest spec = optionalRequest.orElse(new TransactionsRequest());
 
-        TransactionsData createdTransaction = testDataService.createTransactionData(spec);
+        TransactionsResponse createdTransaction = testDataService.createTransactionData(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put("_id", createdTransaction.getId());
@@ -486,8 +527,8 @@ public class TestDataController {
     }
 
     @PostMapping("/internal/combined-sic-activities")
-    public ResponseEntity<CombinedSicActivitiesData> createCombinedSicActivities(
-            @Valid @RequestBody CombinedSicActivitiesSpec request) throws DataException {
+    public ResponseEntity<CombinedSicActivitiesResponse> createCombinedSicActivities(
+            @Valid @RequestBody CombinedSicActivitiesRequest request) throws DataException {
 
         var createdSicCodeKeyword = testDataService.createCombinedSicActivitiesData(request);
 
@@ -514,7 +555,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/identity/verification")
-    public ResponseEntity<IdentityVerificationData> getIdentityVerification(
+    public ResponseEntity<IdentityVerificationResponse> getIdentityVerification(
             @RequestParam("email") String email)
             throws DataException, NoDataFoundException {
 
@@ -526,13 +567,36 @@ public class TestDataController {
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
+    @GetMapping("/internal/get-populated-company-structure")
+    public ResponseEntity<PopulatedCompanyDetailsResponse> getCompanyWithPopulatedStructure(
+            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
+
+        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
+        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
+
+        var companyData = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
+        return new ResponseEntity<>(companyData, HttpStatus.OK);
+    }
+
+    @PostMapping("/internal/create-company-with-populated-structure")
+    public ResponseEntity<CompanyProfileResponse> createCompanyWithPopulatedStructure(
+            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureRequest request) throws DataException {
+        Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
+        CompanyWithPopulatedStructureRequest spec = optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
+        var createdCompany = testDataService.createCompanyWithStructure(spec);
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
+        LOG.info(NEW_COMPANY_CREATED, data);
+        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
+    }
+
     /* Internal endpoint to create company data */
     @PostMapping("/internal/company-profile")
     public ResponseEntity<InternalCompanyData> createCompanyCompanyInternal(
-            @Valid @RequestBody(required = false) CompanySpec request) throws DataException {
+            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
 
-        Optional<CompanySpec> optionalRequest = Optional.ofNullable(request);
-        CompanySpec spec = optionalRequest.orElse(new CompanySpec());
+        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
+        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
 
         InternalCompanyData createdCompany = testDataService.createInternalCompanyData(spec);
 
@@ -543,7 +607,6 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
-    @DeleteMapping("/internal/company-profile/{companyNumber}")
     public ResponseEntity<Void> deleteInternalCompany(
             @PathVariable("companyNumber") String companyNumber,
             @RequestParam("deltaAt") String deltaAt)

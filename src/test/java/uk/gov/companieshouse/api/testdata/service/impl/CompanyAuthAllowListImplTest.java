@@ -20,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthAllowList;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthAllowListResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthAllowListRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -40,12 +40,12 @@ class CompanyAuthAllowListImplTest {
 
     @Test
     void createCompanyAuthAllowList() throws DataException {
-        CompanyAuthAllowListSpec spec = new CompanyAuthAllowListSpec();
+        CompanyAuthAllowListRequest spec = new CompanyAuthAllowListRequest();
         spec.setEmailAddress("test@example.com");
 
         when(randomService.getString(24)).thenReturn(randomId);
 
-        CompanyAuthAllowListData result = companyAuthAllowListImpl.create(spec);
+        CompanyAuthAllowListResponse result = companyAuthAllowListImpl.create(spec);
 
         assertNotNull(result);
         assertEquals(randomId, result.getId());

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,8 +29,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -49,7 +50,7 @@ class CompanyRegistersServiceImplTest {
     @InjectMocks
     private CompanyRegistersServiceImpl service;
 
-    private CompanySpec companySpec;
+    private CompanyRequest companySpec;
 
     private static final String DIRECTORS_TEXT = "directors";
     private static final String DIRECTORS_REGISTER_TYPE = "directors_register";
@@ -100,7 +101,7 @@ class CompanyRegistersServiceImplTest {
     @Test
     void testCreateCompanyRegistersWithMultipleRegisters() throws DataException {
         setRegister(DIRECTORS_TEXT, PUBLIC_REGISTER);
-        RegistersSpec secretariesRegister = new RegistersSpec();
+        RegistersRequest secretariesRegister = new RegistersRequest();
         secretariesRegister.setRegisterType("secretaries");
         secretariesRegister.setRegisterMovedTo("Companies House");
 
@@ -282,6 +283,27 @@ class CompanyRegistersServiceImplTest {
         verify(filingHistoryRepository, times(1)).findAllByCompanyNumber(COMPANY_NUMBER);
     }
 
+    @Test
+    void createReturnsUnsavedRegistersWhenCompanyWithDataStructureIsTrue() throws DataException {
+        companySpec = new CompanyRequest();
+        companySpec.setCompanyNumber(COMPANY_NUMBER);
+        RegistersRequest register = new RegistersRequest();
+        register.setRegisterType(DIRECTORS_TEXT);
+        register.setRegisterMovedTo(PUBLIC_REGISTER);
+        companySpec.setRegisters(List.of(register));
+        companySpec.setCompanyWithPopulatedStructureOnly(true);
+
+        FilingHistory filingHistory = new FilingHistory();
+        filingHistory.setId("filing-history-id");
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(List.of(filingHistory)));
+
+        CompanyRegisters result = service.create(companySpec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        verify(repository, never()).save(any());
+    }
 
     private void setRegister(String registerType, String registerMovedTo) {
         setCompanySpec(registerType, registerMovedTo);
@@ -291,9 +313,10 @@ class CompanyRegistersServiceImplTest {
     }
 
     private void setCompanySpec(String registerType, String registerMovedTo) {
-        companySpec = new CompanySpec();
+        companySpec = new CompanyRequest();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
-        RegistersSpec register = new RegistersSpec();
+        companySpec.setCompanyWithPopulatedStructureOnly(false);
+        RegistersRequest register = new RegistersRequest();
         register.setRegisterType(registerType);
         register.setRegisterMovedTo(registerMovedTo);
         companySpec.setRegisters(List.of(register));

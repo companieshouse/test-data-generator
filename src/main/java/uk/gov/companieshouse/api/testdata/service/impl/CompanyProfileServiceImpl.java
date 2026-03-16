@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,16 +15,14 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
-import uk.gov.companieshouse.api.testdata.model.dto.AccountParameters;
-import uk.gov.companieshouse.api.testdata.model.dto.CompanyDetailsParameters;
-import uk.gov.companieshouse.api.testdata.model.dto.DateParameters;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -80,9 +80,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private boolean isCompanyTypeHasNoFilingHistory = true;
 
     @Override
-    public CompanyProfile create(CompanySpec spec) {
+    public CompanyProfile create(CompanyRequest spec) {
         final String companyNumber = spec.getCompanyNumber();
-        final Jurisdiction jurisdiction = spec.getJurisdiction();
+        final JurisdictionType jurisdiction = spec.getJurisdiction();
         final CompanyType companyType = spec.getCompanyType();
         final String subType = spec.getSubType();
         final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
@@ -91,37 +91,46 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final String accountsDueStatus = spec.getAccountsDueStatus();
         final Boolean registeredOfficeIsInDispute = spec.getRegisteredOfficeIsInDispute();
 
-        var accountParams = new AccountParameters(accountsDueStatus, randomService);
-        var dateParams = new DateParameters(accountParams.getAccountingReferenceDate());
-        var companyParams = new CompanyDetailsParameters(
-                companyType, hasSuperSecurePscs, companyStatus, subType,
-                companyStatusDetail, registeredOfficeIsInDispute);
+        final LocalDate accountingReferenceDate = resolveAccountingReferenceDate(accountsDueStatus);
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
-            return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
+            return createOverseasEntity(companyNumber, jurisdiction, spec, accountingReferenceDate,
                     OVERSEAS_ENTITY_TYPE, companyType, registeredOfficeIsInDispute);
         } else if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            return createOverseasEntity(companyNumber, jurisdiction, spec, dateParams,
+            return createOverseasEntity(companyNumber, jurisdiction, spec, accountingReferenceDate,
                     OVERSEA_COMPANY_TYPE, companyType, registeredOfficeIsInDispute);
         } else {
             return createDefaultCompanyProfile(companyNumber, jurisdiction,
-                    spec, dateParams, companyParams, accountParams);
+                    spec, accountingReferenceDate, companyType, hasSuperSecurePscs, companyStatus,
+                    subType, companyStatusDetail, registeredOfficeIsInDispute, accountsDueStatus);
         }
     }
 
     private CompanyProfile createDefaultCompanyProfile(String companyNumber,
-                                                       Jurisdiction jurisdiction,
-                                                       CompanySpec spec,
-                                                       DateParameters dateParams,
-                                                       CompanyDetailsParameters companyParams,
-                                                       AccountParameters accountParams) {
+                                                       JurisdictionType jurisdiction,
+                                                       CompanyRequest spec,
+                                                       LocalDate accountingReferenceDate,
+                                                       CompanyType companyType,
+                                                       Boolean hasSuperSecurePscs,
+                                                       String companyStatus,
+                                                       String subType,
+                                                       String companyStatusDetail,
+                                                       Boolean registeredOfficeIsInDispute,
+                                                       String accountsDueStatus) {
         LOG.info("Creating a default CompanyProfile. " + companyNumber);
+
+        final Instant dateOneYearAgo = dateOneYearAgo(accountingReferenceDate);
+        final Instant dateNow = dateNow(accountingReferenceDate);
+        final Instant dateInOneYear = dateInOneYear(accountingReferenceDate);
+        final Instant dateInOneYearTwoWeeks = dateInOneYearTwoWeeks(accountingReferenceDate);
+        final Instant dateInOneYearNineMonths = dateInOneYearNineMonths(accountingReferenceDate);
+        final Instant dateInTwoYear = dateInTwoYear(accountingReferenceDate);
+        final Instant dateInTwoYearTwoWeeks = dateInTwoYearTwoWeeks(accountingReferenceDate);
 
         CompanyProfile profile = new CompanyProfile();
         profile.setId(companyNumber);
-        isCompanyTypeHasNoFilingHistory = hasNoFilingHistory(companyParams.getCompanyType());
-        String companyTypeValue = companyParams.getCompanyType()
-                != null ? companyParams.getCompanyType().getValue() : "ltd";
+        isCompanyTypeHasNoFilingHistory = hasNoFilingHistory(companyType);
+        String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
         setCompanyHasRegisters(spec);
         profile.setCompanyNumber(companyNumber);
         String nonJurisdictionType = (jurisdiction != null)
@@ -130,22 +139,22 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                 ? createLinkForSelf(companyNumber) : createLinks(companyNumber));
 
         var accounts = profile.getAccounts();
-        accounts.setNextDue(dateParams.getDateInOneYearNineMonths());
-        accounts.setPeriodStart(dateParams.getDateNow());
-        accounts.setPeriodEnd(dateParams.getDateInOneYear());
-        accounts.setNextAccountsDueOn(dateParams.getDateInOneYearNineMonths());
+        accounts.setNextDue(dateInOneYearNineMonths);
+        accounts.setPeriodStart(dateNow);
+        accounts.setPeriodEnd(dateInOneYear);
+        accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
         accounts.setNextAccountsOverdue(false);
-        accounts.setNextMadeUpTo(dateParams.getDateInOneYear());
+        accounts.setNextMadeUpTo(dateInOneYear);
         accounts.setAccountingReferenceDateDay(
-                String.valueOf(dateParams.getAccountingReferenceDate().getDayOfMonth()));
+                String.valueOf(accountingReferenceDate.getDayOfMonth()));
         accounts.setAccountingReferenceDateMonth(
-                String.valueOf(dateParams.getAccountingReferenceDate().getMonthValue()));
+                String.valueOf(accountingReferenceDate.getMonthValue()));
 
-        profile.setDateOfCreation(dateParams.getDateOneYearAgo());
+        profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(companyTypeValue);
         profile.setUndeliverableRegisteredOfficeAddress(BooleanUtils.isTrue(spec.getUndeliverableRegisteredOfficeAddress()));
 
-        profile.setHasSuperSecurePscs(BooleanUtils.isTrue(companyParams.getHasSuperSecurePscs()));
+        profile.setHasSuperSecurePscs(BooleanUtils.isTrue(hasSuperSecurePscs));
         if (spec.getCompanyName() != null) {
             profile.setCompanyName(spec.getCompanyName() + " " + companyNumber);
         } else {
@@ -154,45 +163,52 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setSicCodes(Collections.singletonList("71200"));
 
         var confirmationStatement = profile.getConfirmationStatement();
-        if ("due-soon".equalsIgnoreCase(accountParams.getAccountsDueStatus())) {
-            confirmationStatement.setLastMadeUpTo(dateParams.getDateInOneYear());
-            confirmationStatement.setNextMadeUpTo(dateParams.getDateInTwoYear());
+        if ("due-soon".equalsIgnoreCase(accountsDueStatus)) {
+            confirmationStatement.setLastMadeUpTo(dateInOneYear);
+            confirmationStatement.setNextMadeUpTo(dateInTwoYear);
             confirmationStatement.setOverdue(false);
-            confirmationStatement.setNextDue(dateParams.getDateInTwoYearTwoWeeks());
+            confirmationStatement.setNextDue(dateInTwoYearTwoWeeks);
         } else {
-            confirmationStatement.setNextMadeUpTo(dateParams.getDateInOneYear());
+            confirmationStatement.setNextMadeUpTo(dateInOneYear);
             confirmationStatement.setOverdue(false);
-            confirmationStatement.setNextDue(dateParams.getDateInOneYearTwoWeeks());
+            confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
             setRegisteredOfficeAddressIsInDispute(profile,
-                    companyParams.getRegisteredOfficeIsInDispute());
+                    registeredOfficeIsInDispute);
         }
-        confirmationStatement.setNextMadeUpTo(dateParams.getDateInOneYear());
+        confirmationStatement.setNextMadeUpTo(dateInOneYear);
         confirmationStatement.setOverdue(false);
-        confirmationStatement.setNextDue(dateParams.getDateInOneYearTwoWeeks());
+        confirmationStatement.setNextDue(dateInOneYearTwoWeeks);
 
         setRegisteredOfficeAddressIsInDispute(profile,
-                companyParams.getRegisteredOfficeIsInDispute());
-        setCompanyStatus(profile, companyParams.getCompanyStatus(), companyTypeValue);
+                registeredOfficeIsInDispute);
+        setCompanyStatus(profile, companyStatus, companyTypeValue);
         profile.setHasInsolvencyHistory(
                 "dissolved".equals(Objects.requireNonNullElse(
-                        companyParams.getCompanyStatus(), "")));
+                        companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
         setJurisdictionAndAddress(profile, jurisdiction, nonJurisdictionType);
         profile.setHasCharges(false);
         profile.setCanFile(true);
-        setPartialDataOptions(profile, jurisdiction, companyParams.getCompanyType());
-        setSubType(profile, companyParams.getSubType());
-        setCompanyStatusDetail(profile, companyParams.getCompanyStatusDetail(), companyTypeValue);
+        setPartialDataOptions(profile, jurisdiction, companyType);
+        setSubType(profile, subType);
+        setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return profile;
+        }
         return repository.save(profile);
     }
 
     private OverseasEntity createOverseasEntity(String companyNumber,
-                                                Jurisdiction jurisdiction, CompanySpec spec,
-                                                DateParameters dateParams,
+                                                JurisdictionType jurisdiction, CompanyRequest spec,
+                                                LocalDate accountingReferenceDate,
                                                 String entityType, CompanyType companyType,
                                                 Boolean isRegisteredOfficeIsInDispute) {
         LOG.info("Creating " + entityType + " for " + companyNumber);
+        final Instant dateOneYearAgo = dateOneYearAgo(accountingReferenceDate);
+        final Instant dateNow = dateNow(accountingReferenceDate);
+        final Instant dateInOneYear = dateInOneYear(accountingReferenceDate);
+        final Instant dateInOneYearTwoWeeks = dateInOneYearTwoWeeks(accountingReferenceDate);
 
         var overseasEntity = new OverseasEntity();
         overseasEntity.setId(companyNumber);
@@ -211,11 +227,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setHasInsolvencyHistory(false);
         overseasEntity.setJurisdiction(jurisdiction.toString());
 
-        overseasEntity.setDateOfCreation(dateParams.getDateOneYearAgo());
+        overseasEntity.setDateOfCreation(dateOneYearAgo);
 
         // Confirmation Statement
-        overseasEntity.getConfirmationStatement().setNextMadeUpTo(dateParams.getDateInOneYear());
-        overseasEntity.getConfirmationStatement().setNextDue(dateParams.getDateInOneYearTwoWeeks());
+        overseasEntity.getConfirmationStatement().setNextMadeUpTo(dateInOneYear);
+        overseasEntity.getConfirmationStatement().setNextDue(dateInOneYearTwoWeeks);
         overseasEntity.getConfirmationStatement().setOverdue(false);
 
         // Company Details
@@ -278,29 +294,29 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         // Accounts
         OverseasEntity.IAccounts accounts = OverseasEntity.createAccounts();
         accounts.setOverdue(false);
-        accounts.setNextMadeUpTo(dateParams.getDateInOneYear());
-        accounts.setNextDue(dateParams.getDateInOneYearTwoWeeks());
+        accounts.setNextMadeUpTo(dateInOneYear);
+        accounts.setNextDue(dateInOneYearTwoWeeks);
 
         // Accounting Reference Date
-        var accountingReferenceDate = new OverseasEntity.AccountingReferenceDate();
-        accountingReferenceDate.setDay("9");
-        accountingReferenceDate.setMonth("9");
-        accounts.setAccountingReferenceDate(accountingReferenceDate);
+        var overseasAccountingReferenceDate = new OverseasEntity.AccountingReferenceDate();
+        overseasAccountingReferenceDate.setDay("9");
+        overseasAccountingReferenceDate.setMonth("9");
+        accounts.setAccountingReferenceDate(overseasAccountingReferenceDate);
 
         // Next Accounts
         var nextAccounts = new OverseasEntity.NextAccounts();
         nextAccounts.setOverdue(false);
-        nextAccounts.setDueOn(dateParams.getDateInOneYearTwoWeeks());
-        nextAccounts.setPeriodStartOn(dateParams.getDateNow());
-        nextAccounts.setPeriodEndOn(dateParams.getDateInOneYear());
+        nextAccounts.setDueOn(dateInOneYearTwoWeeks);
+        nextAccounts.setPeriodStartOn(dateNow);
+        nextAccounts.setPeriodEndOn(dateInOneYear);
         accounts.setNextAccounts(nextAccounts);
 
         // Last Accounts
         var lastAccounts = new OverseasEntity.LastAccounts();
         lastAccounts.setType("aa");
-        lastAccounts.setPeriodStartOn(dateParams.getDateOneYearAgo());
-        lastAccounts.setPeriodEndOn(dateParams.getDateNow());
-        lastAccounts.setMadeUpTo(dateParams.getDateInOneYear());
+        lastAccounts.setPeriodStartOn(dateOneYearAgo);
+        lastAccounts.setPeriodEndOn(dateNow);
+        lastAccounts.setMadeUpTo(dateInOneYear);
         accounts.setLastAccounts(lastAccounts);
 
         overseasEntity.setAccounts(accounts);
@@ -316,7 +332,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
 
         overseasEntity.setLinks(createOverseaLinks(
-                companyNumber, companyType, spec, jurisdiction, dateParams));
+                companyNumber, companyType, spec, jurisdiction, accountingReferenceDate));
+
+        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            return overseasEntity;
+        }
 
         repository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);
@@ -324,8 +344,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     protected String createUkEstablishment(String parentCompanyNumber,
-                                           Jurisdiction jurisdiction,
-                                           DateParameters dateParams) {
+                                           JurisdictionType jurisdiction,
+                                           LocalDate accountingReferenceDate) {
         String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
         LOG.info("Creating UK establishment for parent company " + parentCompanyNumber);
 
@@ -345,7 +365,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         ukEstablishment.setCompanyName(COMPANY_NAME_PREFIX
                 + ukEstablishmentNumber + COMPANY_NAME_SUFFIX);
-        ukEstablishment.setDateOfCreation(dateParams.getDateNow());
+        ukEstablishment.setDateOfCreation(dateNow(accountingReferenceDate));
         ukEstablishment.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
 
         ukEstablishment.setCompanyStatus("open");
@@ -365,7 +385,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
-            Jurisdiction companyJurisdiction) {
+            JurisdictionType companyJurisdiction) {
         Map<CompanyType, String> partialDataOptions = new HashMap<>();
         partialDataOptions.put(CompanyType.INVESTMENT_COMPANY_WITH_VARIABLE_CAPITAL,
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY);
@@ -374,7 +394,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         partialDataOptions.put(CompanyType.ROYAL_CHARTER, FULL_DATA_AVAILABLE_FROM_THE_COMPANY);
         partialDataOptions.put(CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL,
                 FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER);
-        if (Jurisdiction.NI.equals(companyJurisdiction)) {
+        if (JurisdictionType.NI.equals(companyJurisdiction)) {
             partialDataOptions.put(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY,
                     FULL_DATA_AVAILABLE_FROM_DEPARTMENT_OF_THE_ECONOMY);
         } else {
@@ -423,14 +443,15 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private Links createOverseaLinks(String companyNumber,
-                                     CompanyType companyType, CompanySpec spec,
-                                     Jurisdiction jurisdiction, DateParameters dateParams) {
+                                     CompanyType companyType, CompanyRequest spec,
+                                     JurisdictionType jurisdiction,
+                                     LocalDate accountingReferenceDate) {
         var links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)
                 && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
-            createUkEstablishment(companyNumber, jurisdiction, dateParams);
+            createUkEstablishment(companyNumber, jurisdiction, accountingReferenceDate);
             links.setUkEstablishments(LINK_STEM + companyNumber + "/uk-establishments");
         }
 
@@ -444,7 +465,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return links;
     }
 
-    private String checkNonJurisdictionTypes(Jurisdiction jurisdiction, String companyType) {
+    private String checkNonJurisdictionTypes(JurisdictionType jurisdiction, String companyType) {
         Set<String> noJurisdictionTypes = Set.of(
                 CompanyType.REGISTERED_SOCIETY_NON_JURISDICTIONAL.getValue(),
                 CompanyType.ROYAL_CHARTER.getValue(),
@@ -458,7 +479,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void setPartialDataOptions(CompanyProfile profile,
-                                       Jurisdiction jurisdiction,
+                                       JurisdictionType jurisdiction,
                                        CompanyType companyType) {
         Map<CompanyType, String> partialDataOptions = createPartialDataOptionsMap(jurisdiction);
         if (partialDataOptions.containsKey(companyType)) {
@@ -485,7 +506,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void setJurisdictionAndAddress(CompanyProfile profile,
-                                           Jurisdiction jurisdiction,
+                                           JurisdictionType jurisdiction,
                                            String nonJurisdictionType) {
         if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
             profile.setJurisdiction(jurisdiction.toString());
@@ -493,7 +514,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setCompanyHasRegisters(CompanySpec spec) {
+    private void setCompanyHasRegisters(CompanyRequest spec) {
         hasCompanyRegisters = spec.getRegisters() != null && !spec.getRegisters().isEmpty();
     }
 
@@ -555,5 +576,44 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             CompanyProfile profile, Boolean registeredOfficeIsInDispute) {
         profile.setRegisteredOfficeIsInDispute(Objects.requireNonNullElse(
                 registeredOfficeIsInDispute, false));
+    }
+
+    private LocalDate resolveAccountingReferenceDate(String accountsDueStatus) {
+        if (StringUtils.hasText(accountsDueStatus)) {
+            return randomService.generateAccountsDueDateByStatus(accountsDueStatus);
+        }
+        return LocalDate.now();
+    }
+
+    private Instant dateOneYearAgo(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate.minusYears(1));
+    }
+
+    private Instant dateNow(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate);
+    }
+
+    private Instant dateInOneYear(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate.plusYears(1));
+    }
+
+    private Instant dateInOneYearTwoWeeks(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate.plusYears(1).plusDays(14));
+    }
+
+    private Instant dateInOneYearNineMonths(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate.plusYears(1).plusMonths(9));
+    }
+
+    private Instant dateInTwoYear(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate.plusYears(2));
+    }
+
+    private Instant dateInTwoYearTwoWeeks(LocalDate accountingReferenceDate) {
+        return toUtcStartOfDay(accountingReferenceDate.plusYears(2).plusDays(14));
+    }
+
+    private Instant toUtcStartOfDay(LocalDate date) {
+        return date.atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 }

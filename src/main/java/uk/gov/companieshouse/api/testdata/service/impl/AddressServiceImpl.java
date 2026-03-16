@@ -2,7 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 
 @Service
@@ -78,7 +78,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public Address getAddress(Jurisdiction jurisdiction) {
+    public Address getAddress(JurisdictionType jurisdiction) {
         return switch (jurisdiction) {
             case ENGLAND_WALES, WALES -> ENGLAND_WALES_ADDRESS;
             case SCOTLAND -> SCOTLAND_ADDRESS;
@@ -91,7 +91,7 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public String getCountryOfResidence(Jurisdiction jurisdiction) {
+    public String getCountryOfResidence(JurisdictionType jurisdiction) {
         return switch (jurisdiction) {
             case ENGLAND_WALES, WALES -> "Wales";
             case SCOTLAND -> "Scotland";

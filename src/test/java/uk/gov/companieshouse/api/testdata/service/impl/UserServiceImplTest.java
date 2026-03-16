@@ -17,17 +17,16 @@ import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
-import uk.gov.companieshouse.api.testdata.model.rest.IdentityVerificationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserRoles;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.IdentityVerificationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.UserRoles;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,48 +88,48 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithoutRoles() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("hello@hello.com");
-        userSpec.setPassword("password");
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("hello@hello.com");
+        userRequest.setPassword("password");
 
         when(randomService.getString(23)).thenReturn(TEST_USER_ID);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        UserData userData = userServiceImpl.create(userSpec);
+        UserResponse userResponse = userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertCommonUserAssertions(userSpec, savedUser, userData, TEST_USER_ID);
+        assertCommonUserAssertions(userRequest, savedUser, userResponse, TEST_USER_ID);
         assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
 
     @Test
     void testCreateUserWithoutEmailsAndRoles() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
 
         when(randomService.getString(23)).thenReturn(TEST_USER_ID);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        UserData userData = userServiceImpl.create(userSpec);
+        UserResponse userResponse = userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
-        assertCommonUserAssertions(userSpec, savedUser, userData, TEST_USER_ID);
+        assertCommonUserAssertions(userRequest, savedUser, userResponse, TEST_USER_ID);
         assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
 
 
     @Test
     void testCreateUserWithInvalidEmail() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("invalid-email");
-        userSpec.setPassword("password");
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("invalid-email");
+        userRequest.setPassword("password");
 
-        Set<ConstraintViolation<UserSpec>> violations = validator.validate(userSpec);
+        Set<ConstraintViolation<UserRequest>> violations = validator.validate(userRequest);
         assertFalse(violations.isEmpty());
         assertEquals("email is not a valid email address",
                 violations.iterator().next().getMessage());
@@ -139,10 +138,10 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithValidRolesAndAdminPermissions() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("valid@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR", "CHS_ADMIN_SUPPORT_MEMBER"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("valid@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("CHS_ADMIN_SUPERVISOR", "CHS_ADMIN_SUPPORT_MEMBER"));
 
         when(randomService.getString(23)).thenReturn(TEST_USER_ID);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
@@ -157,7 +156,7 @@ class UserServiceImplTest {
         when(adminPermissionsRepository.findByGroupName(UserRoles.CHS_ADMIN_SUPPORT_MEMBER.getGroupName()))
                 .thenReturn(supportPerm);
 
-        UserData userData = userServiceImpl.create(userSpec);
+        UserResponse userResponse = userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -167,41 +166,41 @@ class UserServiceImplTest {
 
         assertEquals(expectedEntraGroupIds.size(), savedUser.getRoles().size());
         assertTrue(savedUser.getRoles().containsAll(expectedEntraGroupIds));
-        assertEquals(TEST_USER_ID, userData.getId());
+        assertEquals(TEST_USER_ID, userResponse.getId());
     }
 
     @Test
     void testCreateUserWithInvalidRoleNameThrowsException() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("invalidrole@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("NOT_A_ROLE"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("invalidrole@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("NOT_A_ROLE"));
 
         String generatedUserId = "invalidid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
 
-        DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userSpec));
+        DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userRequest));
         assertTrue(ex.getMessage().contains("Invalid role name: NOT_A_ROLE"));
         verify(userRepository, never()).save(any());
     }
 
     @Test
     void testCreateUserWithEmptyRolesList() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(new ArrayList<>());
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(new ArrayList<>());
 
         String generatedUserId = "randomised";
         when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        UserData userData = userServiceImpl.create(userSpec);
+        UserResponse userResponse = userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertCommonUserAssertions(userSpec, savedUser, userData, generatedUserId);
+        assertCommonUserAssertions(userRequest, savedUser, userResponse, generatedUserId);
         assertNull(savedUser.getRoles(), "User should have no roles assigned");
     }
 
@@ -236,7 +235,7 @@ class UserServiceImplTest {
 
     @Test
     void createUser_withAllFieldsAndRoles() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("test@domain.com");
         spec.setPassword("pass");
         spec.setIsAdmin(true);
@@ -249,7 +248,7 @@ class UserServiceImplTest {
         adminPermissions.setEntraGroupId("entra-group-id");
         when(adminPermissionsRepository.findByGroupName("chs admin supervisor")).thenReturn(adminPermissions);
 
-        UserData result = userServiceImpl.create(spec);
+        UserResponse result = userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -275,11 +274,11 @@ class UserServiceImplTest {
 
     @Test
     void createUser_withoutEmail_assignsGeneratedEmail() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setPassword("pass");
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserData result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -292,13 +291,13 @@ class UserServiceImplTest {
 
     @Test
     void createUser_withNullRoles_doesNotSetRoles() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("test@domain.com");
         spec.setPassword("pass");
         spec.setRoles(null);
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserData result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -309,13 +308,13 @@ class UserServiceImplTest {
 
     @Test
     void createUser_withEmptyRoles_doesNotSetRoles() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("test@domain.com");
         spec.setPassword("pass");
         spec.setRoles(List.of());
         when(randomService.getString(23)).thenReturn("RANDOMID");
 
-        UserData result = userServiceImpl.create(spec);
+        userServiceImpl.create(spec);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -326,7 +325,7 @@ class UserServiceImplTest {
 
     @Test
     void createUser_withIsAdminFalse_setsAdminUserFalse() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("test@domain.com");
         spec.setPassword("pass");
         spec.setIsAdmin(false);
@@ -343,7 +342,7 @@ class UserServiceImplTest {
 
     @Test
     void createUser_withIsAdminNull_setsAdminUserFalse() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("test@domain.com");
         spec.setPassword("pass");
         spec.setIsAdmin(null);
@@ -515,10 +514,10 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithMultipleRolesAndEntraGroupIds() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("multirole@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR", "CHS_ADMIN_SUPPORT_MEMBER", "CHS_ADMIN_BADOS_USER"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("multirole@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("CHS_ADMIN_SUPERVISOR", "CHS_ADMIN_SUPPORT_MEMBER", "CHS_ADMIN_BADOS_USER"));
 
         String generatedUserId = "multiroleid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
@@ -538,7 +537,7 @@ class UserServiceImplTest {
         when(adminPermissionsRepository.findByGroupName("chs admin bados user"))
                 .thenReturn(badosPerm);
 
-        UserData userData = userServiceImpl.create(userSpec);
+        UserResponse userResponse = userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -552,7 +551,7 @@ class UserServiceImplTest {
 
         assertEquals(expectedEntraGroupIds.size(), savedUser.getRoles().size());
         assertTrue(savedUser.getRoles().containsAll(expectedEntraGroupIds));
-        assertEquals(generatedUserId, userData.getId());
+        assertEquals(generatedUserId, userResponse.getId());
 
         verify(adminPermissionsRepository, times(1)).findByGroupName("chs admin supervisor");
         verify(adminPermissionsRepository, times(1)).findByGroupName("chs admin support member");
@@ -561,10 +560,10 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithRoleThatHasNullEntraGroupIdThrowsException() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("nullentra@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("nullentra@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
 
         String generatedUserId = "nullentraid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
@@ -577,7 +576,7 @@ class UserServiceImplTest {
                 .thenReturn(adminPermissions);
 
         DataException ex = assertThrows(DataException.class,
-                () -> userServiceImpl.create(userSpec));
+                () -> userServiceImpl.create(userRequest));
 
         assertTrue(ex.getMessage().contains("No entra_group_id found for group: chs admin supervisor"));
         verify(userRepository, never()).save(any());
@@ -585,10 +584,10 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithRoleThatHasEmptyEntraGroupIdThrowsException() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("emptyentra@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("emptyentra@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("CHS_ADMIN_SUPERVISOR"));
 
         String generatedUserId = "emptyentraid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
@@ -601,21 +600,21 @@ class UserServiceImplTest {
                 .thenReturn(adminPermissions);
 
         DataException ex = assertThrows(DataException.class,
-                () -> userServiceImpl.create(userSpec));
+                () -> userServiceImpl.create(userRequest));
 
         assertTrue(ex.getMessage().contains("No entra_group_id found for group: chs admin supervisor"));
         verify(userRepository, never()).save(any());
     }
 
     private void assertCommonUserAssertions(
-            UserSpec userSpec, User savedUser, UserData userData, String generatedUserId) {
+            UserRequest userRequest, User savedUser, UserResponse userResponse, String generatedUserId) {
         assertEquals(
-                userSpec.getPassword(),
+                userRequest.getPassword(),
                 savedUser.getPassword(),
                 "Password should match the one set in UserSpec");
         assertEquals(generatedUserId, savedUser.getId(), "User ID should match the generated ID");
-        String expectedEmail = userSpec.getEmail() != null ?
-                userSpec.getEmail() :
+        String expectedEmail = userRequest.getEmail() != null ?
+                userRequest.getEmail() :
                 "test-data-generated" + generatedUserId + "@chtesttdg.mailosaur.net";
         assertEquals(expectedEmail, savedUser.getEmail(), "Email should match");
 
@@ -632,14 +631,14 @@ class UserServiceImplTest {
                 true, savedUser.getDirectLoginPrivilege(), "Direct login privilege should be true");
         assertEquals(DATE_NOW, savedUser.getCreated(),
                 "Created date should be set to today's date");
-        assertEquals(generatedUserId, userData.getId(), "User ID should match the generated ID");
+        assertEquals(generatedUserId, userResponse.getId(), "User ID should match the generated ID");
         assertTrue(
-                userData.getEmail().contains(userSpec.getEmail() != null ? userSpec.getEmail()
+                userResponse.getEmail().contains(userRequest.getEmail() != null ? userRequest.getEmail()
                         : "test-data-generated"),
                 "Email in UserData should contain the correct prefix");
-        assertTrue(userData.getForename().contains("Forename"),
+        assertTrue(userResponse.getForename().contains("Forename"),
                 "Forename should contain 'Forename'");
-        assertTrue(userData.getSurname().contains("Surname"), "Surname should contain 'Surname'");
+        assertTrue(userResponse.getSurname().contains("Surname"), "Surname should contain 'Surname'");
         assertTrue(savedUser.getTestData(), "test data as true by default");
     }
 
@@ -725,16 +724,16 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithIsAdminTrue() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("admin@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setIsAdmin(true);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("admin@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setIsAdmin(true);
 
         String generatedUserId = "adminid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        userServiceImpl.create(userSpec);
+        userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -745,16 +744,16 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithIsAdminFalse() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("user@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setIsAdmin(false);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("user@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setIsAdmin(false);
 
         String generatedUserId = "userid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        userServiceImpl.create(userSpec);
+        userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -765,16 +764,16 @@ class UserServiceImplTest {
 
     @Test
     void testCreateUserWithIsAdminNull() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setEmail("nulladmin@hello.com");
-        userSpec.setPassword("password");
-        userSpec.setIsAdmin(null);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("nulladmin@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setIsAdmin(null);
 
         String generatedUserId = "nulladminid";
         when(randomService.getString(23)).thenReturn(generatedUserId);
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
 
-        userServiceImpl.create(userSpec);
+        userServiceImpl.create(userRequest);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
         verify(userRepository).save(userCaptor.capture());
@@ -785,10 +784,10 @@ class UserServiceImplTest {
 
     @Test
     void create_WithIdentityVerification_CreatesIdentityAndUvid() throws Exception {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource("TEST_SOURCE");
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -829,7 +828,7 @@ class UserServiceImplTest {
 
     @Test
     void create_WithoutIdentityVerification_DoesNotCreateIdentityOrUvid() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
         spec.setIdentityVerification(null);
@@ -846,7 +845,7 @@ class UserServiceImplTest {
 
     @Test
     void create_WithEmptyIdentityVerification_DoesNotCreateIdentityOrUvid() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
         spec.setIdentityVerification(new ArrayList<>());
@@ -863,10 +862,10 @@ class UserServiceImplTest {
 
     @Test
     void create_WithNullIvSpecItem_SkipsAndDoesNotCreate() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
-        spec.setIdentityVerification(java.util.Arrays.asList((IdentityVerificationSpec) null));
+        spec.setIdentityVerification(java.util.Arrays.asList((IdentityVerificationRequest) null));
 
         when(randomService.getString(23)).thenReturn("RANDOMID");
         when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
@@ -880,10 +879,10 @@ class UserServiceImplTest {
 
     @Test
     void create_WithNullVerificationSource_SkipsAndDoesNotCreate() throws DataException {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource(null);
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -899,10 +898,10 @@ class UserServiceImplTest {
 
     @Test
     void testGenerateUvid_returnsCorrectPattern_noReflection() throws Exception {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource("TEST_SOURCE");
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -926,10 +925,10 @@ class UserServiceImplTest {
 
     @Test
     void testGenerateIdentityId_returnsValidUUID_noReflection() throws Exception {
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setEmail("user@example.com");
         spec.setPassword("password");
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource("TEST_SOURCE");
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -954,7 +953,7 @@ class UserServiceImplTest {
     @Test
     void processIdentityVerifications_withNullList_doesNothing() {
         User user = new User();
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setIdentityVerification(null);
 
         userServiceImpl.processIdentityVerifications(user, spec);
@@ -966,7 +965,7 @@ class UserServiceImplTest {
     @Test
     void processIdentityVerifications_withEmptyList_doesNothing() {
         User user = new User();
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setIdentityVerification(List.of());
 
         userServiceImpl.processIdentityVerifications(user, spec);
@@ -978,8 +977,8 @@ class UserServiceImplTest {
     @Test
     void processIdentityVerifications_withNullItemInList_skipsItem() {
         User user = new User();
-        UserSpec spec = new UserSpec();
-        spec.setIdentityVerification(Arrays.asList((IdentityVerificationSpec) null));
+        UserRequest spec = new UserRequest();
+        spec.setIdentityVerification(Arrays.asList((IdentityVerificationRequest) null));
 
         userServiceImpl.processIdentityVerifications(user, spec);
 
@@ -990,8 +989,8 @@ class UserServiceImplTest {
     @Test
     void processIdentityVerifications_withNullVerificationSource_skipsItem() {
         User user = new User();
-        UserSpec spec = new UserSpec();
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        UserRequest spec = new UserRequest();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource(null);
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -1004,8 +1003,8 @@ class UserServiceImplTest {
     @Test
     void processIdentityVerifications_withEmptyVerificationSource_skipsItem() {
         User user = new User();
-        UserSpec spec = new UserSpec();
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        UserRequest spec = new UserRequest();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource("");
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -1021,8 +1020,8 @@ class UserServiceImplTest {
         user.setId(TEST_USER_ID);
         user.setEmail("test@example.com");
 
-        UserSpec spec = new UserSpec();
-        IdentityVerificationSpec ivSpec = new IdentityVerificationSpec();
+        UserRequest spec = new UserRequest();
+        IdentityVerificationRequest ivSpec = new IdentityVerificationRequest();
         ivSpec.setVerificationSource("VALID_SOURCE");
         spec.setIdentityVerification(List.of(ivSpec));
 
@@ -1058,19 +1057,19 @@ class UserServiceImplTest {
         user.setId(TEST_USER_ID);
         user.setEmail("test@example.com");
 
-        IdentityVerificationSpec validSpec1 = new IdentityVerificationSpec();
+        IdentityVerificationRequest validSpec1 = new IdentityVerificationRequest();
         validSpec1.setVerificationSource("VALID_1");
 
-        IdentityVerificationSpec nullSourceSpec = new IdentityVerificationSpec();
+        IdentityVerificationRequest nullSourceSpec = new IdentityVerificationRequest();
         nullSourceSpec.setVerificationSource(null);
 
-        IdentityVerificationSpec emptySourceSpec = new IdentityVerificationSpec();
+        IdentityVerificationRequest emptySourceSpec = new IdentityVerificationRequest();
         emptySourceSpec.setVerificationSource("");
 
-        IdentityVerificationSpec validSpec2 = new IdentityVerificationSpec();
+        IdentityVerificationRequest validSpec2 = new IdentityVerificationRequest();
         validSpec2.setVerificationSource("VALID_2");
 
-        UserSpec spec = new UserSpec();
+        UserRequest spec = new UserRequest();
         spec.setIdentityVerification(Arrays.asList(
                 validSpec1,
                 nullSourceSpec,

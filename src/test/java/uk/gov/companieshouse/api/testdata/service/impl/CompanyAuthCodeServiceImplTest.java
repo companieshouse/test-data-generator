@@ -32,7 +32,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -61,8 +61,9 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void create() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
@@ -188,14 +189,14 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createThrowsDataExceptionWhenEncryptFails() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
-
+        spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
         CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
             @Override
-            public CompanyAuthCode create(CompanySpec spec) throws DataException {
+            public CompanyAuthCode create(CompanyRequest spec) throws DataException {
                 final String authCode = String.valueOf(randomService.getNumber(6));
                 CompanyAuthCode companyAuthCode = new CompanyAuthCode();
                 companyAuthCode.setId(spec.getCompanyNumber());
@@ -296,5 +297,23 @@ class CompanyAuthCodeServiceImplTest {
         assertEquals(DEFAULT_AUTH_CODE, captured.getAuthCode());
         assertTrue(captured.getIsActive());
         assertTrue(BCrypt.checkpw(password, captured.getEncryptedAuthCode()));
+    }
+
+    @Test
+    void createReturnsUnsavedAuthCodeWhenCompanyWithDataStructureIsTrue() throws Exception {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setCompanyWithPopulatedStructureOnly(true);
+
+        when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
+
+        CompanyAuthCode result = companyAuthCodeServiceImpl.create(spec);
+
+        assertNotNull(result);
+        assertEquals(COMPANY_NUMBER, result.getId());
+        assertEquals(String.valueOf(COMPANY_AUTH_CODE), result.getAuthCode());
+        assertTrue(result.getIsActive());
+        assertNotNull(result.getEncryptedAuthCode());
+        verify(repository, never()).save(any());
     }
 }

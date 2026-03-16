@@ -21,21 +21,66 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.rest.*;
+import uk.gov.companieshouse.api.testdata.model.rest.InternalCompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.*;
+import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
+import uk.gov.companieshouse.api.testdata.service.AppealsService;
+import uk.gov.companieshouse.api.testdata.service.AppointmentService;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
+import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileInternalService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
+import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
+import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
+import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
+import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.PostcodeService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.TestDataService;
+import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -49,32 +94,32 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private CompanyProfileService companyProfileService;
     @Autowired
-    private DataService<FilingHistory, CompanySpec> filingHistoryService;
+    private DataService<FilingHistory, CompanyRequest> filingHistoryService;
     @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
     private AppointmentService appointmentService;
     @Autowired
-    private DataService<CompanyMetrics, CompanySpec> companyMetricsService;
+    private DataService<CompanyMetrics, CompanyRequest> companyMetricsService;
     @Autowired
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Autowired
-    private DataService<CompanyPscs, CompanySpec> companyPscsService;
+    private CompanyPscService companyPscService;
     @Autowired
     private RandomService randomService;
     @Autowired
     private UserService userService;
     @Autowired
-    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    private DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
     @Autowired
-    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    private DataService<CertificatesResponse, CertificatesRequest> certificatesService;
     @Autowired
-    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    private DataService<CertificatesResponse, CertifiedCopiesRequest> certifiedCopiesService;
     @Autowired
-    private DataService<CombinedSicActivitiesData,
-            CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    private DataService<CombinedSicActivitiesResponse,
+            CombinedSicActivitiesRequest> combinedSicActivitiesService;
     @Autowired
-    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
+    private DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService;
     @Autowired
     private AcspMembersRepository acspMembersRepository;
     @Autowired
@@ -86,15 +131,15 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
     @Autowired
-    private DataService<TransactionsData, TransactionsSpec> transactionService;
+    private DataService<TransactionsResponse, TransactionsRequest> transactionService;
     @Autowired
-    private DataService<AcspProfileData, AcspProfileSpec> acspProfileService;
+    private AcspProfileService acspProfileService;
     @Autowired
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Autowired
     AppealsService appealsService;
     @Autowired
-    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    private DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
     @Autowired
     @Qualifier("companySearchService")
     private CompanySearchService companySearchService;
@@ -109,13 +154,14 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private PostcodeService postcodeService;
     @Autowired
-    private DataService<Disqualifications, CompanySpec> disqualificationsService;
+    private DataService<Disqualifications, CompanyRequest> disqualificationsService;
     @Autowired
-    private DataService<UserCompanyAssociationData,
-            UserCompanyAssociationSpec> userCompanyAssociationService;
+    private DataService<UserCompanyAssociationResponse,
+            UserCompanyAssociationRequest> userCompanyAssociationService;
     @Autowired
-    private DataService<AdminPermissionsData, AdminPermissionsSpec> adminPermissionsService;
+    private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
 
+    private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
     @Autowired
     private CompanyProfileInternalService companyProfileInternalService;
 
@@ -133,20 +179,30 @@ public class TestDataServiceImpl implements TestDataService {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
+    public TestDataServiceImpl(
+            CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
+        this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
+    }
+
     @Override
-    public CompanyData createCompanyData(final CompanySpec spec) throws DataException {
+    public CompanyProfileResponse createCompanyData(final CompanyRequest spec) throws DataException {
         if (spec == null) {
-            throw new IllegalArgumentException("CompanySpec can not be null");
+            throw new IllegalArgumentException("CompanyRequest can not be null");
         }
+
         String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+
         if (spec.getIsPaddingCompanyNumber() != null) {
             companyNumberPrefix = companyNumberPrefix + "000";
         }
+
         do {
             spec.setCompanyNumber(companyNumberPrefix
                     + randomService
                     .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
+        spec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
             companyProfileService.create(spec);
@@ -169,7 +225,7 @@ public class TestDataServiceImpl implements TestDataService {
             companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            companyPscsService.create(spec);
+            companyPscService.create(spec);
             LOG.info("Successfully created PSCs");
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
@@ -183,7 +239,7 @@ public class TestDataServiceImpl implements TestDataService {
             }
 
             String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-            var companyData = new CompanyData(spec.getCompanyNumber(),
+            var companyData = new CompanyProfileResponse(spec.getCompanyNumber(),
                     authCode.getAuthCode(), companyUri);
             addCompanyToElasticSearchIndexes(spec, companyData);
             LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
@@ -308,7 +364,7 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
         try {
-            this.companyPscsService.delete(companyId);
+            this.companyPscService.delete(companyId);
             LOG.info("Deleted PSCs for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
@@ -368,13 +424,13 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public UserData createUserData(UserSpec userSpec) throws DataException {
-        final String password = userSpec.getPassword();
+    public UserResponse createUserData(UserRequest userRequest) throws DataException {
+        final String password = userRequest.getPassword();
         if (password == null || password.isEmpty()) {
             throw new DataException("Password is required to create a user");
         }
 
-        List<String> adminPermissionIds = userSpec.getRoles();
+        List<String> adminPermissionIds = userRequest.getRoles();
         if (adminPermissionIds != null && !adminPermissionIds.isEmpty()) {
             List<String> permissionStrings = new ArrayList<>();
 
@@ -388,13 +444,13 @@ public class TestDataServiceImpl implements TestDataService {
                 }
             }
             if (!permissionStrings.isEmpty()) {
-                userSpec.setRoles(permissionStrings);
+                userRequest.setRoles(permissionStrings);
             }
         }
 
-        var userData = userService.create(userSpec);
-        if (userSpec.getIsCompanyAuthAllowList() != null && userSpec.getIsCompanyAuthAllowList()) {
-            var companyAuthAllowListSpec = new CompanyAuthAllowListSpec();
+        var userData = userService.create(userRequest);
+        if (userRequest.getIsCompanyAuthAllowList() != null && userRequest.getIsCompanyAuthAllowList()) {
+            var companyAuthAllowListSpec = new CompanyAuthAllowListRequest();
             companyAuthAllowListSpec.setEmailAddress(userData.getEmail());
             companyAuthAllowListService.create(companyAuthAllowListSpec);
         }
@@ -418,12 +474,12 @@ public class TestDataServiceImpl implements TestDataService {
 
 
     @Override
-    public AcspMembersData createAcspMembersData(final AcspMembersSpec spec) throws DataException {
+    public AcspMembersResponse createAcspMembersData(final AcspMembersRequest spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create an ACSP member");
         }
 
-        var acspProfileSpec = new AcspProfileSpec();
+        var acspProfileSpec = new AcspProfileRequest();
         if (spec.getAcspProfile() != null) {
             acspProfileSpec = spec.getAcspProfile();
         }
@@ -432,9 +488,9 @@ public class TestDataServiceImpl implements TestDataService {
             var acspProfileData = createAcspProfile(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
 
-            AcspMembersData createdMember = createAcspMember(spec);
+            AcspMembersResponse createdMember = createAcspMember(spec);
 
-            return new AcspMembersData(
+            return new AcspMembersResponse(
                     new ObjectId(createdMember.getAcspMemberId()),
                     createdMember.getAcspNumber(),
                     createdMember.getUserId(),
@@ -446,16 +502,16 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-    private AcspProfileData createAcspProfile(AcspProfileSpec acspProfileSpec)
+    private AcspProfileResponse createAcspProfile(AcspProfileRequest acspProfileRequest)
             throws DataException {
         try {
-            return this.acspProfileService.create(acspProfileSpec);
+            return this.acspProfileService.create(acspProfileRequest);
         } catch (Exception ex) {
             throw new DataException("Error creating ACSP profile", ex);
         }
     }
 
-    private AcspMembersData createAcspMember(AcspMembersSpec spec) throws DataException {
+    private AcspMembersResponse createAcspMember(AcspMembersRequest spec) throws DataException {
         try {
             return this.acspMembersService.create(spec);
         } catch (Exception ex) {
@@ -490,8 +546,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertificatesData(
-            final CertificatesSpec spec) throws DataException {
+    public CertificatesResponse createCertificatesData(
+            final CertificatesRequest spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certificates");
         }
@@ -504,8 +560,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createCertifiedCopiesData(
-            final CertifiedCopiesSpec spec) throws DataException {
+    public CertificatesResponse createCertifiedCopiesData(
+            final CertifiedCopiesRequest spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create certified copies");
         }
@@ -517,8 +573,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CertificatesData createMissingImageDeliveriesData(
-            final MissingImageDeliveriesSpec spec) throws DataException {
+    public CertificatesResponse createMissingImageDeliveriesData(
+            final MissingImageDeliveriesRequest spec) throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create missing image deliveries");
         }
@@ -531,8 +587,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CombinedSicActivitiesData createCombinedSicActivitiesData(
-            final CombinedSicActivitiesSpec spec) throws DataException {
+    public CombinedSicActivitiesResponse createCombinedSicActivitiesData(
+            final CombinedSicActivitiesRequest spec) throws DataException {
         try {
             return combinedSicActivitiesService.create(spec);
         } catch (Exception ex) {
@@ -589,7 +645,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltiesData(String id)
+    public AccountPenaltiesResponse getAccountPenaltiesData(String id)
             throws NoDataFoundException {
         try {
             return accountPenaltiesService.getAccountPenalties(id);
@@ -599,7 +655,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData getAccountPenaltiesData(String customerCode, String companyCode)
+    public AccountPenaltiesResponse getAccountPenaltiesData(String customerCode, String companyCode)
             throws NoDataFoundException {
         try {
             return accountPenaltiesService.getAccountPenalties(customerCode, companyCode);
@@ -609,7 +665,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData updateAccountPenaltiesData(
+    public AccountPenaltiesResponse updateAccountPenaltiesData(
             String penaltyRef, UpdateAccountPenaltiesRequest request)
             throws NoDataFoundException, DataException {
         try {
@@ -648,21 +704,21 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public AccountPenaltiesData createPenaltyData(PenaltySpec penaltySpec) throws DataException {
+    public AccountPenaltiesResponse createPenaltyData(PenaltyRequest penaltyRequest) throws DataException {
         try {
-            LOG.info("Creating account penalties for company code: " + penaltySpec.getCompanyCode()
-                    + " and customer code: " + penaltySpec.getCustomerCode());
-            return accountPenaltiesService.createAccountPenalties(penaltySpec);
+            LOG.info("Creating account penalties for company code: " + penaltyRequest.getCompanyCode()
+                    + " and customer code: " + penaltyRequest.getCustomerCode());
+            return accountPenaltiesService.createAccountPenalties(penaltyRequest);
         } catch (Exception ex) {
             LOG.error("Failed to create account penalties for company code: "
-                    + penaltySpec.getCompanyCode()
-                    + " and customer code: " + penaltySpec.getCustomerCode(), ex);
+                    + penaltyRequest.getCompanyCode()
+                    + " and customer code: " + penaltyRequest.getCustomerCode(), ex);
             throw new DataException("Error creating account penalties", ex);
         }
     }
 
     @Override
-    public PostcodesData getPostcodes(String country) throws DataException {
+    public PostcodesResponse getPostcodes(String country) throws DataException {
         try {
             List<Postcodes> postcodes = postcodeService.getPostcodeByCountry(country);
             if (postcodes == null || postcodes.isEmpty()) {
@@ -677,10 +733,10 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-    private static List<PostcodesData> getPostCodesData(List<Postcodes> postcodes) {
-        List<PostcodesData> postcodesDataList = new ArrayList<>();
+    private static List<PostcodesResponse> getPostCodesData(List<Postcodes> postcodes) {
+        List<PostcodesResponse> postcodesResponseList = new ArrayList<>();
         for (Postcodes postcode : postcodes) {
-            var postcodeData = new PostcodesData(
+            var postcodeData = new PostcodesResponse(
                     postcode.getBuildingNumber() != null ? postcode
                             .getBuildingNumber().intValue() : null,
                     postcode.getThoroughfare().getName() + " "
@@ -690,9 +746,15 @@ public class TestDataServiceImpl implements TestDataService {
                     postcode.getLocality().getPostTown(),
                     postcode.getPostcode().getPretty()
             );
-            postcodesDataList.add(postcodeData);
+            postcodesResponseList.add(postcodeData);
         }
-        return postcodesDataList;
+        return postcodesResponseList;
+    }
+
+    public Optional<AcspProfile> getAcspProfileData(String acspNumber)
+            throws NoDataFoundException {
+
+        return acspProfileService.getAcspProfile(acspNumber);
     }
 
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
@@ -712,8 +774,8 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public UserCompanyAssociationData createUserCompanyAssociationData(
-            UserCompanyAssociationSpec spec)
+    public UserCompanyAssociationResponse createUserCompanyAssociationData(
+            UserCompanyAssociationRequest spec)
             throws DataException {
         if (spec.getUserId() == null
                 && spec.getUserEmail() == null) {
@@ -727,10 +789,10 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         try {
-            UserCompanyAssociationData createdAssociation =
+            UserCompanyAssociationResponse createdAssociation =
                     userCompanyAssociationService.create(spec);
 
-            return new UserCompanyAssociationData(
+            return new UserCompanyAssociationResponse(
                     new ObjectId(createdAssociation.getId()),
                     createdAssociation.getCompanyNumber(),
                     createdAssociation.getUserId(),
@@ -754,21 +816,21 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-    public TransactionsData createTransactionData(TransactionsSpec transactionsSpec)
+    public TransactionsResponse createTransactionData(TransactionsRequest transactionsRequest)
             throws DataException {
         try {
-            LOG.info("Creating Txn for User Id: " + transactionsSpec.getUserId());
-            return transactionService.create(transactionsSpec);
+            LOG.info("Creating Txn for User Id: " + transactionsRequest.getUserId());
+            return transactionService.create(transactionsRequest);
         } catch (Exception ex) {
             LOG.error("Failed to create Transaction for User Id: "
-                    + transactionsSpec.getUserId());
+                    + transactionsRequest.getUserId());
             throw new DataException("Error creating transaction", ex);
         }
     }
 
     @Override
-    public AdminPermissionsData createAdminPermissionsData(
-            AdminPermissionsSpec spec) throws DataException {
+    public AdminPermissionsResponse createAdminPermissionsData(
+            AdminPermissionsRequest spec) throws DataException {
         return adminPermissionsService.create(spec);
     }
 
@@ -791,11 +853,11 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyData createPublicCompanyData(PublicCompanySpec publicCompanySpec)
+    public CompanyProfileResponse createPublicCompanyData(PublicCompanyRequest publicCompanySpec)
             throws DataException {
-        var companySpec = new CompanySpec();
+        var companySpec = new CompanyRequest();
 
-        // Only set allowed fields from PublicCompanySpec
+        // Only set allowed fields from PublicCompanyRequest
         companySpec.setJurisdiction(publicCompanySpec.getJurisdiction());
         companySpec.setCompanyType(publicCompanySpec.getCompanyType());
         companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
@@ -823,15 +885,14 @@ public class TestDataServiceImpl implements TestDataService {
         companySpec.setUndeliverableRegisteredOfficeAddress(
                 publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
         if (publicCompanySpec.getForeignCompanyLegalForm() != null
-                && publicCompanySpec.getForeignCompanyLegalForm()) {
-            companySpec.setForeignCompanyLegalForm("legal form for company "
-                    + randomService.getString(10));
+                && !publicCompanySpec.getForeignCompanyLegalForm().isBlank()) {
+            companySpec.setForeignCompanyLegalForm(publicCompanySpec.getForeignCompanyLegalForm());
         }
         return createCompanyData(companySpec);
     }
 
-    private void addCompanyToElasticSearchIndexes(CompanySpec spec,
-                                                  CompanyData companyData)
+    private void addCompanyToElasticSearchIndexes(CompanyRequest spec,
+                                                  CompanyProfileResponse companyData)
             throws DataException, ApiErrorResponseException, URIValidationException {
 
         // This variable is set from environment to allow disabling ES indexing in certain environments
@@ -871,7 +932,92 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public InternalCompanyData createInternalCompanyData(CompanySpec spec) throws DataException {
+    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanyRequest spec) throws DataException {
+        if (spec == null) {
+            throw new IllegalArgumentException("CompanyRequest can not be null");
+        }
+        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
+        if (spec.getIsPaddingCompanyNumber() != null) {
+            companyNumberPrefix = companyNumberPrefix + "000";
+        }
+        do {
+            spec.setCompanyNumber(companyNumberPrefix
+                    + randomService
+                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
+        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+
+        try {
+            var response = new PopulatedCompanyDetailsResponse();
+            spec.setCompanyWithPopulatedStructureOnly(true);
+
+            var companyProfile = companyProfileService.create(spec);
+            LOG.info("Successfully get company profile");
+            response.setCompanyProfile(companyProfile);
+
+            var filingHistory = filingHistoryService.create(spec);
+            LOG.info("Successfully get filing history");
+            response.setFilingHistory(filingHistory);
+
+            if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
+                var appointments = appointmentService.createAppointment(spec);
+                LOG.info("Successfully get appointments ");
+                response.setAppointmentsData(appointments);
+            }
+
+            var authCode = companyAuthCodeService.create(spec);
+            LOG.info("Successfully get auth code: " + authCode.getAuthCode());
+            response.setCompanyAuthCode(authCode);
+
+
+            var companyMetrics = companyMetricsService.create(spec);
+            LOG.info("Successfully get company metrics");
+            response.setCompanyMetrics(companyMetrics);
+
+            List<CompanyPscStatement> companyPscStatements = companyPscStatementService.createPscStatements(spec);
+            LOG.info("Successfully get all PSC statements based on spec counts.");
+            response.setCompanyPscStatement(companyPscStatements);
+
+            var companyPscs = companyPscService.create(spec);
+            LOG.info("Successfully get PSCs");
+            response.setCompanyPscs(companyPscs);
+
+            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
+                var companyRegisters = this.companyRegistersService.create(spec);
+                LOG.info("Successfully get company registers");
+                response.setCompanyRegisters(companyRegisters);
+            }
+
+            if (spec.getDisqualifiedOfficers()
+                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
+                var disqualifications = disqualificationsService.create(spec);
+                LOG.info("Successfully get disqualifications");
+                response.setDisqualifications(disqualifications);
+            }
+
+            return response;
+        } catch (Exception ex) {
+            Map<String, Object> data = new HashMap<>();
+            data.put("company number", spec.getCompanyNumber());
+            data.put("error message", ex.getMessage());
+            LOG.error("Failed to get company data for company number: "
+                    + spec.getCompanyNumber(), ex, data);
+            throw new DataException("Failed to get company data from service", ex);
+        }
+    }
+
+    @Override
+    public CompanyProfileResponse createCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec) throws DataException {
+
+        var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
+        var authCode = companySpec.getCompanyAuthCode().getAuthCode();
+        companyWithPopulatedStructureService.createCompanyWithPopulatedStructure(companySpec);
+        String companyUri = this.apiUrl + "/company/" + companyNumber;
+        return new CompanyProfileResponse(companyNumber,
+                authCode, companyUri);
+    }
+
+    @Override
+    public InternalCompanyData createInternalCompanyData(CompanyRequest spec) throws DataException {
         String deltaAt = "";
         if (spec == null) {
             throw new IllegalArgumentException("CompanySpec can not be null");
