@@ -318,6 +318,24 @@ class CompanyMetricsServiceImplTest {
     }
 
     @Test
+    void createWithActivePscStatementsCountFromNumberOfPsc() {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyNumber(COMPANY_NUMBER);
+        spec.setNumberOfPscs(2);
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyMetrics());
+
+        metricsService.create(spec);
+
+        ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
+        verify(repository).save(captor.capture());
+        CompanyMetrics metrics = captor.getValue();
+
+        assertEquals(2, metrics.getActivePscStatementsCount());
+    }
+
+    @Test
     void createWithDefaultActivePscStatementsCount() {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
@@ -331,7 +349,7 @@ class CompanyMetricsServiceImplTest {
         verify(repository).save(captor.capture());
         CompanyMetrics metrics = captor.getValue();
 
-        assertEquals(0, metrics.getActivePscStatementsCount());
+        assertEquals(1, metrics.getActivePscStatementsCount());
     }
 
     @Test
@@ -413,6 +431,16 @@ class CompanyMetricsServiceImplTest {
         spec.setHasSuperSecurePscs(true);
         spec.setCompanyWithPopulatedStructureOnly(false);
 
+        CompanyMetrics metrics = new CompanyMetrics();
+        metricsService.setPscCount(metrics, spec);
+
+        assertEquals(1, metrics.getPscCount());
+    }
+
+    @Test
+    void setPscCount_WhenNoPscCount_ShouldSetCountToZero() {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyWithPopulatedStructureOnly(false);
         CompanyMetrics metrics = new CompanyMetrics();
         metricsService.setPscCount(metrics, spec);
 
