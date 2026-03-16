@@ -215,6 +215,7 @@ class CompanyPscServiceImplTest {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPscs(0);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
         spec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -298,6 +299,7 @@ class CompanyPscServiceImplTest {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
+        spec.setPscType(null);
         spec.setNumberOfPscs(null);
         spec.setCompanyWithPopulatedStructureOnly(false);
 

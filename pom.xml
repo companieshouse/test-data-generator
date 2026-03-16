@@ -38,7 +38,7 @@
         <api-security-java.version>2.0.8</api-security-java.version>
         <private-api-sdk-java.version>4.0.416</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.10</api-sdk-manager-java-library.version>
-        <test-data-generator-library.version>1.0.3</test-data-generator-library.version>
+        <test-data-generator-library.version>1.0.5</test-data-generator-library.version>
 
         <!-- Overrides -->
         <!-- CVE-2025-48924 -->
