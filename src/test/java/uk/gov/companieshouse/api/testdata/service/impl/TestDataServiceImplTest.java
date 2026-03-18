@@ -27,6 +27,8 @@ import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -369,6 +371,29 @@ class TestDataServiceImplTest {
         CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 JurisdictionType.ENGLAND_WALES);
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    // passes both null and empty string ("")
+    void createCompanyDataWhenCompanyNumberIsNullOrEmpty(String inputCompanyNumber) throws Exception {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyNumber(inputCompanyNumber);
+
+        String expectedFullCompanyNumber = COMPANY_NUMBER;
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
+
+        assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
+        verifyCommonCompanyCreation(
+                capturedSpec,
+                createdCompany,
+                expectedFullCompanyNumber,
+                JurisdictionType.ENGLAND_WALES
+        );
+        verify(randomService, times(1)).getNumber(8);
     }
 
     @Test
