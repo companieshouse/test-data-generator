@@ -190,15 +190,15 @@ public class TestDataServiceImpl implements TestDataService {
             companyNumberPrefix = companyNumberPrefix + "000";
         }
 
-        do {
-            if (spec.getCompanyNumber() == null || spec.getCompanyNumber().trim().isEmpty()) {
+        if (spec.getCompanyNumber() == null || spec.getCompanyNumber().trim().isEmpty()) {
+            do {
                 spec.setCompanyNumber(companyNumberPrefix
                         + randomService
                         .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
-            } else {
-                spec.setCompanyNumber(spec.getCompanyNumber());
-            }
-        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+            } while (companyProfileService.companyExists(spec.getCompanyNumber()));
+        } else {
+            spec.setCompanyNumber(spec.getCompanyNumber());
+        }
 
         spec.setCompanyWithPopulatedStructureOnly(false);
 
