@@ -417,6 +417,28 @@ class TestDataServiceImplTest {
     }
 
     @Test
+    void createCompanyPassingCompanyNumberInSpec() throws Exception {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyNumber("12345678");
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
+
+        assertEquals("12345678", capturedSpec.getCompanyNumber());
+        verify(randomService, never()).getNumber(anyInt());
+        verifyCommonCompanyCreation(
+                capturedSpec,
+                createdCompany,
+                "12345678",
+                JurisdictionType.ENGLAND_WALES
+        );
+    }
+
+    @Test
     void createCompanyDataExistingNumber() throws Exception {
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
