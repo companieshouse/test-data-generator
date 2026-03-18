@@ -295,10 +295,10 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_WithNullNumberOfPsc_ReturnsNull() throws DataException {
+    void createWithExcludedPscCompanyTypeReturnsNull() throws DataException {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
+        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
         spec.setPscType(null);
         spec.setNumberOfPscs(null);
         spec.setCompanyWithPopulatedStructureOnly(false);
