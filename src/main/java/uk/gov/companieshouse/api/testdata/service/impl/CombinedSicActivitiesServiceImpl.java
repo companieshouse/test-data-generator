@@ -8,14 +8,14 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CombinedSicActivities;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
 import uk.gov.companieshouse.api.testdata.repository.CombinedSicActivitiesRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> {
+public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSicActivitiesResponse, CombinedSicActivitiesRequest> {
 
   private final CombinedSicActivitiesRepository repository;
 
@@ -29,7 +29,7 @@ public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSic
   }
 
   @Override
-  public CombinedSicActivitiesData create(CombinedSicActivitiesSpec spec) throws DataException {
+  public CombinedSicActivitiesResponse create(CombinedSicActivitiesRequest spec) throws DataException {
     var sicActivity = new CombinedSicActivities();
     var sicCode = randomService.getNumber(5);
 
@@ -58,8 +58,8 @@ public class CombinedSicActivitiesServiceImpl implements DataService<CombinedSic
     return false;
   }
 
-  private CombinedSicActivitiesData mapToSicActivitiesData(CombinedSicActivities sicActivity) {
-    return new CombinedSicActivitiesData(
+  private CombinedSicActivitiesResponse mapToSicActivitiesData(CombinedSicActivities sicActivity) {
+    return new CombinedSicActivitiesResponse(
         sicActivity.getId().toHexString(),
         sicActivity.getSicCode(),
         sicActivity.getSicDescription()

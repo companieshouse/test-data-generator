@@ -1,35 +1,27 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+
+import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
+import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
+import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
-import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
-import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
 class TransactionServiceImplTest {
@@ -52,16 +44,16 @@ class TransactionServiceImplTest {
 
     private AcspApplication acspApplication;
 
-    private TransactionsSpec txnSpec;
-    @Mock
+    private TransactionsRequest txnSpec;
 
+    @Mock
     private RandomService randomService;
 
 
     @BeforeEach
     void setUp() {
         transactions = new Transactions();
-        txnSpec = new TransactionsSpec();
+        txnSpec = new TransactionsRequest();
         acspApplication = new AcspApplication();
     }
 
@@ -73,7 +65,7 @@ class TransactionServiceImplTest {
         when(transactionsRepository.save(any(Transactions.class))).thenReturn(transactions);
         when(acspApplicationRepository.save(any(AcspApplication.class))).thenReturn(acspApplication);
 
-        TransactionsData result = transactionServiceImpl.create(txnSpec);
+        TransactionsResponse result = transactionServiceImpl.create(txnSpec);
 
         assertNotNull(result);
 
@@ -106,7 +98,7 @@ class TransactionServiceImplTest {
         when(transactionsRepository.save(any(Transactions.class))).thenReturn(transactions);
         when(acspApplicationRepository.save(any(AcspApplication.class))).thenReturn(acspApplication);
 
-        TransactionsData result = transactionServiceImpl.create(txnSpec);
+        TransactionsResponse result = transactionServiceImpl.create(txnSpec);
 
         assertNotNull(result);
         verify(transactionsRepository).save(any(Transactions.class));

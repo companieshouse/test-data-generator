@@ -12,18 +12,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 
 @Service
-public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters, CompanySpec> {
+public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters, CompanyRequest> {
+    @Autowired
+    private RandomService randomService;
+
+    @Autowired
+    private CompanyRegistersRepository repository;
+
+    @Autowired
+    private FilingHistoryRepository filingHistoryRepository;
 
     private static final String LINK_STEM = "/company/";
     private static final String DIRECTORS_LINK = "/company/%s/officers?register_view=true&register_type=directors";
@@ -42,23 +50,9 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
     private static final String PSC_REGISTER_TYPE = "persons_with_significant_control";
     private static final String PUBLIC_REGISTER = "public-register";
 
-    private final RandomService randomService;
-
-    private final CompanyRegistersRepository repository;
-
-    private final FilingHistoryRepository filingHistoryRepository;
-
-    @Autowired
-    public CompanyRegistersServiceImpl(RandomService randomService, CompanyRegistersRepository repository,
-            FilingHistoryRepository filingHistoryRepository) {
-        super();
-        this.randomService = randomService;
-        this.repository = repository;
-        this.filingHistoryRepository = filingHistoryRepository;
-    }
 
     @Override
-    public CompanyRegisters create(CompanySpec companySpec) throws DataException {
+    public CompanyRegisters create(CompanyRequest companySpec) throws DataException {
         var now = LocalDate.now();
         var companyRegisters = new CompanyRegisters();
         companyRegisters.setId(companySpec.getCompanyNumber());
@@ -86,8 +80,8 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         return LINK_STEM + companyNumber + REGISTER_STEM;
     }
 
-    private Map<String, Register> createRegisters(List<RegistersSpec> registers, String companyNumber) throws DataException {
-        for(RegistersSpec register : registers) {
+    private Map<String, Register> createRegisters(List<RegistersRequest> registers, String companyNumber) throws DataException {
+        for(RegistersRequest register : registers) {
             if (register.getRegisterType() == null || register.getRegisterType().isBlank() ) {
                 throw new DataException("Register type must be provided");
             }
@@ -101,7 +95,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
         ));
     }
 
-    private Register buildRegister(RegistersSpec registerSpec, String companyNumber) {
+    private Register buildRegister(RegistersRequest registerSpec, String companyNumber) {
         var registerItem = new RegisterItem();
         registerItem.setRegisterMovedTo(registerSpec.getRegisterMovedTo());
         registerItem.setMovedOn(LocalDate.now());

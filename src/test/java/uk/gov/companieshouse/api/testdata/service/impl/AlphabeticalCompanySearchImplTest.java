@@ -28,7 +28,7 @@ import uk.gov.companieshouse.api.handler.search.alphabeticalCompany.request.Priv
 import uk.gov.companieshouse.api.handler.search.alphabeticalCompany.request.PrivateAlphabeticalCompanySearchUpsert;
 import uk.gov.companieshouse.api.model.ApiResponse;
 import uk.gov.companieshouse.api.model.company.CompanyProfileApi;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AlphabeticalCompanySearchImplTest {
@@ -80,7 +80,7 @@ class AlphabeticalCompanySearchImplTest {
                 .thenReturn(privateAlphabeticalCompanySearchUpsert);
         when(privateAlphabeticalCompanySearchUpsert.execute()).thenReturn(SUCCESS_RESPONSE);
 
-        CompanyData companyData = new CompanyData(COMPANY_NUMBER, "authCode", "companyUri");
+        CompanyProfileResponse companyData = new CompanyProfileResponse(COMPANY_NUMBER, "authCode", "companyUri");
         service.addCompanyIntoElasticSearchIndex(companyData);
 
         verify(privateAlphabeticalCompanySearchHandler).put(URI, companyProfileApi);

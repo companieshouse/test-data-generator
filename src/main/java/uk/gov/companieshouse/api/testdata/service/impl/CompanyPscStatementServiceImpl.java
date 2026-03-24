@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,15 +12,15 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class CompanyPscStatementServiceImpl implements
-        DataService<CompanyPscStatement, CompanySpec> {
+        DataService<CompanyPscStatement, CompanyRequest> {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
@@ -41,7 +40,7 @@ public class CompanyPscStatementServiceImpl implements
     }
 
     @Override
-    public CompanyPscStatement create(CompanySpec spec) {
+    public CompanyPscStatement create(CompanyRequest spec) {
         var pscStatement = new CompanyPscStatement();
 
         String pscStatementId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
@@ -82,49 +81,39 @@ public class CompanyPscStatementServiceImpl implements
         return repository.save(pscStatement);
     }
 
-    public List<CompanyPscStatement> createPscStatements(CompanySpec spec) {
+    public List<CompanyPscStatement> createPscStatements(CompanyRequest spec) {
         List<CompanyPscStatement> generatedStatements = new ArrayList<>();
 
-        Integer withdrawnPscStatementsCount = spec.getWithdrawnStatements();
-        Integer activePscStatementsCount = spec.getActiveStatements();
-        Integer numberOfPsc = spec.getNumberOfPscs();
+        int withdrawnPscStatementsCount = spec.getWithdrawnStatements() != null ? spec.getWithdrawnStatements() : 0;
+        int activePscStatementsCount = spec.getActiveStatements() != null ? spec.getActiveStatements() : 0;
 
-        boolean specificWithdrawnRequested = withdrawnPscStatementsCount
-                != null && withdrawnPscStatementsCount > 0;
-
-        int effectiveActivePscCount;
-        if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
-            effectiveActivePscCount = 1;
-        } else {
-            effectiveActivePscCount = Objects.requireNonNullElseGet(activePscStatementsCount,
-                    () -> Objects.requireNonNullElse(numberOfPsc, 0));
-        }
-
-        boolean specificActiveOrNumberOfPscRequested = effectiveActivePscCount > 0;
+        boolean hasSuperSecure = BooleanUtils.isTrue(spec.getHasSuperSecurePscs());
+        boolean specificWithdrawnRequested = withdrawnPscStatementsCount > 0;
+        boolean specificActiveRequested = activePscStatementsCount > 0;
 
         List<CompanyPscStatement> withdrawn = new ArrayList<>();
         List<CompanyPscStatement> active = new ArrayList<>();
-        // No need for singleDefault list if it's no longer being conditionally added
 
-        if (specificWithdrawnRequested || specificActiveOrNumberOfPscRequested) {
+        if (hasSuperSecure) {
+            int count = spec.getActiveStatements() != null ? spec.getActiveStatements() : 1;
+            active = generateActivePscStatements(spec, count);
+        } else {
             if (specificWithdrawnRequested) {
                 withdrawn = generateWithdrawnPscStatements(spec, withdrawnPscStatementsCount);
             }
-            if (specificActiveOrNumberOfPscRequested) {
-                active = generateActivePscStatements(spec, effectiveActivePscCount);
+            if (specificActiveRequested) {
+                active = generateActivePscStatements(spec, activePscStatementsCount);
             }
         }
-        // The 'else' block that added a default statement has been removed.
 
         generatedStatements.addAll(withdrawn);
         generatedStatements.addAll(active);
-        // singleDefault list and its addAll call is removed.
 
         return generatedStatements;
     }
 
     protected List<CompanyPscStatement> generateWithdrawnPscStatements(
-            CompanySpec spec, Integer count) {
+            CompanyRequest spec, Integer count) {
 
         List<CompanyPscStatement> generatedList = new ArrayList<>();
 
@@ -133,7 +122,7 @@ public class CompanyPscStatementServiceImpl implements
         }
 
         for (var i = 0; i < count; i++) {
-            var tempSpec = new CompanySpec();
+            var tempSpec = new CompanyRequest();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(1);
@@ -148,7 +137,7 @@ public class CompanyPscStatementServiceImpl implements
     }
 
     protected List<CompanyPscStatement> generateActivePscStatements(
-            CompanySpec spec, Integer count) {
+            CompanyRequest spec, Integer count) {
 
         List<CompanyPscStatement> generatedList = new ArrayList<>();
 
@@ -157,12 +146,13 @@ public class CompanyPscStatementServiceImpl implements
         }
 
         for (var i = 0; i < count; i++) {
-            var tempSpec = new CompanySpec();
+            var tempSpec = new CompanyRequest();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(0);
             tempSpec.setNumberOfPscs(1);
             tempSpec.setPscActive(true);
+            tempSpec.setHasSuperSecurePscs(spec.getHasSuperSecurePscs());
             if (spec.getCompanyWithPopulatedStructureOnly() != null) {
                 tempSpec.setCompanyWithPopulatedStructureOnly(spec.getCompanyWithPopulatedStructureOnly());
             }

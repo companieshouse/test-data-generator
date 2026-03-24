@@ -14,11 +14,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
-import uk.gov.companieshouse.api.testdata.model.rest.AppointmentCreationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.OfficerRoles;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
@@ -71,7 +71,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         this.officerRepository = officerRepository;
     }
 
-    public AppointmentsResultData createAppointment(CompanySpec spec) {
+    public AppointmentsResultResponse createAppointment(CompanyRequest spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
                     + spec.getCompanyNumber());
@@ -90,13 +90,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
             numberOfAppointments = 1;
         }
 
-        List<OfficerRoles> officerRoleList = new ArrayList<>();
+        List<OfficerType> officerRoleList = new ArrayList<>();
         if (spec.getOfficerRoles() != null) {
             officerRoleList.addAll(spec.getOfficerRoles());
             LOG.debug("Officer roles provided: " + spec.getOfficerRoles());
         }
         while (officerRoleList.size() < numberOfAppointments) {
-            officerRoleList.add(OfficerRoles.DIRECTOR);
+            officerRoleList.add(OfficerType.DIRECTOR);
         }
 
         List<String> appointmentIds = new ArrayList<>();
@@ -109,7 +109,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         List<OfficerAppointment> createdOfficerAppointments = new ArrayList<>();
 
         for (var i = 0; i < numberOfAppointments; i++) {
-            OfficerRoles currentRoleEnum = officerRoleList.get(i);
+            OfficerType currentRoleEnum = officerRoleList.get(i);
             if (currentRoleEnum == null) {
                 LOG.error("Invalid officer role: null at index " + i);
                 throw new IllegalArgumentException("Invalid officer role: null");
@@ -183,7 +183,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             }
             createdAppointmentsData.add(appointmentsData);
         }
-        var appointmentsResultData = new AppointmentsResultData();
+        var appointmentsResultData = new AppointmentsResultResponse();
         appointmentsResultData.setAppointment(createdAppointments);
         appointmentsResultData.setAppointmentsData(createdAppointmentsData);
         appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
@@ -268,7 +268,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private AppointmentsData createBaseAppointmentsData(
-            CompanySpec spec, String internalId, String officerId,
+            CompanyRequest spec, String internalId, String officerId,
             Instant now, String appointmentId) {
         var appointmentsData = new AppointmentsData();
         String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
@@ -308,7 +308,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private void validateOfficerRole(String role) {
         try {
-            OfficerRoles.valueOf(role.toUpperCase().replace("-", "_"));
+            OfficerType.valueOf(role.toUpperCase().replace("-", "_"));
         } catch (IllegalArgumentException ex) {
             LOG.error("Invalid officer role: " + role + ex);
             throw new IllegalArgumentException("Invalid officer role: " + role);
@@ -316,7 +316,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private OfficerAppointment createOfficerAppointment(
-            CompanySpec spec, String officerId, String appointmentId, String role) {
+            CompanyRequest spec, String officerId, String appointmentId, String role) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
@@ -351,14 +351,14 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(
-            CompanySpec companySpec,
+            CompanyRequest companySpec,
             String appointmentId,
             Instant dayNow,
             Instant dayTimeNow,
             String role
     ) {
         var companyNumber = companySpec.getCompanyNumber();
-        Jurisdiction jurisdiction = companySpec.getJurisdiction();
+        JurisdictionType jurisdiction = companySpec.getJurisdiction();
         String roleName = setRoleName(role);
 
         OfficerAppointmentItem item = new OfficerAppointmentItem();

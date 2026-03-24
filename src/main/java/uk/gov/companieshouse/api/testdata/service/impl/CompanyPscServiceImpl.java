@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,10 +19,10 @@ import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.NameElements;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.PscType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
@@ -34,14 +35,20 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
     private static final Logger LOG = LoggerFactory.getLogger(String.valueOf(CompanyPscServiceImpl.class));
 
-    static final String[] NATURES_OF_CONTROL = {"ownership-of-shares-25-to-50-percent",
+    static final String[] NATURES_OF_CONTROL_SHARES = {"ownership-of-shares-25-to-50-percent",
             "ownership-of-shares-50-to-75-percent",
             "ownership-of-shares-75-to-100-percent",
             "ownership-of-shares-25-to-50-percent-as-trust",
             "ownership-of-shares-50-to-75-percent-as-trust"};
+    static final String[] NATURES_OF_CONTROL_VOTING_RIGHTS = {"voting-rights-25-to-50-percent",
+            "voting-rights-50-to-75-percent",
+            "voting-rights-75-to-100-percent",};
+    static final String[] NATURES_OF_CONTROL_RIGHT_TO_APPOINT = {"right-to-appoint-and-remove-directors",
+            "right-to-appoint-and-remove-directors-as-trust",
+            "right-to-appoint-and-remove-directors-as-firm",};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
-    public static final String NATIONALITY = "BRITISH";
+    public static final String NATIONALITY = "British";
     public static final String REGISTRATION_NUMBER = "12345678";
     public static final String LEGAL_FORM = "Legal Form";
     public static final String LEGAL_AUTHORITY = "Legal Authority";
@@ -51,10 +58,19 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     public static final String TITLE = "Dr.";
     public static final String FIRST_NAME = "First";
     public static final String LAST_NAME = "Last";
-    private static final int DEFAULT_NUMBER_OF_PSC = 0;
+    private static final int DEFAULT_NUMBER_OF_PSC = 1;
     private static final String PSC_ERROR_MESSAGE = "psc_type must be accompanied by number_of_psc";
     private static final String BENEFICIAL_OWNER_ERROR =
             "Beneficial owner type is not allowed for this company type";
+
+    private static final Set<CompanyType> EXCLUDED_COMPANY_TYPES = Set.of(
+            CompanyType.CHARITABLE_INCORPORATED_ORGANISATION,
+            CompanyType.EEIG,
+            CompanyType.EEIG_ESTABLISHMENT,
+            CompanyType.FURTHER_EDUCATION_OR_SIXTH_FORM_COLLEGE_CORPORATION,
+            CompanyType.OVERSEA_COMPANY,
+            CompanyType.SCOTTISH_CHARITABLE_INCORPORATED_ORGANISATION
+    );
 
     private final RandomService randomService;
     private final CompanyPscsRepository repository;
@@ -70,11 +86,18 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     }
 
     @Override
-    public List<CompanyPscs> create(CompanySpec spec) throws DataException {
+    public List<CompanyPscs> create(CompanyRequest spec) throws DataException {
         LOG.info("Starting creation of PSCs for company number: " + spec.getCompanyNumber());
 
-        if (shouldReturnNullForOverseaCompany(spec)) {
-            LOG.info("Company type is OVERSEA_COMPANY. No PSCs will be created.");
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType()) &&
+            (spec.getPscType() == null || spec.getPscType().isEmpty() ||
+             spec.getPscType().stream().anyMatch(type -> type == PscType.INDIVIDUAL))) {
+             spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+        }
+
+        if (shouldReturnNullForCompaniesThatDoNotNeedPscs(spec)) {
+            LOG.info("Company type does not require a PSC. No PSCs will be created.");
+            spec.setNumberOfPscs(0);
             return null;
         }
 
@@ -97,25 +120,28 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return createPscsBasedOnCompanyType(spec, numberOfPsc);
     }
 
-    private boolean shouldReturnNullForOverseaCompany(CompanySpec spec) {
-        boolean result = CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType());
-        LOG.debug("shouldReturnNullForOverseaCompany: " + result);
+    private boolean shouldReturnNullForCompaniesThatDoNotNeedPscs(CompanyRequest spec) {
+        if (spec == null || spec.getCompanyType() == null) {
+            return false;
+        }
+        boolean result = EXCLUDED_COMPANY_TYPES.contains(spec.getCompanyType());
+        LOG.debug("shouldReturnNullForExcludedCompanies: " + result);
         return result;
     }
 
-    private boolean shouldCreateSuperSecurePsc(CompanySpec spec) {
+    private boolean shouldCreateSuperSecurePsc(CompanyRequest spec) {
         boolean result = Boolean.TRUE.equals(spec.getHasSuperSecurePscs());
         LOG.debug("shouldCreateSuperSecurePsc: " + result);
         return result;
     }
 
-    private CompanyPscs createAppropriateSuperSecurePsc(CompanySpec spec) {
+    private CompanyPscs createAppropriateSuperSecurePsc(CompanyRequest spec) {
         return CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())
                 ? createSuperSecureBeneficialOwner(spec)
                 : createSuperSecurePsc(spec);
     }
 
-    private void validatePscTypeAndCount(CompanySpec spec) throws DataException {
+    private void validatePscTypeAndCount(CompanyRequest spec) throws DataException {
         if (hasPscTypesWithoutCount(spec)) {
             LOG.error("Validation failed: " +  PSC_ERROR_MESSAGE);
             throw new DataException(PSC_ERROR_MESSAGE);
@@ -127,13 +153,13 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         LOG.debug("Validation passed for PSC type and count.");
     }
 
-    private boolean hasPscTypesWithoutCount(CompanySpec spec) {
+    private boolean hasPscTypesWithoutCount(CompanyRequest spec) {
         return spec.getPscType() != null
                 && !spec.getPscType().isEmpty()
                 && (spec.getNumberOfPscs() == null || spec.getNumberOfPscs() <= 0);
     }
 
-    private boolean hasInvalidBeneficialOwnerType(CompanySpec spec) {
+    private boolean hasInvalidBeneficialOwnerType(CompanyRequest spec) {
         return spec.getPscType() != null
                 && spec.getPscType().stream().anyMatch(this::isBeneficialOwnerType)
                 && !CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
@@ -143,13 +169,13 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return type == PscType.INDIVIDUAL_BENEFICIAL_OWNER || type == PscType.CORPORATE_BENEFICIAL_OWNER;
     }
 
-    private int getNumberOfPsc(CompanySpec spec) {
+    private int getNumberOfPsc(CompanyRequest spec) {
         int numberOfPsc = Optional.ofNullable(spec.getNumberOfPscs()).orElse(DEFAULT_NUMBER_OF_PSC);
         LOG.debug("Number of PSCs determined: " + numberOfPsc);
         return numberOfPsc;
     }
 
-    private List<CompanyPscs> createPscsBasedOnCompanyType(CompanySpec spec, int numberOfPsc) {
+    private List<CompanyPscs> createPscsBasedOnCompanyType(CompanyRequest spec, int numberOfPsc) {
         LOG.info("Creating PSCs based on company type: " + spec.getCompanyType());
 
         if (numberOfPsc <= 0) {
@@ -182,11 +208,12 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     }
 
     private PscType getBeneficialOwnerType(List<PscType> requestedPscTypes, int index) {
+        // If PSC types are provided, cycle through them
         if (requestedPscTypes != null && !requestedPscTypes.isEmpty()) {
             return requestedPscTypes.get(index % requestedPscTypes.size());
         }
-        return index % 2 == 0 ? PscType.INDIVIDUAL_BENEFICIAL_OWNER
-                : PscType.CORPORATE_BENEFICIAL_OWNER;
+        // Default to INDIVIDUAL_BENEFICIAL_OWNER for registered overseas entities
+        return PscType.INDIVIDUAL_BENEFICIAL_OWNER;
     }
 
     private PscType getRegularPscType(List<PscType> requestedPscTypes, int index) {
@@ -206,7 +233,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
                 .orElse(0)];
     }
 
-    private CompanyPscs createSuperSecureBeneficialOwner(CompanySpec spec) {
+    private CompanyPscs createSuperSecureBeneficialOwner(CompanyRequest spec) {
         CompanyPscs superSecureBo = createBasePsc(spec, true);
         buildSuperSecureBeneficialOwner(superSecureBo);
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
@@ -215,7 +242,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(superSecureBo);
     }
 
-    private CompanyPscs createSuperSecurePsc(CompanySpec spec) {
+    private CompanyPscs createSuperSecurePsc(CompanyRequest spec) {
         CompanyPscs superSecurePsc = createBasePsc(spec, true);
         buildSuperSecurePsc(superSecurePsc);
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
@@ -224,7 +251,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(superSecurePsc);
     }
 
-    CompanyPscs createBasePsc(CompanySpec spec, boolean isActive) {
+    CompanyPscs createBasePsc(CompanyRequest spec, boolean isActive) {
         var companyPsc = new CompanyPscs();
         companyPsc.setCompanyNumber(spec.getCompanyNumber());
 
@@ -243,14 +270,14 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         companyPsc.setId(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         companyPsc.setEtag(this.randomService.getEtag());
         companyPsc.setStatementType("statement type");
-        companyPsc.setAddress(addressService.getAddress(Jurisdiction.ENGLAND_WALES));
+        companyPsc.setAddress(addressService.getAddress(JurisdictionType.ENGLAND_WALES));
 
         setNaturesOfControl(companyPsc);
 
         return companyPsc;
     }
 
-    private Instant getCreatedUpdatedAt(CompanySpec spec) {
+    private Instant getCreatedUpdatedAt(CompanyRequest spec) {
         if (StringUtils.hasText(spec.getAccountsDueStatus())) {
             LocalDate dueDateNow = randomService.generateAccountsDueDateByStatus(
                     spec.getAccountsDueStatus());
@@ -259,12 +286,27 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 
+    /**
+     * Sets the natures of control for a given CompanyPscs object.
+     * This method selects one random nature of control from each of the predefined categories:
+     * ownership of shares, voting rights, and the right to appoint and remove directors
+     * The selected values are then assigned to the CompanyPscs object.
+     *
+     * @param companyPsc the CompanyPscs object to which the natures of control will be assigned
+     */
     private void setNaturesOfControl(CompanyPscs companyPsc) {
-        List<String> nocList = Arrays.asList(NATURES_OF_CONTROL);
-        Collections.shuffle(nocList);
-        long num = randomService.getNumberInRange(0, NATURES_OF_CONTROL.length).orElse(0);
-        companyPsc.setNaturesOfControl(new ArrayList<>(nocList.subList(0, (int) num + 1)));
+        List<String> sharesList = new ArrayList<>(Arrays.asList(NATURES_OF_CONTROL_SHARES));
+        List<String> votingRightsList = new ArrayList<>(Arrays.asList(NATURES_OF_CONTROL_VOTING_RIGHTS));
+        List<String> rightToAppointList = new ArrayList<>(Arrays.asList(NATURES_OF_CONTROL_RIGHT_TO_APPOINT));
+        Collections.shuffle(sharesList);
+        Collections.shuffle(votingRightsList);
+        Collections.shuffle(rightToAppointList);
+        String randomShares = sharesList.get(0);
+        String randomVotingRights = votingRightsList.get(0);
+        String randomRightToAppoint = rightToAppointList.get(0);
+        companyPsc.setNaturesOfControl(List.of(randomShares, randomVotingRights, randomRightToAppoint));
     }
+
 
     private void buildSuperSecureBeneficialOwner(CompanyPscs companyPscs) {
         companyPscs.setKind(PscType.SUPER_SECURE_BENEFICIAL_OWNER.getKind());
@@ -289,7 +331,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         companyPscs.setLinks(links);
     }
 
-    private CompanyPscs createPsc(CompanySpec spec, PscType pscType, boolean isActive) {
+    private CompanyPscs createPsc(CompanyRequest spec, PscType pscType, boolean isActive) {
         var companyPscs = createBasePsc(spec, isActive);
         switch (pscType) {
             case INDIVIDUAL:
@@ -307,7 +349,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(companyPscs);
     }
 
-    private CompanyPscs createBeneficialOwner(CompanySpec spec, PscType pscType, boolean isActive) {
+    private CompanyPscs createBeneficialOwner(CompanyRequest spec, PscType pscType, boolean isActive) {
         var beneficialOwner = createBasePsc(spec, isActive);
         switch (pscType) {
             case INDIVIDUAL_BENEFICIAL_OWNER:
@@ -328,7 +370,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     private void buildIndividualBeneficialOwner(CompanyPscs beneficialOwner) {
         beneficialOwner.setKind(PscType.INDIVIDUAL_BENEFICIAL_OWNER.getKind());
         beneficialOwner.setCountryOfResidence(addressService
-                .getCountryOfResidence(Jurisdiction.WALES));
+                .getCountryOfResidence(JurisdictionType.WALES));
         beneficialOwner.setNationality(NATIONALITY);
         beneficialOwner.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 
@@ -345,7 +387,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
                 + PSC_SUFFIX + PscType.INDIVIDUAL_BENEFICIAL_OWNER.getLinkType()
                 + "/" + beneficialOwner.getId());
 
-        beneficialOwner.setUsualResidentialAddress(addressService.getAddress(Jurisdiction.NON_EU));
+        beneficialOwner.setUsualResidentialAddress(addressService.getAddress(JurisdictionType.NON_EU));
         beneficialOwner.setResidentialAddressSameAsServiceAddress(false);
     }
 
@@ -361,7 +403,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         beneficialOwner.setSanctioned(false);
         beneficialOwner.setIsSanctioned(false);
 
-        beneficialOwner.setPrincipalOfficeAddress(addressService.getAddress(Jurisdiction.NON_EU));
+        beneficialOwner.setPrincipalOfficeAddress(addressService.getAddress(JurisdictionType.NON_EU));
 
         var identification = new Identification();
         identification.setLegalAuthority(LEGAL_AUTHORITY);
@@ -371,9 +413,9 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
     private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType) {
         companyPsc.setKind(pscType);
-        companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(Jurisdiction.WALES));
-        companyPsc.setAddress(addressService.getAddress(Jurisdiction.SCOTLAND));
-        companyPsc.setUsualResidentialAddress(addressService.getAddress(Jurisdiction.WALES));
+        companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(JurisdictionType.WALES));
+        companyPsc.setAddress(addressService.getAddress(JurisdictionType.SCOTLAND));
+        companyPsc.setUsualResidentialAddress(addressService.getAddress(JurisdictionType.WALES));
         companyPsc.setResidentialAddressSameAsServiceAddress(false);
         companyPsc.setNationality(NATIONALITY);
         companyPsc.setDateOfBirth(new DateOfBirth(20, 9, 1975));
@@ -399,10 +441,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
         Identification identification = new Identification();
         identification.setCountryRegistered(
-                addressService.getCountryOfResidence(Jurisdiction.UNITED_KINGDOM));
+                addressService.getCountryOfResidence(JurisdictionType.UNITED_KINGDOM));
         identification.setLegalAuthority(LEGAL_AUTHORITY);
         identification.setLegalForm(LEGAL_FORM);
-        identification.setPlaceRegistered(addressService.getCountryOfResidence(Jurisdiction.WALES));
+        identification.setPlaceRegistered(addressService.getCountryOfResidence(JurisdictionType.WALES));
         identification.setRegistrationNumber(REGISTRATION_NUMBER);
         companyPsc.setIdentification(identification);
 
@@ -431,3 +473,4 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         }
     }
 }
+

@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,8 +28,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -54,11 +55,11 @@ class CompanyPscStatementServiceImplTest {
     @InjectMocks
     private CompanyPscStatementServiceImpl companyPscStatementService;
 
-    public CompanySpec spec;
+    public CompanyRequest spec;
 
     @BeforeEach
     void setUp() {
-        spec = new CompanySpec();
+        spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
     }
@@ -340,9 +341,12 @@ class CompanyPscStatementServiceImplTest {
 
     @Test
     void createPscStatements_defaultScenario() {
+        spec.setWithdrawnStatements(0);
+        spec.setActiveStatements(0);
+        spec.setNumberOfPscs(0);
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
         assertTrue(result.isEmpty());
     }
 
@@ -351,17 +355,17 @@ class CompanyPscStatementServiceImplTest {
         spec.setWithdrawnStatements(2);
         spec.setActiveStatements(0);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
+        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanyRequest.class));
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(2)).create(any(CompanySpec.class));
+        verify(companyPscStatementService, times(2)).create(any(CompanyRequest.class));
         assertEquals(2, result.size());
 
-        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
+        ArgumentCaptor<CompanyRequest> specCaptor = ArgumentCaptor.forClass(CompanyRequest.class);
         verify(companyPscStatementService, times(2)).create(specCaptor.capture());
 
-        List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
+        List<CompanyRequest> capturedSpecs = specCaptor.getAllValues();
         assertEquals(1, capturedSpecs.get(0).getWithdrawnStatements());
         assertEquals(0, capturedSpecs.get(0).getNumberOfPscs());
         assertEquals(COMPANY_NUMBER, capturedSpecs.get(0).getCompanyNumber());
@@ -376,17 +380,17 @@ class CompanyPscStatementServiceImplTest {
         spec.setWithdrawnStatements(0);
         spec.setActiveStatements(3);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
+        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanyRequest.class));
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(3)).create(any(CompanySpec.class));
+        verify(companyPscStatementService, times(3)).create(any(CompanyRequest.class));
         assertEquals(3, result.size());
 
-        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
+        ArgumentCaptor<CompanyRequest> specCaptor = ArgumentCaptor.forClass(CompanyRequest.class);
         verify(companyPscStatementService, times(3)).create(specCaptor.capture());
 
-        List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
+        List<CompanyRequest> capturedSpecs = specCaptor.getAllValues();
         assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
         assertEquals(0, capturedSpecs.get(1).getWithdrawnStatements());
         assertEquals(1, capturedSpecs.get(1).getNumberOfPscs());
@@ -400,17 +404,17 @@ class CompanyPscStatementServiceImplTest {
         spec.setWithdrawnStatements(1);
         spec.setActiveStatements(2);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
+        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanyRequest.class));
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(3)).create(any(CompanySpec.class));
+        verify(companyPscStatementService, times(3)).create(any(CompanyRequest.class));
         assertEquals(3, result.size());
 
-        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
+        ArgumentCaptor<CompanyRequest> specCaptor = ArgumentCaptor.forClass(CompanyRequest.class);
         verify(companyPscStatementService, times(3)).create(specCaptor.capture());
 
-        List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
+        List<CompanyRequest> capturedSpecs = specCaptor.getAllValues();
 
         assertEquals(1, capturedSpecs.get(0).getWithdrawnStatements());
         assertEquals(0, capturedSpecs.get(0).getNumberOfPscs());
@@ -465,62 +469,21 @@ class CompanyPscStatementServiceImplTest {
     }
 
     @Test
-    void createPscStatements_hasSuperSecurePscs() {
-        spec.setHasSuperSecurePscs(true);
-        spec.setNumberOfPscs(5);
-
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
-
-        List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
-
-        verify(companyPscStatementService, times(1)).create(any(CompanySpec.class));
-        assertEquals(1, result.size());
-
-        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
-        verify(companyPscStatementService, times(1)).create(specCaptor.capture());
-        CompanySpec capturedSpec = specCaptor.getValue();
-        assertEquals(0, capturedSpec.getWithdrawnStatements());
-        assertEquals(1, capturedSpec.getNumberOfPscs());
-        assertTrue(capturedSpec.getPscActive());
-    }
-
-    @Test
     void createPscStatements_activeStatementsPrioritizesOverNumberOfPsc() {
         spec.setActiveStatements(2);
         spec.setNumberOfPscs(5);
 
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
+        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanyRequest.class));
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, times(2)).create(any(CompanySpec.class));
+        verify(companyPscStatementService, times(2)).create(any(CompanyRequest.class));
         assertEquals(2, result.size());
 
-        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
+        ArgumentCaptor<CompanyRequest> specCaptor = ArgumentCaptor.forClass(CompanyRequest.class);
         verify(companyPscStatementService, times(2)).create(specCaptor.capture());
-        List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
+        List<CompanyRequest> capturedSpecs = specCaptor.getAllValues();
         assertEquals(2, capturedSpecs.size());
-        assertTrue(capturedSpecs.get(0).getPscActive());
-        assertEquals(1, capturedSpecs.get(0).getNumberOfPscs());
-        assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
-    }
-
-    @Test
-    void createPscStatements_numberOfPscUsedWhenActiveStatementsIsNull() {
-        spec.setActiveStatements(null);
-        spec.setNumberOfPscs(3);
-
-        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanySpec.class));
-
-        List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
-
-        verify(companyPscStatementService, times(3)).create(any(CompanySpec.class));
-        assertEquals(3, result.size());
-
-        ArgumentCaptor<CompanySpec> specCaptor = ArgumentCaptor.forClass(CompanySpec.class);
-        verify(companyPscStatementService, times(3)).create(specCaptor.capture());
-        List<CompanySpec> capturedSpecs = specCaptor.getAllValues();
-        assertEquals(3, capturedSpecs.size());
         assertTrue(capturedSpecs.get(0).getPscActive());
         assertEquals(1, capturedSpecs.get(0).getNumberOfPscs());
         assertEquals(0, capturedSpecs.get(0).getWithdrawnStatements());
@@ -534,7 +497,7 @@ class CompanyPscStatementServiceImplTest {
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
         assertTrue(result.isEmpty());
     }
 
@@ -546,7 +509,7 @@ class CompanyPscStatementServiceImplTest {
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
         assertTrue(result.isEmpty());
     }
 
@@ -556,7 +519,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanyPscStatement> result = companyPscStatementService.generateWithdrawnPscStatements(spec, null);
 
         assertTrue(result.isEmpty());
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
     }
 
     @Test
@@ -565,7 +528,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanyPscStatement> result = companyPscStatementService.generateWithdrawnPscStatements(spec, 0);
 
         assertTrue(result.isEmpty());
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
     }
 
     @Test
@@ -573,7 +536,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanyPscStatement> result = companyPscStatementService.generateWithdrawnPscStatements(spec, -1);
 
         assertTrue(result.isEmpty());
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
     }
 
     @Test
@@ -581,7 +544,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanyPscStatement> result = companyPscStatementService.generateActivePscStatements(spec, null);
 
         assertTrue(result.isEmpty());
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
     }
 
     @Test
@@ -589,7 +552,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanyPscStatement> result = companyPscStatementService.generateActivePscStatements(spec, 0);
 
         assertTrue(result.isEmpty());
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
     }
 
     @Test
@@ -597,7 +560,7 @@ class CompanyPscStatementServiceImplTest {
         List<CompanyPscStatement> result = companyPscStatementService.generateActivePscStatements(spec, -1);
 
         assertTrue(result.isEmpty());
-        verify(companyPscStatementService, never()).create(any(CompanySpec.class));
+        verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
     }
 
     @Test
@@ -616,4 +579,46 @@ class CompanyPscStatementServiceImplTest {
         verify(repository, never()).save(any());
     }
 
+    @Test
+    void createActivePscStatementsWithSuperSecurePscs() {
+        spec.setHasSuperSecurePscs(true);
+        spec.setActiveStatements(3);
+
+        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanyRequest.class));
+
+        List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
+
+        verify(companyPscStatementService, times(3)).create(any(CompanyRequest.class));
+        assertEquals(3, result.size());
+
+        ArgumentCaptor<CompanyRequest> specCaptor = ArgumentCaptor.forClass(CompanyRequest.class);
+        verify(companyPscStatementService, times(3)).create(specCaptor.capture());
+        List<CompanyRequest> capturedSpecs = specCaptor.getAllValues();
+        assertEquals(3, capturedSpecs.size());
+        for (CompanyRequest capturedSpec : capturedSpecs) {
+            assertEquals(Boolean.TRUE, capturedSpec.getHasSuperSecurePscs());
+        }
+    }
+
+    @Test
+    void createActivePscStatementsWithoutSuperSecurePscs() {
+        spec.setHasSuperSecurePscs(false);
+        spec.setActiveStatements(3);
+        spec.setWithdrawnStatements(2);
+
+        doReturn(new CompanyPscStatement()).when(companyPscStatementService).create(any(CompanyRequest.class));
+
+        List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
+
+        verify(companyPscStatementService, times(5)).create(any(CompanyRequest.class));
+        assertEquals(5, result.size());
+
+        ArgumentCaptor<CompanyRequest> specCaptor = ArgumentCaptor.forClass(CompanyRequest.class);
+        verify(companyPscStatementService, times(5)).create(specCaptor.capture());
+        List<CompanyRequest> capturedSpecs = specCaptor.getAllValues();
+        assertEquals(5, capturedSpecs.size());
+        for (CompanyRequest capturedSpec : capturedSpecs) {
+            assertNotEquals(Boolean.TRUE, capturedSpec.getHasSuperSecurePscs());
+        }
+    }
 }

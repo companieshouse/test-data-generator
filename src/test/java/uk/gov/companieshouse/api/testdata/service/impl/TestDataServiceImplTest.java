@@ -55,38 +55,38 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
-import uk.gov.companieshouse.api.testdata.model.rest.AccountPenaltiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspMembersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileData;
-import uk.gov.companieshouse.api.testdata.model.rest.AcspProfileSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AmlSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.AppointmentsResultData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CertificatesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CertifiedCopiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyWithPopulatedStructureSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesData;
-import uk.gov.companieshouse.api.testdata.model.rest.CombinedSicActivitiesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyAuthAllowListSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyData;
-import uk.gov.companieshouse.api.testdata.model.rest.PopulatedCompanyDetailsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.DisqualificationsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.Jurisdiction;
-import uk.gov.companieshouse.api.testdata.model.rest.MissingImageDeliveriesSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PenaltySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.PostcodesData;
-import uk.gov.companieshouse.api.testdata.model.rest.PublicCompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.RegistersSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsData;
-import uk.gov.companieshouse.api.testdata.model.rest.TransactionsSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserCompanyAssociationSpec;
-import uk.gov.companieshouse.api.testdata.model.rest.UserData;
-import uk.gov.companieshouse.api.testdata.model.rest.UserSpec;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
@@ -137,13 +137,13 @@ class TestDataServiceImplTest {
     @Mock
     private CompanyProfileService companyProfileService;
     @Mock
-    private DataService<FilingHistory, CompanySpec> filingHistoryService;
+    private DataService<FilingHistory, CompanyRequest> filingHistoryService;
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
     @Mock
     private AppointmentService appointmentService;
     @Mock
-    private DataService<CompanyMetrics, CompanySpec> metricsService;
+    private DataService<CompanyMetrics, CompanyRequest> metricsService;
     @Mock
     private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock
@@ -155,31 +155,31 @@ class TestDataServiceImplTest {
     @Mock
     private AdminPermissionsRepository adminPermissionsRepository;
     @Mock
-    private DataService<AcspMembersData, AcspMembersSpec> acspMembersService;
+    private DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
     @Mock
     private AcspMembersRepository acspMembersRepository;
     @Mock
     private AcspProfileService acspProfileService;
     @Captor
-    private ArgumentCaptor<CompanySpec> specCaptor;
+    private ArgumentCaptor<CompanyRequest> specCaptor;
     @Mock
     private CompanyAuthAllowListService companyAuthAllowListService;
     @Mock
     private AppealsService appealsService;
     @Mock
-    private DataService<CompanyRegisters, CompanySpec> companyRegistersService;
+    private DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
     @Mock
     private Appointment commonAppointment;
     @Mock
     private CompanySearchServiceImpl companySearchService;
     @Mock
-    private DataService<CombinedSicActivitiesData, CombinedSicActivitiesSpec> combinedSicActivitiesService;
+    private DataService<CombinedSicActivitiesResponse, CombinedSicActivitiesRequest> combinedSicActivitiesService;
     @Mock
-    private DataService<CertificatesData, CertificatesSpec> certificatesService;
+    private DataService<CertificatesResponse, CertificatesRequest> certificatesService;
     @Mock
-    private DataService<CertificatesData, CertifiedCopiesSpec> certifiedCopiesService;
+    private DataService<CertificatesResponse, CertifiedCopiesRequest> certifiedCopiesService;
     @Mock
-    private DataService<CertificatesData, MissingImageDeliveriesSpec> missingImageDeliveriesService;
+    private DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService;
     @Mock
     private AccountPenaltiesService accountPenaltiesService;
     @Mock
@@ -188,12 +188,12 @@ class TestDataServiceImplTest {
     private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock
     private PostcodeService postcodeService;
-    @Mock private DataService<TransactionsData, TransactionsSpec> transactionService;
+    @Mock private DataService<TransactionsResponse, TransactionsRequest> transactionService;
     @Mock
-    private DataService<Disqualifications, CompanySpec> disqualificationsService;
+    private DataService<Disqualifications, CompanyRequest> disqualificationsService;
     @Mock
-    private DataService<UserCompanyAssociationData,
-            UserCompanyAssociationSpec> userCompanyAssociationService;
+    private DataService<UserCompanyAssociationResponse,
+            UserCompanyAssociationRequest> userCompanyAssociationService;
     @Mock
     private UserCompanyAssociationRepository userCompanyAssociationRepository;
 
@@ -213,13 +213,12 @@ class TestDataServiceImplTest {
     /**
      * Sets up common mocks for creating a company.
      *
-     * @param spec                      the CompanySpec to be created.
      * @param companyNumber             the raw company number (as string) to be returned by
      *                                  randomService.
      * @param numberDigits              the number of digits to request from randomService.
      * @param expectedFullCompanyNumber the full company number expected in the created spec.
      */
-    private void setupCompanyCreationMocks(CompanySpec spec, String companyNumber, int numberDigits,
+    private void setupCompanyCreationMocks(String companyNumber, int numberDigits,
                                            String expectedFullCompanyNumber) throws DataException {
         when(randomService.getNumber(numberDigits)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(expectedFullCompanyNumber)).thenReturn(false);
@@ -228,7 +227,7 @@ class TestDataServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
     }
 
-    private CompanyData createCompanyDataWithRegisters(CompanySpec spec) throws Exception {
+    private CompanyProfileResponse createCompanyDataWithRegisters(CompanyRequest spec) throws Exception {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
 
@@ -242,20 +241,18 @@ class TestDataServiceImplTest {
         return testDataService.createCompanyData(spec);
     }
 
-    private CompanySpec captureCompanySpec() throws DataException {
-        ArgumentCaptor<CompanySpec> captor = ArgumentCaptor.forClass(CompanySpec.class);
+    private CompanyRequest captureCompanySpec() throws DataException {
+        ArgumentCaptor<CompanyRequest> captor = ArgumentCaptor.forClass(CompanyRequest.class);
         verify(companyProfileService, times(1)).create(captor.capture());
         return captor.getValue();
     }
 
-    private CompanySpec captureCreatedSpec() throws DataException {
-        ArgumentCaptor<CompanySpec> captor = ArgumentCaptor.forClass(CompanySpec.class);
-        verify(companyProfileService, times(1)).create(captor.capture());
-        return captor.getValue();
+    private CompanyRequest captureCreatedSpec() throws DataException {
+        return captureCompanySpec();
     }
 
-    private void verifyCommonCompanyCreation(CompanySpec capturedSpec, CompanyData createdCompany,
-                                             String expectedFullCompanyNumber, Jurisdiction expectedJurisdiction)
+    private void verifyCommonCompanyCreation(CompanyRequest capturedSpec, CompanyProfileResponse createdCompany,
+                                             String expectedFullCompanyNumber, JurisdictionType expectedJurisdiction)
             throws DataException {
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(expectedJurisdiction, capturedSpec.getJurisdiction());
@@ -281,18 +278,18 @@ class TestDataServiceImplTest {
      * @return the result of testDataService.createAcspMembersData(...)
      * @throws DataException if creation fails
      */
-    private AcspMembersData createAcspMembersDataHelper(String userId,
-                                                        AcspProfileData profileData,
-                                                        AcspMembersData membersData, AcspProfileSpec profileSpec) throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+    private AcspMembersResponse createAcspMembersDataHelper(String userId,
+                                                            AcspProfileResponse profileData,
+                                                            AcspMembersResponse membersData, AcspProfileRequest profileSpec) throws DataException {
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId(userId);
         spec.setAcspProfile(profileSpec);
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(profileData);
-        when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(membersData);
+        when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(profileData);
+        when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(membersData);
         return testDataService.createAcspMembersData(spec);
     }
 
-    private void verifyAcspMembersData(AcspMembersData data,
+    private void verifyAcspMembersData(AcspMembersResponse data,
                                        String expectedMemberId,
                                        String expectedAcspNumber,
                                        String expectedUserId,
@@ -361,68 +358,68 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataDefaultSpec() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
 
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
-                Jurisdiction.ENGLAND_WALES);
+                JurisdictionType.ENGLAND_WALES);
     }
 
     @Test
     void createCompanyDataScottishSpec() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 6, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
-                Jurisdiction.SCOTLAND);
+                JurisdictionType.SCOTLAND);
     }
 
     @Test
     void createCompanyDataNISpec() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.NI);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.NI);
         String expectedFullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 6, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
-                Jurisdiction.NI);
+                JurisdictionType.NI);
     }
 
     @Test
     void createCompanyDataSpec() throws Exception {
         final String companyNumber = "12345678";
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         when(randomService.getNumber(8)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(companyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(companyNumber, capturedSpec.getCompanyNumber());
-        assertEquals(Jurisdiction.ENGLAND_WALES, capturedSpec.getJurisdiction());
+        assertEquals(JurisdictionType.ENGLAND_WALES, capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber,
-                Jurisdiction.ENGLAND_WALES);
+                JurisdictionType.ENGLAND_WALES);
         verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
     void createCompanyDataExistingNumber() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.SCOTLAND);
         final String existingCompanyNumber = "555555";
         final String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
         when(randomService.getNumber(anyInt()))
@@ -436,35 +433,35 @@ class TestDataServiceImplTest {
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
-                Jurisdiction.SCOTLAND);
+                JurisdictionType.SCOTLAND);
         verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
     void createCompanyDataWithCompanyRegisters() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        RegistersSpec directorsRegister = new RegistersSpec();
+        CompanyRequest spec = new CompanyRequest();
+        RegistersRequest directorsRegister = new RegistersRequest();
         directorsRegister.setRegisterType("directors");
         directorsRegister.setRegisterMovedTo("Companies House");
         spec.setRegisters(List.of(directorsRegister));
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
-                Jurisdiction.ENGLAND_WALES);
+                JurisdictionType.ENGLAND_WALES);
         verify(companyRegistersService, times(1)).create(capturedSpec);
     }
 
     @Test
     void createCompanyDataRollBack() throws DataException {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.NI);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.NI);
         final String fullCompanyNumber =
                 spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
 
@@ -481,7 +478,7 @@ class TestDataServiceImplTest {
 
         assertEquals(pscStatementRuntimeException, thrown.getCause());
 
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
@@ -493,8 +490,8 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataOverseasSpec() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.UNITED_KINGDOM);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.UNITED_KINGDOM);
         when(randomService.getNumber(6)).thenReturn(
                 Long.valueOf(OVERSEAS_COMPANY_NUMBER.substring(2)));
         final String fullCompanyNumber = OVERSEAS_COMPANY_NUMBER;
@@ -503,10 +500,10 @@ class TestDataServiceImplTest {
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
-        assertEquals(Jurisdiction.UNITED_KINGDOM, capturedSpec.getJurisdiction());
+        assertEquals(JurisdictionType.UNITED_KINGDOM, capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointment(capturedSpec);
@@ -660,153 +657,153 @@ class TestDataServiceImplTest {
 
     @Test
     void createUserDataThrowsExceptionWhenPasswordIsNull() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword(null);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword(null);
 
         DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createUserData(userSpec));
+                testDataService.createUserData(userRequest));
         assertEquals("Password is required to create a user", exception.getMessage());
     }
 
     @Test
     void createUserDataThrowsExceptionWhenPasswordIsEmpty() {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("");
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("");
 
         DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createUserData(userSpec));
+                testDataService.createUserData(userRequest));
         assertEquals("Password is required to create a user", exception.getMessage());
     }
 
     @Test
     void createUserDataWithNullRoles() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(null);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(null);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
-        assertEquals(userData, result);
-        verify(userService).create(userSpec);
+        assertEquals(userResponse, result);
+        verify(userService).create(userRequest);
         verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
     void createUserDataWithEmptyRoles() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(new ArrayList<>());
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(new ArrayList<>());
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
-        assertEquals(userData, result);
-        verify(userService).create(userSpec);
+        assertEquals(userResponse, result);
+        verify(userService).create(userRequest);
         verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
     void createUserDataWithRolesAndPermissions() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("group1"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("group1"));
 
         var entity = new AdminPermissions();
         entity.setPermissions(List.of("perm1", "perm2"));
         when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
-        assertEquals(userData, result);
-        assertEquals(List.of("perm1", "perm2"), userSpec.getRoles());
-        verify(userService).create(userSpec);
+        assertEquals(userResponse, result);
+        assertEquals(List.of("perm1", "perm2"), userRequest.getRoles());
+        verify(userService).create(userRequest);
         verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
     void createUserDataWithRolesAndNoPermissions() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("group1"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("group1"));
 
         when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
-        assertEquals(userData, result);
-        assertEquals(List.of("group1"), userSpec.getRoles());
-        verify(userService).create(userSpec);
+        assertEquals(userResponse, result);
+        assertEquals(List.of("group1"), userRequest.getRoles());
+        verify(userService).create(userRequest);
         verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
     void createUserData_addsPermissionsWhenEntityAndPermissionsExist() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("group1"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("group1"));
 
         AdminPermissions entity = new AdminPermissions();
         entity.setPermissions(List.of("perm1", "perm2"));
         when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        testDataService.createUserData(userSpec);
+        testDataService.createUserData(userRequest);
 
-        assertEquals(List.of("perm1", "perm2"), userSpec.getRoles());
+        assertEquals(List.of("perm1", "perm2"), userRequest.getRoles());
     }
 
     @Test
     void createUserData_doesNotAddPermissionsWhenEntityIsNull() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("group1"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("group1"));
 
         when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        testDataService.createUserData(userSpec);
+        testDataService.createUserData(userRequest);
 
-        assertEquals(List.of("group1"), userSpec.getRoles());
+        assertEquals(List.of("group1"), userRequest.getRoles());
     }
 
     @Test
     void createUserData_doesNotAddPermissionsWhenPermissionsAreNull() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("group1"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("group1"));
 
         AdminPermissions entity = new AdminPermissions();
         entity.setPermissions(null);
         when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        testDataService.createUserData(userSpec);
+        testDataService.createUserData(userRequest);
 
-        assertEquals(List.of("group1"), userSpec.getRoles());
+        assertEquals(List.of("group1"), userRequest.getRoles());
     }
 
     @Test
     void createUserData_handlesMultipleGroupNamesWithMixedEntities() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setRoles(List.of("group1", "group2", "group3"));
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("group1", "group2", "group3"));
 
         AdminPermissions entity1 = new AdminPermissions();
         entity1.setPermissions(List.of("perm1"));
@@ -817,47 +814,47 @@ class TestDataServiceImplTest {
         when(adminPermissionsRepository.findByGroupName("group2")).thenReturn(null);
         when(adminPermissionsRepository.findByGroupName("group3")).thenReturn(entity2);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        testDataService.createUserData(userSpec);
+        testDataService.createUserData(userRequest);
 
-        assertEquals(List.of("perm1"), userSpec.getRoles());
+        assertEquals(List.of("perm1"), userRequest.getRoles());
     }
 
     @Test
     void createUserDataWithCompanyAuthAllowListTrue() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setIsCompanyAuthAllowList(true);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setIsCompanyAuthAllowList(true);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
-        assertEquals(userData, result);
-        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListSpec.class));
+        assertEquals(userResponse, result);
+        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListRequest.class));
     }
 
     @Test
     void createUserDataWithCompanyAuthAllowListFalse() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setIsCompanyAuthAllowList(false);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setIsCompanyAuthAllowList(false);
 
-        UserData userData = new UserData("id", "email", "forename", "surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
-        assertEquals(userData, result);
+        assertEquals(userResponse, result);
         verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
     void createAcspMembersData() throws DataException {
-        AcspProfileSpec profileSpec = new AcspProfileSpec();
+        AcspProfileRequest profileSpec = new AcspProfileRequest();
         profileSpec.setAcspNumber("acspNumber");
         profileSpec.setStatus("active");
         profileSpec.setType("limited-company");
@@ -867,24 +864,24 @@ class TestDataServiceImplTest {
         profileEntity.setName(profileSpec.getName());
         profileEntity.setVersion(1L);
 
-        AcspProfileData acspProfileData =
-                new AcspProfileData(profileEntity);
-        AcspMembersData expectedMembersData =
-                new AcspMembersData(new ObjectId(),
+        AcspProfileResponse acspProfileResponse =
+                new AcspProfileResponse(profileEntity);
+        AcspMembersResponse expectedMembersData =
+                new AcspMembersResponse(new ObjectId(),
                         profileSpec.getAcspNumber(), "userId", "active", "role");
-        AcspMembersData result = createAcspMembersDataHelper(
-                "userId", acspProfileData, expectedMembersData, profileSpec);
+        AcspMembersResponse result = createAcspMembersDataHelper(
+                "userId", acspProfileResponse, expectedMembersData, profileSpec);
         verifyAcspMembersData(result,
                 String.valueOf(expectedMembersData.getAcspMemberId()),
-                acspProfileData.getAcspNumber(), expectedMembersData.getUserId(),
+                acspProfileResponse.getAcspNumber(), expectedMembersData.getUserId(),
                 expectedMembersData.getStatus(), expectedMembersData.getUserRole());
-        verify(acspMembersService).create(any(AcspMembersSpec.class));
+        verify(acspMembersService).create(any(AcspMembersRequest.class));
         verify(acspProfileService).create(argThat(profile -> profile.getAmlDetails() == null));
     }
 
     @Test
     void createAcspMembersDataNullUserId() {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
         assertEquals("User ID is required to create an ACSP member", exception.getMessage());
@@ -892,10 +889,10 @@ class TestDataServiceImplTest {
 
     @Test
     void createAcspMembersDataException() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
-        when(acspProfileService.create(any(AcspProfileSpec.class)))
+        when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
@@ -906,52 +903,52 @@ class TestDataServiceImplTest {
 
     @Test
     void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
        AcspProfile profileEntity = new AcspProfile();
         profileEntity.setAcspNumber("acspNumber");
         profileEntity.setName("name");
         profileEntity.setVersion(1L);
 
-        AcspProfileData acspProfileData = new AcspProfileData(profileEntity);
-        AcspMembersData acspMembersData =
-                new AcspMembersData(new ObjectId(), acspProfileData.getAcspNumber(),"userId",
+        AcspProfileResponse acspProfileResponse = new AcspProfileResponse(profileEntity);
+        AcspMembersResponse acspMembersResponse =
+                new AcspMembersResponse(new ObjectId(), acspProfileResponse.getAcspNumber(),"userId",
                         "active", "role");
         var acspStatus = "active";
         var acspType = "ltd";
         var supervisoryBody = "financial-conduct-authority-fca";
         var membershipDetails = "Membership ID: FCA654321";
-        AcspProfileSpec acspProfile = new AcspProfileSpec();
+        AcspProfileRequest acspProfile = new AcspProfileRequest();
         acspProfile.setStatus(acspStatus);
         acspProfile.setType(acspType);
-        AmlSpec amlSpec = new AmlSpec();
-        amlSpec.setSupervisoryBody(supervisoryBody);
-        amlSpec.setMembershipDetails(membershipDetails);
+        AmlRequest amlRequest = new AmlRequest();
+        amlRequest.setSupervisoryBody(supervisoryBody);
+        amlRequest.setMembershipDetails(membershipDetails);
 
-        acspProfile.setAmlDetails(Collections.singletonList(amlSpec));
+        acspProfile.setAmlDetails(Collections.singletonList(amlRequest));
 
         spec.setAcspProfile(acspProfile);
 
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
-        when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(acspMembersData);
-        AcspMembersData result = testDataService.createAcspMembersData(spec);
+        when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
+        when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
+        AcspMembersResponse result = testDataService.createAcspMembersData(spec);
 
         verifyAcspMembersData(result,
-                String.valueOf(acspMembersData.getAcspMemberId()),
-                acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
-        acspProfileData.getAcspNumber();
+                String.valueOf(acspMembersResponse.getAcspMemberId()),
+                acspProfileResponse.getAcspNumber(), acspMembersResponse.getUserId(), acspMembersResponse.getStatus(), acspMembersResponse.getUserRole());
+        acspProfileResponse.getAcspNumber();
 
         verify(acspProfileService).create(acspProfile);
 
         verify(acspMembersService).create(argThat(membersSpec ->
-                acspMembersData.getUserId().equals(membersSpec.getUserId())
-                        && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
+                acspMembersResponse.getUserId().equals(membersSpec.getUserId())
+                        && acspMembersResponse.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
     @Test
     void createAcspMembersDataWhenProfileIsNull() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
         AcspProfile profileEntity = new AcspProfile();
@@ -959,36 +956,36 @@ class TestDataServiceImplTest {
         profileEntity.setName("name");
         profileEntity.setVersion(1L);
 
-        AcspProfileData acspProfileData = new AcspProfileData(profileEntity);
-        AcspMembersData acspMembersData = new AcspMembersData(new ObjectId(),
+        AcspProfileResponse acspProfileResponse = new AcspProfileResponse(profileEntity);
+        AcspMembersResponse acspMembersResponse = new AcspMembersResponse(new ObjectId(),
                 "acspNumber", "userId", "active", "role");
         spec.setAcspProfile(null);
 
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
-        when(acspMembersService.create(any(AcspMembersSpec.class))).thenReturn(acspMembersData);
+        when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
+        when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
 
-        AcspMembersData result = testDataService.createAcspMembersData(spec);
+        AcspMembersResponse result = testDataService.createAcspMembersData(spec);
 
         verifyAcspMembersData(result,
-                String.valueOf(acspMembersData.getAcspMemberId()),
-                acspProfileData.getAcspNumber(), acspMembersData.getUserId(), acspMembersData.getStatus(), acspMembersData.getUserRole());
+                String.valueOf(acspMembersResponse.getAcspMemberId()),
+                acspProfileResponse.getAcspNumber(), acspMembersResponse.getUserId(), acspMembersResponse.getStatus(), acspMembersResponse.getUserRole());
 
         verify(acspProfileService).create(argThat(profile ->
                 profile.getStatus() == null
                         && profile.getType() == null
                         && profile.getAmlDetails() == null));
         verify(acspMembersService).create(argThat(membersSpec ->
-                acspMembersData.getUserId().equals(membersSpec.getUserId())
-                        && acspMembersData.getAcspNumber().equals(membersSpec.getAcspNumber())
+                acspMembersResponse.getUserId().equals(membersSpec.getUserId())
+                        && acspMembersResponse.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
     @Test
     void createAcspMembersDataProfileCreationException() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
-        when(acspProfileService.create(any(AcspProfileSpec.class)))
+        when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
@@ -999,7 +996,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createAcspMembersDataMemberCreationException() throws DataException {
-        AcspMembersSpec spec = new AcspMembersSpec();
+        AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
         AcspProfile profileEntity = new AcspProfile();
@@ -1007,9 +1004,9 @@ class TestDataServiceImplTest {
         profileEntity.setName("name");
         profileEntity.setVersion(1L);
 
-        AcspProfileData acspProfileData = new AcspProfileData(profileEntity);
-        when(acspProfileService.create(any(AcspProfileSpec.class))).thenReturn(acspProfileData);
-        when(acspMembersService.create(any(AcspMembersSpec.class)))
+        AcspProfileResponse acspProfileResponse = new AcspProfileResponse(profileEntity);
+        when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
+        when(acspMembersService.create(any(AcspMembersRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createAcspMembersData(spec));
@@ -1057,63 +1054,63 @@ class TestDataServiceImplTest {
 
     @Test
     void createUserDataWithCompanyAuthAllowList() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setIsCompanyAuthAllowList(true);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setIsCompanyAuthAllowList(true);
 
-        UserData mockUserData = new UserData("userId", "email@example.com", "Forename", "Surname");
+        UserResponse mockUserResponse = new UserResponse("userId", "email@example.com", "Forename", "Surname");
 
-        when(userService.create(userSpec)).thenReturn(mockUserData);
+        when(userService.create(userRequest)).thenReturn(mockUserResponse);
 
-        UserData createdUserData = testDataService.createUserData(userSpec);
+        UserResponse createdUserResponse = testDataService.createUserData(userRequest);
 
-        assertEquals("userId", createdUserData.getId());
-        assertEquals("email@example.com", createdUserData.getEmail());
-        assertEquals("Forename", createdUserData.getForename());
-        assertEquals("Surname", createdUserData.getSurname());
-        assertTrue(userSpec.getIsCompanyAuthAllowList());
+        assertEquals("userId", createdUserResponse.getId());
+        assertEquals("email@example.com", createdUserResponse.getEmail());
+        assertEquals("Forename", createdUserResponse.getForename());
+        assertEquals("Surname", createdUserResponse.getSurname());
+        assertTrue(userRequest.getIsCompanyAuthAllowList());
 
-        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListSpec.class));
+        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListRequest.class));
     }
 
     @Test
     void createUserDataWithOutCompanyAuthAllow() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
 
-        UserData mockUserData = new UserData("userId", "email@example.com", "Forename", "Surname");
+        UserResponse mockUserResponse = new UserResponse("userId", "email@example.com", "Forename", "Surname");
 
-        when(userService.create(userSpec)).thenReturn(mockUserData);
+        when(userService.create(userRequest)).thenReturn(mockUserResponse);
 
-        UserData createdUserData = testDataService.createUserData(userSpec);
+        UserResponse createdUserResponse = testDataService.createUserData(userRequest);
 
-        assertEquals("userId", createdUserData.getId());
-        assertEquals("email@example.com", createdUserData.getEmail());
-        assertEquals("Forename", createdUserData.getForename());
-        assertEquals("Surname", createdUserData.getSurname());
-        assertNull(userSpec.getIsCompanyAuthAllowList());
+        assertEquals("userId", createdUserResponse.getId());
+        assertEquals("email@example.com", createdUserResponse.getEmail());
+        assertEquals("Forename", createdUserResponse.getForename());
+        assertEquals("Surname", createdUserResponse.getSurname());
+        assertNull(userRequest.getIsCompanyAuthAllowList());
 
-        verify(companyAuthAllowListService, times(0)).create(any(CompanyAuthAllowListSpec.class));
+        verify(companyAuthAllowListService, times(0)).create(any(CompanyAuthAllowListRequest.class));
     }
 
     @Test
     void createUserDataWithNullCompanyAuthAllowList() throws DataException {
-        UserSpec userSpec = new UserSpec();
-        userSpec.setPassword("password");
-        userSpec.setIsCompanyAuthAllowList(null);
+        UserRequest userRequest = new UserRequest();
+        userRequest.setPassword("password");
+        userRequest.setIsCompanyAuthAllowList(null);
 
-        UserData userData = new UserData("userId", "test@example.com", "Forename", "Surname");
-        when(userService.create(userSpec)).thenReturn(userData);
+        UserResponse userResponse = new UserResponse("userId", "test@example.com", "Forename", "Surname");
+        when(userService.create(userRequest)).thenReturn(userResponse);
 
-        UserData result = testDataService.createUserData(userSpec);
+        UserResponse result = testDataService.createUserData(userRequest);
 
         assertEquals("test@example.com", result.getEmail());
         assertEquals("Forename", result.getForename());
         assertEquals("Surname", result.getSurname());
         assertEquals("userId", result.getId());
-        assertNull(userSpec.getIsCompanyAuthAllowList());
-        verify(userService, times(1)).create(userSpec);
-        verify(companyAuthAllowListService, never()).create(any(CompanyAuthAllowListSpec.class));
+        assertNull(userRequest.getIsCompanyAuthAllowList());
+        verify(userService, times(1)).create(userRequest);
+        verify(companyAuthAllowListService, never()).create(any(CompanyAuthAllowListRequest.class));
     }
 
     @Test
@@ -1258,13 +1255,13 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataWithNullRegisters() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setRegisters(null);
 
-        CompanyData createdCompany = createCompanyDataWithRegisters(spec);
-        CompanySpec capturedSpec = captureCreatedSpec();
+        CompanyProfileResponse createdCompany = createCompanyDataWithRegisters(spec);
+        CompanyRequest capturedSpec = captureCreatedSpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
-                Jurisdiction.ENGLAND_WALES);
+                JurisdictionType.ENGLAND_WALES);
 
         assertEquals(OFFICER_ID, commonAppointment.getOfficerId());
         assertEquals(APPOINTMENT_ID, commonAppointment.getAppointmentId());
@@ -1272,32 +1269,32 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataWithEmptyRegisters() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setRegisters(new ArrayList<>());
 
-        CompanyData createdCompany = createCompanyDataWithRegisters(spec);
-        CompanySpec capturedSpec = captureCreatedSpec();
+        CompanyProfileResponse createdCompany = createCompanyDataWithRegisters(spec);
+        CompanyRequest capturedSpec = captureCreatedSpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
-                Jurisdiction.ENGLAND_WALES);
+                JurisdictionType.ENGLAND_WALES);
     }
 
     @Test
     void createCertificatesData() throws DataException {
-        CertificatesSpec spec = new CertificatesSpec();
+        CertificatesRequest spec = new CertificatesRequest();
         spec.setUserId(USER_ID);
 
-        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+        CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
             "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
-        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+        CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
             "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
-        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
-        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+        List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesResponse expectedCertificatesResponse = new CertificatesResponse(entries);
 
-        when(certificatesService.create(any(CertificatesSpec.class))).thenReturn(expectedCertificatesData);
-        CertificatesData result = testDataService.createCertificatesData(spec);
+        when(certificatesService.create(any(CertificatesRequest.class))).thenReturn(expectedCertificatesResponse);
+        CertificatesResponse result = testDataService.createCertificatesData(spec);
 
         assertNotNull(result);
         assertEquals(2, result.getCertificates().size());
@@ -1309,7 +1306,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCertificatesDataNullUserId() {
-        CertificatesSpec spec = new CertificatesSpec();
+        CertificatesRequest spec = new CertificatesRequest();
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createCertificatesData(spec));
         assertEquals("User ID is required to create certificates", exception.getMessage());
@@ -1317,10 +1314,10 @@ class TestDataServiceImplTest {
 
     @Test
     void createCertificatesDataException() throws DataException {
-        CertificatesSpec spec = new CertificatesSpec();
+        CertificatesRequest spec = new CertificatesRequest();
         spec.setUserId(USER_ID);
 
-        when(certificatesService.create(any(CertificatesSpec.class)))
+        when(certificatesService.create(any(CertificatesRequest.class)))
                 .thenThrow(new DataException("Error creating certificates"));
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createCertificatesData(spec));
@@ -1367,21 +1364,21 @@ class TestDataServiceImplTest {
 
     @Test
     void createCertifiedCopiesData() throws DataException {
-        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         spec.setUserId(USER_ID);
 
-        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+        CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
             "CCD-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
-        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+        CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
             "CCD-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
-        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
-        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+        List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesResponse expectedCertificatesResponse = new CertificatesResponse(entries);
 
-        when(certifiedCopiesService.create(any(CertifiedCopiesSpec.class))).thenReturn(expectedCertificatesData);
-        CertificatesData result = testDataService.createCertifiedCopiesData(spec);
+        when(certifiedCopiesService.create(any(CertifiedCopiesRequest.class))).thenReturn(expectedCertificatesResponse);
+        CertificatesResponse result = testDataService.createCertifiedCopiesData(spec);
 
         assertNotNull(result);
         assertEquals(2, result.getCertificates().size());
@@ -1393,7 +1390,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createCertifiedCopiesDataNullUserId() {
-        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         DataException exception = assertThrows(DataException.class,
             () -> testDataService.createCertifiedCopiesData(spec));
         assertEquals("User ID is required to create certified copies", exception.getMessage());
@@ -1401,10 +1398,10 @@ class TestDataServiceImplTest {
 
     @Test
     void createCertifiedCopiesDataException() throws DataException {
-        CertifiedCopiesSpec spec = new CertifiedCopiesSpec();
+        CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         spec.setUserId(USER_ID);
 
-        when(certifiedCopiesService.create(any(CertifiedCopiesSpec.class)))
+        when(certifiedCopiesService.create(any(CertifiedCopiesRequest.class)))
             .thenThrow(new DataException("Error creating certified copies"));
         DataException exception = assertThrows(DataException.class,
             () -> testDataService.createCertifiedCopiesData(spec));
@@ -1451,21 +1448,21 @@ class TestDataServiceImplTest {
 
     @Test
     void createMissingImageDeliveriesData() throws DataException {
-        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
         spec.setUserId(USER_ID);
 
-        CertificatesData.CertificateEntry entry1 = new CertificatesData.CertificateEntry(
+        CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
             "MID-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
-        CertificatesData.CertificateEntry entry2 = new CertificatesData.CertificateEntry(
+        CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
             "MID-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
-        List<CertificatesData.CertificateEntry> entries = List.of(entry1, entry2);
-        CertificatesData expectedCertificatesData = new CertificatesData(entries);
+        List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
+        CertificatesResponse expectedCertificatesResponse = new CertificatesResponse(entries);
 
-        when(missingImageDeliveriesService.create(any(MissingImageDeliveriesSpec.class))).thenReturn(expectedCertificatesData);
-        CertificatesData result = testDataService.createMissingImageDeliveriesData(spec);
+        when(missingImageDeliveriesService.create(any(MissingImageDeliveriesRequest.class))).thenReturn(expectedCertificatesResponse);
+        CertificatesResponse result = testDataService.createMissingImageDeliveriesData(spec);
 
         assertNotNull(result);
         assertEquals(2, result.getCertificates().size());
@@ -1477,7 +1474,7 @@ class TestDataServiceImplTest {
 
     @Test
     void createMissingImageDeliveriesDataNullUserId() {
-        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
         DataException exception = assertThrows(DataException.class,
             () -> testDataService.createMissingImageDeliveriesData(spec));
         assertEquals("User ID is required to create missing image deliveries", exception.getMessage());
@@ -1485,10 +1482,10 @@ class TestDataServiceImplTest {
 
     @Test
     void createMissingImageDeliveriesDataException() throws DataException {
-        MissingImageDeliveriesSpec spec = new MissingImageDeliveriesSpec();
+        MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
         spec.setUserId(USER_ID);
 
-        when(missingImageDeliveriesService.create(any(MissingImageDeliveriesSpec.class)))
+        when(missingImageDeliveriesService.create(any(MissingImageDeliveriesRequest.class)))
             .thenThrow(new DataException("Error creating missing image deliveries"));
         DataException exception = assertThrows(DataException.class,
             () -> testDataService.createMissingImageDeliveriesData(spec));
@@ -1549,19 +1546,19 @@ class TestDataServiceImplTest {
                                                     int expectedInvocationCount)
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(isElasticSearchDeployed);
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAddToCompanyElasticSearchIndex(true);
         spec.setAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
-                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+                expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(expectedInvocationCount))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
         verify(alphabeticalCompanySearch, times(expectedInvocationCount))
@@ -1702,43 +1699,43 @@ class TestDataServiceImplTest {
 
     @Test
     void createPenaltyDataSuccess() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("NI23456");
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode("NI23456");
 
-        AccountPenaltiesData expectedData = new AccountPenaltiesData();
+        AccountPenaltiesResponse expectedData = new AccountPenaltiesResponse();
         expectedData.setCompanyCode("LP");
         expectedData.setCustomerCode("NI23456");
 
-        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenReturn(expectedData);
+        when(accountPenaltiesService.createAccountPenalties(penaltyRequest)).thenReturn(expectedData);
 
-        AccountPenaltiesData result = testDataService.createPenaltyData(penaltySpec);
+        AccountPenaltiesResponse result = testDataService.createPenaltyData(penaltyRequest);
 
         assertEquals(expectedData, result);
-        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltyRequest);
     }
 
     @Test
     void createPenaltyDataThrowsException() throws DataException {
-        PenaltySpec penaltySpec = new PenaltySpec();
-        penaltySpec.setCompanyCode("LP");
-        penaltySpec.setCustomerCode("NI23456");
+        PenaltyRequest penaltyRequest = new PenaltyRequest();
+        penaltyRequest.setCompanyCode("LP");
+        penaltyRequest.setCustomerCode("NI23456");
 
         DataException ex = new DataException("creation failed");
-        when(accountPenaltiesService.createAccountPenalties(penaltySpec)).thenThrow(ex);
+        when(accountPenaltiesService.createAccountPenalties(penaltyRequest)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.createPenaltyData(penaltySpec));
+                testDataService.createPenaltyData(penaltyRequest));
         assertEquals("Error creating account penalties", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
-        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltySpec);
+        verify(accountPenaltiesService, times(1)).createAccountPenalties(penaltyRequest);
     }
 
     @Test
     void getAccountPenaltiesDataDelegatesToService() throws Exception {
         when(accountPenaltiesService.getAccountPenalties(PENALTY_ID))
-                .thenReturn(new AccountPenaltiesData());
-        AccountPenaltiesData result = testDataService.getAccountPenaltiesData(PENALTY_ID);
+                .thenReturn(new AccountPenaltiesResponse());
+        AccountPenaltiesResponse result = testDataService.getAccountPenaltiesData(PENALTY_ID);
         assertNotNull(result);
         verify(accountPenaltiesService).getAccountPenalties(PENALTY_ID);
     }
@@ -1754,17 +1751,17 @@ class TestDataServiceImplTest {
 
     @Test
     void createPenaltyDataDelegatesToService() throws Exception {
-        PenaltySpec spec = new PenaltySpec();
-        AccountPenaltiesData data = new AccountPenaltiesData();
+        PenaltyRequest spec = new PenaltyRequest();
+        AccountPenaltiesResponse data = new AccountPenaltiesResponse();
         when(accountPenaltiesService.createAccountPenalties(spec)).thenReturn(data);
-        AccountPenaltiesData result = testDataService.createPenaltyData(spec);
+        AccountPenaltiesResponse result = testDataService.createPenaltyData(spec);
         assertEquals(data, result);
         verify(accountPenaltiesService).createAccountPenalties(spec);
     }
 
     @Test
     void createPenaltyDataThrowsDataException() throws Exception {
-        PenaltySpec spec = new PenaltySpec();
+        PenaltyRequest spec = new PenaltyRequest();
         when(accountPenaltiesService.createAccountPenalties(spec))
                 .thenThrow(new DataException("fail"));
         DataException ex = assertThrows(DataException.class, () ->
@@ -1828,39 +1825,39 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyWithCompanyNumberPadding() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setIsPaddingCompanyNumber(true);
-        spec.setJurisdiction(Jurisdiction.SCOTLAND);
+        spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String companyNumber = "123";
         String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + "000" + companyNumber;
 
         // Use anyInt() to allow flexibility in the argument
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(companyNumber));
 
-        setupCompanyCreationMocks(spec, companyNumber, 3, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(companyNumber, 3, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
-                Jurisdiction.SCOTLAND);
+                JurisdictionType.SCOTLAND);
     }
 
     @Test
     void testCreateCompanyWithoutAlphabeticalSearch()
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAdvancedSearch(true);
         spec.setAddToCompanyElasticSearchIndex(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
-                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+                expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(1))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
         verify(alphabeticalCompanySearch, times(0))
@@ -1873,18 +1870,18 @@ class TestDataServiceImplTest {
     void testCreateCompanyWithoutAdvancedSearch()
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAlphabeticalSearch(true);
         spec.setAddToCompanyElasticSearchIndex(true);
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
-                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+                expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(1))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
         verify(alphabeticalCompanySearch, times(1))
@@ -1918,7 +1915,7 @@ class TestDataServiceImplTest {
         mockPostcode.setCountry(country);
 
         when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of(mockPostcode));
-        PostcodesData result = testDataService.getPostcodes(country);
+        PostcodesResponse result = testDataService.getPostcodes(country);
         assertEquals(buildingNumber, result.getBuildingNumber());
         assertEquals(streetName + " " + streetDescriptor, result.getFirstLine());
         assertEquals(dependentLocality, result.getDependentLocality());
@@ -1933,7 +1930,7 @@ class TestDataServiceImplTest {
 
         when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of());
 
-        PostcodesData result = testDataService.getPostcodes(country);
+        PostcodesResponse result = testDataService.getPostcodes(country);
 
         assertNull(result);
         verify(postcodeService, times(1)).getPostcodeByCountry(country);
@@ -1953,19 +1950,19 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyDataWithDisqualifications() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
-        DisqualificationsSpec disqSpec = new DisqualificationsSpec();
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        DisqualificationsRequest disqSpec = new DisqualificationsRequest();
         disqSpec.setCorporateOfficer(false);
         spec.setDisqualifiedOfficers(List.of(disqSpec));
 
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, COMPANY_NUMBER);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         Disqualifications disqEntity = new Disqualifications();
         disqEntity.setId("D123");
         when(disqualificationsService.create(spec)).thenReturn(disqEntity);
 
-        CompanyData result = testDataService.createCompanyData(spec);
+        CompanyProfileResponse result = testDataService.createCompanyData(spec);
 
         assertNotNull(result);
         verify(disqualificationsService).create(spec);
@@ -1974,19 +1971,19 @@ class TestDataServiceImplTest {
     @Test
     void createUserCompanyAssociationData() throws DataException {
         var id = new ObjectId();
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
         spec.setUserId(USER_ID);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
-        UserCompanyAssociationData associationData =
-                new UserCompanyAssociationData(id, spec.getCompanyNumber(),
+        UserCompanyAssociationResponse associationData =
+                new UserCompanyAssociationResponse(id, spec.getCompanyNumber(),
                         spec.getUserId(), null, CONFIRMED_STATUS,
                         AUTH_CODE_APPROVAL_ROUTE, null);
 
         when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
 
-        UserCompanyAssociationData createdAssociation =
+        UserCompanyAssociationResponse createdAssociation =
                 testDataService.createUserCompanyAssociationData(spec);
 
         assertNotNull(createdAssociation);
@@ -2004,8 +2001,8 @@ class TestDataServiceImplTest {
 
     @Test
     void createUserCompanyAssociationDataNoUserIdOrUserEmail() {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
 
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.createUserCompanyAssociationData(spec));
@@ -2015,8 +2012,8 @@ class TestDataServiceImplTest {
 
     @Test
     void createUserCompanyAssociationDataNoCompanyNumber() {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
         spec.setUserId(USER_ID);
 
         DataException exception = assertThrows(DataException.class,
@@ -2027,8 +2024,8 @@ class TestDataServiceImplTest {
 
     @Test
     void createUserCompanyAssociationDataException() throws DataException {
-        UserCompanyAssociationSpec spec =
-                new UserCompanyAssociationSpec();
+        UserCompanyAssociationRequest spec =
+                new UserCompanyAssociationRequest();
         spec.setUserId(USER_ID);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -2086,24 +2083,24 @@ class TestDataServiceImplTest {
 
     @Test
     void createTransactionData() throws DataException {
-        TransactionsSpec transactionsSpec = new TransactionsSpec();
-        transactionsSpec.setUserId("Test12454");
-        transactionsSpec.setReference("ACSP Registration");
-        TransactionsData txn = new TransactionsData("Test12454","email@email.com" ,"forename","surname","resumeURI","status", "250788-250788-250788");
-        when(transactionService.create(transactionsSpec)).thenReturn(txn);
-        TransactionsData result = testDataService.createTransactionData(transactionsSpec);
+        TransactionsRequest transactionsRequest = new TransactionsRequest();
+        transactionsRequest.setUserId("Test12454");
+        transactionsRequest.setReference("ACSP Registration");
+        TransactionsResponse txn = new TransactionsResponse("Test12454","email@email.com" ,"forename","surname","resumeURI","status", "250788-250788-250788");
+        when(transactionService.create(transactionsRequest)).thenReturn(txn);
+        TransactionsResponse result = testDataService.createTransactionData(transactionsRequest);
         assertEquals(txn, result);
     }
 
     @Test
     void createTransactionDataException() throws DataException {
-        TransactionsSpec transactionsSpec = new TransactionsSpec();
-        transactionsSpec.setUserId("Test12454");
-        transactionsSpec.setReference("ACSP Registration");
+        TransactionsRequest transactionsRequest = new TransactionsRequest();
+        transactionsRequest.setUserId("Test12454");
+        transactionsRequest.setReference("ACSP Registration");
         DataException ex = new DataException("creation failed");
-        when(transactionService.create(transactionsSpec)).thenThrow(ex);
+        when(transactionService.create(transactionsRequest)).thenThrow(ex);
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.createTransactionData(transactionsSpec));
+                testDataService.createTransactionData(transactionsRequest));
         assertEquals("Error creating transaction", thrown.getMessage());
         assertEquals(ex, thrown.getCause());
     }
@@ -2143,11 +2140,11 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyData_appointmentCreatedWhenNoDefaultOfficerIsNull() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNoDefaultOfficer(null);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
 
         testDataService.createCompanyData(spec);
 
@@ -2156,11 +2153,11 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyData_appointmentCreatedWhenNoDefaultOfficerIsFalse() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNoDefaultOfficer(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
 
         testDataService.createCompanyData(spec);
 
@@ -2169,11 +2166,11 @@ class TestDataServiceImplTest {
 
     @Test
     void createCompanyData_appointmentNotCreatedWhenNoDefaultOfficerIsTrue() throws Exception {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setNoDefaultOfficer(true);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
 
         testDataService.createCompanyData(spec);
 
@@ -2182,23 +2179,23 @@ class TestDataServiceImplTest {
 
     @Test
     void createCombinedSicActivitiesData() throws DataException {
-        CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+        CombinedSicActivitiesRequest spec = new CombinedSicActivitiesRequest();
         spec.setActivityDescription("Braunkohle waschen");
         spec.setSicDescription("Abbau von Braunkohle");
         spec.setIsChActivity(false);
         spec.setActivityDescriptionSearchField("braunkohle waschen");
 
-        CombinedSicActivitiesData expectedData =
-            new CombinedSicActivitiesData(
+        CombinedSicActivitiesResponse expectedData =
+            new CombinedSicActivitiesResponse(
                 new ObjectId().toHexString(),
                 "12345",
                 "Abbau von Braunkohle"
             );
 
-        when(combinedSicActivitiesService.create(any(CombinedSicActivitiesSpec.class)))
+        when(combinedSicActivitiesService.create(any(CombinedSicActivitiesRequest.class)))
             .thenReturn(expectedData);
 
-        CombinedSicActivitiesData result =
+        CombinedSicActivitiesResponse result =
             testDataService.createCombinedSicActivitiesData(spec);
 
         assertNotNull(result);
@@ -2210,10 +2207,10 @@ class TestDataServiceImplTest {
 
     @Test
     void createCombinedSicActivitiesDataException() throws DataException {
-        CombinedSicActivitiesSpec spec = new CombinedSicActivitiesSpec();
+        CombinedSicActivitiesRequest spec = new CombinedSicActivitiesRequest();
         spec.setSicDescription("Test Sic Description");
 
-        when(combinedSicActivitiesService.create(any(CombinedSicActivitiesSpec.class)))
+        when(combinedSicActivitiesService.create(any(CombinedSicActivitiesRequest.class)))
             .thenThrow(new DataException("Error creating Sic code and keyword"));
 
         DataException exception = assertThrows(DataException.class,
@@ -2257,18 +2254,18 @@ class TestDataServiceImplTest {
 
     @Test
     void createPublicCompany() throws DataException {
-        PublicCompanySpec spec = new PublicCompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        PublicCompanyRequest spec = new PublicCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         testPublicCompanySpec(spec);
     }
 
     @Test
     void createPublicCompanyWithNullSpec() throws DataException {
-        PublicCompanySpec spec = new PublicCompanySpec();
+        PublicCompanyRequest spec = new PublicCompanyRequest();
         testPublicCompanySpec(spec);
     }
 
-    private void testPublicCompanySpec(PublicCompanySpec spec) throws DataException{
+    private void testPublicCompanySpec(PublicCompanyRequest spec) throws DataException{
         String expectedFullCompanyNumber = COMPANY_NUMBER;
 
         when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
@@ -2277,10 +2274,10 @@ class TestDataServiceImplTest {
         mockAuthCode.setAuthCode(AUTH_CODE);
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
-        CompanyData createdCompany = testDataService.createPublicCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createPublicCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
-                Jurisdiction.ENGLAND_WALES);
+                JurisdictionType.ENGLAND_WALES);
     }
 
     @Test
@@ -2324,7 +2321,7 @@ class TestDataServiceImplTest {
     void testCreateCompanyElasticSearchIndexAsFalse()
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setAddToCompanyElasticSearchIndex(false);
         validateElasticSearch(spec);
     }
@@ -2333,20 +2330,20 @@ class TestDataServiceImplTest {
     void testCreateCompanyWithoutElasticSearchIndex()
             throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         validateElasticSearch(spec);
     }
 
-    private void validateElasticSearch(CompanySpec spec) throws DataException, ApiErrorResponseException, URIValidationException {
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+    private void validateElasticSearch(CompanyRequest spec) throws DataException, ApiErrorResponseException, URIValidationException {
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         String expectedFullCompanyNumber = COMPANY_NUMBER;
-        setupCompanyCreationMocks(spec, COMPANY_NUMBER, 8, expectedFullCompanyNumber);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
-        CompanyData createdCompany = testDataService.createCompanyData(spec);
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
+        CompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
-                expectedFullCompanyNumber, Jurisdiction.ENGLAND_WALES);
+                expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(0))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
         verify(alphabeticalCompanySearch, times(0))
@@ -2357,16 +2354,16 @@ class TestDataServiceImplTest {
 
     @Test
     void getCompanyProfile_success_createsAndReturnsCompanyDetails() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
 
         // Exercise optional paths too
-        RegistersSpec register = new RegistersSpec();
+        RegistersRequest register = new RegistersRequest();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("registered-office");
         spec.setRegisters(List.of(register));
 
-        DisqualificationsSpec disqualification = new DisqualificationsSpec();
+        DisqualificationsRequest disqualification = new DisqualificationsRequest();
         disqualification.setDisqualificationType("court-order");
         spec.setDisqualifiedOfficers(List.of(disqualification));
 
@@ -2382,7 +2379,7 @@ class TestDataServiceImplTest {
         Appointment appointment = new Appointment();
         appointment.setOfficerId(OFFICER_ID);
         appointment.setAppointmentId(APPOINTMENT_ID);
-        AppointmentsResultData appointments = new AppointmentsResultData();
+        AppointmentsResultResponse appointments = new AppointmentsResultResponse();
         appointments.setAppointment(List.of(appointment));
 
         CompanyAuthCode authCode = new CompanyAuthCode();
@@ -2397,20 +2394,20 @@ class TestDataServiceImplTest {
         CompanyRegisters companyRegisters = new CompanyRegisters();
         Disqualifications disqualifications = new Disqualifications();
 
-        when(companyProfileService.create(any(CompanySpec.class))).thenReturn(companyProfile);
-        when(filingHistoryService.create(any(CompanySpec.class))).thenReturn(filingHistory);
-        when(appointmentService.createAppointment(any(CompanySpec.class))).thenReturn(appointments);
-        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(authCode);
-        when(metricsService.create(any(CompanySpec.class))).thenReturn(companyMetrics);
-        when(companyPscStatementService.createPscStatements(any(CompanySpec.class))).thenReturn(pscStatements);
-        when(companyPscService.create(any(CompanySpec.class))).thenReturn(companyPscs);
-        when(companyRegistersService.create(any(CompanySpec.class))).thenReturn(companyRegisters);
-        when(disqualificationsService.create(any(CompanySpec.class))).thenReturn(disqualifications);
+        when(companyProfileService.create(any(CompanyRequest.class))).thenReturn(companyProfile);
+        when(filingHistoryService.create(any(CompanyRequest.class))).thenReturn(filingHistory);
+        when(appointmentService.createAppointment(any(CompanyRequest.class))).thenReturn(appointments);
+        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(authCode);
+        when(metricsService.create(any(CompanyRequest.class))).thenReturn(companyMetrics);
+        when(companyPscStatementService.createPscStatements(any(CompanyRequest.class))).thenReturn(pscStatements);
+        when(companyPscService.create(any(CompanyRequest.class))).thenReturn(companyPscs);
+        when(companyRegistersService.create(any(CompanyRequest.class))).thenReturn(companyRegisters);
+        when(disqualificationsService.create(any(CompanyRequest.class))).thenReturn(disqualifications);
 
         PopulatedCompanyDetailsResponse response = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
 
         // Capture the spec that was used for creation
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
         assertEquals(Boolean.TRUE, capturedSpec.getCompanyWithPopulatedStructureOnly());
 
@@ -2438,34 +2435,34 @@ class TestDataServiceImplTest {
 
     @Test
     void getCompanyDataStructureBeforeSavingInMongoDb_noDefaultOfficerTrue_doesNotCreateAppointments() throws Exception {
-        CompanySpec spec = new CompanySpec();
-        spec.setJurisdiction(Jurisdiction.ENGLAND_WALES);
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setNoDefaultOfficer(true);
 
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
 
-        when(companyProfileService.create(any(CompanySpec.class))).thenReturn(new CompanyProfile());
-        when(filingHistoryService.create(any(CompanySpec.class))).thenReturn(new FilingHistory());
+        when(companyProfileService.create(any(CompanyRequest.class))).thenReturn(new CompanyProfile());
+        when(filingHistoryService.create(any(CompanyRequest.class))).thenReturn(new FilingHistory());
 
         CompanyAuthCode authCode = new CompanyAuthCode();
         authCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanySpec.class))).thenReturn(authCode);
+        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(authCode);
 
-        when(metricsService.create(any(CompanySpec.class))).thenReturn(new CompanyMetrics());
-        when(companyPscStatementService.createPscStatements(any(CompanySpec.class)))
+        when(metricsService.create(any(CompanyRequest.class))).thenReturn(new CompanyMetrics());
+        when(companyPscStatementService.createPscStatements(any(CompanyRequest.class)))
                 .thenReturn(Collections.emptyList());
-        when(companyPscService.create(any(CompanySpec.class))).thenReturn(Collections.emptyList());
+        when(companyPscService.create(any(CompanyRequest.class))).thenReturn(Collections.emptyList());
 
         testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
 
-        CompanySpec capturedSpec = captureCompanySpec();
+        CompanyRequest capturedSpec = captureCompanySpec();
         verify(appointmentService, never()).createAppointment(capturedSpec);
     }
 
     @Test
     void createCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() throws Exception {
-        CompanyWithPopulatedStructureSpec spec = new CompanyWithPopulatedStructureSpec();
+        CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
 
         CompanyProfile profile = new CompanyProfile();
         profile.setCompanyNumber(COMPANY_NUMBER);
@@ -2475,7 +2472,7 @@ class TestDataServiceImplTest {
         authCode.setAuthCode(AUTH_CODE);
         spec.setCompanyAuthCode(authCode);
 
-        CompanyData result = testDataService.createCompanyWithStructure(spec);
+        CompanyProfileResponse result = testDataService.createCompanyWithStructure(spec);
 
         assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals(AUTH_CODE, result.getAuthCode());

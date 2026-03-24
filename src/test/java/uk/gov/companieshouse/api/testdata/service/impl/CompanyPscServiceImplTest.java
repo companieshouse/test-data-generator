@@ -29,9 +29,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanySpec;
-import uk.gov.companieshouse.api.testdata.model.rest.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.PscType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -42,6 +42,7 @@ class CompanyPscServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_ID = "encoded123";
     private static final String ETAG = "etag123";
+    private static final Instant NOW = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
 
     @Mock
     private CompanyPscsRepository repository;
@@ -55,7 +56,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_OverseasEntity_CreatesBeneficialOwners() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(3);
@@ -74,7 +75,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_SuperSecurePsc_CreatesSuperSecurePsc() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setHasSuperSecurePscs(true);
@@ -100,7 +101,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_SuperSecureBeneficialOwner_CreatesCorrectType() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setHasSuperSecurePscs(true);
@@ -124,7 +125,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_OverseaCompany_ReturnsNull() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -137,7 +138,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithAccountsDueStatus_SetsCorrectDates() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
         spec.setNumberOfPscs(1);
@@ -184,7 +185,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_StandardCompany_VerifyBaseFields() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(3);
@@ -211,9 +212,10 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_PscTypeWithoutNumber_ThrowsException() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
+        spec.setNumberOfPscs(0);
         spec.setPscType(List.of(PscType.INDIVIDUAL));
         spec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -226,7 +228,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_BeneficialOwnerTypeWithNonOverseas_ThrowsException() {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(2);
@@ -243,7 +245,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_ValidPscTypeWithNumber_CreatesPscs() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(2);
@@ -262,7 +264,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_ValidBeneficialOwnerType_CreatesBeneficialOwners() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
         spec.setNumberOfPscs(2);
@@ -280,8 +282,8 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_NumberZeroWithPscType_ReturnsNull() {
-        CompanySpec spec = new CompanySpec();
+    void create_NumberZeroWithPscType_ReturnsNull() throws DataException {
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
@@ -293,10 +295,11 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_WithNullNumberOfPsc_ReturnsNull() throws DataException {
-        CompanySpec spec = new CompanySpec();
+    void createWithExcludedPscCompanyTypeReturnsNull() throws DataException {
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
+        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
+        spec.setPscType(null);
         spec.setNumberOfPscs(null);
         spec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -308,7 +311,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithMultiplePscTypes_CreatesCorrectNumber() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(3);
@@ -327,7 +330,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithZeroNumberOfPsc_AndNullPscType_ReturnsNull() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
@@ -342,7 +345,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithZeroNumberOfPsc_AndEmptyPscType_ReturnsNull() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(0);
@@ -357,7 +360,7 @@ class CompanyPscServiceImplTest {
 
     @Test
     void createReturnsUnsavedPscsWhenCompanyWithDataStructureIsTrue() throws DataException {
-        CompanySpec spec = new CompanySpec();
+        CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
         spec.setNumberOfPscs(1);
