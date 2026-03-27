@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.AuditDetails;
@@ -41,7 +42,16 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         var soleTraderForename = "Forename ";
         var soleTraderSurname = "Surname ";
         var nationality = "British";
-        var randomId = randomService.getString(8);
+        String randomId;
+
+        do {
+            randomId = "AP" + randomService.getNumber(6);
+            Optional<AcspProfile> profile = this.getAcspProfile(randomId);
+            if (profile.isEmpty()) {
+                break;
+            }
+        } while (true);
+
         var acspNumber = Objects.requireNonNullElse(spec.getAcspNumber(), randomId);
         var profile = new AcspProfile();
         profile.setId(acspNumber);
@@ -87,6 +97,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         updated.setBy("TestDataGenerator");
         updated.setType("acsp_delta");
         profile.setUpdated(updated);
+        profile.setDeltaAt(String.valueOf(System.currentTimeMillis()));
 
         AcspProfile savedProfile = repository.save(profile);
         return new AcspProfileResponse(savedProfile);
