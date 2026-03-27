@@ -417,4 +417,36 @@ class AcspProfileServiceImplTest {
         assertEquals(deltaAtValue, profile.getDeltaAt());
     }
 
+    @Test
+    void createAcspProfileRetriesUntilUniqueIdFound() throws DataException {
+        when(randomService.getNumber(6))
+                .thenReturn(100001L) // first attempt
+                .thenReturn(100002L); // second attempt
+
+        // First ID exists → loop continues
+        when(repository.findById("AP100001"))
+                .thenReturn(Optional.of(new AcspProfile()));
+
+        // Second ID does NOT exist → loop breaks
+        when(repository.findById("AP100002"))
+                .thenReturn(Optional.empty());
+
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AcspProfileResponse result = service.create(acspProfileRequest);
+
+        assertNotNull(result);
+        assertEquals("AP100002", result.getAcspNumber());
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertEquals("AP100002", captured.getId());
+        assertEquals("AP100002", captured.getAcspNumber());
+    }
+
 }
