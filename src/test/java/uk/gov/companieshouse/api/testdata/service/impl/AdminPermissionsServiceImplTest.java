@@ -18,6 +18,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DuplicateKeyException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
@@ -117,6 +118,35 @@ class AdminPermissionsServiceImplTest {
 
         assertEquals("group_name is required", ex.getMessage());
         verify(repository, never()).save(any(AdminPermissions.class));
+    }
+
+    @Test
+    void create_shouldThrowWhenGroupNameNull() {
+        AdminPermissionsRequest spec = new AdminPermissionsRequest();
+        spec.setGroupName(null);
+        spec.setRoles(List.of("role1"));
+
+        DataException ex =
+                assertThrows(DataException.class, () -> adminPermissionsService.create(spec));
+
+        assertEquals("group_name is required", ex.getMessage());
+        verify(repository, never()).save(any(AdminPermissions.class));
+    }
+
+    @Test
+    void create_shouldThrowWhenSaveHitsDuplicateKeyException() {
+        AdminPermissionsRequest spec = new AdminPermissionsRequest();
+        spec.setGroupName("Test Group");
+        spec.setRoles(List.of("role1"));
+
+        when(repository.existsByGroupName("Test Group")).thenReturn(false);
+        when(repository.save(any(AdminPermissions.class)))
+                .thenThrow(new DuplicateKeyException("duplicate key"));
+
+        DataException ex =
+                assertThrows(DataException.class, () -> adminPermissionsService.create(spec));
+
+        assertEquals("Admin permissions group_name already exists: Test Group", ex.getMessage());
     }
 
     @Test

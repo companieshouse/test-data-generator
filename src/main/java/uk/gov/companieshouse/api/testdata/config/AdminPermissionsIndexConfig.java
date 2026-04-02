@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.config;
 
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -11,8 +10,11 @@ import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 @Configuration
 public class AdminPermissionsIndexConfig {
 
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    private final MongoTemplate mongoTemplate;
+
+    public AdminPermissionsIndexConfig(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
 
     @PostConstruct
     public void ensureUniqueGroupNameIndex() {

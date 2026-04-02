@@ -725,69 +725,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserDataWithRolesAndNoPermissions() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        assertEquals(List.of("group1"), userRequest.getRoles());
-        verify(userService).create(userRequest);
-        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
-        verify(companyAuthAllowListService, never()).create(any());
-    }
-
-    @Test
-    void createUserData_doesNotTransformRolesWhenEntityAndPermissionsExist() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("group1"), userRequest.getRoles());
-        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
-    }
-
-    @Test
-    void createUserData_doesNotAddPermissionsWhenEntityIsNull() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("group1"), userRequest.getRoles());
-        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
-    }
-
-    @Test
-    void createUserData_doesNotAddPermissionsWhenPermissionsAreNull() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("group1"), userRequest.getRoles());
-        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
-    }
-
-    @Test
     void createUserData_handlesMultipleGroupNamesWithoutTransformation() throws DataException {
         UserRequest userRequest = new UserRequest();
         userRequest.setPassword("password");

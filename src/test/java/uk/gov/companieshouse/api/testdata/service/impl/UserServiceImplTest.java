@@ -420,6 +420,28 @@ class UserServiceImplTest {
     }
 
     @Test
+    void testProcessRolesWithNullRoleNameThrowsException() {
+        List<String> roleNames = Arrays.asList((String) null);
+
+        DataException ex = assertThrows(DataException.class,
+                () -> userServiceImpl.processRoles(roleNames));
+
+        assertTrue(ex.getMessage().contains("Invalid role name: null"));
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
+    }
+
+    @Test
+    void testProcessRolesWithBlankRoleNameThrowsException() {
+        List<String> roleNames = List.of("   ");
+
+        DataException ex = assertThrows(DataException.class,
+                () -> userServiceImpl.processRoles(roleNames));
+
+        assertTrue(ex.getMessage().contains("Invalid role name:"));
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
+    }
+
+    @Test
     void testProcessRolesWithNullAdminPermissionsThrowsException() {
         List<String> roleNames = List.of("CHS_ADMIN_SUPERVISOR");
 
