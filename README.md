@@ -107,24 +107,31 @@ In order to use the generator, there are different possible endpoints that can b
 - GET: Sending a GET request on the endpoint `{Base URL}/test-data/internal/company/authcode?{companyNumber}` will return the default authcode for a company if it does not have an existing authcode or will return a `null` if the company has a valid existing `authcode`.
 
 #### Creating test users
-- POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/user` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
-    - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.
-    - `password`: The password of the user. This is mandatory.
-    - `roles`: The entra group name of the user which contains all the associated roles for that user. Roles is optional.
-    - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
-    - `identity_verification`: This is optional. It takes a list of `IdentiyVerificationSpec` and creates an `identity` and `uvid`
-    
-    A usage example looks like this: `{ "password": "password", "roles": [  "GROUPNAME_1", "GROUPNAME_2"] ], "is_company_auth_allow_list": true, "identity_verification": [{"verification_source": "ONE_LOGIN"}] }`
+- POST: Sending a POST request to create users with associated Entra groups `{Base URL}/test-data/internal/user` will generate a new test user.
+    - `email`: Optional. If omitted, the service generates `test-data-generated<randomId>@chtesttdg.mailosaur.net`.
+    - `password`: Mandatory.
+    - `roles`: Optional list.
+      - Each entry can be either:
+        - a `UserRoles` enum value (for example `CHS_ADMIN_SUPERVISOR`), or
+        - a custom `admin_permissions.group_name` value.
+      - User creation resolves each role to an `entra_group_id` and stores those IDs on the user record.
+    - `is_company_auth_allow_list`: Optional boolean.
+    - `identity_verification`: Optional list of `IdentityVerificationSpec`. Valid entries create an `identity` and `uvid`.
+
+    A usage example looks like this:
+    `{ "password": "password", "roles": ["CHS_ADMIN_SUPERVISOR", "chs admin test 2"], "is_company_auth_allow_list": true, "identity_verification": [{"verification_source": "ONE_LOGIN"}] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
 
 #### Creating admin permission
-- POST: Sending a POST request to create admin permission for a user `{Base URL}/test-data/admin-permission` will generate a new admin permission for a user. The request body must include `AdminPermissionSpec` parameter to customise the generated admin permission.
-    - `entra_group_id`: The user id of the user. This is mandatory.
-    - `group_name`: The permission of the user. This is mandatory.
-    - `roles`: The roles associated with the permission.
-    
-    A usage example looks like this: `{"group_id": "8aa9fc1c-8d78-4ce3-8ba9-fee57adf3a84", "group_name": "chs admin csi support", "roles": [ "/admin/images"  ] }`
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/admin-permission/{id}` will delete the test admin permission. `id` is required to delete the admin permission; This is generated as response when an admin permission is created.
+- POST: Sending a POST request to create admin permissions `{Base URL}/test-data/internal/admin-permissions` creates a new group that can be used in user creation.
+    - `group_name`: Mandatory and unique (service validation + DB unique index).
+    - `roles`: Optional list of permission strings associated with the group (for example `/admin/images`).
+    - `group_id`: Optional in request but ignored by the service.
+      - The service generates `entra_group_id` dynamically as a UUID (for example `186df8ae-96fe-4475-918e-c249483ee237`).
+
+    A usage example looks like this:
+    `{"group_name": "chs admin test 2", "roles": ["/admin/images", "/admin/users"]}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/admin-permissions/{id}` will delete the test admin permission. `id` is required to delete the admin permission; This is generated as response when an admin permission is created.
 
 #### Getting Identity_Id and Uvid for a user
 - GET: Sending a GET request on the endpoint `{Base URL}/test-data/identity/?email=email@email.com` will return the `identity_id`, `uvid`, `firstname` and `lastname` for the user. `userId` is required to get the identity id and uvid.
@@ -429,4 +436,3 @@ The supported environmental variables have been categorised by use case and are 
 | MONGODB_URL              | Mongo database URL.                  | ✓         |         | mongodb://localhost:27017 |
 | BARCODE_SERVICE_URL      | URL of barcode service               | ✓         |         | http://localhost:9000     |
 | API_URL                  | URL of (company) API service         | ✓         |         |                           |
-

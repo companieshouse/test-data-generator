@@ -146,8 +146,7 @@ public class UserServiceImpl implements UserService {
     List<String> processRoles(List<String> roles) throws DataException {
         List<String> entraGroupIds = new ArrayList<>();
         for (String roleName : roles) {
-            var userRole = getUserRole(roleName);
-            String groupName = userRole.getGroupName();
+            String groupName = resolveGroupName(roleName);
             var adminPermissionEntity = adminPermissionsRepository.findByGroupName(groupName);
             if (adminPermissionEntity == null) {
                 throw new DataException("No admin permissions found for groupName: "
@@ -162,6 +161,18 @@ public class UserServiceImpl implements UserService {
             }
         }
         return entraGroupIds;
+    }
+
+    private String resolveGroupName(String roleName) throws DataException {
+        if (roleName == null || roleName.isBlank()) {
+            throw new DataException("Invalid role name: " + roleName);
+        }
+        try {
+            return getUserRole(roleName).getGroupName();
+        } catch (DataException error) {
+            LOG.info("Role name is not in UserRoles enum. Treating it as groupName: " + roleName);
+            return roleName;
+        }
     }
 
     UserRoles getUserRole(String roleName) throws DataException {

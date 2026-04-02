@@ -40,7 +40,6 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.CertifiedCopies;
@@ -708,14 +707,10 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserDataWithRolesAndPermissions() throws DataException {
+    void createUserDataWithRoles_keepsGroupNames() throws DataException {
         UserRequest userRequest = new UserRequest();
         userRequest.setPassword("password");
         userRequest.setRoles(List.of("group1"));
-
-        var entity = new AdminPermissions();
-        entity.setPermissions(List.of("perm1", "perm2"));
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
         UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
         when(userService.create(userRequest)).thenReturn(userResponse);
@@ -723,8 +718,9 @@ class TestDataServiceImplTest {
         UserResponse result = testDataService.createUserData(userRequest);
 
         assertEquals(userResponse, result);
-        assertEquals(List.of("perm1", "perm2"), userRequest.getRoles());
+        assertEquals(List.of("group1"), userRequest.getRoles());
         verify(userService).create(userRequest);
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
         verify(companyAuthAllowListService, never()).create(any());
     }
 
@@ -734,8 +730,6 @@ class TestDataServiceImplTest {
         userRequest.setPassword("password");
         userRequest.setRoles(List.of("group1"));
 
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
-
         UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
         when(userService.create(userRequest)).thenReturn(userResponse);
 
@@ -744,25 +738,23 @@ class TestDataServiceImplTest {
         assertEquals(userResponse, result);
         assertEquals(List.of("group1"), userRequest.getRoles());
         verify(userService).create(userRequest);
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
         verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
-    void createUserData_addsPermissionsWhenEntityAndPermissionsExist() throws DataException {
+    void createUserData_doesNotTransformRolesWhenEntityAndPermissionsExist() throws DataException {
         UserRequest userRequest = new UserRequest();
         userRequest.setPassword("password");
         userRequest.setRoles(List.of("group1"));
-
-        AdminPermissions entity = new AdminPermissions();
-        entity.setPermissions(List.of("perm1", "perm2"));
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
 
         UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
         when(userService.create(userRequest)).thenReturn(userResponse);
 
         testDataService.createUserData(userRequest);
 
-        assertEquals(List.of("perm1", "perm2"), userRequest.getRoles());
+        assertEquals(List.of("group1"), userRequest.getRoles());
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
     }
 
     @Test
@@ -771,14 +763,13 @@ class TestDataServiceImplTest {
         userRequest.setPassword("password");
         userRequest.setRoles(List.of("group1"));
 
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
-
         UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
         when(userService.create(userRequest)).thenReturn(userResponse);
 
         testDataService.createUserData(userRequest);
 
         assertEquals(List.of("group1"), userRequest.getRoles());
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
     }
 
     @Test
@@ -787,39 +778,28 @@ class TestDataServiceImplTest {
         userRequest.setPassword("password");
         userRequest.setRoles(List.of("group1"));
 
-        AdminPermissions entity = new AdminPermissions();
-        entity.setPermissions(null);
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
-
         UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
         when(userService.create(userRequest)).thenReturn(userResponse);
 
         testDataService.createUserData(userRequest);
 
         assertEquals(List.of("group1"), userRequest.getRoles());
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
     }
 
     @Test
-    void createUserData_handlesMultipleGroupNamesWithMixedEntities() throws DataException {
+    void createUserData_handlesMultipleGroupNamesWithoutTransformation() throws DataException {
         UserRequest userRequest = new UserRequest();
         userRequest.setPassword("password");
         userRequest.setRoles(List.of("group1", "group2", "group3"));
-
-        AdminPermissions entity1 = new AdminPermissions();
-        entity1.setPermissions(List.of("perm1"));
-        AdminPermissions entity2 = new AdminPermissions();
-        entity2.setPermissions(null);
-
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity1);
-        when(adminPermissionsRepository.findByGroupName("group2")).thenReturn(null);
-        when(adminPermissionsRepository.findByGroupName("group3")).thenReturn(entity2);
 
         UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
         when(userService.create(userRequest)).thenReturn(userResponse);
 
         testDataService.createUserData(userRequest);
 
-        assertEquals(List.of("perm1"), userRequest.getRoles());
+        assertEquals(List.of("group1", "group2", "group3"), userRequest.getRoles());
+        verify(adminPermissionsRepository, never()).findByGroupName(anyString());
     }
 
     @Test

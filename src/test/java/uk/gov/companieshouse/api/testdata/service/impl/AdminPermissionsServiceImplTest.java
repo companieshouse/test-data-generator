@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.never;
@@ -18,6 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
@@ -37,7 +39,7 @@ class AdminPermissionsServiceImplTest {
     }
 
     @Test
-    void create_shouldSaveAndReturnData() {
+    void create_shouldSaveAndReturnData() throws DataException {
         AdminPermissionsRequest spec = new AdminPermissionsRequest();
         spec.setGroupId("group123");
         spec.setGroupName("Test Group");
@@ -45,10 +47,11 @@ class AdminPermissionsServiceImplTest {
 
         AdminPermissions saved = new AdminPermissions();
         saved.setId("id123");
-        saved.setEntraGroupId("group123");
+        saved.setEntraGroupId("186df8ae-96fe-4475-918e-c249483ee237");
         saved.setGroupName("Test Group");
         saved.setPermissions(List.of("role1", "role2"));
 
+        when(repository.existsByGroupName("Test Group")).thenReturn(false);
         when(repository.save(any(AdminPermissions.class))).thenReturn(saved);
 
         AdminPermissionsResponse result = adminPermissionsService.create(spec);
@@ -57,12 +60,63 @@ class AdminPermissionsServiceImplTest {
         verify(repository).save(captor.capture());
         AdminPermissions toSave = captor.getValue();
 
-        assertEquals("group123", toSave.getEntraGroupId());
+        assertTrue(toSave.getEntraGroupId().matches(
+                "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"));
         assertEquals("Test Group", toSave.getGroupName());
         assertEquals(List.of("role1", "role2"), toSave.getPermissions());
 
         assertEquals("id123", result.getId());
         assertEquals("Test Group", result.getGroupName());
+    }
+
+    @Test
+    void create_shouldTrimGroupNameBeforeSaving() throws DataException {
+        AdminPermissionsRequest spec = new AdminPermissionsRequest();
+        spec.setGroupName("  Test Group  ");
+        spec.setRoles(List.of("role1"));
+
+        AdminPermissions saved = new AdminPermissions();
+        saved.setId("id123");
+        saved.setEntraGroupId("186df8ae-96fe-4475-918e-c249483ee237");
+        saved.setGroupName("Test Group");
+        saved.setPermissions(List.of("role1"));
+
+        when(repository.existsByGroupName("Test Group")).thenReturn(false);
+        when(repository.save(any(AdminPermissions.class))).thenReturn(saved);
+
+        adminPermissionsService.create(spec);
+
+        ArgumentCaptor<AdminPermissions> captor = ArgumentCaptor.forClass(AdminPermissions.class);
+        verify(repository).save(captor.capture());
+        assertEquals("Test Group", captor.getValue().getGroupName());
+    }
+
+    @Test
+    void create_shouldThrowWhenGroupNameAlreadyExists() {
+        AdminPermissionsRequest spec = new AdminPermissionsRequest();
+        spec.setGroupName("Test Group");
+        spec.setRoles(List.of("role1"));
+
+        when(repository.existsByGroupName("Test Group")).thenReturn(true);
+
+        DataException ex =
+                assertThrows(DataException.class, () -> adminPermissionsService.create(spec));
+
+        assertEquals("Admin permissions group_name already exists: Test Group", ex.getMessage());
+        verify(repository, never()).save(any(AdminPermissions.class));
+    }
+
+    @Test
+    void create_shouldThrowWhenGroupNameBlank() {
+        AdminPermissionsRequest spec = new AdminPermissionsRequest();
+        spec.setGroupName("   ");
+        spec.setRoles(List.of("role1"));
+
+        DataException ex =
+                assertThrows(DataException.class, () -> adminPermissionsService.create(spec));
+
+        assertEquals("group_name is required", ex.getMessage());
+        verify(repository, never()).save(any(AdminPermissions.class));
     }
 
     @Test

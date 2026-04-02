@@ -58,7 +58,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociat
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
@@ -118,8 +117,6 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService;
     @Autowired
     private AcspMembersRepository acspMembersRepository;
-    @Autowired
-    private AdminPermissionsRepository adminPermissionsRepository;
     @Autowired
     private CertificatesRepository certificatesRepository;
     @Autowired
@@ -422,24 +419,6 @@ public class TestDataServiceImpl implements TestDataService {
         final String password = userRequest.getPassword();
         if (password == null || password.isEmpty()) {
             throw new DataException("Password is required to create a user");
-        }
-
-        List<String> adminPermissionIds = userRequest.getRoles();
-        if (adminPermissionIds != null && !adminPermissionIds.isEmpty()) {
-            List<String> permissionStrings = new ArrayList<>();
-
-            for (String groupName : adminPermissionIds) {
-                var adminPermissionEntity = adminPermissionsRepository
-                        .findByGroupName(groupName);
-
-                if (adminPermissionEntity != null
-                        && adminPermissionEntity.getPermissions() != null) {
-                    permissionStrings.addAll(adminPermissionEntity.getPermissions());
-                }
-            }
-            if (!permissionStrings.isEmpty()) {
-                userRequest.setRoles(permissionStrings);
-            }
         }
 
         var userData = userService.create(userRequest);

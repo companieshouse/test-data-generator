@@ -170,7 +170,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void testCreateUserWithInvalidRoleNameThrowsException() {
+    void testCreateUserWithUnknownRoleNameAndNoMappingThrowsException() {
         UserRequest userRequest = new UserRequest();
         userRequest.setEmail("invalidrole@hello.com");
         userRequest.setPassword("password");
@@ -180,8 +180,34 @@ class UserServiceImplTest {
         when(randomService.getString(23)).thenReturn(generatedUserId);
 
         DataException ex = assertThrows(DataException.class, () -> userServiceImpl.create(userRequest));
-        assertTrue(ex.getMessage().contains("Invalid role name: NOT_A_ROLE"));
+        assertTrue(ex.getMessage().contains("No admin permissions found for groupName: NOT_A_ROLE"));
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void testCreateUserWithNonEnumGroupNameUsesAdminPermissionsLookup() throws DataException {
+        UserRequest userRequest = new UserRequest();
+        userRequest.setEmail("customgroup@hello.com");
+        userRequest.setPassword("password");
+        userRequest.setRoles(List.of("custom group name"));
+
+        when(randomService.getString(23)).thenReturn(TEST_USER_ID);
+        when(userServiceImpl.getDateNow()).thenReturn(DATE_NOW);
+
+        AdminPermissions customGroupPerm = new AdminPermissions();
+        customGroupPerm.setEntraGroupId("entra-group-id-custom");
+        customGroupPerm.setGroupName("custom group name");
+        when(adminPermissionsRepository.findByGroupName("custom group name"))
+                .thenReturn(customGroupPerm);
+
+        UserResponse userResponse = userServiceImpl.create(userRequest);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        User savedUser = userCaptor.getValue();
+
+        assertEquals(List.of("entra-group-id-custom"), savedUser.getRoles());
+        assertEquals(TEST_USER_ID, userResponse.getId());
     }
 
     @Test
@@ -462,6 +488,24 @@ class UserServiceImplTest {
         assertTrue(ex.getMessage().contains("No admin permissions found for groupName: chs admin support member"));
         verify(adminPermissionsRepository, times(1)).findByGroupName("chs admin supervisor");
         verify(adminPermissionsRepository, times(1)).findByGroupName("chs admin support member");
+    }
+
+    @Test
+    void testProcessRolesWithNonEnumGroupNameUsesGroupNameLookup() throws DataException {
+        List<String> roleNames = List.of("custom entra group");
+
+        AdminPermissions adminPermissions = new AdminPermissions();
+        adminPermissions.setEntraGroupId("entra-group-id-custom");
+        adminPermissions.setGroupName("custom entra group");
+
+        when(adminPermissionsRepository.findByGroupName("custom entra group"))
+                .thenReturn(adminPermissions);
+
+        List<String> result = userServiceImpl.processRoles(roleNames);
+
+        assertEquals(1, result.size());
+        assertEquals("entra-group-id-custom", result.getFirst());
+        verify(adminPermissionsRepository, times(1)).findByGroupName("custom entra group");
     }
 
     @Test

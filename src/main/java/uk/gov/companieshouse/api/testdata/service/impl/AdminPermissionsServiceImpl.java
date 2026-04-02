@@ -1,8 +1,12 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
@@ -22,21 +26,38 @@ public class AdminPermissionsServiceImpl implements DataService<
     private AdminPermissionsRepository repository;
 
     @Override
-    public AdminPermissionsResponse create(AdminPermissionsRequest spec) {
-        LOG.info("Starting creation of admin permissions for group: " + spec.getGroupName());
+    public AdminPermissionsResponse create(AdminPermissionsRequest spec) throws DataException {
+        String groupName = normaliseGroupName(spec.getGroupName());
+        LOG.info("Starting creation of admin permissions for group: " + groupName);
+
+        if (repository.existsByGroupName(groupName)) {
+            throw new DataException("Admin permissions group_name already exists: " + groupName);
+        }
 
         var adminPermissions = new AdminPermissions();
-        adminPermissions.setEntraGroupId(spec.getGroupId());
-        adminPermissions.setGroupName(spec.getGroupName());
+        adminPermissions.setEntraGroupId(UUID.randomUUID().toString());
+        adminPermissions.setGroupName(groupName);
         adminPermissions.setPermissions(spec.getRoles());
 
-        AdminPermissions savedPermissions = repository.save(adminPermissions);
+        AdminPermissions savedPermissions;
+        try {
+            savedPermissions = repository.save(adminPermissions);
+        } catch (DuplicateKeyException ex) {
+            throw new DataException("Admin permissions group_name already exists: " + groupName, ex);
+        }
 
         LOG.info("Successfully created admin permissions with ID: " + savedPermissions.getId());
 
         return new AdminPermissionsResponse(
                 savedPermissions.getId(),
                 savedPermissions.getGroupName());
+    }
+
+    private String normaliseGroupName(String groupName) throws DataException {
+        if (groupName == null || groupName.trim().isEmpty()) {
+            throw new DataException("group_name is required");
+        }
+        return groupName.trim();
     }
 
     public boolean delete(String id) {

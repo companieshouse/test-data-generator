@@ -5,4 +5,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 
 public interface AdminPermissionsRepository extends MongoRepository<AdminPermissions, String> {
     AdminPermissions findByGroupName(String groupName);
+
+    boolean existsByGroupName(String groupName);
 }
