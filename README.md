@@ -111,10 +111,13 @@ In order to use the generator, there are different possible endpoints that can b
     - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.
     - `password`: The password of the user. This is mandatory.
     - `roles`: The entra group name of the user which contains all the associated roles for that user. Roles is optional.
+    - `is_admin`: Optional boolean (`admin_user` on the created user). Defaults to `true` when omitted. Set this explicitly to `false` only when you need a non-admin user.
+    - `admin_user` default behaviour: User creation always defaults `admin_user` to `true` unless `is_admin` is explicitly set to `false` in the request.
+    - `permissions behaviour`: With `admin_user=true`, the user has access to the permissions mapped to the Entra group(s) assigned in `roles`.
     - `is_company_auth_allow_list`: This is optional. If we provide this, we need to provide the value as `true` or `false`.
     - `identity_verification`: This is optional. It takes a list of `IdentiyVerificationSpec` and creates an `identity` and `uvid`
     
-    A usage example looks like this: `{ "password": "password", "roles": [  "GROUPNAME_1", "GROUPNAME_2"] ], "is_company_auth_allow_list": true, "identity_verification": [{"verification_source": "ONE_LOGIN"}] }`
+    A usage example looks like this: `{ "password": "password", "roles": [ "GROUPNAME_1", "GROUPNAME_2" ], "is_admin": true, "is_company_auth_allow_list": true, "identity_verification": [{"verification_source": "ONE_LOGIN"}] }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
 
 #### Creating admin permission
@@ -429,4 +432,3 @@ The supported environmental variables have been categorised by use case and are 
 | MONGODB_URL              | Mongo database URL.                  | ✓         |         | mongodb://localhost:27017 |
 | BARCODE_SERVICE_URL      | URL of barcode service               | ✓         |         | http://localhost:9000     |
 | API_URL                  | URL of (company) API service         | ✓         |         |                           |
-

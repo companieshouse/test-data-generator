@@ -341,7 +341,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    void createUser_withIsAdminNull_setsAdminUserFalse() throws DataException {
+    void createUser_withIsAdminNull_setsAdminUserTrueByDefault() throws DataException {
         UserRequest spec = new UserRequest();
         spec.setEmail("test@domain.com");
         spec.setPassword("pass");
@@ -354,7 +354,7 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User saved = userCaptor.getValue();
 
-        assertFalse(saved.getAdminUser());
+        assertTrue(saved.getAdminUser());
     }
 
     @Test
@@ -640,6 +640,7 @@ class UserServiceImplTest {
                 "Forename should contain 'Forename'");
         assertTrue(userResponse.getSurname().contains("Surname"), "Surname should contain 'Surname'");
         assertTrue(savedUser.getTestData(), "test data as true by default");
+        assertTrue(savedUser.getAdminUser(), "admin_user should default to true when isAdmin is not supplied");
     }
 
     @Test
@@ -779,7 +780,7 @@ class UserServiceImplTest {
         verify(userRepository).save(userCaptor.capture());
         User savedUser = userCaptor.getValue();
 
-        assertFalse(savedUser.getAdminUser(), "User should not be marked as admin when isAdmin is null");
+        assertTrue(savedUser.getAdminUser(), "User should be marked as admin when isAdmin is null");
     }
 
     @Test
