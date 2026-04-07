@@ -99,13 +99,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
         if (spec.getCompanyType() == CompanyType.PLC) {
             for (int i = providedCount; i < numberOfAppointments; i++) {
-                if (i == 0 || i == 1) {
-                    officerRoleList.add(OfficerType.DIRECTOR);
-                } else if (i == 2) {
-                    officerRoleList.add(OfficerType.SECRETARY);
-                } else {
-                    officerRoleList.add(OfficerType.DIRECTOR);
-                }
+                OfficerType officerType = (i == 2) ? OfficerType.SECRETARY : OfficerType.DIRECTOR;
+                officerRoleList.add(officerType);
             }
         } else {
             for (int i = providedCount; i < numberOfAppointments; i++) {
