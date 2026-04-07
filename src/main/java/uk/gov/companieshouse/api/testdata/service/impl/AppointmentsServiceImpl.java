@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
@@ -73,19 +74,43 @@ public class AppointmentsServiceImpl implements AppointmentService {
         final var companyNumber = spec.getCompanyNumber();
         final String countryOfResidence = addressService.getCountryOfResidence(
                 spec.getJurisdiction());
-        int numberOfAppointments = spec.getNumberOfAppointments();
-        if (numberOfAppointments <= 0) {
-            LOG.info("Number of appointments is less than or equal to 0. Defaulting to 1.");
-            numberOfAppointments = 1;
+        Integer numberOfAppointments = spec.getNumberOfAppointments();
+        boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(spec);
+
+        if (spec.getCompanyType() == CompanyType.PLC) {
+            // Always ensure at least 2 directors and 1 secretary for PLC
+            if (!explicitlySet || numberOfAppointments == null || numberOfAppointments < 3) {
+                LOG.info("PLC company type and numberOfAppointments not set or less than 3. Defaulting to 2 directors and 1 secretary");
+                numberOfAppointments = 3;
+            }
+        } else {
+            if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
+                LOG.info("Number of appointments not set or <= 0. Defaulting to 1.");
+                numberOfAppointments = 1;
+            }
         }
 
         List<OfficerType> officerRoleList = new ArrayList<>();
-        if (spec.getOfficerRoles() != null) {
-            officerRoleList.addAll(spec.getOfficerRoles());
-            LOG.debug("Officer roles provided: " + spec.getOfficerRoles());
+        List<OfficerType> providedRoles = spec.getOfficerRoles();
+        int providedCount = (providedRoles != null) ? providedRoles.size() : 0;
+        if (providedCount > 0) {
+            officerRoleList.addAll(providedRoles);
+            LOG.debug("Officer roles provided: " + providedRoles);
         }
-        while (officerRoleList.size() < numberOfAppointments) {
-            officerRoleList.add(OfficerType.DIRECTOR);
+        if (spec.getCompanyType() == CompanyType.PLC) {
+            for (int i = providedCount; i < numberOfAppointments; i++) {
+                if (i == 0 || i == 1) {
+                    officerRoleList.add(OfficerType.DIRECTOR);
+                } else if (i == 2) {
+                    officerRoleList.add(OfficerType.SECRETARY);
+                } else {
+                    officerRoleList.add(OfficerType.DIRECTOR);
+                }
+            }
+        } else {
+            for (int i = providedCount; i < numberOfAppointments; i++) {
+                officerRoleList.add(OfficerType.DIRECTOR);
+            }
         }
 
         List<String> appointmentIds = new ArrayList<>();
@@ -384,5 +409,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private String setRoleName(String role) {
         return role.toLowerCase().replace(role.substring(0, 1),
                 role.substring(0, 1).toUpperCase());
+    }
+
+    private boolean payloadExplicitlySetNumberOfAppointments(CompanyRequest spec) {
+        return spec.isNumberOfAppointmentsSet();
     }
 }
