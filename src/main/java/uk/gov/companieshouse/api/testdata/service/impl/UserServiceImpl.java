@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(password);
         user.setDirectLoginPrivilege(true);
         user.setCreated(getDateNow());
-        user.setAdminUser(Optional.ofNullable(userRequest.getIsAdmin()).orElse(false));
+        user.setAdminUser(Optional.ofNullable(userRequest.getIsAdmin()).orElse(true));
         user.setTestData(true);
 
         if (userRequest.getIdentityVerification()
