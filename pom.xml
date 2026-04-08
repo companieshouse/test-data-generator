@@ -22,7 +22,7 @@
         <junit-jupiter-engine.version>5.2.0</junit-jupiter-engine.version>
         <mockito-junit-jupiter.version>2.18.0</mockito-junit-jupiter.version>
         <jackson-xml.version>2.9.6</jackson-xml.version>
-        <api-helper-java.version>3.0.1</api-helper-java.version>
+        <api-helper-java.version>3.0.3</api-helper-java.version>
         <structured-logging.version>3.0.20</structured-logging.version>
 
         <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
@@ -30,14 +30,14 @@
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 
-        <spring-boot-dependencies.version>3.5.9</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.5.9</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>3.5.11</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>3.5.11</spring-boot-maven-plugin.version>
         <log4j2.version>2.25.3</log4j2.version>
 
         <!-- internal dependencies -->
-        <api-security-java.version>2.0.8</api-security-java.version>
-        <private-api-sdk-java.version>4.0.416</private-api-sdk-java.version>
-        <api-sdk-manager-java-library.version>3.0.10</api-sdk-manager-java-library.version>
+        <api-security-java.version>2.0.25</api-security-java.version>
+        <private-api-sdk-java.version>4.0.492</private-api-sdk-java.version>
+        <api-sdk-manager-java-library.version>3.0.18</api-sdk-manager-java-library.version>
         <test-data-generator-library.version>1.0.8</test-data-generator-library.version>
 
         <!-- Overrides -->
