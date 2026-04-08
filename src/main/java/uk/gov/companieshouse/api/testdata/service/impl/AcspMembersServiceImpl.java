@@ -18,12 +18,16 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class AcspMembersServiceImpl implements DataService<AcspMembersResponse, AcspMembersRequest> {
 
-    @Autowired
-    private AcspMembersRepository repository;
+    private final AcspMembersRepository repository;
+
+    private final RandomService randomService;
 
     @Autowired
-    private RandomService randomService;
-
+    public AcspMembersServiceImpl(AcspMembersRepository repository, RandomService randomService) {
+        super();
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public AcspMembersResponse create(AcspMembersRequest acspMembersRequest) throws DataException {

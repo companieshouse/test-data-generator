@@ -666,6 +666,7 @@ class AppointmentsServiceImplTest {
         }
     }
 
+    @SuppressWarnings("unchecked")
     private List<OfficerAppointmentItem> invokeCreateOfficerAppointmentItems(
             CompanyRequest spec, String appointmentId, Instant dayNow, Instant dayTimeNow, String role) {
         try {
