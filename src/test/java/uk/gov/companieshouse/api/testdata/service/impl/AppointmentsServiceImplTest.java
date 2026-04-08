@@ -34,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
@@ -553,6 +554,94 @@ class AppointmentsServiceImplTest {
         assertNotNull(result.getAppointmentsData());
         assertNotNull(result.getOfficerAppointment());
     }
+
+    @Test
+    void createsTwoDirectorsAndOneSecretaryForPlcWhenNoAppointmentsSpecified() {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        spec.setCompanyType(CompanyType.PLC);
+        spec.setOfficerRoles(null);
+        spec.setNumberOfAppointments(null);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(spec);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(3, savedAppointments.size());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(0).getOfficerRole());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(1).getOfficerRole());
+        assertEquals(OfficerType.SECRETARY.getValue(), savedAppointments.get(2).getOfficerRole());
+    }
+
+    @Test
+    void createsTwoDirectorsAndOneSecretaryForPlcWhenAppointmentsSpecified() {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        spec.setCompanyType(CompanyType.PLC);
+        spec.setOfficerRoles(null);
+        spec.setNumberOfAppointments(3);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(spec);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(3, savedAppointments.size());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(0).getOfficerRole());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(1).getOfficerRole());
+        assertEquals(OfficerType.SECRETARY.getValue(), savedAppointments.get(2).getOfficerRole());
+    }
+
+    @Test
+    void createsFiveDirectorsAndOneSecretaryForPlcWhenAppointmentsSpecified() {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setCompanyWithPopulatedStructureOnly(false);
+        spec.setCompanyType(CompanyType.PLC);
+        spec.setOfficerRoles(null);
+        spec.setNumberOfAppointments(6);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(spec);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(6)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(6, savedAppointments.size());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(0).getOfficerRole());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(1).getOfficerRole());
+        assertEquals(OfficerType.SECRETARY.getValue(), savedAppointments.get(2).getOfficerRole());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(3).getOfficerRole());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(4).getOfficerRole());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(5).getOfficerRole());
+    }
+
 
     private AppointmentCreationRequest buildAppointmentCreationRequest(CompanyRequest spec) {
         return AppointmentCreationRequest.builder()

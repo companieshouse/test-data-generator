@@ -857,7 +857,9 @@ public class TestDataServiceImpl implements TestDataService {
         companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
         companySpec.setSubType(publicCompanySpec.getSubType());
         companySpec.setHasSuperSecurePscs(publicCompanySpec.getHasSuperSecurePscs());
-        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        if (publicCompanySpec.getNumberOfAppointments() != null) {
+            companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
+        }
         companySpec.setSecureOfficer(publicCompanySpec.getSecureOfficer());
         companySpec.setRegisters(publicCompanySpec.getRegisters());
         companySpec.setCompanyStatusDetail(publicCompanySpec.getCompanyStatusDetail());
