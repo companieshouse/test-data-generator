@@ -898,16 +898,11 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         // Decide which indexes to update
-        boolean addCompanyIndex =
-                Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())
-                        || spec.getAlphabeticalSearch() != null
-                        || spec.getAdvancedSearch() != null;
-
         boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
         boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
 
         // Company index (ensure present if any specialised index is requested)
-        if (addCompanyIndex) {
+        if (Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())) {
             LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
             companySearchService.addCompanyIntoElasticSearchIndex(companyData);
         }
