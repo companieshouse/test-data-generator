@@ -898,7 +898,6 @@ public class TestDataServiceImpl implements TestDataService {
         }
 
         // Decide which indexes to update
-        boolean addCompanyIndex = spec.getAddToCompanyElasticSearchIndex() != null;
         boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
         boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
 
