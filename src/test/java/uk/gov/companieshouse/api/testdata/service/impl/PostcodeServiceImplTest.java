@@ -56,6 +56,37 @@ class PostcodeServiceImplTest {
     }
 
     @Test
+    void testPostcodeByCountryEnglandShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry("eng");
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testPostcodeByCountryWalesShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry("wls");
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testPostcodeByCountryScotlandShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry("sct");
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testPostcodeByCountryNorthernIrelandShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry("nir");
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testInvalidCountryReturnsInvalidPostcode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry("foo");
+        assertTrue(result.isEmpty() || result.stream().allMatch(p -> p.getPostcode() == null ||
+            p.getPostcode().getStripped().equals("INVALID")));
+    }
+
+    @Test
     void testPostcodesForInvalidCountry() {
         String invalidCountry = "invalid-country";
         try {

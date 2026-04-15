@@ -87,11 +87,11 @@ public class PostcodeServiceImpl implements PostcodeService {
         List<String> prefixesNI = List.of("BT");
 
         return switch (country.toLowerCase()) {
-            case "gb-wls" -> prefixesWales;
-            case "gb-sct" -> prefixesScotland;
-            case "gb-nir" -> prefixesNI;
-            case "gb-eng" -> prefixesEngland;
-            default -> throw new IllegalArgumentException("Country not recognised: " + country);
+            case "gb-wls", "wls" -> prefixesWales;
+            case "gb-sct", "sct" -> prefixesScotland;
+            case "gb-nir", "nir" -> prefixesNI;
+            case "gb-eng", "eng" -> prefixesEngland;
+            default -> List.of("INVALID");
         };
     }
 
