@@ -1,5 +1,14 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.OptionalLong;
@@ -13,8 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class PostcodeServiceImplTest {
@@ -30,6 +38,11 @@ class PostcodeServiceImplTest {
     private static final String COUNTRY_WALES = "gb-wls";
     private static final String COUNTRY_SCOTLAND = "gb-sct";
     private static final String COUNTRY_NORTHERN_IRELAND = "gb-nir";
+    private static final String COUNTRY_ENGLAND_PARTIAL = "eng";
+    private static final String COUNTRY_WALES_PARTIAL = "wls";
+    private static final String COUNTRY_SCOTLAND_PARTIAL = "sct";
+    private static final String COUNTRY_NORTHERN_IRELAND_PARTIAL = "nir";
+    private static final String INVALID_COUNTRY = "foo";
 
     @Test
     void testPostcodeByCountryEngland() {
@@ -56,12 +69,44 @@ class PostcodeServiceImplTest {
     }
 
     @Test
+    void testPostcodeByCountryEnglandShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND_PARTIAL);
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testPostcodeByCountryWalesShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_WALES_PARTIAL);
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testPostcodeByCountryScotlandShortCode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_SCOTLAND_PARTIAL);
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testPostcodeByCountryNorthernIrelandShortCode() {
+        List<Postcodes> result = postcodeService
+                .getPostcodeByCountry(COUNTRY_NORTHERN_IRELAND_PARTIAL);
+        assertEquals(10, result.size());
+    }
+
+    @Test
+    void testInvalidCountryReturnsInvalidPostcode() {
+        List<Postcodes> result = postcodeService.getPostcodeByCountry(INVALID_COUNTRY);
+        assertTrue(result.isEmpty() || result.stream().allMatch(p
+                -> p.getPostcode() == null || p.getPostcode().getStripped().equals("INVALID")));
+    }
+
+    @Test
     void testPostcodesForInvalidCountry() {
         String invalidCountry = "invalid-country";
         try {
             postcodeService.getPostcodeByCountry(invalidCountry);
-        } catch (IllegalArgumentException e) {
-            assertEquals("Country not recognised: invalid-country", e.getMessage());
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Country not recognised: invalid-country", ex.getMessage());
         }
     }
 
@@ -69,8 +114,8 @@ class PostcodeServiceImplTest {
     void testPostcodesForEmptyCountry() {
         try {
             postcodeService.getPostcodeByCountry("");
-        } catch (IllegalArgumentException e) {
-            assertEquals("Country not recognised: ", e.getMessage());
+        } catch (IllegalArgumentException ex) {
+            assertEquals("Country not recognised: ", ex.getMessage());
         }
     }
 
@@ -89,10 +134,12 @@ class PostcodeServiceImplTest {
         var list = postcodeService.getPostcodeByCountry(COUNTRY_WALES);
         assertFalse(list.isEmpty(), "Expected CF matches");
         assertTrue(
-                list.stream().allMatch(p -> p.getPostcode() != null && p.getPostcode().getStripped().startsWith("CF")),
+                list.stream().allMatch(p -> p.getPostcode()
+                        != null && p.getPostcode().getStripped().startsWith("CF")),
                 "All results should start with CF"
         );
-        assertTrue(list.stream().allMatch(p -> p.getBuildingNumber() != null), "buildingNumber must be non-null");
+        assertTrue(list.stream().allMatch(p -> p.getBuildingNumber()
+                != null), "buildingNumber must be non-null");
         assertEquals(10, list.size(), "Should return 10 results");
     }
 
@@ -111,18 +158,19 @@ class PostcodeServiceImplTest {
         when(nullBuilding.getPostcode()).thenReturn(postcodeObj);
         when(nullBuilding.getBuildingNumber()).thenReturn(null);
 
-        doReturn(List.of(valid, nullPostcode, nullBuilding)).when(postcodeService).loadAllPostcodes();
+        doReturn(List.of(valid, nullPostcode, nullBuilding))
+                .when(postcodeService).loadAllPostcodes();
 
         List<Postcodes> result = postcodeService.getPostcodeByCountry(COUNTRY_ENGLAND);
         assertEquals(1, result.size());
-        assertTrue(result.stream().allMatch(p -> p.getPostcode() != null && p.getBuildingNumber() != null));
+        assertTrue(result.stream().allMatch(p
+                -> p.getPostcode() != null && p.getBuildingNumber() != null));
         assertTrue(result.contains(valid));
     }
 
     @Test
-    void testIOExceptionWhenReadingPostcodesJsonReturnsException() {
+    void testIoExceptionWhenReadingPostcodesJsonReturnsException() {
         PostcodeServiceImpl service = spy(new PostcodeServiceImpl());
-        // Create an InputStream that throws IOException on read
         var faultyStream = new java.io.InputStream() {
             @Override
             public int read() throws IOException {
@@ -132,8 +180,8 @@ class PostcodeServiceImplTest {
         doReturn(faultyStream).when(service).getPostcodesResourceStream();
         try {
             service.loadAllPostcodes();
-        } catch (RuntimeException e) {
-            assertEquals("java.io.IOException: Simulated IO error", e.getMessage());
+        } catch (RuntimeException ex) {
+            assertEquals("java.io.IOException: Simulated IO error", ex.getMessage());
         }
     }
 
