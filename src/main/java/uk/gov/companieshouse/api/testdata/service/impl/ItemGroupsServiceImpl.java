@@ -8,8 +8,12 @@ import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 @Service
 public class ItemGroupsServiceImpl implements ItemGroupsService { // Add the interface here
 
+    private final ItemGroupsRepository itemGroupsRepository;
+
     @Autowired
-    public ItemGroupsRepository itemGroupsRepository;
+    public ItemGroupsServiceImpl(ItemGroupsRepository itemGroupsRepository) {
+        this.itemGroupsRepository = itemGroupsRepository;
+    }
 
     @Override // Good practice to add this
     public boolean deleteItemGroups(String orderNumber) {
