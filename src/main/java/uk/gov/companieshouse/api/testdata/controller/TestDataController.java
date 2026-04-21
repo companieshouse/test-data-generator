@@ -589,4 +589,22 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
+    @DeleteMapping("/internal/item-groups/{orderNumber}")
+    public ResponseEntity<Map<String, Object>> deleteItemGroups(@PathVariable("orderNumber")
+    String orderNumber)
+            throws DataException {
+        Map<String, Object> response = new HashMap<>();
+        response.put("orderNumber", orderNumber);
+        boolean deleteItemGroups = testDataService.deleteItemGroupsData(orderNumber);
+
+        if (deleteItemGroups) {
+            LOG.info("Item Groups is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Item Groups Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
 }

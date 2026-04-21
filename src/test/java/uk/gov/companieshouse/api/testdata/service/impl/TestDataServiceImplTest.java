@@ -52,6 +52,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.ItemGroups;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
@@ -101,6 +102,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -196,6 +198,8 @@ class TestDataServiceImplTest {
             UserCompanyAssociationRequest> userCompanyAssociationService;
     @Mock
     private UserCompanyAssociationRepository userCompanyAssociationRepository;
+    @Mock
+    private ItemGroupsService itemGroupsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -2483,20 +2487,16 @@ class TestDataServiceImplTest {
     void getAcspProfileDataReturnsProfile() throws NoDataFoundException {
         String acspNumber = "AP000036";
 
-        // Prepare the mock AcspProfile
         AcspProfile profile = new AcspProfile();
         profile.setId(acspNumber);
         profile.setAcspNumber(acspNumber);
         profile.setName("Test ACSP Company");
         profile.setStatus("active");
 
-        // Mock the acspProfileService
         when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
 
-        // Call the service method
         Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
 
-        // Verify results
         assertNotNull(result);
         assertTrue(result.isPresent());
 
@@ -2506,7 +2506,6 @@ class TestDataServiceImplTest {
         assertEquals("Test ACSP Company", returnedProfile.getName());
         assertEquals("active", returnedProfile.getStatus());
 
-        // Verify interaction with the mock
         verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 
@@ -2514,19 +2513,51 @@ class TestDataServiceImplTest {
     void getAcspProfileDataReturnsEmpty() throws NoDataFoundException {
         String acspNumber = "NON_EXISTENT";
 
-        // Mock empty response
         when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
 
-        // Call the service method
         Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
 
-        // Verify results
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        // Verify interaction with the mock
         verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 
+    @Test
+    void deleteItemGroupsData() throws DataException {
+        final String orderNumber = "ORD-123456-789012";
 
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenReturn(true);
+
+        boolean result = testDataService.deleteItemGroupsData(orderNumber);
+
+        assertTrue(result);
+        verify(itemGroupsService).deleteItemGroups(orderNumber);
+    }
+
+    @Test
+    void deleteItemGroupsDataFailure() throws DataException {
+        final String orderNumber = "ORD-123456-789012";
+
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenReturn(false);
+
+        boolean result = testDataService.deleteItemGroupsData(orderNumber);
+
+        assertFalse(result);
+        verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
+
+    @Test
+    void deleteItemGroupsThrowsException() {
+        final String orderNumber = "ORD-123456-789012";
+        RuntimeException ex = new RuntimeException("Internal Database Error");
+
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenThrow(ex);
+        DataException exception = assertThrows(DataException.class, () ->
+                testDataService.deleteItemGroupsData(orderNumber));
+
+        assertEquals("Error deleting Item Groups", exception.getMessage());
+        assertEquals(ex, exception.getCause());
+        verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
 }

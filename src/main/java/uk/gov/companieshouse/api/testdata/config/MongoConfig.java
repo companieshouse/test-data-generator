@@ -34,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.ItemGroupsRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
@@ -51,6 +52,7 @@ public class MongoConfig {
     private static final String ITEMS_DATABASE = "items";
     private static final String SIC_CODE_DATABASE = "sic_code";
     private static final String IDENTITY_VERIFICATION = "identity_verification";
+    private static final String ITEM_GROUPS_DATABASE = "orders_item_groups";
 
     private final MongoProperties mongoProperties;
 
@@ -191,6 +193,11 @@ public class MongoConfig {
     public UserCompanyAssociationRepository userCompanyAssociationRepository() {
         return getMongoRepositoryBean(UserCompanyAssociationRepository.class,
                 "user_company_associations");
+    }
+
+    @Bean
+    public ItemGroupsRepository itemGroupsRepository() {
+        return getMongoRepositoryBean(ItemGroupsRepository.class, ITEM_GROUPS_DATABASE);
     }
 
     @Bean

@@ -14,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1612,5 +1613,37 @@ class TestDataControllerTest {
 
         verify(testDataService, times(1)).getAcspProfileData(acspNumber);
     }
+
+    @Test
+    void deleteItemGroups() throws Exception {
+        final String orderNumber = "ORD-1776329853";
+        when(this.testDataService.deleteItemGroupsData(orderNumber)).thenReturn(true);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteItemGroups(orderNumber);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteItemGroupsData(orderNumber);
+    }
+
+
+    @Test
+    void deleteItemGroupsNoData() throws Exception {
+        final String orderNumber = "ORD-1776329853";
+
+        when(this.testDataService.deleteItemGroupsData(orderNumber)).thenReturn(false);
+        ResponseEntity<Map<String, Object>> response
+                = this.testDataController.deleteItemGroups(orderNumber);
+
+        Map<String, Object> expectedBody = new HashMap<>();
+        expectedBody.put("orderNumber", orderNumber);
+        expectedBody.put("message", "Item Groups Not Found");
+        expectedBody.put("status", HttpStatus.NOT_FOUND);
+
+        assertEquals(expectedBody, response.getBody());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(testDataService).deleteItemGroupsData(orderNumber);
+    }
+
 
 }
