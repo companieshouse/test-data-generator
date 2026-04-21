@@ -159,7 +159,6 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
 
-
     private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
     @Value("${api.url}")
