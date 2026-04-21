@@ -52,7 +52,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.entity.ItemGroups;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
