@@ -2523,20 +2523,20 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteItemGroupsData() throws DataException {
-        final String orderNumber = "ORD-123456-789012";
+    void deleteItemGroupsDataSuccess() throws DataException {
+        String orderNumber = "ORD-1234-5678";
 
         when(itemGroupsService.deleteItemGroups(orderNumber)).thenReturn(true);
 
         boolean result = testDataService.deleteItemGroupsData(orderNumber);
 
         assertTrue(result);
-        verify(itemGroupsService).deleteItemGroups(orderNumber);
+        verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
     }
 
     @Test
-    void deleteItemGroupsDataFailure() throws DataException {
-        final String orderNumber = "ORD-123456-789012";
+    void deleteItemGroupsDataReturnsFalse() throws DataException {
+        String orderNumber = "ORD-0000-0000";
 
         when(itemGroupsService.deleteItemGroups(orderNumber)).thenReturn(false);
 
@@ -2547,16 +2547,19 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteItemGroupsThrowsException() {
-        final String orderNumber = "ORD-123456-789012";
-        RuntimeException ex = new RuntimeException("Internal Database Error");
+    void deleteItemGroupsDataThrowsException() {
+        String orderNumber = "ORD-ERROR-1234";
+        RuntimeException cause = new RuntimeException("Mongo failure");
 
-        when(itemGroupsService.deleteItemGroups(orderNumber)).thenThrow(ex);
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.deleteItemGroupsData(orderNumber));
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenThrow(cause);
+
+        DataException exception = assertThrows(
+                DataException.class,
+                () -> testDataService.deleteItemGroupsData(orderNumber)
+        );
 
         assertEquals("Error deleting Item Groups", exception.getMessage());
-        assertEquals(ex, exception.getCause());
+        assertSame(cause, exception.getCause());
         verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
     }
 }

@@ -87,7 +87,6 @@ public class TestDataServiceImpl implements TestDataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
-    private final ItemGroupsService itemGroupsService;
 
     @Autowired
     private CompanyProfileService companyProfileService;
@@ -158,6 +157,8 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationRequest> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
+    @Autowired
+    private ItemGroupsService itemGroupsService;
 
     private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
@@ -176,8 +177,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     public TestDataServiceImpl(
-            ItemGroupsService itemGroupsService, CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
-        this.itemGroupsService = itemGroupsService;
+            CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
         this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
     }
 
