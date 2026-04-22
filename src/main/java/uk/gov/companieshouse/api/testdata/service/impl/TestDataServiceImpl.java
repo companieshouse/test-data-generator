@@ -157,6 +157,7 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationRequest> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
+    @SuppressWarnings("java:S6813") // legacy service – constructor injection not feasible
     @Autowired
     private ItemGroupsService itemGroupsService;
 
