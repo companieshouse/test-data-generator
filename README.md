@@ -366,9 +366,9 @@ In order to use the generator, there are different possible endpoints that can b
 
   - A usage example looks like this: `{ "penalty_ref": "A123456" }`
 
-#### Deleting Item groups
+#### Deleting Item Groups
 
-- DELETE: Sending a DELETE request to the endpoint `{Base URL}/test-data/internal/item-groups/{orderNumber}` will delete the entire item group and all its nested items.
+- DELETE: Sending a DELETE request to the endpoint `{Base URL}/test-data/internal/item-groups/{orderNumber}` will delete the entire Item Groups and all its nested items.
   - `orderNumber`: The unique order reference (e.g., ORD-177632-985311) is required in the path.
 
 #### Retrieving Postcode

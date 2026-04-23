@@ -52,7 +52,7 @@ public class MongoConfig {
     private static final String ITEMS_DATABASE = "items";
     private static final String SIC_CODE_DATABASE = "sic_code";
     private static final String IDENTITY_VERIFICATION = "identity_verification";
-    private static final String ITEM_GROUPS_DATABASE = "orders_item_groups";
+    private static final String ORDERS_ITEM_GROUPS_DATABASE = "orders_item_groups";
 
     private final MongoProperties mongoProperties;
 
@@ -197,7 +197,7 @@ public class MongoConfig {
 
     @Bean
     public ItemGroupsRepository itemGroupsRepository() {
-        return getMongoRepositoryBean(ItemGroupsRepository.class, ITEM_GROUPS_DATABASE);
+        return getMongoRepositoryBean(ItemGroupsRepository.class, ORDERS_ITEM_GROUPS_DATABASE);
     }
 
     @Bean

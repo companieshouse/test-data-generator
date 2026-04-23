@@ -6,7 +6,7 @@ import uk.gov.companieshouse.api.testdata.repository.ItemGroupsRepository;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 
 @Service
-public class ItemGroupsServiceImpl implements ItemGroupsService { // Add the interface here
+public class ItemGroupsServiceImpl implements ItemGroupsService {
 
     private final ItemGroupsRepository itemGroupsRepository;
 
@@ -15,7 +15,7 @@ public class ItemGroupsServiceImpl implements ItemGroupsService { // Add the int
         this.itemGroupsRepository = itemGroupsRepository;
     }
 
-    @Override // Good practice to add this
+    @Override
     public boolean deleteItemGroups(String orderNumber) {
         var itemGroups = itemGroupsRepository.findByDataOrderNumber(orderNumber);
         if (itemGroups.isPresent()) {

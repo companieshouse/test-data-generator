@@ -7,8 +7,8 @@ public interface ItemGroupsService {
     /**
      * Deletes Item Groups from the DB
      *
-     * @param orderNumber the items groups needs to be deleted
-     * @return the null on success and error for failure with the HTTP status
+     * @param orderNumber the item groups that needs to be deleted
+     * @return null on success and error with the HTTP status for failure
      * @throws NoDataFoundException if the item groups for the order number not found
      * @throws DataException if the item groups not deleted successfully
      */

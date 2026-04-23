@@ -327,7 +327,7 @@ public interface TestDataService {
     /**
      * Deletes the Item Groups test data for the given order number.
      *
-     * @param orderNumber the order number generated while creating Item groups
+     * @param orderNumber the order number generated while creating Item Groups
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteItemGroupsData(String orderNumber) throws DataException;
