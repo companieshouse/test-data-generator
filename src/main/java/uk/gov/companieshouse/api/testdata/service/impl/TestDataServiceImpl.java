@@ -73,6 +73,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
@@ -156,6 +157,9 @@ public class TestDataServiceImpl implements TestDataService {
             UserCompanyAssociationRequest> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
+    @SuppressWarnings("java:S6813") // legacy service – constructor injection not feasible
+    @Autowired
+    private ItemGroupsService itemGroupsService;
 
     private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
 
@@ -1005,6 +1009,15 @@ public class TestDataServiceImpl implements TestDataService {
         String companyUri = this.apiUrl + "/company/" + companyNumber;
         return new CompanyProfileResponse(companyNumber,
                 authCode, companyUri);
+    }
+
+    @Override
+    public boolean deleteItemGroupsData(String orderNumber) throws DataException {
+        try {
+            return itemGroupsService.deleteItemGroups(orderNumber);
+        } catch (Exception ex) {
+            throw new DataException("Error deleting Item Groups", ex);
+        }
     }
 
 }

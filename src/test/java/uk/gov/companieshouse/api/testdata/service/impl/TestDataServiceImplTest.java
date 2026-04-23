@@ -101,6 +101,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
@@ -196,6 +197,8 @@ class TestDataServiceImplTest {
             UserCompanyAssociationRequest> userCompanyAssociationService;
     @Mock
     private UserCompanyAssociationRepository userCompanyAssociationRepository;
+    @Mock
+    private ItemGroupsService itemGroupsService;
 
     @InjectMocks
     private TestDataServiceImpl testDataService;
@@ -2483,20 +2486,16 @@ class TestDataServiceImplTest {
     void getAcspProfileDataReturnsProfile() throws NoDataFoundException {
         String acspNumber = "AP000036";
 
-        // Prepare the mock AcspProfile
         AcspProfile profile = new AcspProfile();
         profile.setId(acspNumber);
         profile.setAcspNumber(acspNumber);
         profile.setName("Test ACSP Company");
         profile.setStatus("active");
 
-        // Mock the acspProfileService
         when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
 
-        // Call the service method
         Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
 
-        // Verify results
         assertNotNull(result);
         assertTrue(result.isPresent());
 
@@ -2506,7 +2505,6 @@ class TestDataServiceImplTest {
         assertEquals("Test ACSP Company", returnedProfile.getName());
         assertEquals("active", returnedProfile.getStatus());
 
-        // Verify interaction with the mock
         verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 
@@ -2514,19 +2512,54 @@ class TestDataServiceImplTest {
     void getAcspProfileDataReturnsEmpty() throws NoDataFoundException {
         String acspNumber = "NON_EXISTENT";
 
-        // Mock empty response
         when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
 
-        // Call the service method
         Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
 
-        // Verify results
         assertNotNull(result);
         assertTrue(result.isEmpty());
 
-        // Verify interaction with the mock
         verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 
+    @Test
+    void deleteItemGroupsDataSuccess() throws DataException {
+        String orderNumber = "ORD-1234-5678";
 
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenReturn(true);
+
+        boolean result = testDataService.deleteItemGroupsData(orderNumber);
+
+        assertTrue(result);
+        verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
+
+    @Test
+    void deleteItemGroupsDataReturnsFalse() throws DataException {
+        String orderNumber = "ORD-0000-0000";
+
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenReturn(false);
+
+        boolean result = testDataService.deleteItemGroupsData(orderNumber);
+
+        assertFalse(result);
+        verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
+
+    @Test
+    void deleteItemGroupsDataThrowsException() {
+        String orderNumber = "ORD-ERROR-1234";
+        RuntimeException cause = new RuntimeException("Mongo failure");
+
+        when(itemGroupsService.deleteItemGroups(orderNumber)).thenThrow(cause);
+
+        DataException exception = assertThrows(
+                DataException.class,
+                () -> testDataService.deleteItemGroupsData(orderNumber)
+        );
+
+        assertEquals("Error deleting Item Groups", exception.getMessage());
+        assertSame(cause, exception.getCause());
+        verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
 }

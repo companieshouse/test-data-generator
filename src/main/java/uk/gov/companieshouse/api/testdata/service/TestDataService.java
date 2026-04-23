@@ -323,4 +323,13 @@ public interface TestDataService {
      * @throws DataException If any error occurs
      */
     CompanyProfileResponse createCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec) throws DataException;
+
+    /**
+     * Deletes the Item Groups test data for the given order number.
+     *
+     * @param orderNumber the order number generated while creating Item Groups
+     * @throws DataException if there is an error during user deletion
+     */
+    boolean deleteItemGroupsData(String orderNumber) throws DataException;
+
 }
