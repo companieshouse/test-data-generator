@@ -207,7 +207,7 @@ public class MongoConfig {
 
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
-                MongoClients.create(this.mongoProperties.getUri()), database);
+                MongoClients.create(this.mongoProperties.determineUri()), database);
         var mappingMongoConverter = getMappingMongoConverter(
                 simpleMongoDbFactory);
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
