@@ -265,6 +265,10 @@ class AcspProfileServiceImplTest {
     @Test
     void createAcspProfileAsSoleTraderWithDefaultValues() throws DataException {
         acspProfileRequest.setType("sole-trader");
+        acspProfileRequest.setStatus(null);
+        acspProfileRequest.setAmlDetails(null);
+        acspProfileRequest.setEmail(null);
+        acspProfileRequest.setBusinessSector(null);
 
         when(randomService.getNumber(6)).thenReturn(Long.valueOf("100001"));
         when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM)).thenReturn(new Address());
@@ -281,8 +285,14 @@ class AcspProfileServiceImplTest {
         verify(repository).save(profileCaptor.capture());
         AcspProfile captured = profileCaptor.getValue();
 
-        assertCommonProfileDetails(captured, "sole-trader", "Forename AP100001",
-                "Surname AP100001");
+        assertEquals("active", captured.getStatus());
+        assertEquals("sole-trader", captured.getType());
+        assertNull(captured.getAmlDetails());
+        assertNull(captured.getEmail());
+        assertEquals("financial-institutions", captured.getBusinessSector());
+        assertNotNull(captured.getSoleTraderDetails());
+        assertEquals("Forename AP100001", captured.getSoleTraderDetails().getForename());
+        assertEquals("Surname AP100001", captured.getSoleTraderDetails().getSurname());
     }
      @Test
     void createAcspProfileWithName() throws DataException {

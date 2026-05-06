@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 import org.apache.commons.codec.digest.MessageDigestAlgorithms;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -27,14 +26,18 @@ public class CompanyAuthCodeServiceImpl implements CompanyAuthCodeService {
 
     private static final int AUTH_CODE_LENGTH = 6;
 
-    @Autowired
-    private RandomService randomService;
+    private final RandomService randomService;
+    private final CompanyAuthCodeRepository repository;
+    private final CompanyProfileRepository companyProfileRepository;
 
-    @Autowired
-    private CompanyAuthCodeRepository repository;
-
-    @Autowired
-    private CompanyProfileRepository companyProfileRepository;
+    public CompanyAuthCodeServiceImpl(
+            RandomService randomService,
+            CompanyAuthCodeRepository repository,
+            CompanyProfileRepository companyProfileRepository) {
+        this.randomService = randomService;
+        this.repository = repository;
+        this.companyProfileRepository = companyProfileRepository;
+    }
 
     @Override
     public CompanyAuthCode create(CompanyRequest spec) throws DataException {

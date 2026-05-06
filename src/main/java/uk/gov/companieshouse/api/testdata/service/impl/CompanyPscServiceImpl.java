@@ -98,7 +98,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         if (shouldReturnNullForCompaniesThatDoNotNeedPscs(spec)) {
             LOG.info("Company type does not require a PSC. No PSCs will be created.");
             spec.setNumberOfPscs(0);
-            return null;
+            return Collections.emptyList();
         }
 
         if (shouldCreateSuperSecurePsc(spec)) {
@@ -113,7 +113,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         int numberOfPsc = getNumberOfPsc(spec);
         if (numberOfPsc <= 0) {
             LOG.info("Number of PSCs is less than or equal to 0. No PSCs will be created.");
-            return null;
+            return Collections.emptyList();
         }
 
         LOG.info("Creating " + numberOfPsc + " PSCs for company number: " + spec.getCompanyNumber());
@@ -179,8 +179,9 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         LOG.info("Creating PSCs based on company type: " + spec.getCompanyType());
 
         if (numberOfPsc <= 0) {
-            LOG.info("No PSCs requested for company number: " + spec.getCompanyNumber() + ". Returning null.");
-            return null;
+            LOG.info("No PSCs requested for company number: " + spec.getCompanyNumber()
+                    + ". Returning empty list.");
+            return Collections.emptyList();
         }
 
         CompanyPscs firstPsc = null;
@@ -473,4 +474,3 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         }
     }
 }
-

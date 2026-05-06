@@ -1036,6 +1036,10 @@ class TestDataServiceImplTest {
     void createAcspMembersDataProfileCreationException() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
+        AcspProfileRequest profileRequest = new AcspProfileRequest();
+        profileRequest.setStatus("active");
+        profileRequest.setType("limited-company");
+        spec.setAcspProfile(profileRequest);
 
         when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
@@ -1044,6 +1048,8 @@ class TestDataServiceImplTest {
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
+        verify(acspProfileService).create(profileRequest);
+        verify(acspMembersService, never()).create(any(AcspMembersRequest.class));
     }
 
     @Test
@@ -1201,26 +1207,27 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteUserDataWithEmailAndAllowListId() {
-        String userId = "userId";
+        String userId = "user-id-with-auth";
         User user = new User();
-        user.setEmail("email@example.com");
+        user.setEmail("allow@example.com");
 
         when(userService.getUserById(userId)).thenReturn(Optional.of(user));
         when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("authId");
+        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("allow-list-id");
 
         boolean result = testDataService.deleteUserData(userId);
 
         assertTrue(result);
         verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, times(1)).delete("authId");
+        verify(companyAuthAllowListService, times(1)).getAuthId("allow@example.com");
+        verify(companyAuthAllowListService, times(1)).delete("allow-list-id");
     }
 
     @Test
     void deleteUserDataWithEmailAndNoAllowListId() {
-        String userId = "userId";
+        String userId = "user-id-without-auth";
         User user = new User();
-        user.setEmail("email@example.com");
+        user.setEmail("no-allow@example.com");
 
         when(userService.getUserById(userId)).thenReturn(Optional.of(user));
         when(userService.delete(userId)).thenReturn(true);
@@ -1230,6 +1237,7 @@ class TestDataServiceImplTest {
 
         assertTrue(result);
         verify(userService, times(1)).delete(userId);
+        verify(companyAuthAllowListService, times(1)).getAuthId("no-allow@example.com");
         verify(companyAuthAllowListService, never()).delete(anyString());
     }
 
@@ -1621,7 +1629,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
@@ -1634,7 +1642,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchNotDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, URIValidationException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);

@@ -5,9 +5,7 @@ import jakarta.validation.Valid;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -73,21 +71,26 @@ public class TestDataController {
     private static final String STATUS = "status";
     private static final String ERROR = "error";
 
-    @Autowired
-    private TestDataService testDataService;
-
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
-
-    @Autowired
-    private AccountPenaltiesService accountPenaltyService;
+    private final TestDataService testDataService;
+    private final CompanyAuthCodeService companyAuthCodeService;
+    private final AccountPenaltiesService accountPenaltyService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
 
-    @Autowired
-    private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
+    private final VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
+
+    public TestDataController(
+            TestDataService testDataService,
+            CompanyAuthCodeService companyAuthCodeService,
+            AccountPenaltiesService accountPenaltyService,
+            VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService) {
+        this.testDataService = testDataService;
+        this.companyAuthCodeService = companyAuthCodeService;
+        this.accountPenaltyService = accountPenaltyService;
+        this.verifiedIdentityService = verifiedIdentityService;
+    }
 
     /* Public endpoint to create company data */
     @PostMapping("/company")
@@ -419,7 +422,7 @@ public class TestDataController {
                     accountPenaltiesData.getPenalties().stream()
                             .filter(penalty -> transactionReference.equals(
                                     penalty.getTransactionReference()))
-                            .collect(Collectors.toList())
+                            .toList()
             );
         }
         return ResponseEntity.ok(accountPenaltiesData);

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -128,8 +130,11 @@ public class GlobalExceptionHandlerTest {
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
-        MethodArgumentNotValidException ex = Mockito.mock(MethodArgumentNotValidException.class);
-        when(ex.getBindingResult()).thenReturn(bindingResult);
+        Method method = GlobalExceptionHandlerTest.class
+                .getDeclaredMethod("dummyMethod", String.class);
+        MethodParameter methodParameter = new MethodParameter(method, 0);
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(
+                methodParameter, bindingResult);
         WebRequest request = Mockito.mock(WebRequest.class);
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
@@ -155,5 +160,10 @@ public class GlobalExceptionHandlerTest {
 
         final ValidationError expectedError = new ValidationError("incorrect company auth_code", null, null, "ch:validation");
         assertTrue(response.getBody().containsError(expectedError));
+    }
+
+    @SuppressWarnings("unused")
+    private void dummyMethod(String value) {
+        // Used only to construct MethodParameter for MethodArgumentNotValidException tests.
     }
 }

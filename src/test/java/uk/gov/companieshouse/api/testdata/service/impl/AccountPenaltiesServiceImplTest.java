@@ -434,7 +434,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldDefaultCompanyCodeAndTransactionSubTypeIfBlank() throws DataException {
+    void createPenaltiesList_shouldDefaultCompanyCodeAndTransactionSubTypeIfBlank() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("");
         penaltyRequest.setTransactionSubType(null);
@@ -453,7 +453,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldDefaultLedgerCodeAndTypeDescriptionIfConfigNotPresent() throws DataException {
+    void createPenaltiesList_shouldDefaultLedgerCodeAndTypeDescriptionIfConfigNotPresent() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("ZZ");
         penaltyRequest.setTransactionSubType(null);
@@ -469,7 +469,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldDefaultTransactionTypeIfNull() throws DataException {
+    void createPenaltiesList_shouldDefaultTransactionTypeIfNull() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("ZZ");
         penaltyRequest.setTransactionType(null);
@@ -482,7 +482,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldRoundAmountToTwoDecimals() throws DataException{
+    void createPenaltiesList_shouldRoundAmountToTwoDecimals() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("C1");
         penaltyRequest.setCustomerCode("12345678");
@@ -495,7 +495,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_shouldGenerateDifferentAmountsForMultiplePenalties() throws DataException {
+    void createPenaltiesList_shouldGenerateDifferentAmountsForMultiplePenalties() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("C1");
         penaltyRequest.setCustomerCode("12345678");
@@ -512,7 +512,7 @@ class AccountPenaltiesServiceImplTest {
     @ParameterizedTest
     @MethodSource("penaltyReferencePrefixProvider")
     void generateTransactionReference_shouldUseCorrectPrefix(
-            String companyCode, String transactionSubType, String expectedPrefix) throws DataException {
+            String companyCode, String transactionSubType, String expectedPrefix) {
         try {
             var method = AccountPenaltiesServiceImpl.class.getDeclaredMethod("generateTransactionReference", String.class, String.class);
             method.setAccessible(true);
@@ -526,7 +526,7 @@ class AccountPenaltiesServiceImplTest {
     @ParameterizedTest
     @MethodSource("penaltyReferencePrefixProvider")
     void createPenaltiesList_transactionReferencePrefix(
-            String companyCode, String transactionSubType, String expectedPrefix) throws DataException {
+            String companyCode, String transactionSubType, String expectedPrefix) {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode(companyCode);
 
@@ -616,7 +616,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_partPaid_setsOutstandingAmountLessThanAmount() throws DataException {
+    void createPenaltiesList_partPaid_setsOutstandingAmountLessThanAmount() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("LP");
         penaltyRequest.setCustomerCode(CUSTOMER_CODE);
@@ -634,7 +634,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_amountNull_usesRandomAmount() throws DataException {
+    void createPenaltiesList_amountNull_usesRandomAmount() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("LP");
         penaltyRequest.setCustomerCode(CUSTOMER_CODE);
@@ -650,7 +650,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createPenaltiesList_isPaid_setsOutstandingAmountZero() throws DataException {
+    void createPenaltiesList_isPaid_setsOutstandingAmountZero() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("LP");
         penaltyRequest.setCustomerCode(CUSTOMER_CODE);
@@ -799,7 +799,7 @@ class AccountPenaltiesServiceImplTest {
     }
 
     @Test
-    void createDuplicatePenalties_shouldGenerateMultiplePenaltiesWithSameTransactionReference() throws DataException {
+    void createDuplicatePenalties_shouldGenerateMultiplePenaltiesWithSameTransactionReference() {
         PenaltyRequest penaltyRequest = new PenaltyRequest();
         penaltyRequest.setCompanyCode("LP");
         penaltyRequest.setCustomerCode("12345678");

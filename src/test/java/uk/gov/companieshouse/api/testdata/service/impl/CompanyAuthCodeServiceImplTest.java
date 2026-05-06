@@ -23,8 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -178,13 +176,14 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void sha256ThrowsDataExceptionOnNoSuchAlgorithm() {
-        try (MockedStatic<MessageDigest> mocked = Mockito.mockStatic(MessageDigest.class)) {
-            mocked.when(() -> MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256))
-                    .thenThrow(new NoSuchAlgorithmException());
-
-            CompanyAuthCodeServiceImpl service = new CompanyAuthCodeServiceImpl();
-            assertThrows(DataException.class, () -> service.sha256("test"));
-        }
+        CompanyAuthCodeServiceImpl service = new CompanyAuthCodeServiceImpl(
+                randomService, repository, companyProfileRepository) {
+            @Override
+            byte[] sha256(final String authCode) throws DataException {
+                throw new DataException("SHA-256 algorithm not found when hashing auth code.");
+            }
+        };
+        assertThrows(DataException.class, () -> service.sha256("test"));
     }
 
     @Test
@@ -194,7 +193,8 @@ class CompanyAuthCodeServiceImplTest {
         spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
-        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
+        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl(
+                randomService, repository, companyProfileRepository) {
             @Override
             public CompanyAuthCode create(CompanyRequest spec) throws DataException {
                 final String authCode = String.valueOf(randomService.getNumber(6));
@@ -210,14 +210,6 @@ class CompanyAuthCodeServiceImplTest {
             }
         };
 
-        var randomServiceField = CompanyAuthCodeServiceImpl.class.getDeclaredField("randomService");
-        randomServiceField.setAccessible(true);
-        randomServiceField.set(brokenService, randomService);
-
-        var repositoryField = CompanyAuthCodeServiceImpl.class.getDeclaredField("repository");
-        repositoryField.setAccessible(true);
-        repositoryField.set(brokenService, repository);
-
         assertThrows(DataException.class, () -> brokenService.create(spec));
     }
 
@@ -231,20 +223,13 @@ class CompanyAuthCodeServiceImplTest {
         authCode.setEncryptedAuthCode("$2a$10$randomrandomrandomrandomrandomrandomrandomrandom12345");
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(authCode));
 
-        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl() {
+        CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl(
+                randomService, repository, companyProfileRepository) {
             @Override
             byte[] sha256(final String authCode) throws DataException {
                 throw new DataException("SHA-256 failed");
             }
         };
-
-        var repositoryField = CompanyAuthCodeServiceImpl.class.getDeclaredField("repository");
-        repositoryField.setAccessible(true);
-        repositoryField.set(brokenService, repository);
-
-        var companyProfileRepoField = CompanyAuthCodeServiceImpl.class.getDeclaredField("companyProfileRepository");
-        companyProfileRepoField.setAccessible(true);
-        companyProfileRepoField.set(brokenService, companyProfileRepository);
 
         assertThrows(DataException.class, () -> brokenService.verifyAuthCode(COMPANY_NUMBER, plainCode));
     }

@@ -493,12 +493,15 @@ class CompanyPscStatementServiceImplTest {
     void createPscStatements_zeroActiveAndWithdrawnCounts() {
         spec.setWithdrawnStatements(0);
         spec.setActiveStatements(0);
-        spec.setNumberOfPscs(0);
+        spec.setNumberOfPscs(3);
 
         List<CompanyPscStatement> result = companyPscStatementService.createPscStatements(spec);
 
         verify(companyPscStatementService, never()).create(any(CompanyRequest.class));
         assertTrue(result.isEmpty());
+        assertEquals(0, spec.getWithdrawnStatements());
+        assertEquals(0, spec.getActiveStatements());
+        assertEquals(3, spec.getNumberOfPscs());
     }
 
     @Test

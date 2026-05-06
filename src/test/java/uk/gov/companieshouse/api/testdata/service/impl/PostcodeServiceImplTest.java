@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.mockito.Mockito.doReturn;
@@ -19,6 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.testdata.exception.PostcodeLoadException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -178,11 +180,11 @@ class PostcodeServiceImplTest {
             }
         };
         doReturn(faultyStream).when(service).getPostcodesResourceStream();
-        try {
-            service.loadAllPostcodes();
-        } catch (RuntimeException ex) {
-            assertEquals("java.io.IOException: Simulated IO error", ex.getMessage());
-        }
+        PostcodeLoadException ex = assertThrows(
+                PostcodeLoadException.class,
+                service::loadAllPostcodes);
+        assertEquals("Failed to read postcodes.json", ex.getMessage());
+        assertEquals("Simulated IO error", ex.getCause().getMessage());
     }
 
     @Test
