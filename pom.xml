@@ -41,7 +41,6 @@
         <test-data-generator-library.version>1.0.12</test-data-generator-library.version>
 
         <!-- Overrides -->
-        <!-- CVE-2025-48924 -->
         <commons-lang3.version>3.18.0</commons-lang3.version>
 
         <!-- Sonar config -->
