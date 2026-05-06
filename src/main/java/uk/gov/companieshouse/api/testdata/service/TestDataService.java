@@ -6,6 +6,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -28,6 +29,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
@@ -52,6 +54,17 @@ public interface TestDataService {
      * @throws DataException If any error occurs
      */
     void deleteCompanyData(String companyNumber) throws DataException;
+
+    /**
+     * . Updates the company profile data for a given company number and {@link UpdateCompanyRequest}
+     *
+     * @param request the update request
+     * @return
+     * @throws NoDataFoundException if the requested company number cannot be found
+     * @throws DataException        if the company profile cannot be updated
+     */
+    CompanyProfile updateCompanyData(
+            UpdateCompanyRequest request) throws NoDataFoundException, DataException;
 
     /**
      * Creates a new user test data based on the provided user specifications.
