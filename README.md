@@ -100,7 +100,7 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
   - A usage example for creating a company with disqualified officers: `{ "disqualified_officers": [ { "disqualification_type": "court-order", "is_corporate_officer": false }]}`
 
-- PUT: Sending a PUT request to update Company Profile for a specific company `{Base URL}/test-data/internal` will update an Company Profile entry. The request body must include mandatory `company_number`and optional `etag` parameters.
+- PUT: Sending a PUT request to update Company Profile for a specific company `{Base URL}/test-data/internal/update-company` will update an Company Profile entry. The request body must include mandatory `company_number`and optional `etag` parameters.
   - `company_number`: The Company Number of the Company Profile entry in the company_profile db collection. This is mandatory.
   - `etag`: The etag of the Company Profile entry in the company_profile db collection. This is optional.
 
