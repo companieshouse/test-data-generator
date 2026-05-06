@@ -155,7 +155,7 @@ public class TestDataController {
         return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
     }
 
-    @PutMapping("/internal/company")
+    @PutMapping("/internal/update-company")
     public ResponseEntity<Object> updateCompany(
             @Valid @RequestBody UpdateCompanyRequest request) {
 
