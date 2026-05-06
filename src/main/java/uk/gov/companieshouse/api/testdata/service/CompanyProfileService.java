@@ -8,7 +8,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import java.util.List;
 import java.util.Optional;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 
 public interface CompanyProfileService extends DataService<CompanyProfile, CompanyRequest> {
 
@@ -25,10 +24,9 @@ public interface CompanyProfileService extends DataService<CompanyProfile, Compa
     Optional<CompanyProfile> getCompanyProfile(String companyNumber);
 
     /**
-     * Updates an company details for the company Number.
-     *
-     * @param request    the update request with company Number.
-     * list
+     * Updates an company profile for the company Number.
+     * *
+     * @param request the update request with company Number as mandatory.
      * @throws NoDataFoundException if the company number cannot be found
      * @throws DataException if the company number details cannot be updated
      */

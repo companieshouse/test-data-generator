@@ -59,7 +59,7 @@ public interface TestDataService {
      * . Updates the company profile data for a given company number and {@link UpdateCompanyRequest}
      *
      * @param request the update request
-     * @return
+     * @return the status of the updated request
      * @throws NoDataFoundException if the requested company number cannot be found
      * @throws DataException        if the company profile cannot be updated
      */
