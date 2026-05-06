@@ -102,18 +102,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             return createOverseasEntity(companyNumber, jurisdiction, spec, accountingReferenceDate,
                     OVERSEA_COMPANY_TYPE, companyType, registeredOfficeIsInDispute);
         } else {
-            return createDefaultCompanyProfile(new DefaultCompanyProfileParams(
-                    companyNumber,
-                    jurisdiction,
-                    spec,
-                    accountingReferenceDate,
-                    companyType,
-                    hasSuperSecurePscs,
-                    companyStatus,
-                    subType,
-                    companyStatusDetail,
-                    registeredOfficeIsInDispute,
-                    accountsDueStatus));
+            DefaultCompanyProfileParams params = new DefaultCompanyProfileParams();
+            params.companyNumber = companyNumber;
+            params.jurisdiction = jurisdiction;
+            params.spec = spec;
+            params.accountingReferenceDate = accountingReferenceDate;
+            params.companyType = companyType;
+            params.hasSuperSecurePscs = hasSuperSecurePscs;
+            params.companyStatus = companyStatus;
+            params.subType = subType;
+            params.companyStatusDetail = companyStatusDetail;
+            params.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
+            params.accountsDueStatus = accountsDueStatus;
+            return createDefaultCompanyProfile(params);
         }
     }
 
@@ -660,40 +661,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private static final class DefaultCompanyProfileParams {
-        private final String companyNumber;
-        private final JurisdictionType jurisdiction;
-        private final CompanyRequest spec;
-        private final LocalDate accountingReferenceDate;
-        private final CompanyType companyType;
-        private final Boolean hasSuperSecurePscs;
-        private final String companyStatus;
-        private final String subType;
-        private final String companyStatusDetail;
-        private final Boolean registeredOfficeIsInDispute;
-        private final String accountsDueStatus;
-
-        private DefaultCompanyProfileParams(String companyNumber,
-                                            JurisdictionType jurisdiction,
-                                            CompanyRequest spec,
-                                            LocalDate accountingReferenceDate,
-                                            CompanyType companyType,
-                                            Boolean hasSuperSecurePscs,
-                                            String companyStatus,
-                                            String subType,
-                                            String companyStatusDetail,
-                                            Boolean registeredOfficeIsInDispute,
-                                            String accountsDueStatus) {
-            this.companyNumber = companyNumber;
-            this.jurisdiction = jurisdiction;
-            this.spec = spec;
-            this.accountingReferenceDate = accountingReferenceDate;
-            this.companyType = companyType;
-            this.hasSuperSecurePscs = hasSuperSecurePscs;
-            this.companyStatus = companyStatus;
-            this.subType = subType;
-            this.companyStatusDetail = companyStatusDetail;
-            this.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
-            this.accountsDueStatus = accountsDueStatus;
-        }
+        private String companyNumber;
+        private JurisdictionType jurisdiction;
+        private CompanyRequest spec;
+        private LocalDate accountingReferenceDate;
+        private CompanyType companyType;
+        private Boolean hasSuperSecurePscs;
+        private String companyStatus;
+        private String subType;
+        private String companyStatusDetail;
+        private Boolean registeredOfficeIsInDispute;
+        private String accountsDueStatus;
     }
 }

@@ -1629,7 +1629,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchDeployed()
-            throws DataException, URIValidationException {
+            throws DataException {
         testDataService.setElasticSearchDeployed(true);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
@@ -1642,7 +1642,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchNotDeployed()
-            throws DataException, URIValidationException {
+            throws DataException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);

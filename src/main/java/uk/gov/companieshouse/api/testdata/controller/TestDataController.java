@@ -56,7 +56,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssocia
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
@@ -73,7 +72,6 @@ public class TestDataController {
 
     private final TestDataService testDataService;
     private final CompanyAuthCodeService companyAuthCodeService;
-    private final AccountPenaltiesService accountPenaltyService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
@@ -84,11 +82,9 @@ public class TestDataController {
     public TestDataController(
             TestDataService testDataService,
             CompanyAuthCodeService companyAuthCodeService,
-            AccountPenaltiesService accountPenaltyService,
             VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService) {
         this.testDataService = testDataService;
         this.companyAuthCodeService = companyAuthCodeService;
-        this.accountPenaltyService = accountPenaltyService;
         this.verifiedIdentityService = verifiedIdentityService;
     }
 
