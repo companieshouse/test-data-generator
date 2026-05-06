@@ -33,6 +33,8 @@
         <spring-boot-dependencies.version>4.0.5</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>4.0.5</spring-boot-maven-plugin.version>
         <log4j2.version>2.25.3</log4j2.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.25</api-security-java.version>
@@ -40,11 +42,7 @@
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
         <test-data-generator-library.version>1.0.12</test-data-generator-library.version>
 
-        <!-- Overrides -->
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-
         <!-- Sonar config -->
-        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login/>
