@@ -55,6 +55,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -656,6 +657,54 @@ class TestDataServiceImplTest {
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER_2);
         verify(companyProfileService).delete(OVERSEA_COMPANY);
+    }
+
+    @Test
+    void updateCompanyDataSuccess() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyProfile expectedProfile = new CompanyProfile();
+        expectedProfile.setCompanyNumber(COMPANY_NUMBER);
+
+        when(companyProfileService.updateCompany(request)).thenReturn(expectedProfile);
+
+        CompanyProfile actualProfile = testDataService.updateCompanyData(request);
+
+        assertEquals(expectedProfile, actualProfile);
+        verify(companyProfileService, times(1)).updateCompany(request);
+    }
+
+    @Test
+    void updateCompanyDataNotFound() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        String errorMessage = "Company not found";
+        when(companyProfileService.updateCompany(request))
+                .thenThrow(new NoDataFoundException(errorMessage));
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataService.updateCompanyData(request));
+
+        assertEquals(errorMessage, thrown.getMessage());
+        verify(companyProfileService, times(1)).updateCompany(request);
+    }
+
+    @Test
+    void updateCompanyDataException() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        String errorMessage = "Database error";
+        when(companyProfileService.updateCompany(request))
+                .thenThrow(new DataException(errorMessage));
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataService.updateCompanyData(request));
+
+        assertEquals(errorMessage, thrown.getMessage());
+        verify(companyProfileService, times(1)).updateCompany(request);
     }
 
     @Test
