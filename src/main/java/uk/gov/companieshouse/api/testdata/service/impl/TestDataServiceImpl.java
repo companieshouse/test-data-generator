@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -281,6 +282,25 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
+    }
+
+//    public CompanyProfile updateCompanyData(
+//            UpdateCompanyRequest request)
+//            throws NoDataFoundException, DataException {
+//        try {
+//            return companyProfileService.updateCompany(request);
+//        } catch (NoDataFoundException ex) {
+//            throw new NoDataFoundException("Error updating account penalties - not found");
+//        } catch (Exception ex) {
+//            throw new DataException("Error updating account penalties", ex);
+//        }
+//    }
+
+    @Override
+    public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
+            throws NoDataFoundException, DataException {
+
+        return companyProfileService.updateCompany(request);
     }
 
     private void deleteUkEstablishmentsIfOverseaCompany(

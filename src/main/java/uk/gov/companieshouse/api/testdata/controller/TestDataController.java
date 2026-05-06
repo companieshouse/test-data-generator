@@ -25,8 +25,10 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -43,6 +45,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
@@ -149,6 +152,39 @@ public class TestDataController {
         var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
         var defaultAuthCode = new CompanyAuthCodeResponse(authCode.getAuthCode());
         return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
+    }
+
+    @PutMapping("/internal/company")
+    public ResponseEntity<?> updateCompany(
+            @Valid @RequestBody UpdateCompanyRequest request) {
+
+        try {
+            CompanyProfile updatedCompany =
+                    testDataService.updateCompanyData(request);
+
+            CompanyUpdateResponse response = new CompanyUpdateResponse(
+                    updatedCompany.getCompanyNumber(),
+                    "updated"
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (NoDataFoundException ex) {
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", ex.getMessage());
+            error.put("status", 404);
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+
+        } catch (DataException ex) {
+
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", ex.getMessage());
+            error.put("status", 500);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+        }
     }
 
     @PostMapping("/internal/user")
@@ -414,7 +450,6 @@ public class TestDataController {
                 penaltyRef, request);
 
         return new ResponseEntity<>(accountPenaltiesData, HttpStatus.CREATED);
-
     }
 
     @DeleteMapping("/internal/penalties/{id}")
@@ -607,4 +642,16 @@ public class TestDataController {
         }
     }
 
+    private ResponseEntity<Map<String, Object>> errorResponse(
+            HttpStatus status,
+            String error,
+            String message) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("status", status.value());
+        body.put("error", error);
+        body.put("message", message);
+
+        return new ResponseEntity<>(body, status);
+    }
 }
