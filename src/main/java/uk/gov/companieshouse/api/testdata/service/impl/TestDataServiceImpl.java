@@ -284,18 +284,6 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-//    public CompanyProfile updateCompanyData(
-//            UpdateCompanyRequest request)
-//            throws NoDataFoundException, DataException {
-//        try {
-//            return companyProfileService.updateCompany(request);
-//        } catch (NoDataFoundException ex) {
-//            throw new NoDataFoundException("Error updating account penalties - not found");
-//        } catch (Exception ex) {
-//            throw new DataException("Error updating account penalties", ex);
-//        }
-//    }
-
     @Override
     public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
             throws NoDataFoundException, DataException {

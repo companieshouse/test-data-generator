@@ -71,6 +71,7 @@ public class TestDataController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
+    private static final String ERROR = "error";
 
     @Autowired
     private TestDataService testDataService;
@@ -155,7 +156,7 @@ public class TestDataController {
     }
 
     @PutMapping("/internal/company")
-    public ResponseEntity<?> updateCompany(
+    public ResponseEntity<Object> updateCompany(
             @Valid @RequestBody UpdateCompanyRequest request) {
 
         try {
@@ -170,20 +171,15 @@ public class TestDataController {
             return ResponseEntity.ok(response);
 
         } catch (NoDataFoundException ex) {
-
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", ex.getMessage());
-            error.put("status", 404);
-
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put(ERROR, ex.getMessage());
+            errorBody.put(STATUS, HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody);
         } catch (DataException ex) {
-
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", ex.getMessage());
-            error.put("status", 500);
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put(ERROR, ex.getMessage());
+            errorBody.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
         }
     }
 
@@ -640,18 +636,5 @@ public class TestDataController {
             LOG.info("Item Groups Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-    }
-
-    private ResponseEntity<Map<String, Object>> errorResponse(
-            HttpStatus status,
-            String error,
-            String message) {
-
-        Map<String, Object> body = new HashMap<>();
-        body.put("status", status.value());
-        body.put("error", error);
-        body.put("message", message);
-
-        return new ResponseEntity<>(body, status);
     }
 }
