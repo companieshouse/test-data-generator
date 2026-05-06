@@ -1352,7 +1352,7 @@ class TestDataControllerTest {
 
         ResponseEntity<AdminPermissionsResponse> response = testDataController.createAdminPermissions(spec);
 
-        assertEquals(HttpStatus.CREATED.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.CREATED.value(), response.getStatusCode().value());
         assertEquals(data, response.getBody());
         verify(testDataService, times(1)).createAdminPermissionsData(spec);
     }
@@ -1378,7 +1378,7 @@ class TestDataControllerTest {
 
         ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
 
-        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatusCode().value());
         assertNull(response.getBody());
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
     }
@@ -1390,7 +1390,7 @@ class TestDataControllerTest {
 
         ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
 
-        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCodeValue());
+        assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertEquals(id, response.getBody().get("admin-permissions-id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
