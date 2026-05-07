@@ -35,12 +35,14 @@ import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
@@ -51,6 +53,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulate
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
@@ -301,6 +304,64 @@ class TestDataControllerTest {
                         NoDataFoundException.class,
                         () -> this.testDataController.deleteCompany(companyNumber, request));
         assertEquals(ex, thrown);
+    }
+
+    @Test
+    void updateCompanySuccess() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyProfile updatedProfile = new CompanyProfile();
+        updatedProfile.setCompanyNumber(COMPANY_NUMBER);
+
+        when(this.testDataService.updateCompanyData(request)).thenReturn(updatedProfile);
+
+        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
+
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        CompanyUpdateResponse body = (CompanyUpdateResponse) response.getBody();
+        assertEquals(COMPANY_NUMBER, body.getCompanyNumber());
+        assertEquals("updated", body.getStatus());
+
+        verify(testDataService).updateCompanyData(request);
+    }
+
+    @Test
+    void updateCompanyNotFound() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        String errorMessage = "Company not found";
+        when(this.testDataService.updateCompanyData(request))
+                .thenThrow(new NoDataFoundException(errorMessage));
+
+        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertEquals(errorMessage, body.get("error"));
+        assertEquals(HttpStatus.NOT_FOUND.value(), body.get("status"));
+    }
+
+    @Test
+    void updateCompanyDataException() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        String errorMessage = "Internal server error";
+        when(this.testDataService.updateCompanyData(request))
+                .thenThrow(new DataException(errorMessage));
+
+        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertEquals(errorMessage, body.get("error"));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), body.get("status"));
     }
 
     @Test

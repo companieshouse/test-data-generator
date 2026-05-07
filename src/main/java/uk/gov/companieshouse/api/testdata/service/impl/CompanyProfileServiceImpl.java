@@ -17,10 +17,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
@@ -570,6 +573,35 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     @Override
     public Optional<CompanyProfile> getCompanyProfile(String companyNumber) {
         return repository.findByCompanyNumber(companyNumber);
+    }
+
+    @Override
+    public CompanyProfile updateCompanyProfile(UpdateCompanyRequest request)
+            throws NoDataFoundException, DataException {
+
+        if (request.getCompanyNumber() == null || request.getCompanyNumber().isBlank()) {
+            throw new DataException("companyNumber is required");
+        }
+
+        CompanyProfile company = repository.findByCompanyNumber(request.getCompanyNumber())
+                .orElseThrow(() -> new NoDataFoundException(
+                        "Company not found for number: " + request.getCompanyNumber()));
+
+        if (request.getEtag() != null && !request.getEtag().isBlank()) {
+            company.setEtag(request.getEtag());
+        }
+
+        if (!request.getUnknownFields().isEmpty()) {
+            throw new DataException(
+                    "Invalid field(s): " + request.getUnknownFields().keySet()
+            );
+        }
+
+        try {
+            return repository.save(company);
+        } catch (Exception ex) {
+            throw new DataException("Failed to update company profile", ex);
+        }
     }
 
     private void setRegisteredOfficeAddressIsInDispute(

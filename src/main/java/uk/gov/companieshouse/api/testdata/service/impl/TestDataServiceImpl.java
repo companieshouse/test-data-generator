@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -281,6 +282,13 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.forEach(ex::addSuppressed);
             throw ex;
         }
+    }
+
+    @Override
+    public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
+            throws NoDataFoundException, DataException {
+
+        return companyProfileService.updateCompanyProfile(request);
     }
 
     private void deleteUkEstablishmentsIfOverseaCompany(

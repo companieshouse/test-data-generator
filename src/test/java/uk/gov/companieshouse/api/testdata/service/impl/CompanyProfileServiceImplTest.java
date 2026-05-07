@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -33,6 +34,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
@@ -41,6 +44,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -849,6 +853,83 @@ class CompanyProfileServiceImplTest {
         assertEquals(COMPANY_NUMBER, result.getId());
         assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", result.getCompanyName());
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void updateCompanyProfileSuccess() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setEtag("NEW_ETAG");
+
+        CompanyProfile existingProfile = new CompanyProfile();
+        existingProfile.setCompanyNumber(COMPANY_NUMBER);
+        existingProfile.setEtag("OLD_ETAG");
+
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(existingProfile));
+        when(repository.save(existingProfile)).thenReturn(existingProfile);
+
+        CompanyProfile result = companyProfileService.updateCompanyProfile(request);
+
+        assertNotNull(result);
+        assertEquals("NEW_ETAG", existingProfile.getEtag());
+        verify(repository).save(existingProfile);
+    }
+
+    @Test
+    void updateCompanyProfileMissingNumber() {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber("");
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                companyProfileService.updateCompanyProfile(request));
+
+        assertEquals("companyNumber is required", thrown.getMessage());
+        verify(repository, never()).findByCompanyNumber(any());
+    }
+
+    @Test
+    void updateCompanyProfileNotFound() {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                companyProfileService.updateCompanyProfile(request));
+
+        assertTrue(thrown.getMessage().contains(COMPANY_NUMBER));
+    }
+
+    @Test
+    void updateCompanyProfileWithUnknownFields() {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        request.addUnknownField("invalid_field", "some_value");
+
+        CompanyProfile existingProfile = new CompanyProfile();
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(existingProfile));
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                companyProfileService.updateCompanyProfile(request));
+
+        assertTrue(thrown.getMessage().contains("Invalid field(s)"));
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void updateCompanyProfileSaveFailure() {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyProfile existingProfile = new CompanyProfile();
+        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(existingProfile));
+        when(repository.save(any())).thenThrow(new RuntimeException("DB Error"));
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                companyProfileService.updateCompanyProfile(request));
+
+        assertEquals("Failed to update company profile", thrown.getMessage());
     }
 
     @ParameterizedTest

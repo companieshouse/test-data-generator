@@ -25,8 +25,10 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -43,6 +45,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
@@ -68,6 +71,7 @@ public class TestDataController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
+    private static final String ERROR = "error";
 
     @Autowired
     private TestDataService testDataService;
@@ -149,6 +153,34 @@ public class TestDataController {
         var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
         var defaultAuthCode = new CompanyAuthCodeResponse(authCode.getAuthCode());
         return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
+    }
+
+    @PutMapping("/internal/update-company")
+    public ResponseEntity<Object> updateCompany(
+            @Valid @RequestBody UpdateCompanyRequest request) {
+
+        try {
+            CompanyProfile updatedCompany =
+                    testDataService.updateCompanyData(request);
+
+            CompanyUpdateResponse response = new CompanyUpdateResponse(
+                    updatedCompany.getCompanyNumber(),
+                    "updated"
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (NoDataFoundException ex) {
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put(ERROR, ex.getMessage());
+            errorBody.put(STATUS, HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody);
+        } catch (DataException ex) {
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put(ERROR, ex.getMessage());
+            errorBody.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
+        }
     }
 
     @PostMapping("/internal/user")
@@ -414,7 +446,6 @@ public class TestDataController {
                 penaltyRef, request);
 
         return new ResponseEntity<>(accountPenaltiesData, HttpStatus.CREATED);
-
     }
 
     @DeleteMapping("/internal/penalties/{id}")
@@ -606,5 +637,4 @@ public class TestDataController {
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
-
 }
