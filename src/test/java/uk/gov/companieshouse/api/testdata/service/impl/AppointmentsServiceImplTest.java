@@ -15,7 +15,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -184,18 +183,10 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void createWithInvalidOfficerRole() throws Exception {
-        Method validateOfficerRole = AppointmentsServiceImpl.class
-                .getDeclaredMethod("validateOfficerRole", String.class);
-        validateOfficerRole.setAccessible(true);
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            try {
-                validateOfficerRole.invoke(appointmentsService, "invalid_role");
-            } catch (java.lang.reflect.InvocationTargetException e) {
-                throw (RuntimeException) e.getCause();
-            }
-        });
+    void createWithInvalidOfficerRole() {
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> invokeValidateOfficerRole("invalid_role"));
         assertEquals("Invalid officer role: invalid_role", exception.getMessage());
     }
 
