@@ -576,7 +576,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     @Override
-    public CompanyProfile updateCompany(UpdateCompanyRequest request)
+    public CompanyProfile updateCompanyProfile(UpdateCompanyRequest request)
             throws NoDataFoundException, DataException {
 
         if (request.getCompanyNumber() == null || request.getCompanyNumber().isBlank()) {

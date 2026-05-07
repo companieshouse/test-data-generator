@@ -24,13 +24,13 @@ public interface CompanyProfileService extends DataService<CompanyProfile, Compa
     Optional<CompanyProfile> getCompanyProfile(String companyNumber);
 
     /**
-     * Updates an company profile for the company Number.
+     * Updates the company profile for the company number provided.
      * *
-     * @param request the update request with company Number as mandatory.
+     * @param request the update request with company number as mandatory.
      * @throws NoDataFoundException if the company number cannot be found
-     * @throws DataException if the company number details cannot be updated
+     * @throws DataException if the company profile cannot be updated
      */
-    CompanyProfile updateCompany(
+    CompanyProfile updateCompanyProfile(
             UpdateCompanyRequest request) throws NoDataFoundException, DataException;
 
 }
