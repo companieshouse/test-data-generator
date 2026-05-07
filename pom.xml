@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>test-data-generator</artifactId>
@@ -30,10 +30,11 @@
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 
-        <spring-boot-dependencies.version>3.5.13</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>3.5.13</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>4.0.5</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>4.0.5</spring-boot-maven-plugin.version>
         <log4j2.version>2.25.3</log4j2.version>
-        <tomcat.version>10.1.54</tomcat.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
+        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.25</api-security-java.version>
@@ -41,12 +42,7 @@
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
         <test-data-generator-library.version>1.0.13</test-data-generator-library.version>
 
-        <!-- Overrides -->
-        <!-- CVE-2025-48924 -->
-        <commons-lang3.version>3.18.0</commons-lang3.version>
-
         <!-- Sonar config -->
-        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login/>
@@ -162,21 +158,6 @@
             <artifactId>test-data-generator-library</artifactId>
             <version>${test-data-generator-library.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-core</artifactId>
-            <version>${tomcat.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-websocket</artifactId>
-            <version>${tomcat.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.tomcat.embed</groupId>
-            <artifactId>tomcat-embed-el</artifactId>
-            <version>${tomcat.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
@@ -200,9 +181,9 @@
                 <configuration>
                     <source>21</source>
                     <target>21</target>
-                        <compilerArgs>
-                            <arg>-parameters</arg>
-                        </compilerArgs>
+                    <compilerArgs>
+                        <arg>-parameters</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
