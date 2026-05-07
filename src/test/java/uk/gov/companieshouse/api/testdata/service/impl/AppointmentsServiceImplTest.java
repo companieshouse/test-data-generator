@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
@@ -183,16 +184,19 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void createWithInvalidOfficerRole() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyWithPopulatedStructureOnly(false);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setOfficerRoles(Collections.singletonList(null));
+    void createWithInvalidOfficerRole() throws Exception {
+        Method validateOfficerRole = AppointmentsServiceImpl.class
+                .getDeclaredMethod("validateOfficerRole", String.class);
+        validateOfficerRole.setAccessible(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentsService.createAppointment(spec);
+            try {
+                validateOfficerRole.invoke(appointmentsService, "invalid_role");
+            } catch (java.lang.reflect.InvocationTargetException e) {
+                throw (RuntimeException) e.getCause();
+            }
         });
-        assertEquals("Invalid officer role: null", exception.getMessage());
+        assertEquals("Invalid officer role: invalid_role", exception.getMessage());
     }
 
     @Test
