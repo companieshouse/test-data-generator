@@ -56,10 +56,10 @@ public interface TestDataService {
     void deleteCompanyData(String companyNumber) throws DataException;
 
     /**
-     * . Updates the company profile data for a given company number and {@link UpdateCompanyRequest}
+     * Updates the company profile data for the company number provided and {@link UpdateCompanyRequest}
      *
-     * @param request the update request
-     * @return the status of the updated request
+     * @param request the update request with company number as mandatory
+     * @return the status of the update request
      * @throws NoDataFoundException if the company number cannot be found
      * @throws DataException if the company profile cannot be updated
      */
