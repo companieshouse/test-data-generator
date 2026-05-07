@@ -667,12 +667,12 @@ class TestDataServiceImplTest {
         CompanyProfile expectedProfile = new CompanyProfile();
         expectedProfile.setCompanyNumber(COMPANY_NUMBER);
 
-        when(companyProfileService.updateCompany(request)).thenReturn(expectedProfile);
+        when(companyProfileService.updateCompanyProfile(request)).thenReturn(expectedProfile);
 
         CompanyProfile actualProfile = testDataService.updateCompanyData(request);
 
         assertEquals(expectedProfile, actualProfile);
-        verify(companyProfileService, times(1)).updateCompany(request);
+        verify(companyProfileService, times(1)).updateCompanyProfile(request);
     }
 
     @Test
@@ -681,14 +681,14 @@ class TestDataServiceImplTest {
         request.setCompanyNumber(COMPANY_NUMBER);
 
         String errorMessage = "Company not found";
-        when(companyProfileService.updateCompany(request))
+        when(companyProfileService.updateCompanyProfile(request))
                 .thenThrow(new NoDataFoundException(errorMessage));
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
                 testDataService.updateCompanyData(request));
 
         assertEquals(errorMessage, thrown.getMessage());
-        verify(companyProfileService, times(1)).updateCompany(request);
+        verify(companyProfileService, times(1)).updateCompanyProfile(request);
     }
 
     @Test
@@ -697,14 +697,14 @@ class TestDataServiceImplTest {
         request.setCompanyNumber(COMPANY_NUMBER);
 
         String errorMessage = "Database error";
-        when(companyProfileService.updateCompany(request))
+        when(companyProfileService.updateCompanyProfile(request))
                 .thenThrow(new DataException(errorMessage));
 
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataService.updateCompanyData(request));
 
         assertEquals(errorMessage, thrown.getMessage());
-        verify(companyProfileService, times(1)).updateCompany(request);
+        verify(companyProfileService, times(1)).updateCompanyProfile(request);
     }
 
     @Test

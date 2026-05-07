@@ -288,7 +288,7 @@ public class TestDataServiceImpl implements TestDataService {
     public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
             throws NoDataFoundException, DataException {
 
-        return companyProfileService.updateCompany(request);
+        return companyProfileService.updateCompanyProfile(request);
     }
 
     private void deleteUkEstablishmentsIfOverseaCompany(

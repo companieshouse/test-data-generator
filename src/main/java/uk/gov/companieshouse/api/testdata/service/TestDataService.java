@@ -60,8 +60,8 @@ public interface TestDataService {
      *
      * @param request the update request
      * @return the status of the updated request
-     * @throws NoDataFoundException if the requested company number cannot be found
-     * @throws DataException        if the company profile cannot be updated
+     * @throws NoDataFoundException if the company number cannot be found
+     * @throws DataException if the company profile cannot be updated
      */
     CompanyProfile updateCompanyData(
             UpdateCompanyRequest request) throws NoDataFoundException, DataException;

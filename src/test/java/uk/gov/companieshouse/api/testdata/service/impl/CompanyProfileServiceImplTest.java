@@ -856,7 +856,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void updateCompanySuccess() throws Exception {
+    void updateCompanyProfileSuccess() throws Exception {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
         request.setEtag("NEW_ETAG");
@@ -868,7 +868,7 @@ class CompanyProfileServiceImplTest {
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(existingProfile));
         when(repository.save(existingProfile)).thenReturn(existingProfile);
 
-        CompanyProfile result = companyProfileService.updateCompany(request);
+        CompanyProfile result = companyProfileService.updateCompanyProfile(request);
 
         assertNotNull(result);
         assertEquals("NEW_ETAG", existingProfile.getEtag());
@@ -876,32 +876,32 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void updateCompanyMissingNumber() {
+    void updateCompanyProfileMissingNumber() {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber("");
 
         DataException thrown = assertThrows(DataException.class, () ->
-                companyProfileService.updateCompany(request));
+                companyProfileService.updateCompanyProfile(request));
 
         assertEquals("companyNumber is required", thrown.getMessage());
         verify(repository, never()).findByCompanyNumber(any());
     }
 
     @Test
-    void updateCompanyNotFound() {
+    void updateCompanyProfileNotFound() {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
 
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                companyProfileService.updateCompany(request));
+                companyProfileService.updateCompanyProfile(request));
 
         assertTrue(thrown.getMessage().contains(COMPANY_NUMBER));
     }
 
     @Test
-    void updateCompanyWithUnknownFields() {
+    void updateCompanyProfileWithUnknownFields() {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
 
@@ -911,14 +911,14 @@ class CompanyProfileServiceImplTest {
         when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(existingProfile));
 
         DataException thrown = assertThrows(DataException.class, () ->
-                companyProfileService.updateCompany(request));
+                companyProfileService.updateCompanyProfile(request));
 
         assertTrue(thrown.getMessage().contains("Invalid field(s)"));
         verify(repository, never()).save(any());
     }
 
     @Test
-    void updateCompanySaveFailure() {
+    void updateCompanyProfileSaveFailure() {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
 
@@ -927,7 +927,7 @@ class CompanyProfileServiceImplTest {
         when(repository.save(any())).thenThrow(new RuntimeException("DB Error"));
 
         DataException thrown = assertThrows(DataException.class, () ->
-                companyProfileService.updateCompany(request));
+                companyProfileService.updateCompanyProfile(request));
 
         assertEquals("Failed to update company profile", thrown.getMessage());
     }
