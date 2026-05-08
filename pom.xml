@@ -49,7 +49,6 @@
         <sonar.password/>
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
-        <argLine/>
     </properties>
 
     <dependencyManagement>
