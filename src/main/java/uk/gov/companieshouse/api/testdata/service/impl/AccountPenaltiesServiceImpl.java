@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
                                                            AccountPenalties accountPenalties) {
         return accountPenalties.getPenalties().stream()
                 .filter(p -> p.getTransactionReference().equals(penaltyRef))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -449,7 +448,7 @@ public class AccountPenaltiesServiceImpl implements AccountPenaltiesService {
 
         List<PenaltyResponse> penalties = accountPenalties.getPenalties().stream()
                 .map(this::mapToAccountPenaltyData)
-                .collect(Collectors.toList());
+                .toList();
 
         accountPenaltiesData.setPenalties(penalties);
 

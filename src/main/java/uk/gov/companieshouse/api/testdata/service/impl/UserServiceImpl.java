@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.companieshouse.api.testdata.Application;
@@ -34,20 +33,23 @@ public class UserServiceImpl implements UserService {
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @Autowired
-    private UserRepository repository;
+    private final UserRepository repository;
+    private final AdminPermissionsRepository adminPermissionsRepository;
+    private final RandomService randomService;
+    private final IdentityRepository identityRepository;
+    private final UvidRepository uvidRepository;
 
-    @Autowired
-    private AdminPermissionsRepository adminPermissionsRepository;
-
-    @Autowired
-    private RandomService randomService;
-
-    @Autowired
-    private IdentityRepository identityRepository;
-
-    @Autowired
-    private UvidRepository uvidRepository;
+    public UserServiceImpl(UserRepository repository,
+                           AdminPermissionsRepository adminPermissionsRepository,
+                           RandomService randomService,
+                           IdentityRepository identityRepository,
+                           UvidRepository uvidRepository) {
+        this.repository = repository;
+        this.adminPermissionsRepository = adminPermissionsRepository;
+        this.randomService = randomService;
+        this.identityRepository = identityRepository;
+        this.uvidRepository = uvidRepository;
+    }
 
     @Override
     @Transactional

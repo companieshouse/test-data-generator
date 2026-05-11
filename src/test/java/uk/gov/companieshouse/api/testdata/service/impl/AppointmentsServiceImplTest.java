@@ -25,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
@@ -185,16 +184,9 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createWithInvalidOfficerRole() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyWithPopulatedStructureOnly(false);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        OfficerType invalidRole = Mockito.spy(OfficerType.DIRECTOR);
-        when(invalidRole.getValue()).thenReturn("invalid_role");
-        spec.setOfficerRoles(Collections.singletonList(invalidRole));
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            appointmentsService.createAppointment(spec);
-        });
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> invokeValidateOfficerRole("invalid_role"));
         assertEquals("Invalid officer role: invalid_role", exception.getMessage());
     }
 

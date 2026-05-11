@@ -124,7 +124,7 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_OverseaCompany_ReturnsNull() throws DataException {
+    void create_OverseaCompany_ReturnsEmptyList() throws DataException {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
@@ -132,7 +132,8 @@ class CompanyPscServiceImplTest {
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
         verify(repository, never()).save(any());
     }
 
@@ -282,7 +283,7 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_NumberZeroWithPscType_ReturnsNull() throws DataException {
+    void create_NumberZeroWithPscType_ReturnsNull() {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
@@ -295,7 +296,7 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void createWithExcludedPscCompanyTypeReturnsNull() throws DataException {
+    void createWithExcludedPscCompanyTypeReturnsEmptyList() throws DataException {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
@@ -305,7 +306,8 @@ class CompanyPscServiceImplTest {
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
         verify(repository, never()).save(any());
     }
 
@@ -329,7 +331,7 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
-    void create_WithZeroNumberOfPsc_AndNullPscType_ReturnsNull() throws DataException {
+    void create_WithZeroNumberOfPsc_AndNullPscType_ReturnsEmptyList() throws DataException {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
@@ -339,12 +341,13 @@ class CompanyPscServiceImplTest {
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
         verify(repository, never()).save(any());
     }
 
     @Test
-    void create_WithZeroNumberOfPsc_AndEmptyPscType_ReturnsNull() throws DataException {
+    void create_WithZeroNumberOfPsc_AndEmptyPscType_ReturnsEmptyList() throws DataException {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyType(CompanyType.LTD);
@@ -354,7 +357,8 @@ class CompanyPscServiceImplTest {
 
         List<CompanyPscs> result = companyPscsService.create(spec);
 
-        assertNull(result);
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
         verify(repository, never()).save(any());
     }
 

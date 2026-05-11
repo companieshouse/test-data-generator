@@ -427,8 +427,12 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void deleteCompanyProfileNotExists() {
-        when(repository.findByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.empty());
-        assertFalse(companyProfileService.delete(COMPANY_NUMBER));
+        String missingCompanyNumber = "MISSING123";
+        when(repository.findByCompanyNumber(missingCompanyNumber)).thenReturn(Optional.empty());
+
+        assertFalse(companyProfileService.delete(missingCompanyNumber));
+
+        verify(repository).findByCompanyNumber(missingCompanyNumber);
         verify(repository, never()).delete(any());
     }
 
