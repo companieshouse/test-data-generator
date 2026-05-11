@@ -71,25 +71,24 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     void handleHttpMessageNotReadableCompanySpecInvalidFormatException() throws Exception {
-        InvalidFormatException cause = Mockito.mock(InvalidFormatException.class);
+        InvalidFormatException cause = new InvalidFormatException(
+                null,
+                "error",
+                "input",
+                String.class
+        );
         HttpInputMessage httpInputMessage = null;
         Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
-        when(cause.getPathReference())
-                .thenReturn("uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest[\"jurisdiction\"]");
-
-        StackTraceElement[] stackTrace = new StackTraceElement[] {
-            new StackTraceElement("CompanyRequest", "getJurisdiction", "CompanyRequest.java", 123)
-        };
-        when(cause.getStackTrace()).thenReturn(stackTrace);
-
-        final ValidationError expectedError = new ValidationError("invalid jurisdiction", null, null, "ch:validation");
+        final ValidationError expectedError =
+                new ValidationError("invalid request", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertTrue(response.getBody() instanceof ValidationErrors);
+
         ValidationErrors errors = (ValidationErrors) response.getBody();
         assertEquals(1, errors.getErrorCount());
         assertTrue(errors.containsError(expectedError));
@@ -97,17 +96,19 @@ public class GlobalExceptionHandlerTest {
 
     @Test
     void handleHttpMessageNotReadableOtherInvalidFormatException() throws Exception {
-        InvalidFormatException cause = Mockito.mock(InvalidFormatException.class);
+        InvalidFormatException cause = new InvalidFormatException(
+                null,
+                "invalid value",
+                "INVALID",
+                String.class
+        );
         HttpInputMessage httpInputMessage = null;
         Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
-        when(cause.getPathReference()).thenReturn("unrecognised path reference");
-
         StackTraceElement[] stackTrace = new StackTraceElement[] {
             new StackTraceElement("CompanyRequest", "getJurisdiction", "CompanyRequest.java", 123)
         };
-        when(cause.getStackTrace()).thenReturn(stackTrace);
 
         final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
 
