@@ -13,14 +13,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 import uk.gov.companieshouse.logging.Logger;
@@ -60,16 +56,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         String message = "invalid request";
         Throwable cause = ex.getCause();
-        if (cause instanceof InvalidFormatException) {
-            InvalidFormatException ife = (InvalidFormatException) cause;
-            String pathReference = ife.getPathReference();
-            if (pathReference != null
-                    && (pathReference.startsWith(CompanyRequest.class.getName())
-                    || pathReference.startsWith(PublicCompanyRequest.class.getName()))) {
-                // Handle invalid format in CompanyRequest (failed to deserialize enum)
-                String invalidField = pathReference.substring(pathReference.indexOf("[\"") + 2,
-                        pathReference.indexOf("\"]"));
-                message = "invalid " + invalidField;
+        if (cause != null && cause.getClass().getName().contains("InvalidFormatException")) {
+            String errorMessage = cause.getMessage();
+
+            if (errorMessage != null && errorMessage.contains("CompanyRequest[\"")) {
+                int start = errorMessage.indexOf("[\"") + 2;
+                int end = errorMessage.indexOf("\"]");
+
+                if (start > 1 && end > start) {
+
+                    String invalidField = errorMessage.substring(start, end);
+
+                    message = "invalid " + invalidField;
+                }
             }
         }
 
