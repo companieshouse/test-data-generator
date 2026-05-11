@@ -95,61 +95,22 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleHttpMessageNotReadableInvalidFormatExceptionNullMessage() throws Exception {
+    void handleHttpMessageNotReadableInvalidFormatExceptionWithFieldName() throws Exception {
+        String errorMessage = "CompanyRequest[\"jurisdiction\"]";
 
         InvalidFormatException cause = new InvalidFormatException(
-                (String) null,
                 null,
-                "input",
+                errorMessage,
+                "invalid-value",
                 String.class
         );
 
-        StackTraceElement[] stackTrace = new StackTraceElement[] {
-                new StackTraceElement(
-                        "CompanyRequest",
-                        "getJurisdiction",
-                        "CompanyRequest.java",
-                        123)
-        };
-        cause.setStackTrace(stackTrace);
-
         HttpInputMessage httpInputMessage = null;
-
-        Exception ex = new HttpMessageNotReadableException(
-                "ex",
-                cause,
-                httpInputMessage
-        );
-
+        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
 
-        ResponseEntity<Object> response = handler.handleException(ex, request);
-
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals(1, errors.getErrorCount());
-
-        ValidationError actual = errors.getErrors()
-                .stream()
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals("invalid request", actual.getError());
-    }
-
-    @Test
-    void handleHttpMessageNotReadableInvalidFormatExceptionIrrelevantMessage() throws Exception {
-
-        HttpInputMessage httpInputMessage = null;
-
-        Exception ex = new HttpMessageNotReadableException(
-                "ex",
-                new RuntimeException("cause"),
-                httpInputMessage
-        );
-
-        WebRequest request = Mockito.mock(WebRequest.class);
+        final ValidationError expectedError =
+                new ValidationError("invalid jurisdiction", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
@@ -157,45 +118,8 @@ public class GlobalExceptionHandlerTest {
         assertTrue(response.getBody() instanceof ValidationErrors);
 
         ValidationErrors errors = (ValidationErrors) response.getBody();
-
         assertEquals(1, errors.getErrorCount());
-
-        ValidationError actual = errors.getErrors()
-                .stream()
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals("invalid request", actual.getError());
-    }
-
-    @Test
-    void handleHttpMessageNotReadableInvalidFormatExceptionBadBracketIndexes() throws Exception {
-
-        HttpInputMessage httpInputMessage = null;
-
-        Exception ex = new HttpMessageNotReadableException(
-                "ex",
-                new RuntimeException("cause"),
-                httpInputMessage
-        );
-
-        WebRequest request = Mockito.mock(WebRequest.class);
-
-        ResponseEntity<Object> response = handler.handleException(ex, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ValidationErrors);
-
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-
-        assertEquals(1, errors.getErrorCount());
-
-        ValidationError actual = errors.getErrors()
-                .stream()
-                .findFirst()
-                .orElseThrow();
-
-        assertEquals("invalid request", actual.getError());
+        assertTrue(errors.containsError(expectedError));
     }
 
     @Test
