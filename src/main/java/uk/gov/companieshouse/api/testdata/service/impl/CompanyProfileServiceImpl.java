@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,23 +102,35 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             return createOverseasEntity(companyNumber, jurisdiction, spec, accountingReferenceDate,
                     OVERSEA_COMPANY_TYPE, companyType, registeredOfficeIsInDispute);
         } else {
-            return createDefaultCompanyProfile(companyNumber, jurisdiction,
-                    spec, accountingReferenceDate, companyType, hasSuperSecurePscs, companyStatus,
-                    subType, companyStatusDetail, registeredOfficeIsInDispute, accountsDueStatus);
+            DefaultCompanyProfileParams params = new DefaultCompanyProfileParams();
+            params.companyNumber = companyNumber;
+            params.jurisdiction = jurisdiction;
+            params.spec = spec;
+            params.accountingReferenceDate = accountingReferenceDate;
+            params.companyType = companyType;
+            params.hasSuperSecurePscs = hasSuperSecurePscs;
+            params.companyStatus = companyStatus;
+            params.subType = subType;
+            params.companyStatusDetail = companyStatusDetail;
+            params.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
+            params.accountsDueStatus = accountsDueStatus;
+            return createDefaultCompanyProfile(params);
         }
     }
 
-    private CompanyProfile createDefaultCompanyProfile(String companyNumber,
-                                                       JurisdictionType jurisdiction,
-                                                       CompanyRequest spec,
-                                                       LocalDate accountingReferenceDate,
-                                                       CompanyType companyType,
-                                                       Boolean hasSuperSecurePscs,
-                                                       String companyStatus,
-                                                       String subType,
-                                                       String companyStatusDetail,
-                                                       Boolean registeredOfficeIsInDispute,
-                                                       String accountsDueStatus) {
+    private CompanyProfile createDefaultCompanyProfile(DefaultCompanyProfileParams params) {
+        final String companyNumber = params.companyNumber;
+        final JurisdictionType jurisdiction = params.jurisdiction;
+        final CompanyRequest spec = params.spec;
+        final LocalDate accountingReferenceDate = params.accountingReferenceDate;
+        final CompanyType companyType = params.companyType;
+        final Boolean hasSuperSecurePscs = params.hasSuperSecurePscs;
+        final String companyStatus = params.companyStatus;
+        final String subType = params.subType;
+        final String companyStatusDetail = params.companyStatusDetail;
+        final Boolean registeredOfficeIsInDispute = params.registeredOfficeIsInDispute;
+        final String accountsDueStatus = params.accountsDueStatus;
+
         LOG.info("Creating a default CompanyProfile. " + companyNumber);
 
         final Instant dateOneYearAgo = dateOneYearAgo(accountingReferenceDate);
@@ -567,7 +578,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         return repository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
                 .stream()
                 .map(CompanyProfile::getCompanyNumber)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -647,5 +658,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private Instant toUtcStartOfDay(LocalDate date) {
         return date.atStartOfDay(ZoneId.of("UTC")).toInstant();
+    }
+
+    private static final class DefaultCompanyProfileParams {
+        private String companyNumber;
+        private JurisdictionType jurisdiction;
+        private CompanyRequest spec;
+        private LocalDate accountingReferenceDate;
+        private CompanyType companyType;
+        private Boolean hasSuperSecurePscs;
+        private String companyStatus;
+        private String subType;
+        private String companyStatusDetail;
+        private Boolean registeredOfficeIsInDispute;
+        private String accountsDueStatus;
     }
 }

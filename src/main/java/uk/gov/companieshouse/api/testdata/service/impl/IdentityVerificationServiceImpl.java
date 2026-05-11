@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
@@ -20,14 +19,17 @@ public class IdentityVerificationServiceImpl implements
         VerifiedIdentityService<IdentityVerificationResponse> {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @Autowired
-    private IdentityRepository identityRepository;
+    private final IdentityRepository identityRepository;
+    private final UvidRepository uvidRepository;
+    private final UserRepository userRepository;
 
-    @Autowired
-    private UvidRepository uvidRepository;
-
-    @Autowired
-    private UserRepository userRepository;
+    public IdentityVerificationServiceImpl(IdentityRepository identityRepository,
+                                           UvidRepository uvidRepository,
+                                           UserRepository userRepository) {
+        this.identityRepository = identityRepository;
+        this.uvidRepository = uvidRepository;
+        this.userRepository = userRepository;
+    }
 
     @Override
     public IdentityVerificationResponse getIdentityVerificationData(String email) {
