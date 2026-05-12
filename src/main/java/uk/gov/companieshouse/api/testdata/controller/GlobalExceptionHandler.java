@@ -61,16 +61,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         String message = "invalid request";
         Throwable cause = ex.getCause();
-        LOG.error("Cause " + cause);
-
 
         if (cause instanceof tools.jackson.databind.exc.InvalidFormatException ife) {
 
             List<JacksonException.Reference> path = ife.getPath();
 
             if (!path.isEmpty()) {
-
-                // ✅ Always take LAST element → actual field
                 Reference lastRef = path.get(path.size() - 1);
 
                 String desc = lastRef.getDescription();
