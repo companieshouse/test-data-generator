@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
+
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +23,11 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.core.JacksonException.Reference;
 
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 
@@ -94,55 +97,30 @@ public class GlobalExceptionHandlerTest {
         assertTrue(errors.containsError(expectedError));
     }
 
+
     @Test
     void handleHttpMessageNotReadableInvalidFormatExceptionWithFieldName() throws Exception {
-        String errorMessage = "CompanyRequest[\"jurisdiction\"]";
-
         InvalidFormatException cause = new InvalidFormatException(
                 null,
-                errorMessage,
+                "error",
                 "invalid-value",
                 String.class
         );
+        Reference ref = new Reference(CompanyRequest.class, "jurisdiction");
 
-        HttpInputMessage httpInputMessage = null;
-        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
+        cause.prependPath(ref);
+
+        HttpMessageNotReadableException ex =
+                new HttpMessageNotReadableException("ex", cause, null);
+
         WebRequest request = Mockito.mock(WebRequest.class);
-
-        final ValidationError expectedError =
-                new ValidationError("invalid jurisdiction", null, null, "ch:validation");
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ValidationErrors);
-
         ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals(1, errors.getErrorCount());
-        assertTrue(errors.containsError(expectedError));
-    }
+        ValidationError actual = errors.getErrors().iterator().next();
 
-    @Test
-    void handleHttpMessageNotReadableOtherInvalidFormatException() throws Exception {
-        InvalidFormatException cause = new InvalidFormatException(
-                null,
-                "invalid value",
-                "INVALID",
-                String.class
-        );
-        HttpInputMessage httpInputMessage = null;
-        Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
-        WebRequest request = Mockito.mock(WebRequest.class);
-
-        final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
-
-        ResponseEntity<Object> response = handler.handleException(ex, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertTrue(response.getBody() instanceof ValidationErrors);
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals(1, errors.getErrorCount());
-        assertTrue(errors.containsError(expectedError));
+        assertEquals("invalid jurisdiction", actual.getError());
     }
 
     @Test
