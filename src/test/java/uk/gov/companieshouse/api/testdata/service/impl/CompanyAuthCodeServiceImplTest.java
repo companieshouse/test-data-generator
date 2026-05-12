@@ -187,7 +187,7 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void createThrowsDataExceptionWhenEncryptFails() throws Exception {
+    void createThrowsDataExceptionWhenEncryptFails() {
         CompanyRequest spec = new CompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
@@ -214,7 +214,7 @@ class CompanyAuthCodeServiceImplTest {
     }
 
     @Test
-    void verifyAuthCodeThrowsDataExceptionWhenSha256Fails() throws Exception {
+    void verifyAuthCodeThrowsDataExceptionWhenSha256Fails() {
         final String plainCode = "222";
         when(companyProfileRepository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(mockCompanyProfile));
 
