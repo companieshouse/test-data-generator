@@ -70,7 +70,7 @@ public class GlobalExceptionHandlerTest {
     }
 
     @Test
-    void handleHttpMessageNotReadableCompanySpecInvalidFormatException() throws Exception {
+    void handleHttpMessageNotReadableReturnsGenericInvalidRequest() throws Exception {
         InvalidFormatException cause = new InvalidFormatException(
                 null,
                 "error",
@@ -133,10 +133,6 @@ public class GlobalExceptionHandlerTest {
         HttpInputMessage httpInputMessage = null;
         Exception ex = new HttpMessageNotReadableException("ex", cause, httpInputMessage);
         WebRequest request = Mockito.mock(WebRequest.class);
-
-        StackTraceElement[] stackTrace = new StackTraceElement[] {
-            new StackTraceElement("CompanyRequest", "getJurisdiction", "CompanyRequest.java", 123)
-        };
 
         final ValidationError expectedError = new ValidationError("invalid request", null, null, "ch:validation");
 

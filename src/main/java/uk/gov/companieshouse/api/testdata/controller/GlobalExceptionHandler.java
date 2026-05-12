@@ -1,5 +1,7 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JacksonException.Reference;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
@@ -21,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import tools.jackson.databind.exc.InvalidFormatException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
@@ -56,26 +61,39 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         String message = "invalid request";
         Throwable cause = ex.getCause();
-        if (cause != null && cause.getClass().getName().contains("InvalidFormatException")) {
-            String errorMessage = cause.getMessage();
+        LOG.error("Cause " + cause);
 
-            if (errorMessage != null && errorMessage.contains("CompanyRequest[\"")) {
-                int start = errorMessage.indexOf("[\"") + 2;
-                int end = errorMessage.indexOf("\"]");
 
-                if (start > 1 && end > start) {
+        if (cause instanceof tools.jackson.databind.exc.InvalidFormatException ife) {
 
-                    String invalidField = errorMessage.substring(start, end);
+            List<JacksonException.Reference> path = ife.getPath();
 
-                    message = "invalid " + invalidField;
+            if (!path.isEmpty()) {
+
+                // ✅ Always take LAST element → actual field
+                Reference lastRef = path.get(path.size() - 1);
+
+                String desc = lastRef.getDescription();
+
+                if (desc != null && desc.contains("[\"")) {
+
+                    int start = desc.indexOf("[\"") + 2;
+                    int end = desc.indexOf("\"]");
+
+                    if (start > 1 && end > start) {
+                        String fieldName = desc.substring(start, end);
+                        message = "invalid " + fieldName;
+                    }
                 }
             }
         }
 
         ValidationErrors errors = new ValidationErrors();
         errors.addError(createValidationError(message));
+
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
+
 
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
