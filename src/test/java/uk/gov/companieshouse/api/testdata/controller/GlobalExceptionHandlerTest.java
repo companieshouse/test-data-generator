@@ -11,6 +11,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
@@ -30,6 +32,7 @@ import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
+
 
 @ExtendWith(MockitoExtension.class)
 public class GlobalExceptionHandlerTest {
@@ -122,23 +125,20 @@ public class GlobalExceptionHandlerTest {
         assertEquals("invalid jurisdiction", actual.getError());
     }
 
-    @Test
-    void extractFieldMessageNullPathReturnsInvalidRequest() throws Exception {
-        HttpMessageNotReadableException ex =
-                new HttpMessageNotReadableException("ex", (Throwable) null, null);
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "no-field-info",
+            "[\"field\""
+    })
+    void extractFieldName_invalidDescriptions_returnsInvalidRequest(String description) throws Exception {
 
-        WebRequest request = Mockito.mock(WebRequest.class);
+        InvalidFormatException cause =
+                new InvalidFormatException(null, "msg", "value", String.class);
 
-        ResponseEntity<Object> response = handler.handleException(ex, request);
+        Reference ref = Mockito.mock(Reference.class);
+        when(ref.getDescription()).thenReturn(description);
 
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
-    }
-
-    @Test
-    void extractFieldMessageEmptyPathReturnsInvalidRequest() throws Exception {
-        InvalidFormatException cause = new InvalidFormatException(
-                null, "msg", "value", String.class);
+        cause.prependPath(ref);
 
         HttpMessageNotReadableException ex =
                 new HttpMessageNotReadableException("ex", cause, null);
@@ -148,13 +148,16 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
         ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
+
+        assertEquals("invalid request",
+                errors.getErrors().iterator().next().getError());
     }
 
     @Test
-    void extractFieldNameNullDescriptionReturnsInvalidRequest() throws Exception {
-        InvalidFormatException cause = new InvalidFormatException(
-                null, "msg", "value", String.class);
+    void extractFieldName_nullDescription_returnsInvalidRequest() throws Exception {
+
+        InvalidFormatException cause =
+                new InvalidFormatException(null, "msg", "value", String.class);
 
         Reference ref = Mockito.mock(Reference.class);
         when(ref.getDescription()).thenReturn(null);
@@ -169,7 +172,9 @@ public class GlobalExceptionHandlerTest {
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
         ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
+
+        assertEquals("invalid request",
+                errors.getErrors().iterator().next().getError());
     }
 
     @Test
