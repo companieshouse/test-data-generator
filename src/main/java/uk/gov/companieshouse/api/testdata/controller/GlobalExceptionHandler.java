@@ -65,19 +65,29 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             List<JacksonException.Reference> path = ife.getPath();
 
             if (!path.isEmpty()) {
-                Reference lastRef = path.get(path.size() - 1);
 
-                String desc = lastRef.getDescription();
+                String fieldName = null;
 
-                if (desc != null && desc.contains("[\"")) {
+                for (JacksonException.Reference ref : path) {
 
-                    int start = desc.indexOf("[\"") + 2;
-                    int end = desc.indexOf("\"]");
+                    String desc = ref.getDescription();
 
-                    if (start > 1 && end > start) {
-                        String fieldName = desc.substring(start, end);
-                        message = "invalid " + fieldName;
+                    if (desc != null && desc.contains("[\"")) {
+
+                        int start = desc.indexOf("[\"") + 2;
+                        int end = desc.indexOf("\"]");
+
+                        if (start > 1 && end > start) {
+                            fieldName = desc.substring(start, end);
+                            if (fieldName != null) {
+                                break;
+                            }
+                        }
                     }
+                }
+
+                if (fieldName != null) {
+                    message = "invalid " + fieldName;
                 }
             }
         }
