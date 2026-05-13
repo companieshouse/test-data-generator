@@ -97,7 +97,6 @@ public class GlobalExceptionHandlerTest {
         assertTrue(errors.containsError(expectedError));
     }
 
-
     @Test
     void handleHttpMessageNotReadableInvalidFormatExceptionWithFieldName() throws Exception {
         InvalidFormatException cause = new InvalidFormatException(
@@ -121,6 +120,98 @@ public class GlobalExceptionHandlerTest {
         ValidationError actual = errors.getErrors().iterator().next();
 
         assertEquals("invalid jurisdiction", actual.getError());
+    }
+
+    @Test
+    void extractFieldMessageNullPathReturnsInvalidRequest() throws Exception {
+        HttpMessageNotReadableException ex =
+                new HttpMessageNotReadableException("ex", (Throwable) null, null);
+
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
+    }
+
+    @Test
+    void extractFieldMessageEmptyPathReturnsInvalidRequest() throws Exception {
+        InvalidFormatException cause = new InvalidFormatException(
+                null, "msg", "value", String.class);
+
+        HttpMessageNotReadableException ex =
+                new HttpMessageNotReadableException("ex", cause, null);
+
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
+    }
+
+    @Test
+    void extractFieldNameNullDescriptionReturnsInvalidRequest() throws Exception {
+        InvalidFormatException cause = new InvalidFormatException(
+                null, "msg", "value", String.class);
+
+        Reference ref = Mockito.mock(Reference.class);
+        when(ref.getDescription()).thenReturn(null);
+
+        cause.prependPath(ref);
+
+        HttpMessageNotReadableException ex =
+                new HttpMessageNotReadableException("ex", cause, null);
+
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
+    }
+
+    @Test
+    void extractFieldNameInvalidFormatDescriptionReturnsInvalidRequest() throws Exception {
+        InvalidFormatException cause = new InvalidFormatException(
+                null, "msg", "value", String.class);
+
+        Reference ref = Mockito.mock(Reference.class);
+        when(ref.getDescription()).thenReturn("no-field-info");
+
+        cause.prependPath(ref);
+
+        HttpMessageNotReadableException ex =
+                new HttpMessageNotReadableException("ex", cause, null);
+
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
+    }
+
+    @Test
+    void extractFieldNameBadIndexesReturnsInvalidRequest() throws Exception {
+        InvalidFormatException cause = new InvalidFormatException(
+                null, "msg", "value", String.class);
+
+        Reference ref = Mockito.mock(Reference.class);
+        when(ref.getDescription()).thenReturn("[\"field\""); // missing closing "]
+
+        cause.prependPath(ref);
+
+        HttpMessageNotReadableException ex =
+                new HttpMessageNotReadableException("ex", cause, null);
+
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
     }
 
     @Test
