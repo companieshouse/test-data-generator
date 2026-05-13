@@ -9,9 +9,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,6 +40,13 @@ import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors
 public class GlobalExceptionHandlerTest {
 
     private GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    private static Stream<String> invalidDescriptions() {
+        return Stream.of(
+                null,                 // null case
+                "no-field-info",      // no [" pattern
+                "[\"field\""          // bad index (missing closing "])
+        );
+    }
 
     @Test
     void handleHttpMessageNotReadableNullCause() throws Exception {
@@ -126,11 +135,8 @@ public class GlobalExceptionHandlerTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {
-            "no-field-info",
-            "[\"field\""
-    })
-    void extractFieldName_invalidDescriptions_returnsInvalidRequest(String description) throws Exception {
+    @MethodSource("invalidDescriptions")
+    void extractFieldNameInvalidDescriptionsReturnsInvalidRequest(String description) throws Exception {
 
         InvalidFormatException cause =
                 new InvalidFormatException(null, "msg", "value", String.class);
@@ -151,72 +157,6 @@ public class GlobalExceptionHandlerTest {
 
         assertEquals("invalid request",
                 errors.getErrors().iterator().next().getError());
-    }
-
-    @Test
-    void extractFieldName_nullDescription_returnsInvalidRequest() throws Exception {
-
-        InvalidFormatException cause =
-                new InvalidFormatException(null, "msg", "value", String.class);
-
-        Reference ref = Mockito.mock(Reference.class);
-        when(ref.getDescription()).thenReturn(null);
-
-        cause.prependPath(ref);
-
-        HttpMessageNotReadableException ex =
-                new HttpMessageNotReadableException("ex", cause, null);
-
-        WebRequest request = Mockito.mock(WebRequest.class);
-
-        ResponseEntity<Object> response = handler.handleException(ex, request);
-
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-
-        assertEquals("invalid request",
-                errors.getErrors().iterator().next().getError());
-    }
-
-    @Test
-    void extractFieldNameInvalidFormatDescriptionReturnsInvalidRequest() throws Exception {
-        InvalidFormatException cause = new InvalidFormatException(
-                null, "msg", "value", String.class);
-
-        Reference ref = Mockito.mock(Reference.class);
-        when(ref.getDescription()).thenReturn("no-field-info");
-
-        cause.prependPath(ref);
-
-        HttpMessageNotReadableException ex =
-                new HttpMessageNotReadableException("ex", cause, null);
-
-        WebRequest request = Mockito.mock(WebRequest.class);
-
-        ResponseEntity<Object> response = handler.handleException(ex, request);
-
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
-    }
-
-    @Test
-    void extractFieldNameBadIndexesReturnsInvalidRequest() throws Exception {
-        InvalidFormatException cause = new InvalidFormatException(
-                null, "msg", "value", String.class);
-
-        Reference ref = Mockito.mock(Reference.class);
-        when(ref.getDescription()).thenReturn("[\"field\""); // missing closing "]
-
-        cause.prependPath(ref);
-
-        HttpMessageNotReadableException ex =
-                new HttpMessageNotReadableException("ex", cause, null);
-
-        WebRequest request = Mockito.mock(WebRequest.class);
-
-        ResponseEntity<Object> response = handler.handleException(ex, request);
-
-        ValidationErrors errors = (ValidationErrors) response.getBody();
-        assertEquals("invalid request", errors.getErrors().iterator().next().getError());
     }
 
     @Test
