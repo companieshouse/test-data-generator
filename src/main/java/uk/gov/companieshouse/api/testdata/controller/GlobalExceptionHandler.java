@@ -15,7 +15,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import tools.jackson.core.JacksonException;
-import tools.jackson.core.JacksonException.Reference;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
@@ -53,49 +52,60 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status,
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
             WebRequest request) {
+
         logException(ex);
 
-        String message = "invalid request";
-        Throwable cause = ex.getCause();
-
-        if (cause instanceof tools.jackson.databind.exc.InvalidFormatException ife) {
-
-            List<JacksonException.Reference> path = ife.getPath();
-
-            if (!path.isEmpty()) {
-
-                String fieldName = null;
-
-                for (JacksonException.Reference ref : path) {
-
-                    String desc = ref.getDescription();
-
-                    if (desc != null && desc.contains("[\"")) {
-
-                        int start = desc.indexOf("[\"") + 2;
-                        int end = desc.indexOf("\"]");
-
-                        if (start > 1 && end > start) {
-                            fieldName = desc.substring(start, end);
-                            if (fieldName != null) {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (fieldName != null) {
-                    message = "invalid " + fieldName;
-                }
-            }
-        }
+        String message = resolveMessage(ex);
 
         ValidationErrors errors = new ValidationErrors();
         errors.addError(createValidationError(message));
 
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    private String resolveMessage(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+
+        if (!(cause instanceof tools.jackson.databind.exc.InvalidFormatException ife)) {
+            return "invalid request";
+        }
+
+        return extractFieldMessage(ife.getPath());
+    }
+
+    private String extractFieldMessage(List<JacksonException.Reference> path) {
+        if (path == null || path.isEmpty()) {
+            return "invalid request";
+        }
+
+        for (JacksonException.Reference ref : path) {
+
+            String fieldName = extractFieldName(ref.getDescription());
+
+            if (fieldName != null) {
+                return "invalid " + fieldName;
+            }
+        }
+        return "invalid request";
+    }
+
+    private String extractFieldName(String desc) {
+        if (desc == null || !desc.contains("[\"")) {
+            return null;
+        }
+
+        int start = desc.indexOf("[\"") + 2;
+        int end = desc.indexOf("\"]");
+
+        if (start > 1 && end > start) {
+            return desc.substring(start, end);
+        }
+
+        return null;
     }
 
 
