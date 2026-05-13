@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,14 +14,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import com.fasterxml.jackson.databind.exc.InvalidFormatException;
-
+import tools.jackson.core.JacksonException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 import uk.gov.companieshouse.logging.Logger;
@@ -29,6 +27,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+    private static final String INVALID_REQUEST = "invalid request";
 
     @ExceptionHandler(value = {DataException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -54,28 +53,61 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status,
+            HttpMessageNotReadableException ex,
+            HttpHeaders headers,
+            HttpStatusCode status,
             WebRequest request) {
+
         logException(ex);
 
-        String message = "invalid request";
-        Throwable cause = ex.getCause();
-        if (cause instanceof InvalidFormatException) {
-            InvalidFormatException ife = (InvalidFormatException) cause;
-            String pathReference = ife.getPathReference();
-            if (pathReference != null
-                    && (pathReference.startsWith(CompanyRequest.class.getName())
-                    || pathReference.startsWith(PublicCompanyRequest.class.getName()))) {
-                // Handle invalid format in CompanyRequest (failed to deserialize enum)
-                String invalidField = pathReference.substring(pathReference.indexOf("[\"") + 2,
-                        pathReference.indexOf("\"]"));
-                message = "invalid " + invalidField;
-            }
-        }
+        String message = resolveMessage(ex);
 
         ValidationErrors errors = new ValidationErrors();
         errors.addError(createValidationError(message));
+
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    private String resolveMessage(HttpMessageNotReadableException ex) {
+        Throwable cause = ex.getCause();
+
+        if (!(cause instanceof tools.jackson.databind.exc.InvalidFormatException ife)) {
+            return INVALID_REQUEST;
+        }
+
+        return extractFieldMessage(ife.getPath());
+    }
+
+    private String extractFieldMessage(List<JacksonException.Reference> path) {
+        if (path == null || path.isEmpty()) {
+            return INVALID_REQUEST;
+        }
+
+        for (JacksonException.Reference ref : path) {
+
+            String fieldName = extractFieldName(ref.getDescription());
+
+            if (fieldName != null) {
+                return "invalid " + fieldName;
+            }
+        }
+
+        return INVALID_REQUEST;
+    }
+
+    private String extractFieldName(String desc) {
+        if (desc == null || !desc.contains("[\"")) {
+            return null;
+        }
+
+        int start = desc.indexOf("[\"") + 2;
+        int end = desc.indexOf("\"]");
+
+        if (start > 1 && end > start) {
+            return desc.substring(start, end);
+        }
+
+        return null;
     }
 
     @Override
