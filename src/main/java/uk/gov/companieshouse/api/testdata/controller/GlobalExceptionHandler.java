@@ -27,7 +27,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
-    private static final String invalidRequest = "invalid request";
+    private static final String INVALID_REQUEST = "invalid request";
 
     @ExceptionHandler(value = {DataException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         Throwable cause = ex.getCause();
 
         if (!(cause instanceof tools.jackson.databind.exc.InvalidFormatException ife)) {
-            return invalidRequest;
+            return INVALID_REQUEST;
         }
 
         return extractFieldMessage(ife.getPath());
@@ -80,7 +80,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private String extractFieldMessage(List<JacksonException.Reference> path) {
         if (path == null || path.isEmpty()) {
-            return invalidRequest;
+            return INVALID_REQUEST;
         }
 
         for (JacksonException.Reference ref : path) {
@@ -92,7 +92,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             }
         }
 
-        return "invalid request";
+        return INVALID_REQUEST;
     }
 
     private String extractFieldName(String desc) {
