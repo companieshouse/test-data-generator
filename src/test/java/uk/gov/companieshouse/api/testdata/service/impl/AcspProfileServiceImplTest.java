@@ -463,7 +463,6 @@ class AcspProfileServiceImplTest {
     void createAcspProfileWithValidServiceAddressSetsAddress() throws DataException {
         Address serviceAddress = org.mockito.Mockito.mock(Address.class);
 
-        // Make address NON-empty so isEmptyAddress() returns false
         when(serviceAddress.getPremise()).thenReturn("123");
 
         acspProfileRequest.setServiceAddress(serviceAddress);
