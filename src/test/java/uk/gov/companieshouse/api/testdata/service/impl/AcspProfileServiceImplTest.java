@@ -460,7 +460,7 @@ class AcspProfileServiceImplTest {
     }
 
     @Test
-    void createAcspProfile_withValidServiceAddress_setsAddress() throws DataException {
+    void createAcspProfileWithValidServiceAddressSetsAddress() throws DataException {
         Address serviceAddress = org.mockito.Mockito.mock(Address.class);
 
         // Make address NON-empty so isEmptyAddress() returns false
@@ -483,6 +483,33 @@ class AcspProfileServiceImplTest {
 
         assertNotNull(captured.getServiceAddress());
         assertEquals("123", captured.getServiceAddress().getPremise());
+    }
+
+    @Test
+    void createAcspProfileWithEmptyServiceAddressDoesNotSetAddress() throws DataException {
+        Address serviceAddress = org.mockito.Mockito.mock(Address.class);
+
+        when(serviceAddress.getPremise()).thenReturn(null);
+        when(serviceAddress.getAddressLine1()).thenReturn(null);
+        when(serviceAddress.getAddressLine2()).thenReturn(null);
+        when(serviceAddress.getCountry()).thenReturn(null);
+        when(serviceAddress.getLocality()).thenReturn(null);
+        when(serviceAddress.getPostalCode()).thenReturn(null);
+
+        acspProfileRequest.setServiceAddress(serviceAddress);
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getServiceAddress());
     }
 
 }
