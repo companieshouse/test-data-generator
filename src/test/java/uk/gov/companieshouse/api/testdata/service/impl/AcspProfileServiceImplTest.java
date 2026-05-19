@@ -459,4 +459,30 @@ class AcspProfileServiceImplTest {
         assertEquals("AP100002", captured.getAcspNumber());
     }
 
+    @Test
+    void createAcspProfile_withValidServiceAddress_setsAddress() throws DataException {
+        Address serviceAddress = org.mockito.Mockito.mock(Address.class);
+
+        // Make address NON-empty so isEmptyAddress() returns false
+        when(serviceAddress.getPremise()).thenReturn("123");
+
+        acspProfileRequest.setServiceAddress(serviceAddress);
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AcspProfileResponse result = service.create(acspProfileRequest);
+
+        assertNotNull(result);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNotNull(captured.getServiceAddress());
+        assertEquals("123", captured.getServiceAddress().getPremise());
+    }
+
 }

@@ -59,31 +59,24 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
         profile.setType(Objects.requireNonNullElse(spec.getType(), "limited-company"));
         profile.setAcspNumber(acspNumber);
-//        profile.setBusinessSector(Objects.requireNonNullElse(spec.getBusinessSector(), "financial-institutions"));
         profile.setRegisteredOfficeAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
-//        profile.setServiceAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
         String businessSector = spec.getBusinessSector();
 
         if (businessSector == null) {
-            // NOT provided → set default
             profile.setBusinessSector("financial-institutions");
         } else if (!businessSector.isBlank() && !"empty".equalsIgnoreCase(businessSector)) {
-            // valid value
             profile.setBusinessSector(businessSector);
         }
 
         var serviceAddress = spec.getServiceAddress();
 
         if (serviceAddress == null) {
-            // not provided → set default
             profile.setServiceAddress(
                     addressService.getAddress(JurisdictionType.UNITED_KINGDOM)
             );
         } else if (!isEmptyAddress(serviceAddress)) {
-            // valid object → set
             profile.setServiceAddress(serviceAddress);
         }
-// else {} → skip
 
         profile.setName(Objects.requireNonNullElse(spec.getName(),"Test Data Generator " + acspNumber + " Company Ltd"));
         profile.setLinksSelf(LINK_STEM + acspNumber);
