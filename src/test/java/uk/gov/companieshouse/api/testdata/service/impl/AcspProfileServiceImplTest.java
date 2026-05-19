@@ -512,4 +512,66 @@ class AcspProfileServiceImplTest {
         assertNull(captured.getServiceAddress());
     }
 
+    @Test
+    void createAcspProfileWithBlankBusinessSectorDoesNotSet() throws DataException {
+        acspProfileRequest.setBusinessSector(""); // blank
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getBusinessSector());
+    }
+
+    @Test
+    void createAcspProfileWithEmptyKeywordBusinessSectorDoesNotSet() throws DataException {
+        acspProfileRequest.setBusinessSector("empty"); // special value
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getBusinessSector());
+    }
+
+    @Test
+    void createAcspProfileWithBlankFieldsInServiceAddressTreatedAsEmpty() throws DataException {
+        Address serviceAddress = org.mockito.Mockito.mock(Address.class);
+
+        when(serviceAddress.getPremise()).thenReturn(" ");
+        when(serviceAddress.getAddressLine1()).thenReturn("");
+        when(serviceAddress.getAddressLine2()).thenReturn(" ");
+        when(serviceAddress.getCountry()).thenReturn("");
+        when(serviceAddress.getLocality()).thenReturn(" ");
+        when(serviceAddress.getPostalCode()).thenReturn("");
+
+        acspProfileRequest.setServiceAddress(serviceAddress);
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getServiceAddress());
+    }
 }
