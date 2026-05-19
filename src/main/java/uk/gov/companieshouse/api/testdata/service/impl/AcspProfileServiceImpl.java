@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.AmlDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.AuditDetails;
 import uk.gov.companieshouse.api.testdata.model.entity.SoleTraderDetails;
@@ -59,32 +58,9 @@ public class AcspProfileServiceImpl implements AcspProfileService {
         profile.setStatus(Objects.requireNonNullElse(spec.getStatus(), "active"));
         profile.setType(Objects.requireNonNullElse(spec.getType(), "limited-company"));
         profile.setAcspNumber(acspNumber);
-//        profile.setBusinessSector(Objects.requireNonNullElse(spec.getBusinessSector(), "financial-institutions"));
+        profile.setBusinessSector(Objects.requireNonNullElse(spec.getBusinessSector(), "financial-institutions"));
         profile.setRegisteredOfficeAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
-//        profile.setServiceAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
-        String businessSector = spec.getBusinessSector();
-
-        if (businessSector == null) {
-            // NOT provided → set default
-            profile.setBusinessSector("financial-institutions");
-        } else if (!businessSector.isBlank() && !"empty".equalsIgnoreCase(businessSector)) {
-            // valid value
-            profile.setBusinessSector(businessSector);
-        }
-
-        var serviceAddress = spec.getServiceAddress();
-
-        if (serviceAddress == null) {
-            // not provided → set default
-            profile.setServiceAddress(
-                    addressService.getAddress(JurisdictionType.UNITED_KINGDOM)
-            );
-        } else if (!isEmptyAddress(serviceAddress)) {
-            // valid object → set
-            profile.setServiceAddress(serviceAddress);
-        }
-// else {} → skip
-
+        profile.setServiceAddress(addressService.getAddress(JurisdictionType.UNITED_KINGDOM));
         profile.setName(Objects.requireNonNullElse(spec.getName(),"Test Data Generator " + acspNumber + " Company Ltd"));
         profile.setLinksSelf(LINK_STEM + acspNumber);
         if (spec.getAmlDetails() != null) {
@@ -141,14 +117,5 @@ public class AcspProfileServiceImpl implements AcspProfileService {
             LOG.error("Error retrieving ACSP profile for acspNumber: {} " + acspNumber, ex);
             return Optional.empty();
         }
-    }
-
-    private boolean isEmptyAddress(Address address) {
-        return (address.getPremise() == null || address.getPremise().isBlank())
-                && (address.getAddressLine1() == null || address.getAddressLine1().isBlank())
-                && (address.getAddressLine2() == null || address.getAddressLine2().isBlank())
-                && (address.getCountry() == null || address.getCountry().isBlank())
-                && (address.getLocality() == null || address.getLocality().isBlank())
-                && (address.getPostalCode() == null || address.getPostalCode().isBlank());
     }
 }
