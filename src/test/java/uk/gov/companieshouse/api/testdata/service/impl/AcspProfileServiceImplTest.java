@@ -218,7 +218,7 @@ class AcspProfileServiceImplTest {
         assertEquals("Test Data Generator AP100001 Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/AP100001", captured.getLinksSelf());
         assertEquals(acspProfileRequest.getEmail(),captured.getEmail());
-        assertEquals(null,captured.getBusinessSector());
+        assertEquals(acspProfileRequest.getBusinessSector(),captured.getBusinessSector());
     }
 
     @Test

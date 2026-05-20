@@ -68,7 +68,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
             profile.setBusinessSector(businessSector);
         }
 
-        var serviceAddress = spec.getServiceAddress();
+        Address serviceAddress = spec.getServiceAddress();
 
         if (serviceAddress == null) {
             profile.setServiceAddress(
