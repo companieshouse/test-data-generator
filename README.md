@@ -149,7 +149,8 @@ In order to use the generator, there are different possible endpoints that can b
       - `type`: Company type of the AcspProfile. This is optional with a defaults to `limited-company`.
       - `status`: Status of the Acsp Profile. This is optional with a defaults to`active`.
       - `acsp_number`: ACSP number of the ACSP Profile. This is optional.
-      - `business_sector`: Business sector of the ACSP Profile. This is optional.
+      - `business_sector`: Business sector of the ACSP Profile. This is optional. If not provided → defaults to `financial-institutions`. If provided as an empty string `""` or `"empty"` → no business sector will be set.
+      - `service_address`: Service address of the ACSP Profile. This is optional. If not provided → a default UK address will be generated. If provided as an empty object `{}` or all fields are blank → no service address will be set.
       - `aml_details`:
           - `supervisory_body`: Supervisory body of the Acsp Profile. This is optional.
           - `membership_details`: Membership details of the Acsp Profile. This is optional.
