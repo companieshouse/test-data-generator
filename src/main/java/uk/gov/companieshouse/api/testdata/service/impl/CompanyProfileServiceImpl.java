@@ -24,6 +24,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -47,7 +48,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String OVERSEA_COMPANY_TYPE = "oversea-company";
     private static final String EXT_REGISTRATION_NUMBER = "124234R34";
     private static final String COMPANY_NAME_PREFIX = "COMPANY ";
-    private static final String COMPANY_NAME_SUFFIX = " LIMITED";
     private static final String FCD_COUNTRY = "Barbados";
     private static final String LEGAL_FORM = "Plc";
     private static final String BUSINESS_ACTIVITY = "Trading";
@@ -373,12 +373,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         var branchDetails = new CompanyProfile.BranchCompanyDetails();
         branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
         branchDetails.setParentCompanyName(COMPANY_NAME_PREFIX
-                + parentCompanyNumber + COMPANY_NAME_SUFFIX);
+                + parentCompanyNumber + getCompanyNameEnding(CompanyType.UK_ESTABLISHMENT));
         branchDetails.setParentCompanyNumber(parentCompanyNumber);
         ukEstablishment.setBranchCompanyDetails(branchDetails);
 
         ukEstablishment.setCompanyName(COMPANY_NAME_PREFIX
-                + ukEstablishmentNumber + COMPANY_NAME_SUFFIX);
+                + ukEstablishmentNumber + getCompanyNameEnding(CompanyType.UK_ESTABLISHMENT));
         ukEstablishment.setDateOfCreation(dateNow(accountingReferenceDate));
         ukEstablishment.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
 
@@ -548,7 +548,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
             profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + " UK SOCIETAS");
         } else {
-            profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + COMPANY_NAME_SUFFIX);
+            profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + getCompanyNameEnding(CompanyType.fromValue(companyType)));
         }
     }
 
@@ -673,4 +673,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         private Boolean registeredOfficeIsInDispute;
         private String accountsDueStatus;
     }
+
+    private String getCompanyNameEnding(CompanyType companyType) {
+        if (companyType == null) {
+            LOG.info("getCompanyNameEnding called with null companyType");
+            return "";
+        }
+        try {
+            String ending = CompanyNameEnding.fromTypeEnum(companyType).getEnding();
+            return ending.isEmpty() ? "" : " " + ending;
+        } catch (IllegalArgumentException ex) {
+            LOG.error("No CompanyNameEnding mapping for CompanyType:}" + companyType, ex);
+            return "";
+        }
+    }
+    
 }

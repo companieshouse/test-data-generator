@@ -124,7 +124,11 @@ class CompanyProfileServiceImplTest {
                                       String companyType, Boolean hasInsolvencyHistory) {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        // Dynamically determine the expected company name ending
+        CompanyType typeEnum = CompanyType.valueOf(companyType.toUpperCase().replace("-", "_"));
+        String ending = uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding.fromTypeEnum(typeEnum).getEnding();
+        String expectedCompanyName = "COMPANY " + COMPANY_NUMBER + (ending.isEmpty() ? "" : " " + ending);
+        assertEquals(expectedCompanyName, profile.getCompanyName());
         assertEquals(companyStatus, profile.getCompanyStatus());
         assertEquals(jurisdiction, profile.getJurisdiction());
         assertEquals(companyType.toLowerCase(), profile.getType());
@@ -788,7 +792,7 @@ class CompanyProfileServiceImplTest {
         CompanyProfile savedProfile = captor.getValue();
 
         assertEquals(expectedUkEstablishmentNumber, savedProfile.getCompanyNumber());
-        assertEquals("COMPANY BR123456 LIMITED", savedProfile.getCompanyName());
+        assertEquals("COMPANY BR123456", savedProfile.getCompanyName());
         assertEquals("open", savedProfile.getCompanyStatus());
         assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), savedProfile.getType());
         assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
