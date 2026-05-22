@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,6 +42,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
@@ -69,6 +71,8 @@ class CompanyProfileServiceImplTest {
     public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
     private static final String OVERSEA_COMPANY_NUMBER = "FC001234";
     private static final CompanyType OVERSEA_COMPANY_TYPE = CompanyType.OVERSEA_COMPANY;
+    private static final CompanyType CONVERTED_OR_CLOSED_TYPE = CompanyType.CONVERTED_OR_CLOSED;
+    private static final CompanyType PLC_TYPE = CompanyType.PLC;
 
 
 
@@ -124,7 +128,11 @@ class CompanyProfileServiceImplTest {
                                       String companyType, Boolean hasInsolvencyHistory) {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
-        assertEquals("COMPANY " + COMPANY_NUMBER + " LIMITED", profile.getCompanyName());
+        // Dynamically determine the expected company name ending
+        CompanyType typeEnum = CompanyType.valueOf(companyType.toUpperCase().replace("-", "_"));
+        String ending = uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding.fromTypeEnum(typeEnum).getEnding();
+        String expectedCompanyName = "COMPANY " + COMPANY_NUMBER + (ending.isEmpty() ? "" : " " + ending);
+        assertEquals(expectedCompanyName, profile.getCompanyName());
         assertEquals(companyStatus, profile.getCompanyStatus());
         assertEquals(jurisdiction, profile.getJurisdiction());
         assertEquals(companyType.toLowerCase(), profile.getType());
@@ -788,7 +796,7 @@ class CompanyProfileServiceImplTest {
         CompanyProfile savedProfile = captor.getValue();
 
         assertEquals(expectedUkEstablishmentNumber, savedProfile.getCompanyNumber());
-        assertEquals("COMPANY BR123456 LIMITED", savedProfile.getCompanyName());
+        assertEquals("COMPANY BR123456", savedProfile.getCompanyName());
         assertEquals("open", savedProfile.getCompanyStatus());
         assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), savedProfile.getType());
         assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
@@ -951,4 +959,114 @@ class CompanyProfileServiceImplTest {
                 Arguments.of("GmbH", "GmbH")
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("companyTypeAndExpectedNameEnding")
+    void createSetsExpectedCompanyNameEndingFromCompanyType(CompanyType companyType,
+                                                            String expectedEnding) {
+        spec.setCompanyType(companyType);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(spec);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        String expectedName = expectedEnding.isEmpty()
+                ? "COMPANY " + COMPANY_NUMBER
+                : "COMPANY " + COMPANY_NUMBER + " " + expectedEnding;
+
+        assertEquals(expectedName, profile.getCompanyName());
+    }
+
+    @Test
+    void createCompanyTypeWithPlcNameEnding() {
+        spec.setCompanyType(PLC_TYPE);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(spec);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        assertEquals("COMPANY " + COMPANY_NUMBER + " PLC", profile.getCompanyName());
+    }
+
+    @Test
+    void createCompanyTypeWithoutNameEnding() {
+        spec.setCompanyType(CONVERTED_OR_CLOSED_TYPE);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(spec);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        assertEquals("COMPANY " + COMPANY_NUMBER, profile.getCompanyName());
+    }
+
+    @Test
+    void getCompanyNameEndingWithNullCompanyTypeReturnsEmptyString() throws Exception {
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "getCompanyNameEnding", CompanyType.class);
+        method.setAccessible(true);
+
+        String result = (String) method.invoke(companyProfileService, new Object[]{null});
+
+        assertEquals("", result);
+    }
+
+    @Test
+    void getCompanyNameEndingWhenMappingLookupThrowsReturnsEmptyString() throws Exception {
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "getCompanyNameEnding", CompanyType.class);
+        method.setAccessible(true);
+
+        try (MockedStatic<CompanyNameEnding> mocked = Mockito.mockStatic(CompanyNameEnding.class)) {
+            mocked.when(() -> CompanyNameEnding.fromTypeEnum(CompanyType.PLC))
+                    .thenThrow(new IllegalArgumentException("No mapping"));
+
+            String result = (String) method.invoke(companyProfileService, CompanyType.PLC);
+
+            assertEquals("", result);
+        }
+    }
+
+    @Test
+    void getCompanyNameEndingWithMappedCompanyTypeReturnsPrefixedEnding() throws Exception {
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "getCompanyNameEnding", CompanyType.class);
+        method.setAccessible(true);
+
+        String result = (String) method.invoke(companyProfileService, CompanyType.PLC);
+
+        assertEquals(" PLC", result);
+    }
+
+     static Stream<Arguments> companyTypeAndExpectedNameEnding() {
+        return Stream.of(
+                Arguments.of(CompanyType.EEIG, "EEIG"),
+                Arguments.of(CompanyType.EUROPEAN_PUBLIC_LIMITED_LIABILITY_COMPANY_SE, "SE"),
+                Arguments.of(CompanyType.ICVC_SECURITIES, "ICVC"),
+                Arguments.of(CompanyType.LIMITED_PARTNERSHIP, "LIMITED PARTNERSHIP"),
+                Arguments.of(CompanyType.LLP, "LIMITED LIABILITY PARTNERSHIP"),
+                Arguments.of(CompanyType.PRIVATE_UNLIMITED, "UNLIMITED"),
+                Arguments.of(CompanyType.PROTECTED_CELL_COMPANY, "PCC LIMITED"),
+                Arguments.of(CompanyType.UKEIG, "UKEIG"),
+                Arguments.of(CompanyType.UNITED_KINGDOM_SOCIETAS, "UK SOCIETAS")
+        );
+    }
+
 }
