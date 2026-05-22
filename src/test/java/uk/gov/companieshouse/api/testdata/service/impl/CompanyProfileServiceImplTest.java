@@ -69,6 +69,8 @@ class CompanyProfileServiceImplTest {
     public static final String FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER = "full-data-available-from-financial-conduct-authority-mutuals-public-register";
     private static final String OVERSEA_COMPANY_NUMBER = "FC001234";
     private static final CompanyType OVERSEA_COMPANY_TYPE = CompanyType.OVERSEA_COMPANY;
+    private static final CompanyType CONVERTED_OR_CLOSED_TYPE = CompanyType.CONVERTED_OR_CLOSED;
+    private static final CompanyType PLC_TYPE = CompanyType.PLC;
 
 
 
@@ -955,4 +957,76 @@ class CompanyProfileServiceImplTest {
                 Arguments.of("GmbH", "GmbH")
         );
     }
+
+    @ParameterizedTest
+    @MethodSource("companyTypeAndExpectedNameEnding")
+    void createSetsExpectedCompanyNameEndingFromCompanyType(CompanyType companyType,
+                                                            String expectedEnding) {
+        spec.setCompanyType(companyType);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(spec);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        String expectedName = expectedEnding.isEmpty()
+                ? "COMPANY " + COMPANY_NUMBER
+                : "COMPANY " + COMPANY_NUMBER + " " + expectedEnding;
+
+        assertEquals(expectedName, profile.getCompanyName());
+    }
+
+    @Test
+    void createCompanyTypeWithPlcNameEnding() {
+        spec.setCompanyType(PLC_TYPE);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(spec);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        assertEquals("COMPANY " + COMPANY_NUMBER + " PLC", profile.getCompanyName());
+    }
+
+    @Test
+    void createCompanyTypeWithoutNameEnding() {
+        spec.setCompanyType(CONVERTED_OR_CLOSED_TYPE);
+        spec.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(spec);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        assertEquals("COMPANY " + COMPANY_NUMBER, profile.getCompanyName());
+    }
+
+     static Stream<Arguments> companyTypeAndExpectedNameEnding() {
+        return Stream.of(
+                Arguments.of(CompanyType.EEIG, "EEIG"),
+                Arguments.of(CompanyType.EUROPEAN_PUBLIC_LIMITED_LIABILITY_COMPANY_SE, "SE"),
+                Arguments.of(CompanyType.ICVC_SECURITIES, "ICVC"),
+                Arguments.of(CompanyType.LIMITED_PARTNERSHIP, "LIMITED PARTNERSHIP"),
+                Arguments.of(CompanyType.LLP, "LIMITED LIABILITY PARTNERSHIP"),
+                Arguments.of(CompanyType.PRIVATE_UNLIMITED, "UNLIMITED"),
+                Arguments.of(CompanyType.PROTECTED_CELL_COMPANY, "PCC LIMITED"),
+                Arguments.of(CompanyType.UKEIG, "UKEIG"),
+                Arguments.of(CompanyType.UNITED_KINGDOM_SOCIETAS, "UK SOCIETAS")
+        );
+    }
+
 }
