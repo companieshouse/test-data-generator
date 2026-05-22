@@ -218,7 +218,7 @@ class AcspProfileServiceImplTest {
         assertEquals("Test Data Generator AP100001 Company Ltd", captured.getName());
         assertEquals("/authorised-corporate-service-providers/AP100001", captured.getLinksSelf());
         assertEquals(acspProfileRequest.getEmail(),captured.getEmail());
-        assertEquals(acspProfileRequest.getBusinessSector(),captured.getBusinessSector());
+        assertEquals(null,captured.getBusinessSector());
     }
 
     @Test
@@ -459,4 +459,118 @@ class AcspProfileServiceImplTest {
         assertEquals("AP100002", captured.getAcspNumber());
     }
 
+    @Test
+    void createAcspProfileWithValidServiceAddressSetsAddress() throws DataException {
+        Address serviceAddress = org.mockito.Mockito.mock(Address.class);
+
+        when(serviceAddress.getPremise()).thenReturn("123");
+
+        acspProfileRequest.setServiceAddress(serviceAddress);
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        AcspProfileResponse result = service.create(acspProfileRequest);
+
+        assertNotNull(result);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNotNull(captured.getServiceAddress());
+        assertEquals("123", captured.getServiceAddress().getPremise());
+    }
+
+    @Test
+    void createAcspProfileWithEmptyServiceAddressDoesNotSetAddress() throws DataException {
+        Address serviceAddress = org.mockito.Mockito.mock(Address.class);
+
+        when(serviceAddress.getPremise()).thenReturn(null);
+        when(serviceAddress.getAddressLine1()).thenReturn(null);
+        when(serviceAddress.getAddressLine2()).thenReturn(null);
+        when(serviceAddress.getCountry()).thenReturn(null);
+        when(serviceAddress.getLocality()).thenReturn(null);
+        when(serviceAddress.getPostalCode()).thenReturn(null);
+
+        acspProfileRequest.setServiceAddress(serviceAddress);
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getServiceAddress());
+    }
+
+    @Test
+    void createAcspProfileWithBlankBusinessSectorDoesNotSet() throws DataException {
+        acspProfileRequest.setBusinessSector(""); // blank
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getBusinessSector());
+    }
+
+    @Test
+    void createAcspProfileWithEmptyKeywordBusinessSectorDoesNotSet() throws DataException {
+        acspProfileRequest.setBusinessSector("empty"); // special value
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getBusinessSector());
+    }
+
+    @Test
+    void createAcspProfileWithBlankFieldsInServiceAddressTreatedAsEmpty() throws DataException {
+        Address serviceAddress = org.mockito.Mockito.mock(Address.class);
+
+        when(serviceAddress.getPremise()).thenReturn(" ");
+        when(serviceAddress.getAddressLine1()).thenReturn("");
+        when(serviceAddress.getAddressLine2()).thenReturn(" ");
+        when(serviceAddress.getCountry()).thenReturn("");
+        when(serviceAddress.getLocality()).thenReturn(" ");
+        when(serviceAddress.getPostalCode()).thenReturn("");
+
+        acspProfileRequest.setServiceAddress(serviceAddress);
+
+        when(randomService.getNumber(6)).thenReturn(100001L);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM))
+                .thenReturn(new Address());
+        when(repository.save(any(AcspProfile.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        service.create(acspProfileRequest);
+
+        verify(repository).save(profileCaptor.capture());
+        AcspProfile captured = profileCaptor.getValue();
+
+        assertNull(captured.getServiceAddress());
+    }
 }
