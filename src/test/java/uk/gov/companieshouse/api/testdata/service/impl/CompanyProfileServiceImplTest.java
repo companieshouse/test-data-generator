@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,6 +42,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
@@ -1013,6 +1015,44 @@ class CompanyProfileServiceImplTest {
         CompanyProfile profile = captor.getValue();
 
         assertEquals("COMPANY " + COMPANY_NUMBER, profile.getCompanyName());
+    }
+
+    @Test
+    void getCompanyNameEndingWithNullCompanyTypeReturnsEmptyString() throws Exception {
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "getCompanyNameEnding", CompanyType.class);
+        method.setAccessible(true);
+
+        String result = (String) method.invoke(companyProfileService, new Object[]{null});
+
+        assertEquals("", result);
+    }
+
+    @Test
+    void getCompanyNameEndingWhenMappingLookupThrowsReturnsEmptyString() throws Exception {
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "getCompanyNameEnding", CompanyType.class);
+        method.setAccessible(true);
+
+        try (MockedStatic<CompanyNameEnding> mocked = Mockito.mockStatic(CompanyNameEnding.class)) {
+            mocked.when(() -> CompanyNameEnding.fromTypeEnum(CompanyType.PLC))
+                    .thenThrow(new IllegalArgumentException("No mapping"));
+
+            String result = (String) method.invoke(companyProfileService, CompanyType.PLC);
+
+            assertEquals("", result);
+        }
+    }
+
+    @Test
+    void getCompanyNameEndingWithMappedCompanyTypeReturnsPrefixedEnding() throws Exception {
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "getCompanyNameEnding", CompanyType.class);
+        method.setAccessible(true);
+
+        String result = (String) method.invoke(companyProfileService, CompanyType.PLC);
+
+        assertEquals(" PLC", result);
     }
 
      static Stream<Arguments> companyTypeAndExpectedNameEnding() {
