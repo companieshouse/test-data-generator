@@ -12,4 +12,6 @@ public interface IdentityRepository extends MongoRepository<Identity, String> {
     Optional<Identity> findByEmail(String email);
 
     Optional<Identity> findByUserId(String userId);
+
+    long deleteByEmail(String email);
 }

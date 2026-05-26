@@ -1,9 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
@@ -93,5 +97,45 @@ public class IdentityVerificationServiceImpl implements
         }
 
         return new String[]{firstName, lastName};
+    }
+
+    @Override
+    public boolean deleteIdentityByEmail(String email) throws DataException, NoDataFoundException {
+
+        if (email == null || email.isBlank()) {
+            throw new DataException("email is required");
+        }
+
+        long deletedCount = identityRepository.deleteByEmail(email);
+
+        if (deletedCount == 0) {
+            throw new NoDataFoundException("No identity found for email: " + email);
+        }
+
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("email", email);
+        LOG.debug("Identity deleted", logData);
+
+        return true;
+    }
+
+    @Override
+    public boolean deleteIdentityById(String identityId) throws DataException, NoDataFoundException {
+
+        if (identityId == null || identityId.isBlank()) {
+            throw new DataException("identityId is required");
+        }
+
+        if (!identityRepository.existsById(identityId)) {
+            throw new NoDataFoundException("No identity found for identityId: " + identityId);
+        }
+
+        identityRepository.deleteById(identityId);
+
+        Map<String, Object> logData = new HashMap<>();
+        logData.put("identityId", identityId);
+        LOG.debug("Identity deleted", logData);
+
+        return true;
     }
 }

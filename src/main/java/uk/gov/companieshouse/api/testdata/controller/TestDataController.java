@@ -596,6 +596,46 @@ public class TestDataController {
         return new ResponseEntity<>(data, HttpStatus.OK);
     }
 
+    @DeleteMapping("/internal/identity-verification/identity")
+    public ResponseEntity<Map<String, Object>> deleteIdentityByEmail(
+            @RequestParam("email") String email)
+            throws DataException, NoDataFoundException {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("email", email);
+
+        boolean deleted = verifiedIdentityService.deleteIdentityByEmail(email);
+
+        if (deleted) {
+            LOG.info("Identity is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Identity Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @DeleteMapping("/internal/identity-verification/identity/{identityId}")
+    public ResponseEntity<Map<String, Object>> deleteIdentityById(
+            @PathVariable("identityId") String identityId)
+            throws DataException, NoDataFoundException {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("identityId", identityId);
+
+        boolean deleted = verifiedIdentityService.deleteIdentityById(identityId);
+
+        if (deleted) {
+            LOG.info("Identity is deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Identity Not Found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/internal/get-populated-company-structure")
     public ResponseEntity<PopulatedCompanyDetailsResponse> getCompanyWithPopulatedStructure(
             @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
