@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
@@ -70,6 +71,9 @@ class UserServiceImplTest {
 
     @Mock
     private UvidRepository uvidRepository;
+
+    @Mock
+    private BacklogRepository backlogRepository;
 
     @Mock
     private RandomService randomService;
