@@ -20,9 +20,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
@@ -38,17 +40,20 @@ public class UserServiceImpl implements UserService {
     private final RandomService randomService;
     private final IdentityRepository identityRepository;
     private final UvidRepository uvidRepository;
+    private final BacklogRepository backlogRepository;
 
     public UserServiceImpl(UserRepository repository,
                            AdminPermissionsRepository adminPermissionsRepository,
                            RandomService randomService,
                            IdentityRepository identityRepository,
-                           UvidRepository uvidRepository) {
+                           UvidRepository uvidRepository,
+                           BacklogRepository backlogRepository) {
         this.repository = repository;
         this.adminPermissionsRepository = adminPermissionsRepository;
         this.randomService = randomService;
         this.identityRepository = identityRepository;
         this.uvidRepository = uvidRepository;
+        this.backlogRepository = backlogRepository;
     }
 
     @Override
@@ -217,6 +222,16 @@ public class UserServiceImpl implements UserService {
                         + identity.getId() +  ex.getMessage());
                 throw ex;
             }
+
+            try {
+                backlogRepository.deleteByUserId(identity.getUserId());
+                LOG.debug("Deleted backlog for identity id = " + identity.getId());
+            } catch (Exception ex) {
+                LOG.error("Failed to backlog UVIDs for identity id = "
+                        + identity.getId() + ex.getMessage());
+                throw ex;
+            }
+
         } else {
             LOG.debug("No identity associated with userId= " + userId);
         }

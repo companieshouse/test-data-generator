@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppealsRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
@@ -135,6 +136,11 @@ public class MongoConfig {
     @Bean
     public UvidRepository uvidRepository() {
         return getMongoRepositoryBean(UvidRepository.class, IDENTITY_VERIFICATION);
+    }
+
+    @Bean
+    public BacklogRepository backlogRepository() {
+        return getMongoRepositoryBean(BacklogRepository.class, IDENTITY_VERIFICATION);
     }
 
     @Bean
