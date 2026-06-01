@@ -226,7 +226,7 @@ public class UserServiceImpl implements UserService {
                 backlogRepository.deleteByUserId(identity.getUserId());
                 LOG.debug("Deleted backlog for identity id = " + identity.getId());
             } catch (Exception ex) {
-                LOG.error("Failed to backlog UVIDs for identity id = "
+                LOG.error("Failed to backlog for identity id = "
                         + identity.getId() + ex.getMessage());
                 throw ex;
             }
