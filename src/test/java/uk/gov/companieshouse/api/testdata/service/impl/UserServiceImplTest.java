@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.UserRoles;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
@@ -70,6 +71,9 @@ class UserServiceImplTest {
 
     @Mock
     private UvidRepository uvidRepository;
+
+    @Mock
+    private BacklogRepository backlogRepository;
 
     @Mock
     private RandomService randomService;
@@ -1087,5 +1091,86 @@ class UserServiceImplTest {
 
         verify(identityRepository, times(2)).save(any(Identity.class));
         verify(uvidRepository, times(2)).save(any(Uvid.class));
+    }
+
+    @Test
+    void testDeleteUser_whenUvidDeletionFails_shouldThrowException() {
+        User mockUser = new User();
+        mockUser.setId(TEST_USER_ID);
+
+        Identity mockIdentity = new Identity();
+        mockIdentity.setId(TEST_IDENTITY_ID);
+        mockIdentity.setUserId(TEST_USER_ID);
+
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(identityRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(mockIdentity));
+
+        doThrow(new RuntimeException("UVID delete failure"))
+                .when(uvidRepository).deleteByIdentityId(TEST_IDENTITY_ID);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userServiceImpl.delete(TEST_USER_ID));
+
+        assertEquals("UVID delete failure", ex.getMessage());
+
+        verify(uvidRepository, times(1)).deleteByIdentityId(TEST_IDENTITY_ID);
+
+        verify(identityRepository, never()).delete(any());
+        verify(backlogRepository, never()).deleteByUserId(anyString());
+        verify(userRepository, never()).delete(any());
+    }
+
+    @Test
+    void testDeleteUser_whenIdentityDeletionFails_shouldThrowException() {
+        User mockUser = new User();
+        mockUser.setId(TEST_USER_ID);
+
+        Identity mockIdentity = new Identity();
+        mockIdentity.setId(TEST_IDENTITY_ID);
+        mockIdentity.setUserId(TEST_USER_ID);
+
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(identityRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(mockIdentity));
+
+        doThrow(new RuntimeException("Identity delete failure"))
+                .when(identityRepository).delete(mockIdentity);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userServiceImpl.delete(TEST_USER_ID));
+
+        assertEquals("Identity delete failure", ex.getMessage());
+
+        verify(uvidRepository, times(1)).deleteByIdentityId(TEST_IDENTITY_ID);
+        verify(identityRepository, times(1)).delete(mockIdentity);
+
+        verify(backlogRepository, never()).deleteByUserId(anyString());
+        verify(userRepository, never()).delete(any());
+    }
+
+    @Test
+    void testDeleteUser_whenBacklogDeletionFails_shouldThrowException() {
+        User mockUser = new User();
+        mockUser.setId(TEST_USER_ID);
+
+        Identity mockIdentity = new Identity();
+        mockIdentity.setId(TEST_IDENTITY_ID);
+        mockIdentity.setUserId(TEST_USER_ID);
+
+        when(userRepository.findById(TEST_USER_ID)).thenReturn(Optional.of(mockUser));
+        when(identityRepository.findByUserId(TEST_USER_ID)).thenReturn(Optional.of(mockIdentity));
+
+        doThrow(new RuntimeException("Backlog delete failure"))
+                .when(backlogRepository).deleteByUserId(TEST_USER_ID);
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> userServiceImpl.delete(TEST_USER_ID));
+
+        assertEquals("Backlog delete failure", ex.getMessage());
+
+        verify(uvidRepository, times(1)).deleteByIdentityId(TEST_IDENTITY_ID);
+        verify(identityRepository, times(1)).delete(mockIdentity);
+        verify(backlogRepository, times(1)).deleteByUserId(TEST_USER_ID);
+
+        verify(userRepository, never()).delete(any());
     }
 }
