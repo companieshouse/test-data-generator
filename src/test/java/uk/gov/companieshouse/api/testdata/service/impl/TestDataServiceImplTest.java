@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -12,6 +13,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -212,6 +214,7 @@ class TestDataServiceImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         this.testDataService.setAPIUrl(API_URL);
+        lenient().when(companyProfileService.delete(anyString())).thenReturn(true);
     }
 
     /**
@@ -612,7 +615,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataWithUkEstablishments() throws DataException {
+    void deleteCompanyDataWithUkEstablishments() throws DataException, NoDataFoundException {
         List<String> ukEstablishments = List.of("BR123456", "BR654321");
         CompanyProfile companyProfile = new CompanyProfile();
         companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue());
@@ -629,7 +632,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataWithoutUkEstablishments() throws DataException {
+    void deleteCompanyDataWithoutUkEstablishments() throws DataException, NoDataFoundException {
         CompanyProfile companyProfile = new CompanyProfile();
         companyProfile.setType(CompanyType.LTD.getValue());
         when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
@@ -656,6 +659,74 @@ class TestDataServiceImplTest {
         assertEquals("Deletion error", exception.getSuppressed()[0].getMessage());
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER_2);
+        verify(companyProfileService).delete(OVERSEA_COMPANY);
+    }
+
+    /**
+     * When companyProfileService.delete() returns false for the main company,
+     * deleteSingleCompanyData throws NoDataFoundException which propagates out of deleteCompanyData.
+     */
+    @Test
+    void deleteCompanyDataThrowsNoDataFoundExceptionWhenProfileNotDeleted() {
+        when(companyProfileService.delete(COMPANY_NUMBER)).thenReturn(false);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class,
+                () -> testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals("Company profile not found for company number: " + COMPANY_NUMBER,
+                thrown.getMessage());
+        // Profile delete was attempted; downstream services should NOT have been called
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+        verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
+        verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
+        verify(appointmentService, never()).deleteAllAppointments(COMPANY_NUMBER);
+    }
+
+    /**
+     * When companyProfileService.delete() throws a non-NoDataFoundException (RuntimeException),
+     * it is added to suppressedExceptions and ultimately wrapped in a DataException.
+     * This is the existing "profile exception" path — kept here for completeness alongside
+     * the NoDataFoundException path.
+     */
+    @Test
+    void deleteCompanyDataProfileRuntimeExceptionAddedToSuppressed() {
+        RuntimeException ex = new RuntimeException("db error");
+        when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> testDataService.deleteCompanyData(COMPANY_NUMBER));
+
+        assertEquals(1, thrown.getSuppressed().length);
+        assertEquals(ex, thrown.getSuppressed()[0]);
+    }
+
+    /**
+     * When delete() returns false for a UK establishment, NoDataFoundException is thrown by
+     * deleteSingleCompanyData, caught by the outer catch(Exception) in
+     * deleteUkEstablishmentsForParent, and accumulated as a suppressed exception in DataException.
+     */
+    @Test
+    void deleteCompanyDataUkEstablishmentNotFoundBecomesDataException() {
+        List<String> ukEstablishments = List.of(UK_ESTABLISHMENT_NUMBER);
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue());
+        when(companyProfileService.getCompanyProfile(OVERSEA_COMPANY))
+                .thenReturn(Optional.of(companyProfile));
+        when(companyProfileService.findUkEstablishmentsByParent(OVERSEA_COMPANY))
+                .thenReturn(ukEstablishments);
+        // UK establishment returns false → NoDataFoundException inside deleteSingleCompanyData
+        when(companyProfileService.delete(UK_ESTABLISHMENT_NUMBER)).thenReturn(false);
+        // Parent company deletes successfully
+        when(companyProfileService.delete(OVERSEA_COMPANY)).thenReturn(true);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> testDataService.deleteCompanyData(OVERSEA_COMPANY));
+
+        assertEquals(1, thrown.getSuppressed().length);
+        assertInstanceOf(NoDataFoundException.class, thrown.getSuppressed()[0]);
+        assertEquals("Company profile not found for company number: " + UK_ESTABLISHMENT_NUMBER,
+                thrown.getSuppressed()[0].getMessage());
+        verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
         verify(companyProfileService).delete(OVERSEA_COMPANY);
     }
 
@@ -1592,19 +1663,19 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithElasticSearchDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testCreateCompanyWithElasticSearch(true, 1);
     }
 
     @Test
     void testCreateCompanyWithElasticSearchNotDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testCreateCompanyWithElasticSearch(false, 0);
     }
 
     private void testCreateCompanyWithElasticSearch(boolean isElasticSearchDeployed,
                                                     int expectedInvocationCount)
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(isElasticSearchDeployed);
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
@@ -1629,7 +1700,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchDeployed()
-            throws DataException {
+            throws DataException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(true);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
@@ -1642,7 +1713,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchNotDeployed()
-            throws DataException {
+            throws DataException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
@@ -1904,7 +1975,7 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithoutAlphabeticalSearch()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
@@ -1928,7 +1999,7 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithoutAdvancedSearch()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
@@ -2379,7 +2450,7 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyElasticSearchIndexAsFalse()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         spec.setAddToCompanyElasticSearchIndex(false);
@@ -2388,13 +2459,13 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithoutElasticSearchIndex()
-            throws DataException, ApiErrorResponseException, URIValidationException {
+            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         validateElasticSearch(spec);
     }
 
-    private void validateElasticSearch(CompanyRequest spec) throws DataException, ApiErrorResponseException, URIValidationException {
+    private void validateElasticSearch(CompanyRequest spec) throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         String expectedFullCompanyNumber = COMPANY_NUMBER;

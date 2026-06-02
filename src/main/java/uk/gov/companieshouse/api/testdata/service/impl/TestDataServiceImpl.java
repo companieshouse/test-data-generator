@@ -184,7 +184,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyProfileResponse createCompanyData(final CompanyRequest spec) throws DataException {
+    public CompanyProfileResponse createCompanyData(final CompanyRequest spec) throws DataException, NoDataFoundException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanyRequest can not be null");
         }
@@ -256,7 +256,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public void deleteCompanyData(String companyId) throws DataException {
+    public void deleteCompanyData(String companyId) throws DataException, NoDataFoundException {
         LOG.info("Deleting company data for company number: " + companyId);
         List<Exception> suppressedExceptions = new ArrayList<>();
 
@@ -337,11 +337,18 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
+    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) throws NoDataFoundException {
         LOG.info("Deleting single company data for company number: " + companyId);
         try {
-            this.companyProfileService.delete(companyId);
-            LOG.info("Deleted company profile for company number: " + companyId);
+            var isDeleted = this.companyProfileService.delete(companyId);
+            if (isDeleted) {
+                LOG.info("Deleted company profile for company number: " + companyId);
+            } else {
+                LOG.info("No company profile found to delete for company number: " + companyId);
+                throw new NoDataFoundException("Company profile not found for company number: " + companyId);
+            }
+        } catch (NoDataFoundException de) {
+            throw de;
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
@@ -896,7 +903,11 @@ public class TestDataServiceImpl implements TestDataService {
                 && !publicCompanySpec.getForeignCompanyLegalForm().isBlank()) {
             companySpec.setForeignCompanyLegalForm(publicCompanySpec.getForeignCompanyLegalForm());
         }
-        return createCompanyData(companySpec);
+        try {
+            return createCompanyData(companySpec);
+        } catch (NoDataFoundException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     private void addCompanyToElasticSearchIndexes(CompanyRequest spec,

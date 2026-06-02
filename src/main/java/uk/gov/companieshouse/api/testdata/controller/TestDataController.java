@@ -108,7 +108,7 @@ public class TestDataController {
     /* Internal endpoint to create company data */
     @PostMapping("/internal/company")
     public ResponseEntity<CompanyProfileResponse> createCompanyInternal(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
+            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException , NoDataFoundException {
 
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
         CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
@@ -122,7 +122,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
-    @DeleteMapping({"/internal/company/{companyNumber}", "/company/{companyNumber}"})
+    @DeleteMapping({"/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
             @PathVariable("companyNumber") String companyNumber,
             @Valid @RequestBody DeleteCompanyRequest request)
@@ -137,6 +137,25 @@ public class TestDataController {
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);
         LOG.info("Company deleted", data);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping({"/internal/company/{companyNumber}"})
+    public ResponseEntity<Void> deleteCompanyInternal(
+            @PathVariable("companyNumber") String companyNumber,
+            @Valid @RequestBody(required = false) DeleteCompanyRequest request)
+            throws DataException, NoDataFoundException, InvalidAuthCodeException {
+
+        if (request != null && request.getAuthCode() != null) {
+            if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
+                throw new InvalidAuthCodeException(companyNumber);
+            }
+        }
+        testDataService.deleteCompanyData(companyNumber);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, companyNumber);
+        LOG.info("Internal Company deleted", data);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
