@@ -65,7 +65,7 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile for company number: " + companyNumber, ex);
-//            throw new DataException("Failed to delete company profile: " + ex.getMessage(), ex);
+            throw new DataException("Failed to delete company profile: " + ex.getMessage(), ex);
         }
     }
 
