@@ -146,10 +146,9 @@ public class TestDataController {
             @Valid @RequestBody(required = false) DeleteCompanyRequest request)
             throws DataException, NoDataFoundException, InvalidAuthCodeException {
 
-        if (request != null && request.getAuthCode() != null) {
-            if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
-                throw new InvalidAuthCodeException(companyNumber);
-            }
+        if (request != null && request.getAuthCode() != null
+                && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
+            throw new InvalidAuthCodeException(companyNumber);
         }
         testDataService.deleteCompanyData(companyNumber);
 

@@ -407,6 +407,10 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
 
+        deleteFromElasticSearchIndex(companyId);
+    }
+
+    private void deleteFromElasticSearchIndex(String companyId) {
         if (isElasticSearchDeployed) {
             try {
                 LOG.info("Attempting to delete "
@@ -906,7 +910,7 @@ public class TestDataServiceImpl implements TestDataService {
         try {
             return createCompanyData(companySpec);
         } catch (NoDataFoundException ex) {
-            throw new RuntimeException(ex);
+            throw new DataException("Failed to create company data for public company spec", ex);
         }
     }
 
