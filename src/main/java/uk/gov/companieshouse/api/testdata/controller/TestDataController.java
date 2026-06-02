@@ -644,7 +644,7 @@ public class TestDataController {
     }
 
     @GetMapping("/internal/company-filing-history")
-    public ResponseEntity<?> getCompanyFilingHistory(
+    public ResponseEntity<Object> getCompanyFilingHistory(
             @RequestParam(value = "companyNumber", required = false) String companyNumber,
             @RequestParam(value = "id", required = false) String companyFilingHistoryId) {
 
@@ -652,8 +652,8 @@ public class TestDataController {
                 (companyFilingHistoryId == null || companyFilingHistoryId.isEmpty())) {
 
             Map<String, Object> error = new HashMap<>();
-            error.put("error", "Either companyNumber or transactionId must be provided");
-            error.put("status", HttpStatus.BAD_REQUEST.value());
+            error.put(ERROR, "Either companyNumber or id must be provided");
+            error.put(STATUS, HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(error);
         }
 
@@ -683,7 +683,7 @@ public class TestDataController {
     }
 
     @DeleteMapping("/internal/company-filing-history/{companyNumber}")
-    public ResponseEntity<?> deleteCompanyFilingHistory(
+    public ResponseEntity<Object> deleteCompanyFilingHistory(
             @PathVariable String companyNumber) throws NoDataFoundException {
 
         boolean deleted = filingHistoryService.deleteCompanyFilingHistory(companyNumber);
@@ -693,7 +693,7 @@ public class TestDataController {
         } else {
             Map<String, Object> response = new HashMap<>();
             response.put("companyNumber", companyNumber);
-            response.put("status", HttpStatus.NOT_FOUND.value());
+            response.put(STATUS, HttpStatus.NOT_FOUND.value());
 
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
