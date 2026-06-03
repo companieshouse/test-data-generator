@@ -36,6 +36,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
@@ -74,6 +75,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssocia
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 
@@ -103,7 +105,7 @@ class TestDataControllerTest {
     private TestDataController testDataController;
 
     @Mock
-    private AccountPenaltiesService accountPenaltiesService;
+    private FilingHistoryService filingHistoryService;
 
     @Mock
     private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
@@ -1801,5 +1803,127 @@ class TestDataControllerTest {
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
     }
+    @Test
+    void getCompanyFilingHistoryNoParamsReturnsBadRequest() {
+        ResponseEntity<Object> response =
+                testDataController.getCompanyFilingHistory(null, null);
 
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertNotNull(body);
+        assertEquals("Either companyNumber or id must be provided", body.get("error"));
+        assertEquals(HttpStatus.BAD_REQUEST.value(), body.get("status"));
+    }
+
+    @Test
+    void getCompanyFilingHistoryByCompanyNumberFound() {
+        String companyNumber = "12345678";
+
+        FilingHistory filingHistory = new FilingHistory();
+        List<FilingHistory> results = List.of(filingHistory);
+
+        when(filingHistoryService.getCompanyFilingHistoryByCompanyNumber(companyNumber))
+                .thenReturn(results);
+
+        ResponseEntity<?> response =
+                testDataController.getCompanyFilingHistory(companyNumber, null);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(results, response.getBody());
+
+        verify(filingHistoryService, times(1))
+                .getCompanyFilingHistoryByCompanyNumber(companyNumber);
+    }
+
+    @Test
+    void getCompanyFilingHistoryByCompanyNumberNotFound() {
+        String companyNumber = "12345678";
+
+        when(filingHistoryService.getCompanyFilingHistoryByCompanyNumber(companyNumber))
+                .thenReturn(Collections.emptyList());
+
+        ResponseEntity<?> response =
+                testDataController.getCompanyFilingHistory(companyNumber, null);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+
+        verify(filingHistoryService, times(1))
+                .getCompanyFilingHistoryByCompanyNumber(companyNumber);
+    }
+
+    @Test
+    void getCompanyFilingHistoryByIdFound() {
+        String filingHistoryId = "FH123";
+
+        FilingHistory fh = new FilingHistory();
+
+        when(filingHistoryService.getCompanyFilingHistoryById(filingHistoryId))
+                .thenReturn(Optional.of(fh));
+
+        ResponseEntity<?> response =
+                testDataController.getCompanyFilingHistory(null, filingHistoryId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(fh, response.getBody());
+
+        verify(filingHistoryService, times(1))
+                .getCompanyFilingHistoryById(filingHistoryId);
+    }
+
+    @Test
+    void getCompanyFilingHistoryByIdNotFound() {
+        String filingHistoryId = "FH123";
+
+        when(filingHistoryService.getCompanyFilingHistoryById(filingHistoryId))
+                .thenReturn(Optional.empty());
+
+        ResponseEntity<?> response =
+                testDataController.getCompanyFilingHistory(null, filingHistoryId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody());
+
+        verify(filingHistoryService, times(1))
+                .getCompanyFilingHistoryById(filingHistoryId);
+    }
+
+    @Test
+    void deleteCompanyFilingHistorySuccess() throws Exception {
+        String companyNumber = "12345678";
+
+        when(filingHistoryService.deleteCompanyFilingHistory(companyNumber))
+                .thenReturn(true);
+
+        ResponseEntity<?> response =
+                testDataController.deleteCompanyFilingHistory(companyNumber);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+
+        verify(filingHistoryService, times(1))
+                .deleteCompanyFilingHistory(companyNumber);
+    }
+
+    @Test
+    void deleteCompanyFilingHistoryNotFound() throws Exception {
+        String companyNumber = "12345678";
+
+        when(filingHistoryService.deleteCompanyFilingHistory(companyNumber))
+                .thenReturn(false);
+
+        ResponseEntity<?> response =
+                testDataController.deleteCompanyFilingHistory(companyNumber);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertNotNull(body);
+        assertEquals(companyNumber, body.get("companyNumber"));
+        assertEquals(HttpStatus.NOT_FOUND.value(), body.get("status"));
+
+        verify(filingHistoryService, times(1))
+                .deleteCompanyFilingHistory(companyNumber);
+    }
 }

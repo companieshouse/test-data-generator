@@ -38,12 +38,13 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.ResolutionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.service.BarcodeService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class FilingHistoryServiceImpl implements DataService<FilingHistory, CompanyRequest> {
+public class FilingHistoryServiceImpl implements FilingHistoryService, DataService<FilingHistory, CompanyRequest> {
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
@@ -310,5 +311,24 @@ public class FilingHistoryServiceImpl implements DataService<FilingHistory, Comp
         } else {
             return Collections.emptyList();
         }
+    }
+
+    public Optional<FilingHistory> getFilingHistoryById(String id) {
+        return filingHistoryRepository.findById(id);
+    }
+
+    @Override
+    public List<FilingHistory> getCompanyFilingHistoryByCompanyNumber(String companyNumber) {
+        return getFilingHistories(companyNumber);
+    }
+
+    @Override
+    public Optional<FilingHistory> getCompanyFilingHistoryById(String id) {
+        return getFilingHistoryById(id);
+    }
+
+    @Override
+    public boolean deleteCompanyFilingHistory(String companyNumber) {
+        return delete(companyNumber);
     }
 }

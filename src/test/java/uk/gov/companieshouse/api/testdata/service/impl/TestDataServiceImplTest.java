@@ -2644,7 +2644,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteInternalCompanyDataPropagatesDataException() throws DataException {
+    void deleteInternalCompanyDataPropagatesDataException() {
         when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
         RuntimeException cause = new RuntimeException("Mongo failure");
         doThrow(cause).when(companyProfileService).delete(COMPANY_NUMBER);

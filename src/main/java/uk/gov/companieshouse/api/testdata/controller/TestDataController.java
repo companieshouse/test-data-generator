@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 import jakarta.validation.Valid;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
@@ -57,6 +59,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociat
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
@@ -78,14 +81,17 @@ public class TestDataController {
     private static final String NEW_COMPANY_CREATED = "New company created";
 
     private final VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
+    private final FilingHistoryService filingHistoryService;
 
     public TestDataController(
             TestDataService testDataService,
             CompanyAuthCodeService companyAuthCodeService,
-            VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService) {
+            VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService,
+            FilingHistoryService filingHistoryService) {
         this.testDataService = testDataService;
         this.companyAuthCodeService = companyAuthCodeService;
         this.verifiedIdentityService = verifiedIdentityService;
+        this.filingHistoryService = filingHistoryService;
     }
 
     /* Public endpoint to create company data */
@@ -652,6 +658,62 @@ public class TestDataController {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Item Groups Not Found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/internal/company-filing-history")
+    public ResponseEntity<Object> getCompanyFilingHistory(
+            @RequestParam(value = "companyNumber", required = false) String companyNumber,
+            @RequestParam(value = "id", required = false) String companyFilingHistoryId) {
+
+        if ((companyNumber == null || companyNumber.isEmpty()) &&
+                (companyFilingHistoryId == null || companyFilingHistoryId.isEmpty())) {
+
+            Map<String, Object> error = new HashMap<>();
+            error.put(ERROR, "Either companyNumber or id must be provided");
+            error.put(STATUS, HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(error);
+        }
+
+        if (companyNumber != null && !companyNumber.isEmpty()) {
+
+            List<FilingHistory> results =
+                    filingHistoryService.getCompanyFilingHistoryByCompanyNumber(companyNumber);
+
+            if (results.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(results);
+
+        } else {
+
+            Optional<FilingHistory> result =
+                    filingHistoryService.getCompanyFilingHistoryById(companyFilingHistoryId);
+
+            if (result.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            return ResponseEntity.ok(result.get());
+        }
+
+    }
+
+    @DeleteMapping("/internal/company-filing-history/{companyNumber}")
+    public ResponseEntity<Object> deleteCompanyFilingHistory(
+            @PathVariable String companyNumber) throws NoDataFoundException {
+
+        boolean deleted = filingHistoryService.deleteCompanyFilingHistory(companyNumber);
+
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        } else {
+            Map<String, Object> response = new HashMap<>();
+            response.put("companyNumber", companyNumber);
+            response.put(STATUS, HttpStatus.NOT_FOUND.value());
+
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
     }
 }
