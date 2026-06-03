@@ -1726,7 +1726,7 @@ class TestDataControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteCompanyData(COMPANY_NUMBER);
+        verify(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
     }
 
     @Test
@@ -1741,7 +1741,7 @@ class TestDataControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteCompanyData(COMPANY_NUMBER);
+        verify(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
     }
 
     @Test
@@ -1759,7 +1759,7 @@ class TestDataControllerTest {
     @Test
     void deleteCompanyInternalDataException() throws Exception {
         DataException ex = new DataException("error");
-        doThrow(ex).when(testDataService).deleteCompanyData(COMPANY_NUMBER);
+        doThrow(ex).when(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 testDataController.deleteCompanyInternal(COMPANY_NUMBER, null));
@@ -1768,28 +1768,11 @@ class TestDataControllerTest {
 
     @Test
     void deleteCompanyInternalNoDataFoundException() throws Exception {
-        NoDataFoundException ex = new NoDataFoundException("company not found");
-        doThrow(ex).when(testDataService).deleteCompanyData(COMPANY_NUMBER);
+        NoDataFoundException ex = new NoDataFoundException("Company not found");
+        doThrow(ex).when(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
                 testDataController.deleteCompanyInternal(COMPANY_NUMBER, null));
-        assertEquals(ex, thrown);
-    }
-
-    @Test
-    void deleteCompanyNoDataFoundException() throws Exception {
-        final String companyNumber = "123456";
-        final DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("222222");
-
-        when(companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode()))
-                .thenReturn(true);
-
-        NoDataFoundException ex = new NoDataFoundException("company not found");
-        doThrow(ex).when(testDataService).deleteCompanyData(companyNumber);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.deleteCompany(companyNumber, request));
         assertEquals(ex, thrown);
     }
 

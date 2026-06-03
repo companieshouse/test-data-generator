@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -13,7 +12,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -214,7 +212,6 @@ class TestDataServiceImplTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         this.testDataService.setAPIUrl(API_URL);
-        lenient().when(companyProfileService.delete(anyString())).thenReturn(true);
     }
 
     /**
@@ -615,7 +612,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataWithUkEstablishments() throws DataException, NoDataFoundException {
+    void deleteCompanyDataWithUkEstablishments() throws DataException {
         List<String> ukEstablishments = List.of("BR123456", "BR654321");
         CompanyProfile companyProfile = new CompanyProfile();
         companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue());
@@ -632,7 +629,7 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void deleteCompanyDataWithoutUkEstablishments() throws DataException, NoDataFoundException {
+    void deleteCompanyDataWithoutUkEstablishments() throws DataException {
         CompanyProfile companyProfile = new CompanyProfile();
         companyProfile.setType(CompanyType.LTD.getValue());
         when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
@@ -659,74 +656,6 @@ class TestDataServiceImplTest {
         assertEquals("Deletion error", exception.getSuppressed()[0].getMessage());
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
         verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER_2);
-        verify(companyProfileService).delete(OVERSEA_COMPANY);
-    }
-
-    /**
-     * When companyProfileService.delete() returns false for the main company,
-     * deleteSingleCompanyData throws NoDataFoundException which propagates out of deleteCompanyData.
-     */
-    @Test
-    void deleteCompanyDataThrowsNoDataFoundExceptionWhenProfileNotDeleted() {
-        when(companyProfileService.delete(COMPANY_NUMBER)).thenReturn(false);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class,
-                () -> testDataService.deleteCompanyData(COMPANY_NUMBER));
-
-        assertEquals("Company profile not found for company number: " + COMPANY_NUMBER,
-                thrown.getMessage());
-        // Profile delete was attempted; downstream services should NOT have been called
-        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
-        verify(filingHistoryService, never()).delete(COMPANY_NUMBER);
-        verify(companyAuthCodeService, never()).delete(COMPANY_NUMBER);
-        verify(appointmentService, never()).deleteAllAppointments(COMPANY_NUMBER);
-    }
-
-    /**
-     * When companyProfileService.delete() throws a non-NoDataFoundException (RuntimeException),
-     * it is added to suppressedExceptions and ultimately wrapped in a DataException.
-     * This is the existing "profile exception" path — kept here for completeness alongside
-     * the NoDataFoundException path.
-     */
-    @Test
-    void deleteCompanyDataProfileRuntimeExceptionAddedToSuppressed() {
-        RuntimeException ex = new RuntimeException("db error");
-        when(companyProfileService.delete(COMPANY_NUMBER)).thenThrow(ex);
-
-        DataException thrown = assertThrows(DataException.class,
-                () -> testDataService.deleteCompanyData(COMPANY_NUMBER));
-
-        assertEquals(1, thrown.getSuppressed().length);
-        assertEquals(ex, thrown.getSuppressed()[0]);
-    }
-
-    /**
-     * When delete() returns false for a UK establishment, NoDataFoundException is thrown by
-     * deleteSingleCompanyData, caught by the outer catch(Exception) in
-     * deleteUkEstablishmentsForParent, and accumulated as a suppressed exception in DataException.
-     */
-    @Test
-    void deleteCompanyDataUkEstablishmentNotFoundBecomesDataException() {
-        List<String> ukEstablishments = List.of(UK_ESTABLISHMENT_NUMBER);
-        CompanyProfile companyProfile = new CompanyProfile();
-        companyProfile.setType(CompanyType.OVERSEA_COMPANY.getValue());
-        when(companyProfileService.getCompanyProfile(OVERSEA_COMPANY))
-                .thenReturn(Optional.of(companyProfile));
-        when(companyProfileService.findUkEstablishmentsByParent(OVERSEA_COMPANY))
-                .thenReturn(ukEstablishments);
-        // UK establishment returns false → NoDataFoundException inside deleteSingleCompanyData
-        when(companyProfileService.delete(UK_ESTABLISHMENT_NUMBER)).thenReturn(false);
-        // Parent company deletes successfully
-        when(companyProfileService.delete(OVERSEA_COMPANY)).thenReturn(true);
-
-        DataException thrown = assertThrows(DataException.class,
-                () -> testDataService.deleteCompanyData(OVERSEA_COMPANY));
-
-        assertEquals(1, thrown.getSuppressed().length);
-        assertInstanceOf(NoDataFoundException.class, thrown.getSuppressed()[0]);
-        assertEquals("Company profile not found for company number: " + UK_ESTABLISHMENT_NUMBER,
-                thrown.getSuppressed()[0].getMessage());
-        verify(companyProfileService).delete(UK_ESTABLISHMENT_NUMBER);
         verify(companyProfileService).delete(OVERSEA_COMPANY);
     }
 
@@ -1028,7 +957,7 @@ class TestDataServiceImplTest {
     void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
-       AcspProfile profileEntity = new AcspProfile();
+        AcspProfile profileEntity = new AcspProfile();
         profileEntity.setAcspNumber("acspNumber");
         profileEntity.setName("name");
         profileEntity.setVersion(1L);
@@ -1415,10 +1344,10 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
         CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
@@ -1499,10 +1428,10 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "CCD-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CCD-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
         CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "CCD-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CCD-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
@@ -1523,7 +1452,7 @@ class TestDataServiceImplTest {
     void createCertifiedCopiesDataNullUserId() {
         CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createCertifiedCopiesData(spec));
+                () -> testDataService.createCertifiedCopiesData(spec));
         assertEquals("User ID is required to create certified copies", exception.getMessage());
     }
 
@@ -1533,9 +1462,9 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         when(certifiedCopiesService.create(any(CertifiedCopiesRequest.class)))
-            .thenThrow(new DataException("Error creating certified copies"));
+                .thenThrow(new DataException("Error creating certified copies"));
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createCertifiedCopiesData(spec));
+                () -> testDataService.createCertifiedCopiesData(spec));
         assertEquals("Error creating certified copies", exception.getMessage());
     }
 
@@ -1571,7 +1500,7 @@ class TestDataServiceImplTest {
         when(certifiedCopiesService.delete(CERTIFIED_COPIES_ID)).thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class, () ->
-            testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID));
+                testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID));
         assertEquals("Error deleting certified copies", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(certifiedCopiesService, times(1)).delete(CERTIFIED_COPIES_ID);
@@ -1583,10 +1512,10 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "MID-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "MID-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
         CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "MID-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "MID-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
@@ -1607,7 +1536,7 @@ class TestDataServiceImplTest {
     void createMissingImageDeliveriesDataNullUserId() {
         MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createMissingImageDeliveriesData(spec));
+                () -> testDataService.createMissingImageDeliveriesData(spec));
         assertEquals("User ID is required to create missing image deliveries", exception.getMessage());
     }
 
@@ -1617,9 +1546,9 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         when(missingImageDeliveriesService.create(any(MissingImageDeliveriesRequest.class)))
-            .thenThrow(new DataException("Error creating missing image deliveries"));
+                .thenThrow(new DataException("Error creating missing image deliveries"));
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createMissingImageDeliveriesData(spec));
+                () -> testDataService.createMissingImageDeliveriesData(spec));
         assertEquals("Error creating missing image deliveries", exception.getMessage());
     }
 
@@ -1655,7 +1584,7 @@ class TestDataServiceImplTest {
         when(missingImageDeliveriesService.delete(MISSING_IMAGE_DELIVERIES_ID)).thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class, () ->
-            testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID));
+                testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID));
         assertEquals("Error deleting missing image deliveries", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(missingImageDeliveriesService, times(1)).delete(MISSING_IMAGE_DELIVERIES_ID);
@@ -1663,19 +1592,19 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithElasticSearchDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testCreateCompanyWithElasticSearch(true, 1);
     }
 
     @Test
     void testCreateCompanyWithElasticSearchNotDeployed()
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testCreateCompanyWithElasticSearch(false, 0);
     }
 
     private void testCreateCompanyWithElasticSearch(boolean isElasticSearchDeployed,
                                                     int expectedInvocationCount)
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(isElasticSearchDeployed);
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
@@ -1700,7 +1629,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchDeployed()
-            throws DataException, NoDataFoundException {
+            throws DataException {
         testDataService.setElasticSearchDeployed(true);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
 
@@ -1713,7 +1642,7 @@ class TestDataServiceImplTest {
 
     @Test
     void deleteCompanyDataWithElasticSearchNotDeployed()
-            throws DataException, NoDataFoundException {
+            throws DataException {
         testDataService.setElasticSearchDeployed(false);
         testDataService.deleteCompanyData(COMPANY_NUMBER);
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
@@ -1975,7 +1904,7 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithoutAlphabeticalSearch()
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
@@ -1999,7 +1928,7 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithoutAdvancedSearch()
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
@@ -2317,17 +2246,17 @@ class TestDataServiceImplTest {
         spec.setActivityDescriptionSearchField("braunkohle waschen");
 
         CombinedSicActivitiesResponse expectedData =
-            new CombinedSicActivitiesResponse(
-                new ObjectId().toHexString(),
-                "12345",
-                "Abbau von Braunkohle"
-            );
+                new CombinedSicActivitiesResponse(
+                        new ObjectId().toHexString(),
+                        "12345",
+                        "Abbau von Braunkohle"
+                );
 
         when(combinedSicActivitiesService.create(any(CombinedSicActivitiesRequest.class)))
-            .thenReturn(expectedData);
+                .thenReturn(expectedData);
 
         CombinedSicActivitiesResponse result =
-            testDataService.createCombinedSicActivitiesData(spec);
+                testDataService.createCombinedSicActivitiesData(spec);
 
         assertNotNull(result);
         assertEquals("12345", result.getSicCode());
@@ -2342,10 +2271,10 @@ class TestDataServiceImplTest {
         spec.setSicDescription("Test Sic Description");
 
         when(combinedSicActivitiesService.create(any(CombinedSicActivitiesRequest.class)))
-            .thenThrow(new DataException("Error creating Sic code and keyword"));
+                .thenThrow(new DataException("Error creating Sic code and keyword"));
 
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createCombinedSicActivitiesData(spec));
+                () -> testDataService.createCombinedSicActivitiesData(spec));
 
         assertEquals("Error creating Sic code and keyword", exception.getMessage());
     }
@@ -2376,7 +2305,7 @@ class TestDataServiceImplTest {
         when(combinedSicActivitiesService.delete(SIC_ACTIVITY_ID)).thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class, () ->
-            testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID));
+                testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID));
 
         assertEquals("Error deleting appeals data", exception.getMessage());
         assertEquals(ex, exception.getCause());
@@ -2450,7 +2379,7 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyElasticSearchIndexAsFalse()
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         spec.setAddToCompanyElasticSearchIndex(false);
@@ -2459,13 +2388,13 @@ class TestDataServiceImplTest {
 
     @Test
     void testCreateCompanyWithoutElasticSearchIndex()
-            throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+            throws DataException, ApiErrorResponseException, URIValidationException {
         testDataService.setElasticSearchDeployed(true);
         CompanyRequest spec = new CompanyRequest();
         validateElasticSearch(spec);
     }
 
-    private void validateElasticSearch(CompanyRequest spec) throws DataException, ApiErrorResponseException, URIValidationException, NoDataFoundException {
+    private void validateElasticSearch(CompanyRequest spec) throws DataException, ApiErrorResponseException, URIValidationException {
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         String expectedFullCompanyNumber = COMPANY_NUMBER;
@@ -2689,5 +2618,40 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting Item Groups", exception.getMessage());
         assertSame(cause, exception.getCause());
         verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
+
+    @Test
+    void deleteInternalCompanyDataSuccess() throws DataException, NoDataFoundException {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
+
+        testDataService.deleteInternalCompanyData(COMPANY_NUMBER);
+
+        verifyDeleteCompanyData(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteInternalCompanyDataThrowsNoDataFoundExceptionWhenCompanyNotFound() {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
+
+        NoDataFoundException exception = assertThrows(
+                NoDataFoundException.class,
+                () -> testDataService.deleteInternalCompanyData(COMPANY_NUMBER)
+        );
+
+        assertEquals("Company with number " + COMPANY_NUMBER + " not found", exception.getMessage());
+        verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
+        verify(companyProfileService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteInternalCompanyDataPropagatesDataException() throws DataException {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
+        RuntimeException cause = new RuntimeException("Mongo failure");
+        doThrow(cause).when(companyProfileService).delete(COMPANY_NUMBER);
+
+        assertThrows(DataException.class,
+                () -> testDataService.deleteInternalCompanyData(COMPANY_NUMBER));
+
+        verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
     }
 }

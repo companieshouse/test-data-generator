@@ -184,7 +184,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyProfileResponse createCompanyData(final CompanyRequest spec) throws DataException, NoDataFoundException {
+    public CompanyProfileResponse createCompanyData(final CompanyRequest spec) throws DataException {
         if (spec == null) {
             throw new IllegalArgumentException("CompanyRequest can not be null");
         }
@@ -256,7 +256,7 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public void deleteCompanyData(String companyId) throws DataException, NoDataFoundException {
+    public void deleteCompanyData(String companyId) throws DataException {
         LOG.info("Deleting company data for company number: " + companyId);
         List<Exception> suppressedExceptions = new ArrayList<>();
 
@@ -337,18 +337,11 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
-    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) throws NoDataFoundException {
+    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
         LOG.info("Deleting single company data for company number: " + companyId);
         try {
-            var isDeleted = this.companyProfileService.delete(companyId);
-            if (isDeleted) {
-                LOG.info("Deleted company profile for company number: " + companyId);
-            } else {
-                LOG.info("No company profile found to delete for company number: " + companyId);
-                throw new NoDataFoundException("Company profile not found for company number: " + companyId);
-            }
-        } catch (NoDataFoundException de) {
-            throw de;
+            this.companyProfileService.delete(companyId);
+            LOG.info("Deleted company profile for company number: " + companyId);
         } catch (Exception de) {
             suppressedExceptions.add(de);
         }
@@ -407,10 +400,6 @@ public class TestDataServiceImpl implements TestDataService {
             suppressedExceptions.add(de);
         }
 
-        deleteFromElasticSearchIndex(companyId);
-    }
-
-    private void deleteFromElasticSearchIndex(String companyId) {
         if (isElasticSearchDeployed) {
             try {
                 LOG.info("Attempting to delete "
@@ -907,11 +896,7 @@ public class TestDataServiceImpl implements TestDataService {
                 && !publicCompanySpec.getForeignCompanyLegalForm().isBlank()) {
             companySpec.setForeignCompanyLegalForm(publicCompanySpec.getForeignCompanyLegalForm());
         }
-        try {
-            return createCompanyData(companySpec);
-        } catch (NoDataFoundException ex) {
-            throw new DataException("Failed to create company data for public company spec", ex);
-        }
+        return createCompanyData(companySpec);
     }
 
     private void addCompanyToElasticSearchIndexes(CompanyRequest spec,
@@ -1043,4 +1028,12 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
+    @Override
+    public void deleteInternalCompanyData(String companyId) throws DataException, NoDataFoundException {
+        if (companyProfileService.companyExists(companyId)) {
+            deleteCompanyData(companyId);
+        } else {
+            throw new NoDataFoundException("Company with number " + companyId + " not found");
+        }
+    }
 }

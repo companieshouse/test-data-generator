@@ -1,7 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import java.util.Optional;
-
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -46,7 +45,7 @@ public interface TestDataService {
      * @return A {@link CompanyProfileResponse}
      * @throws DataException If any error occurs
      */
-    CompanyProfileResponse createCompanyData(CompanyRequest companySpec) throws DataException, NoDataFoundException;
+    CompanyProfileResponse createCompanyData(CompanyRequest companySpec) throws DataException;
 
     /**
      * Delete all data for company {@code companyNumber}.
@@ -54,7 +53,7 @@ public interface TestDataService {
      * @param companyNumber The company number to be deleted
      * @throws DataException If any error occurs
      */
-    void deleteCompanyData(String companyNumber) throws DataException, NoDataFoundException;
+    void deleteCompanyData(String companyNumber) throws DataException;
 
     /**
      * Updates the company profile data for the company number provided and {@link UpdateCompanyRequest}
@@ -62,7 +61,7 @@ public interface TestDataService {
      * @param request the update request with company number as mandatory
      * @return the status of the update request
      * @throws NoDataFoundException if the company number cannot be found
-     * @throws DataException        if the company profile cannot be updated
+     * @throws DataException if the company profile cannot be updated
      */
     CompanyProfile updateCompanyData(
             UpdateCompanyRequest request) throws NoDataFoundException, DataException;
@@ -138,7 +137,7 @@ public interface TestDataService {
      * @throws DataException if there is an error during user creation
      */
     CombinedSicActivitiesResponse createCombinedSicActivitiesData(
-            CombinedSicActivitiesRequest combinedSicActivitiesRequest) throws DataException;
+            CombinedSicActivitiesRequest combinedSicActivitiesRequest)  throws DataException;
 
     /**
      * Deletes the certificates test data for the given id.
@@ -180,7 +179,7 @@ public interface TestDataService {
     /**
      * Gets the account penalties data for a given company by AccountPenalties ID.
      *
-     * @param id the ID of the AccountPenalties Mongo DB collection
+     * @param id  the ID of the AccountPenalties Mongo DB collection
      * @return @return the {@link AccountPenaltiesResponse}
      * @throws NoDataFoundException if the penalty cannot be found
      */
@@ -190,7 +189,7 @@ public interface TestDataService {
     /**
      * Gets the account penalties data for a given company code and customer code.
      *
-     * @param customerCode the customer code
+     * @param customerCode  the customer code
      * @param companyCode  the company code
      * @return @return the {@link AccountPenaltiesResponse}
      * @throws NoDataFoundException if the penalty cannot be found
@@ -198,8 +197,7 @@ public interface TestDataService {
     AccountPenaltiesResponse getAccountPenaltiesData(String customerCode, String companyCode)
             throws NoDataFoundException;
 
-    /**
-     * .
+    /**.
      * Updates the account penalties data for a given penalty reference and
      * {@link UpdateAccountPenaltiesRequest}
      *
@@ -207,16 +205,15 @@ public interface TestDataService {
      * @param request    the update request
      * @return the {@link AccountPenaltiesResponse}
      * @throws NoDataFoundException if the requested penalty reference cannot be found
-     * @throws DataException        if the account penalties cannot be updated
+     * @throws DataException if the account penalties cannot be updated
      */
     AccountPenaltiesResponse updateAccountPenaltiesData(String penaltyRef,
                                                         UpdateAccountPenaltiesRequest request) throws NoDataFoundException, DataException;
 
-    /**
-     * .
+    /**.
      * Deletes all account penalties data for a given company code and customer code
      *
-     * @param id the penalty id
+     * @param id  the penalty id
      * @return the {@link ResponseEntity} with the HTTP status
      * @throws NoDataFoundException if the account penalties cannot be found
      * @throws DataException        if the account penalties failed to be deleted
@@ -227,7 +224,7 @@ public interface TestDataService {
     /**
      * Deletes an account penalty by its reference.
      *
-     * @param id                   the company code
+     * @param id                 the company code
      * @param transactionReference the transaction reference
      * @return the {@link ResponseEntity} with the HTTP status
      * @throws NoDataFoundException if the account penalty cannot be found
@@ -273,7 +270,7 @@ public interface TestDataService {
      * provided user specifications.
      *
      * @param userCompanyAssociationRequest the specifications of the
-     *                                      association to create
+     *                                   association to create
      * @return the created user company association test data
      * @throws DataException if there is an error during creation
      */
@@ -313,10 +310,9 @@ public interface TestDataService {
     /**
      * Find an existing CompanyAuthCode for the given company number
      * or create a default one if none exists.
-     *
      * @param companyNumber the company number
      * @return the existing or newly created CompanyAuthCode
-     * @throws DataException        on general errors
+     * @throws DataException on general errors
      * @throws NoDataFoundException if the company profile is not found
      */
     CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
@@ -348,5 +344,7 @@ public interface TestDataService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteItemGroupsData(String orderNumber) throws DataException;
+
+    void deleteInternalCompanyData(String companyNumber) throws DataException, NoDataFoundException;
 
 }

@@ -108,7 +108,7 @@ public class TestDataController {
     /* Internal endpoint to create company data */
     @PostMapping("/internal/company")
     public ResponseEntity<CompanyProfileResponse> createCompanyInternal(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException , NoDataFoundException {
+            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
 
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
         CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
@@ -150,7 +150,7 @@ public class TestDataController {
                 && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
             throw new InvalidAuthCodeException(companyNumber);
         }
-        testDataService.deleteCompanyData(companyNumber);
+        testDataService.deleteInternalCompanyData(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);
