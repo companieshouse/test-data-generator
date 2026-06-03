@@ -839,4 +839,60 @@ class FilingHistoryServiceImplTest {
         assertEquals(BARCODE, result.getBarcode());
         verify(filingHistoryRepository, never()).save(any());
     }
+
+    @Test
+    void getCompanyFilingHistoryByCompanyNumberDelegatesToGetFilingHistories() {
+        FilingHistory filingHistory = new FilingHistory();
+        List<FilingHistory> expected = List.of(filingHistory);
+
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(expected));
+
+        List<FilingHistory> result =
+                filingHistoryService.getCompanyFilingHistoryByCompanyNumber(COMPANY_NUMBER);
+
+        assertEquals(expected, result);
+        verify(filingHistoryRepository).findAllByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void getCompanyFilingHistoryByIdDelegatesToGetFilingHistoryById() {
+        FilingHistory filingHistory = new FilingHistory();
+
+        when(filingHistoryRepository.findById(TEST_ID))
+                .thenReturn(Optional.of(filingHistory));
+
+        Optional<FilingHistory> result =
+                filingHistoryService.getCompanyFilingHistoryById(TEST_ID);
+
+        assertTrue(result.isPresent());
+        assertEquals(filingHistory, result.get());
+        verify(filingHistoryRepository).findById(TEST_ID);
+    }
+
+    @Test
+    void deleteCompanyFilingHistoryDelegatesToDeleteAndReturnsTrue() {
+        FilingHistory filingHistory = new FilingHistory();
+
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(List.of(filingHistory)));
+
+        boolean result =
+                filingHistoryService.deleteCompanyFilingHistory(COMPANY_NUMBER);
+
+        assertTrue(result);
+        verify(filingHistoryRepository).delete(filingHistory);
+    }
+
+    @Test
+    void deleteCompanyFilingHistoryDelegatesToDeleteAndReturnsFalse() {
+        when(filingHistoryRepository.findAllByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.empty());
+
+        boolean result =
+                filingHistoryService.deleteCompanyFilingHistory(COMPANY_NUMBER);
+
+        assertFalse(result);
+        verify(filingHistoryRepository, never()).delete(any());
+    }
 }
