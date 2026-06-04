@@ -1028,4 +1028,12 @@ public class TestDataServiceImpl implements TestDataService {
         }
     }
 
+    @Override
+    public void deleteInternalCompanyData(String companyId) throws DataException, NoDataFoundException {
+        if (companyProfileService.companyExists(companyId)) {
+            deleteCompanyData(companyId);
+        } else {
+            throw new NoDataFoundException("Company with number " + companyId + " not found");
+        }
+    }
 }

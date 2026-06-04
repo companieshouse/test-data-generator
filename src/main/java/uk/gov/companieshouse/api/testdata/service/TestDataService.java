@@ -174,7 +174,7 @@ public interface TestDataService {
     boolean deleteAppealsData(String companyNumber, String penaltyReference) throws DataException;
 
     boolean deleteCombinedSicActivitiesData(String id)
-        throws DataException;
+            throws DataException;
 
     /**
      * Gets the account penalties data for a given company by AccountPenalties ID.
@@ -275,7 +275,7 @@ public interface TestDataService {
      * @throws DataException if there is an error during creation
      */
     UserCompanyAssociationResponse
-            createUserCompanyAssociationData(UserCompanyAssociationRequest userCompanyAssociationRequest)
+    createUserCompanyAssociationData(UserCompanyAssociationRequest userCompanyAssociationRequest)
             throws DataException;
 
     /**
@@ -344,5 +344,7 @@ public interface TestDataService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteItemGroupsData(String orderNumber) throws DataException;
+
+    void deleteInternalCompanyData(String companyNumber) throws DataException, NoDataFoundException;
 
 }
