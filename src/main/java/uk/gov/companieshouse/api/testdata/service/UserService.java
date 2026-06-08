@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.service;
 
 import java.util.Optional;
 
-import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;

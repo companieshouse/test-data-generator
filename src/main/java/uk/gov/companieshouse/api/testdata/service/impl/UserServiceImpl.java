@@ -248,6 +248,7 @@ public class UserServiceImpl implements UserService {
     public boolean deleteByEmail(String email) {
         LOG.info("delete called for email= " + email);
         var userOpt = repository.findByEmail(email);
+
         if (userOpt.isEmpty()) {
             LOG.debug("User not found for email=  " + email);
             return false;
@@ -278,7 +279,7 @@ public class UserServiceImpl implements UserService {
             }
 
             try {
-                backlogRepository.deleteByUserId(identity.getUserId());
+                backlogRepository.deleteByUserId(String.valueOf(userOpt.map(User::getId)));
                 LOG.debug("Deleted backlog for identity id = " + identity.getId());
             } catch (Exception ex) {
                 LOG.error("Failed to backlog for identity id = "
