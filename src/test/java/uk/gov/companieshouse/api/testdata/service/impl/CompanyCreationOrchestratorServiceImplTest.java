@@ -30,7 +30,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
-import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
+import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -72,7 +72,7 @@ class CompanyCreationOrchestratorServiceImplTest {
     @Mock private RandomService randomService;
     @Mock private DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
     @Mock private DataService<Disqualifications, CompanyRequest> disqualificationsService;
-    @Mock private CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
+    @Mock private CompanyStructurePersistenceService companyStructurePersistenceService;
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
@@ -123,7 +123,7 @@ class CompanyCreationOrchestratorServiceImplTest {
                 randomService,
                 companyRegistersService,
                 disqualificationsService,
-                companyWithPopulatedStructureService,
+                companyStructurePersistenceService,
                 companySearchService,
                 alphabeticalCompanySearch,
                 advancedCompanySearch,
@@ -659,10 +659,10 @@ class CompanyCreationOrchestratorServiceImplTest {
         verify(appointmentService, never()).createAppointments(capturedSpec);
     }
 
-    // ── createCompanyWithStructure ────────────────────────────────────────────
+    // ── persistCompanyStructure ────────────────────────────────────────────
 
     @Test
-    void createCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() throws Exception {
+    void persistCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() throws Exception {
         CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
 
         CompanyProfile profile = new CompanyProfile();
@@ -673,13 +673,13 @@ class CompanyCreationOrchestratorServiceImplTest {
         authCode.setAuthCode(AUTH_CODE);
         spec.setCompanyAuthCode(authCode);
 
-        CompanyProfileResponse result = creationService.createCompanyWithStructure(spec);
+        CompanyProfileResponse result = creationService.persistCompanyStructure(spec);
 
         assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals(AUTH_CODE, result.getAuthCode());
         assertEquals(API_URL + "/company/" + COMPANY_NUMBER, result.getCompanyUri());
-        verify(companyWithPopulatedStructureService)
-                .createCompanyWithPopulatedStructure(spec);
+        verify(companyStructurePersistenceService)
+                .persistCompanyWithStructure(spec);
     }
 
     @Test

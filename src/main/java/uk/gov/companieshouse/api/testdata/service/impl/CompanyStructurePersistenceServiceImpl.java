@@ -17,11 +17,11 @@ import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
+import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
 
 @Service
-public class CompanyWithPopulatedStructureServiceImpl
-        implements CompanyWithPopulatedStructureService {
+public class CompanyStructurePersistenceServiceImpl
+        implements CompanyStructurePersistenceService {
 
     private final CompanyProfileRepository companyProfileRepository;
     private final CompanyAuthCodeRepository authCodeRepository;
@@ -36,7 +36,7 @@ public class CompanyWithPopulatedStructureServiceImpl
     private final OfficerRepository officerRepository;
 
     @Autowired
-    public CompanyWithPopulatedStructureServiceImpl(
+    public CompanyStructurePersistenceServiceImpl(
             CompanyProfileRepository companyProfileRepository,
             CompanyAuthCodeRepository authCodeRepository,
             FilingHistoryRepository filingHistoryRepository,
@@ -62,7 +62,7 @@ public class CompanyWithPopulatedStructureServiceImpl
     }
 
     @Override
-    public void createCompanyWithPopulatedStructure(CompanyWithPopulatedStructureRequest companySpec) {
+    public void persistCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec) {
         saveCompanyProfile(companySpec);
         saveAuthCode(companySpec);
         saveFilingHistory(companySpec);

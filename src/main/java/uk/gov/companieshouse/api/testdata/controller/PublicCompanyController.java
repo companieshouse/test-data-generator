@@ -28,8 +28,9 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Handles public-facing company endpoints. Auth code validation is mandatory for all
- * mutating operations; callers must supply a valid auth code in the request body.
+ * Handles public-facing company endpoints.
+ * Company creation does not require an auth code, while company deletion requires
+ * a valid auth code in the request body.
  */
 @RestController
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)

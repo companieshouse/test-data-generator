@@ -16,7 +16,7 @@ public interface CompanyCreationOrchestratorService {
     PopulatedCompanyDetailsResponse buildCompanyDataStructure(CompanyRequest spec)
             throws DataException;
 
-    CompanyProfileResponse createCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec)
+    CompanyProfileResponse persistCompanyStructure(CompanyWithPopulatedStructureRequest companySpec)
             throws DataException;
 }
 

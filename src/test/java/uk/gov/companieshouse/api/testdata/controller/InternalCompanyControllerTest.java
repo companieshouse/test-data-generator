@@ -184,13 +184,13 @@ class InternalCompanyControllerTest {
     }
 
     @Test
-    void getCompanyWithPopulatedStructureSuccess() throws Exception {
+    void buildCompanyWithStructureSuccess() throws Exception {
         CompanyRequest request = new CompanyRequest();
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
         when(companyCreationOrchestratorService.buildCompanyDataStructure(request)).thenReturn(responseObj);
 
         ResponseEntity<PopulatedCompanyDetailsResponse> response =
-                internalCompanyController.getCompanyWithPopulatedStructure(request);
+                internalCompanyController.buildCompanyWithStructure(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
@@ -198,13 +198,13 @@ class InternalCompanyControllerTest {
     }
 
     @Test
-    void getCompanyWithPopulatedStructureNullRequestUsesDefault() throws Exception {
+    void buildCompanyWithStructureNullRequestUsesDefault() throws Exception {
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
         when(companyCreationOrchestratorService.buildCompanyDataStructure(any(CompanyRequest.class)))
                 .thenReturn(responseObj);
 
         ResponseEntity<PopulatedCompanyDetailsResponse> response =
-                internalCompanyController.getCompanyWithPopulatedStructure(null);
+                internalCompanyController.buildCompanyWithStructure(null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
@@ -212,54 +212,54 @@ class InternalCompanyControllerTest {
     }
 
     @Test
-    void getCompanyWithPopulatedStructureThrowsDataException() throws Exception {
+    void buildCompanyWithStructureThrowsDataException() throws Exception {
         CompanyRequest request = new CompanyRequest();
         DataException exception = new DataException("error");
         when(companyCreationOrchestratorService.buildCompanyDataStructure(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                internalCompanyController.getCompanyWithPopulatedStructure(request));
+                internalCompanyController.buildCompanyWithStructure(request));
         assertEquals(exception, thrown);
     }
 
     @Test
-    void createCompanyWithPopulatedStructureSuccess() throws Exception {
+    void persistCompanyWithStructureSuccess() throws Exception {
         CompanyWithPopulatedStructureRequest request = new CompanyWithPopulatedStructureRequest();
         CompanyProfileResponse companyData =
                 new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(companyCreationOrchestratorService.createCompanyWithStructure(request)).thenReturn(companyData);
+        when(companyCreationOrchestratorService.persistCompanyStructure(request)).thenReturn(companyData);
 
         ResponseEntity<CompanyProfileResponse> response =
-                internalCompanyController.createCompanyWithPopulatedStructure(request);
+                internalCompanyController.persistCompanyWithStructure(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
-        verify(companyCreationOrchestratorService, times(1)).createCompanyWithStructure(request);
+        verify(companyCreationOrchestratorService, times(1)).persistCompanyStructure(request);
     }
 
     @Test
-    void createCompanyWithPopulatedStructureNullRequestUsesDefault() throws Exception {
+    void persistCompanyWithStructureNullRequestUsesDefault() throws Exception {
         CompanyProfileResponse companyData =
                 new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(companyCreationOrchestratorService.createCompanyWithStructure(any(CompanyWithPopulatedStructureRequest.class)))
+        when(companyCreationOrchestratorService.persistCompanyStructure(any(CompanyWithPopulatedStructureRequest.class)))
                 .thenReturn(companyData);
 
         ResponseEntity<CompanyProfileResponse> response =
-                internalCompanyController.createCompanyWithPopulatedStructure(null);
+                internalCompanyController.persistCompanyWithStructure(null);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
-        verify(companyCreationOrchestratorService, times(1)).createCompanyWithStructure(any(CompanyWithPopulatedStructureRequest.class));
+        verify(companyCreationOrchestratorService, times(1)).persistCompanyStructure(any(CompanyWithPopulatedStructureRequest.class));
     }
 
     @Test
-    void createCompanyWithPopulatedStructureThrowsDataException() throws Exception {
+    void persistCompanyWithStructureThrowsDataException() throws Exception {
         CompanyWithPopulatedStructureRequest request = new CompanyWithPopulatedStructureRequest();
         DataException exception = new DataException("error");
-        when(companyCreationOrchestratorService.createCompanyWithStructure(request)).thenThrow(exception);
+        when(companyCreationOrchestratorService.persistCompanyStructure(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                internalCompanyController.createCompanyWithPopulatedStructure(request));
+                internalCompanyController.persistCompanyWithStructure(request));
         assertEquals(exception, thrown);
     }
 }

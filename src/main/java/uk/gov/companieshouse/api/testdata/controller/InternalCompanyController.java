@@ -31,9 +31,10 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Handles internal company endpoints, including company creation, deletion, and
- * pre-populated structure operations. Auth code validation is optional; if an auth
- * code is supplied it will be verified, but requests without one are permitted.
+ * Handles internal company endpoints for company creation, deletion, and
+ * pre-populated structure operations.
+ * Auth code validation is only applied on internal delete requests when an auth
+ * code is provided; create endpoints do not require an auth code.
  */
 @RestController
 @RequestMapping(value = "${api.endpoint}/internal", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -93,7 +94,7 @@ public class InternalCompanyController {
     }
 
     @GetMapping("/get-populated-company-structure")
-    public ResponseEntity<PopulatedCompanyDetailsResponse> getCompanyWithPopulatedStructure(
+    public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyWithStructure(
             @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
 
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
@@ -104,13 +105,13 @@ public class InternalCompanyController {
     }
 
     @PostMapping("/create-company-with-populated-structure")
-    public ResponseEntity<CompanyProfileResponse> createCompanyWithPopulatedStructure(
+    public ResponseEntity<CompanyProfileResponse> persistCompanyWithStructure(
             @Valid @RequestBody(required = false) CompanyWithPopulatedStructureRequest request)
             throws DataException {
         Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
         CompanyWithPopulatedStructureRequest spec =
                 optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = companyCreationOrchestratorService.createCompanyWithStructure(spec);
+        var createdCompany = companyCreationOrchestratorService.persistCompanyStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
         LOG.info(NEW_COMPANY_CREATED, data);

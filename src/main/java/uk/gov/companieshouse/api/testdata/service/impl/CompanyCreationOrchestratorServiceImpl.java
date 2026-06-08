@@ -25,7 +25,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorSer
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
-import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
+import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -51,7 +51,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
     private final RandomService randomService;
     private final DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
     private final DataService<Disqualifications, CompanyRequest> disqualificationsService;
-    private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
+    private final CompanyStructurePersistenceService companyStructurePersistenceService;
     private final CompanySearchService companySearchService;
     private final CompanySearchService alphabeticalCompanySearch;
     private final CompanySearchService advancedCompanySearch;
@@ -82,7 +82,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
             RandomService randomService,
             DataService<CompanyRegisters, CompanyRequest> companyRegistersService,
             DataService<Disqualifications, CompanyRequest> disqualificationsService,
-            CompanyWithPopulatedStructureService companyWithPopulatedStructureService,
+            CompanyStructurePersistenceService companyStructurePersistenceService,
             @Qualifier("companySearchService") CompanySearchService companySearchService,
             @Qualifier("alphabeticalCompanySearchService")
             CompanySearchService alphabeticalCompanySearch,
@@ -98,7 +98,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
         this.randomService = randomService;
         this.companyRegistersService = companyRegistersService;
         this.disqualificationsService = disqualificationsService;
-        this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
+        this.companyStructurePersistenceService = companyStructurePersistenceService;
         this.companySearchService = companySearchService;
         this.alphabeticalCompanySearch = alphabeticalCompanySearch;
         this.advancedCompanySearch = advancedCompanySearch;
@@ -181,11 +181,11 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
     }
 
     @Override
-    public CompanyProfileResponse createCompanyWithStructure(
+    public CompanyProfileResponse persistCompanyStructure(
             CompanyWithPopulatedStructureRequest companySpec) throws DataException {
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
-        companyWithPopulatedStructureService.createCompanyWithPopulatedStructure(companySpec);
+        companyStructurePersistenceService.persistCompanyWithStructure(companySpec);
         String companyUri = this.apiUrl + "/company/" + companyNumber;
         return new CompanyProfileResponse(companyNumber, authCode, companyUri);
     }
