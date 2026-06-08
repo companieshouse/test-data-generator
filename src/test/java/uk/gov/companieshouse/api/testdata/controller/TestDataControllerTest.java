@@ -1,37 +1,14 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import java.util.Optional;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
@@ -43,6 +20,12 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsReq
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
@@ -50,34 +33,36 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesRe
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
-import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -98,215 +83,14 @@ class TestDataControllerTest {
     @Mock
     private TestDataService testDataService;
 
-    @Mock
-    private CompanyAuthCodeService companyAuthCodeService;
-
     @InjectMocks
-    private TestDataController testDataController;
+    private TestDataController companyController;
 
     @Mock
     private FilingHistoryService filingHistoryService;
 
     @Mock
     private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
-
-    @Captor
-    private ArgumentCaptor<CompanyRequest> specCaptor;
-
-    @Captor
-    private ArgumentCaptor<PublicCompanyRequest> publicSpecCaptor;
-
-    public static String companyUri = "http://localhost:1234/company/12345678";
-
-    @Test
-    void createCompanyInternal() throws Exception {
-        CompanyRequest request = new CompanyRequest();
-        request.setJurisdiction(JurisdictionType.SCOTLAND);
-        CompanyProfileResponse company =
-                new CompanyProfileResponse("12345678", "123456", companyUri);
-
-        when(this.testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = this.testDataController.createCompanyInternal(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void createCompanyInternalNoRequest() throws Exception {
-        CompanyProfileResponse company =
-                new CompanyProfileResponse("12345678", "123456", companyUri);
-
-        when(this.testDataService.createCompanyData(any())).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = this.testDataController.createCompanyInternal(null);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        verify(testDataService).createCompanyData(specCaptor.capture());
-        CompanyRequest usedSpec = specCaptor.getValue();
-
-        assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
-    }
-
-    @Test
-    void createCompanyInternalDefaultJurisdiction() throws Exception {
-        CompanyRequest request = new CompanyRequest();
-        CompanyProfileResponse company =
-                new CompanyProfileResponse("12345678", "123456", companyUri);
-
-        when(this.testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = this.testDataController.createCompanyInternal(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        // england/wales is the default jurisdiction
-        assertEquals(JurisdictionType.ENGLAND_WALES, request.getJurisdiction());
-    }
-
-    @Test
-    void createCompanyInternalException() throws Exception {
-        CompanyRequest request = new CompanyRequest();
-        request.setJurisdiction(JurisdictionType.NI);
-        Throwable exception = new DataException("Error message");
-        when(this.testDataService.createCompanyData(request)).thenThrow(exception);
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createCompanyInternal(request));
-        assertEquals(exception, thrown);
-    }
-
-    @Test
-    void createCompanyPublic() throws Exception {
-        var request = new PublicCompanyRequest();
-        request.setJurisdiction(JurisdictionType.SCOTLAND);
-        var company =
-                new CompanyProfileResponse("12345678", "123456", companyUri);
-
-        when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = this.testDataController.createCompany(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void createDefaultPublicCompanyWithEmptyRequest() throws Exception {
-        var company =
-                new CompanyProfileResponse("12345678", "123456", companyUri);
-
-        when(this.testDataService.createPublicCompanyData(any())).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = this.testDataController.createCompany(null);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        verify(testDataService).createPublicCompanyData(publicSpecCaptor.capture());
-        var usedSpec = publicSpecCaptor.getValue();
-
-        assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
-    }
-
-    @Test
-    void createCompanyPublicDefaultJurisdiction() throws Exception {
-        var request = new PublicCompanyRequest();
-        var company =
-                new CompanyProfileResponse("12345678", "123456", companyUri);
-
-        when(this.testDataService.createPublicCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = this.testDataController.createCompany(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-
-        // england/wales is the default jurisdiction
-        assertEquals(JurisdictionType.ENGLAND_WALES, request.getJurisdiction());
-    }
-
-    @Test
-    void createCompanyPublicException() throws Exception {
-        var request = new PublicCompanyRequest();
-        request.setJurisdiction(JurisdictionType.NI);
-        Throwable exception = new DataException("Error message");
-        when(this.testDataService.createPublicCompanyData(request)).thenThrow(exception);
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createCompany(request));
-        assertEquals(exception, thrown);
-    }
-
-
-    @Test
-    void deleteCompany() throws Exception {
-        final String companyNumber = "123456";
-        final DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("222222");
-        final boolean validAuthCode = true;
-
-        when(companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode()))
-                .thenReturn(validAuthCode);
-
-        ResponseEntity<Void> response =
-                this.testDataController.deleteCompany(companyNumber, request);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-
-        verify(testDataService).deleteCompanyData(companyNumber);
-    }
-
-    @Test
-    void deleteCompanyDataException() throws Exception {
-        final String companyNumber = "123456";
-        final DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("222222");
-        final boolean validAuthCode = true;
-
-        when(companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode()))
-                .thenReturn(validAuthCode);
-
-        DataException ex = new DataException("Error message");
-        doThrow(ex).when(this.testDataService).deleteCompanyData(companyNumber);
-
-        DataException thrown =
-                assertThrows(
-                        DataException.class,
-                        () -> this.testDataController.deleteCompany(companyNumber, request));
-        assertEquals(ex, thrown);
-    }
-
-    @Test
-    void deleteCompanyInvalidAuthCode() throws Exception {
-        final String companyNumber = "123456";
-        final DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("222222");
-        final boolean validAuthCode = false;
-
-        when(companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode()))
-                .thenReturn(validAuthCode);
-
-        InvalidAuthCodeException thrown =
-                assertThrows(
-                        InvalidAuthCodeException.class,
-                        () -> this.testDataController.deleteCompany(companyNumber, request));
-        assertEquals(companyNumber, thrown.getCompanyNumber());
-    }
-
-    @Test
-    void deleteCompanyNoAuthCodeFound() throws Exception {
-        final String companyNumber = "123456";
-        final DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("222222");
-        NoDataFoundException ex = new NoDataFoundException("no auth code");
-
-        when(companyAuthCodeService.verifyAuthCode(
-                companyNumber, request.getAuthCode())).thenThrow(ex);
-
-        NoDataFoundException thrown =
-                assertThrows(
-                        NoDataFoundException.class,
-                        () -> this.testDataController.deleteCompany(companyNumber, request));
-        assertEquals(ex, thrown);
-    }
 
     @Test
     void updateCompanySuccess() throws Exception {
@@ -318,7 +102,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.updateCompanyData(request)).thenReturn(updatedProfile);
 
-        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
+        ResponseEntity<Object> response = this.companyController.updateCompany(request);
 
         assertNotNull(response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -339,7 +123,7 @@ class TestDataControllerTest {
         when(this.testDataService.updateCompanyData(request))
                 .thenThrow(new NoDataFoundException(errorMessage));
 
-        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
+        ResponseEntity<Object> response = this.companyController.updateCompany(request);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 
@@ -357,7 +141,7 @@ class TestDataControllerTest {
         when(this.testDataService.updateCompanyData(request))
                 .thenThrow(new DataException(errorMessage));
 
-        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
+        ResponseEntity<Object> response = this.companyController.updateCompany(request);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
 
@@ -373,7 +157,7 @@ class TestDataControllerTest {
         UserResponse user = new UserResponse("userId", "email@example.com", "Forename", "Surname");
 
         when(this.testDataService.createUserData(request)).thenReturn(user);
-        ResponseEntity<UserResponse> response = this.testDataController.createUser(request);
+        ResponseEntity<UserResponse> response = this.companyController.createUser(request);
 
         assertEquals(user, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -388,7 +172,7 @@ class TestDataControllerTest {
         when(this.testDataService.createUserData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createUser(request));
+                this.companyController.createUser(request));
         assertEquals(exception, thrown);
     }
 
@@ -398,7 +182,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.deleteUserData(userId)).thenReturn(true);
 
-        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
+        ResponseEntity<Map<String, Object>> response = this.companyController.deleteUser(userId);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -414,7 +198,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteUserData(userId)).thenThrow(exception);
 
         DataException thrown =
-                assertThrows(DataException.class, () -> this.testDataController.deleteUser(userId));
+                assertThrows(DataException.class, () -> this.companyController.deleteUser(userId));
         assertEquals(exception, thrown);
     }
 
@@ -424,7 +208,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.deleteUserData(userId)).thenReturn(false);
 
-        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
+        ResponseEntity<Map<String, Object>> response = this.companyController.deleteUser(userId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("userId", response.getBody().get("user id"));
@@ -446,7 +230,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);
         ResponseEntity<AcspMembersResponse> response
-                = this.testDataController.createAcspMember(request);
+                = this.companyController.createAcspMember(request);
 
         assertEquals(acspMember, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -460,7 +244,7 @@ class TestDataControllerTest {
         when(this.testDataService.createAcspMembersData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createAcspMember(request));
+                this.companyController.createAcspMember(request));
         assertEquals(exception, thrown);
     }
 
@@ -470,7 +254,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAcspMember(acspMemberId);
+                = this.companyController.deleteAcspMember(acspMemberId);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -483,7 +267,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(false);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAcspMember(acspMemberId);
+                = this.companyController.deleteAcspMember(acspMemberId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp-member-id"));
@@ -500,7 +284,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenThrow(exception);
 
         DataException thrown = assertThrows(
-                DataException.class, () -> this.testDataController.deleteAcspMember(acspMemberId));
+                DataException.class, () -> this.companyController.deleteAcspMember(acspMemberId));
         assertEquals(exception, thrown);
     }
 
@@ -514,7 +298,7 @@ class TestDataControllerTest {
                 request.getCompanyNumber(), request.getPenaltyReference()))
                 .thenReturn(true);
 
-        ResponseEntity<Void> response = testDataController.deleteAppeal(request);
+        ResponseEntity<Void> response = companyController.deleteAppeal(request);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -532,7 +316,7 @@ class TestDataControllerTest {
                 request.getCompanyNumber(), request.getPenaltyReference()))
                 .thenReturn(false);
 
-        ResponseEntity<Void> response = testDataController.deleteAppeal(request);
+        ResponseEntity<Void> response = companyController.deleteAppeal(request);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -542,7 +326,7 @@ class TestDataControllerTest {
 
     @Test
     void deleteAppealBadRequest() throws Exception {
-        ResponseEntity<Void> response = testDataController.deleteAppeal(null);
+        ResponseEntity<Void> response = companyController.deleteAppeal(null);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -558,7 +342,7 @@ class TestDataControllerTest {
 
         when(testDataService.createCertificatesData(request)).thenReturn(certificateData);
 
-        ResponseEntity<CertificatesResponse> response = testDataController.createCertificates(request);
+        ResponseEntity<CertificatesResponse> response = companyController.createCertificates(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
@@ -578,7 +362,7 @@ class TestDataControllerTest {
         when(testDataService.createCertificatesData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.createCertificates(request));
+                companyController.createCertificates(request));
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
 
@@ -588,7 +372,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteCertificatesData(certificateId)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-                = testDataController.deleteCertificates(certificateId);
+                = companyController.deleteCertificates(certificateId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -601,7 +385,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteCertificatesData(certificateId)).thenReturn(false);
         ResponseEntity<Map<String, Object>>
-                response = testDataController.deleteCertificates(certificateId);
+                response = companyController.deleteCertificates(certificateId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
@@ -616,7 +400,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteCertificatesData(certificateId)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.deleteCertificates(certificateId));
+                companyController.deleteCertificates(certificateId));
 
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
@@ -627,7 +411,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-            = testDataController.deleteCertifiedCopies(certifiedCopiesId);
+            = companyController.deleteCertifiedCopies(certifiedCopiesId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -640,7 +424,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(false);
         ResponseEntity<Map<String, Object>>
-            response = testDataController.deleteCertifiedCopies(certifiedCopiesId);
+            response = companyController.deleteCertifiedCopies(certifiedCopiesId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
@@ -655,7 +439,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.deleteCertifiedCopies(certifiedCopiesId));
+            companyController.deleteCertifiedCopies(certifiedCopiesId));
 
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
@@ -666,7 +450,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-            = testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId);
+            = companyController.deleteMissingImageDeliveries(missingImageDeliveriesId);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -679,7 +463,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenReturn(false);
         ResponseEntity<Map<String, Object>>
-            response = testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId);
+            response = companyController.deleteMissingImageDeliveries(missingImageDeliveriesId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
@@ -694,7 +478,7 @@ class TestDataControllerTest {
 
         when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenThrow(exception);
         DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId));
+            companyController.deleteMissingImageDeliveries(missingImageDeliveriesId));
 
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
@@ -705,7 +489,7 @@ class TestDataControllerTest {
                 .thenThrow(new NoDataFoundException("no account penalties"));
 
         assertThrows(NoDataFoundException.class, () -> {
-            this.testDataController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
+            this.companyController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
         });
     }
 
@@ -719,7 +503,7 @@ class TestDataControllerTest {
         when(this.testDataService.getAccountPenaltiesData(request.getId()))
                 .thenReturn(accountPenaltiesResponse);
 
-        ResponseEntity<AccountPenaltiesResponse> response = this.testDataController
+        ResponseEntity<AccountPenaltiesResponse> response = this.companyController
                 .getAccountPenalties(request.getId(), null);
 
         assertEquals(accountPenaltiesResponse, response.getBody());
@@ -734,7 +518,7 @@ class TestDataControllerTest {
                 .thenThrow(new NoDataFoundException("Account penalties not found"));
 
         assertThrows(NoDataFoundException.class, () -> {
-            this.testDataController.getAccountPenalties(penaltyId, null);
+            this.companyController.getAccountPenalties(penaltyId, null);
         });
     }
 
@@ -745,7 +529,7 @@ class TestDataControllerTest {
         when(this.testDataService.getAccountPenaltiesData(CUSTOMER_CODE, COMPANY_CODE))
                 .thenReturn(accountPenaltiesResponse);
 
-        ResponseEntity<AccountPenaltiesResponse> response = this.testDataController
+        ResponseEntity<AccountPenaltiesResponse> response = this.companyController
                 .getAccountPenaltiesByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE);
 
         assertEquals(accountPenaltiesResponse, response.getBody());
@@ -758,7 +542,7 @@ class TestDataControllerTest {
                 .thenThrow(new NoDataFoundException("Account penalties not found"));
 
         assertThrows(NoDataFoundException.class, () -> {
-            this.testDataController.getAccountPenaltiesByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE);
+            this.companyController.getAccountPenaltiesByCustomerCodeAndCompanyCode(CUSTOMER_CODE, COMPANY_CODE);
         });
     }
 
@@ -788,7 +572,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.updateAccountPenaltiesData(PENALTY_REFERENCE, request))
                 .thenReturn(accountPenaltiesResponse);
-        ResponseEntity<AccountPenaltiesResponse> response = this.testDataController
+        ResponseEntity<AccountPenaltiesResponse> response = this.companyController
                 .updateAccountPenalties(PENALTY_REFERENCE, request);
 
         assertEquals(accountPenaltiesResponse, response.getBody());
@@ -808,7 +592,7 @@ class TestDataControllerTest {
         when(testDataService.getAccountPenaltiesData(PENALTY_ID)).thenReturn(accountPenaltiesResponse);
 
         ResponseEntity<AccountPenaltiesResponse> response =
-                testDataController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
+                companyController.getAccountPenalties(PENALTY_ID, PENALTY_REFERENCE);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().getPenalties().size());
@@ -824,7 +608,7 @@ class TestDataControllerTest {
         when(testDataService.deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE))
                 .thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, request);
+        ResponseEntity<Void> response = companyController.deleteAccountPenalties(PENALTY_ID, request);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE);
@@ -840,7 +624,7 @@ class TestDataControllerTest {
                 .thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.deleteAccountPenalties(PENALTY_ID, request));
+                companyController.deleteAccountPenalties(PENALTY_ID, request));
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, PENALTY_REFERENCE);
     }
@@ -855,7 +639,7 @@ class TestDataControllerTest {
                 .thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.deleteAccountPenalties(PENALTY_ID, request));
+                companyController.deleteAccountPenalties(PENALTY_ID, request));
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteAccountPenaltyByReference(PENALTY_ID, "A1234567");
     }
@@ -880,7 +664,7 @@ class TestDataControllerTest {
                 .thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.updateAccountPenalties(penaltyRef, request));
+                this.companyController.updateAccountPenalties(penaltyRef, request));
         assertEquals(exception, thrown);
     }
 
@@ -889,7 +673,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID))
                 .thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, null);
+        ResponseEntity<Void> response = companyController.deleteAccountPenalties(PENALTY_ID, null);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
@@ -901,7 +685,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.deleteAccountPenalties(PENALTY_ID, null));
+                this.companyController.deleteAccountPenalties(PENALTY_ID, null));
         assertEquals(exception, thrown);
     }
 
@@ -911,7 +695,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteAccountPenaltiesData(PENALTY_ID)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.deleteAccountPenalties(PENALTY_ID, null));
+                this.companyController.deleteAccountPenalties(PENALTY_ID, null));
         assertEquals(exception, thrown);
     }
 
@@ -943,7 +727,7 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
 
-        ResponseEntity<?> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = companyController.createPenalty(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(createdPenalties, response.getBody());
@@ -960,7 +744,7 @@ class TestDataControllerTest {
         when(testDataService.createPenaltyData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.createPenalty(request));
+                companyController.createPenalty(request));
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).createPenaltyData(request);
     }
@@ -977,7 +761,7 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(createdPenalties);
 
-        ResponseEntity<?> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = companyController.createPenalty(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> body = (Map<String, Object>) response.getBody();
@@ -995,7 +779,7 @@ class TestDataControllerTest {
 
         when(testDataService.createPenaltyData(request)).thenReturn(null);
 
-        ResponseEntity<?> response = testDataController.createPenalty(request);
+        ResponseEntity<?> response = companyController.createPenalty(request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> body = (Map<String, Object>) response.getBody();
@@ -1024,7 +808,7 @@ class TestDataControllerTest {
 
         when(testDataService.getPostcodes(country)).thenReturn(postcodesResponse);
 
-        ResponseEntity<PostcodesResponse> response = testDataController.getPostcode(country);
+        ResponseEntity<PostcodesResponse> response = companyController.getPostcode(country);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(postcodesResponse, response.getBody());
@@ -1037,7 +821,7 @@ class TestDataControllerTest {
 
         when(testDataService.getPostcodes(country)).thenReturn(null);
 
-        ResponseEntity<PostcodesResponse> response = testDataController.getPostcode(country);
+        ResponseEntity<PostcodesResponse> response = companyController.getPostcode(country);
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(1)).getPostcodes(country);
     }
@@ -1050,7 +834,7 @@ class TestDataControllerTest {
                 .thenThrow(new DataException("Error retrieving postcodes"));
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.getPostcode(country));
+                companyController.getPostcode(country));
 
         assertEquals("Error retrieving postcodes", thrown.getMessage());
         verify(testDataService, times(1)).getPostcodes(country);
@@ -1058,35 +842,12 @@ class TestDataControllerTest {
 
     @Test
     void testGetPostcodeIsNull() throws Exception {
-        ResponseEntity<PostcodesResponse> response = testDataController.getPostcode(null);
+        ResponseEntity<PostcodesResponse> response = companyController.getPostcode(null);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(testDataService, times(0)).getPostcodes(anyString());
     }
 
-    @Test
-    void createCompanyInternalWithDisqualifications() throws Exception {
-        CompanyRequest request = new CompanyRequest();
-        request.setJurisdiction(JurisdictionType.SCOTLAND);
-        DisqualificationsRequest disqSpec = new DisqualificationsRequest();
-        disqSpec.setCorporateOfficer(false);
-        request.setDisqualifiedOfficers(List.of(disqSpec));
-
-        CompanyProfileResponse company = new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-
-        when(testDataService.createCompanyData(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = testDataController.createCompanyInternal(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void testHealthCheck() {
-        var response = testDataController.healthCheck();
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("test-data-generator is alive",response.getBody());
-    }
 
     @Test
     void createCertifiedCopiesSuccess() throws Exception {
@@ -1097,7 +858,7 @@ class TestDataControllerTest {
 
         when(testDataService.createCertifiedCopiesData(request)).thenReturn(certificateData);
 
-        ResponseEntity<CertificatesResponse> response = testDataController.createCertifiedCopies(request);
+        ResponseEntity<CertificatesResponse> response = companyController.createCertifiedCopies(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
@@ -1128,7 +889,7 @@ class TestDataControllerTest {
         when(testDataService.createCertifiedCopiesData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.createCertifiedCopies(request));
+            companyController.createCertifiedCopies(request));
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
 
@@ -1141,7 +902,7 @@ class TestDataControllerTest {
 
         when(testDataService.createMissingImageDeliveriesData(request)).thenReturn(certificateData);
 
-        ResponseEntity<CertificatesResponse> response = testDataController.createMissingImageDeliveries(request);
+        ResponseEntity<CertificatesResponse> response = companyController.createMissingImageDeliveries(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
@@ -1159,7 +920,7 @@ class TestDataControllerTest {
         when(testDataService.createMissingImageDeliveriesData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.createMissingImageDeliveries(request));
+            companyController.createMissingImageDeliveries(request));
         assertEquals(exception.getMessage(), thrown.getMessage());
     }
 
@@ -1181,7 +942,7 @@ class TestDataControllerTest {
         when(this.testDataService.createUserCompanyAssociationData(spec))
                 .thenReturn(association);
         ResponseEntity<UserCompanyAssociationResponse> response
-                = this.testDataController.createAssociation(spec);
+                = this.companyController.createAssociation(spec);
 
         assertEquals(association, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -1198,7 +959,7 @@ class TestDataControllerTest {
                 .thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createAssociation(spec));
+                this.companyController.createAssociation(spec));
         assertEquals(exception, thrown);
     }
 
@@ -1207,7 +968,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
                 .thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
+                = this.companyController.deleteAssociation(ASSOCIATION_ID);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -1219,7 +980,7 @@ class TestDataControllerTest {
         when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
                 .thenReturn(false);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
+                = this.companyController.deleteAssociation(ASSOCIATION_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(ASSOCIATION_ID,
@@ -1240,7 +1001,7 @@ class TestDataControllerTest {
 
         DataException thrown = assertThrows(
                 DataException.class,
-                () -> this.testDataController.deleteAssociation(ASSOCIATION_ID));
+                () -> this.companyController.deleteAssociation(ASSOCIATION_ID));
         assertEquals(exception, thrown);
     }
 
@@ -1253,7 +1014,7 @@ class TestDataControllerTest {
         TransactionsResponse txn = new TransactionsResponse("rsf3pdwywvse5yz55mfodfx8","email@email.com" ,"forename","surname","resumeURI","status", "250788-250788-250788");
         when(this.testDataService.createTransactionData(request)).thenReturn(txn);
         ResponseEntity<TransactionsResponse> response
-                = this.testDataController.createTransaction(request);
+                = this.companyController.createTransaction(request);
 
         assertEquals(txn, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -1269,7 +1030,7 @@ class TestDataControllerTest {
         when(this.testDataService.createTransactionData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createTransaction(request));
+                this.companyController.createTransaction(request));
         assertEquals(exception, thrown);
     }
 
@@ -1279,7 +1040,7 @@ class TestDataControllerTest {
                 .thenReturn(true);
 
         ResponseEntity<Map<String, Object>> response =
-                this.testDataController.deleteTransaction(TRANSACTION_ID);
+                this.companyController.deleteTransaction(TRANSACTION_ID);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -1292,7 +1053,7 @@ class TestDataControllerTest {
                 .thenReturn(false);
 
         ResponseEntity<Map<String, Object>> response =
-                this.testDataController.deleteTransaction(TRANSACTION_ID);
+                this.companyController.deleteTransaction(TRANSACTION_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(TRANSACTION_ID,
@@ -1311,7 +1072,7 @@ class TestDataControllerTest {
 
         DataException thrown = assertThrows(
                 DataException.class,
-                () -> this.testDataController.deleteTransaction(TRANSACTION_ID));
+                () -> this.companyController.deleteTransaction(TRANSACTION_ID));
 
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteTransaction(TRANSACTION_ID);
@@ -1335,7 +1096,7 @@ class TestDataControllerTest {
             .thenReturn(data);
 
         ResponseEntity<CombinedSicActivitiesResponse> response =
-            this.testDataController.createCombinedSicActivities(spec);
+            this.companyController.createCombinedSicActivities(spec);
 
         assertEquals(data, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -1356,7 +1117,7 @@ class TestDataControllerTest {
             .thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class,
-            () -> this.testDataController.createCombinedSicActivities(spec));
+            () -> this.companyController.createCombinedSicActivities(spec));
 
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).createCombinedSicActivitiesData(spec);
@@ -1368,7 +1129,7 @@ class TestDataControllerTest {
             .thenReturn(true);
 
         ResponseEntity<Map<String, Object>> response =
-            this.testDataController.deleteCombinedSicActivities(SIC_ACTIVITY_ID);
+            this.companyController.deleteCombinedSicActivities(SIC_ACTIVITY_ID);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -1381,7 +1142,7 @@ class TestDataControllerTest {
             .thenReturn(false);
 
         ResponseEntity<Map<String, Object>> response =
-            this.testDataController.deleteCombinedSicActivities(SIC_ACTIVITY_ID);
+            this.companyController.deleteCombinedSicActivities(SIC_ACTIVITY_ID);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(SIC_ACTIVITY_ID,
@@ -1400,7 +1161,7 @@ class TestDataControllerTest {
 
         DataException thrown = assertThrows(
             DataException.class,
-            () -> this.testDataController.deleteCombinedSicActivities(SIC_ACTIVITY_ID));
+            () -> this.companyController.deleteCombinedSicActivities(SIC_ACTIVITY_ID));
 
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID);
@@ -1413,7 +1174,7 @@ class TestDataControllerTest {
 
         when(testDataService.createAdminPermissionsData(spec)).thenReturn(data);
 
-        ResponseEntity<AdminPermissionsResponse> response = testDataController.createAdminPermissions(spec);
+        ResponseEntity<AdminPermissionsResponse> response = companyController.createAdminPermissions(spec);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(data, response.getBody());
@@ -1428,7 +1189,7 @@ class TestDataControllerTest {
         when(testDataService.createAdminPermissionsData(spec)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.createAdminPermissions(spec)
+                companyController.createAdminPermissions(spec)
         );
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).createAdminPermissionsData(spec);
@@ -1439,7 +1200,7 @@ class TestDataControllerTest {
         String id = "permId";
         when(testDataService.deleteAdminPermissionsData(id)).thenReturn(true);
 
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
+        ResponseEntity<Map<String, Object>> response = companyController.deleteAdminPermissions(id);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -1451,7 +1212,7 @@ class TestDataControllerTest {
         String id = "permId";
         when(testDataService.deleteAdminPermissionsData(id)).thenReturn(false);
 
-        ResponseEntity<Map<String, Object>> response = testDataController.deleteAdminPermissions(id);
+        ResponseEntity<Map<String, Object>> response = companyController.deleteAdminPermissions(id);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -1467,7 +1228,7 @@ class TestDataControllerTest {
         when(testDataService.deleteAdminPermissionsData(id)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.deleteAdminPermissions(id)
+                companyController.deleteAdminPermissions(id)
         );
         assertEquals(exception, thrown);
         verify(testDataService, times(1)).deleteAdminPermissionsData(id);
@@ -1481,7 +1242,7 @@ class TestDataControllerTest {
         when(this.verifiedIdentityService.getIdentityVerificationData(email))
                 .thenReturn(data);
 
-        ResponseEntity<IdentityVerificationResponse> response = this.testDataController.getIdentityVerification(email);
+        ResponseEntity<IdentityVerificationResponse> response = this.companyController.getIdentityVerification(email);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(data, response.getBody());
@@ -1497,7 +1258,7 @@ class TestDataControllerTest {
                 .thenReturn(null);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                this.testDataController.getIdentityVerification(email));
+                this.companyController.getIdentityVerification(email));
 
         assertEquals("No identity verification found for email: " + email, thrown.getMessage());
 
@@ -1514,7 +1275,7 @@ class TestDataControllerTest {
         when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenReturn(authCode);
 
         ResponseEntity<CompanyAuthCodeResponse> response =
-                testDataController.findOrCreateCompanyAuthCode(companyNumber);
+                companyController.findOrCreateCompanyAuthCode(companyNumber);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -1524,14 +1285,14 @@ class TestDataControllerTest {
     @Test
     void findOrCreateCompanyAuthCode_nullCompanyNumber_throwsDataException() {
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(null));
+                companyController.findOrCreateCompanyAuthCode(null));
         assertEquals("companyNumber query parameter is required", thrown.getMessage());
     }
 
     @Test
     void findOrCreateCompanyAuthCode_emptyCompanyNumber_throwsDataException() {
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(""));
+                companyController.findOrCreateCompanyAuthCode(""));
         assertEquals("companyNumber query parameter is required", thrown.getMessage());
     }
 
@@ -1542,7 +1303,7 @@ class TestDataControllerTest {
         when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(companyNumber));
+                companyController.findOrCreateCompanyAuthCode(companyNumber));
         assertEquals(ex, thrown);
     }
 
@@ -1553,82 +1314,8 @@ class TestDataControllerTest {
         when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(companyNumber));
+                companyController.findOrCreateCompanyAuthCode(companyNumber));
         assertEquals(ex, thrown);
-    }
-
-    @Test
-    void getCompanyWithPopulatedStructure_success() throws Exception {
-        CompanyRequest request = new CompanyRequest();
-        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
-        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenReturn(responseObj);
-
-        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(request);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseObj, response.getBody());
-        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(request);
-    }
-
-    @Test
-    void getCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
-        PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
-        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(any(CompanyRequest.class))).thenReturn(responseObj);
-
-        ResponseEntity<PopulatedCompanyDetailsResponse> response = testDataController.getCompanyWithPopulatedStructure(null);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(responseObj, response.getBody());
-        verify(testDataService, times(1)).getCompanyDataStructureBeforeSavingInMongoDb(any(CompanyRequest.class));
-    }
-
-    @Test
-    void getCompanyWithPopulatedStructure_throwsDataException() throws Exception {
-        CompanyRequest request = new CompanyRequest();
-        DataException exception = new DataException("error");
-        when(testDataService.getCompanyDataStructureBeforeSavingInMongoDb(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.getCompanyWithPopulatedStructure(request)
-        );
-        assertEquals(exception, thrown);
-    }
-
-    @Test
-    void createCompanyWithPopulatedStructure_success() throws Exception {
-        CompanyWithPopulatedStructureRequest request = new CompanyWithPopulatedStructureRequest();
-        CompanyProfileResponse companyData = new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(testDataService.createCompanyWithStructure(request)).thenReturn(companyData);
-
-        ResponseEntity<CompanyProfileResponse> response = testDataController.createCompanyWithPopulatedStructure(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(companyData, response.getBody());
-        verify(testDataService, times(1)).createCompanyWithStructure(request);
-    }
-
-    @Test
-    void createCompanyWithPopulatedStructure_nullRequest_usesDefault() throws Exception {
-        CompanyProfileResponse companyData = new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(testDataService.createCompanyWithStructure(any(CompanyWithPopulatedStructureRequest.class))).thenReturn(companyData);
-
-        ResponseEntity<CompanyProfileResponse> response = testDataController.createCompanyWithPopulatedStructure(null);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(companyData, response.getBody());
-        verify(testDataService, times(1)).createCompanyWithStructure(any(CompanyWithPopulatedStructureRequest.class));
-    }
-
-    @Test
-    void createCompanyWithPopulatedStructure_throwsDataException() throws Exception {
-        CompanyWithPopulatedStructureRequest request = new CompanyWithPopulatedStructureRequest();
-        DataException exception = new DataException("error");
-        when(testDataService.createCompanyWithStructure(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.createCompanyWithPopulatedStructure(request)
-        );
-        assertEquals(exception, thrown);
     }
 
     @Test
@@ -1644,7 +1331,7 @@ class TestDataControllerTest {
         when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.of(profile));
 
         ResponseEntity<Optional<AcspProfile>> response =
-                testDataController.getAcspProfile(acspNumber);
+                companyController.getAcspProfile(acspNumber);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1667,7 +1354,7 @@ class TestDataControllerTest {
         when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.empty());
 
         ResponseEntity<Optional<AcspProfile>> response =
-                testDataController.getAcspProfile(acspNumber);
+                companyController.getAcspProfile(acspNumber);
 
         assertNotNull(response);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -1682,7 +1369,7 @@ class TestDataControllerTest {
         final String orderNumber = "ORD-1776329853";
         when(this.testDataService.deleteItemGroupsData(orderNumber)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteItemGroups(orderNumber);
+                = this.companyController.deleteItemGroups(orderNumber);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -1696,7 +1383,7 @@ class TestDataControllerTest {
 
         when(this.testDataService.deleteItemGroupsData(orderNumber)).thenReturn(false);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteItemGroups(orderNumber);
+                = this.companyController.deleteItemGroups(orderNumber);
 
         Map<String, Object> expectedBody = new HashMap<>();
         expectedBody.put("orderNumber", orderNumber);
@@ -1716,67 +1403,11 @@ class TestDataControllerTest {
         when(testDataService.deleteItemGroupsData(orderNumber)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.deleteItemGroups(orderNumber));
+                companyController.deleteItemGroups(orderNumber));
         assertEquals(exception, thrown);
         verify(testDataService).deleteItemGroupsData(orderNumber);
     }
 
-    @Test
-    void deleteCompanyInternalSuccess() throws Exception {
-        ResponseEntity<Void> response =
-                testDataController.deleteCompanyInternal(COMPANY_NUMBER, null);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
-    }
-
-    @Test
-    void deleteCompanyInternalWithValidAuthCode() throws Exception {
-        DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("654321");
-
-        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "654321")).thenReturn(true);
-
-        ResponseEntity<Void> response =
-                testDataController.deleteCompanyInternal(COMPANY_NUMBER, request);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
-    }
-
-    @Test
-    void deleteCompanyInternalWithInvalidAuthCode() throws Exception {
-        DeleteCompanyRequest request = new DeleteCompanyRequest();
-        request.setAuthCode("wrongCode");
-
-        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "wrongCode")).thenReturn(false);
-
-        InvalidAuthCodeException thrown = assertThrows(InvalidAuthCodeException.class, () ->
-                testDataController.deleteCompanyInternal(COMPANY_NUMBER, request));
-        assertEquals(COMPANY_NUMBER, thrown.getCompanyNumber());
-    }
-
-    @Test
-    void deleteCompanyInternalDataException() throws Exception {
-        DataException ex = new DataException("error");
-        doThrow(ex).when(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.deleteCompanyInternal(COMPANY_NUMBER, null));
-        assertEquals(ex, thrown);
-    }
-
-    @Test
-    void deleteCompanyInternalNoDataFoundException() throws Exception {
-        NoDataFoundException ex = new NoDataFoundException("Company not found");
-        doThrow(ex).when(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.deleteCompanyInternal(COMPANY_NUMBER, null));
-        assertEquals(ex, thrown);
-    }
 
     @Test
     void getAcspProfileThrowsNoDataFoundException() throws Exception {
@@ -1786,7 +1417,7 @@ class TestDataControllerTest {
         when(testDataService.getAcspProfileData(acspNumber)).thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.getAcspProfile(acspNumber));
+                companyController.getAcspProfile(acspNumber));
         assertEquals(ex, thrown);
     }
 
@@ -1798,7 +1429,7 @@ class TestDataControllerTest {
         when(testDataService.deleteAccountPenaltiesData(PENALTY_ID))
                 .thenReturn(ResponseEntity.noContent().build());
 
-        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, request);
+        ResponseEntity<Void> response = companyController.deleteAccountPenalties(PENALTY_ID, request);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
@@ -1806,7 +1437,7 @@ class TestDataControllerTest {
     @Test
     void getCompanyFilingHistoryNoParamsReturnsBadRequest() {
         ResponseEntity<Object> response =
-                testDataController.getCompanyFilingHistory(null, null);
+                companyController.getCompanyFilingHistory(null, null);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
 
@@ -1827,7 +1458,7 @@ class TestDataControllerTest {
                 .thenReturn(results);
 
         ResponseEntity<?> response =
-                testDataController.getCompanyFilingHistory(companyNumber, null);
+                companyController.getCompanyFilingHistory(companyNumber, null);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(results, response.getBody());
@@ -1844,7 +1475,7 @@ class TestDataControllerTest {
                 .thenReturn(Collections.emptyList());
 
         ResponseEntity<?> response =
-                testDataController.getCompanyFilingHistory(companyNumber, null);
+                companyController.getCompanyFilingHistory(companyNumber, null);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
@@ -1863,7 +1494,7 @@ class TestDataControllerTest {
                 .thenReturn(Optional.of(fh));
 
         ResponseEntity<?> response =
-                testDataController.getCompanyFilingHistory(null, filingHistoryId);
+                companyController.getCompanyFilingHistory(null, filingHistoryId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(fh, response.getBody());
@@ -1880,7 +1511,7 @@ class TestDataControllerTest {
                 .thenReturn(Optional.empty());
 
         ResponseEntity<?> response =
-                testDataController.getCompanyFilingHistory(null, filingHistoryId);
+                companyController.getCompanyFilingHistory(null, filingHistoryId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertNull(response.getBody());
@@ -1897,7 +1528,7 @@ class TestDataControllerTest {
                 .thenReturn(true);
 
         ResponseEntity<?> response =
-                testDataController.deleteCompanyFilingHistory(companyNumber);
+                companyController.deleteCompanyFilingHistory(companyNumber);
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         assertNull(response.getBody());
@@ -1914,7 +1545,7 @@ class TestDataControllerTest {
                 .thenReturn(false);
 
         ResponseEntity<?> response =
-                testDataController.deleteCompanyFilingHistory(companyNumber);
+                companyController.deleteCompanyFilingHistory(companyNumber);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 

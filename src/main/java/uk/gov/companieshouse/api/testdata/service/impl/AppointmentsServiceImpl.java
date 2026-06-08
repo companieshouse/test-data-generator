@@ -61,7 +61,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Autowired
     private OfficerRepository officerRepository;
 
-    public AppointmentsResultResponse createAppointment(CompanyRequest spec) {
+    public AppointmentsResultResponse createAppointments(CompanyRequest spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
                     + spec.getCompanyNumber());

@@ -21,44 +21,36 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
@@ -74,94 +66,17 @@ public class TestDataController {
     private static final String ERROR = "error";
 
     private final TestDataService testDataService;
-    private final CompanyAuthCodeService companyAuthCodeService;
-
-    private static final String COMPANY_NUMBER_DATA = "company number";
-    private static final String JURISDICTION_DATA = "jurisdiction";
-    private static final String NEW_COMPANY_CREATED = "New company created";
 
     private final VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
     private final FilingHistoryService filingHistoryService;
 
     public TestDataController(
             TestDataService testDataService,
-            CompanyAuthCodeService companyAuthCodeService,
             VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService,
             FilingHistoryService filingHistoryService) {
         this.testDataService = testDataService;
-        this.companyAuthCodeService = companyAuthCodeService;
         this.verifiedIdentityService = verifiedIdentityService;
         this.filingHistoryService = filingHistoryService;
-    }
-
-    /* Public endpoint to create company data */
-    @PostMapping("/company")
-    public ResponseEntity<CompanyProfileResponse> createCompany(
-            @Valid @RequestBody(required = false) PublicCompanyRequest request) throws DataException {
-
-        Optional<PublicCompanyRequest> optionalRequest = Optional.ofNullable(request);
-        PublicCompanyRequest spec = optionalRequest.orElse(new PublicCompanyRequest());
-
-        var createdCompany = testDataService.createPublicCompanyData(spec);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
-        LOG.info(NEW_COMPANY_CREATED, data);
-        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
-    }
-
-    /* Internal endpoint to create company data */
-    @PostMapping("/internal/company")
-    public ResponseEntity<CompanyProfileResponse> createCompanyInternal(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
-
-        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
-
-        CompanyProfileResponse createdCompany = testDataService.createCompanyData(spec);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
-        LOG.info(NEW_COMPANY_CREATED, data);
-        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping({"/company/{companyNumber}"})
-    public ResponseEntity<Void> deleteCompany(
-            @PathVariable("companyNumber") String companyNumber,
-            @Valid @RequestBody DeleteCompanyRequest request)
-            throws DataException, InvalidAuthCodeException, NoDataFoundException {
-
-        if (!companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
-            throw new InvalidAuthCodeException(companyNumber);
-        }
-
-        testDataService.deleteCompanyData(companyNumber);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(COMPANY_NUMBER_DATA, companyNumber);
-        LOG.info("Company deleted", data);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @DeleteMapping({"/internal/company/{companyNumber}"})
-    public ResponseEntity<Void> deleteCompanyInternal(
-            @PathVariable("companyNumber") String companyNumber,
-            @Valid @RequestBody(required = false) DeleteCompanyRequest request)
-            throws DataException, NoDataFoundException, InvalidAuthCodeException {
-
-        if (request != null && request.getAuthCode() != null
-                && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
-            throw new InvalidAuthCodeException(companyNumber);
-        }
-        testDataService.deleteInternalCompanyData(companyNumber);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(COMPANY_NUMBER_DATA, companyNumber);
-        LOG.info("Internal Company deleted", data);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @GetMapping("internal/company/authcode")
@@ -539,11 +454,6 @@ public class TestDataController {
         }
     }
 
-    @GetMapping("/health-check")
-    public ResponseEntity<String> healthCheck() {
-        LOG.info("Health check passed");
-        return new ResponseEntity<>("test-data-generator is alive", HttpStatus.OK);
-    }
 
     @PostMapping("/internal/transactions")
     public ResponseEntity<TransactionsResponse> createTransaction(
@@ -618,29 +528,6 @@ public class TestDataController {
         }
 
         return new ResponseEntity<>(data, HttpStatus.OK);
-    }
-
-    @GetMapping("/internal/get-populated-company-structure")
-    public ResponseEntity<PopulatedCompanyDetailsResponse> getCompanyWithPopulatedStructure(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
-
-        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
-
-        var companyData = testDataService.getCompanyDataStructureBeforeSavingInMongoDb(spec);
-        return new ResponseEntity<>(companyData, HttpStatus.OK);
-    }
-
-    @PostMapping("/internal/create-company-with-populated-structure")
-    public ResponseEntity<CompanyProfileResponse> createCompanyWithPopulatedStructure(
-            @Valid @RequestBody(required = false) CompanyWithPopulatedStructureRequest request) throws DataException {
-        Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyWithPopulatedStructureRequest spec = optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = testDataService.createCompanyWithStructure(spec);
-        Map<String, Object> data = new HashMap<>();
-        data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        LOG.info(NEW_COMPANY_CREATED, data);
-        return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/internal/item-groups/{orderNumber}")
