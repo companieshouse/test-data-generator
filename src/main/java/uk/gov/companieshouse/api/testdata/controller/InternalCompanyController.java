@@ -21,8 +21,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyCreationOrchestratorService;
-import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -42,8 +42,8 @@ public class InternalCompanyController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    private final CompanyCreationOrchestratorService companyCreationOrchestratorService;
-    private final CompanyDeletionOrchestratorService companyDeletionOrchestratorService;
+    private final CreateCompanyService createCompanyService;
+    private final DeleteCompanyService deleteCompanyService;
     private final CompanyAuthCodeService companyAuthCodeService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
@@ -51,11 +51,11 @@ public class InternalCompanyController {
     private static final String NEW_COMPANY_CREATED = "New company created";
 
     public InternalCompanyController(
-            CompanyCreationOrchestratorService companyCreationOrchestratorService,
-            CompanyDeletionOrchestratorService companyDeletionOrchestratorService,
+            CreateCompanyService createCompanyService,
+            DeleteCompanyService deleteCompanyService,
             CompanyAuthCodeService companyAuthCodeService) {
-        this.companyCreationOrchestratorService = companyCreationOrchestratorService;
-        this.companyDeletionOrchestratorService = companyDeletionOrchestratorService;
+        this.createCompanyService = createCompanyService;
+        this.deleteCompanyService = deleteCompanyService;
         this.companyAuthCodeService = companyAuthCodeService;
     }
 
@@ -66,7 +66,7 @@ public class InternalCompanyController {
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
         CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
 
-        CompanyProfileResponse createdCompany = companyCreationOrchestratorService.createInternalCompany(spec);
+        CompanyProfileResponse createdCompany = createCompanyService.createInternalCompany(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
@@ -85,7 +85,7 @@ public class InternalCompanyController {
                 && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
             throw new InvalidAuthCodeException(companyNumber);
         }
-        companyDeletionOrchestratorService.deleteCompany(companyNumber);
+        deleteCompanyService.deleteCompany(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);
@@ -100,7 +100,7 @@ public class InternalCompanyController {
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
         CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
 
-        var companyData = companyCreationOrchestratorService.buildCompanyDataStructure(spec);
+        var companyData = createCompanyService.buildCompanyDataStructure(spec);
         return new ResponseEntity<>(companyData, HttpStatus.OK);
     }
 
@@ -111,7 +111,7 @@ public class InternalCompanyController {
         Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
         CompanyWithPopulatedStructureRequest spec =
                 optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = companyCreationOrchestratorService.persistCompanyDataStructure(spec);
+        var createdCompany = createCompanyService.persistCompanyDataStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
         LOG.info(NEW_COMPANY_CREATED, data);

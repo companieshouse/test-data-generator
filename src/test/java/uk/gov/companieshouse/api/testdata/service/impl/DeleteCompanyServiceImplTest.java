@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CompanyDeletionOrchestratorServiceImplTest {
+class DeleteCompanyServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String OVERSEA_COMPANY = "FC123456";
@@ -55,11 +55,11 @@ class CompanyDeletionOrchestratorServiceImplTest {
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
 
-    private CompanyDeletionOrchestratorServiceImpl deletionService;
+    private DeleteCompanyServiceImpl deletionService;
 
     @BeforeEach
     void setUp() {
-        deletionService = new CompanyDeletionOrchestratorServiceImpl(
+        deletionService = new DeleteCompanyServiceImpl(
                 companyProfileService,
                 filingHistoryService,
                 companyAuthCodeService,
@@ -297,4 +297,5 @@ class CompanyDeletionOrchestratorServiceImplTest {
         verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
     }
 }
+
 

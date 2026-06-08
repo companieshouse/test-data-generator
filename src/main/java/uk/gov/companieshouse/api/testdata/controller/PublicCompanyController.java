@@ -18,8 +18,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyCreationOrchestratorService;
-import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -38,8 +38,8 @@ public class PublicCompanyController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    private final CompanyCreationOrchestratorService companyCreationOrchestratorService;
-    private final CompanyDeletionOrchestratorService companyDeletionOrchestratorService;
+    private final CreateCompanyService createCompanyService;
+    private final DeleteCompanyService deleteCompanyService;
     private final CompanyAuthCodeService companyAuthCodeService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
@@ -47,11 +47,11 @@ public class PublicCompanyController {
     private static final String NEW_COMPANY_CREATED = "New company created";
 
     public PublicCompanyController(
-            CompanyCreationOrchestratorService companyCreationOrchestratorService,
-            CompanyDeletionOrchestratorService companyDeletionOrchestratorService,
+            CreateCompanyService createCompanyService,
+            DeleteCompanyService deleteCompanyService,
             CompanyAuthCodeService companyAuthCodeService) {
-        this.companyCreationOrchestratorService = companyCreationOrchestratorService;
-        this.companyDeletionOrchestratorService = companyDeletionOrchestratorService;
+        this.createCompanyService = createCompanyService;
+        this.deleteCompanyService = deleteCompanyService;
         this.companyAuthCodeService = companyAuthCodeService;
     }
 
@@ -62,7 +62,7 @@ public class PublicCompanyController {
         Optional<PublicCompanyRequest> optionalRequest = Optional.ofNullable(request);
         PublicCompanyRequest spec = optionalRequest.orElse(new PublicCompanyRequest());
 
-        var createdCompany = companyCreationOrchestratorService.createPublicCompany(spec);
+        var createdCompany = createCompanyService.createPublicCompany(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
@@ -81,7 +81,7 @@ public class PublicCompanyController {
             throw new InvalidAuthCodeException(companyNumber);
         }
 
-        companyDeletionOrchestratorService.deleteCompany(companyNumber);
+        deleteCompanyService.deleteCompany(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);

@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CompanyDeletionOrchestratorServiceImpl implements CompanyDeletionOrchestratorService {
+public class DeleteCompanyServiceImpl implements DeleteCompanyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
@@ -54,7 +54,7 @@ public class CompanyDeletionOrchestratorServiceImpl implements CompanyDeletionOr
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
-    public CompanyDeletionOrchestratorServiceImpl(
+    public DeleteCompanyServiceImpl(
             CompanyProfileService companyProfileService,
             DataService<FilingHistory, CompanyRequest> filingHistoryService,
             CompanyAuthCodeService companyAuthCodeService,
@@ -258,4 +258,5 @@ public class CompanyDeletionOrchestratorServiceImpl implements CompanyDeletionOr
         }
     }
 }
+
 

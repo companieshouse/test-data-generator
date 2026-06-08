@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
@@ -51,7 +51,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CompanyCreationOrchestratorServiceImplTest {
+class CreateCompanyServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String OVERSEAS_COMPANY_NUMBER = "OE123456";
@@ -76,10 +76,10 @@ class CompanyCreationOrchestratorServiceImplTest {
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
-    @Mock private CompanyDeletionOrchestratorService companyDeletionOrchestratorService;
+    @Mock private DeleteCompanyService deleteCompanyService;
     @Mock private Appointment commonAppointment;
 
-    private CompanyCreationOrchestratorServiceImpl creationService;
+    private CreateCompanyServiceImpl creationService;
 
     /**
      * Sets up common mocks for creating a company.
@@ -112,7 +112,7 @@ class CompanyCreationOrchestratorServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        creationService = new CompanyCreationOrchestratorServiceImpl(
+        creationService = new CreateCompanyServiceImpl(
                 companyProfileService,
                 filingHistoryService,
                 companyAuthCodeService,
@@ -127,7 +127,7 @@ class CompanyCreationOrchestratorServiceImplTest {
                 companySearchService,
                 alphabeticalCompanySearch,
                 advancedCompanySearch,
-                companyDeletionOrchestratorService);
+                deleteCompanyService);
         creationService.setAPIUrl(API_URL);
         creationService.setElasticSearchDeployed(false);
     }
@@ -301,7 +301,7 @@ class CompanyCreationOrchestratorServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointments(capturedSpec);
         verify(metricsService).create(capturedSpec);
-        verify(companyDeletionOrchestratorService).deleteCompany(fullCompanyNumber);
+        verify(deleteCompanyService).deleteCompany(fullCompanyNumber);
     }
 
     @Test
@@ -309,7 +309,7 @@ class CompanyCreationOrchestratorServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> creationService.createInternalCompany(null));
         verify(companyProfileService, never()).create(any());
-        verify(companyDeletionOrchestratorService, never()).deleteCompany(any());
+        verify(deleteCompanyService, never()).deleteCompany(any());
     }
 
     @Test
@@ -811,7 +811,7 @@ class CompanyCreationOrchestratorServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointments(capturedSpec);
         verify(metricsService).create(capturedSpec);
-        verify(companyDeletionOrchestratorService).deleteCompany(fullCompanyNumber);
+        verify(deleteCompanyService).deleteCompany(fullCompanyNumber);
     }
 
     @Test
@@ -844,7 +844,7 @@ class CompanyCreationOrchestratorServiceImplTest {
     @Test
     void createCompanyDataNullSpec() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> creationService.createCompany(null));
-        verify(companyDeletionOrchestratorService, never()).deleteCompany(any());
+        verify(deleteCompanyService, never()).deleteCompany(any());
         verify(companyProfileService, never()).create(any());
     }
 
@@ -1004,4 +1004,5 @@ class CompanyCreationOrchestratorServiceImplTest {
         validateElasticSearch(spec);
     }
 }
+
 

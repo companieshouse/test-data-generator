@@ -20,8 +20,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyCreationOrchestratorService;
-import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
@@ -36,7 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOrchestratorService {
+public class CreateCompanyServiceImpl implements CreateCompanyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
@@ -55,7 +55,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
     private final CompanySearchService companySearchService;
     private final CompanySearchService alphabeticalCompanySearch;
     private final CompanySearchService advancedCompanySearch;
-    private final CompanyDeletionOrchestratorService companyDeletionOrchestratorService;
+    private final DeleteCompanyService deleteCompanyService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -71,7 +71,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
-    public CompanyCreationOrchestratorServiceImpl(
+    public CreateCompanyServiceImpl(
             CompanyProfileService companyProfileService,
             DataService<FilingHistory, CompanyRequest> filingHistoryService,
             CompanyAuthCodeService companyAuthCodeService,
@@ -87,7 +87,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
             @Qualifier("alphabeticalCompanySearchService")
             CompanySearchService alphabeticalCompanySearch,
             @Qualifier("advancedCompanySearchService") CompanySearchService advancedCompanySearch,
-            CompanyDeletionOrchestratorService companyDeletionOrchestratorService) {
+            DeleteCompanyService deleteCompanyService) {
         this.companyProfileService = companyProfileService;
         this.filingHistoryService = filingHistoryService;
         this.companyAuthCodeService = companyAuthCodeService;
@@ -102,7 +102,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
         this.companySearchService = companySearchService;
         this.alphabeticalCompanySearch = alphabeticalCompanySearch;
         this.advancedCompanySearch = advancedCompanySearch;
-        this.companyDeletionOrchestratorService = companyDeletionOrchestratorService;
+        this.deleteCompanyService = deleteCompanyService;
     }
 
     @Override
@@ -309,7 +309,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
         LOG.error("Failed to create company data for company number", ex, data);
 
         try {
-            companyDeletionOrchestratorService.deleteCompany(companyNumber);
+            deleteCompanyService.deleteCompany(companyNumber);
         } catch (Exception rollbackException) {
             LOG.error("Rollback delete failed for company number " + companyNumber, rollbackException);
         }
@@ -357,4 +357,5 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
         return data;
     }
 }
+
 

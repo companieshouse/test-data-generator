@@ -7,7 +7,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 
-public interface CompanyCreationOrchestratorService {
+public interface CreateCompanyService {
 
     CompanyProfileResponse createPublicCompany(PublicCompanyRequest companySpec) throws DataException;
 
@@ -19,4 +19,5 @@ public interface CompanyCreationOrchestratorService {
     CompanyProfileResponse persistCompanyDataStructure(CompanyWithPopulatedStructureRequest companySpec)
             throws DataException;
 }
+
 

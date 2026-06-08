@@ -17,8 +17,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyCreationOrchestratorService;
-import uk.gov.companieshouse.api.testdata.service.CompanyDeletionOrchestratorService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -35,10 +35,10 @@ class PublicCompanyControllerTest {
     private static final String COMPANY_URI = "http://localhost:1234/company/12345678";
 
     @Mock
-    private CompanyCreationOrchestratorService companyCreationOrchestratorService;
+    private CreateCompanyService createCompanyService;
 
     @Mock
-    private CompanyDeletionOrchestratorService companyDeletionOrchestratorService;
+    private DeleteCompanyService deleteCompanyService;
 
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
@@ -56,7 +56,7 @@ class PublicCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(companyCreationOrchestratorService.createPublicCompany(request)).thenReturn(company);
+        when(createCompanyService.createPublicCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -68,13 +68,13 @@ class PublicCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(companyCreationOrchestratorService.createPublicCompany(any())).thenReturn(company);
+        when(createCompanyService.createPublicCompany(any())).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompany(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        verify(companyCreationOrchestratorService).createPublicCompany(publicSpecCaptor.capture());
+        verify(createCompanyService).createPublicCompany(publicSpecCaptor.capture());
         PublicCompanyRequest usedSpec = publicSpecCaptor.getValue();
 
         assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
@@ -86,7 +86,7 @@ class PublicCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(companyCreationOrchestratorService.createPublicCompany(request)).thenReturn(company);
+        when(createCompanyService.createPublicCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -99,7 +99,7 @@ class PublicCompanyControllerTest {
         PublicCompanyRequest request = new PublicCompanyRequest();
         request.setJurisdiction(JurisdictionType.NI);
         DataException exception = new DataException("Error message");
-        when(companyCreationOrchestratorService.createPublicCompany(request)).thenThrow(exception);
+        when(createCompanyService.createPublicCompany(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 publicCompanyController.createCompany(request));
@@ -119,7 +119,7 @@ class PublicCompanyControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(companyDeletionOrchestratorService).deleteCompany(companyNumber);
+        verify(deleteCompanyService).deleteCompany(companyNumber);
     }
 
     @Test
@@ -132,7 +132,7 @@ class PublicCompanyControllerTest {
                 .thenReturn(true);
 
         DataException ex = new DataException("Error message");
-        doThrow(ex).when(companyDeletionOrchestratorService).deleteCompany(companyNumber);
+        doThrow(ex).when(deleteCompanyService).deleteCompany(companyNumber);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> publicCompanyController.deleteCompany(companyNumber, request));
