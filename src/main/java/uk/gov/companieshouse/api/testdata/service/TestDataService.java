@@ -84,6 +84,14 @@ public interface TestDataService {
     boolean deleteUserData(String userId) throws DataException;
 
     /**
+     * Deletes an user test data by their user email.
+     *
+     * @param userEmail the email of the user to delete
+     * @throws DataException if there is an error during user deletion
+     */
+    boolean deleteUserDataByEmail(String userEmail) throws DataException;
+
+    /**
      * Creates a new acsp member test data based on the provided user specifications.
      *
      * @param acspMembersRequest the specifications of the acsp member to create

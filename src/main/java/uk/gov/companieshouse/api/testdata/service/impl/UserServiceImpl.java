@@ -245,11 +245,74 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    public boolean deleteByEmail(String email) {
+        LOG.info("delete called for email= " + email);
+        var userOpt = repository.findByEmail(email);
+        if (userOpt.isEmpty()) {
+            LOG.debug("User not found for email=  " + email);
+            return false;
+        }
+
+        Optional<Identity> identityOpt = identityRepository.findByEmail(email);
+        if (identityOpt.isPresent()) {
+            var identity = identityOpt.get();
+            LOG.info("Found identity for user email = "
+                    + email
+                    + "Identity_id = " + identity.getId());
+            try {
+                uvidRepository.deleteByIdentityId(identity.getId());
+                LOG.debug("Deleted UVIDs for identityId = " + identity.getId());
+            } catch (Exception ex) {
+                LOG.error("Failed to delete UVIDs for identityId = "
+                        + identity.getId() + ex.getMessage());
+                throw ex;
+            }
+
+            try {
+                identityRepository.delete(identity);
+                LOG.debug("Deleted identity id= " + identity.getId());
+            } catch (Exception ex) {
+                LOG.error("Failed to delete identity id= "
+                        + identity.getId() +  ex.getMessage());
+                throw ex;
+            }
+
+            try {
+                backlogRepository.deleteByUserId(identity.getUserId());
+                LOG.debug("Deleted backlog for identity id = " + identity.getId());
+            } catch (Exception ex) {
+                LOG.error("Failed to backlog for identity id = "
+                        + identity.getId() + ex.getMessage());
+                throw ex;
+            }
+
+        } else {
+            LOG.debug("No identity associated with email= " + email);
+        }
+
+        try {
+            repository.delete(userOpt.get());
+            LOG.info("Deleted user email= " + email);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete user email " + email, ex);
+            throw ex;
+        }
+        return true;
+    }
+
     @Override
     public Optional<User> getUserById(String userId) {
         LOG.debug("getUserById called for userId= " + userId);
         var result = repository.findById(userId);
         LOG.debug("getUserById found={}");
+        return result;
+    }
+
+    @Override
+    public Optional<User> getUserByEmail(String email) {
+        LOG.debug("getUserByEmail called for email= " + email);
+        var result = repository.findByEmail(email);
+        LOG.debug("getUserByEmail found={}");
         return result;
     }
 
