@@ -659,7 +659,7 @@ class CompanyCreationOrchestratorServiceImplTest {
         verify(appointmentService, never()).createAppointments(capturedSpec);
     }
 
-    // ── persistCompanyStructure ────────────────────────────────────────────
+    // ── persistCompanyDataStructure ────────────────────────────────────────────
 
     @Test
     void persistCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() throws Exception {
@@ -673,7 +673,7 @@ class CompanyCreationOrchestratorServiceImplTest {
         authCode.setAuthCode(AUTH_CODE);
         spec.setCompanyAuthCode(authCode);
 
-        CompanyProfileResponse result = creationService.persistCompanyStructure(spec);
+        CompanyProfileResponse result = creationService.persistCompanyDataStructure(spec);
 
         assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
         assertEquals(AUTH_CODE, result.getAuthCode());

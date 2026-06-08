@@ -94,7 +94,7 @@ public class InternalCompanyController {
     }
 
     @GetMapping("/get-populated-company-structure")
-    public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyWithStructure(
+    public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyDataStructure(
             @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
 
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
@@ -105,13 +105,13 @@ public class InternalCompanyController {
     }
 
     @PostMapping("/create-company-with-populated-structure")
-    public ResponseEntity<CompanyProfileResponse> persistCompanyWithStructure(
+    public ResponseEntity<CompanyProfileResponse> persistCompanyDataStructure(
             @Valid @RequestBody(required = false) CompanyWithPopulatedStructureRequest request)
             throws DataException {
         Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
         CompanyWithPopulatedStructureRequest spec =
                 optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = companyCreationOrchestratorService.persistCompanyStructure(spec);
+        var createdCompany = companyCreationOrchestratorService.persistCompanyDataStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
         LOG.info(NEW_COMPANY_CREATED, data);

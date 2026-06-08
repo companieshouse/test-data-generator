@@ -181,7 +181,7 @@ public class CompanyCreationOrchestratorServiceImpl implements CompanyCreationOr
     }
 
     @Override
-    public CompanyProfileResponse persistCompanyStructure(
+    public CompanyProfileResponse persistCompanyDataStructure(
             CompanyWithPopulatedStructureRequest companySpec) throws DataException {
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
