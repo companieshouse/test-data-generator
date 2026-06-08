@@ -957,7 +957,7 @@ class TestDataServiceImplTest {
     void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
-       AcspProfile profileEntity = new AcspProfile();
+        AcspProfile profileEntity = new AcspProfile();
         profileEntity.setAcspNumber("acspNumber");
         profileEntity.setName("name");
         profileEntity.setVersion(1L);
@@ -1344,10 +1344,10 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CRT-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
         CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CRT-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
@@ -1428,10 +1428,10 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "CCD-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CCD-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
         CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "CCD-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "CCD-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
@@ -1452,7 +1452,7 @@ class TestDataServiceImplTest {
     void createCertifiedCopiesDataNullUserId() {
         CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createCertifiedCopiesData(spec));
+                () -> testDataService.createCertifiedCopiesData(spec));
         assertEquals("User ID is required to create certified copies", exception.getMessage());
     }
 
@@ -1462,9 +1462,9 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         when(certifiedCopiesService.create(any(CertifiedCopiesRequest.class)))
-            .thenThrow(new DataException("Error creating certified copies"));
+                .thenThrow(new DataException("Error creating certified copies"));
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createCertifiedCopiesData(spec));
+                () -> testDataService.createCertifiedCopiesData(spec));
         assertEquals("Error creating certified copies", exception.getMessage());
     }
 
@@ -1500,7 +1500,7 @@ class TestDataServiceImplTest {
         when(certifiedCopiesService.delete(CERTIFIED_COPIES_ID)).thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class, () ->
-            testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID));
+                testDataService.deleteCertifiedCopiesData(CERTIFIED_COPIES_ID));
         assertEquals("Error deleting certified copies", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(certifiedCopiesService, times(1)).delete(CERTIFIED_COPIES_ID);
@@ -1512,10 +1512,10 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "MID-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "MID-111111-222222", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
         CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "MID-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
+                "MID-333333-444444", "2025-04-14T00:00:00Z", "2025-04-14T00:00:00Z"
         );
 
         List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
@@ -1536,7 +1536,7 @@ class TestDataServiceImplTest {
     void createMissingImageDeliveriesDataNullUserId() {
         MissingImageDeliveriesRequest spec = new MissingImageDeliveriesRequest();
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createMissingImageDeliveriesData(spec));
+                () -> testDataService.createMissingImageDeliveriesData(spec));
         assertEquals("User ID is required to create missing image deliveries", exception.getMessage());
     }
 
@@ -1546,9 +1546,9 @@ class TestDataServiceImplTest {
         spec.setUserId(USER_ID);
 
         when(missingImageDeliveriesService.create(any(MissingImageDeliveriesRequest.class)))
-            .thenThrow(new DataException("Error creating missing image deliveries"));
+                .thenThrow(new DataException("Error creating missing image deliveries"));
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createMissingImageDeliveriesData(spec));
+                () -> testDataService.createMissingImageDeliveriesData(spec));
         assertEquals("Error creating missing image deliveries", exception.getMessage());
     }
 
@@ -1584,7 +1584,7 @@ class TestDataServiceImplTest {
         when(missingImageDeliveriesService.delete(MISSING_IMAGE_DELIVERIES_ID)).thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class, () ->
-            testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID));
+                testDataService.deleteMissingImageDeliveriesData(MISSING_IMAGE_DELIVERIES_ID));
         assertEquals("Error deleting missing image deliveries", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(missingImageDeliveriesService, times(1)).delete(MISSING_IMAGE_DELIVERIES_ID);
@@ -2246,17 +2246,17 @@ class TestDataServiceImplTest {
         spec.setActivityDescriptionSearchField("braunkohle waschen");
 
         CombinedSicActivitiesResponse expectedData =
-            new CombinedSicActivitiesResponse(
-                new ObjectId().toHexString(),
-                "12345",
-                "Abbau von Braunkohle"
-            );
+                new CombinedSicActivitiesResponse(
+                        new ObjectId().toHexString(),
+                        "12345",
+                        "Abbau von Braunkohle"
+                );
 
         when(combinedSicActivitiesService.create(any(CombinedSicActivitiesRequest.class)))
-            .thenReturn(expectedData);
+                .thenReturn(expectedData);
 
         CombinedSicActivitiesResponse result =
-            testDataService.createCombinedSicActivitiesData(spec);
+                testDataService.createCombinedSicActivitiesData(spec);
 
         assertNotNull(result);
         assertEquals("12345", result.getSicCode());
@@ -2271,10 +2271,10 @@ class TestDataServiceImplTest {
         spec.setSicDescription("Test Sic Description");
 
         when(combinedSicActivitiesService.create(any(CombinedSicActivitiesRequest.class)))
-            .thenThrow(new DataException("Error creating Sic code and keyword"));
+                .thenThrow(new DataException("Error creating Sic code and keyword"));
 
         DataException exception = assertThrows(DataException.class,
-            () -> testDataService.createCombinedSicActivitiesData(spec));
+                () -> testDataService.createCombinedSicActivitiesData(spec));
 
         assertEquals("Error creating Sic code and keyword", exception.getMessage());
     }
@@ -2305,7 +2305,7 @@ class TestDataServiceImplTest {
         when(combinedSicActivitiesService.delete(SIC_ACTIVITY_ID)).thenThrow(ex);
 
         DataException exception = assertThrows(DataException.class, () ->
-            testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID));
+                testDataService.deleteCombinedSicActivitiesData(SIC_ACTIVITY_ID));
 
         assertEquals("Error deleting appeals data", exception.getMessage());
         assertEquals(ex, exception.getCause());
@@ -2618,5 +2618,40 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting Item Groups", exception.getMessage());
         assertSame(cause, exception.getCause());
         verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
+    }
+
+    @Test
+    void deleteInternalCompanyDataSuccess() throws DataException, NoDataFoundException {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
+
+        testDataService.deleteInternalCompanyData(COMPANY_NUMBER);
+
+        verifyDeleteCompanyData(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteInternalCompanyDataThrowsNoDataFoundExceptionWhenCompanyNotFound() {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
+
+        NoDataFoundException exception = assertThrows(
+                NoDataFoundException.class,
+                () -> testDataService.deleteInternalCompanyData(COMPANY_NUMBER)
+        );
+
+        assertEquals("Company with number " + COMPANY_NUMBER + " not found", exception.getMessage());
+        verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
+        verify(companyProfileService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteInternalCompanyDataPropagatesDataException() {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
+        RuntimeException cause = new RuntimeException("Mongo failure");
+        doThrow(cause).when(companyProfileService).delete(COMPANY_NUMBER);
+
+        assertThrows(DataException.class,
+                () -> testDataService.deleteInternalCompanyData(COMPANY_NUMBER));
+
+        verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
     }
 }

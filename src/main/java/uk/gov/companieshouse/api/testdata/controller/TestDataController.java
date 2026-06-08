@@ -128,7 +128,7 @@ public class TestDataController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
-    @DeleteMapping({"/internal/company/{companyNumber}", "/company/{companyNumber}"})
+    @DeleteMapping({"/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
             @PathVariable("companyNumber") String companyNumber,
             @Valid @RequestBody DeleteCompanyRequest request)
@@ -143,6 +143,24 @@ public class TestDataController {
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);
         LOG.info("Company deleted", data);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @DeleteMapping({"/internal/company/{companyNumber}"})
+    public ResponseEntity<Void> deleteCompanyInternal(
+            @PathVariable("companyNumber") String companyNumber,
+            @Valid @RequestBody(required = false) DeleteCompanyRequest request)
+            throws DataException, NoDataFoundException, InvalidAuthCodeException {
+
+        if (request != null && request.getAuthCode() != null
+                && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
+            throw new InvalidAuthCodeException(companyNumber);
+        }
+        testDataService.deleteInternalCompanyData(companyNumber);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, companyNumber);
+        LOG.info("Internal Company deleted", data);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

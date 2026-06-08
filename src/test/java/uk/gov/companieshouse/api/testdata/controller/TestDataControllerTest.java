@@ -1709,6 +1709,101 @@ class TestDataControllerTest {
     }
 
     @Test
+    void deleteItemGroupsException() throws Exception {
+        final String orderNumber = "ORD-1776329853";
+        DataException exception = new DataException("Error deleting item groups");
+
+        when(testDataService.deleteItemGroupsData(orderNumber)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.deleteItemGroups(orderNumber));
+        assertEquals(exception, thrown);
+        verify(testDataService).deleteItemGroupsData(orderNumber);
+    }
+
+    @Test
+    void deleteCompanyInternalSuccess() throws Exception {
+        ResponseEntity<Void> response =
+                testDataController.deleteCompanyInternal(COMPANY_NUMBER, null);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyInternalWithValidAuthCode() throws Exception {
+        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        request.setAuthCode("654321");
+
+        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "654321")).thenReturn(true);
+
+        ResponseEntity<Void> response =
+                testDataController.deleteCompanyInternal(COMPANY_NUMBER, request);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyInternalWithInvalidAuthCode() throws Exception {
+        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        request.setAuthCode("wrongCode");
+
+        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "wrongCode")).thenReturn(false);
+
+        InvalidAuthCodeException thrown = assertThrows(InvalidAuthCodeException.class, () ->
+                testDataController.deleteCompanyInternal(COMPANY_NUMBER, request));
+        assertEquals(COMPANY_NUMBER, thrown.getCompanyNumber());
+    }
+
+    @Test
+    void deleteCompanyInternalDataException() throws Exception {
+        DataException ex = new DataException("error");
+        doThrow(ex).when(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                testDataController.deleteCompanyInternal(COMPANY_NUMBER, null));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void deleteCompanyInternalNoDataFoundException() throws Exception {
+        NoDataFoundException ex = new NoDataFoundException("Company not found");
+        doThrow(ex).when(testDataService).deleteInternalCompanyData(COMPANY_NUMBER);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.deleteCompanyInternal(COMPANY_NUMBER, null));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void getAcspProfileThrowsNoDataFoundException() throws Exception {
+        String acspNumber = "AP000036";
+        NoDataFoundException ex = new NoDataFoundException("ACSP not found");
+
+        when(testDataService.getAcspProfileData(acspNumber)).thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                testDataController.getAcspProfile(acspNumber));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void deleteAccountPenaltiesWithNonNullRequestButNullTransactionReference() throws Exception {
+        PenaltyDeleteRequest request = new PenaltyDeleteRequest();
+        // transactionReference is null by default
+
+        when(testDataService.deleteAccountPenaltiesData(PENALTY_ID))
+                .thenReturn(ResponseEntity.noContent().build());
+
+        ResponseEntity<Void> response = testDataController.deleteAccountPenalties(PENALTY_ID, request);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(testDataService, times(1)).deleteAccountPenaltiesData(PENALTY_ID);
+    }
+    @Test
     void getCompanyFilingHistoryNoParamsReturnsBadRequest() {
         ResponseEntity<Object> response =
                 testDataController.getCompanyFilingHistory(null, null);

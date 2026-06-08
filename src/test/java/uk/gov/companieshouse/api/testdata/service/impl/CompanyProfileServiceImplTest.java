@@ -156,7 +156,7 @@ class CompanyProfileServiceImplTest {
             assertEquals("/company/" + COMPANY_NUMBER
                     + "/officers", profile.getLinks().getOfficers());
             assertEquals("/company/" + COMPANY_NUMBER
-                    + "/persons-with-significant-control-statement",
+                            + "/persons-with-significant-control-statement",
                     profile.getLinks().getPersonsWithSignificantControlStatement());
         }
 
@@ -1055,7 +1055,7 @@ class CompanyProfileServiceImplTest {
         assertEquals(" PLC", result);
     }
 
-     static Stream<Arguments> companyTypeAndExpectedNameEnding() {
+    static Stream<Arguments> companyTypeAndExpectedNameEnding() {
         return Stream.of(
                 Arguments.of(CompanyType.EEIG, "EEIG"),
                 Arguments.of(CompanyType.EUROPEAN_PUBLIC_LIMITED_LIABILITY_COMPANY_SE, "SE"),
