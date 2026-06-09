@@ -261,27 +261,7 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        Optional<Identity> identityOpt = identityRepository.findByEmail(email);
-
-        if (identityOpt.isPresent()) {
-            var identity = identityOpt.get();
-
-            LOG.info("Found identity for user email={} identityId={}");
-
-            deleteIdentityData(identity, userOpt.get().getId());
-        } else {
-            LOG.debug("No identity associated with email={}");
-        }
-
-        try {
-            repository.delete(userOpt.get());
-            LOG.info("Deleted user email={}");
-        } catch (Exception ex) {
-            LOG.error("Failed to delete user email={}");
-            throw ex;
-        }
-
-        return true;
+        return delete(userOpt.get().getId());
     }
 
     @Override
