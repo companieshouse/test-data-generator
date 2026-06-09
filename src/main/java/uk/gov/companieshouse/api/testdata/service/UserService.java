@@ -14,4 +14,20 @@ public interface UserService extends DataService<UserResponse, UserRequest> {
      * @return an Optional containing the user if found, or empty if not found
      */
     Optional<User> getUserById(String userId);
+
+    /**
+     * Retrieves the roles associated with a given user email.
+     *
+     * @param email the email of the user whose roles are to be retrieved
+     * @return an Optional containing the user if found, or empty if not found
+     */
+    Optional<User> getUserByEmail(String email);
+
+    /**
+     * Deleted the User associated with a given user email.
+     *
+     * @param email the email of the user whose roles are to be retrieved
+     * @return true if the user was deleted, false otherwise
+     */
+    boolean deleteByEmail(String email);
 }

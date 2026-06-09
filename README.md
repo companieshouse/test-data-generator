@@ -124,8 +124,9 @@ In order to use the generator, there are different possible endpoints that can b
     - `identity_verification`: This is optional. It takes a list of `IdentiyVerificationSpec` and creates an `identity` and `uvid`
     
     A usage example looks like this: `{ "password": "password", "roles": [ "GROUPNAME_1", "GROUPNAME_2" ], "is_admin": true, "is_company_auth_allow_list": true, "identity_verification": [{"verification_source": "ONE_LOGIN"}] }`
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` will delete the test user. `userid` is required to delete the user.
-
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/user/{userId}` or `{Base URL}/test-data/user?email={emailAddress}` will delete the test user. `userid` or `email` is required to delete the user.
+  - By deleting the user we delete the mapped identity id, backlog and uvid data
+- 
 #### Creating admin permission
 - POST: Sending a POST request to create admin permission for a user `{Base URL}/test-data/admin-permission` will generate a new admin permission for a user. The request body must include `AdminPermissionSpec` parameter to customise the generated admin permission.
     - `entra_group_id`: The user id of the user. This is mandatory.

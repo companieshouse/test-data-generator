@@ -264,6 +264,25 @@ public class TestDataController {
         }
     }
 
+    @DeleteMapping(value = "/internal/user", params = "email")
+    public ResponseEntity<Map<String, Object>> deleteUserByEmail(
+            @RequestParam("email") String email) throws DataException {
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("email", email);
+
+        boolean deleted = testDataService.deleteUserDataByEmail(email);
+
+        if (deleted) {
+            LOG.info("User deleted", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("User not found", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+    }
+
     @PostMapping("/internal/acsp-members")
     public ResponseEntity<AcspMembersResponse> createAcspMember(
             @Valid @RequestBody AcspMembersRequest request) throws DataException {
