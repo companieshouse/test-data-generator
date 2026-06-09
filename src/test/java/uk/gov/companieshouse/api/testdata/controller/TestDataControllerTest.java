@@ -24,8 +24,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
@@ -35,8 +33,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificati
 import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
@@ -67,11 +63,6 @@ class TestDataControllerTest {
     private static final String CUSTOMER_CODE = "NI23456";
     private static final String PENALTY_REFERENCE = "A1234567";
     private static final String COMPANY_NUMBER = "TC123456";
-    private static final String AUTH_CODE_APPROVAL_ROUTE =
-            "auth_code";
-    private static final String CONFIRMED_STATUS = "confirmed";
-    private static final String USER_ID = "userId";
-    private static final String ASSOCIATION_ID = "associationId";
     private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
     private static final String TRANSACTION_ID = "412123-412123-412123";
 
@@ -86,73 +77,6 @@ class TestDataControllerTest {
 
     @Mock
     private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
-
-    @Test
-    void createUser() throws Exception {
-        UserRequest request = new UserRequest();
-        request.setPassword("password");
-        UserResponse user = new UserResponse("userId", "email@example.com", "Forename", "Surname");
-
-        when(this.testDataService.createUserData(request)).thenReturn(user);
-        ResponseEntity<UserResponse> response = this.testDataController.createUser(request);
-
-        assertEquals(user, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void createUserException() throws Exception {
-        UserRequest request = new UserRequest();
-        request.setPassword("password");
-        Throwable exception = new DataException("Error message");
-
-        when(this.testDataService.createUserData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createUser(request));
-        assertEquals(exception, thrown);
-    }
-
-    @Test
-    void deleteUser() throws Exception {
-        final String userId = "userId";
-
-        when(this.testDataService.deleteUserData(userId)).thenReturn(true);
-
-        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-
-        verify(testDataService).deleteUserData(userId);
-    }
-
-    @Test
-    void deleteUserException() throws Exception {
-        final String userId = "userId";
-        Throwable exception = new DataException("Error message");
-
-        when(this.testDataService.deleteUserData(userId)).thenThrow(exception);
-
-        DataException thrown =
-                assertThrows(DataException.class, () -> this.testDataController.deleteUser(userId));
-        assertEquals(exception, thrown);
-    }
-
-    @Test
-    void deleteUserNotFound() throws Exception {
-        final String userId = "userId";
-
-        when(this.testDataService.deleteUserData(userId)).thenReturn(false);
-
-        ResponseEntity<Map<String, Object>> response = this.testDataController.deleteUser(userId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("userId", response.getBody().get("user id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-
-        verify(testDataService).deleteUserData(userId);
-    }
 
     @Test
     void createAcspMember() throws Exception {
@@ -862,87 +786,6 @@ class TestDataControllerTest {
     }
 
     @Test
-    void createUserCompanyAssociation() throws Exception {
-        UserCompanyAssociationRequest spec =
-                new UserCompanyAssociationRequest();
-        spec.setUserId(USER_ID);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setStatus(CONFIRMED_STATUS);
-        spec.setApprovalRoute(AUTH_CODE_APPROVAL_ROUTE);
-
-        UserCompanyAssociationResponse association =
-                new UserCompanyAssociationResponse(
-                new ObjectId(), COMPANY_NUMBER, USER_ID,
-                        null, CONFIRMED_STATUS, AUTH_CODE_APPROVAL_ROUTE,
-                        null);
-
-        when(this.testDataService.createUserCompanyAssociationData(spec))
-                .thenReturn(association);
-        ResponseEntity<UserCompanyAssociationResponse> response
-                = this.testDataController.createAssociation(spec);
-
-        assertEquals(association, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void createUserCompanyAssociationException() throws Exception {
-        UserCompanyAssociationRequest spec =
-                new UserCompanyAssociationRequest();
-        Throwable exception = new DataException("Error creating an "
-                + "association");
-
-        when(this.testDataService.createUserCompanyAssociationData(spec))
-                .thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createAssociation(spec));
-        assertEquals(exception, thrown);
-    }
-
-    @Test
-    void deleteUserCompanyAssociation() throws Exception {
-        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
-                .thenReturn(true);
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteUserCompanyAssociationData(ASSOCIATION_ID);
-    }
-
-    @Test
-    void deleteUserCompanyAssociationNotFound() throws Exception {
-        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
-                .thenReturn(false);
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAssociation(ASSOCIATION_ID);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals(ASSOCIATION_ID,
-                Objects.requireNonNull(response.getBody()).get(
-                        "association_id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-
-        verify(testDataService, times(1)).deleteUserCompanyAssociationData(ASSOCIATION_ID);
-    }
-
-    @Test
-    void deleteUserCompanyAssociationException() throws Exception {
-        Throwable exception = new DataException("Error deleting "
-                + "association");
-
-        when(this.testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID))
-                .thenThrow(exception);
-
-        DataException thrown = assertThrows(
-                DataException.class,
-                () -> this.testDataController.deleteAssociation(ASSOCIATION_ID));
-        assertEquals(exception, thrown);
-    }
-
-    @Test
     void createTransaction() throws Exception {
         TransactionsRequest request = new TransactionsRequest();
         request.setUserId("rsf3pdwywvse5yz55mfodfx8");
@@ -1443,51 +1286,4 @@ class TestDataControllerTest {
                 .deleteCompanyFilingHistory(companyNumber);
     }
 
-    @Test
-    void deleteUserByEmailSuccess() throws Exception {
-        String email = "test@example.com";
-
-        when(testDataService.deleteUserDataByEmail(email)).thenReturn(true);
-
-        ResponseEntity<Map<String, Object>> response =
-                testDataController.deleteUserByEmail(email);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
-
-        verify(testDataService, times(1)).deleteUserDataByEmail(email);
-    }
-
-    @Test
-    void deleteUserByEmailNotFound() throws Exception {
-        String email = "test@example.com";
-
-        when(testDataService.deleteUserDataByEmail(email)).thenReturn(false);
-
-        ResponseEntity<Map<String, Object>> response =
-                testDataController.deleteUserByEmail(email);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-
-        Map<String, Object> body = response.getBody();
-        assertNotNull(body);
-        assertEquals(email, body.get("email"));
-        assertEquals(HttpStatus.NOT_FOUND, body.get("status"));
-
-        verify(testDataService, times(1)).deleteUserDataByEmail(email);
-    }
-
-    @Test
-    void deleteUserByEmailException() throws Exception {
-        String email = "test@example.com";
-        DataException exception = new DataException("Error deleting user");
-
-        when(testDataService.deleteUserDataByEmail(email)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class,
-                () -> testDataController.deleteUserByEmail(email));
-
-        assertEquals(exception, thrown);
-        verify(testDataService, times(1)).deleteUserDataByEmail(email);
-    }
 }

@@ -13,8 +13,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliver
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
@@ -23,38 +21,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesRespon
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 
 import java.util.Optional;
 
 
 public interface TestDataService {
-
-    /**
-     * Creates a new user test data based on the provided user specifications.
-     *
-     * @param userRequest the specifications of the user to create
-     * @return the created user's test data
-     * @throws DataException if there is an error during user creation
-     */
-    UserResponse createUserData(UserRequest userRequest) throws DataException;
-
-    /**
-     * Deletes a user test data by their user ID.
-     *
-     * @param userId the ID of the user to delete
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteUserData(String userId) throws DataException;
-
-    /**
-     * Deletes an user test data by their user email.
-     *
-     * @param userEmail the email of the user to delete
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteUserDataByEmail(String userEmail) throws DataException;
 
     /**
      * Creates a new acsp member test data based on the provided user specifications.
@@ -237,28 +208,6 @@ public interface TestDataService {
     TransactionsResponse createTransactionData(TransactionsRequest transactionsRequest) throws DataException;
 
     boolean deleteTransaction(String transactionId) throws DataException;
-
-    /**
-     * Creates a new user company association test data based on the
-     * provided user specifications.
-     *
-     * @param userCompanyAssociationRequest the specifications of the
-     *                                   association to create
-     * @return the created user company association test data
-     * @throws DataException if there is an error during creation
-     */
-    UserCompanyAssociationResponse
-    createUserCompanyAssociationData(UserCompanyAssociationRequest userCompanyAssociationRequest)
-            throws DataException;
-
-    /**
-     * Deletes a user company association test data by
-     * association id.
-     *
-     * @param associationId the ID of the association to delete
-     * @throws DataException if there is an error during deletion
-     */
-    boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
 
     AdminPermissionsResponse createAdminPermissionsData(AdminPermissionsRequest spec) throws DataException;
 

@@ -35,8 +35,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
@@ -45,8 +43,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivit
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
@@ -75,17 +71,6 @@ public class TestDataController {
         this.filingHistoryService = filingHistoryService;
     }
 
-    @PostMapping("/internal/user")
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody() UserRequest request)
-            throws DataException {
-        var createdUser = testDataService.createUserData(request);
-        Map<String, Object> data = new HashMap<>();
-        data.put("user email", createdUser.getEmail());
-        data.put("user id", createdUser.getId());
-        LOG.info("New user created", data);
-        return new ResponseEntity<>(createdUser, HttpStatus.CREATED);
-    }
-
     @PostMapping("/internal/admin-permissions")
     public ResponseEntity<AdminPermissionsResponse> createAdminPermissions(
             @Valid @RequestBody AdminPermissionsRequest request) throws DataException {
@@ -112,42 +97,6 @@ public class TestDataController {
         } else {
             response.put(STATUS, HttpStatus.NOT_FOUND);
             LOG.info("Admin permissions not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/internal/user/{userId}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("user id", userId);
-        boolean deleteUser = testDataService.deleteUserData(userId);
-
-        if (deleteUser) {
-            LOG.info("User deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("User not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping(value = "/internal/user", params = "email")
-    public ResponseEntity<Map<String, Object>> deleteUserByEmail(
-            @RequestParam("email") String email) throws DataException {
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("email", email);
-
-        boolean deleted = testDataService.deleteUserDataByEmail(email);
-
-        if (deleted) {
-            LOG.info("User deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("User not found", response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
@@ -394,39 +343,6 @@ public class TestDataController {
 
         return new ResponseEntity<>(acspProfile, HttpStatus.OK);
     }
-
-    @PostMapping("/internal/associations")
-    public ResponseEntity<UserCompanyAssociationResponse> createAssociation(
-            @Valid @RequestBody UserCompanyAssociationRequest request) throws DataException {
-        var createdAssociation =
-                testDataService.createUserCompanyAssociationData(request);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("association_id",
-                createdAssociation.getId());
-        LOG.info("New association created", data);
-        return new ResponseEntity<>(createdAssociation, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/internal/associations/{associationId}")
-    public ResponseEntity<Map<String, Object>> deleteAssociation(@PathVariable("associationId")
-                                                                 String associationId)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("association_id", associationId);
-        boolean deleteAssociation =
-                testDataService.deleteUserCompanyAssociationData(associationId);
-
-        if (deleteAssociation) {
-            LOG.info("Association is deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Association is not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
 
     @PostMapping("/internal/transactions")
     public ResponseEntity<TransactionsResponse> createTransaction(
