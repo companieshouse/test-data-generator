@@ -22,7 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
-import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -43,7 +43,7 @@ public class InternalCompanyController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private final CreateCompanyWorkflowService createCompanyWorkflowService;
-    private final DeleteCompanyService deleteCompanyService;
+    private final DeleteCompanyWorkflowService deleteCompanyWorkflowService;
     private final CompanyAuthCodeService companyAuthCodeService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
@@ -52,10 +52,10 @@ public class InternalCompanyController {
 
     public InternalCompanyController(
             CreateCompanyWorkflowService createCompanyWorkflowService,
-            DeleteCompanyService deleteCompanyService,
+            DeleteCompanyWorkflowService deleteCompanyWorkflowService,
             CompanyAuthCodeService companyAuthCodeService) {
         this.createCompanyWorkflowService = createCompanyWorkflowService;
-        this.deleteCompanyService = deleteCompanyService;
+        this.deleteCompanyWorkflowService = deleteCompanyWorkflowService;
         this.companyAuthCodeService = companyAuthCodeService;
     }
 
@@ -85,7 +85,7 @@ public class InternalCompanyController {
                 && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
             throw new InvalidAuthCodeException(companyNumber);
         }
-        deleteCompanyService.deleteCompany(companyNumber);
+        deleteCompanyWorkflowService.deleteCompany(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);

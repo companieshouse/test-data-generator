@@ -21,7 +21,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDe
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
-import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
@@ -57,7 +57,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     private final CompanySearchService companySearchService;
     private final CompanySearchService alphabeticalCompanySearch;
     private final CompanySearchService advancedCompanySearch;
-    private final DeleteCompanyService deleteCompanyService;
+    private final DeleteCompanyWorkflowService deleteCompanyWorkflowService;
 
     @Value("${api.url}")
     private String apiUrl;
@@ -89,7 +89,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             @Qualifier("alphabeticalCompanySearchService")
             CompanySearchService alphabeticalCompanySearch,
             @Qualifier("advancedCompanySearchService") CompanySearchService advancedCompanySearch,
-            DeleteCompanyService deleteCompanyService) {
+            DeleteCompanyWorkflowService deleteCompanyWorkflowService) {
         this.companyProfileService = companyProfileService;
         this.filingHistoryService = filingHistoryService;
         this.companyAuthCodeService = companyAuthCodeService;
@@ -104,7 +104,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         this.companySearchService = companySearchService;
         this.alphabeticalCompanySearch = alphabeticalCompanySearch;
         this.advancedCompanySearch = advancedCompanySearch;
-        this.deleteCompanyService = deleteCompanyService;
+        this.deleteCompanyWorkflowService = deleteCompanyWorkflowService;
     }
 
     @Override
@@ -311,7 +311,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         LOG.error("Failed to create company data for company number", ex, data);
 
         try {
-            deleteCompanyService.deleteCompany(companyNumber);
+            deleteCompanyWorkflowService.deleteCompany(companyNumber);
         } catch (Exception rollbackException) {
             LOG.error("Rollback delete failed for company number " + companyNumber, rollbackException);
         }

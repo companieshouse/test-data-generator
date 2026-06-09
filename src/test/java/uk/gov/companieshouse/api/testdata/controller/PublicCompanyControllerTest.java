@@ -18,7 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
-import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -37,7 +37,7 @@ class PublicCompanyControllerTest {
     private CreateCompanyWorkflowService createCompanyWorkflowService;
 
     @Mock
-    private DeleteCompanyService deleteCompanyService;
+    private DeleteCompanyWorkflowService deleteCompanyWorkflowService;
 
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
@@ -118,7 +118,7 @@ class PublicCompanyControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(deleteCompanyService).deleteCompany(companyNumber);
+        verify(deleteCompanyWorkflowService).deleteCompany(companyNumber);
     }
 
     @Test
@@ -131,7 +131,7 @@ class PublicCompanyControllerTest {
                 .thenReturn(true);
 
         DataException ex = new DataException("Error message");
-        doThrow(ex).when(deleteCompanyService).deleteCompany(companyNumber);
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(companyNumber);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> publicCompanyController.deleteCompany(companyNumber, request));

@@ -21,7 +21,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
-import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -42,7 +42,7 @@ class InternalCompanyControllerTest {
     private CreateCompanyWorkflowService createCompanyWorkflowService;
 
     @Mock
-    private DeleteCompanyService deleteCompanyService;
+    private DeleteCompanyWorkflowService deleteCompanyWorkflowService;
 
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
@@ -134,7 +134,7 @@ class InternalCompanyControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(deleteCompanyService).deleteCompany(COMPANY_NUMBER);
+        verify(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
     }
 
     @Test
@@ -148,7 +148,7 @@ class InternalCompanyControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(deleteCompanyService).deleteCompany(COMPANY_NUMBER);
+        verify(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
     }
 
     @Test
@@ -166,7 +166,7 @@ class InternalCompanyControllerTest {
     @Test
     void deleteCompanyInternalDataException() throws Exception {
         DataException ex = new DataException("error");
-        doThrow(ex).when(deleteCompanyService).deleteCompany(COMPANY_NUMBER);
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
 
         DataException thrown = assertThrows(DataException.class,
                 () -> internalCompanyController.deleteCompany(COMPANY_NUMBER, null));
@@ -176,7 +176,7 @@ class InternalCompanyControllerTest {
     @Test
     void deleteCompanyInternalNoDataFoundException() throws Exception {
         NoDataFoundException ex = new NoDataFoundException("Company not found");
-        doThrow(ex).when(deleteCompanyService).deleteCompany(COMPANY_NUMBER);
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class,
                 () -> internalCompanyController.deleteCompany(COMPANY_NUMBER, null));

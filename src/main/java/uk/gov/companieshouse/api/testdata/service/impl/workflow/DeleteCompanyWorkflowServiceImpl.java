@@ -16,11 +16,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyService {
+public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
@@ -87,7 +87,6 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyService {
 
     @Override
     public void deleteCompany(String companyNumber) throws DataException, NoDataFoundException {
-
         LOG.info("Attempting to delete company with company number: " + companyNumber);
 
         if (!companyProfileService.companyExists(companyNumber)) {
@@ -101,14 +100,12 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyService {
         deleteCompanyData(companyNumber, suppressedExceptions);
 
         if (!suppressedExceptions.isEmpty()) {
-
             LOG.error("Errors occurred while deleting company data for company number: " + companyNumber);
 
             var errorMessage = new StringBuilder(
                     "Error deleting company data. Details: ");
 
             for (var i = 0; i < suppressedExceptions.size(); i++) {
-
                 var ex = suppressedExceptions.get(i);
 
                 errorMessage.append(" [")
@@ -128,7 +125,6 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyService {
 
             var ex = new DataException(errorMessage.toString());
             suppressedExceptions.forEach(ex::addSuppressed);
-
             throw ex;
         }
 

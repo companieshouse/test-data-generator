@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
+import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
@@ -80,7 +80,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
-    @Mock private DeleteCompanyService deleteCompanyService;
+    @Mock private DeleteCompanyWorkflowService deleteCompanyWorkflowService;
     @Mock private Appointment commonAppointment;
 
     private CreateCompanyWorkflowServiceImpl creationService;
@@ -131,7 +131,7 @@ class CreateCompanyWorkflowServiceImplTest {
                 companySearchService,
                 alphabeticalCompanySearch,
                 advancedCompanySearch,
-                deleteCompanyService);
+                deleteCompanyWorkflowService);
         creationService.setAPIUrl(API_URL);
         creationService.setElasticSearchDeployed(false);
     }
@@ -305,7 +305,7 @@ class CreateCompanyWorkflowServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointments(capturedSpec);
         verify(metricsService).create(capturedSpec);
-        verify(deleteCompanyService).deleteCompany(fullCompanyNumber);
+        verify(deleteCompanyWorkflowService).deleteCompany(fullCompanyNumber);
     }
 
     @Test
@@ -313,7 +313,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> creationService.createInternalCompany(null));
         verify(companyProfileService, never()).create(any());
-        verify(deleteCompanyService, never()).deleteCompany(any());
+        verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
     }
 
     @Test
@@ -813,7 +813,7 @@ class CreateCompanyWorkflowServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointments(capturedSpec);
         verify(metricsService).create(capturedSpec);
-        verify(deleteCompanyService).deleteCompany(fullCompanyNumber);
+        verify(deleteCompanyWorkflowService).deleteCompany(fullCompanyNumber);
     }
 
     @Test
@@ -846,7 +846,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createCompanyDataNullSpec() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> creationService.createCompany(null));
-        verify(deleteCompanyService, never()).deleteCompany(any());
+        verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
         verify(companyProfileService, never()).create(any());
     }
 
