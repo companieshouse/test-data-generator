@@ -2654,4 +2654,114 @@ class TestDataServiceImplTest {
 
         verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
     }
+
+    @Test
+    void deleteUserDataByEmailUserNotFoundReturnsFalse() {
+        String email = "test@example.com";
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.empty());
+
+        boolean result = testDataService.deleteUserDataByEmail(email);
+
+        assertFalse(result);
+        verify(userService, times(1)).getUserByEmail(email);
+        verify(userService, never()).deleteByEmail(anyString());
+        verify(companyAuthAllowListService, never()).delete(anyString());
+    }
+
+    @Test
+    void deleteUserDataByEmailSuccessWithAllowList() {
+        String email = "test@example.com";
+
+        User user = new User();
+        user.setEmail(email);
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(companyAuthAllowListService.getAuthId(email)).thenReturn("allowId");
+        when(userService.deleteByEmail(email)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserDataByEmail(email);
+
+        assertTrue(result);
+
+        verify(userService).getUserByEmail(email);
+        verify(companyAuthAllowListService).getAuthId(email);
+        verify(companyAuthAllowListService).delete("allowId");
+        verify(userService).deleteByEmail(email);
+    }
+
+    @Test
+    void deleteUserDataByEmailSuccessNoAllowList() {
+        String email = "test@example.com";
+
+        User user = new User();
+        user.setEmail(email);
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(companyAuthAllowListService.getAuthId(email)).thenReturn(null);
+        when(userService.deleteByEmail(email)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserDataByEmail(email);
+
+        assertTrue(result);
+
+        verify(companyAuthAllowListService).getAuthId(email);
+        verify(companyAuthAllowListService, never()).delete(anyString());
+        verify(userService).deleteByEmail(email);
+    }
+
+    @Test
+    void deleteUserDataByEmailUserWithNullEmailSkipsAllowList() {
+        String email = "test@example.com";
+
+        User user = new User();
+        user.setEmail(null);
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(userService.deleteByEmail(email)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserDataByEmail(email);
+
+        assertTrue(result);
+
+        verify(companyAuthAllowListService, never()).getAuthId(anyString());
+        verify(companyAuthAllowListService, never()).delete(anyString());
+        verify(userService).deleteByEmail(email);
+    }
+
+    @Test
+    void deleteUserDataByEmailUserWithEmptyEmailSkipsAllowList() {
+        String email = "test@example.com";
+
+        User user = new User();
+        user.setEmail("");
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(userService.deleteByEmail(email)).thenReturn(true);
+
+        boolean result = testDataService.deleteUserDataByEmail(email);
+
+        assertTrue(result);
+
+        verify(companyAuthAllowListService, never()).getAuthId(anyString());
+        verify(companyAuthAllowListService, never()).delete(anyString());
+        verify(userService).deleteByEmail(email);
+    }
+
+    @Test
+    void deleteUserDataByEmailDeleteReturnsFalse() {
+        String email = "test@example.com";
+
+        User user = new User();
+        user.setEmail(email);
+
+        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
+        when(companyAuthAllowListService.getAuthId(email)).thenReturn(null);
+        when(userService.deleteByEmail(email)).thenReturn(false);
+
+        boolean result = testDataService.deleteUserDataByEmail(email);
+
+        assertFalse(result);
+        verify(userService).deleteByEmail(email);
+    }
 }

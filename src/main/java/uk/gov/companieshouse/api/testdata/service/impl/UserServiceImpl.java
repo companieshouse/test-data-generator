@@ -250,7 +250,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
     public boolean deleteByEmail(String email) {
         LOG.info("delete called for email={}");
 

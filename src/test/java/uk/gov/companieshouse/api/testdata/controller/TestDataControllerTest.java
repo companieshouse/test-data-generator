@@ -1926,4 +1926,52 @@ class TestDataControllerTest {
         verify(filingHistoryService, times(1))
                 .deleteCompanyFilingHistory(companyNumber);
     }
+
+    @Test
+    void deleteUserByEmailSuccess() throws Exception {
+        String email = "test@example.com";
+
+        when(testDataService.deleteUserDataByEmail(email)).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response =
+                testDataController.deleteUserByEmail(email);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+
+        verify(testDataService, times(1)).deleteUserDataByEmail(email);
+    }
+
+    @Test
+    void deleteUserByEmailNotFound() throws Exception {
+        String email = "test@example.com";
+
+        when(testDataService.deleteUserDataByEmail(email)).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response =
+                testDataController.deleteUserByEmail(email);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        Map<String, Object> body = response.getBody();
+        assertNotNull(body);
+        assertEquals(email, body.get("email"));
+        assertEquals(HttpStatus.NOT_FOUND, body.get("status"));
+
+        verify(testDataService, times(1)).deleteUserDataByEmail(email);
+    }
+
+    @Test
+    void deleteUserByEmailException() throws Exception {
+        String email = "test@example.com";
+        DataException exception = new DataException("Error deleting user");
+
+        when(testDataService.deleteUserDataByEmail(email)).thenThrow(exception);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> testDataController.deleteUserByEmail(email));
+
+        assertEquals(exception, thrown);
+        verify(testDataService, times(1)).deleteUserDataByEmail(email);
+    }
 }
