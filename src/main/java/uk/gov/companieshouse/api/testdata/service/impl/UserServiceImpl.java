@@ -188,116 +188,99 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    private void deleteIdentityData(Identity identity, String userId) {
+        try {
+            uvidRepository.deleteByIdentityId(identity.getId());
+            LOG.debug("Deleted UVIDs for identityId={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete UVIDs for identityId={}");
+            throw ex;
+        }
+
+        try {
+            identityRepository.delete(identity);
+            LOG.debug("Deleted identity id={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete identity id={}");
+            throw ex;
+        }
+
+        try {
+            backlogRepository.deleteByUserId(userId);
+            LOG.debug("Deleted backlog for userId={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete backlog for userId={}");
+            throw ex;
+        }
+    }
+
     @Override
     @Transactional
     public boolean delete(String userId) {
-        LOG.info("delete called for userId= " + userId);
+        LOG.info("delete called for userId={}");
+
         var userOpt = repository.findById(userId);
         if (userOpt.isEmpty()) {
-            LOG.debug("User not found for id=  " + userId);
+            LOG.debug("User not found for id={}");
             return false;
         }
 
         Optional<Identity> identityOpt = identityRepository.findByUserId(userId);
+
         if (identityOpt.isPresent()) {
             var identity = identityOpt.get();
-            LOG.info("Found identity for userId = "
-                    + userId
-                    + "Identity_id = " + identity.getId());
-            try {
-                uvidRepository.deleteByIdentityId(identity.getId());
-                LOG.debug("Deleted UVIDs for identityId = " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to delete UVIDs for identityId = "
-                        + identity.getId() + ex.getMessage());
-                throw ex;
-            }
 
-            try {
-                identityRepository.delete(identity);
-                LOG.debug("Deleted identity id= " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to delete identity id= "
-                        + identity.getId() +  ex.getMessage());
-                throw ex;
-            }
+            LOG.info("Found identity for userId={} identityId={}"
+            );
 
-            try {
-                backlogRepository.deleteByUserId(identity.getUserId());
-                LOG.debug("Deleted backlog for identity id = " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to backlog for identity id = "
-                        + identity.getId() + ex.getMessage());
-                throw ex;
-            }
-
+            deleteIdentityData(identity, userId);
         } else {
-            LOG.debug("No identity associated with userId= " + userId);
+            LOG.debug("No identity associated with userId={}");
         }
 
         try {
             repository.delete(userOpt.get());
-            LOG.info("Deleted user id= " + userId);
+            LOG.info("Deleted user id={}");
         } catch (Exception ex) {
-            LOG.error("Failed to delete user id " + userId, ex);
+            LOG.error("Failed to delete user id={}");
             throw ex;
         }
+
         return true;
     }
 
+    @Override
+    @Transactional
     public boolean deleteByEmail(String email) {
-        LOG.info("delete called for email= " + email);
+        LOG.info("delete called for email={}");
+
         var userOpt = repository.findByEmail(email);
 
         if (userOpt.isEmpty()) {
-            LOG.debug("User not found for email=  " + email);
+            LOG.debug("User not found for email={}");
             return false;
         }
 
         Optional<Identity> identityOpt = identityRepository.findByEmail(email);
+
         if (identityOpt.isPresent()) {
             var identity = identityOpt.get();
-            LOG.info("Found identity for user email = "
-                    + email
-                    + "Identity_id = " + identity.getId());
-            try {
-                uvidRepository.deleteByIdentityId(identity.getId());
-                LOG.debug("Deleted UVIDs for identityId = " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to delete UVIDs for identityId = "
-                        + identity.getId() + ex.getMessage());
-                throw ex;
-            }
 
-            try {
-                identityRepository.delete(identity);
-                LOG.debug("Deleted identity id= " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to delete identity id= "
-                        + identity.getId() +  ex.getMessage());
-                throw ex;
-            }
+            LOG.info("Found identity for user email={} identityId={}");
 
-            try {
-                backlogRepository.deleteByUserId(String.valueOf(userOpt.map(User::getId)));
-                LOG.debug("Deleted backlog for identity id = " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to backlog for identity id = "
-                        + identity.getId() + ex.getMessage());
-                throw ex;
-            }
-
+            deleteIdentityData(identity, userOpt.get().getId());
         } else {
-            LOG.debug("No identity associated with email= " + email);
+            LOG.debug("No identity associated with email={}");
         }
 
         try {
             repository.delete(userOpt.get());
-            LOG.info("Deleted user email= " + email);
+            LOG.info("Deleted user email={}");
         } catch (Exception ex) {
-            LOG.error("Failed to delete user email " + email, ex);
+            LOG.error("Failed to delete user email={}");
             throw ex;
         }
+
         return true;
     }
 
