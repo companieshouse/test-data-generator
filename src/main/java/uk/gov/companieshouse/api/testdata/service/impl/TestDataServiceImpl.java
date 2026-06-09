@@ -172,6 +172,22 @@ public class TestDataServiceImpl implements TestDataService {
         return this.userService.delete(userId);
     }
 
+    @Override
+    public boolean deleteUserDataByEmail(String email) {
+        var user = userService.getUserByEmail(email).orElse(null);
+
+        if (user == null) {
+            return false;
+        }
+        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
+            var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
+            if (allowListId != null) {
+                companyAuthAllowListService.delete(allowListId);
+            }
+        }
+        return this.userService.deleteByEmail(email);
+    }
+
 
     @Override
     public AcspMembersResponse createAcspMembersData(final AcspMembersRequest spec) throws DataException {

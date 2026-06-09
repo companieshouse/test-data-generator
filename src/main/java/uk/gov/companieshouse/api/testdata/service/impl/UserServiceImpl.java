@@ -188,60 +188,92 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    @Transactional
-    public boolean delete(String userId) {
-        LOG.info("delete called for userId= " + userId);
-        var userOpt = repository.findById(userId);
-        if (userOpt.isEmpty()) {
-            LOG.debug("User not found for id=  " + userId);
-            return false;
-        }
+    private void deleteIdentityData(Identity identity, String userId) {
 
-        Optional<Identity> identityOpt = identityRepository.findByUserId(userId);
-        if (identityOpt.isPresent()) {
-            var identity = identityOpt.get();
-            LOG.info("Found identity for userId = "
-                    + userId
-                    + "Identity_id = " + identity.getId());
-            try {
-                uvidRepository.deleteByIdentityId(identity.getId());
-                LOG.debug("Deleted UVIDs for identityId = " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to delete UVIDs for identityId = "
-                        + identity.getId() + ex.getMessage());
-                throw ex;
-            }
-
-            try {
-                identityRepository.delete(identity);
-                LOG.debug("Deleted identity id= " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to delete identity id= "
-                        + identity.getId() +  ex.getMessage());
-                throw ex;
-            }
-
-            try {
-                backlogRepository.deleteByUserId(identity.getUserId());
-                LOG.debug("Deleted backlog for identity id = " + identity.getId());
-            } catch (Exception ex) {
-                LOG.error("Failed to backlog for identity id = "
-                        + identity.getId() + ex.getMessage());
-                throw ex;
-            }
-
-        } else {
-            LOG.debug("No identity associated with userId= " + userId);
+        try {
+            uvidRepository.deleteByIdentityId(identity.getId());
+            LOG.debug("Deleted UVIDs for identityId={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete UVIDs for identityId={}");
+            throw ex;
         }
 
         try {
-            repository.delete(userOpt.get());
-            LOG.info("Deleted user id= " + userId);
+            identityRepository.delete(identity);
+            LOG.debug("Deleted identity id={}");
         } catch (Exception ex) {
-            LOG.error("Failed to delete user id " + userId, ex);
+            LOG.error("Failed to delete identity id={}");
             throw ex;
         }
+
+        try {
+            backlogRepository.deleteByUserId(userId);
+            LOG.debug("Deleted backlog for userId={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete backlog for userId={}");
+            throw ex;
+        }
+    }
+
+    private void deleteUserAndIdentity(User user, Optional<Identity> identityOpt) {
+
+        if (identityOpt.isPresent()) {
+            Identity identity = identityOpt.get();
+
+            LOG.info("Found identity for userId={} identityId={}"
+            );
+
+            deleteIdentityData(identity, user.getId());
+        } else {
+            LOG.debug("No identity associated with userId={}");
+        }
+
+        try {
+            repository.delete(user);
+            LOG.info("Deleted user id={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete user id={}");
+            throw ex;
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(String userId) {
+
+        LOG.info("delete called for userId={}");
+
+        var userOpt = repository.findById(userId);
+
+        if (userOpt.isEmpty()) {
+            LOG.debug("User not found for id={}");
+            return false;
+        }
+
+        deleteUserAndIdentity(
+                userOpt.get(),
+                identityRepository.findByUserId(userId));
+
+        return true;
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteByEmail(String email) {
+
+        LOG.info("delete called for email={}");
+
+        var userOpt = repository.findByEmail(email);
+
+        if (userOpt.isEmpty()) {
+            LOG.debug("User not found for email={}");
+            return false;
+        }
+
+        deleteUserAndIdentity(
+                userOpt.get(),
+                identityRepository.findByEmail(email));
+
         return true;
     }
 
@@ -250,6 +282,14 @@ public class UserServiceImpl implements UserService {
         LOG.debug("getUserById called for userId= " + userId);
         var result = repository.findById(userId);
         LOG.debug("getUserById found={}");
+        return result;
+    }
+
+    @Override
+    public Optional<User> getUserByEmail(String email) {
+        LOG.debug("getUserByEmail called for email= " + email);
+        var result = repository.findByEmail(email);
+        LOG.debug("getUserByEmail found={}");
         return result;
     }
 
