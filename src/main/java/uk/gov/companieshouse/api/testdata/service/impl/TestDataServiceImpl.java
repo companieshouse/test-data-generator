@@ -8,8 +8,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
@@ -22,7 +20,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliver
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
@@ -41,8 +38,6 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
@@ -62,10 +57,6 @@ public class TestDataServiceImpl implements TestDataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @Autowired
-    private CompanyProfileService companyProfileService;
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -102,26 +93,6 @@ public class TestDataServiceImpl implements TestDataService {
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
     @Autowired
     private ItemGroupsService itemGroupsService;
-
-    @Override
-    public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
-            throws NoDataFoundException, DataException {
-
-        return companyProfileService.updateCompanyProfile(request);
-    }
-
-    @Override
-    public CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
-            throws DataException, NoDataFoundException {
-        try {
-            return companyAuthCodeService.findOrCreate(companyNumber);
-        } catch (NoDataFoundException ex) {
-            throw new NoDataFoundException(
-                    "Company profile not found when finding or creating auth code");
-        } catch (Exception ex) {
-            throw new DataException("Error finding or creating company auth code", ex);
-        }
-    }
 
     @Override
     public UserResponse createUserData(UserRequest userRequest) throws DataException {

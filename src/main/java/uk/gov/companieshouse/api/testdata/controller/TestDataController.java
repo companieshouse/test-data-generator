@@ -23,7 +23,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
@@ -36,7 +35,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
@@ -44,8 +42,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersRespons
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
@@ -77,48 +73,6 @@ public class TestDataController {
         this.testDataService = testDataService;
         this.verifiedIdentityService = verifiedIdentityService;
         this.filingHistoryService = filingHistoryService;
-    }
-
-    @GetMapping("internal/company/authcode")
-    public ResponseEntity<CompanyAuthCodeResponse> findOrCreateCompanyAuthCode(
-            @RequestParam("companyNumber") final String companyNumber)
-            throws DataException, NoDataFoundException {
-
-        if (companyNumber == null || companyNumber.isEmpty()) {
-            throw new DataException("companyNumber query parameter is required");
-        }
-
-        var authCode = testDataService.findOrCreateCompanyAuthCode(companyNumber);
-        var defaultAuthCode = new CompanyAuthCodeResponse(authCode.getAuthCode());
-        return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
-    }
-
-    @PutMapping("/internal/update-company")
-    public ResponseEntity<Object> updateCompany(
-            @Valid @RequestBody UpdateCompanyRequest request) {
-
-        try {
-            CompanyProfile updatedCompany =
-                    testDataService.updateCompanyData(request);
-
-            CompanyUpdateResponse response = new CompanyUpdateResponse(
-                    updatedCompany.getCompanyNumber(),
-                    "updated"
-            );
-
-            return ResponseEntity.ok(response);
-
-        } catch (NoDataFoundException ex) {
-            Map<String, Object> errorBody = new HashMap<>();
-            errorBody.put(ERROR, ex.getMessage());
-            errorBody.put(STATUS, HttpStatus.NOT_FOUND.value());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody);
-        } catch (DataException ex) {
-            Map<String, Object> errorBody = new HashMap<>();
-            errorBody.put(ERROR, ex.getMessage());
-            errorBody.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
-        }
     }
 
     @PostMapping("/internal/user")

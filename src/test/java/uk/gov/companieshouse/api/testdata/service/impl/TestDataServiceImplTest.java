@@ -15,8 +15,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.CertifiedCopies;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
@@ -31,7 +29,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliver
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
@@ -49,8 +46,6 @@ import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
@@ -96,10 +91,6 @@ class TestDataServiceImplTest {
     private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
     private static final String TRANSACTION_ID = "903085-903085-903085";
 
-    @Mock
-    private CompanyProfileService companyProfileService;
-    @Mock
-    private CompanyAuthCodeService companyAuthCodeService;
     @Mock
     private UserService userService;
     @Mock
@@ -185,53 +176,6 @@ class TestDataServiceImplTest {
         return testDataService.deleteAcspMembersData(acspMemberId);
     }
 
-    @Test
-    void updateCompanyDataSuccess() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        CompanyProfile expectedProfile = new CompanyProfile();
-        expectedProfile.setCompanyNumber(COMPANY_NUMBER);
-
-        when(companyProfileService.updateCompanyProfile(request)).thenReturn(expectedProfile);
-
-        CompanyProfile actualProfile = testDataService.updateCompanyData(request);
-
-        assertEquals(expectedProfile, actualProfile);
-        verify(companyProfileService, times(1)).updateCompanyProfile(request);
-    }
-
-    @Test
-    void updateCompanyDataNotFound() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        String errorMessage = "Company not found";
-        when(companyProfileService.updateCompanyProfile(request))
-                .thenThrow(new NoDataFoundException(errorMessage));
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.updateCompanyData(request));
-
-        assertEquals(errorMessage, thrown.getMessage());
-        verify(companyProfileService, times(1)).updateCompanyProfile(request);
-    }
-
-    @Test
-    void updateCompanyDataException() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        String errorMessage = "Database error";
-        when(companyProfileService.updateCompanyProfile(request))
-                .thenThrow(new DataException(errorMessage));
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.updateCompanyData(request));
-
-        assertEquals(errorMessage, thrown.getMessage());
-        verify(companyProfileService, times(1)).updateCompanyProfile(request);
-    }
 
     @Test
     void createUserDataThrowsExceptionWhenPasswordIsNull() {
@@ -1623,43 +1567,6 @@ class TestDataServiceImplTest {
         assertEquals("Error deleting appeals data", exception.getMessage());
         assertEquals(ex, exception.getCause());
         verify(combinedSicActivitiesService, times(1)).delete(SIC_ACTIVITY_ID);
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_successReturnsAuthCode() throws Exception {
-        CompanyAuthCode expected = new CompanyAuthCode();
-        expected.setId(COMPANY_NUMBER);
-        expected.setAuthCode("999999");
-
-        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenReturn(expected);
-
-        CompanyAuthCode actual = testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER);
-
-        assertSame(expected, actual);
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_profileNotFoundIsMappedToNoDataFoundException() throws Exception {
-        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER))
-                .thenThrow(new NoDataFoundException("profile missing"));
-
-        NoDataFoundException ex = assertThrows(NoDataFoundException.class,
-                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
-
-        assertEquals("Company profile not found when finding or creating auth code", ex.getMessage());
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_otherExceptionIsWrappedInDataException() throws Exception {
-        RuntimeException cause = new RuntimeException("boom");
-        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(cause);
-
-        DataException ex = assertThrows(DataException.class,
-                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
-
-        assertEquals("Error finding or creating company auth code", ex.getMessage());
-        // ensure original cause is preserved
-        assertSame(cause, ex.getCause());
     }
 
     @Test

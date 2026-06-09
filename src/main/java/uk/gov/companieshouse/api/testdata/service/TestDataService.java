@@ -4,8 +4,6 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
@@ -15,7 +13,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliver
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
@@ -33,17 +30,6 @@ import java.util.Optional;
 
 
 public interface TestDataService {
-
-    /**
-     * Updates the company profile data for the company number provided and {@link UpdateCompanyRequest}
-     *
-     * @param request the update request with company number as mandatory
-     * @return the status of the update request
-     * @throws NoDataFoundException if the company number cannot be found
-     * @throws DataException if the company profile cannot be updated
-     */
-    CompanyProfile updateCompanyData(
-            UpdateCompanyRequest request) throws NoDataFoundException, DataException;
 
     /**
      * Creates a new user test data based on the provided user specifications.
@@ -284,17 +270,6 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAdminPermissionsData(String id) throws DataException;
-
-    /**
-     * Find an existing CompanyAuthCode for the given company number
-     * or create a default one if none exists.
-     * @param companyNumber the company number
-     * @return the existing or newly created CompanyAuthCode
-     * @throws DataException on general errors
-     * @throws NoDataFoundException if the company profile is not found
-     */
-    CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
-            throws DataException, NoDataFoundException;
 
     /**
      * Deletes the Item Groups test data for the given order number.

@@ -11,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
@@ -26,7 +24,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
@@ -34,8 +31,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersRespons
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
@@ -91,64 +86,6 @@ class TestDataControllerTest {
 
     @Mock
     private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
-
-    @Test
-    void updateCompanySuccess() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        CompanyProfile updatedProfile = new CompanyProfile();
-        updatedProfile.setCompanyNumber(COMPANY_NUMBER);
-
-        when(this.testDataService.updateCompanyData(request)).thenReturn(updatedProfile);
-
-        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
-
-        assertNotNull(response.getBody());
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-
-        CompanyUpdateResponse body = (CompanyUpdateResponse) response.getBody();
-        assertEquals(COMPANY_NUMBER, body.getCompanyNumber());
-        assertEquals("updated", body.getStatus());
-
-        verify(testDataService).updateCompanyData(request);
-    }
-
-    @Test
-    void updateCompanyNotFound() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        String errorMessage = "Company not found";
-        when(this.testDataService.updateCompanyData(request))
-                .thenThrow(new NoDataFoundException(errorMessage));
-
-        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-
-        Map<String, Object> body = (Map<String, Object>) response.getBody();
-        assertEquals(errorMessage, body.get("error"));
-        assertEquals(HttpStatus.NOT_FOUND.value(), body.get("status"));
-    }
-
-    @Test
-    void updateCompanyDataException() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        String errorMessage = "Internal server error";
-        when(this.testDataService.updateCompanyData(request))
-                .thenThrow(new DataException(errorMessage));
-
-        ResponseEntity<Object> response = this.testDataController.updateCompany(request);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-
-        Map<String, Object> body = (Map<String, Object>) response.getBody();
-        assertEquals(errorMessage, body.get("error"));
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), body.get("status"));
-    }
 
     @Test
     void createUser() throws Exception {
@@ -1265,58 +1202,6 @@ class TestDataControllerTest {
         verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
     }
 
-    @Test
-    void findOrCreateCompanyAuthCode_success() throws Exception {
-        String companyNumber = "12345678";
-        var authCode = new CompanyAuthCode();
-        authCode.setId(companyNumber);
-        authCode.setAuthCode("CODE123");
-
-        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenReturn(authCode);
-
-        ResponseEntity<CompanyAuthCodeResponse> response =
-                testDataController.findOrCreateCompanyAuthCode(companyNumber);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertEquals("CODE123", response.getBody().getAuthCode());
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_nullCompanyNumber_throwsDataException() {
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(null));
-        assertEquals("companyNumber query parameter is required", thrown.getMessage());
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_emptyCompanyNumber_throwsDataException() {
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(""));
-        assertEquals("companyNumber query parameter is required", thrown.getMessage());
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_serviceThrowsDataException() throws Exception {
-        String companyNumber = "12345678";
-        DataException ex = new DataException("Service error");
-        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(companyNumber));
-        assertEquals(ex, thrown);
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_serviceThrowsNoDataFoundException() throws Exception {
-        String companyNumber = "12345678";
-        NoDataFoundException ex = new NoDataFoundException("Not found");
-        when(testDataService.findOrCreateCompanyAuthCode(companyNumber)).thenThrow(ex);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.findOrCreateCompanyAuthCode(companyNumber));
-        assertEquals(ex, thrown);
-    }
 
     @Test
     void getAcspProfileFound() throws Exception {
