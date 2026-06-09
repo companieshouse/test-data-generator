@@ -143,7 +143,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertEquals(expectedJurisdiction, capturedSpec.getJurisdiction());
         verify(filingHistoryService, times(1)).create(capturedSpec);
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
-        verify(appointmentService, times(1)).createAppointments(capturedSpec);
+        verify(appointmentService, times(1)).createAppointment(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscService, times(1)).create(capturedSpec);
@@ -303,7 +303,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).createAppointments(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verify(deleteCompanyWorkflowService).deleteCompany(fullCompanyNumber);
     }
@@ -326,7 +326,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         creationService.createInternalCompany(spec);
 
-        verify(appointmentService, times(1)).createAppointments(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -339,7 +339,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         creationService.createInternalCompany(spec);
 
-        verify(appointmentService, times(1)).createAppointments(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -352,7 +352,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         creationService.createInternalCompany(spec);
 
-        verify(appointmentService, never()).createAppointments(spec);
+        verify(appointmentService, never()).createAppointment(spec);
     }
 
     private CompanyProfileResponse createCompanyDataWithRegisters(CompanyRequest spec) throws Exception {
@@ -596,7 +596,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         when(companyProfileService.create(any(CompanyRequest.class))).thenReturn(companyProfile);
         when(filingHistoryService.create(any(CompanyRequest.class))).thenReturn(filingHistory);
-        when(appointmentService.createAppointments(any(CompanyRequest.class)))
+        when(appointmentService.createAppointment(any(CompanyRequest.class)))
                 .thenReturn(appointments);
         when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(authCode);
         when(metricsService.create(any(CompanyRequest.class))).thenReturn(companyMetrics);
@@ -615,7 +615,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertTrue(capturedSpec.getCompanyWithPopulatedStructureOnly());
 
         verify(filingHistoryService, times(1)).create(capturedSpec);
-        verify(appointmentService, times(1)).createAppointments(capturedSpec);
+        verify(appointmentService, times(1)).createAppointment(capturedSpec);
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
@@ -660,7 +660,7 @@ class CreateCompanyWorkflowServiceImplTest {
         creationService.buildCompanyDataStructure(spec);
 
         CompanyRequest capturedSpec = captureCompanySpec();
-        verify(appointmentService, never()).createAppointments(capturedSpec);
+        verify(appointmentService, never()).createAppointment(capturedSpec);
     }
 
     @Test
@@ -741,7 +741,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertEquals(JurisdictionType.ENGLAND_WALES, capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber,
                 JurisdictionType.ENGLAND_WALES);
-        verify(appointmentService, times(1)).createAppointments(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -767,7 +767,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 JurisdictionType.SCOTLAND);
-        verify(appointmentService, times(1)).createAppointments(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -811,7 +811,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).createAppointments(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verify(deleteCompanyWorkflowService).deleteCompany(fullCompanyNumber);
     }
@@ -834,7 +834,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertEquals(JurisdictionType.UNITED_KINGDOM, capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
-        verify(appointmentService).createAppointments(capturedSpec);
+        verify(appointmentService).createAppointment(capturedSpec);
         verify(companyPscStatementService).createPscStatements(capturedSpec);
         verify(metricsService).create(capturedSpec);
         verify(companyPscService).create(capturedSpec);
@@ -942,7 +942,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         creationService.createCompany(spec);
 
-        verify(appointmentService, times(1)).createAppointments(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -955,7 +955,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         creationService.createCompany(spec);
 
-        verify(appointmentService, times(1)).createAppointments(spec);
+        verify(appointmentService, times(1)).createAppointment(spec);
     }
 
     @Test
@@ -968,7 +968,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         creationService.createCompany(spec);
 
-        verify(appointmentService, never()).createAppointments(spec);
+        verify(appointmentService, never()).createAppointment(spec);
     }
 
     private void validateElasticSearch(CompanyRequest spec) throws Exception {

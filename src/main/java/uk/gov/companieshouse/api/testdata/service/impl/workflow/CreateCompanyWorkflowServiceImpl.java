@@ -138,7 +138,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             response.setFilingHistory(filingHistory);
 
             if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                var appointments = appointmentService.createAppointments(spec);
+                var appointments = appointmentService.createAppointment(spec);
                 LOG.info("Successfully get appointments ");
                 response.setAppointmentsData(appointments);
             }
@@ -244,7 +244,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             LOG.info("Successfully created filing history");
 
             if (companySpec.getNoDefaultOfficer() == null || !companySpec.getNoDefaultOfficer()) {
-                appointmentService.createAppointments(companySpec);
+                appointmentService.createAppointment(companySpec);
                 LOG.info("Successfully created appointments ");
             }
 

@@ -94,7 +94,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -149,7 +149,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -212,7 +212,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
     }
@@ -240,7 +240,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(3)).save(any(Appointment.class));
     }
@@ -376,7 +376,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
     }
@@ -388,7 +388,7 @@ class AppointmentsServiceImplTest {
         spec.setCompanyNumber("12345678");
         spec.setNoDefaultOfficer(true);
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, never()).save(any());
     }
@@ -437,7 +437,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository).save(any());
         verify(appointmentsDataRepository).save(any());
@@ -537,7 +537,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
-        var result = appointmentsService.createAppointments(spec);
+        var result = appointmentsService.createAppointment(spec);
 
         verify(appointmentsRepository, never()).save(any());
         verify(appointmentsDataRepository, never()).save(any());
@@ -564,7 +564,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
@@ -592,7 +592,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
@@ -620,7 +620,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
         when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
-        appointmentsService.createAppointments(spec);
+        appointmentsService.createAppointment(spec);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(6)).save(aptCaptor.capture());

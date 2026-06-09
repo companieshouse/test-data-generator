@@ -4,7 +4,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResult
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 
 public interface AppointmentService {
-    AppointmentsResultResponse createAppointments(CompanyRequest spec);
+    AppointmentsResultResponse createAppointment(CompanyRequest spec);
 
     boolean deleteAllAppointments(String companyNumber);
 }
