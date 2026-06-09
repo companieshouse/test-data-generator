@@ -7,7 +7,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 
-public interface CreateCompanyService {
+public interface CreateCompanyWorkflowService {
 
     CompanyProfileResponse createPublicCompany(PublicCompanyRequest companySpec) throws DataException;
 

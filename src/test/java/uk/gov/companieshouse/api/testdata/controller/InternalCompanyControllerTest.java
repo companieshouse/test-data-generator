@@ -20,7 +20,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRe
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +39,7 @@ class InternalCompanyControllerTest {
     private static final String COMPANY_URI = "http://localhost:1234/company/12345678";
 
     @Mock
-    private CreateCompanyService createCompanyService;
+    private CreateCompanyWorkflowService createCompanyWorkflowService;
 
     @Mock
     private DeleteCompanyService deleteCompanyService;
@@ -60,7 +60,7 @@ class InternalCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(createCompanyService.createInternalCompany(request)).thenReturn(company);
+        when(createCompanyWorkflowService.createInternalCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -72,13 +72,13 @@ class InternalCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(createCompanyService.createInternalCompany(any())).thenReturn(company);
+        when(createCompanyWorkflowService.createInternalCompany(any())).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        verify(createCompanyService).createInternalCompany(specCaptor.capture());
+        verify(createCompanyWorkflowService).createInternalCompany(specCaptor.capture());
         CompanyRequest usedSpec = specCaptor.getValue();
 
         assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
@@ -90,7 +90,7 @@ class InternalCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(createCompanyService.createInternalCompany(request)).thenReturn(company);
+        when(createCompanyWorkflowService.createInternalCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -109,7 +109,7 @@ class InternalCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
 
-        when(createCompanyService.createInternalCompany(request)).thenReturn(company);
+        when(createCompanyWorkflowService.createInternalCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -121,7 +121,7 @@ class InternalCompanyControllerTest {
         CompanyRequest request = new CompanyRequest();
         request.setJurisdiction(JurisdictionType.NI);
         DataException exception = new DataException("Error message");
-        when(createCompanyService.createInternalCompany(request)).thenThrow(exception);
+        when(createCompanyWorkflowService.createInternalCompany(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 internalCompanyController.createCompany(request));
@@ -187,20 +187,20 @@ class InternalCompanyControllerTest {
     void buildCompanyDataStructureSuccess() throws Exception {
         CompanyRequest request = new CompanyRequest();
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
-        when(createCompanyService.buildCompanyDataStructure(request)).thenReturn(responseObj);
+        when(createCompanyWorkflowService.buildCompanyDataStructure(request)).thenReturn(responseObj);
 
         ResponseEntity<PopulatedCompanyDetailsResponse> response =
                 internalCompanyController.buildCompanyDataStructure(request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
-        verify(createCompanyService, times(1)).buildCompanyDataStructure(request);
+        verify(createCompanyWorkflowService, times(1)).buildCompanyDataStructure(request);
     }
 
     @Test
     void buildCompanyDataStructureNullRequestUsesDefault() throws Exception {
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
-        when(createCompanyService.buildCompanyDataStructure(any(CompanyRequest.class)))
+        when(createCompanyWorkflowService.buildCompanyDataStructure(any(CompanyRequest.class)))
                 .thenReturn(responseObj);
 
         ResponseEntity<PopulatedCompanyDetailsResponse> response =
@@ -208,14 +208,14 @@ class InternalCompanyControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
-        verify(createCompanyService, times(1)).buildCompanyDataStructure(any(CompanyRequest.class));
+        verify(createCompanyWorkflowService, times(1)).buildCompanyDataStructure(any(CompanyRequest.class));
     }
 
     @Test
     void buildCompanyDataStructureThrowsDataException() throws Exception {
         CompanyRequest request = new CompanyRequest();
         DataException exception = new DataException("error");
-        when(createCompanyService.buildCompanyDataStructure(request)).thenThrow(exception);
+        when(createCompanyWorkflowService.buildCompanyDataStructure(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 internalCompanyController.buildCompanyDataStructure(request));
@@ -227,21 +227,21 @@ class InternalCompanyControllerTest {
         CompanyWithPopulatedStructureRequest request = new CompanyWithPopulatedStructureRequest();
         CompanyProfileResponse companyData =
                 new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(createCompanyService.persistCompanyDataStructure(request)).thenReturn(companyData);
+        when(createCompanyWorkflowService.persistCompanyDataStructure(request)).thenReturn(companyData);
 
         ResponseEntity<CompanyProfileResponse> response =
                 internalCompanyController.persistCompanyDataStructure(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
-        verify(createCompanyService, times(1)).persistCompanyDataStructure(request);
+        verify(createCompanyWorkflowService, times(1)).persistCompanyDataStructure(request);
     }
 
     @Test
     void persistCompanyDataStructureNullRequestUsesDefault() throws Exception {
         CompanyProfileResponse companyData =
                 new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
-        when(createCompanyService.persistCompanyDataStructure(any(CompanyWithPopulatedStructureRequest.class)))
+        when(createCompanyWorkflowService.persistCompanyDataStructure(any(CompanyWithPopulatedStructureRequest.class)))
                 .thenReturn(companyData);
 
         ResponseEntity<CompanyProfileResponse> response =
@@ -249,14 +249,14 @@ class InternalCompanyControllerTest {
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(companyData, response.getBody());
-        verify(createCompanyService, times(1)).persistCompanyDataStructure(any(CompanyWithPopulatedStructureRequest.class));
+        verify(createCompanyWorkflowService, times(1)).persistCompanyDataStructure(any(CompanyWithPopulatedStructureRequest.class));
     }
 
     @Test
     void persistCompanyDataStructureThrowsDataException() throws Exception {
         CompanyWithPopulatedStructureRequest request = new CompanyWithPopulatedStructureRequest();
         DataException exception = new DataException("error");
-        when(createCompanyService.persistCompanyDataStructure(request)).thenThrow(exception);
+        when(createCompanyWorkflowService.persistCompanyDataStructure(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 internalCompanyController.persistCompanyDataStructure(request));

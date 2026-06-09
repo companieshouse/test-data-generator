@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service.impl;
+package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,7 +20,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -36,8 +37,9 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class CreateCompanyServiceImpl implements CreateCompanyService {
+public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowService {
 
+    public static final String COMPANY_NUMBER = "company_number";
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
@@ -71,7 +73,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
-    public CreateCompanyServiceImpl(
+    public CreateCompanyWorkflowServiceImpl(
             CompanyProfileService companyProfileService,
             DataService<FilingHistory, CompanyRequest> filingHistoryService,
             CompanyAuthCodeService companyAuthCodeService,
@@ -182,7 +184,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
 
     @Override
     public CompanyProfileResponse persistCompanyDataStructure(
-            CompanyWithPopulatedStructureRequest companySpec) throws DataException {
+            CompanyWithPopulatedStructureRequest companySpec) {
         var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
         companyStructurePersistenceService.persistCompanyWithStructure(companySpec);
@@ -260,7 +262,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
 
             if (companySpec.getRegisters() != null && !companySpec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company",
-                        singleEntryData("company_number", companySpec.getCompanyNumber()));
+                        singleEntryData(COMPANY_NUMBER, companySpec.getCompanyNumber()));
                 companyRegistersService.create(companySpec);
                 LOG.info("Successfully created company registers");
             }
@@ -274,7 +276,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
             var companyData = buildCompanyResponse(companySpec, authCode.getAuthCode());
             addCompanyToElasticSearchIndexes(companySpec, companyData);
             LOG.info("Successfully created all company data",
-                    singleEntryData("company_number", companySpec.getCompanyNumber()));
+                    singleEntryData(COMPANY_NUMBER, companySpec.getCompanyNumber()));
             return companyData;
         } catch (Exception ex) {
             throw handleCreateFailure(companySpec.getCompanyNumber(), ex);
@@ -302,7 +304,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
         return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
     }
 
-    private DataException handleCreateFailure(String companyNumber, Exception ex) throws DataException{
+    private DataException handleCreateFailure(String companyNumber, Exception ex) {
         Map<String, Object> data = new HashMap<>();
         data.put("company number", companyNumber);
         data.put("error message", ex.getMessage());
@@ -331,7 +333,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
 
         if (Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())) {
             LOG.info("Adding company to ElasticSearch index",
-                    singleEntryData("company_number", spec.getCompanyNumber()));
+                    singleEntryData(COMPANY_NUMBER, spec.getCompanyNumber()));
             companySearchService.addCompanyIntoElasticSearchIndex(companyData);
         }
 
@@ -343,7 +345,7 @@ public class CreateCompanyServiceImpl implements CreateCompanyService {
 
         if (addAdvancedIndex) {
             LOG.info("Adding company to Advanced ElasticSearch index",
-                    singleEntryData("company_number", spec.getCompanyNumber()));
+                    singleEntryData(COMPANY_NUMBER, spec.getCompanyNumber()));
             advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
         }
 

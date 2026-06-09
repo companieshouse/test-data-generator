@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service.impl;
+package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,6 +20,10 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.impl.AdvancedCompanySearchImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.AlphabeticalCompanySearchImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanySearchServiceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +38,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class DeleteCompanyServiceImplTest {
+class DeleteCompanyWorkflowServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String OVERSEA_COMPANY = "FC123456";
@@ -55,11 +59,11 @@ class DeleteCompanyServiceImplTest {
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
 
-    private DeleteCompanyServiceImpl deletionService;
+    private DeleteCompanyWorkflowServiceImpl deletionService;
 
     @BeforeEach
     void setUp() {
-        deletionService = new DeleteCompanyServiceImpl(
+        deletionService = new DeleteCompanyWorkflowServiceImpl(
                 companyProfileService,
                 filingHistoryService,
                 companyAuthCodeService,

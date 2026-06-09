@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service.impl;
+package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +33,10 @@ import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.impl.AdvancedCompanySearchImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.AlphabeticalCompanySearchImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanySearchServiceImpl;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,7 +55,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class CreateCompanyServiceImplTest {
+class CreateCompanyWorkflowServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
     private static final String OVERSEAS_COMPANY_NUMBER = "OE123456";
@@ -79,7 +83,7 @@ class CreateCompanyServiceImplTest {
     @Mock private DeleteCompanyService deleteCompanyService;
     @Mock private Appointment commonAppointment;
 
-    private CreateCompanyServiceImpl creationService;
+    private CreateCompanyWorkflowServiceImpl creationService;
 
     /**
      * Sets up common mocks for creating a company.
@@ -112,7 +116,7 @@ class CreateCompanyServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        creationService = new CreateCompanyServiceImpl(
+        creationService = new CreateCompanyWorkflowServiceImpl(
                 companyProfileService,
                 filingHistoryService,
                 companyAuthCodeService,
@@ -659,10 +663,8 @@ class CreateCompanyServiceImplTest {
         verify(appointmentService, never()).createAppointments(capturedSpec);
     }
 
-    // ── persistCompanyDataStructure ────────────────────────────────────────────
-
     @Test
-    void persistCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() throws Exception {
+    void persistCompanyWithStructure_callsCombinedServiceAndReturnsCompanyData() {
         CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
 
         CompanyProfile profile = new CompanyProfile();

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service.impl;
+package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +21,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -29,7 +30,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class DeleteCompanyServiceImpl implements DeleteCompanyService {
+public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
@@ -54,7 +55,7 @@ public class DeleteCompanyServiceImpl implements DeleteCompanyService {
         this.isElasticSearchDeployed = isElasticSearchDeployed;
     }
 
-    public DeleteCompanyServiceImpl(
+    public DeleteCompanyWorkflowServiceImpl(
             CompanyProfileService companyProfileService,
             DataService<FilingHistory, CompanyRequest> filingHistoryService,
             CompanyAuthCodeService companyAuthCodeService,
@@ -97,7 +98,7 @@ public class DeleteCompanyServiceImpl implements DeleteCompanyService {
         List<Exception> suppressedExceptions = new ArrayList<>();
 
         deleteUkEstablishmentsIfOverseaCompany(companyNumber, suppressedExceptions);
-        orchestratedDeleteCompany(companyNumber, suppressedExceptions);
+        deleteCompanyData(companyNumber, suppressedExceptions);
 
         if (!suppressedExceptions.isEmpty()) {
 
@@ -171,14 +172,14 @@ public class DeleteCompanyServiceImpl implements DeleteCompanyService {
         for (String ukEstablishmentNumber : ukEstablishments) {
             try {
                 LOG.info("Deleting UK establishment with company number: " + ukEstablishmentNumber);
-                orchestratedDeleteCompany(ukEstablishmentNumber, suppressedExceptions);
+                deleteCompanyData(ukEstablishmentNumber, suppressedExceptions);
             } catch (Exception ex) {
                 suppressedExceptions.add(ex);
             }
         }
     }
 
-    private void orchestratedDeleteCompany(String companyNumber, List<Exception> suppressedExceptions) {
+    private void deleteCompanyData(String companyNumber, List<Exception> suppressedExceptions) {
         LOG.info("Deleting company data for company number: " + companyNumber);
 
         try {

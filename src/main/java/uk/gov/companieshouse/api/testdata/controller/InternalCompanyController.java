@@ -21,7 +21,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -42,7 +42,7 @@ public class InternalCompanyController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    private final CreateCompanyService createCompanyService;
+    private final CreateCompanyWorkflowService createCompanyWorkflowService;
     private final DeleteCompanyService deleteCompanyService;
     private final CompanyAuthCodeService companyAuthCodeService;
 
@@ -51,10 +51,10 @@ public class InternalCompanyController {
     private static final String NEW_COMPANY_CREATED = "New company created";
 
     public InternalCompanyController(
-            CreateCompanyService createCompanyService,
+            CreateCompanyWorkflowService createCompanyWorkflowService,
             DeleteCompanyService deleteCompanyService,
             CompanyAuthCodeService companyAuthCodeService) {
-        this.createCompanyService = createCompanyService;
+        this.createCompanyWorkflowService = createCompanyWorkflowService;
         this.deleteCompanyService = deleteCompanyService;
         this.companyAuthCodeService = companyAuthCodeService;
     }
@@ -66,7 +66,7 @@ public class InternalCompanyController {
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
         CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
 
-        CompanyProfileResponse createdCompany = createCompanyService.createInternalCompany(spec);
+        CompanyProfileResponse createdCompany = createCompanyWorkflowService.createInternalCompany(spec);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
@@ -100,7 +100,7 @@ public class InternalCompanyController {
         Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
         CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
 
-        var companyData = createCompanyService.buildCompanyDataStructure(spec);
+        var companyData = createCompanyWorkflowService.buildCompanyDataStructure(spec);
         return new ResponseEntity<>(companyData, HttpStatus.OK);
     }
 
@@ -111,7 +111,7 @@ public class InternalCompanyController {
         Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
         CompanyWithPopulatedStructureRequest spec =
                 optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = createCompanyService.persistCompanyDataStructure(spec);
+        var createdCompany = createCompanyWorkflowService.persistCompanyDataStructure(spec);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
         LOG.info(NEW_COMPANY_CREATED, data);

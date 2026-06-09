@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyReques
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CreateCompanyService;
+import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -31,11 +31,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class PublicCompanyControllerTest {
 
-    private static final String COMPANY_NUMBER = "TC123456";
     private static final String COMPANY_URI = "http://localhost:1234/company/12345678";
 
     @Mock
-    private CreateCompanyService createCompanyService;
+    private CreateCompanyWorkflowService createCompanyWorkflowService;
 
     @Mock
     private DeleteCompanyService deleteCompanyService;
@@ -56,7 +55,7 @@ class PublicCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(createCompanyService.createPublicCompany(request)).thenReturn(company);
+        when(createCompanyWorkflowService.createPublicCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -68,13 +67,13 @@ class PublicCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(createCompanyService.createPublicCompany(any())).thenReturn(company);
+        when(createCompanyWorkflowService.createPublicCompany(any())).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompany(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        verify(createCompanyService).createPublicCompany(publicSpecCaptor.capture());
+        verify(createCompanyWorkflowService).createPublicCompany(publicSpecCaptor.capture());
         PublicCompanyRequest usedSpec = publicSpecCaptor.getValue();
 
         assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
@@ -86,7 +85,7 @@ class PublicCompanyControllerTest {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(createCompanyService.createPublicCompany(request)).thenReturn(company);
+        when(createCompanyWorkflowService.createPublicCompany(request)).thenReturn(company);
         ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompany(request);
 
         assertEquals(company, response.getBody());
@@ -99,7 +98,7 @@ class PublicCompanyControllerTest {
         PublicCompanyRequest request = new PublicCompanyRequest();
         request.setJurisdiction(JurisdictionType.NI);
         DataException exception = new DataException("Error message");
-        when(createCompanyService.createPublicCompany(request)).thenThrow(exception);
+        when(createCompanyWorkflowService.createPublicCompany(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 publicCompanyController.createCompany(request));
