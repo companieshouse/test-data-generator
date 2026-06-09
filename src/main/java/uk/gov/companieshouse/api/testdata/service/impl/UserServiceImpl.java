@@ -189,6 +189,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private void deleteIdentityData(Identity identity, String userId) {
+
         try {
             uvidRepository.deleteByIdentityId(identity.getId());
             LOG.debug("Deleted UVIDs for identityId={}");
@@ -214,37 +215,44 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Override
-    @Transactional
-    public boolean delete(String userId) {
-        LOG.info("delete called for userId={}");
-
-        var userOpt = repository.findById(userId);
-        if (userOpt.isEmpty()) {
-            LOG.debug("User not found for id={}");
-            return false;
-        }
-
-        Optional<Identity> identityOpt = identityRepository.findByUserId(userId);
+    private void deleteUserAndIdentity(User user, Optional<Identity> identityOpt) {
 
         if (identityOpt.isPresent()) {
-            var identity = identityOpt.get();
+            Identity identity = identityOpt.get();
 
             LOG.info("Found identity for userId={} identityId={}"
             );
 
-            deleteIdentityData(identity, userId);
+            deleteIdentityData(identity, user.getId());
         } else {
             LOG.debug("No identity associated with userId={}");
         }
 
         try {
-            repository.delete(userOpt.get());
+            repository.delete(user);
             LOG.info("Deleted user id={}");
         } catch (Exception ex) {
             LOG.error("Failed to delete user id={}");
             throw ex;
         }
+    }
+
+    @Override
+    @Transactional
+    public boolean delete(String userId) {
+
+        LOG.info("delete called for userId={}");
+
+        var userOpt = repository.findById(userId);
+
+        if (userOpt.isEmpty()) {
+            LOG.debug("User not found for id={}");
+            return false;
+        }
+
+        deleteUserAndIdentity(
+                userOpt.get(),
+                identityRepository.findByUserId(userId));
 
         return true;
     }
@@ -252,6 +260,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public boolean deleteByEmail(String email) {
+
         LOG.info("delete called for email={}");
 
         var userOpt = repository.findByEmail(email);
@@ -261,7 +270,11 @@ public class UserServiceImpl implements UserService {
             return false;
         }
 
-        return delete(userOpt.get().getId());
+        deleteUserAndIdentity(
+                userOpt.get(),
+                identityRepository.findByEmail(email));
+
+        return true;
     }
 
     @Override
