@@ -96,7 +96,7 @@ class UserCompanyAssociationControllerTest {
     }
 
     @Test
-    void deleteUserCompanyAssociationException() throws Exception {
+    void deleteUserCompanyAssociationException() {
         when(userCompanyAssociationService.delete(ASSOCIATION_ID))
                 .thenThrow(new RuntimeException("boom"));
 

@@ -31,6 +31,7 @@ public class UserController {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
+    private static final String USER_NOT_FOUND = "User not found";
 
     private final UserService userService;
     private final CompanyAuthAllowListService companyAuthAllowListService;
@@ -65,15 +66,14 @@ public class UserController {
     }
 
     @DeleteMapping("/user/{userId}")
-    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId)
-            throws DataException {
+    public ResponseEntity<Map<String, Object>> deleteUser(@PathVariable("userId") String userId) {
         Map<String, Object> response = new HashMap<>();
         response.put("user id", userId);
 
         User user = userService.getUserById(userId).orElse(null);
         if (user == null) {
             response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("User not found", response);
+            LOG.info(USER_NOT_FOUND, response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
 
@@ -91,13 +91,13 @@ public class UserController {
         }
 
         response.put(STATUS, HttpStatus.NOT_FOUND);
-        LOG.info("User not found", response);
+        LOG.info(USER_NOT_FOUND, response);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @DeleteMapping(value = "/user", params = "email")
     public ResponseEntity<Map<String, Object>> deleteUserByEmail(
-            @RequestParam("email") String email) throws DataException {
+            @RequestParam("email") String email) {
 
         Map<String, Object> response = new HashMap<>();
         response.put("email", email);
@@ -105,7 +105,7 @@ public class UserController {
         User user = userService.getUserByEmail(email).orElse(null);
         if (user == null) {
             response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("User not found", response);
+            LOG.info(USER_NOT_FOUND, response);
             return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
         if (user.getEmail() != null && !user.getEmail().isEmpty()) {
@@ -122,7 +122,7 @@ public class UserController {
         }
 
         response.put(STATUS, HttpStatus.NOT_FOUND);
-        LOG.info("User not found", response);
+        LOG.info(USER_NOT_FOUND, response);
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 

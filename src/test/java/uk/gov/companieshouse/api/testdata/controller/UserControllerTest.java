@@ -146,7 +146,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUserByEmailException() throws Exception {
+    void deleteUserByEmailException() {
         String email = "test@example.com";
         User user = new User();
         user.setEmail(email);
