@@ -43,7 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class TestDataServiceImpl implements TestDataService {
 
@@ -72,6 +71,7 @@ public class TestDataServiceImpl implements TestDataService {
     private AccountPenaltiesService accountPenaltiesService;
     @Autowired
     private PostcodeService postcodeService;
+    @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
     @Autowired
     private ItemGroupsService itemGroupsService;
