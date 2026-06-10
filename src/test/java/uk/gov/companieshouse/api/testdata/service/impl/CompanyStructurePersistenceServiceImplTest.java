@@ -40,7 +40,7 @@ import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 
 @ExtendWith(MockitoExtension.class)
-class CompanyWithPopulatedStructureServiceImplTest {
+class CompanyStructurePersistenceServiceImplTest {
 
     @Mock
     private CompanyProfileRepository companyProfileRepository;
@@ -66,7 +66,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
     private OfficerRepository officerRepository;
 
     @InjectMocks
-    private CompanyWithPopulatedStructureServiceImpl service;
+    private CompanyStructurePersistenceServiceImpl service;
 
     @Test
     void createCompany_WithPopulatedStructure_savesAllEntities() {
@@ -108,7 +108,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         Disqualifications disqualifications = new Disqualifications();
         spec.setDisqualifications(disqualifications);
 
-        service.createCompanyWithPopulatedStructure(spec);
+        service.persistCompanyWithStructure(spec);
 
         verify(companyProfileRepository).save(profile);
         verify(authCodeRepository).save(authCode);
@@ -129,7 +129,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         spec.setCompanyProfile(new CompanyProfile());
         // All other fields are null
 
-        service.createCompanyWithPopulatedStructure(spec);
+        service.persistCompanyWithStructure(spec);
 
         verify(companyProfileRepository).save(any(CompanyProfile.class));
         verifyNoInteractions(authCodeRepository, filingHistoryRepository,
@@ -147,7 +147,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         // All sublists are null
         spec.setAppointmentsData(appointmentsData);
 
-        service.createCompanyWithPopulatedStructure(spec);
+        service.persistCompanyWithStructure(spec);
 
         verify(companyProfileRepository).save(any());
         verifyNoInteractions(appointmentsDataRepository, appointmentRepository, officerRepository);
@@ -165,7 +165,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         spec.setCompanyPscStatement(List.of());
         spec.setCompanyPscs(List.of());
 
-        service.createCompanyWithPopulatedStructure(spec);
+        service.persistCompanyWithStructure(spec);
 
         verify(companyProfileRepository).save(any());
         verifyNoInteractions(appointmentsDataRepository, appointmentRepository, officerRepository,
@@ -183,7 +183,7 @@ class CompanyWithPopulatedStructureServiceImplTest {
         CompanyPscs p2 = new CompanyPscs();
         spec.setCompanyPscs(List.of(p1, p2));
 
-        service.createCompanyWithPopulatedStructure(spec);
+        service.persistCompanyWithStructure(spec);
 
         verify(companyPscStatementRepository).save(s1);
         verify(companyPscStatementRepository).save(s2);

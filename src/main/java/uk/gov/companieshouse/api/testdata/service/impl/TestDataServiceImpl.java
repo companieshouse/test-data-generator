@@ -1,110 +1,71 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
-import uk.gov.companieshouse.api.error.ApiErrorResponseException;
-import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
-import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
-import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
-import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
-import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
-import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
-import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
-import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
-import uk.gov.companieshouse.api.testdata.service.CompanyWithPopulatedStructureService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
-import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
-    private static final int COMPANY_NUMBER_LENGTH = 8;
 
     @Autowired
     private CompanyProfileService companyProfileService;
     @Autowired
-    private DataService<FilingHistory, CompanyRequest> filingHistoryService;
-    @Autowired
     private CompanyAuthCodeService companyAuthCodeService;
-    @Autowired
-    private AppointmentService appointmentService;
-    @Autowired
-    private DataService<CompanyMetrics, CompanyRequest> companyMetricsService;
-    @Autowired
-    private CompanyPscStatementServiceImpl companyPscStatementService;
-    @Autowired
-    private CompanyPscService companyPscService;
-    @Autowired
-    private RandomService randomService;
     @Autowired
     private UserService userService;
     @Autowired
@@ -123,12 +84,6 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private AdminPermissionsRepository adminPermissionsRepository;
     @Autowired
-    private CertificatesRepository certificatesRepository;
-    @Autowired
-    private CertifiedCopiesRepository certifiedCopiesRepository;
-    @Autowired
-    private MissingImageDeliveriesRepository missingImageDeliveriesRepository;
-    @Autowired
     private DataService<TransactionsResponse, TransactionsRequest> transactionService;
     @Autowired
     private AcspProfileService acspProfileService;
@@ -137,283 +92,22 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     AppealsService appealsService;
     @Autowired
-    private DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
-    @Autowired
-    @Qualifier("companySearchService")
-    private CompanySearchService companySearchService;
-    @Autowired
     private AccountPenaltiesService accountPenaltiesService;
     @Autowired
-    @Qualifier("alphabeticalCompanySearchService")
-    private CompanySearchService alphabeticalCompanySearch;
-    @Autowired
-    @Qualifier("advancedCompanySearchService")
-    private CompanySearchService advancedCompanySearch;
-    @Autowired
     private PostcodeService postcodeService;
-    @Autowired
-    private DataService<Disqualifications, CompanyRequest> disqualificationsService;
     @Autowired
     private DataService<UserCompanyAssociationResponse,
             UserCompanyAssociationRequest> userCompanyAssociationService;
     @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
-    @SuppressWarnings("java:S6813") // legacy service – constructor injection not feasible
     @Autowired
     private ItemGroupsService itemGroupsService;
-
-    private final CompanyWithPopulatedStructureService companyWithPopulatedStructureService;
-
-    @Value("${api.url}")
-    private String apiUrl;
-
-    @Value("${elastic.search.deployed}")
-    private boolean isElasticSearchDeployed;
-
-    void setAPIUrl(String apiUrl) {
-        this.apiUrl = apiUrl;
-    }
-
-    void setElasticSearchDeployed(Boolean isElasticSearchDeployed) {
-        this.isElasticSearchDeployed = isElasticSearchDeployed;
-    }
-
-    public TestDataServiceImpl(
-            CompanyWithPopulatedStructureService companyWithPopulatedStructureService) {
-        this.companyWithPopulatedStructureService = companyWithPopulatedStructureService;
-    }
-
-    @Override
-    public CompanyProfileResponse createCompanyData(final CompanyRequest spec) throws DataException {
-        if (spec == null) {
-            throw new IllegalArgumentException("CompanyRequest can not be null");
-        }
-
-        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
-
-        if (spec.getIsPaddingCompanyNumber() != null) {
-            companyNumberPrefix = companyNumberPrefix + "000";
-        }
-
-        do {
-            spec.setCompanyNumber(companyNumberPrefix
-                    + randomService
-                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
-        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
-
-        spec.setCompanyWithPopulatedStructureOnly(false);
-
-        try {
-            companyProfileService.create(spec);
-            LOG.info("Successfully created company profile");
-
-            filingHistoryService.create(spec);
-            LOG.info("Successfully created filing history");
-
-            if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                appointmentService.createAppointment(spec);
-                LOG.info("Successfully created appointments ");
-            }
-
-            var authCode = companyAuthCodeService.create(spec);
-            LOG.info("Successfully created auth code: " + authCode.getAuthCode());
-
-            companyMetricsService.create(spec);
-            LOG.info("Successfully created company metrics");
-
-            companyPscStatementService.createPscStatements(spec);
-            LOG.info("Successfully created all PSC statements based on spec counts.");
-
-            companyPscService.create(spec);
-            LOG.info("Successfully created PSCs");
-            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-                LOG.info("Creating company registers for company: " + spec.getCompanyNumber());
-                this.companyRegistersService.create(spec);
-                LOG.info("Successfully created company registers");
-            }
-            if (spec.getDisqualifiedOfficers()
-                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
-                disqualificationsService.create(spec);
-                LOG.info("Successfully created disqualifications");
-            }
-
-            String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-            var companyData = new CompanyProfileResponse(spec.getCompanyNumber(),
-                    authCode.getAuthCode(), companyUri);
-            addCompanyToElasticSearchIndexes(spec, companyData);
-            LOG.info("Successfully created all company data for: " + spec.getCompanyNumber());
-            return companyData;
-        } catch (Exception ex) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("company number", spec.getCompanyNumber());
-            data.put("error message", ex.getMessage());
-            LOG.error("Failed to create company data for company number: "
-                    + spec.getCompanyNumber(), ex, data);
-            // Rollback all successful insertions
-            deleteCompanyData(spec.getCompanyNumber());
-            throw new DataException("Failed to create company data in service", ex);
-        }
-    }
-
-    @Override
-    public void deleteCompanyData(String companyId) throws DataException {
-        LOG.info("Deleting company data for company number: " + companyId);
-        List<Exception> suppressedExceptions = new ArrayList<>();
-
-        deleteUkEstablishmentsIfOverseaCompany(companyId, suppressedExceptions);
-
-        deleteSingleCompanyData(companyId, suppressedExceptions);
-
-        if (!suppressedExceptions.isEmpty()) {
-            LOG.error("Errors occurred while deleting company data for company number: "
-                    + companyId);
-            var errorMessage = new StringBuilder(
-                    "Error deleting company data. Details: ");
-            for (var i = 0; i < suppressedExceptions.size(); i++) {
-                var ex = suppressedExceptions.get(i);
-                errorMessage.append(" [").append(i + 1).append("] ")
-                        .append(ex.getMessage() != null ? ex.getMessage() : "Unknown error");
-                if (ex.getCause() != null) {
-                    errorMessage.append(" Cause: ").append(ex.getCause().getMessage()
-                            != null ? ex.getCause().getMessage() : "Unknown cause");
-                }
-            }
-            var ex = new DataException(errorMessage.toString());
-            suppressedExceptions.forEach(ex::addSuppressed);
-            throw ex;
-        }
-    }
 
     @Override
     public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
             throws NoDataFoundException, DataException {
 
         return companyProfileService.updateCompanyProfile(request);
-    }
-
-    private void deleteUkEstablishmentsIfOverseaCompany(
-            String companyId, List<Exception> suppressedExceptions) {
-        try {
-            LOG.info("Checking if company number " + companyId + " is an oversea company.");
-            Optional<CompanyProfile> companyProfile =
-                    companyProfileService.getCompanyProfile(companyId);
-            if (isOverseaCompany(companyProfile)) {
-                LOG.info("Company number " + companyId
-                        + " is an oversea company. Deleting UK establishments.");
-                deleteUkEstablishmentsForParent(companyId, suppressedExceptions);
-            } else {
-                LOG.info("Company number " + companyId
-                        + " is not an oversea company. Skipping UK establishments deletion.");
-            }
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-    }
-
-    private boolean isOverseaCompany(Optional<CompanyProfile> companyProfile) {
-        boolean isOversea = companyProfile.isPresent()
-                && CompanyType.OVERSEA_COMPANY.getValue().equals(companyProfile.get().getType());
-        LOG.debug("Is company oversea: " + isOversea);
-        return isOversea;
-    }
-
-    private void deleteUkEstablishmentsForParent(String companyId,
-                                                 List<Exception> suppressedExceptions) {
-        LOG.info("Fetching UK establishments for parent company number: " + companyId);
-        List<String> ukEstablishments =
-                companyProfileService.findUkEstablishmentsByParent(companyId);
-        if (ukEstablishments.isEmpty()) {
-            LOG.info("No UK establishments found for company number: " + companyId);
-        } else {
-            for (String ukEstablishmentNumber : ukEstablishments) {
-                try {
-                    LOG.info("Deleting UK establishment with company number: "
-                            + ukEstablishmentNumber);
-                    deleteSingleCompanyData(ukEstablishmentNumber, suppressedExceptions);
-                } catch (Exception de) {
-                    suppressedExceptions.add(de);
-                }
-            }
-        }
-    }
-
-    private void deleteSingleCompanyData(String companyId, List<Exception> suppressedExceptions) {
-        LOG.info("Deleting single company data for company number: " + companyId);
-        try {
-            this.companyProfileService.delete(companyId);
-            LOG.info("Deleted company profile for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.filingHistoryService.delete(companyId);
-            LOG.info("Deleted filing history for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.companyAuthCodeService.delete(companyId);
-            LOG.info("Deleted company auth code for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.appointmentService.deleteAllAppointments(companyId);
-            LOG.info("Deleted appointments for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.companyPscStatementService.delete(companyId);
-            LOG.info("Deleted PSC statements for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.companyPscService.delete(companyId);
-            LOG.info("Deleted PSCs for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.companyMetricsService.delete(companyId);
-            LOG.info("Deleted company metrics for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.companyAuthAllowListService.delete(companyId);
-            LOG.info("Deleted company auth allow list for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.companyRegistersService.delete(companyId);
-            LOG.info("Deleted company registers for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-        try {
-            this.disqualificationsService.delete(companyId);
-            LOG.info("Deleted disqualifications for company number: " + companyId);
-        } catch (Exception de) {
-            suppressedExceptions.add(de);
-        }
-
-        if (isElasticSearchDeployed) {
-            try {
-                LOG.info("Attempting to delete "
-                        + "company from ElasticSearch index for company number: " + companyId);
-                this.companySearchService.deleteCompanyFromElasticSearchIndex(companyId);
-                this.alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyId);
-                this.advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyId);
-                LOG.info("Deleted company from ElasticSearch index for company number: "
-                        + companyId);
-            } catch (Exception ex) {
-                LOG.error("Failed to delete company from ElasticSearch index for company number: "
-                        + companyId, ex);
-            }
-        }
     }
 
     @Override
@@ -875,181 +569,11 @@ public class TestDataServiceImpl implements TestDataService {
     }
 
     @Override
-    public CompanyProfileResponse createPublicCompanyData(PublicCompanyRequest publicCompanySpec)
-            throws DataException {
-        var companySpec = new CompanyRequest();
-
-        // Only set allowed fields from PublicCompanyRequest
-        companySpec.setJurisdiction(publicCompanySpec.getJurisdiction());
-        companySpec.setCompanyType(publicCompanySpec.getCompanyType());
-        companySpec.setCompanyStatus(publicCompanySpec.getCompanyStatus());
-        companySpec.setSubType(publicCompanySpec.getSubType());
-        companySpec.setHasSuperSecurePscs(publicCompanySpec.getHasSuperSecurePscs());
-        if (publicCompanySpec.getNumberOfAppointments() != null) {
-            companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
-        }
-        companySpec.setSecureOfficer(publicCompanySpec.getSecureOfficer());
-        companySpec.setRegisters(publicCompanySpec.getRegisters());
-        companySpec.setCompanyStatusDetail(publicCompanySpec.getCompanyStatusDetail());
-        companySpec.setFilingHistoryList(publicCompanySpec.getFilingHistoryList());
-        if (!CollectionUtils.isEmpty(publicCompanySpec.getFilingHistoryList())) {
-            companySpec.getFilingHistoryList().forEach(filing -> filing.setDocumentMetadata(false));
-        }
-        companySpec.setNumberOfAppointments(publicCompanySpec.getNumberOfAppointments());
-        companySpec.setOfficerRoles(publicCompanySpec.getOfficerRoles());
-        companySpec.setAccountsDueStatus(publicCompanySpec.getAccountsDueStatus());
-        companySpec.setNumberOfPscs(publicCompanySpec.getNumberOfPscs());
-        companySpec.setPscType(publicCompanySpec.getPscType());
-        companySpec.setPscActive(publicCompanySpec.getPscActive());
-        companySpec.setWithdrawnStatements(publicCompanySpec.getWithdrawnStatements());
-        companySpec.setActiveStatements(publicCompanySpec.getActiveStatements());
-        companySpec.setHasUkEstablishment(publicCompanySpec.getHasUkEstablishment());
-        companySpec.setRegisteredOfficeIsInDispute(
-                publicCompanySpec.getRegisteredOfficeIsInDispute());
-        companySpec.setUndeliverableRegisteredOfficeAddress(
-                publicCompanySpec.getUndeliverableRegisteredOfficeAddress());
-        if (publicCompanySpec.getForeignCompanyLegalForm() != null
-                && !publicCompanySpec.getForeignCompanyLegalForm().isBlank()) {
-            companySpec.setForeignCompanyLegalForm(publicCompanySpec.getForeignCompanyLegalForm());
-        }
-        return createCompanyData(companySpec);
-    }
-
-    private void addCompanyToElasticSearchIndexes(CompanyRequest spec,
-                                                  CompanyProfileResponse companyData)
-            throws DataException, ApiErrorResponseException, URIValidationException {
-
-        // This variable is set from environment to allow disabling ES indexing in certain environments
-        if (!isElasticSearchDeployed) {
-            LOG.debug("Elasticsearch not deployed; skipping indexing for company " + spec.getCompanyNumber());
-            return;
-        }
-
-        // Decide which indexes to update
-        boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
-        boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
-
-        // Company index (ensure present if any specialised index is requested)
-        if (Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())) {
-            LOG.info("Adding company to ElasticSearch index: " + spec.getCompanyNumber());
-            companySearchService.addCompanyIntoElasticSearchIndex(companyData);
-        }
-
-        // Alphabetical index
-        if (addAlphabeticalIndex) {
-            LOG.info("Adding company to Alphabetical ElasticSearch index: " + spec.getCompanyNumber());
-            alphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-        }
-
-        // Advanced index
-        if (addAdvancedIndex) {
-            LOG.info("Adding company to Advanced ElasticSearch index: " + spec.getCompanyNumber());
-            advancedCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
-        }
-
-        LOG.info("Successfully added company to configured ElasticSearch indexes : " + spec.getCompanyNumber());
-    }
-
-    @Override
-    public PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanyRequest spec) throws DataException {
-        if (spec == null) {
-            throw new IllegalArgumentException("CompanyRequest can not be null");
-        }
-        String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
-        if (spec.getIsPaddingCompanyNumber() != null) {
-            companyNumberPrefix = companyNumberPrefix + "000";
-        }
-        do {
-            spec.setCompanyNumber(companyNumberPrefix
-                    + randomService
-                    .getNumber(COMPANY_NUMBER_LENGTH - companyNumberPrefix.length()));
-        } while (companyProfileService.companyExists(spec.getCompanyNumber()));
-
-        try {
-            var response = new PopulatedCompanyDetailsResponse();
-            spec.setCompanyWithPopulatedStructureOnly(true);
-
-            var companyProfile = companyProfileService.create(spec);
-            LOG.info("Successfully get company profile");
-            response.setCompanyProfile(companyProfile);
-
-            var filingHistory = filingHistoryService.create(spec);
-            LOG.info("Successfully get filing history");
-            response.setFilingHistory(filingHistory);
-
-            if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                var appointments = appointmentService.createAppointment(spec);
-                LOG.info("Successfully get appointments ");
-                response.setAppointmentsData(appointments);
-            }
-
-            var authCode = companyAuthCodeService.create(spec);
-            LOG.info("Successfully get auth code: " + authCode.getAuthCode());
-            response.setCompanyAuthCode(authCode);
-
-
-            var companyMetrics = companyMetricsService.create(spec);
-            LOG.info("Successfully get company metrics");
-            response.setCompanyMetrics(companyMetrics);
-
-            List<CompanyPscStatement> companyPscStatements = companyPscStatementService.createPscStatements(spec);
-            LOG.info("Successfully get all PSC statements based on spec counts.");
-            response.setCompanyPscStatement(companyPscStatements);
-
-            var companyPscs = companyPscService.create(spec);
-            LOG.info("Successfully get PSCs");
-            response.setCompanyPscs(companyPscs);
-
-            if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
-                var companyRegisters = this.companyRegistersService.create(spec);
-                LOG.info("Successfully get company registers");
-                response.setCompanyRegisters(companyRegisters);
-            }
-
-            if (spec.getDisqualifiedOfficers()
-                    != null && !spec.getDisqualifiedOfficers().isEmpty()) {
-                var disqualifications = disqualificationsService.create(spec);
-                LOG.info("Successfully get disqualifications");
-                response.setDisqualifications(disqualifications);
-            }
-
-            return response;
-        } catch (Exception ex) {
-            Map<String, Object> data = new HashMap<>();
-            data.put("company number", spec.getCompanyNumber());
-            data.put("error message", ex.getMessage());
-            LOG.error("Failed to get company data for company number: "
-                    + spec.getCompanyNumber(), ex, data);
-            throw new DataException("Failed to get company data from service", ex);
-        }
-    }
-
-    @Override
-    public CompanyProfileResponse createCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec) throws DataException {
-
-        var companyNumber = companySpec.getCompanyProfile().getCompanyNumber();
-        var authCode = companySpec.getCompanyAuthCode().getAuthCode();
-        companyWithPopulatedStructureService.createCompanyWithPopulatedStructure(companySpec);
-        String companyUri = this.apiUrl + "/company/" + companyNumber;
-        return new CompanyProfileResponse(companyNumber,
-                authCode, companyUri);
-    }
-
-    @Override
     public boolean deleteItemGroupsData(String orderNumber) throws DataException {
         try {
             return itemGroupsService.deleteItemGroups(orderNumber);
         } catch (Exception ex) {
             throw new DataException("Error deleting Item Groups", ex);
-        }
-    }
-
-    @Override
-    public void deleteInternalCompanyData(String companyId) throws DataException, NoDataFoundException {
-        if (companyProfileService.companyExists(companyId)) {
-            deleteCompanyData(companyId);
-        } else {
-            throw new NoDataFoundException("Company with number " + companyId + " not found");
         }
     }
 }

@@ -1,59 +1,38 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import java.util.Optional;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
+
+import java.util.Optional;
 
 
 public interface TestDataService {
-
-    /**
-     * Create company data with given {@code companySpec}.
-     *
-     * @param companySpec The specification the new company must adhere to
-     * @return A {@link CompanyProfileResponse}
-     * @throws DataException If any error occurs
-     */
-    CompanyProfileResponse createCompanyData(CompanyRequest companySpec) throws DataException;
-
-    /**
-     * Delete all data for company {@code companyNumber}.
-     *
-     * @param companyNumber The company number to be deleted
-     * @throws DataException If any error occurs
-     */
-    void deleteCompanyData(String companyNumber) throws DataException;
 
     /**
      * Updates the company profile data for the company number provided and {@link UpdateCompanyRequest}
@@ -307,15 +286,6 @@ public interface TestDataService {
     boolean deleteAdminPermissionsData(String id) throws DataException;
 
     /**
-     * Create public company data with given {@code companySpec}.
-     *
-     * @param companySpec The specification the new public company must adhere to
-     * @return A {@link CompanyProfileResponse}
-     * @throws DataException If any error occurs
-     */
-    CompanyProfileResponse createPublicCompanyData(PublicCompanyRequest companySpec) throws DataException;
-
-    /**
      * Find an existing CompanyAuthCode for the given company number
      * or create a default one if none exists.
      * @param companyNumber the company number
@@ -327,32 +297,10 @@ public interface TestDataService {
             throws DataException, NoDataFoundException;
 
     /**
-     * Get the company data structure before saving in MongoDB.
-     *
-     * @param spec The specification the new company must adhere to
-     * @return A {@link PopulatedCompanyDetailsResponse}
-     * @throws DataException If any error occurs
-     */
-    PopulatedCompanyDetailsResponse getCompanyDataStructureBeforeSavingInMongoDb(CompanyRequest spec)
-            throws DataException;
-
-    /**
-     * Create company with full structure based on the given {@code companySpec}.
-     *
-     * @param companySpec The specification the new company must adhere to
-     * @return A {@link CompanyProfileResponse}
-     * @throws DataException If any error occurs
-     */
-    CompanyProfileResponse createCompanyWithStructure(CompanyWithPopulatedStructureRequest companySpec) throws DataException;
-
-    /**
      * Deletes the Item Groups test data for the given order number.
      *
      * @param orderNumber the order number generated while creating Item Groups
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteItemGroupsData(String orderNumber) throws DataException;
-
-    void deleteInternalCompanyData(String companyNumber) throws DataException, NoDataFoundException;
-
 }
