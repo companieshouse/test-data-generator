@@ -8,8 +8,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
@@ -17,14 +15,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsReq
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
@@ -33,21 +27,14 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesRespon
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -56,18 +43,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 @Service
 public class TestDataServiceImpl implements TestDataService {
 
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
-    @Autowired
-    private CompanyProfileService companyProfileService;
-    @Autowired
-    private CompanyAuthCodeService companyAuthCodeService;
-    @Autowired
-    private UserService userService;
     @Autowired
     private DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
     @Autowired
@@ -82,13 +62,9 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private AcspMembersRepository acspMembersRepository;
     @Autowired
-    private AdminPermissionsRepository adminPermissionsRepository;
-    @Autowired
     private DataService<TransactionsResponse, TransactionsRequest> transactionService;
     @Autowired
     private AcspProfileService acspProfileService;
-    @Autowired
-    private CompanyAuthAllowListService companyAuthAllowListService;
     @Autowired
     AppealsService appealsService;
     @Autowired
@@ -96,98 +72,9 @@ public class TestDataServiceImpl implements TestDataService {
     @Autowired
     private PostcodeService postcodeService;
     @Autowired
-    private DataService<UserCompanyAssociationResponse,
-            UserCompanyAssociationRequest> userCompanyAssociationService;
-    @Autowired
     private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
     @Autowired
     private ItemGroupsService itemGroupsService;
-
-    @Override
-    public CompanyProfile updateCompanyData(UpdateCompanyRequest request)
-            throws NoDataFoundException, DataException {
-
-        return companyProfileService.updateCompanyProfile(request);
-    }
-
-    @Override
-    public CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
-            throws DataException, NoDataFoundException {
-        try {
-            return companyAuthCodeService.findOrCreate(companyNumber);
-        } catch (NoDataFoundException ex) {
-            throw new NoDataFoundException(
-                    "Company profile not found when finding or creating auth code");
-        } catch (Exception ex) {
-            throw new DataException("Error finding or creating company auth code", ex);
-        }
-    }
-
-    @Override
-    public UserResponse createUserData(UserRequest userRequest) throws DataException {
-        final String password = userRequest.getPassword();
-        if (password == null || password.isEmpty()) {
-            throw new DataException("Password is required to create a user");
-        }
-
-        List<String> adminPermissionIds = userRequest.getRoles();
-        if (adminPermissionIds != null && !adminPermissionIds.isEmpty()) {
-            List<String> permissionStrings = new ArrayList<>();
-
-            for (String groupName : adminPermissionIds) {
-                var adminPermissionEntity = adminPermissionsRepository
-                        .findByGroupName(groupName);
-
-                if (adminPermissionEntity != null
-                        && adminPermissionEntity.getPermissions() != null) {
-                    permissionStrings.addAll(adminPermissionEntity.getPermissions());
-                }
-            }
-            if (!permissionStrings.isEmpty()) {
-                userRequest.setRoles(permissionStrings);
-            }
-        }
-
-        var userData = userService.create(userRequest);
-        if (userRequest.getIsCompanyAuthAllowList() != null && userRequest.getIsCompanyAuthAllowList()) {
-            var companyAuthAllowListSpec = new CompanyAuthAllowListRequest();
-            companyAuthAllowListSpec.setEmailAddress(userData.getEmail());
-            companyAuthAllowListService.create(companyAuthAllowListSpec);
-        }
-        return userData;
-    }
-
-    @Override
-    public boolean deleteUserData(String userId) {
-        var user = userService.getUserById(userId).orElse(null);
-        if (user == null) {
-            return false;
-        }
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
-            if (allowListId != null) {
-                companyAuthAllowListService.delete(allowListId);
-            }
-        }
-        return this.userService.delete(userId);
-    }
-
-    @Override
-    public boolean deleteUserDataByEmail(String email) {
-        var user = userService.getUserByEmail(email).orElse(null);
-
-        if (user == null) {
-            return false;
-        }
-        if (user.getEmail() != null && !user.getEmail().isEmpty()) {
-            var allowListId = companyAuthAllowListService.getAuthId(user.getEmail());
-            if (allowListId != null) {
-                companyAuthAllowListService.delete(allowListId);
-            }
-        }
-        return this.userService.deleteByEmail(email);
-    }
-
 
     @Override
     public AcspMembersResponse createAcspMembersData(final AcspMembersRequest spec) throws DataException {
@@ -486,49 +373,6 @@ public class TestDataServiceImpl implements TestDataService {
             this.acspProfileService.delete(acspNumber);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP profile", ex));
-        }
-    }
-
-    @Override
-    public UserCompanyAssociationResponse createUserCompanyAssociationData(
-            UserCompanyAssociationRequest spec)
-            throws DataException {
-        if (spec.getUserId() == null
-                && spec.getUserEmail() == null) {
-            throw new DataException("A user_id or a user_email is "
-                    + "required to create an association");
-        }
-
-        if (spec.getCompanyNumber() == null || spec.getCompanyNumber().isEmpty()) {
-            throw new DataException("Company number is "
-                    + "required to create an association");
-        }
-
-        try {
-            UserCompanyAssociationResponse createdAssociation =
-                    userCompanyAssociationService.create(spec);
-
-            return new UserCompanyAssociationResponse(
-                    new ObjectId(createdAssociation.getId()),
-                    createdAssociation.getCompanyNumber(),
-                    createdAssociation.getUserId(),
-                    createdAssociation.getUserEmail(),
-                    createdAssociation.getStatus(),
-                    createdAssociation.getApprovalRoute(),
-                    createdAssociation.getInvitations()
-            );
-        } catch (Exception ex) {
-            throw new DataException("Error creating the association",
-                    ex);
-        }
-    }
-
-    @Override
-    public boolean deleteUserCompanyAssociationData(String id) throws DataException {
-        try {
-            return userCompanyAssociationService.delete(id);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting association", ex);
         }
     }
 

@@ -12,28 +12,20 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
 import uk.gov.companieshouse.api.testdata.model.entity.Certificates;
 import uk.gov.companieshouse.api.testdata.model.entity.CertifiedCopies;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyAuthAllowListRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
@@ -41,22 +33,14 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesRespon
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
-import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
-import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
-import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
-import uk.gov.companieshouse.api.testdata.service.UserService;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -87,31 +71,17 @@ class TestDataServiceImplTest {
     private static final String PENALTY_REF = "A1234567";
     private static final String USER_ID = "sZJQcNxzPvcwcqDwpUyRKNvVbcq";
     private static final String CERTIFICATES_ID = "CRT-123456-789012";
-    private static final String AUTH_CODE_APPROVAL_ROUTE =
-            "auth_code";
-    private static final String CONFIRMED_STATUS = "confirmed";
-    private static final String ASSOCIATION_ID = "associationId";
     private static final String CERTIFIED_COPIES_ID = "CCD-123456-789012";
     private static final String MISSING_IMAGE_DELIVERIES_ID = "MID-123456-789012";
     private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
     private static final String TRANSACTION_ID = "903085-903085-903085";
 
     @Mock
-    private CompanyProfileService companyProfileService;
-    @Mock
-    private CompanyAuthCodeService companyAuthCodeService;
-    @Mock
-    private UserService userService;
-    @Mock
-    private AdminPermissionsRepository adminPermissionsRepository;
-    @Mock
     private DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
     @Mock
     private AcspMembersRepository acspMembersRepository;
     @Mock
     private AcspProfileService acspProfileService;
-    @Mock
-    private CompanyAuthAllowListService companyAuthAllowListService;
     @Mock
     private AppealsService appealsService;
     @Mock
@@ -127,9 +97,6 @@ class TestDataServiceImplTest {
     @Mock
     private PostcodeService postcodeService;
     @Mock private DataService<TransactionsResponse, TransactionsRequest> transactionService;
-    @Mock
-    private DataService<UserCompanyAssociationResponse,
-            UserCompanyAssociationRequest> userCompanyAssociationService;
     @Mock
     private ItemGroupsService itemGroupsService;
 
@@ -183,251 +150,6 @@ class TestDataServiceImplTest {
             throws DataException {
         when(acspMembersRepository.findById(acspMemberId)).thenReturn(memberOptional);
         return testDataService.deleteAcspMembersData(acspMemberId);
-    }
-
-    @Test
-    void updateCompanyDataSuccess() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        CompanyProfile expectedProfile = new CompanyProfile();
-        expectedProfile.setCompanyNumber(COMPANY_NUMBER);
-
-        when(companyProfileService.updateCompanyProfile(request)).thenReturn(expectedProfile);
-
-        CompanyProfile actualProfile = testDataService.updateCompanyData(request);
-
-        assertEquals(expectedProfile, actualProfile);
-        verify(companyProfileService, times(1)).updateCompanyProfile(request);
-    }
-
-    @Test
-    void updateCompanyDataNotFound() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        String errorMessage = "Company not found";
-        when(companyProfileService.updateCompanyProfile(request))
-                .thenThrow(new NoDataFoundException(errorMessage));
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataService.updateCompanyData(request));
-
-        assertEquals(errorMessage, thrown.getMessage());
-        verify(companyProfileService, times(1)).updateCompanyProfile(request);
-    }
-
-    @Test
-    void updateCompanyDataException() throws Exception {
-        UpdateCompanyRequest request = new UpdateCompanyRequest();
-        request.setCompanyNumber(COMPANY_NUMBER);
-
-        String errorMessage = "Database error";
-        when(companyProfileService.updateCompanyProfile(request))
-                .thenThrow(new DataException(errorMessage));
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataService.updateCompanyData(request));
-
-        assertEquals(errorMessage, thrown.getMessage());
-        verify(companyProfileService, times(1)).updateCompanyProfile(request);
-    }
-
-    @Test
-    void createUserDataThrowsExceptionWhenPasswordIsNull() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword(null);
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createUserData(userRequest));
-        assertEquals("Password is required to create a user", exception.getMessage());
-    }
-
-    @Test
-    void createUserDataThrowsExceptionWhenPasswordIsEmpty() {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("");
-
-        DataException exception = assertThrows(DataException.class, () ->
-                testDataService.createUserData(userRequest));
-        assertEquals("Password is required to create a user", exception.getMessage());
-    }
-
-    @Test
-    void createUserDataWithNullRoles() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(null);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        verify(userService).create(userRequest);
-        verify(companyAuthAllowListService, never()).create(any());
-    }
-
-    @Test
-    void createUserDataWithEmptyRoles() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(new ArrayList<>());
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        verify(userService).create(userRequest);
-        verify(companyAuthAllowListService, never()).create(any());
-    }
-
-    @Test
-    void createUserDataWithRolesAndPermissions() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        var entity = new AdminPermissions();
-        entity.setPermissions(List.of("perm1", "perm2"));
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        assertEquals(List.of("perm1", "perm2"), userRequest.getRoles());
-        verify(userService).create(userRequest);
-        verify(companyAuthAllowListService, never()).create(any());
-    }
-
-    @Test
-    void createUserDataWithRolesAndNoPermissions() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        assertEquals(List.of("group1"), userRequest.getRoles());
-        verify(userService).create(userRequest);
-        verify(companyAuthAllowListService, never()).create(any());
-    }
-
-    @Test
-    void createUserData_addsPermissionsWhenEntityAndPermissionsExist() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        AdminPermissions entity = new AdminPermissions();
-        entity.setPermissions(List.of("perm1", "perm2"));
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("perm1", "perm2"), userRequest.getRoles());
-    }
-
-    @Test
-    void createUserData_doesNotAddPermissionsWhenEntityIsNull() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(null);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("group1"), userRequest.getRoles());
-    }
-
-    @Test
-    void createUserData_doesNotAddPermissionsWhenPermissionsAreNull() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1"));
-
-        AdminPermissions entity = new AdminPermissions();
-        entity.setPermissions(null);
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("group1"), userRequest.getRoles());
-    }
-
-    @Test
-    void createUserData_handlesMultipleGroupNamesWithMixedEntities() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setRoles(List.of("group1", "group2", "group3"));
-
-        AdminPermissions entity1 = new AdminPermissions();
-        entity1.setPermissions(List.of("perm1"));
-        AdminPermissions entity2 = new AdminPermissions();
-        entity2.setPermissions(null);
-
-        when(adminPermissionsRepository.findByGroupName("group1")).thenReturn(entity1);
-        when(adminPermissionsRepository.findByGroupName("group2")).thenReturn(null);
-        when(adminPermissionsRepository.findByGroupName("group3")).thenReturn(entity2);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        testDataService.createUserData(userRequest);
-
-        assertEquals(List.of("perm1"), userRequest.getRoles());
-    }
-
-    @Test
-    void createUserDataWithCompanyAuthAllowListTrue() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setIsCompanyAuthAllowList(true);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListRequest.class));
-    }
-
-    @Test
-    void createUserDataWithCompanyAuthAllowListFalse() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setIsCompanyAuthAllowList(false);
-
-        UserResponse userResponse = new UserResponse("id", "email", "forename", "surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals(userResponse, result);
-        verify(companyAuthAllowListService, never()).create(any());
     }
 
     @Test
@@ -634,169 +356,6 @@ class TestDataServiceImplTest {
         DataException exception = assertThrows(DataException.class,
                 () -> testDataService.deleteAcspMembersData(acspMemberId));
         assertEquals("Error deleting acsp member's data", exception.getMessage());
-    }
-
-    @Test
-    void createUserDataWithCompanyAuthAllowList() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setIsCompanyAuthAllowList(true);
-
-        UserResponse mockUserResponse = new UserResponse("userId", "email@example.com", "Forename", "Surname");
-
-        when(userService.create(userRequest)).thenReturn(mockUserResponse);
-
-        UserResponse createdUserResponse = testDataService.createUserData(userRequest);
-
-        assertEquals("userId", createdUserResponse.getId());
-        assertEquals("email@example.com", createdUserResponse.getEmail());
-        assertEquals("Forename", createdUserResponse.getForename());
-        assertEquals("Surname", createdUserResponse.getSurname());
-        assertTrue(userRequest.getIsCompanyAuthAllowList());
-
-        verify(companyAuthAllowListService, times(1)).create(any(CompanyAuthAllowListRequest.class));
-    }
-
-    @Test
-    void createUserDataWithOutCompanyAuthAllow() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-
-        UserResponse mockUserResponse = new UserResponse("userId", "email@example.com", "Forename", "Surname");
-
-        when(userService.create(userRequest)).thenReturn(mockUserResponse);
-
-        UserResponse createdUserResponse = testDataService.createUserData(userRequest);
-
-        assertEquals("userId", createdUserResponse.getId());
-        assertEquals("email@example.com", createdUserResponse.getEmail());
-        assertEquals("Forename", createdUserResponse.getForename());
-        assertEquals("Surname", createdUserResponse.getSurname());
-        assertNull(userRequest.getIsCompanyAuthAllowList());
-
-        verify(companyAuthAllowListService, times(0)).create(any(CompanyAuthAllowListRequest.class));
-    }
-
-    @Test
-    void createUserDataWithNullCompanyAuthAllowList() throws DataException {
-        UserRequest userRequest = new UserRequest();
-        userRequest.setPassword("password");
-        userRequest.setIsCompanyAuthAllowList(null);
-
-        UserResponse userResponse = new UserResponse("userId", "test@example.com", "Forename", "Surname");
-        when(userService.create(userRequest)).thenReturn(userResponse);
-
-        UserResponse result = testDataService.createUserData(userRequest);
-
-        assertEquals("test@example.com", result.getEmail());
-        assertEquals("Forename", result.getForename());
-        assertEquals("Surname", result.getSurname());
-        assertEquals("userId", result.getId());
-        assertNull(userRequest.getIsCompanyAuthAllowList());
-        verify(userService, times(1)).create(userRequest);
-        verify(companyAuthAllowListService, never()).create(any(CompanyAuthAllowListRequest.class));
-    }
-
-    @Test
-    void deleteCompanyAuthAllowList() {
-        String userId = "userId";
-        User user = new User();
-        user.setEmail("email@example.com");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("authId");
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, times(1)).delete("authId");
-    }
-
-    @Test
-    void deleteCompanyAuthAllowListWhenNull() {
-        String userId = "userId";
-        User user = new User();
-        user.setEmail("email@example.com");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, never()).delete(anyString());
-    }
-
-    @Test
-    void deleteUserDataWithEmailAndAllowListId() {
-        String userId = "user-id-with-auth";
-        User user = new User();
-        user.setEmail("allow@example.com");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn("allow-list-id");
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, times(1)).getAuthId("allow@example.com");
-        verify(companyAuthAllowListService, times(1)).delete("allow-list-id");
-    }
-
-    @Test
-    void deleteUserDataWithEmailAndNoAllowListId() {
-        String userId = "user-id-without-auth";
-        User user = new User();
-        user.setEmail("no-allow@example.com");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-        when(companyAuthAllowListService.getAuthId(user.getEmail())).thenReturn(null);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, times(1)).getAuthId("no-allow@example.com");
-        verify(companyAuthAllowListService, never()).delete(anyString());
-    }
-
-    @Test
-    void deleteUserDataWithNullEmail() {
-        String userId = "userId";
-        User user = new User();
-        user.setEmail(null);
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, never()).delete(anyString());
-    }
-
-    @Test
-    void deleteUserDataWithEmptyEmail() {
-        String userId = "userId";
-        User user = new User();
-        user.setEmail("");
-
-        when(userService.getUserById(userId)).thenReturn(Optional.of(user));
-        when(userService.delete(userId)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserData(userId);
-
-        assertTrue(result);
-        verify(userService, times(1)).delete(userId);
-        verify(companyAuthAllowListService, never()).delete(anyString());
     }
 
     @Test
@@ -1381,119 +940,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void createUserCompanyAssociationData() throws DataException {
-        var id = new ObjectId();
-        UserCompanyAssociationRequest spec =
-                new UserCompanyAssociationRequest();
-        spec.setUserId(USER_ID);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        UserCompanyAssociationResponse associationData =
-                new UserCompanyAssociationResponse(id, spec.getCompanyNumber(),
-                        spec.getUserId(), null, CONFIRMED_STATUS,
-                        AUTH_CODE_APPROVAL_ROUTE, null);
-
-        when(userCompanyAssociationService.create(spec)).thenReturn(associationData);
-
-        UserCompanyAssociationResponse createdAssociation =
-                testDataService.createUserCompanyAssociationData(spec);
-
-        assertNotNull(createdAssociation);
-        assertEquals(id.toString(), createdAssociation.getId());
-        assertEquals(USER_ID, createdAssociation.getUserId());
-        assertEquals(COMPANY_NUMBER, createdAssociation.getCompanyNumber());
-        assertEquals(CONFIRMED_STATUS, createdAssociation.getStatus());
-        assertEquals(AUTH_CODE_APPROVAL_ROUTE,
-                createdAssociation.getApprovalRoute());
-        assertNull(createdAssociation.getInvitations());
-        assertNull(createdAssociation.getUserEmail());
-
-        verify(userCompanyAssociationService, times(1)).create(spec);
-    }
-
-    @Test
-    void createUserCompanyAssociationDataNoUserIdOrUserEmail() {
-        UserCompanyAssociationRequest spec =
-                new UserCompanyAssociationRequest();
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createUserCompanyAssociationData(spec));
-        assertEquals("A user_id or a user_email is required to create "
-                + "an association", exception.getMessage());
-    }
-
-    @Test
-    void createUserCompanyAssociationDataNoCompanyNumber() {
-        UserCompanyAssociationRequest spec =
-                new UserCompanyAssociationRequest();
-        spec.setUserId(USER_ID);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createUserCompanyAssociationData(spec));
-        assertEquals("Company number is required to create an "
-                + "association", exception.getMessage());
-    }
-
-    @Test
-    void createUserCompanyAssociationDataException() throws DataException {
-        UserCompanyAssociationRequest spec =
-                new UserCompanyAssociationRequest();
-        spec.setUserId(USER_ID);
-        spec.setCompanyNumber(COMPANY_NUMBER);
-
-        when(userCompanyAssociationService.create(spec))
-                .thenThrow(new RuntimeException("Error creating the "
-                        + "association"));
-
-        DataException exception =
-                assertThrows(DataException.class,
-                        () -> testDataService.createUserCompanyAssociationData(spec));
-
-        assertEquals("Error creating the association",
-                exception.getMessage());
-        verify(userCompanyAssociationService, times(1)).create(spec);
-    }
-
-    @Test
-    void deleteUserCompanyAssociation() throws DataException {
-        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
-                .thenReturn(true);
-
-        boolean result =
-                testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
-
-        assertTrue(result);
-        verify(userCompanyAssociationService).delete(ASSOCIATION_ID);
-    }
-
-    @Test
-    void deleteUserCompanyAssociationNotFound() throws DataException {
-        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
-                .thenReturn(false);
-
-        boolean result =
-                testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID);
-
-        assertFalse(result);
-        verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
-    }
-
-    @Test
-    void deleteUserCompanyAssociationException() {
-        RuntimeException ex = new RuntimeException("Error deleting "
-                + "association");
-        when(userCompanyAssociationService.delete(ASSOCIATION_ID))
-                .thenThrow(ex);
-
-        DataException exception = assertThrows(DataException.class,
-                () -> testDataService.deleteUserCompanyAssociationData(ASSOCIATION_ID));
-
-        assertEquals("Error deleting association",
-                exception.getMessage());
-        verify(userCompanyAssociationService, times(1)).delete(ASSOCIATION_ID);
-    }
-
-    @Test
     void createTransactionData() throws DataException {
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setUserId("Test12454");
@@ -1626,43 +1072,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void findOrCreateCompanyAuthCode_successReturnsAuthCode() throws Exception {
-        CompanyAuthCode expected = new CompanyAuthCode();
-        expected.setId(COMPANY_NUMBER);
-        expected.setAuthCode("999999");
-
-        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenReturn(expected);
-
-        CompanyAuthCode actual = testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER);
-
-        assertSame(expected, actual);
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_profileNotFoundIsMappedToNoDataFoundException() throws Exception {
-        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER))
-                .thenThrow(new NoDataFoundException("profile missing"));
-
-        NoDataFoundException ex = assertThrows(NoDataFoundException.class,
-                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
-
-        assertEquals("Company profile not found when finding or creating auth code", ex.getMessage());
-    }
-
-    @Test
-    void findOrCreateCompanyAuthCode_otherExceptionIsWrappedInDataException() throws Exception {
-        RuntimeException cause = new RuntimeException("boom");
-        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(cause);
-
-        DataException ex = assertThrows(DataException.class,
-                () -> testDataService.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
-
-        assertEquals("Error finding or creating company auth code", ex.getMessage());
-        // ensure original cause is preserved
-        assertSame(cause, ex.getCause());
-    }
-
-    @Test
     void getAcspProfileDataReturnsProfile() throws NoDataFoundException {
         String acspNumber = "AP000036";
 
@@ -1743,113 +1152,4 @@ class TestDataServiceImplTest {
         verify(itemGroupsService, times(1)).deleteItemGroups(orderNumber);
     }
 
-    @Test
-    void deleteUserDataByEmailUserNotFoundReturnsFalse() {
-        String email = "test@example.com";
-
-        when(userService.getUserByEmail(email)).thenReturn(Optional.empty());
-
-        boolean result = testDataService.deleteUserDataByEmail(email);
-
-        assertFalse(result);
-        verify(userService, times(1)).getUserByEmail(email);
-        verify(userService, never()).deleteByEmail(anyString());
-        verify(companyAuthAllowListService, never()).delete(anyString());
-    }
-
-    @Test
-    void deleteUserDataByEmailSuccessWithAllowList() {
-        String email = "test@example.com";
-
-        User user = new User();
-        user.setEmail(email);
-
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
-        when(companyAuthAllowListService.getAuthId(email)).thenReturn("allowId");
-        when(userService.deleteByEmail(email)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserDataByEmail(email);
-
-        assertTrue(result);
-
-        verify(userService).getUserByEmail(email);
-        verify(companyAuthAllowListService).getAuthId(email);
-        verify(companyAuthAllowListService).delete("allowId");
-        verify(userService).deleteByEmail(email);
-    }
-
-    @Test
-    void deleteUserDataByEmailSuccessNoAllowList() {
-        String email = "test@example.com";
-
-        User user = new User();
-        user.setEmail(email);
-
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
-        when(companyAuthAllowListService.getAuthId(email)).thenReturn(null);
-        when(userService.deleteByEmail(email)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserDataByEmail(email);
-
-        assertTrue(result);
-
-        verify(companyAuthAllowListService).getAuthId(email);
-        verify(companyAuthAllowListService, never()).delete(anyString());
-        verify(userService).deleteByEmail(email);
-    }
-
-    @Test
-    void deleteUserDataByEmailUserWithNullEmailSkipsAllowList() {
-        String email = "test@example.com";
-
-        User user = new User();
-        user.setEmail(null);
-
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
-        when(userService.deleteByEmail(email)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserDataByEmail(email);
-
-        assertTrue(result);
-
-        verify(companyAuthAllowListService, never()).getAuthId(anyString());
-        verify(companyAuthAllowListService, never()).delete(anyString());
-        verify(userService).deleteByEmail(email);
-    }
-
-    @Test
-    void deleteUserDataByEmailUserWithEmptyEmailSkipsAllowList() {
-        String email = "test@example.com";
-
-        User user = new User();
-        user.setEmail("");
-
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
-        when(userService.deleteByEmail(email)).thenReturn(true);
-
-        boolean result = testDataService.deleteUserDataByEmail(email);
-
-        assertTrue(result);
-
-        verify(companyAuthAllowListService, never()).getAuthId(anyString());
-        verify(companyAuthAllowListService, never()).delete(anyString());
-        verify(userService).deleteByEmail(email);
-    }
-
-    @Test
-    void deleteUserDataByEmailDeleteReturnsFalse() {
-        String email = "test@example.com";
-
-        User user = new User();
-        user.setEmail(email);
-
-        when(userService.getUserByEmail(email)).thenReturn(Optional.of(user));
-        when(companyAuthAllowListService.getAuthId(email)).thenReturn(null);
-        when(userService.deleteByEmail(email)).thenReturn(false);
-
-        boolean result = testDataService.deleteUserDataByEmail(email);
-
-        assertFalse(result);
-        verify(userService).deleteByEmail(email);
-    }
 }

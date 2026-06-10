@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -17,20 +16,25 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PreviousStateReques
 import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
-import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.UserCompanyAssociationService;
 
 @Service
 public class UserCompanyAssociationServiceImpl implements
-        DataService<UserCompanyAssociationResponse, UserCompanyAssociationRequest> {
+        UserCompanyAssociationService {
     private static final String AUTH_CODE = "auth_code";
     private static final String CONFIRMED_STATUS = "confirmed";
 
-    @Autowired
-    private UserCompanyAssociationRepository repository;
+    private final UserCompanyAssociationRepository repository;
 
-    @Autowired
-    private RandomService randomService;
+    private final RandomService randomService;
+
+    public UserCompanyAssociationServiceImpl(
+            UserCompanyAssociationRepository repository,
+            RandomService randomService) {
+        this.repository = repository;
+        this.randomService = randomService;
+    }
 
     @Override
     public UserCompanyAssociationResponse create(UserCompanyAssociationRequest spec) throws DataException {

@@ -4,8 +4,6 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
@@ -15,9 +13,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliver
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserCompanyAssociationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.UserRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
@@ -26,49 +21,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesRespon
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserCompanyAssociationResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.UserResponse;
 
 import java.util.Optional;
 
 
 public interface TestDataService {
-
-    /**
-     * Updates the company profile data for the company number provided and {@link UpdateCompanyRequest}
-     *
-     * @param request the update request with company number as mandatory
-     * @return the status of the update request
-     * @throws NoDataFoundException if the company number cannot be found
-     * @throws DataException if the company profile cannot be updated
-     */
-    CompanyProfile updateCompanyData(
-            UpdateCompanyRequest request) throws NoDataFoundException, DataException;
-
-    /**
-     * Creates a new user test data based on the provided user specifications.
-     *
-     * @param userRequest the specifications of the user to create
-     * @return the created user's test data
-     * @throws DataException if there is an error during user creation
-     */
-    UserResponse createUserData(UserRequest userRequest) throws DataException;
-
-    /**
-     * Deletes a user test data by their user ID.
-     *
-     * @param userId the ID of the user to delete
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteUserData(String userId) throws DataException;
-
-    /**
-     * Deletes an user test data by their user email.
-     *
-     * @param userEmail the email of the user to delete
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteUserDataByEmail(String userEmail) throws DataException;
 
     /**
      * Creates a new acsp member test data based on the provided user specifications.
@@ -252,28 +209,6 @@ public interface TestDataService {
 
     boolean deleteTransaction(String transactionId) throws DataException;
 
-    /**
-     * Creates a new user company association test data based on the
-     * provided user specifications.
-     *
-     * @param userCompanyAssociationRequest the specifications of the
-     *                                   association to create
-     * @return the created user company association test data
-     * @throws DataException if there is an error during creation
-     */
-    UserCompanyAssociationResponse
-    createUserCompanyAssociationData(UserCompanyAssociationRequest userCompanyAssociationRequest)
-            throws DataException;
-
-    /**
-     * Deletes a user company association test data by
-     * association id.
-     *
-     * @param associationId the ID of the association to delete
-     * @throws DataException if there is an error during deletion
-     */
-    boolean deleteUserCompanyAssociationData(String associationId) throws DataException;
-
     AdminPermissionsResponse createAdminPermissionsData(AdminPermissionsRequest spec) throws DataException;
 
     /**
@@ -284,17 +219,6 @@ public interface TestDataService {
      * @throws DataException if there is an error during deletion
      */
     boolean deleteAdminPermissionsData(String id) throws DataException;
-
-    /**
-     * Find an existing CompanyAuthCode for the given company number
-     * or create a default one if none exists.
-     * @param companyNumber the company number
-     * @return the existing or newly created CompanyAuthCode
-     * @throws DataException on general errors
-     * @throws NoDataFoundException if the company profile is not found
-     */
-    CompanyAuthCode findOrCreateCompanyAuthCode(String companyNumber)
-            throws DataException, NoDataFoundException;
 
     /**
      * Deletes the Item Groups test data for the given order number.

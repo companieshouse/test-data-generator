@@ -12,17 +12,26 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -46,6 +55,9 @@ class InternalCompanyControllerTest {
 
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
+
+    @Mock
+    private CompanyProfileService companyProfileService;
 
     @InjectMocks
     private InternalCompanyController internalCompanyController;
@@ -262,5 +274,112 @@ class InternalCompanyControllerTest {
                 internalCompanyController.persistCompanyDataStructure(request));
         assertEquals(exception, thrown);
     }
-}
 
+    @Test
+    void updateCompanySuccess() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        CompanyProfile updatedProfile = new CompanyProfile();
+        updatedProfile.setCompanyNumber(COMPANY_NUMBER);
+
+        when(companyProfileService.updateCompanyProfile(request)).thenReturn(updatedProfile);
+
+        ResponseEntity<Object> response = internalCompanyController.updateCompany(request);
+
+        assertNotNull(response.getBody());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        CompanyUpdateResponse body = (CompanyUpdateResponse) response.getBody();
+        assertEquals(COMPANY_NUMBER, body.getCompanyNumber());
+        assertEquals("updated", body.getStatus());
+
+        verify(companyProfileService).updateCompanyProfile(request);
+    }
+
+    @Test
+    void updateCompanyNotFound() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        String errorMessage = "Company not found";
+        when(companyProfileService.updateCompanyProfile(request))
+                .thenThrow(new NoDataFoundException(errorMessage));
+
+        ResponseEntity<Object> response = internalCompanyController.updateCompany(request);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertEquals(errorMessage, body.get("error"));
+        assertEquals(HttpStatus.NOT_FOUND.value(), body.get("status"));
+    }
+
+    @Test
+    void updateCompanyDataException() throws Exception {
+        UpdateCompanyRequest request = new UpdateCompanyRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        String errorMessage = "Internal server error";
+        when(companyProfileService.updateCompanyProfile(request))
+                .thenThrow(new DataException(errorMessage));
+
+        ResponseEntity<Object> response = internalCompanyController.updateCompany(request);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+
+        Map<String, Object> body = (Map<String, Object>) response.getBody();
+        assertEquals(errorMessage, body.get("error"));
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(), body.get("status"));
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCodeSuccess() throws Exception {
+        var authCode = new CompanyAuthCode();
+        authCode.setId(COMPANY_NUMBER);
+        authCode.setAuthCode("CODE123");
+
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenReturn(authCode);
+
+        ResponseEntity<CompanyAuthCodeResponse> response =
+                internalCompanyController.findOrCreateCompanyAuthCode(COMPANY_NUMBER);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertNotNull(response.getBody());
+        assertEquals("CODE123", response.getBody().getAuthCode());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCodeNullCompanyNumberThrowsDataException() {
+        DataException thrown = assertThrows(DataException.class, () ->
+                internalCompanyController.findOrCreateCompanyAuthCode(null));
+        assertEquals("companyNumber query parameter is required", thrown.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCodeEmptyCompanyNumberThrowsDataException() {
+        DataException thrown = assertThrows(DataException.class, () ->
+                internalCompanyController.findOrCreateCompanyAuthCode(""));
+        assertEquals("companyNumber query parameter is required", thrown.getMessage());
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCodeServiceThrowsDataException() throws Exception {
+        DataException ex = new DataException("Service error");
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(ex);
+
+        DataException thrown = assertThrows(DataException.class, () ->
+                internalCompanyController.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void findOrCreateCompanyAuthCodeServiceThrowsNoDataFoundException() throws Exception {
+        NoDataFoundException ex = new NoDataFoundException("Not found");
+        when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(ex);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
+                internalCompanyController.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+        assertEquals(ex, thrown);
+    }
+}

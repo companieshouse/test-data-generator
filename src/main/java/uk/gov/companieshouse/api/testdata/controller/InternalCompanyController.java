@@ -8,19 +8,26 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyUpdateResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 import uk.gov.companieshouse.logging.Logger;
@@ -45,18 +52,23 @@ public class InternalCompanyController {
     private final CreateCompanyWorkflowService createCompanyWorkflowService;
     private final DeleteCompanyWorkflowService deleteCompanyWorkflowService;
     private final CompanyAuthCodeService companyAuthCodeService;
+    private final CompanyProfileService companyProfileService;
 
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
+    private static final String STATUS = "status";
+    private static final String ERROR = "error";
 
     public InternalCompanyController(
             CreateCompanyWorkflowService createCompanyWorkflowService,
             DeleteCompanyWorkflowService deleteCompanyWorkflowService,
-            CompanyAuthCodeService companyAuthCodeService) {
+            CompanyAuthCodeService companyAuthCodeService,
+            CompanyProfileService companyProfileService) {
         this.createCompanyWorkflowService = createCompanyWorkflowService;
         this.deleteCompanyWorkflowService = deleteCompanyWorkflowService;
         this.companyAuthCodeService = companyAuthCodeService;
+        this.companyProfileService = companyProfileService;
     }
 
     @PostMapping("/company")
@@ -117,5 +129,46 @@ public class InternalCompanyController {
         LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
-}
 
+    @GetMapping("/company/authcode")
+    public ResponseEntity<CompanyAuthCodeResponse> findOrCreateCompanyAuthCode(
+            @RequestParam("companyNumber") final String companyNumber)
+            throws DataException, NoDataFoundException {
+
+        if (companyNumber == null || companyNumber.isEmpty()) {
+            throw new DataException("companyNumber query parameter is required");
+        }
+
+        var authCode = companyAuthCodeService.findOrCreate(companyNumber);
+        var defaultAuthCode = new CompanyAuthCodeResponse(authCode.getAuthCode());
+        return new ResponseEntity<>(defaultAuthCode, HttpStatus.OK);
+    }
+
+    @PutMapping("/update-company")
+    public ResponseEntity<Object> updateCompany(
+            @Valid @RequestBody UpdateCompanyRequest request) {
+
+        try {
+            CompanyProfile updatedCompany =
+                    companyProfileService.updateCompanyProfile(request);
+
+            CompanyUpdateResponse response = new CompanyUpdateResponse(
+                    updatedCompany.getCompanyNumber(),
+                    "updated"
+            );
+
+            return ResponseEntity.ok(response);
+
+        } catch (NoDataFoundException ex) {
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put(ERROR, ex.getMessage());
+            errorBody.put(STATUS, HttpStatus.NOT_FOUND.value());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorBody);
+        } catch (DataException ex) {
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put(ERROR, ex.getMessage());
+            errorBody.put(STATUS, HttpStatus.INTERNAL_SERVER_ERROR.value());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
+        }
+    }
+}
