@@ -75,7 +75,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUser() throws Exception {
+    void deleteUser() {
         User user = new User();
         user.setId(USER_ID);
         user.setEmail("test@example.com");
@@ -106,7 +106,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUserNotFound() throws Exception {
+    void deleteUserNotFound() {
         when(userService.getUserById(USER_ID)).thenReturn(Optional.empty());
 
         ResponseEntity<Map<String, Object>> response = userController.deleteUser(USER_ID);
@@ -117,7 +117,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUserByEmailSuccess() throws Exception {
+    void deleteUserByEmailSuccess() {
         String email = "test@example.com";
         User user = new User();
         user.setEmail(email);
@@ -132,7 +132,7 @@ class UserControllerTest {
     }
 
     @Test
-    void deleteUserByEmailNotFound() throws Exception {
+    void deleteUserByEmailNotFound() {
         String email = "test@example.com";
         when(userService.getUserByEmail(email)).thenReturn(Optional.empty());
 
