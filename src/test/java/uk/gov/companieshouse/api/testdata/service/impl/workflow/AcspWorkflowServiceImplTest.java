@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
@@ -308,45 +306,5 @@ class AcspWorkflowServiceImplTest {
         DataException exception = assertThrows(DataException.class,
                 () -> acspWorkflowService.deleteAcspMembersData(acspMemberId));
         assertEquals("Error deleting acsp member's data", exception.getMessage());
-    }
-
-    @Test
-    void getAcspProfileDataReturnsProfile() throws NoDataFoundException {
-        String acspNumber = "AP000036";
-
-        AcspProfile profile = new AcspProfile();
-        profile.setId(acspNumber);
-        profile.setAcspNumber(acspNumber);
-        profile.setName("Test ACSP Company");
-        profile.setStatus("active");
-
-        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
-
-        Optional<AcspProfile> result = acspWorkflowService.getAcspProfileData(acspNumber);
-
-        assertNotNull(result);
-        assertTrue(result.isPresent());
-
-        AcspProfile returnedProfile = result.get();
-        assertEquals(acspNumber, returnedProfile.getId());
-        assertEquals(acspNumber, returnedProfile.getAcspNumber());
-        assertEquals("Test ACSP Company", returnedProfile.getName());
-        assertEquals("active", returnedProfile.getStatus());
-
-        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
-    }
-
-    @Test
-    void getAcspProfileDataReturnsEmpty() throws NoDataFoundException {
-        String acspNumber = "NON_EXISTENT";
-
-        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
-
-        Optional<AcspProfile> result = acspWorkflowService.getAcspProfileData(acspNumber);
-
-        assertNotNull(result);
-        assertTrue(result.isEmpty());
-
-        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 }

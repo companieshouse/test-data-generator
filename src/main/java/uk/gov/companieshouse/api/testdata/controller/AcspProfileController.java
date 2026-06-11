@@ -10,16 +10,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.service.AcspWorkflowService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 
 @RestController
 @RequestMapping(value = "${api.endpoint}/internal", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AcspProfileController {
 
-    private final AcspWorkflowService acspWorkflowService;
+    private final AcspProfileService acspProfileService;
 
-    public AcspProfileController(AcspWorkflowService acspWorkflowService) {
-        this.acspWorkflowService = acspWorkflowService;
+    public AcspProfileController(AcspProfileService acspProfileService) {
+        this.acspProfileService = acspProfileService;
     }
 
     @GetMapping("/acsp-profile/{acspNumber}")
@@ -27,7 +27,7 @@ public class AcspProfileController {
             @PathVariable String acspNumber) throws NoDataFoundException {
 
         Optional<AcspProfile> acspProfile =
-                acspWorkflowService.getAcspProfileData(acspNumber);
+                acspProfileService.getAcspProfile(acspNumber);
 
         return new ResponseEntity<>(acspProfile, HttpStatus.OK);
     }

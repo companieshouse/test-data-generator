@@ -25,23 +25,4 @@ public interface AcspWorkflowService {
      * @throws DataException if there is an error during user deletion
      */
     boolean deleteAcspMembersData(String acspMemberId) throws DataException;
-
-    /**
-     * Adds a new certificate test data based on the provided user specifications.
-     *
-     * @param certificatesRequest the specifications of the certificates to order
-     * @return the created certificates test data
-     * @throws DataException if there is an error during user creation
-     */
-
-    /**
-     * Gets the ACSP profile data for a given ACSP number.
-     *
-     * @param acspNumber the ACSP number
-     * @return the {@link AcspProfileResponse}
-     * @throws NoDataFoundException if the profile cannot be found
-     */
-    Optional<AcspProfile> getAcspProfileData(String acspNumber)
-            throws NoDataFoundException;
-
 }

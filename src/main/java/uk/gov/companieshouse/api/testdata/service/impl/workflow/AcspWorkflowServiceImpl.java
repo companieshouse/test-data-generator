@@ -2,13 +2,10 @@ package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.bson.types.ObjectId;
 
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
@@ -108,12 +105,6 @@ public class AcspWorkflowServiceImpl implements AcspWorkflowService {
             throw ex;
         }
         return true;
-    }
-
-    public Optional<AcspProfile> getAcspProfileData(String acspNumber)
-            throws NoDataFoundException {
-
-        return acspProfileService.getAcspProfile(acspNumber);
     }
 
     private void deleteAcspProfile(String acspNumber, List<Exception> suppressedExceptions) {

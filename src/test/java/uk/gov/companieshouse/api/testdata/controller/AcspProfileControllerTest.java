@@ -18,13 +18,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.service.AcspWorkflowService;
+import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 
 @ExtendWith(MockitoExtension.class)
 class AcspProfileControllerTest {
 
     @Mock
-    private AcspWorkflowService acspWorkflowService;
+    private AcspProfileService acspProfileService;
 
     @InjectMocks
     private AcspProfileController acspProfileController;
@@ -39,7 +39,7 @@ class AcspProfileControllerTest {
         profile.setName("Test ACSP Company");
         profile.setStatus("active");
 
-        when(acspWorkflowService.getAcspProfileData(acspNumber)).thenReturn(Optional.of(profile));
+        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
 
         ResponseEntity<Optional<AcspProfile>> response =
                 acspProfileController.getAcspProfile(acspNumber);
@@ -55,14 +55,14 @@ class AcspProfileControllerTest {
         assertEquals("Test ACSP Company", returnedProfile.getName());
         assertEquals("active", returnedProfile.getStatus());
 
-        verify(acspWorkflowService, times(1)).getAcspProfileData(acspNumber);
+        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 
     @Test
     void getAcspProfileNotFound() throws Exception {
         String acspNumber = "NON_EXISTENT";
 
-        when(acspWorkflowService.getAcspProfileData(acspNumber)).thenReturn(Optional.empty());
+        when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
 
         ResponseEntity<Optional<AcspProfile>> response =
                 acspProfileController.getAcspProfile(acspNumber);
@@ -72,7 +72,7 @@ class AcspProfileControllerTest {
         assertNotNull(response.getBody());
         assertTrue(response.getBody().isEmpty());
 
-        verify(acspWorkflowService, times(1)).getAcspProfileData(acspNumber);
+        verify(acspProfileService, times(1)).getAcspProfile(acspNumber);
     }
 
     @Test
@@ -80,7 +80,7 @@ class AcspProfileControllerTest {
         String acspNumber = "AP000036";
         NoDataFoundException ex = new NoDataFoundException("ACSP not found");
 
-        when(acspWorkflowService.getAcspProfileData(acspNumber)).thenThrow(ex);
+        when(acspProfileService.getAcspProfile(acspNumber)).thenThrow(ex);
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
                 acspProfileController.getAcspProfile(acspNumber));
