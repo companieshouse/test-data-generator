@@ -27,30 +27,6 @@ import java.util.Optional;
 
 public interface TestDataService {
 
-    /**
-     * Creates a new acsp member test data based on the provided user specifications.
-     *
-     * @param acspMembersRequest the specifications of the acsp member to create
-     * @return the created acsp members' test data
-     * @throws DataException if there is an error during user creation
-     */
-    AcspMembersResponse createAcspMembersData(AcspMembersRequest acspMembersRequest) throws DataException;
-
-    /**
-     * Deletes an acsp members' test data by their membership id.
-     *
-     * @param acspMemberId the ID of the membership to delete
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteAcspMembersData(String acspMemberId) throws DataException;
-
-    /**
-     * Adds a new certificate test data based on the provided user specifications.
-     *
-     * @param certificatesRequest the specifications of the certificates to order
-     * @return the created certificates test data
-     * @throws DataException if there is an error during user creation
-     */
     CertificatesResponse createCertificatesData(CertificatesRequest certificatesRequest) throws DataException;
 
     /**
@@ -188,15 +164,6 @@ public interface TestDataService {
      */
     PostcodesResponse getPostcodes(String country) throws DataException;
 
-    /**
-     * Gets the ACSP profile data for a given ACSP number.
-     *
-     * @param acspNumber the ACSP number
-     * @return the {@link AcspProfileResponse}
-     * @throws NoDataFoundException if the profile cannot be found
-     */
-    Optional<AcspProfile> getAcspProfileData(String acspNumber)
-            throws NoDataFoundException;
 
     /**
      * Adds a new transaction and acsp application test data based on the provided specifications.
