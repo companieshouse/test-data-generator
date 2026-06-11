@@ -1,5 +1,22 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,10 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
@@ -25,7 +39,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
@@ -36,24 +49,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsRespon
 import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
@@ -77,77 +72,6 @@ class TestDataControllerTest {
 
     @Mock
     private VerifiedIdentityService<IdentityVerificationResponse> verifiedIdentityService;
-
-    @Test
-    void createAcspMember() throws Exception {
-        AcspMembersRequest request = new AcspMembersRequest();
-        request.setUserId("rsf3pdwywvse5yz55mfodfx8");
-        request.setUserRole("role");
-        request.setStatus("active");
-        request.setAcspProfile(new AcspProfileRequest());
-
-        AcspMembersResponse acspMember = new AcspMembersResponse(
-                new ObjectId(), "acspNumber", "userId", "active", "role");
-
-        when(this.testDataService.createAcspMembersData(request)).thenReturn(acspMember);
-        ResponseEntity<AcspMembersResponse> response
-                = this.testDataController.createAcspMember(request);
-
-        assertEquals(acspMember, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void createAcspMemberException() throws Exception {
-        AcspMembersRequest request = new AcspMembersRequest();
-        Throwable exception = new DataException("Error message");
-
-        when(this.testDataService.createAcspMembersData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createAcspMember(request));
-        assertEquals(exception, thrown);
-    }
-
-    @Test
-    void deleteAcspMember() throws Exception {
-        final String acspMemberId = "memberId";
-
-        when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAcspMember(acspMemberId);
-
-        assertNull(response.getBody());
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(testDataService).deleteAcspMembersData(acspMemberId);
-    }
-
-    @Test
-    void deleteAcspMemberNotFound() throws Exception {
-        final String acspMemberId = "memberId";
-
-        when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAcspMember(acspMemberId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp-member-id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-
-        verify(testDataService).deleteAcspMembersData(acspMemberId);
-    }
-
-    @Test
-    void deleteAcspMemberException() throws Exception {
-        final String acspMemberId = "memberId";
-        Throwable exception = new DataException("Error message");
-
-        when(this.testDataService.deleteAcspMembersData(acspMemberId)).thenThrow(exception);
-
-        DataException thrown = assertThrows(
-                DataException.class, () -> this.testDataController.deleteAcspMember(acspMemberId));
-        assertEquals(exception, thrown);
-    }
 
     @Test
     void deleteAppealSuccess() throws Exception {
@@ -1045,53 +969,6 @@ class TestDataControllerTest {
         verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
     }
 
-
-    @Test
-    void getAcspProfileFound() throws Exception {
-        String acspNumber = "AP000036";
-
-        AcspProfile profile = new AcspProfile();
-        profile.setId(acspNumber);
-        profile.setAcspNumber(acspNumber);
-        profile.setName("Test ACSP Company");
-        profile.setStatus("active");
-
-        when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.of(profile));
-
-        ResponseEntity<Optional<AcspProfile>> response =
-                testDataController.getAcspProfile(acspNumber);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isPresent());
-
-        AcspProfile returnedProfile = response.getBody().get();
-        assertEquals(acspNumber, returnedProfile.getId());
-        assertEquals(acspNumber, returnedProfile.getAcspNumber());
-        assertEquals("Test ACSP Company", returnedProfile.getName());
-        assertEquals("active", returnedProfile.getStatus());
-
-        verify(testDataService, times(1)).getAcspProfileData(acspNumber);
-    }
-
-    @Test
-    void getAcspProfileNotFound() throws Exception {
-        String acspNumber = "NON_EXISTENT";
-
-        when(testDataService.getAcspProfileData(acspNumber)).thenReturn(Optional.empty());
-
-        ResponseEntity<Optional<AcspProfile>> response =
-                testDataController.getAcspProfile(acspNumber);
-
-        assertNotNull(response);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertNotNull(response.getBody());
-        assertTrue(response.getBody().isEmpty());
-
-        verify(testDataService, times(1)).getAcspProfileData(acspNumber);
-    }
-
     @Test
     void deleteItemGroups() throws Exception {
         final String orderNumber = "ORD-1776329853";
@@ -1134,19 +1011,6 @@ class TestDataControllerTest {
                 testDataController.deleteItemGroups(orderNumber));
         assertEquals(exception, thrown);
         verify(testDataService).deleteItemGroupsData(orderNumber);
-    }
-
-
-    @Test
-    void getAcspProfileThrowsNoDataFoundException() throws Exception {
-        String acspNumber = "AP000036";
-        NoDataFoundException ex = new NoDataFoundException("ACSP not found");
-
-        when(testDataService.getAcspProfileData(acspNumber)).thenThrow(ex);
-
-        NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
-                testDataController.getAcspProfile(acspNumber));
-        assertEquals(ex, thrown);
     }
 
     @Test

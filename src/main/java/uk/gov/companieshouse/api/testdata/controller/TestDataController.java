@@ -101,18 +101,6 @@ public class TestDataController {
         }
     }
 
-    @PostMapping("/internal/acsp-members")
-    public ResponseEntity<AcspMembersResponse> createAcspMember(
-            @Valid @RequestBody AcspMembersRequest request) throws DataException {
-
-        var createdAcspMember = testDataService.createAcspMembersData(request);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("acsp-member-id", createdAcspMember.getAcspMemberId());
-        LOG.info("New acsp member created", data);
-        return new ResponseEntity<>(createdAcspMember, HttpStatus.CREATED);
-    }
-
     @PostMapping("/internal/certificates")
     public ResponseEntity<CertificatesResponse> createCertificates(
             @Valid @RequestBody CertificatesRequest request) throws DataException {
@@ -150,24 +138,6 @@ public class TestDataController {
                 createdMissingImageDeliveries.getCertificates().getFirst().getId());
         LOG.info("New missing image deliveries added", data);
         return new ResponseEntity<>(createdMissingImageDeliveries, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/internal/acsp-members/{acspMemberId}")
-    public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
-                                                                String acspMemberId)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("acsp-member-id", acspMemberId);
-        boolean deleteAcspMember = testDataService.deleteAcspMembersData(acspMemberId);
-
-        if (deleteAcspMember) {
-            LOG.info("Acsp Member Deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Acsp Member Not Found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
     }
 
     @DeleteMapping("/internal/certificates/{id}")
@@ -332,16 +302,6 @@ public class TestDataController {
         }
         LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
         return new ResponseEntity<>(postcode, HttpStatus.OK);
-    }
-
-    @GetMapping("/internal/acsp-profile/{acspNumber}")
-    public ResponseEntity<Optional<AcspProfile>> getAcspProfile(
-            @PathVariable String acspNumber) throws NoDataFoundException {
-
-        Optional<AcspProfile> acspProfile =
-                testDataService.getAcspProfileData(acspNumber);
-
-        return new ResponseEntity<>(acspProfile, HttpStatus.OK);
     }
 
     @PostMapping("/internal/transactions")
