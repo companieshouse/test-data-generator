@@ -19,9 +19,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @RequestMapping(value = "${api.endpoint}/internal", produces = MediaType.APPLICATION_JSON_VALUE)
 public class AcspProfileController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
-    private static final String STATUS = "status";
-
     private final AcspWorkflowService acspWorkflowService;
 
     public AcspProfileController(AcspWorkflowService acspWorkflowService) {

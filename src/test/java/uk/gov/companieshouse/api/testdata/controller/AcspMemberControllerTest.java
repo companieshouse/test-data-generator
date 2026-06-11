@@ -24,7 +24,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersRespons
 import uk.gov.companieshouse.api.testdata.service.AcspWorkflowService;
 
 @ExtendWith(MockitoExtension.class)
-public class AcspMemberControllerTest {
+class AcspMemberControllerTest {
 
     @Mock
     private AcspWorkflowService acspWorkflowService;

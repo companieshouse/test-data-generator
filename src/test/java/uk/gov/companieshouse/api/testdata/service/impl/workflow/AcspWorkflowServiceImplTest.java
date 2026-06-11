@@ -39,7 +39,7 @@ import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 
 @ExtendWith(MockitoExtension.class)
-public class AcspWorkflowServiceImplTest {
+class AcspWorkflowServiceImplTest {
 
     @Mock
     private DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
@@ -48,7 +48,6 @@ public class AcspWorkflowServiceImplTest {
     @Mock
     private AcspProfileService acspProfileService;
 
-    // Manually constructed in @BeforeEach to guarantee correct injection order.
     private AcspWorkflowServiceImpl testDataService;
 
     @BeforeEach
