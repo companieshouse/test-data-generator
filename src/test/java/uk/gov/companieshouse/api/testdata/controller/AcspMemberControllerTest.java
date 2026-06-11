@@ -30,7 +30,7 @@ class AcspMemberControllerTest {
     private AcspWorkflowService acspWorkflowService;
 
     @InjectMocks
-    private AcspMemberController testDataController;
+    private AcspMemberController acspMemberController;
 
     @Test
     void createAcspMember() throws Exception {
@@ -45,7 +45,7 @@ class AcspMemberControllerTest {
 
         when(this.acspWorkflowService.createAcspMembersData(request)).thenReturn(acspMember);
         ResponseEntity<AcspMembersResponse> response
-                = this.testDataController.createAcspMember(request);
+                = this.acspMemberController.createAcspMember(request);
 
         assertEquals(acspMember, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -59,7 +59,7 @@ class AcspMemberControllerTest {
         when(this.acspWorkflowService.createAcspMembersData(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                this.testDataController.createAcspMember(request));
+                this.acspMemberController.createAcspMember(request));
         assertEquals(exception, thrown);
     }
 
@@ -69,7 +69,7 @@ class AcspMemberControllerTest {
 
         when(this.acspWorkflowService.deleteAcspMembersData(acspMemberId)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAcspMember(acspMemberId);
+                = this.acspMemberController.deleteAcspMember(acspMemberId);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
@@ -82,7 +82,7 @@ class AcspMemberControllerTest {
 
         when(this.acspWorkflowService.deleteAcspMembersData(acspMemberId)).thenReturn(false);
         ResponseEntity<Map<String, Object>> response
-                = this.testDataController.deleteAcspMember(acspMemberId);
+                = this.acspMemberController.deleteAcspMember(acspMemberId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp-member-id"));
@@ -99,7 +99,7 @@ class AcspMemberControllerTest {
         when(this.acspWorkflowService.deleteAcspMembersData(acspMemberId)).thenThrow(exception);
 
         DataException thrown = assertThrows(
-                DataException.class, () -> this.testDataController.deleteAcspMember(acspMemberId));
+                DataException.class, () -> this.acspMemberController.deleteAcspMember(acspMemberId));
         assertEquals(exception, thrown);
     }
 }

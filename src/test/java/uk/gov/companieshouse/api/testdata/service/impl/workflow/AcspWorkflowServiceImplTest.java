@@ -48,11 +48,11 @@ class AcspWorkflowServiceImplTest {
     @Mock
     private AcspProfileService acspProfileService;
 
-    private AcspWorkflowServiceImpl testDataService;
+    private AcspWorkflowServiceImpl acspWorkflowService;
 
     @BeforeEach
     void setUp() {
-        testDataService = new AcspWorkflowServiceImpl(
+        acspWorkflowService = new AcspWorkflowServiceImpl(
                 acspProfileService,
                 acspMembersRepository,
                 acspMembersService);
@@ -75,7 +75,7 @@ class AcspWorkflowServiceImplTest {
         spec.setAcspProfile(profileSpec);
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(profileData);
         when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(membersData);
-        return testDataService.createAcspMembersData(spec);
+        return acspWorkflowService.createAcspMembersData(spec);
     }
 
     private void verifyAcspMembersData(AcspMembersResponse data,
@@ -104,7 +104,7 @@ class AcspWorkflowServiceImplTest {
                                                 Optional<AcspMembers> memberOptional)
             throws DataException {
         when(acspMembersRepository.findById(acspMemberId)).thenReturn(memberOptional);
-        return testDataService.deleteAcspMembersData(acspMemberId);
+        return acspWorkflowService.deleteAcspMembersData(acspMemberId);
     }
 
     @Test
@@ -138,7 +138,7 @@ class AcspWorkflowServiceImplTest {
     void createAcspMembersDataNullUserId() {
         AcspMembersRequest spec = new AcspMembersRequest();
         DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMembersData(spec));
         assertEquals("User ID is required to create an ACSP member", exception.getMessage());
     }
 
@@ -150,7 +150,7 @@ class AcspWorkflowServiceImplTest {
         when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
         DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMembersData(spec));
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
@@ -183,7 +183,7 @@ class AcspWorkflowServiceImplTest {
                         "active", "role");
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
         when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
-        AcspMembersResponse result = testDataService.createAcspMembersData(spec);
+        AcspMembersResponse result = acspWorkflowService.createAcspMembersData(spec);
 
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersResponse.getAcspMemberId()),
@@ -216,7 +216,7 @@ class AcspWorkflowServiceImplTest {
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
         when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
 
-        AcspMembersResponse result = testDataService.createAcspMembersData(spec);
+        AcspMembersResponse result = acspWorkflowService.createAcspMembersData(spec);
 
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersResponse.getAcspMemberId()),
@@ -244,7 +244,7 @@ class AcspWorkflowServiceImplTest {
         when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
         DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMembersData(spec));
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
@@ -267,7 +267,7 @@ class AcspWorkflowServiceImplTest {
         when(acspMembersService.create(any(AcspMembersRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
         DataException exception = assertThrows(DataException.class,
-                () -> testDataService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMembersData(spec));
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP member",
                 exception.getMessage());
@@ -306,7 +306,7 @@ class AcspWorkflowServiceImplTest {
         doThrow(new RuntimeException(new DataException("Error")))
                 .when(acspMembersService).delete(acspMemberId);
         DataException exception = assertThrows(DataException.class,
-                () -> testDataService.deleteAcspMembersData(acspMemberId));
+                () -> acspWorkflowService.deleteAcspMembersData(acspMemberId));
         assertEquals("Error deleting acsp member's data", exception.getMessage());
     }
 
@@ -322,7 +322,7 @@ class AcspWorkflowServiceImplTest {
 
         when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.of(profile));
 
-        Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
+        Optional<AcspProfile> result = acspWorkflowService.getAcspProfileData(acspNumber);
 
         assertNotNull(result);
         assertTrue(result.isPresent());
@@ -342,7 +342,7 @@ class AcspWorkflowServiceImplTest {
 
         when(acspProfileService.getAcspProfile(acspNumber)).thenReturn(Optional.empty());
 
-        Optional<AcspProfile> result = testDataService.getAcspProfileData(acspNumber);
+        Optional<AcspProfile> result = acspWorkflowService.getAcspProfileData(acspNumber);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
