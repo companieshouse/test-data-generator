@@ -427,54 +427,6 @@ class TestDataControllerTest {
         assertEquals(100.0, penaltyCopy.getOutstandingAmount());
     }
 
-    @Test
-    void getPostcodeSuccess() throws Exception {
-        String country = "England";
-        PostcodesResponse postcodesResponse =
-                new PostcodesResponse(12, "Thoroughfare Name", "Dependent Locality",
-                        "Locality Post Town", "ABC 123");
-
-        when(testDataService.getPostcodes(country)).thenReturn(postcodesResponse);
-
-        ResponseEntity<PostcodesResponse> response = testDataController.getPostcode(country);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(postcodesResponse, response.getBody());
-        verify(testDataService, times(1)).getPostcodes(country);
-    }
-
-    @Test
-    void getPostcodeNoDataFound() throws Exception {
-        String country = "UnknownCountry";
-
-        when(testDataService.getPostcodes(country)).thenReturn(null);
-
-        ResponseEntity<PostcodesResponse> response = testDataController.getPostcode(country);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(testDataService, times(1)).getPostcodes(country);
-    }
-
-    @Test
-    void getPostcodeDataException() throws Exception {
-        String country = "ErrorCountry";
-
-        when(testDataService.getPostcodes(country))
-                .thenThrow(new DataException("Error retrieving postcodes"));
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.getPostcode(country));
-
-        assertEquals("Error retrieving postcodes", thrown.getMessage());
-        verify(testDataService, times(1)).getPostcodes(country);
-    }
-
-    @Test
-    void testGetPostcodeIsNull() throws Exception {
-        ResponseEntity<PostcodesResponse> response = testDataController.getPostcode(null);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(testDataService, times(0)).getPostcodes(anyString());
-    }
 
 
     @Test

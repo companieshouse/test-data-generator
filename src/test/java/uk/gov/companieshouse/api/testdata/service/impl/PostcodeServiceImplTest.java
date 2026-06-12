@@ -2,12 +2,15 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -20,11 +23,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.PostcodeLoadException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-
-
 
 @ExtendWith(MockitoExtension.class)
 class PostcodeServiceImplTest {
@@ -195,4 +198,65 @@ class PostcodeServiceImplTest {
         List<Postcodes> result = service.loadAllPostcodes();
         assertTrue(result.isEmpty(), "Should return empty list when inputStream is null");
     }
+
+    @Test
+    void testGetPostcodesValidCountry() throws DataException {
+        var streetName = "First Avenue";
+        var streetDescriptor = "High Street";
+        var buildingNumber = 12;
+        Postcodes mockPostcode = new Postcodes();
+        mockPostcode.setBuildingNumber(buildingNumber);
+        Postcodes.Thoroughfare thoroughfare = new Postcodes.Thoroughfare();
+        thoroughfare.setName(streetName);
+        thoroughfare.setDescriptor(streetDescriptor);
+        mockPostcode.setThoroughfare(thoroughfare);
+        Postcodes.Locality locality = new Postcodes.Locality();
+        var dependentLocality = "London Road";
+        var postTown = "London";
+        locality.setDependentLocality(dependentLocality);
+        locality.setPostTown(postTown);
+        mockPostcode.setLocality(locality);
+        Postcodes.PostcodeDetails postcodeDetails = new Postcodes.PostcodeDetails();
+        var postcodePretty = "EC1 1BB";
+        postcodeDetails.setPretty(postcodePretty);
+        mockPostcode.setPostcode(postcodeDetails);
+        var country = "England";
+        mockPostcode.setCountry(country);
+
+        doReturn(List.of(mockPostcode)).when(postcodeService).getPostcodeByCountry(country);
+        PostcodesResponse result = postcodeService.getPostcodes(country);
+        assertEquals(buildingNumber, result.getBuildingNumber());
+        assertEquals(streetName + " " + streetDescriptor, result.getFirstLine());
+        assertEquals(dependentLocality, result.getDependentLocality());
+        assertEquals(postTown, result.getPostTown());
+        assertEquals(postcodePretty, result.getPostcode());
+        verify(postcodeService, times(1)).getPostcodeByCountry(country);
+    }
+
+    @Test
+    void testGetPostcodesInvalidCountry() throws DataException {
+        String country = "InvalidCountry";
+
+        doReturn(List.of()).when(postcodeService).getPostcodeByCountry(country);
+
+        PostcodesResponse result = postcodeService.getPostcodes(country);
+
+        assertNull(result);
+        verify(postcodeService, times(1)).getPostcodeByCountry(country);
+    }
+
+    @Test
+    void testGetPostcodesThrowsException() {
+        String country = "ErrorCountry";
+
+        doThrow(new RuntimeException("Error retrieving postcodes"))
+                .when(postcodeService).getPostcodeByCountry(country);
+
+        DataException exception = assertThrows(DataException.class, () ->
+                postcodeService.getPostcodes(country));
+
+        assertEquals("Error retrieving postcodes", exception.getMessage());
+        verify(postcodeService, times(1)).getPostcodeByCountry(country);
+    }
+
 }

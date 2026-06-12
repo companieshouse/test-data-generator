@@ -2,6 +2,8 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -10,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.Application;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.PostcodeLoadException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.service.PostcodeService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -26,6 +30,39 @@ public class PostcodeServiceImpl implements PostcodeService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Override
+    public PostcodesResponse getPostcodes(String country) throws DataException {
+        try {
+            List<Postcodes> postcodes = getPostcodeByCountry(country);
+            if (postcodes == null || postcodes.isEmpty()) {
+                LOG.info("No postcodes found for country: " + country);
+                return null;
+            }
+            var secureRandom = new SecureRandom();
+            var randomPostcode = secureRandom.nextInt(postcodes.size());
+            return getPostCodesData(postcodes).get(randomPostcode);
+        } catch (Exception ex) {
+            throw new DataException("Error retrieving postcodes", ex);
+        }
+    }
+
+    private static List<PostcodesResponse> getPostCodesData(List<Postcodes> postcodes) {
+        List<PostcodesResponse> postcodesResponseList = new ArrayList<>();
+        for (Postcodes postcode : postcodes) {
+            var postcodeData = new PostcodesResponse(
+                    postcode.getBuildingNumber() != null ? postcode
+                            .getBuildingNumber().intValue() : null,
+                    postcode.getThoroughfare().getName() + " "
+                            + (postcode.getThoroughfare().getDescriptor()
+                            != null ? postcode.getThoroughfare().getDescriptor() : ""),
+                    postcode.getLocality().getDependentLocality(),
+                    postcode.getLocality().getPostTown(),
+                    postcode.getPostcode().getPretty()
+            );
+            postcodesResponseList.add(postcodeData);
+        }
+        return postcodesResponseList;
+    }
+
     public List<Postcodes> getPostcodeByCountry(String country) {
         final List<String> postcodePrefixes = getPostcodePrefixes(country);
 

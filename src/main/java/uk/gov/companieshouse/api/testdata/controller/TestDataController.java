@@ -159,18 +159,6 @@ public class TestDataController {
         }
     }
 
-    @GetMapping("/internal/postcodes")
-    public ResponseEntity<PostcodesResponse> getPostcode(
-            @RequestParam(value = "country") String country) throws DataException {
-        LOG.info("Retrieving postcode for country: " + country);
-        var postcode = testDataService.getPostcodes(country);
-        if (postcode == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        LOG.info("Retrieved postcode for country: " + country + " " + postcode.getPostcode());
-        return new ResponseEntity<>(postcode, HttpStatus.OK);
-    }
-
     @PostMapping("/internal/transactions")
     public ResponseEntity<TransactionsResponse> createTransaction(
             @Valid @RequestBody TransactionsRequest request) throws DataException {

@@ -341,64 +341,6 @@ class TestDataServiceImplTest {
     }
 
     @Test
-    void testGetPostcodesValidCountry() throws DataException {
-        var country = "England";
-        var streetName = "First Avenue";
-        var streetDescriptor = "High Street";
-        var dependentLocality = "London Road";
-        var postTown = "London";
-        var postcodePretty = "EC1 1BB";
-        var buildingNumber = 12;
-        Postcodes mockPostcode = new Postcodes();
-        mockPostcode.setBuildingNumber(buildingNumber);
-        Postcodes.Thoroughfare thoroughfare = new Postcodes.Thoroughfare();
-        thoroughfare.setName(streetName);
-        thoroughfare.setDescriptor(streetDescriptor);
-        mockPostcode.setThoroughfare(thoroughfare);
-        Postcodes.Locality locality = new Postcodes.Locality();
-        locality.setDependentLocality(dependentLocality);
-        locality.setPostTown(postTown);
-        mockPostcode.setLocality(locality);
-        Postcodes.PostcodeDetails postcodeDetails = new Postcodes.PostcodeDetails();
-        postcodeDetails.setPretty(postcodePretty);
-        mockPostcode.setPostcode(postcodeDetails);
-        mockPostcode.setCountry(country);
-
-        when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of(mockPostcode));
-        PostcodesResponse result = testDataService.getPostcodes(country);
-        assertEquals(buildingNumber, result.getBuildingNumber());
-        assertEquals(streetName + " " + streetDescriptor, result.getFirstLine());
-        assertEquals(dependentLocality, result.getDependentLocality());
-        assertEquals(postTown, result.getPostTown());
-        assertEquals(postcodePretty, result.getPostcode());
-        verify(postcodeService, times(1)).getPostcodeByCountry(country);
-    }
-
-    @Test
-    void testGetPostcodesInvalidCountry() throws DataException {
-        String country = "InvalidCountry";
-
-        when(postcodeService.getPostcodeByCountry(country)).thenReturn(List.of());
-
-        PostcodesResponse result = testDataService.getPostcodes(country);
-
-        assertNull(result);
-        verify(postcodeService, times(1)).getPostcodeByCountry(country);
-    }
-
-    @Test
-    void testGetPostcodesThrowsException() {
-        String country = "ErrorCountry";
-
-        when(postcodeService.getPostcodeByCountry(country)).thenThrow(new RuntimeException("Error retrieving postcodes"));
-
-        DataException exception = assertThrows(DataException.class, () -> testDataService.getPostcodes(country));
-
-        assertEquals("Error retrieving postcodes", exception.getMessage());
-        verify(postcodeService, times(1)).getPostcodeByCountry(country);
-    }
-
-    @Test
     void createTransactionData() throws DataException {
         TransactionsRequest transactionsRequest = new TransactionsRequest();
         transactionsRequest.setUserId("Test12454");

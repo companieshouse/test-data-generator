@@ -1,14 +1,19 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import java.util.List;
+
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
+import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 
 public interface PostcodeService {
     /**
      * Retrieves postcodes for a given country.
      *
-     * @param country the country name which to retrieve postcodes for
-     * @return Postcodes object containing the post codes for the specified country
+     * @param country the country for which to retrieve postcodes
+     * @return Postcodes object containing the postcodes for the specified country
+     * @throws DataException if there is an error retrieving the postcodes
      */
-    List<Postcodes> getPostcodeByCountry(String country);
+    PostcodesResponse getPostcodes(String country) throws DataException;
+
 }
