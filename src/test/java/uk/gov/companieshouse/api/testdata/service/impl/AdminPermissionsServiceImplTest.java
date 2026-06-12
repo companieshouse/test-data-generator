@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 
 class AdminPermissionsServiceImplTest {
@@ -48,7 +48,6 @@ class AdminPermissionsServiceImplTest {
         saved.setEntraGroupId("group123");
         saved.setGroupName("Test Group");
         saved.setPermissions(List.of("role1", "role2"));
-
         when(repository.save(any(AdminPermissions.class))).thenReturn(saved);
 
         AdminPermissionsResponse result = adminPermissionsService.create(spec);
@@ -60,7 +59,6 @@ class AdminPermissionsServiceImplTest {
         assertEquals("group123", toSave.getEntraGroupId());
         assertEquals("Test Group", toSave.getGroupName());
         assertEquals(List.of("role1", "role2"), toSave.getPermissions());
-
         assertEquals("id123", result.getId());
         assertEquals("Test Group", result.getGroupName());
     }

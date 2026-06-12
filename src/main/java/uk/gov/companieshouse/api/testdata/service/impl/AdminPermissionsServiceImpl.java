@@ -4,16 +4,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.AdminPermissions;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.AdminPermissionsService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class AdminPermissionsServiceImpl implements DataService<
-        AdminPermissionsResponse, AdminPermissionsRequest> {
+public class AdminPermissionsServiceImpl implements AdminPermissionsService {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AdminPermissionsServiceImpl.class));
