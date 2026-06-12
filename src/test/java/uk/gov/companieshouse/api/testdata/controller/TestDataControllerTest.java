@@ -1,22 +1,5 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,19 +11,13 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PenaltyResponse;
@@ -50,6 +27,23 @@ import uk.gov.companieshouse.api.testdata.service.FilingHistoryService;
 import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 
+import java.time.Instant;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(MockitoExtension.class)
 class TestDataControllerTest {
 
@@ -57,7 +51,6 @@ class TestDataControllerTest {
     private static final String COMPANY_CODE = "LP";
     private static final String CUSTOMER_CODE = "NI23456";
     private static final String PENALTY_REFERENCE = "A1234567";
-    private static final String COMPANY_NUMBER = "TC123456";
     private static final String SIC_ACTIVITY_ID = "6242bbbbafaaaa93274b2efd";
     private static final String TRANSACTION_ID = "412123-412123-412123";
 
@@ -116,156 +109,6 @@ class TestDataControllerTest {
         assertNull(response.getBody());
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         verify(testDataService, times(0)).deleteAppealsData(anyString(), anyString());
-    }
-
-    @Test
-    void createCertificateSuccess() throws Exception {
-        CertificatesResponse certificateData = getCertificatesData();
-
-        CertificatesRequest request = new CertificatesRequest();
-        request.setCompanyNumber("12345678");
-
-        when(testDataService.createCertificatesData(request)).thenReturn(certificateData);
-
-        ResponseEntity<CertificatesResponse> response = testDataController.createCertificates(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
-
-        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
-        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
-    }
-
-
-
-    @Test
-    void createCertificateException() throws Exception {
-        CertificatesRequest request = new CertificatesRequest();
-        request.setCompanyNumber("12345678");
-
-        DataException exception = new DataException("Error creating certificate");
-        when(testDataService.createCertificatesData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.createCertificates(request));
-        assertEquals(exception.getMessage(), thrown.getMessage());
-    }
-
-    @Test
-    void deleteCertificateSuccess() throws Exception {
-        final String certificateId = "CRT-834723-192847";
-
-        when(testDataService.deleteCertificatesData(certificateId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response
-                = testDataController.deleteCertificates(certificateId);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
-        verify(testDataService).deleteCertificatesData(certificateId);
-    }
-
-    @Test
-    void deleteCertificateNotFound() throws Exception {
-        final String certificateId = String.valueOf(1234);
-
-        when(testDataService.deleteCertificatesData(certificateId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>>
-                response = testDataController.deleteCertificates(certificateId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-        verify(testDataService).deleteCertificatesData(certificateId);
-    }
-
-    @Test
-    void deleteCertificateException() throws Exception {
-        final String certificateId = "cert123";
-        DataException exception = new DataException("Failed to delete certificate");
-
-        when(testDataService.deleteCertificatesData(certificateId)).thenThrow(exception);
-        DataException thrown = assertThrows(DataException.class, () ->
-                testDataController.deleteCertificates(certificateId));
-
-        assertEquals(exception.getMessage(), thrown.getMessage());
-    }
-
-    @Test
-    void deleteCertifiedCopiesSuccess() throws Exception {
-        final String certifiedCopiesId = "CCD-834723-192847";
-
-        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response
-            = testDataController.deleteCertifiedCopies(certifiedCopiesId);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
-        verify(testDataService).deleteCertifiedCopiesData(certifiedCopiesId);
-    }
-
-    @Test
-    void deleteCertifiedCopiesNotFound() throws Exception {
-        final String certifiedCopiesId = String.valueOf(1234);
-
-        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>>
-            response = testDataController.deleteCertifiedCopies(certifiedCopiesId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-        verify(testDataService).deleteCertifiedCopiesData(certifiedCopiesId);
-    }
-
-    @Test
-    void deleteCertifiedCopiesException() throws Exception {
-        final String certifiedCopiesId = "cert123";
-        DataException exception = new DataException("Failed to delete certificate");
-
-        when(testDataService.deleteCertifiedCopiesData(certifiedCopiesId)).thenThrow(exception);
-        DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.deleteCertifiedCopies(certifiedCopiesId));
-
-        assertEquals(exception.getMessage(), thrown.getMessage());
-    }
-
-    @Test
-    void deleteMissingImageDeliveriesSuccess() throws Exception {
-        final String missingImageDeliveriesId = "MID-834723-192847";
-
-        when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenReturn(true);
-        ResponseEntity<Map<String, Object>> response
-            = testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        assertNull(response.getBody());
-        verify(testDataService).deleteMissingImageDeliveriesData(missingImageDeliveriesId);
-    }
-
-    @Test
-    void deleteMissingImageDeliveriesNotFound() throws Exception {
-        final String missingImageDeliveriesId = String.valueOf(1234);
-
-        when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenReturn(false);
-        ResponseEntity<Map<String, Object>>
-            response = testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        assertEquals("1234", Objects.requireNonNull(response.getBody()).get("id"));
-        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
-        verify(testDataService).deleteMissingImageDeliveriesData(missingImageDeliveriesId);
-    }
-
-    @Test
-    void deleteMissingImageDeliveriesException() throws Exception {
-        final String missingImageDeliveriesId = "cert123";
-        DataException exception = new DataException("Failed to delete missing image deliveries");
-
-        when(testDataService.deleteMissingImageDeliveriesData(missingImageDeliveriesId)).thenThrow(exception);
-        DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.deleteMissingImageDeliveries(missingImageDeliveriesId));
-
-        assertEquals(exception.getMessage(), thrown.getMessage());
     }
 
     @Test
@@ -633,81 +476,6 @@ class TestDataControllerTest {
         verify(testDataService, times(0)).getPostcodes(anyString());
     }
 
-
-    @Test
-    void createCertifiedCopiesSuccess() throws Exception {
-        CertificatesResponse certificateData = getCertificatesData();
-
-        CertifiedCopiesRequest request = new CertifiedCopiesRequest();
-        request.setCompanyNumber("12345678");
-
-        when(testDataService.createCertifiedCopiesData(request)).thenReturn(certificateData);
-
-        ResponseEntity<CertificatesResponse> response = testDataController.createCertifiedCopies(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
-
-        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
-        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
-    }
-
-    private static CertificatesResponse getCertificatesData() {
-        CertificatesResponse.CertificateEntry entry1 = new CertificatesResponse.CertificateEntry(
-            "CRT-834723-192847", "2025-04-14T12:00:00Z", "2025-04-14T12:00:00Z"
-        );
-        CertificatesResponse.CertificateEntry entry2 = new CertificatesResponse.CertificateEntry(
-            "CRT-912834-238472", "2025-04-14T12:05:00Z", "2025-04-14T12:05:00Z"
-        );
-
-        List<CertificatesResponse.CertificateEntry> entries = List.of(entry1, entry2);
-        return new CertificatesResponse(entries);
-    }
-
-
-    @Test
-    void createCertifiedCopiesException() throws Exception {
-        CertifiedCopiesRequest request = new CertifiedCopiesRequest();
-        request.setCompanyNumber("12345678");
-
-        DataException exception = new DataException("Error creating certificate");
-        when(testDataService.createCertifiedCopiesData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.createCertifiedCopies(request));
-        assertEquals(exception.getMessage(), thrown.getMessage());
-    }
-
-    @Test
-    void createMissingImageDeliveriesSuccess() throws Exception {
-        CertificatesResponse certificateData = getCertificatesData();
-
-        MissingImageDeliveriesRequest request = new MissingImageDeliveriesRequest();
-        request.setCompanyNumber("12345678");
-
-        when(testDataService.createMissingImageDeliveriesData(request)).thenReturn(certificateData);
-
-        ResponseEntity<CertificatesResponse> response = testDataController.createMissingImageDeliveries(request);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        assertEquals(2, Objects.requireNonNull(response.getBody()).getCertificates().size());
-
-        assertEquals("CRT-834723-192847", response.getBody().getCertificates().getFirst().getId());
-        assertEquals("CRT-912834-238472", response.getBody().getCertificates().get(1).getId());
-    }
-
-    @Test
-    void createMissingImageDeliveriesException() throws Exception {
-        MissingImageDeliveriesRequest request = new MissingImageDeliveriesRequest();
-        request.setCompanyNumber("12345678");
-
-        DataException exception = new DataException("Error creating certificate");
-        when(testDataService.createMissingImageDeliveriesData(request)).thenThrow(exception);
-
-        DataException thrown = assertThrows(DataException.class, () ->
-            testDataController.createMissingImageDeliveries(request));
-        assertEquals(exception.getMessage(), thrown.getMessage());
-    }
 
     @Test
     void createTransaction() throws Exception {

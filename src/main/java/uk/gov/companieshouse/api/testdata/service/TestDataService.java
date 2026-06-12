@@ -3,51 +3,17 @@ package uk.gov.companieshouse.api.testdata.service;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 
-import java.util.Optional;
-
 
 public interface TestDataService {
-
-    CertificatesResponse createCertificatesData(CertificatesRequest certificatesRequest) throws DataException;
-
-    /**
-     * Adds a new certified copies test data based on the provided user specifications.
-     *
-     * @param certifiedCopiesRequest the specifications of the certified copies to order
-     * @return the created certificates test data
-     * @throws DataException if there is an error during user creation
-     */
-    CertificatesResponse createCertifiedCopiesData(
-            CertifiedCopiesRequest certifiedCopiesRequest) throws DataException;
-
-    /**
-     * Adds a new missing image deliveries test data based on the provided user specifications.
-     *
-     * @param missingImageDeliveriesRequest the specifications of the missing image deliveries to order
-     * @return the created certificates test data
-     * @throws DataException if there is an error during user creation
-     */
-    CertificatesResponse createMissingImageDeliveriesData(
-            MissingImageDeliveriesRequest missingImageDeliveriesRequest) throws DataException;
 
     /**
      * Adds a new sic code test data based on the provided user specifications.
@@ -58,30 +24,6 @@ public interface TestDataService {
      */
     CombinedSicActivitiesResponse createCombinedSicActivitiesData(
             CombinedSicActivitiesRequest combinedSicActivitiesRequest)  throws DataException;
-
-    /**
-     * Deletes the certificates test data for the given id.
-     *
-     * @param id the ID generated while creating certificates
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteCertificatesData(String id) throws DataException;
-
-    /**
-     * Deletes the certified copies test data for the given id.
-     *
-     * @param id the ID generated while creating certificates
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteCertifiedCopiesData(String id) throws DataException;
-
-    /**
-     * Deletes the missing image deliveries test data for the given id.
-     *
-     * @param id the ID generated while creating certificates
-     * @throws DataException if there is an error during user deletion
-     */
-    boolean deleteMissingImageDeliveriesData(String id) throws DataException;
 
     /**
      * Deletes all appeals data for a given penalty reference and company number.

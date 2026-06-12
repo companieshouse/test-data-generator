@@ -58,6 +58,9 @@ class CertificatesServiceImplTest {
     @Mock
     private RandomService randomService;
 
+    @Mock
+    private BasketServiceImpl basketService;
+
     @InjectMocks
     private CertificatesServiceImpl service;
 
@@ -262,7 +265,7 @@ class CertificatesServiceImplTest {
             return cert;
         });
 
-        when(basketRepository.save(any(Basket.class))).thenReturn(basket);
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class))).thenReturn(basket);
 
         CertificatesResponse result = service.create(certificatesRequest);
 
@@ -296,7 +299,7 @@ class CertificatesServiceImplTest {
         assertNotNull(captured.getBasket());
         Basket capturedBasket = captured.getBasket();
 
-        assertEquals(basketRequest.getForename(), capturedBasket.getForename());  // Now should pass
+        assertEquals(basketRequest.getForename(), capturedBasket.getForename());
         assertEquals(basketRequest.getSurname(), capturedBasket.getSurname());
         assertTrue(capturedBasket.isEnrolled());
     }
@@ -307,7 +310,6 @@ class CertificatesServiceImplTest {
         existingBasket.setId("user-123");
         existingBasket.setItems(new ArrayList<>(List.of(new Basket.Item())));
 
-        when(basketRepository.findById("user-123")).thenReturn(Optional.of(existingBasket));
         when(randomService.getNumber(6)).thenReturn(123456L, 789012L);
         when(randomService.getEtag()).thenReturn("etag123");
 
@@ -323,10 +325,17 @@ class CertificatesServiceImplTest {
         spec.setItemOptions(List.of(itemOptions));
         spec.setBasketSpec(new BasketRequest());
 
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class)))
+            .thenAnswer(invocation -> {
+                List<Basket.Item> items = invocation.getArgument(2);
+                existingBasket.getItems().addAll(items);
+                return existingBasket;
+            });
+
         CertificatesResponse result = service.create(spec);
 
         ArgumentCaptor<Basket> basketCaptor = ArgumentCaptor.forClass(Basket.class);
-        verify(basketRepository).save(basketCaptor.capture());
+        verify(basketService).saveBasket(basketCaptor.capture());
 
         Basket savedBasket = basketCaptor.getValue();
         assertEquals(2, savedBasket.getItems().size());
@@ -345,9 +354,17 @@ class CertificatesServiceImplTest {
 
         var existingBasket = new Basket();
         existingBasket.setId("user-456");
-        existingBasket.setItems(null); // <--- triggers the null branch
+        existingBasket.setItems(null);
 
-        when(basketRepository.findById("user-456")).thenReturn(Optional.of(existingBasket));
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class)))
+            .thenAnswer(invocation -> {
+                if (existingBasket.getItems() == null) {
+                    existingBasket.setItems(new ArrayList<>());
+                }
+                List<Basket.Item> items = invocation.getArgument(2);
+                existingBasket.getItems().addAll(items);
+                return existingBasket;
+            });
 
         var itemsToAdd = List.of(new Basket.Item());
 
@@ -388,14 +405,14 @@ class CertificatesServiceImplTest {
         basketRequest.setEnrolled(true);
         certificatesRequest.setBasketSpec(basketRequest);
 
-        // Capture each certificate saved
+        Basket mockBasket = new Basket();
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class))).thenReturn(mockBasket);
+
         when(repository.save(any(Certificates.class))).thenAnswer(invocation -> {
             Certificates cert = invocation.getArgument(0);
             cert.setBasket(new Basket());
             return cert;
         });
-
-        when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
 
         CertificatesResponse results = service.create(certificatesRequest);
 
@@ -464,9 +481,9 @@ class CertificatesServiceImplTest {
         when(repository.findById(certificateId)).thenReturn(java.util.Optional.empty());
         boolean result = service.delete(certificateId);
 
-        assertFalse(result);  // Should return false when not found
+        assertFalse(result);
         verify(repository, never()).delete(any(Certificates.class));
-        verify(basketRepository, never()).delete(any(Basket.class));
+        verify(basketService, never()).deleteBasket(any(String.class));
     }
 
     @Test
@@ -483,18 +500,15 @@ class CertificatesServiceImplTest {
         assertTrue(result);
 
         verify(repository).delete(certificates);
-        verify(basketRepository).delete(basket);
+        verify(basketService).deleteBasket("user123");
     }
 
     @Test
     void deleteBasket_shouldDeleteWhenIdIsNotNull() {
-        String certificateId = "CRT-123456-789012";
-        Basket basket = new Basket();
-        basket.setId(certificateId);
-        when(basketRepository.findById(certificateId)).thenReturn(Optional.of(basket));
+        String basketId = "CRT-123456-789012";
 
-        service.deleteBasket(certificateId);
+        service.deleteBasket(basketId);
 
-        verify(basketRepository, times(1)).delete(basket);
+        verify(basketService, times(1)).deleteBasket(basketId);
     }
 }
