@@ -7,7 +7,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
@@ -16,7 +15,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
@@ -56,8 +54,6 @@ public class TestDataServiceImpl implements TestDataService {
     private AccountPenaltiesService accountPenaltiesService;
     @Autowired
     private PostcodeService postcodeService;
-    @Autowired
-    private DataService<AdminPermissionsResponse, AdminPermissionsRequest> adminPermissionsService;
     @Autowired
     private ItemGroupsService itemGroupsService;
 
@@ -276,21 +272,6 @@ public class TestDataServiceImpl implements TestDataService {
             LOG.error("Failed to create Transaction for User Id: "
                     + transactionsRequest.getUserId());
             throw new DataException("Error creating transaction", ex);
-        }
-    }
-
-    @Override
-    public AdminPermissionsResponse createAdminPermissionsData(
-            AdminPermissionsRequest spec) throws DataException {
-        return adminPermissionsService.create(spec);
-    }
-
-    @Override
-    public boolean deleteAdminPermissionsData(String id) throws DataException {
-        try {
-            return adminPermissionsService.delete(id);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting admin permissions", ex);
         }
     }
 

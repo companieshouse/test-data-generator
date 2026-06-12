@@ -176,17 +176,6 @@ public interface TestDataService {
 
     boolean deleteTransaction(String transactionId) throws DataException;
 
-    AdminPermissionsResponse createAdminPermissionsData(AdminPermissionsRequest spec) throws DataException;
-
-    /**
-     * Deletes admin permissions data by its ID.
-     *
-     * @param id the ID of the admin permissions to delete
-     * @return true if the admin permissions were deleted, false otherwise
-     * @throws DataException if there is an error during deletion
-     */
-    boolean deleteAdminPermissionsData(String id) throws DataException;
-
     /**
      * Deletes the Item Groups test data for the given order number.
      *
