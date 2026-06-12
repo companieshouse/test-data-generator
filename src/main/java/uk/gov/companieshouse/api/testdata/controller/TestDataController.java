@@ -1,12 +1,6 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -22,23 +16,14 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.AcspProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
@@ -48,6 +33,11 @@ import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -69,99 +59,6 @@ public class TestDataController {
         this.testDataService = testDataService;
         this.verifiedIdentityService = verifiedIdentityService;
         this.filingHistoryService = filingHistoryService;
-    }
-
-    @PostMapping("/internal/certificates")
-    public ResponseEntity<CertificatesResponse> createCertificates(
-            @Valid @RequestBody CertificatesRequest request) throws DataException {
-
-        var createdCertificates = testDataService.createCertificatesData(request);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("certificated-id", createdCertificates.getCertificates().getFirst().getId());
-        LOG.info("New certificates added", data);
-        return new ResponseEntity<>(createdCertificates, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/internal/certified-copies")
-    public ResponseEntity<CertificatesResponse> createCertifiedCopies(
-            @Valid @RequestBody CertifiedCopiesRequest request) throws DataException {
-
-        var createdCertifiedCopies = testDataService.createCertifiedCopiesData(request);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("certificates-copies-id",
-                createdCertifiedCopies.getCertificates().getFirst().getId());
-        LOG.info("New certified copies added", data);
-        return new ResponseEntity<>(createdCertifiedCopies, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/internal/missing-image-deliveries")
-    public ResponseEntity<CertificatesResponse> createMissingImageDeliveries(
-            @Valid @RequestBody MissingImageDeliveriesRequest request) throws DataException {
-
-        var createdMissingImageDeliveries =
-                testDataService.createMissingImageDeliveriesData(request);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("missing-image-deliveries-id",
-                createdMissingImageDeliveries.getCertificates().getFirst().getId());
-        LOG.info("New missing image deliveries added", data);
-        return new ResponseEntity<>(createdMissingImageDeliveries, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/internal/certificates/{id}")
-    public ResponseEntity<Map<String, Object>> deleteCertificates(@PathVariable("id")
-                                                                  String id)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", id);
-        boolean deleteCertificates = testDataService.deleteCertificatesData(id);
-
-        if (deleteCertificates) {
-            LOG.info("Certificate is deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Certificate Not Found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/internal/certified-copies/{id}")
-    public ResponseEntity<Map<String, Object>> deleteCertifiedCopies(@PathVariable("id")
-                                                                     String id)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", id);
-        boolean deleteCertifiedCopies = testDataService.deleteCertifiedCopiesData(id);
-
-        if (deleteCertifiedCopies) {
-            LOG.info("Certified Copies is deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Certified Copies Not Found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
-    }
-
-    @DeleteMapping("/internal/missing-image-deliveries/{id}")
-    public ResponseEntity<Map<String, Object>> deleteMissingImageDeliveries(@PathVariable("id")
-                                                                            String id)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("id", id);
-        boolean deleteMissingImageDeliveries = testDataService.deleteMissingImageDeliveriesData(id);
-
-        if (deleteMissingImageDeliveries) {
-            LOG.info("Missing Image Deliveries is deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Missing Image Deliveries Not Found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
     }
 
     @DeleteMapping("/internal/appeals")

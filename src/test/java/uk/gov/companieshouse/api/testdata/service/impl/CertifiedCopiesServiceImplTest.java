@@ -33,7 +33,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDocumentsRequest;
@@ -58,6 +57,9 @@ class CertifiedCopiesServiceImplTest {
 
     @Mock
     private RandomService randomService;
+
+    @Mock
+    private BasketServiceImpl basketService;
 
     @InjectMocks
     private CertifiedCopiesServiceImpl service;
@@ -277,8 +279,7 @@ class CertifiedCopiesServiceImplTest {
             return cert;
         });
 
-        when(basketRepository.save(any(Basket.class))).thenReturn(basket);
-        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class))).thenReturn(basket);
 
         CertificatesResponse result = service.create(certifiedCopiesRequest);
 
@@ -364,8 +365,7 @@ class CertifiedCopiesServiceImplTest {
             return cert;
         });
 
-        when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
-        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class))).thenReturn(new Basket());
 
         CertificatesResponse results = service.create(certifiedCopiesRequest);
 
@@ -499,9 +499,9 @@ class CertifiedCopiesServiceImplTest {
         when(repository.findById(certificateId)).thenReturn(java.util.Optional.empty());
         boolean result = service.delete(certificateId);
 
-        assertFalse(result);  // Should return false when not found
+        assertFalse(result);
         verify(repository, never()).delete(any(CertifiedCopies.class));
-        verify(basketRepository, never()).delete(any(Basket.class));
+        verify(basketService, never()).deleteBasket(any(String.class));
     }
 
     @Test
@@ -518,19 +518,15 @@ class CertifiedCopiesServiceImplTest {
         assertTrue(result);
 
         verify(repository).delete(certifiedCopies);
-        verify(basketRepository).delete(basket);
+        verify(basketService).deleteBasket("user123");
     }
 
     @Test
     void validateBasketNotDeletedWhenNull() {
         String basketId = "user123";
-        Basket basket = new Basket();
-        basket.setId(null);
-
-        when(basketRepository.findById(basketId)).thenReturn(Optional.of(basket));
 
         service.deleteBasket(basketId);
 
-        verify(basketRepository, never()).delete(any());
+        verify(basketService).deleteBasket(basketId);
     }
 }

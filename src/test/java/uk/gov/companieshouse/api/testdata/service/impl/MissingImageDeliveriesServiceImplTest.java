@@ -1,19 +1,5 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,15 +17,28 @@ import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemCostsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MissingImageDeliveriesServiceImplTest {
@@ -52,6 +51,9 @@ class MissingImageDeliveriesServiceImplTest {
 
     @Mock
     private RandomService randomService;
+
+    @Mock
+    private BasketServiceImpl basketService;
 
     @InjectMocks
     private MissingImageDeliveriesImpl service;
@@ -194,8 +196,7 @@ class MissingImageDeliveriesServiceImplTest {
             return cert;
         });
 
-        when(basketRepository.save(any(Basket.class))).thenReturn(basket);
-        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class))).thenReturn(basket);
 
         CertificatesResponse result = service.create(missingImageDeliveriesRequest);
 
@@ -264,8 +265,7 @@ class MissingImageDeliveriesServiceImplTest {
             return cert;
         });
 
-        when(basketRepository.save(any(Basket.class))).thenReturn(new Basket());
-        when(certificatesService.createBasket(any(CertificatesRequest.class), anyList())).thenReturn(basket);
+        when(basketService.createOrUpdateBasket(any(String.class), any(BasketRequest.class), any(List.class))).thenReturn(new Basket());
 
         CertificatesResponse results = service.create(missingImageDeliveriesRequest);
 
@@ -396,9 +396,9 @@ class MissingImageDeliveriesServiceImplTest {
         when(repository.findById(certificateId)).thenReturn(Optional.empty());
         boolean result = service.delete(certificateId);
 
-        assertFalse(result);  // Should return false when not found
+        assertFalse(result);
         verify(repository, never()).delete(any(MissingImageDeliveries.class));
-        verify(basketRepository, never()).delete(any(Basket.class));
+        verify(basketService, never()).deleteBasket(any(String.class));
     }
 
     @Test
@@ -415,20 +415,16 @@ class MissingImageDeliveriesServiceImplTest {
         assertTrue(result);
 
         verify(repository).delete(missingImageDeliveries);
-        verify(basketRepository).delete(basket);
+        verify(basketService).deleteBasket("user123");
     }
 
     @Test
     void validateBasketNotDeletedWhenNull() {
         String basketId = "user123";
-        Basket basket = new Basket();
-        basket.setId(null);
-
-        when(basketRepository.findById(basketId)).thenReturn(Optional.of(basket));
 
         service.deleteBasket(basketId);
 
-        verify(basketRepository, never()).delete(any());
+        verify(basketService).deleteBasket(basketId);
     }
 
     private void assertMandatoryFields(MissingImageDeliveriesRequest spec, MissingImageDeliveries captured) {
