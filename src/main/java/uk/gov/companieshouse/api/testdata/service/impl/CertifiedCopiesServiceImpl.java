@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
@@ -16,34 +15,34 @@ import uk.gov.companieshouse.api.testdata.model.entity.FilingHistoryDocument;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDocumentsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class CertifiedCopiesServiceImpl implements DataService<CertificatesResponse, CertifiedCopiesRequest> {
 
-    @Autowired
-    public CertifiedCopiesRepository certifiedCopiesRepository;
+    private final CertifiedCopiesRepository certifiedCopiesRepository;
+    private final BasketRepository basketRepository;
+    private final RandomService randomService;
+    private final BasketServiceImpl basketService;
 
-    @Autowired
-    public BasketRepository basketRepository;
-
-    @Autowired
-    public AddressService addressService;
-
-    @Autowired
-    public RandomService randomService;
-
-    @Autowired
-    private CertificatesServiceImpl certificatesService;
+    public CertifiedCopiesServiceImpl(
+        CertifiedCopiesRepository certifiedCopiesRepository,
+        BasketRepository basketRepository,
+        RandomService randomService,
+        BasketServiceImpl basketService
+    ) {
+        this.certifiedCopiesRepository = certifiedCopiesRepository;
+        this.basketRepository = basketRepository;
+        this.randomService = randomService;
+        this.basketService = basketService;
+    }
 
     @Override
     public CertificatesResponse create(CertifiedCopiesRequest spec) throws DataException {
@@ -69,8 +68,8 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesRespo
         }
 
         if (spec.getBasketSpec() != null) {
-            var basket = createBasket(spec, basketItems);
-            basketRepository.save(basket);
+            var basket = basketService.createOrUpdateBasket(spec.getUserId(), spec.getBasketSpec(), basketItems);
+            basketService.saveBasket(basket);
         }
 
         return new CertificatesResponse(certificateEntries);
@@ -171,25 +170,8 @@ public class CertifiedCopiesServiceImpl implements DataService<CertificatesRespo
         return certifiedCopies;
     }
 
-    private Basket createBasket(CertifiedCopiesRequest spec, List<Basket.Item> items) {
-        var certSpec = mapCertifiedCopiesToCertificatesSpec(spec);
-        return certificatesService.createBasket(certSpec, items);
-    }
-
-    private CertificatesRequest mapCertifiedCopiesToCertificatesSpec(CertifiedCopiesRequest spec) {
-        var certificatesSpec = new CertificatesRequest();
-        certificatesSpec.setUserId(spec.getUserId());
-        certificatesSpec.setBasketSpec(spec.getBasketSpec());
-        return certificatesSpec;
-    }
-
     protected void deleteBasket(String basketId) {
-        basketRepository.findById(basketId)
-            .ifPresent(basket -> {
-                if (basket.getId() != null) {
-                    basketRepository.delete(basket);
-                }
-            });
+        basketService.deleteBasket(basketId);
     }
 
     @Override

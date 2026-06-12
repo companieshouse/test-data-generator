@@ -19,7 +19,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.SecretaryDetails;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -29,17 +28,22 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 @Service
 public class CertificatesServiceImpl implements DataService<CertificatesResponse, CertificatesRequest> {
 
-    @Autowired
-    public CertificatesRepository certificatesRepository;
+    private final CertificatesRepository certificatesRepository;
+    private final BasketRepository basketRepository;
+    private final RandomService randomService;
+    private final BasketServiceImpl basketService;
 
     @Autowired
-    public BasketRepository basketRepository;
-
-    @Autowired
-    public AddressService addressService;
-
-    @Autowired
-    public RandomService randomService;
+    public CertificatesServiceImpl(CertificatesRepository certificatesRepository,
+                                   BasketRepository basketRepository,
+                                   AddressService addressService,
+                                   RandomService randomService,
+                                   BasketServiceImpl basketService) {
+        this.certificatesRepository = certificatesRepository;
+        this.basketRepository = basketRepository;
+        this.randomService = randomService;
+        this.basketService = basketService;
+    }
 
     @Override
     public CertificatesResponse create(CertificatesRequest spec) throws DataException {
@@ -64,8 +68,8 @@ public class CertificatesServiceImpl implements DataService<CertificatesResponse
         }
 
         if (spec.getBasketSpec() != null) {
-            var basket = createBasket(spec, basketItems);
-            basketRepository.save(basket);
+            var basket = basketService.createOrUpdateBasket(spec.getUserId(), spec.getBasketSpec(), basketItems);
+            basketService.saveBasket(basket);
         }
 
         return new CertificatesResponse(certificateEntries);
@@ -158,47 +162,11 @@ public class CertificatesServiceImpl implements DataService<CertificatesResponse
     }
 
     Basket createBasket(CertificatesRequest spec, List<Basket.Item> items) {
-        Instant now = getCurrentDateTime();
-        var address = addressService.getAddress(JurisdictionType.UNITED_KINGDOM);
-
-        // Check if basket already exists for the user
-        Optional<Basket> existingBasketOpt = basketRepository.findById(spec.getUserId());
-
-        if (existingBasketOpt.isPresent()) {
-            var existingBasket = existingBasketOpt.get();
-            // Add new items to existing basket
-            List<Basket.Item> existingItems = existingBasket.getItems();
-            if (existingItems == null) {
-                existingItems = new ArrayList<>();
-                existingBasket.setItems(existingItems);
-            }
-            existingItems.addAll(items);
-
-            existingBasket.setUpdatedAt(now);
-            return existingBasket; // Will be saved by caller
-        }
-
-        // Create new basket if it does not exist
-        var basket = new Basket();
-        basket.setId(spec.getUserId());
-        basket.setCreatedAt(now);
-        basket.setUpdatedAt(now);
-        basket.setDeliveryDetails(address);
-        basket.setForename(spec.getBasketSpec().getForename());
-        basket.setSurname(spec.getBasketSpec().getSurname());
-        basket.setEnrolled(spec.getBasketSpec().getEnrolled());
-        basket.setItems(items);
-
-        return basket;
+        return basketService.createOrUpdateBasket(spec.getUserId(), spec.getBasketSpec(), items);
     }
 
     void deleteBasket(String basketId) {
-        basketRepository.findById(basketId)
-                .ifPresent(basket -> {
-                    if (basket.getId() != null) {
-                        basketRepository.delete(basket);
-                    }
-                });
+        basketService.deleteBasket(basketId);
     }
 
     @Override

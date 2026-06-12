@@ -8,16 +8,12 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
@@ -40,14 +36,8 @@ public class TestDataServiceImpl implements TestDataService {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Autowired
-    private DataService<CertificatesResponse, CertificatesRequest> certificatesService;
-    @Autowired
-    private DataService<CertificatesResponse, CertifiedCopiesRequest> certifiedCopiesService;
-    @Autowired
     private DataService<CombinedSicActivitiesResponse,
             CombinedSicActivitiesRequest> combinedSicActivitiesService;
-    @Autowired
-    private DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService;
     @Autowired
     private DataService<TransactionsResponse, TransactionsRequest> transactionService;
     @Autowired
@@ -62,47 +52,6 @@ public class TestDataServiceImpl implements TestDataService {
     private ItemGroupsService itemGroupsService;
 
     @Override
-    public CertificatesResponse createCertificatesData(
-            final CertificatesRequest spec) throws DataException {
-        if (spec.getUserId() == null) {
-            throw new DataException("User ID is required to create certificates");
-        }
-
-        try {
-            return certificatesService.create(spec);
-        } catch (Exception ex) {
-            throw new DataException("Error creating certificates", ex);
-        }
-    }
-
-    @Override
-    public CertificatesResponse createCertifiedCopiesData(
-            final CertifiedCopiesRequest spec) throws DataException {
-        if (spec.getUserId() == null) {
-            throw new DataException("User ID is required to create certified copies");
-        }
-        try {
-            return certifiedCopiesService.create(spec);
-        } catch (Exception ex) {
-            throw new DataException("Error creating certified copies", ex);
-        }
-    }
-
-    @Override
-    public CertificatesResponse createMissingImageDeliveriesData(
-            final MissingImageDeliveriesRequest spec) throws DataException {
-        if (spec.getUserId() == null) {
-            throw new DataException("User ID is required to create missing image deliveries");
-        }
-
-        try {
-            return missingImageDeliveriesService.create(spec);
-        } catch (Exception ex) {
-            throw new DataException("Error creating missing image deliveries", ex);
-        }
-    }
-
-    @Override
     public CombinedSicActivitiesResponse createCombinedSicActivitiesData(
             final CombinedSicActivitiesRequest spec) throws DataException {
         try {
@@ -114,29 +63,12 @@ public class TestDataServiceImpl implements TestDataService {
 
 
     @Override
-    public boolean deleteCertificatesData(String id) throws DataException {
+    public boolean deleteCombinedSicActivitiesData(String id)
+            throws DataException {
         try {
-            return certificatesService.delete(id);
+            return combinedSicActivitiesService.delete(String.valueOf(id));
         } catch (Exception ex) {
-            throw new DataException("Error deleting certificates", ex);
-        }
-    }
-
-    @Override
-    public boolean deleteCertifiedCopiesData(String id) throws DataException {
-        try {
-            return certifiedCopiesService.delete(id);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting certified copies", ex);
-        }
-    }
-
-    @Override
-    public boolean deleteMissingImageDeliveriesData(String id) throws DataException {
-        try {
-            return missingImageDeliveriesService.delete(id);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting missing image deliveries", ex);
+            throw new DataException("Error deleting appeals data", ex);
         }
     }
 
@@ -145,16 +77,6 @@ public class TestDataServiceImpl implements TestDataService {
             throws DataException {
         try {
             return appealsService.delete(companyNumber, penaltyReference);
-        } catch (Exception ex) {
-            throw new DataException("Error deleting appeals data", ex);
-        }
-    }
-
-    @Override
-    public boolean deleteCombinedSicActivitiesData(String id)
-            throws DataException {
-        try {
-            return combinedSicActivitiesService.delete(String.valueOf(id));
         } catch (Exception ex) {
             throw new DataException("Error deleting appeals data", ex);
         }

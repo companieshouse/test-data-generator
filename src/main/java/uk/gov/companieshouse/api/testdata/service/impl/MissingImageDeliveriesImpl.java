@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Basket;
@@ -15,14 +14,12 @@ import uk.gov.companieshouse.api.testdata.model.entity.ItemCosts;
 import uk.gov.companieshouse.api.testdata.model.entity.ItemOptions;
 import uk.gov.companieshouse.api.testdata.model.entity.MissingImageDeliveries;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDescriptionValuesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemCostsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -33,20 +30,23 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesRespo
     private static final Logger LOG =
         LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 
-    @Autowired
-    public MissingImageDeliveriesRepository missingImageDeliveriesRepository;
+    private final MissingImageDeliveriesRepository missingImageDeliveriesRepository;
 
-    @Autowired
-    public BasketRepository basketRepository;
+    private final BasketRepository basketRepository;
 
-    @Autowired
-    public AddressService addressService;
+    private final RandomService randomService;
 
-    @Autowired
-    public RandomService randomService;
+    private final BasketServiceImpl basketService;
 
-    @Autowired
-    private CertificatesServiceImpl certificatesService;
+    public MissingImageDeliveriesImpl(MissingImageDeliveriesRepository missingImageDeliveriesRepository,
+                                      BasketRepository basketRepository,
+                                      RandomService randomService,
+                                      BasketServiceImpl basketService) {
+        this.missingImageDeliveriesRepository = missingImageDeliveriesRepository;
+        this.basketRepository = basketRepository;
+        this.randomService = randomService;
+        this.basketService = basketService;
+    }
 
     @Override
     public CertificatesResponse create(MissingImageDeliveriesRequest spec) throws DataException {
@@ -72,8 +72,8 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesRespo
         }
 
         if (spec.getBasketSpec() != null) {
-            var basket = createBasket(spec, basketItems);
-            basketRepository.save(basket);
+            var basket = basketService.createOrUpdateBasket(spec.getUserId(), spec.getBasketSpec(), basketItems);
+            basketService.saveBasket(basket);
         }
 
         return new CertificatesResponse(certificateEntries);
@@ -161,25 +161,8 @@ public class MissingImageDeliveriesImpl implements DataService<CertificatesRespo
         return missingImageDeliveries;
     }
 
-    private Basket createBasket(MissingImageDeliveriesRequest spec, List<Basket.Item> items) {
-        var certSpec = mapMissingImageDeliveriesToCertificatesSpec(spec);
-        return certificatesService.createBasket(certSpec, items);
-    }
-
-    private CertificatesRequest mapMissingImageDeliveriesToCertificatesSpec(MissingImageDeliveriesRequest spec) {
-        var certificatesSpec = new CertificatesRequest();
-        certificatesSpec.setUserId(spec.getUserId());
-        certificatesSpec.setBasketSpec(spec.getBasketSpec());
-        return certificatesSpec;
-    }
-
     void deleteBasket(String basketId) {
-        basketRepository.findById(basketId)
-            .ifPresent(basket -> {
-                if (basket.getId() != null) {
-                    basketRepository.delete(basket);
-                }
-            });
+        basketService.deleteBasket(basketId);
     }
 
     @Override
