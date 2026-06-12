@@ -20,13 +20,13 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.CertificatesService;
 
 @ExtendWith(MockitoExtension.class)
 class CertificatesControllerTest {
 
     @Mock
-    private DataService<CertificatesResponse, CertificatesRequest> certificatesService;
+    private CertificatesService certificatesService;
 
     @InjectMocks
     private CertificatesController certificatesController;

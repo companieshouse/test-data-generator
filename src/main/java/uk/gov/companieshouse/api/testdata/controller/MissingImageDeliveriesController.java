@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.MissingImageDeliveriesService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -27,10 +27,10 @@ public class MissingImageDeliveriesController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
 
-    private final DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService;
+    private final MissingImageDeliveriesService missingImageDeliveriesService;
 
     public MissingImageDeliveriesController(
-            DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService) {
+            MissingImageDeliveriesService missingImageDeliveriesService) {
         this.missingImageDeliveriesService = missingImageDeliveriesService;
     }
 

@@ -21,11 +21,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryDocume
 import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertifiedCopiesRepository;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.CertifiedCopiesService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CertifiedCopiesServiceImpl implements DataService<CertificatesResponse, CertifiedCopiesRequest> {
+public class CertifiedCopiesServiceImpl implements CertifiedCopiesService {
 
     private final CertifiedCopiesRepository certifiedCopiesRepository;
     private final BasketRepository basketRepository;

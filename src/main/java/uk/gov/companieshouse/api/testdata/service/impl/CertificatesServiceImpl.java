@@ -22,11 +22,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.CertificatesService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CertificatesServiceImpl implements DataService<CertificatesResponse, CertificatesRequest> {
+public class CertificatesServiceImpl implements CertificatesService {
 
     private final CertificatesRepository certificatesRepository;
     private final BasketRepository basketRepository;

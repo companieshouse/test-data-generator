@@ -20,13 +20,13 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.ItemOptionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.MissingImageDeliveriesService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class MissingImageDeliveriesImpl implements DataService<CertificatesResponse, MissingImageDeliveriesRequest> {
+public class MissingImageDeliveriesImpl implements MissingImageDeliveriesService {
     private static final Logger LOG =
         LoggerFactory.getLogger(String.valueOf(FilingHistoryServiceImpl.class));
 

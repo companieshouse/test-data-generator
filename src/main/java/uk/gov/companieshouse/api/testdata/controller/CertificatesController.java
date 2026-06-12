@@ -16,7 +16,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.CertificatesService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -27,9 +27,9 @@ public class CertificatesController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
 
-    private final DataService<CertificatesResponse, CertificatesRequest> certificatesService;
+    private final CertificatesService certificatesService;
 
-    public CertificatesController(DataService<CertificatesResponse, CertificatesRequest> certificatesService) {
+    public CertificatesController(CertificatesService certificatesService) {
         this.certificatesService = certificatesService;
     }
 

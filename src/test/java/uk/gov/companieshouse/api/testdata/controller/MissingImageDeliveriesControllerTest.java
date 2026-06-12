@@ -20,13 +20,13 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.MissingImageDeliveriesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.MissingImageDeliveriesService;
 
 @ExtendWith(MockitoExtension.class)
 class MissingImageDeliveriesControllerTest {
 
     @Mock
-    private DataService<CertificatesResponse, MissingImageDeliveriesRequest> missingImageDeliveriesService;
+    private MissingImageDeliveriesService missingImageDeliveriesService;
 
     @InjectMocks
     private MissingImageDeliveriesController missingImageDeliveriesController;
