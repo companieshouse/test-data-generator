@@ -17,7 +17,6 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.request.AdminPermissionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteAppealsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyDeleteRequest;
@@ -25,7 +24,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PenaltyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenaltiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.AdminPermissionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
@@ -61,36 +59,6 @@ public class TestDataController {
         this.testDataService = testDataService;
         this.verifiedIdentityService = verifiedIdentityService;
         this.filingHistoryService = filingHistoryService;
-    }
-
-    @PostMapping("/internal/admin-permissions")
-    public ResponseEntity<AdminPermissionsResponse> createAdminPermissions(
-            @Valid @RequestBody AdminPermissionsRequest request) throws DataException {
-
-        var createdAdminPermissions = testDataService.createAdminPermissionsData(request);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("admin-permissions-id", createdAdminPermissions.getId());
-        data.put("group-name", createdAdminPermissions.getGroupName());
-        LOG.info("New admin permissions created", data);
-        return new ResponseEntity<>(createdAdminPermissions, HttpStatus.CREATED);
-    }
-
-    @DeleteMapping("/internal/admin-permissions/{id}")
-    public ResponseEntity<Map<String, Object>> deleteAdminPermissions(@PathVariable("id") String id)
-            throws DataException {
-        Map<String, Object> response = new HashMap<>();
-        response.put("admin-permissions-id", id);
-        boolean deleted = testDataService.deleteAdminPermissionsData(id);
-
-        if (deleted) {
-            LOG.info("Admin permissions deleted", response);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } else {
-            response.put(STATUS, HttpStatus.NOT_FOUND);
-            LOG.info("Admin permissions not found", response);
-            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
-        }
     }
 
     @DeleteMapping("/internal/appeals")
