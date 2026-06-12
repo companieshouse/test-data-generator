@@ -156,16 +156,6 @@ public interface TestDataService {
     AccountPenaltiesResponse createPenaltyData(PenaltyRequest penaltyRequest) throws DataException;
 
     /**
-     * Retrieves postcodes for a given country.
-     *
-     * @param country the country for which to retrieve postcodes
-     * @return Postcodes object containing the postcodes for the specified country
-     * @throws DataException if there is an error retrieving the postcodes
-     */
-    PostcodesResponse getPostcodes(String country) throws DataException;
-
-
-    /**
      * Adds a new transaction and acsp application test data based on the provided specifications.
      *
      * @param transactionsRequest the specifications of the transactions

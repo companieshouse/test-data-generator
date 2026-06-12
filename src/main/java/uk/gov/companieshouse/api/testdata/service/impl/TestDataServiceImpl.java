@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertificatesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CertifiedCopiesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CombinedSicActivitiesRequest;
@@ -17,7 +16,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateAccountPenalt
 import uk.gov.companieshouse.api.testdata.model.rest.response.AccountPenaltiesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CertificatesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CombinedSicActivitiesResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.service.AccountPenaltiesService;
 import uk.gov.companieshouse.api.testdata.service.AppealsService;
@@ -28,9 +26,6 @@ import uk.gov.companieshouse.api.testdata.service.TestDataService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class TestDataServiceImpl implements TestDataService {
@@ -227,40 +222,6 @@ public class TestDataServiceImpl implements TestDataService {
                     + " and customer code: " + penaltyRequest.getCustomerCode(), ex);
             throw new DataException("Error creating account penalties", ex);
         }
-    }
-
-    @Override
-    public PostcodesResponse getPostcodes(String country) throws DataException {
-        try {
-            List<Postcodes> postcodes = postcodeService.getPostcodeByCountry(country);
-            if (postcodes == null || postcodes.isEmpty()) {
-                LOG.info("No postcodes found for country: " + country);
-                return null;
-            }
-            var secureRandom = new SecureRandom();
-            var randomPostcode = secureRandom.nextInt(postcodes.size());
-            return getPostCodesData(postcodes).get(randomPostcode);
-        } catch (Exception ex) {
-            throw new DataException("Error retrieving postcodes", ex);
-        }
-    }
-
-    private static List<PostcodesResponse> getPostCodesData(List<Postcodes> postcodes) {
-        List<PostcodesResponse> postcodesResponseList = new ArrayList<>();
-        for (Postcodes postcode : postcodes) {
-            var postcodeData = new PostcodesResponse(
-                    postcode.getBuildingNumber() != null ? postcode
-                            .getBuildingNumber().intValue() : null,
-                    postcode.getThoroughfare().getName() + " "
-                            + (postcode.getThoroughfare().getDescriptor()
-                            != null ? postcode.getThoroughfare().getDescriptor() : ""),
-                    postcode.getLocality().getDependentLocality(),
-                    postcode.getLocality().getPostTown(),
-                    postcode.getPostcode().getPretty()
-            );
-            postcodesResponseList.add(postcodeData);
-        }
-        return postcodesResponseList;
     }
 
     public TransactionsResponse createTransactionData(TransactionsRequest transactionsRequest)
