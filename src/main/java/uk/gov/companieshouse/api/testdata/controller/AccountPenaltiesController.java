@@ -105,7 +105,7 @@ public class AccountPenaltiesController {
     public ResponseEntity<Void> deleteAccountPenalties(
             @PathVariable("id") String id,
             @RequestBody(required = false) PenaltyDeleteRequest request)
-            throws DataException, NoDataFoundException {
+            throws NoDataFoundException {
 
         if (request == null || request.getTransactionReference() == null) {
             return accountPenaltiesService.deleteAccountPenalties(id);

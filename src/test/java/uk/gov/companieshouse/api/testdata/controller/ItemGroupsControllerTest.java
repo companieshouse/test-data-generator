@@ -16,11 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.service.ItemGroupsService;
 
 @ExtendWith(MockitoExtension.class)
-public class ItemGroupsControllerTest {
+class ItemGroupsControllerTest {
 
     @Mock
     private ItemGroupsService itemGroupsService;

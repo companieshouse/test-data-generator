@@ -64,7 +64,7 @@ class TransactionsControllerTest {
     }
 
     @Test
-    void deleteTransaction() throws Exception {
+    void deleteTransaction() {
         when(this.testDataService.delete(TRANSACTION_ID))
                 .thenReturn(true);
 
@@ -77,7 +77,7 @@ class TransactionsControllerTest {
     }
 
     @Test
-    void deleteTransactionNotFound() throws Exception {
+    void deleteTransactionNotFound() {
         when(this.testDataService.delete(TRANSACTION_ID))
                 .thenReturn(false);
 

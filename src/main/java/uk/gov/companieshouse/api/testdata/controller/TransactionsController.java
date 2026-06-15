@@ -26,7 +26,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class TransactionsController {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String STATUS = "status";
-    private static final String ERROR = "error";
 
     private final TransactionService transactionService;
 
