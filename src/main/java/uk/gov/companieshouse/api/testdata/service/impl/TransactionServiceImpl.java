@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspApplication;
 import uk.gov.companieshouse.api.testdata.model.entity.Transactions;
-import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.TransactionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.TransactionsResponse;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
+import uk.gov.companieshouse.api.testdata.service.TransactionService;
 
 @Service
-public class TransactionServiceImpl implements DataService<TransactionsResponse, TransactionsRequest>  {
+public class TransactionServiceImpl implements TransactionService {
 
     @Autowired
     private TransactionsRepository repository;
