@@ -5,7 +5,6 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
@@ -19,11 +18,14 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class AcspMemberServiceImpl implements
         AcspMemberService {
 
-    @Autowired
-    private AcspMemberRepository acspMemberRepository;
+    private final AcspMemberRepository acspMemberRepository;
 
-    @Autowired
-    private RandomService randomService;
+    private final RandomService randomService;
+
+    public AcspMemberServiceImpl(AcspMemberRepository acspMemberRepository, RandomService randomService) {
+        this.acspMemberRepository = acspMemberRepository;
+        this.randomService = randomService;
+    }
 
     @Override
     public AcspMembersResponse create(AcspMembersRequest request) throws DataException {
