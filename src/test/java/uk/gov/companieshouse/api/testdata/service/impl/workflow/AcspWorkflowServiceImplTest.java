@@ -31,18 +31,18 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
-import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspMemberRepository;
 
+import uk.gov.companieshouse.api.testdata.service.AcspMemberService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
 
 @ExtendWith(MockitoExtension.class)
 class AcspWorkflowServiceImplTest {
 
     @Mock
-    private DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
+    private AcspMemberService acspMemberService;
     @Mock
-    private AcspMembersRepository acspMembersRepository;
+    private AcspMemberRepository acspMemberRepository;
     @Mock
     private AcspProfileService acspProfileService;
 
@@ -52,8 +52,8 @@ class AcspWorkflowServiceImplTest {
     void setUp() {
         acspWorkflowService = new AcspWorkflowServiceImpl(
                 acspProfileService,
-                acspMembersRepository,
-                acspMembersService);
+                acspMemberRepository,
+                acspMemberService);
     }
 
     /**
@@ -62,18 +62,18 @@ class AcspWorkflowServiceImplTest {
      * @param userId      the user id to set on the spec
      * @param profileData the ACSP profile data to be returned by the profile service
      * @param membersData the ACSP members data to be returned by the members service
-     * @return the result of testDataService.createAcspMembersData(...)
+     * @return the result of testDataService.createAcspMemberRecord(...)
      * @throws DataException if creation fails
      */
-    private AcspMembersResponse createAcspMembersDataHelper(String userId,
-                                                            AcspProfileResponse profileData,
-                                                            AcspMembersResponse membersData, AcspProfileRequest profileSpec) throws DataException {
+    private AcspMembersResponse createAcspMemberHelperRecord(String userId,
+                                                             AcspProfileResponse profileData,
+                                                             AcspMembersResponse membersData, AcspProfileRequest profileSpec) throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId(userId);
         spec.setAcspProfile(profileSpec);
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(profileData);
-        when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(membersData);
-        return acspWorkflowService.createAcspMembersData(spec);
+        when(acspMemberService.create(any(AcspMembersRequest.class))).thenReturn(membersData);
+        return acspWorkflowService.createAcspMember(spec);
     }
 
     private void verifyAcspMembersData(AcspMembersResponse data,
@@ -95,18 +95,18 @@ class AcspWorkflowServiceImplTest {
      *
      * @param acspMemberId   the member id to delete
      * @param memberOptional an Optional containing the AcspMembers if found
-     * @return the result of testDataService.deleteAcspMembersData(...)
+     * @return the result of testDataService.deleteAcspMember(...)
      * @throws DataException if deletion fails
      */
-    private boolean deleteAcspMembersDataHelper(String acspMemberId,
-                                                Optional<AcspMembers> memberOptional)
+    private boolean deleteAcspMemberHelper(String acspMemberId,
+                                           Optional<AcspMembers> memberOptional)
             throws DataException {
-        when(acspMembersRepository.findById(acspMemberId)).thenReturn(memberOptional);
-        return acspWorkflowService.deleteAcspMembersData(acspMemberId);
+        when(acspMemberRepository.findById(acspMemberId)).thenReturn(memberOptional);
+        return acspWorkflowService.deleteAcspMember(acspMemberId);
     }
 
     @Test
-    void createAcspMembersData() throws DataException {
+    void createAcspMemberRecord() throws DataException {
         AcspProfileRequest profileSpec = new AcspProfileRequest();
         profileSpec.setAcspNumber("acspNumber");
         profileSpec.setStatus("active");
@@ -122,40 +122,40 @@ class AcspWorkflowServiceImplTest {
         AcspMembersResponse expectedMembersData =
                 new AcspMembersResponse(new ObjectId(),
                         profileSpec.getAcspNumber(), "userId", "active", "role");
-        AcspMembersResponse result = createAcspMembersDataHelper(
+        AcspMembersResponse result = createAcspMemberHelperRecord(
                 "userId", acspProfileResponse, expectedMembersData, profileSpec);
         verifyAcspMembersData(result,
                 String.valueOf(expectedMembersData.getAcspMemberId()),
                 acspProfileResponse.getAcspNumber(), expectedMembersData.getUserId(),
                 expectedMembersData.getStatus(), expectedMembersData.getUserRole());
-        verify(acspMembersService).create(any(AcspMembersRequest.class));
+        verify(acspMemberService).create(any(AcspMembersRequest.class));
         verify(acspProfileService).create(argThat(profile -> profile.getAmlDetails() == null));
     }
 
     @Test
-    void createAcspMembersDataNullUserId() {
+    void createAcspMemberNullUserIdRecord() {
         AcspMembersRequest spec = new AcspMembersRequest();
         DataException exception = assertThrows(DataException.class,
-                () -> acspWorkflowService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMember(spec));
         assertEquals("User ID is required to create an ACSP member", exception.getMessage());
     }
 
     @Test
-    void createAcspMembersDataException() throws DataException {
+    void createAcspMemberExceptionRecord() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
         when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
         DataException exception = assertThrows(DataException.class,
-                () -> acspWorkflowService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMember(spec));
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
     }
 
     @Test
-    void createAcspMembersDataWhenProfileIsNotNull() throws DataException {
+    void createAcspMemberWhenProfileIsNotNullRecord() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
         AcspProfile profileEntity = new AcspProfile();
@@ -180,8 +180,8 @@ class AcspWorkflowServiceImplTest {
                 new AcspMembersResponse(new ObjectId(), acspProfileResponse.getAcspNumber(),"userId",
                         "active", "role");
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
-        when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
-        AcspMembersResponse result = acspWorkflowService.createAcspMembersData(spec);
+        when(acspMemberService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
+        AcspMembersResponse result = acspWorkflowService.createAcspMember(spec);
 
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersResponse.getAcspMemberId()),
@@ -190,14 +190,14 @@ class AcspWorkflowServiceImplTest {
 
         verify(acspProfileService).create(acspProfile);
 
-        verify(acspMembersService).create(argThat(membersSpec ->
+        verify(acspMemberService).create(argThat(membersSpec ->
                 acspMembersResponse.getUserId().equals(membersSpec.getUserId())
                         && acspMembersResponse.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
     @Test
-    void createAcspMembersDataWhenProfileIsNull() throws DataException {
+    void createAcspMemberWhenProfileIsNullRecord() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
@@ -212,9 +212,9 @@ class AcspWorkflowServiceImplTest {
         spec.setAcspProfile(null);
 
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
-        when(acspMembersService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
+        when(acspMemberService.create(any(AcspMembersRequest.class))).thenReturn(acspMembersResponse);
 
-        AcspMembersResponse result = acspWorkflowService.createAcspMembersData(spec);
+        AcspMembersResponse result = acspWorkflowService.createAcspMember(spec);
 
         verifyAcspMembersData(result,
                 String.valueOf(acspMembersResponse.getAcspMemberId()),
@@ -224,14 +224,14 @@ class AcspWorkflowServiceImplTest {
                 profile.getStatus() == null
                         && profile.getType() == null
                         && profile.getAmlDetails() == null));
-        verify(acspMembersService).create(argThat(membersSpec ->
+        verify(acspMemberService).create(argThat(membersSpec ->
                 acspMembersResponse.getUserId().equals(membersSpec.getUserId())
                         && acspMembersResponse.getAcspNumber().equals(membersSpec.getAcspNumber())
         ));
     }
 
     @Test
-    void createAcspMembersDataProfileCreationException() throws DataException {
+    void createAcspMemberProfileCreationExceptionRecord() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
         AcspProfileRequest profileRequest = new AcspProfileRequest();
@@ -242,16 +242,16 @@ class AcspWorkflowServiceImplTest {
         when(acspProfileService.create(any(AcspProfileRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP profile"));
         DataException exception = assertThrows(DataException.class,
-                () -> acspWorkflowService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMember(spec));
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP profile",
                 exception.getMessage());
         verify(acspProfileService).create(profileRequest);
-        verify(acspMembersService, never()).create(any(AcspMembersRequest.class));
+        verify(acspMemberService, never()).create(any(AcspMembersRequest.class));
     }
 
     @Test
-    void createAcspMembersDataMemberCreationException() throws DataException {
+    void createAcspMemberMemberRecordCreationException() throws DataException {
         AcspMembersRequest spec = new AcspMembersRequest();
         spec.setUserId("userId");
 
@@ -262,49 +262,49 @@ class AcspWorkflowServiceImplTest {
 
         AcspProfileResponse acspProfileResponse = new AcspProfileResponse(profileEntity);
         when(acspProfileService.create(any(AcspProfileRequest.class))).thenReturn(acspProfileResponse);
-        when(acspMembersService.create(any(AcspMembersRequest.class)))
+        when(acspMemberService.create(any(AcspMembersRequest.class)))
                 .thenThrow(new DataException("Error creating ACSP member"));
         DataException exception = assertThrows(DataException.class,
-                () -> acspWorkflowService.createAcspMembersData(spec));
+                () -> acspWorkflowService.createAcspMember(spec));
         assertEquals(
                 "uk.gov.companieshouse.api.testdata.exception.DataException: Error creating ACSP member",
                 exception.getMessage());
     }
 
     @Test
-    void deleteAcspMembersData() throws DataException {
+    void deleteAcspMember() throws DataException {
         String acspMemberId = "memberId";
         AcspMembers member = new AcspMembers();
         member.setAcspNumber("acspNumber");
 
-        boolean result = deleteAcspMembersDataHelper(acspMemberId, Optional.of(member));
+        boolean result = deleteAcspMemberHelper(acspMemberId, Optional.of(member));
 
         assertTrue(result);
-        verify(acspMembersService).delete(acspMemberId);
+        verify(acspMemberService).delete(acspMemberId);
         verify(acspProfileService).delete("acspNumber");
     }
 
     @Test
-    void deleteAcspMembersDataNotFound() throws DataException {
+    void deleteAcspMemberNotFound() throws DataException {
         String acspMemberId = "memberId";
-        boolean result = deleteAcspMembersDataHelper(acspMemberId, Optional.empty());
+        boolean result = deleteAcspMemberHelper(acspMemberId, Optional.empty());
 
         assertFalse(result);
-        verify(acspMembersService, never()).delete(anyString());
+        verify(acspMemberService, never()).delete(anyString());
         verify(acspProfileService, never()).delete(anyString());
     }
 
     @Test
-    void deleteAcspMembersDataException() {
+    void deleteAcspMemberException() {
         String acspMemberId = "memberId";
         AcspMembers member = new AcspMembers();
         member.setAcspNumber("acspNumber");
 
-        when(acspMembersRepository.findById(acspMemberId)).thenReturn(Optional.of(member));
+        when(acspMemberRepository.findById(acspMemberId)).thenReturn(Optional.of(member));
         doThrow(new RuntimeException(new DataException("Error")))
-                .when(acspMembersService).delete(acspMemberId);
+                .when(acspMemberService).delete(acspMemberId);
         DataException exception = assertThrows(DataException.class,
-                () -> acspWorkflowService.deleteAcspMembersData(acspMemberId));
+                () -> acspWorkflowService.deleteAcspMember(acspMemberId));
         assertEquals("Error deleting acsp member's data", exception.getMessage());
     }
 }
