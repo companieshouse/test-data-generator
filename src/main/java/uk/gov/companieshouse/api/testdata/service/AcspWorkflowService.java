@@ -12,7 +12,7 @@ public interface AcspWorkflowService {
      * @return the created acsp members' test data
      * @throws DataException if there is an error during user creation
      */
-    AcspMembersResponse createAcspMembersData(AcspMembersRequest acspMembersRequest) throws DataException;
+    AcspMembersResponse createAcspMember(AcspMembersRequest acspMembersRequest) throws DataException;
 
     /**
      * Deletes an acsp members' test data by their membership id.
@@ -20,5 +20,5 @@ public interface AcspWorkflowService {
      * @param acspMemberId the ID of the membership to delete
      * @throws DataException if there is an error during user deletion
      */
-    boolean deleteAcspMembersData(String acspMemberId) throws DataException;
+    boolean deleteAcspMember(String acspMemberId) throws DataException;
 }

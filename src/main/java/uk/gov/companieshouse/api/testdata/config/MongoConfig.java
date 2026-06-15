@@ -16,7 +16,7 @@ import org.springframework.data.mongodb.repository.support.MongoRepositoryFactor
 import org.springframework.data.repository.Repository;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
-import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspMemberRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppealsRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
@@ -119,8 +119,8 @@ public class MongoConfig {
     }
 
     @Bean
-    public AcspMembersRepository acspMembersRepository() {
-        return getMongoRepositoryBean(AcspMembersRepository.class, "acsp_members");
+    public AcspMemberRepository acspMembersRepository() {
+        return getMongoRepositoryBean(AcspMemberRepository.class, "acsp_members");
     }
 
     @Bean

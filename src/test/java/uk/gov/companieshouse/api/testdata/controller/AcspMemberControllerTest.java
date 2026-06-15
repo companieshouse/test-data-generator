@@ -43,7 +43,7 @@ class AcspMemberControllerTest {
         AcspMembersResponse acspMember = new AcspMembersResponse(
                 new ObjectId(), "acspNumber", "userId", "active", "role");
 
-        when(this.acspWorkflowService.createAcspMembersData(request)).thenReturn(acspMember);
+        when(this.acspWorkflowService.createAcspMember(request)).thenReturn(acspMember);
         ResponseEntity<AcspMembersResponse> response
                 = this.acspMemberController.createAcspMember(request);
 
@@ -56,7 +56,7 @@ class AcspMemberControllerTest {
         AcspMembersRequest request = new AcspMembersRequest();
         Throwable exception = new DataException("Error message");
 
-        when(this.acspWorkflowService.createAcspMembersData(request)).thenThrow(exception);
+        when(this.acspWorkflowService.createAcspMember(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
                 this.acspMemberController.createAcspMember(request));
@@ -67,20 +67,20 @@ class AcspMemberControllerTest {
     void deleteAcspMember() throws Exception {
         final String acspMemberId = "memberId";
 
-        when(this.acspWorkflowService.deleteAcspMembersData(acspMemberId)).thenReturn(true);
+        when(this.acspWorkflowService.deleteAcspMember(acspMemberId)).thenReturn(true);
         ResponseEntity<Map<String, Object>> response
                 = this.acspMemberController.deleteAcspMember(acspMemberId);
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(acspWorkflowService).deleteAcspMembersData(acspMemberId);
+        verify(acspWorkflowService).deleteAcspMember(acspMemberId);
     }
 
     @Test
     void deleteAcspMemberNotFound() throws Exception {
         final String acspMemberId = "memberId";
 
-        when(this.acspWorkflowService.deleteAcspMembersData(acspMemberId)).thenReturn(false);
+        when(this.acspWorkflowService.deleteAcspMember(acspMemberId)).thenReturn(false);
         ResponseEntity<Map<String, Object>> response
                 = this.acspMemberController.deleteAcspMember(acspMemberId);
 
@@ -88,7 +88,7 @@ class AcspMemberControllerTest {
         assertEquals("memberId", Objects.requireNonNull(response.getBody()).get("acsp-member-id"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
 
-        verify(acspWorkflowService).deleteAcspMembersData(acspMemberId);
+        verify(acspWorkflowService).deleteAcspMember(acspMemberId);
     }
 
     @Test
@@ -96,7 +96,7 @@ class AcspMemberControllerTest {
         final String acspMemberId = "memberId";
         Throwable exception = new DataException("Error message");
 
-        when(this.acspWorkflowService.deleteAcspMembersData(acspMemberId)).thenThrow(exception);
+        when(this.acspWorkflowService.deleteAcspMember(acspMemberId)).thenThrow(exception);
 
         DataException thrown = assertThrows(
                 DataException.class, () -> this.acspMemberController.deleteAcspMember(acspMemberId));
