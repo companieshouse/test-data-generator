@@ -8,6 +8,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 
 @NoRepositoryBean
-public interface AcspMembersRepository extends MongoRepository<AcspMembers, String> {
+public interface AcspMemberRepository extends MongoRepository<AcspMembers, String> {
     Optional<AcspMembers> findByAcspMemberId(ObjectId id);
 }

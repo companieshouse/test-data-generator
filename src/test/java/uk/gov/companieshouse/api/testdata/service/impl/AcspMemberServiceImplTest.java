@@ -28,21 +28,21 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.AcspMembers;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
-import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspMemberRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
-class AcspMembersServiceImplTest {
+class AcspMemberServiceImplTest {
 
     @Mock
-    private AcspMembersRepository repository;
+    private AcspMemberRepository acspMemberRepository;
 
     @Mock
     private RandomService randomService;
 
     @InjectMocks
     @Spy
-    private AcspMembersServiceImpl service;
+    private AcspMemberServiceImpl service;
 
     @Test
     void createAcspMember() throws DataException {
@@ -53,7 +53,7 @@ class AcspMembersServiceImplTest {
         spec.setStatus("active");
 
         final var createdDate = Instant.now();
-        doReturn(createdDate).when(service).getCurrentDateTime();
+        doReturn(createdDate).when(service).getCurrentUtcInstant();
 
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
@@ -70,7 +70,7 @@ class AcspMembersServiceImplTest {
         assertEquals("role", result.getUserRole());
 
         ArgumentCaptor<AcspMembers> captor = ArgumentCaptor.forClass(AcspMembers.class);
-        verify(repository).save(captor.capture());
+        verify(acspMemberRepository).save(captor.capture());
 
         AcspMembers captured = captor.getValue();
         assertEquals(id, captured.getAcspMemberId());
@@ -91,7 +91,7 @@ class AcspMembersServiceImplTest {
         spec.setUserId("userId");
 
         final var createdDate = Instant.now();
-        doReturn(createdDate).when(service).getCurrentDateTime();
+        doReturn(createdDate).when(service).getCurrentUtcInstant();
 
         var id = new ObjectId();
         when(randomService.generateId()).thenReturn(id);
@@ -108,7 +108,7 @@ class AcspMembersServiceImplTest {
         assertEquals("owner", result.getUserRole());
 
         ArgumentCaptor<AcspMembers> captor = ArgumentCaptor.forClass(AcspMembers.class);
-        verify(repository).save(captor.capture());
+        verify(acspMemberRepository).save(captor.capture());
 
         AcspMembers captured = captor.getValue();
         assertEquals(id, captured.getAcspMemberId());
@@ -127,8 +127,8 @@ class AcspMembersServiceImplTest {
         var id = new ObjectId();
         var stringId = id.toString();
         AcspMembers acspMember = new AcspMembers();
-        when(repository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
-        doThrow(new RuntimeException("Deletion error")).when(repository).delete(acspMember);
+        when(acspMemberRepository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
+        doThrow(new RuntimeException("Deletion error")).when(acspMemberRepository).delete(acspMember);
 
         RuntimeException exception =
                 assertThrows(RuntimeException.class,
@@ -140,23 +140,23 @@ class AcspMembersServiceImplTest {
     void deleteAcspMember() {
         var id = new ObjectId();
         AcspMembers acspMember = new AcspMembers();
-        when(repository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
+        when(acspMemberRepository.findByAcspMemberId(id)).thenReturn(Optional.of(acspMember));
 
         boolean result = service.delete(String.valueOf(id));
 
         assertTrue(result);
-        verify(repository).delete(acspMember);
+        verify(acspMemberRepository).delete(acspMember);
     }
 
     @Test
     void deleteAcspMemberNotFound() {
         var id = new ObjectId();
-        when(repository.findByAcspMemberId(id)).thenReturn(Optional.empty());
+        when(acspMemberRepository.findByAcspMemberId(id)).thenReturn(Optional.empty());
 
         boolean result =
                 service.delete(String.valueOf(id));
 
         assertFalse(result);
-        verify(repository, never()).delete(any(AcspMembers.class));
+        verify(acspMemberRepository, never()).delete(any(AcspMembers.class));
     }
 }

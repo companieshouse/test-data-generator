@@ -40,7 +40,7 @@ public class AcspMemberController {
     public ResponseEntity<AcspMembersResponse> createAcspMember(
             @Valid @RequestBody AcspMembersRequest request) throws DataException {
 
-        var createdAcspMember = acspWorkflowService.createAcspMembersData(request);
+        var createdAcspMember = acspWorkflowService.createAcspMember(request);
 
         Map<String, Object> data = new HashMap<>();
         data.put("acsp-member-id", createdAcspMember.getAcspMemberId());
@@ -49,12 +49,12 @@ public class AcspMemberController {
     }
 
     @DeleteMapping("/acsp-members/{acspMemberId}")
-    public ResponseEntity<Map<String, Object>> deleteAcspMember(@PathVariable("acspMemberId")
-                                                                String acspMemberId)
+    public ResponseEntity<Map<String, Object>> deleteAcspMember(
+            @PathVariable String acspMemberId)
             throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("acsp-member-id", acspMemberId);
-        boolean deleteAcspMember = acspWorkflowService.deleteAcspMembersData(acspMemberId);
+        boolean deleteAcspMember = acspWorkflowService.deleteAcspMember(acspMemberId);
 
         if (deleteAcspMember) {
             LOG.info("Acsp Member Deleted", response);

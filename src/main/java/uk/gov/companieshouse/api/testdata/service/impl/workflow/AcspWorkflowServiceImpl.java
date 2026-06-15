@@ -10,10 +10,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AcspMembersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspMembersResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AcspProfileResponse;
-import uk.gov.companieshouse.api.testdata.repository.AcspMembersRepository;
+import uk.gov.companieshouse.api.testdata.repository.AcspMemberRepository;
+import uk.gov.companieshouse.api.testdata.service.AcspMemberService;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
 import uk.gov.companieshouse.api.testdata.service.AcspWorkflowService;
-import uk.gov.companieshouse.api.testdata.service.DataService;
 
 
 @Service
@@ -21,21 +21,21 @@ public class AcspWorkflowServiceImpl implements AcspWorkflowService {
 
     private final AcspProfileService acspProfileService;
 
-    private final AcspMembersRepository acspMembersRepository;
+    private final AcspMemberRepository acspMemberRepository;
 
-    private final DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService;
+    private final AcspMemberService acspMemberService;
 
     public AcspWorkflowServiceImpl(
             AcspProfileService acspProfileService,
-            AcspMembersRepository acspMembersRepository,
-            DataService<AcspMembersResponse, AcspMembersRequest> acspMembersService) {
+            AcspMemberRepository acspMemberRepository,
+            AcspMemberService acspMemberService) {
         this.acspProfileService = acspProfileService;
-        this.acspMembersRepository = acspMembersRepository;
-        this.acspMembersService = acspMembersService;
+        this.acspMemberRepository = acspMemberRepository;
+        this.acspMemberService = acspMemberService;
     }
 
     @Override
-    public AcspMembersResponse createAcspMembersData(final AcspMembersRequest spec)
+    public AcspMembersResponse createAcspMember(final AcspMembersRequest spec)
             throws DataException {
         if (spec.getUserId() == null) {
             throw new DataException("User ID is required to create an ACSP member");
@@ -47,10 +47,10 @@ public class AcspWorkflowServiceImpl implements AcspWorkflowService {
         }
 
         try {
-            var acspProfileData = createAcspProfile(acspProfileSpec);
+            var acspProfileData = createAcspProfileRecord(acspProfileSpec);
             spec.setAcspNumber(acspProfileData.getAcspNumber());
 
-            AcspMembersResponse createdMember = createAcspMember(spec);
+            AcspMembersResponse createdMember = createAcspMemberRecord(spec);
 
             return new AcspMembersResponse(
                     new ObjectId(createdMember.getAcspMemberId()),
@@ -64,7 +64,7 @@ public class AcspWorkflowServiceImpl implements AcspWorkflowService {
         }
     }
 
-    private AcspProfileResponse createAcspProfile(AcspProfileRequest acspProfileRequest)
+    private AcspProfileResponse createAcspProfileRecord(AcspProfileRequest acspProfileRequest)
             throws DataException {
         try {
             return this.acspProfileService.create(acspProfileRequest);
@@ -73,19 +73,19 @@ public class AcspWorkflowServiceImpl implements AcspWorkflowService {
         }
     }
 
-    private AcspMembersResponse createAcspMember(AcspMembersRequest spec) throws DataException {
+    private AcspMembersResponse createAcspMemberRecord(AcspMembersRequest spec) throws DataException {
         try {
-            return this.acspMembersService.create(spec);
+            return this.acspMemberService.create(spec);
         } catch (Exception ex) {
             throw new DataException("Error creating ACSP member", ex);
         }
     }
 
     @Override
-    public boolean deleteAcspMembersData(String acspMemberId) throws DataException {
+    public boolean deleteAcspMember(String acspMemberId) throws DataException {
         List<Exception> suppressedExceptions = new ArrayList<>();
         try {
-            var maybeMember = acspMembersRepository.findById(acspMemberId);
+            var maybeMember = acspMemberRepository.findById(acspMemberId);
             if (maybeMember.isPresent()) {
                 var member = maybeMember.get();
                 String acspNumber = member.getAcspNumber();
@@ -117,7 +117,7 @@ public class AcspWorkflowServiceImpl implements AcspWorkflowService {
 
     private void deleteAcspMember(String acspMemberId, List<Exception> suppressedExceptions) {
         try {
-            acspMembersService.delete(acspMemberId);
+            acspMemberService.delete(acspMemberId);
         } catch (Exception ex) {
             suppressedExceptions.add(new DataException("Error deleting ACSP member", ex));
         }
