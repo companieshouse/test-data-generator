@@ -105,7 +105,7 @@ public class InternalCompanyController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/get-populated-company-structure")
+    @PostMapping("/get-populated-company-structure")
     public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyDataStructure(
             @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
 
