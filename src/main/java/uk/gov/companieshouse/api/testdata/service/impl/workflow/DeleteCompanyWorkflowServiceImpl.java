@@ -12,7 +12,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -35,15 +35,15 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private final CompanyProfileService companyProfileService;
-    private final DataService<FilingHistory, CompanyRequest> filingHistoryService;
+    private final DataService<FilingHistory, InternalCompanyRequest> filingHistoryService;
     private final CompanyAuthCodeService companyAuthCodeService;
     private final AppointmentService appointmentService;
     private final CompanyPscStatementServiceImpl companyPscStatementService;
     private final CompanyPscService companyPscService;
-    private final DataService<CompanyMetrics, CompanyRequest> companyMetricsService;
+    private final DataService<CompanyMetrics, InternalCompanyRequest> companyMetricsService;
     private final CompanyAuthAllowListService companyAuthAllowListService;
-    private final DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
-    private final DataService<Disqualifications, CompanyRequest> disqualificationsService;
+    private final DataService<CompanyRegisters, InternalCompanyRequest> companyRegistersService;
+    private final DataService<Disqualifications, InternalCompanyRequest> disqualificationsService;
     private final CompanySearchService companySearchService;
     private final CompanySearchService alphabeticalCompanySearch;
     private final CompanySearchService advancedCompanySearch;
@@ -57,15 +57,15 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
 
     public DeleteCompanyWorkflowServiceImpl(
             CompanyProfileService companyProfileService,
-            DataService<FilingHistory, CompanyRequest> filingHistoryService,
+            DataService<FilingHistory, InternalCompanyRequest> filingHistoryService,
             CompanyAuthCodeService companyAuthCodeService,
             AppointmentService appointmentService,
             CompanyPscStatementServiceImpl companyPscStatementService,
             CompanyPscService companyPscService,
-            DataService<CompanyMetrics, CompanyRequest> companyMetricsService,
+            DataService<CompanyMetrics, InternalCompanyRequest> companyMetricsService,
             CompanyAuthAllowListService companyAuthAllowListService,
-            DataService<CompanyRegisters, CompanyRequest> companyRegistersService,
-            DataService<Disqualifications, CompanyRequest> disqualificationsService,
+            DataService<CompanyRegisters, InternalCompanyRequest> companyRegistersService,
+            DataService<Disqualifications, InternalCompanyRequest> disqualificationsService,
             @Qualifier("companySearchService") CompanySearchService companySearchService,
             @Qualifier("alphabeticalCompanySearchService")
             CompanySearchService alphabeticalCompanySearch,

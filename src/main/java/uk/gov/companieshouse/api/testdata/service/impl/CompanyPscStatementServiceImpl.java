@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -20,7 +20,7 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class CompanyPscStatementServiceImpl implements
-        DataService<CompanyPscStatement, CompanyRequest> {
+        DataService<CompanyPscStatement, InternalCompanyRequest> {
 
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
     private static final int ID_LENGTH = 10;
@@ -35,7 +35,7 @@ public class CompanyPscStatementServiceImpl implements
     private RandomService randomService;
 
     @Override
-    public CompanyPscStatement create(CompanyRequest spec) {
+    public CompanyPscStatement create(InternalCompanyRequest spec) {
         var pscStatement = new CompanyPscStatement();
 
         String pscStatementId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
@@ -76,7 +76,7 @@ public class CompanyPscStatementServiceImpl implements
         return repository.save(pscStatement);
     }
 
-    public List<CompanyPscStatement> createPscStatements(CompanyRequest spec) {
+    public List<CompanyPscStatement> createPscStatements(InternalCompanyRequest spec) {
         List<CompanyPscStatement> generatedStatements = new ArrayList<>();
 
         int withdrawnPscStatementsCount = spec.getWithdrawnStatements() != null ? spec.getWithdrawnStatements() : 0;
@@ -108,7 +108,7 @@ public class CompanyPscStatementServiceImpl implements
     }
 
     protected List<CompanyPscStatement> generateWithdrawnPscStatements(
-            CompanyRequest spec, Integer count) {
+            InternalCompanyRequest spec, Integer count) {
 
         List<CompanyPscStatement> generatedList = new ArrayList<>();
 
@@ -117,7 +117,7 @@ public class CompanyPscStatementServiceImpl implements
         }
 
         for (var i = 0; i < count; i++) {
-            var tempSpec = new CompanyRequest();
+            var tempSpec = new InternalCompanyRequest();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(1);
@@ -132,7 +132,7 @@ public class CompanyPscStatementServiceImpl implements
     }
 
     protected List<CompanyPscStatement> generateActivePscStatements(
-            CompanyRequest spec, Integer count) {
+            InternalCompanyRequest spec, Integer count) {
 
         List<CompanyPscStatement> generatedList = new ArrayList<>();
 
@@ -141,7 +141,7 @@ public class CompanyPscStatementServiceImpl implements
         }
 
         for (var i = 0; i < count; i++) {
-            var tempSpec = new CompanyRequest();
+            var tempSpec = new InternalCompanyRequest();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
             tempSpec.setWithdrawnStatements(0);

@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -24,7 +24,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class DisqualificationsServiceImpl implements DataService<Disqualifications, CompanyRequest> {
+public class DisqualificationsServiceImpl implements DataService<Disqualifications, InternalCompanyRequest> {
 
     private static final Logger LOG
             = LoggerFactory.getLogger(String.valueOf(DisqualificationsServiceImpl.class));
@@ -55,9 +55,9 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     private AddressService addressService;
 
     @Override
-    public Disqualifications create(CompanyRequest spec) throws DataException {
+    public Disqualifications create(InternalCompanyRequest spec) throws DataException {
         if (spec == null) {
-            throw new IllegalArgumentException("CompanyRequest cannot be null");
+            throw new IllegalArgumentException("InternalCompanyRequest cannot be null");
         }
 
         List<DisqualificationsRequest> disqualificationsSpecs = spec.getDisqualifiedOfficers();
@@ -81,7 +81,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     }
 
     private Disqualifications createDisqualificationFromSpec(
-            CompanyRequest companySpec, DisqualificationsRequest spec) {
+            InternalCompanyRequest companySpec, DisqualificationsRequest spec) {
         var disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
         disqualifications.setCompanyNumber(companySpec.getCompanyNumber());

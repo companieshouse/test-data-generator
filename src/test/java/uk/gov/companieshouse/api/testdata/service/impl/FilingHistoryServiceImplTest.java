@@ -43,7 +43,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CategoryType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DescriptionValuesRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.FilingHistoryDescriptionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryRequest;
@@ -93,7 +93,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void create() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -150,7 +150,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createBarcodeServiceException() throws BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -187,7 +187,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWithFilingHistory() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistoryRequest filingHistorySpec = new FilingHistoryRequest();
@@ -240,7 +240,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWithMultipleFilingHistory() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -294,7 +294,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWithNullFilingHistory() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -367,7 +367,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWhenAccountsDueStatusIsNull() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus(null);
@@ -403,7 +403,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWhenAccountsDueStatusIsDueSoon() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("due-soon");
@@ -443,7 +443,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWhenAccountsDueStatusIsOverdue() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setAccountsDueStatus("overdue");
@@ -483,7 +483,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createWithMultipleFilingHistoryTypes() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -521,7 +521,7 @@ class FilingHistoryServiceImplTest {
 
         List<FilingHistory> createdHistories = new ArrayList<>();
         for (FilingHistoryRequest fhSpec : spec.getFilingHistoryList()) {
-            createdHistories.add(filingHistoryService.create(new CompanyRequest() {{
+            createdHistories.add(filingHistoryService.create(new InternalCompanyRequest() {{
                 setCompanyNumber(COMPANY_NUMBER);
                 setCompanyWithPopulatedStructureOnly(false);
                 setFilingHistoryList(List.of(fhSpec));
@@ -655,7 +655,7 @@ class FilingHistoryServiceImplTest {
     // 1. SubCategory logic
     @Test
     void createWithSubCategory_setsSubCategory() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistoryRequest fhSpec = new FilingHistoryRequest();
@@ -693,7 +693,7 @@ class FilingHistoryServiceImplTest {
     // 3. Unknown type handling (default branch)
     @Test
     void createWithUnknownType_setsAssociatedFilings() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistoryRequest fhSpec = new FilingHistoryRequest();
@@ -718,7 +718,7 @@ class FilingHistoryServiceImplTest {
     // 4. AP01 original values
     @Test
     void createWithAP01_setsOriginalValues() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistoryRequest fhSpec = new FilingHistoryRequest();
@@ -766,7 +766,7 @@ class FilingHistoryServiceImplTest {
     // 7. Description is set from FilingHistoryRequest if present
     @Test
     void createWithDescription_setsCustomDescription() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistoryRequest fhSpec = new FilingHistoryRequest();
@@ -795,7 +795,7 @@ class FilingHistoryServiceImplTest {
     // 8. Description falls back to default if not set in FilingHistoryRequest
     @Test
     void createWithNullDescription_setsDefaultDescription() throws DataException, BarcodeServiceException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         FilingHistoryRequest fhSpec = new FilingHistoryRequest();
@@ -820,7 +820,7 @@ class FilingHistoryServiceImplTest {
 
     @Test
     void createReturnsUnsavedFilingHistoryWhenCompanyWithDataStructureIsTrue() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(true);
 

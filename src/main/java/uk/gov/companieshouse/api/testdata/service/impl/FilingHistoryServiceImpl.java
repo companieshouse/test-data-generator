@@ -30,7 +30,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Resolutions;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CapitalRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CategoryType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.SubcategoryType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.FilingHistoryDescriptionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.FilingHistoryRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.ResolutionsRequest;
@@ -44,7 +44,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class FilingHistoryServiceImpl implements FilingHistoryService, DataService<FilingHistory, CompanyRequest> {
+public class FilingHistoryServiceImpl implements FilingHistoryService, DataService<FilingHistory, InternalCompanyRequest> {
     private static final int SALT_LENGTH = 8;
     private static final int ENTITY_ID_LENGTH = 9;
     private static final String ENTITY_ID_PREFIX = "8";
@@ -65,7 +65,7 @@ public class FilingHistoryServiceImpl implements FilingHistoryService, DataServi
     private BarcodeService barcodeService;
 
     @Override
-    public FilingHistory create(CompanyRequest spec) throws DataException {
+    public FilingHistory create(InternalCompanyRequest spec) throws DataException {
         List<FilingHistoryRequest> filingHistorySpecs = spec.getFilingHistoryList(); // New array-style getter
         List<FilingHistory> savedHistories = new ArrayList<>();
         LOG.info("Starting creation of FilingHistory for company number: "
@@ -105,7 +105,7 @@ public class FilingHistoryServiceImpl implements FilingHistoryService, DataServi
         return savedHistories.get(savedHistories.size() - 1);
     }
 
-    private FilingHistory createFilingHistoryFromSpec(CompanyRequest spec, FilingHistoryRequest fhSpec, Instant dayNow, Instant dayTimeNow) throws DataException {
+    private FilingHistory createFilingHistoryFromSpec(InternalCompanyRequest spec, FilingHistoryRequest fhSpec, Instant dayNow, Instant dayTimeNow) throws DataException {
         String barcode = getBarcode();
         String entityId = ENTITY_ID_PREFIX + randomService.getNumber(ENTITY_ID_LENGTH);
         LOG.debug("Generated entity ID: " + entityId);

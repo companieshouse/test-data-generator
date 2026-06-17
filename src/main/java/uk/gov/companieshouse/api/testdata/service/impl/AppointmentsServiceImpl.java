@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
@@ -61,7 +61,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Autowired
     private OfficerRepository officerRepository;
 
-    public AppointmentsResultResponse createAppointment(CompanyRequest spec) {
+    public AppointmentsResultResponse createAppointment(InternalCompanyRequest spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
                     + spec.getCompanyNumber());
@@ -277,7 +277,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private AppointmentsData createBaseAppointmentsData(
-            CompanyRequest spec, String internalId, String officerId,
+            InternalCompanyRequest spec, String internalId, String officerId,
             Instant now, String appointmentId) {
         var appointmentsData = new AppointmentsData();
         String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
@@ -325,7 +325,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private OfficerAppointment createOfficerAppointment(
-            CompanyRequest spec, String officerId, String appointmentId, String role) {
+            InternalCompanyRequest spec, String officerId, String appointmentId, String role) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
@@ -360,7 +360,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(
-            CompanyRequest companySpec,
+            InternalCompanyRequest companySpec,
             String appointmentId,
             Instant dayNow,
             Instant dayTimeNow,
@@ -406,7 +406,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 role.substring(0, 1).toUpperCase());
     }
 
-    private boolean payloadExplicitlySetNumberOfAppointments(CompanyRequest spec) {
+    private boolean payloadExplicitlySetNumberOfAppointments(InternalCompanyRequest spec) {
         return spec.isNumberOfAppointmentsSet();
     }
 }

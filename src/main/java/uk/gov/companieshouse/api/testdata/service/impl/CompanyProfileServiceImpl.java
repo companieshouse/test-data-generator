@@ -20,7 +20,7 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
@@ -90,8 +90,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private boolean isCompanyTypeHasNoFilingHistory = true;
 
+
     @Override
-    public CompanyProfile create(CompanyRequest spec) {
+    public CompanyProfile create(InternalCompanyRequest spec) {
         final String companyNumber = spec.getCompanyNumber();
         final JurisdictionType jurisdiction = spec.getJurisdiction();
         final CompanyType companyType = spec.getCompanyType();
@@ -130,7 +131,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private CompanyProfile createDefaultCompanyProfile(DefaultCompanyProfileParams params) {
         final String companyNumber = params.companyNumber;
         final JurisdictionType jurisdiction = params.jurisdiction;
-        final CompanyRequest spec = params.spec;
+        final InternalCompanyRequest spec = params.spec;
         final LocalDate accountingReferenceDate = params.accountingReferenceDate;
         final CompanyType companyType = params.companyType;
         final Boolean hasSuperSecurePscs = params.hasSuperSecurePscs;
@@ -223,7 +224,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private OverseasEntity createOverseasEntity(String companyNumber,
-                                                JurisdictionType jurisdiction, CompanyRequest spec,
+                                                JurisdictionType jurisdiction, InternalCompanyRequest spec,
                                                 LocalDate accountingReferenceDate,
                                                 String entityType, CompanyType companyType,
                                                 Boolean isRegisteredOfficeIsInDispute) {
@@ -452,7 +453,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private Links createOverseaLinks(String companyNumber,
-                                     CompanyType companyType, CompanyRequest spec,
+                                     CompanyType companyType, InternalCompanyRequest spec,
                                      JurisdictionType jurisdiction,
                                      LocalDate accountingReferenceDate) {
         var links = new Links();
@@ -523,7 +524,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setCompanyHasRegisters(CompanyRequest spec) {
+    private void setCompanyHasRegisters(InternalCompanyRequest spec) {
         hasCompanyRegisters = spec.getRegisters() != null && !spec.getRegisters().isEmpty();
     }
 
@@ -658,7 +659,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final class DefaultCompanyProfileParams {
         private String companyNumber;
         private JurisdictionType jurisdiction;
-        private CompanyRequest spec;
+        private InternalCompanyRequest spec;
         private LocalDate accountingReferenceDate;
         private CompanyType companyType;
         private Boolean hasSuperSecurePscs;

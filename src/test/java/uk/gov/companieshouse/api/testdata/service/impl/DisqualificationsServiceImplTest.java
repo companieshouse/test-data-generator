@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -50,7 +50,7 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationSuccess() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         DisqualificationsRequest disqSpec = new DisqualificationsRequest();
@@ -76,7 +76,7 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createMultipleDisqualifications() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         DisqualificationsRequest disqSpec1 = new DisqualificationsRequest();
@@ -104,7 +104,7 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationCorporateOfficer() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         DisqualificationsRequest disqSpec = new DisqualificationsRequest();
@@ -130,7 +130,7 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createDisqualificationNoSpecCreatesDefault() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -212,7 +212,7 @@ class DisqualificationsServiceImplTest {
 
     @Test
     void createReturnsUnsavedDisqualificationWhenCompanyWithDataStructureIsTrue() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(true);
         DisqualificationsRequest disqSpec = new DisqualificationsRequest();

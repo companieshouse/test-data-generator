@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
@@ -67,15 +67,15 @@ class CreateCompanyWorkflowServiceImplTest {
     private static final String API_URL = "http://localhost:4001";
 
     @Mock private CompanyProfileService companyProfileService;
-    @Mock private DataService<FilingHistory, CompanyRequest> filingHistoryService;
+    @Mock private DataService<FilingHistory, InternalCompanyRequest> filingHistoryService;
     @Mock private CompanyAuthCodeService companyAuthCodeService;
     @Mock private AppointmentService appointmentService;
-    @Mock private DataService<CompanyMetrics, CompanyRequest> metricsService;
+    @Mock private DataService<CompanyMetrics, InternalCompanyRequest> metricsService;
     @Mock private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock private CompanyPscService companyPscService;
     @Mock private RandomService randomService;
-    @Mock private DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
-    @Mock private DataService<Disqualifications, CompanyRequest> disqualificationsService;
+    @Mock private DataService<CompanyRegisters, InternalCompanyRequest> companyRegistersService;
+    @Mock private DataService<Disqualifications, InternalCompanyRequest> disqualificationsService;
     @Mock private CompanyStructurePersistenceService companyStructurePersistenceService;
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
@@ -102,13 +102,13 @@ class CreateCompanyWorkflowServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
     }
 
-    private CompanyRequest captureCompanySpec() throws DataException {
-        ArgumentCaptor<CompanyRequest> captor = ArgumentCaptor.forClass(CompanyRequest.class);
+    private InternalCompanyRequest captureCompanySpec() throws DataException {
+        ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
         verify(companyProfileService, times(1)).create(captor.capture());
         return captor.getValue();
     }
 
-    private CompanyRequest captureCreatedSpec() throws DataException {
+    private InternalCompanyRequest captureCreatedSpec() throws DataException {
         return captureCompanySpec();
     }
 
@@ -136,7 +136,7 @@ class CreateCompanyWorkflowServiceImplTest {
         creationService.setElasticSearchDeployed(false);
     }
 
-    private void verifyCommonCompanyCreation(CompanyRequest capturedSpec,
+    private void verifyCommonCompanyCreation(InternalCompanyRequest capturedSpec,
             CompanyProfileResponse createdCompany, String expectedFullCompanyNumber,
             JurisdictionType expectedJurisdiction) throws DataException {
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
@@ -156,46 +156,46 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyDefaultSpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
     }
 
     @Test
     void createInternalCompanyScottishSpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, expectedFullCompanyNumber,
                 JurisdictionType.SCOTLAND);
     }
 
     @Test
     void createInternalCompanyNISpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.NI);
         String expectedFullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, expectedFullCompanyNumber,
                 JurisdictionType.NI);
     }
 
     @Test
     void createInternalCompanyWithRegisters() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         RegistersRequest directorsRegister = new RegistersRequest();
         directorsRegister.setRegisterType("directors");
         directorsRegister.setRegisterMovedTo("Companies House");
@@ -203,7 +203,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
         verify(companyRegistersService, times(1)).create(capturedSpec);
@@ -211,12 +211,12 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyWithNullRegisters() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setRegisters(null);
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
         verify(companyRegistersService, never()).create(any());
@@ -224,12 +224,12 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyWithEmptyRegisters() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setRegisters(new ArrayList<>());
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
         verify(companyRegistersService, never()).create(any());
@@ -237,7 +237,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyWithDisqualifications() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         DisqualificationsRequest disqSpec = new DisqualificationsRequest();
         disqSpec.setCorporateOfficer(false);
@@ -256,7 +256,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyExistingNumber() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         final String existingCompanyNumber = "555555";
         final String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
@@ -272,7 +272,7 @@ class CreateCompanyWorkflowServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         verifyCommonCompanyCreation(capturedSpec, result, expectedFullCompanyNumber,
                 JurisdictionType.SCOTLAND);
@@ -280,7 +280,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyRollBack() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.NI);
         final String fullCompanyNumber =
                 spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
@@ -299,7 +299,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         assertEquals(pscStatementRuntimeException, thrown.getCause());
 
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
         verify(filingHistoryService).create(capturedSpec);
         verify(companyAuthCodeService).create(capturedSpec);
@@ -318,11 +318,11 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompany_appointmentCreatedWhenNoDefaultOfficerIsNull() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setNoDefaultOfficer(null);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(mockAuthCode);
 
         creationService.createInternalCompany(spec);
 
@@ -331,11 +331,11 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompany_appointmentCreatedWhenNoDefaultOfficerIsFalse() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setNoDefaultOfficer(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(mockAuthCode);
 
         creationService.createInternalCompany(spec);
 
@@ -344,18 +344,18 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompany_appointmentNotCreatedWhenNoDefaultOfficerIsTrue() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setNoDefaultOfficer(true);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(mockAuthCode);
 
         creationService.createInternalCompany(spec);
 
         verify(appointmentService, never()).createAppointment(spec);
     }
 
-    private CompanyProfileResponse createCompanyDataWithRegisters(CompanyRequest spec) throws Exception {
+    private CompanyProfileResponse createCompanyDataWithRegisters(InternalCompanyRequest spec) throws Exception {
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
 
@@ -372,7 +372,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyWithCompanyNumberPadding() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setIsPaddingCompanyNumber(true);
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String companyNumber = "123";
@@ -384,7 +384,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(companyNumber, 3, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 JurisdictionType.SCOTLAND);
     }
@@ -393,7 +393,7 @@ class CreateCompanyWorkflowServiceImplTest {
     void testCreateCompanyWithoutAlphabeticalSearch()
             throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAdvancedSearch(true);
@@ -402,7 +402,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
                 expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(1))
@@ -417,7 +417,7 @@ class CreateCompanyWorkflowServiceImplTest {
     void testCreateCompanyWithoutAdvancedSearch()
             throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAlphabeticalSearch(true);
@@ -426,7 +426,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
                 expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(1))
@@ -439,7 +439,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createInternalCompanyWithCompanyNumberPadding() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setIsPaddingCompanyNumber(true);
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String companyNumber = "123";
@@ -449,7 +449,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(companyNumber, 3, expectedFullCompanyNumber);
 
         CompanyProfileResponse result = creationService.createInternalCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, expectedFullCompanyNumber,
                 JurisdictionType.SCOTLAND);
     }
@@ -457,7 +457,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createInternalCompanyWithElasticSearchDeployed() throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setAddToCompanyElasticSearchIndex(true);
         spec.setAlphabeticalSearch(true);
@@ -474,7 +474,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createInternalCompanyWithElasticSearchNotDeployed() throws Exception {
         creationService.setElasticSearchDeployed(false);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setAddToCompanyElasticSearchIndex(true);
         spec.setAlphabeticalSearch(true);
@@ -491,7 +491,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createInternalCompanyWithoutAlphabeticalSearch() throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setAdvancedSearch(true);
         spec.setAddToCompanyElasticSearchIndex(true);
@@ -507,7 +507,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createInternalCompanyWithoutAdvancedSearch() throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setAlphabeticalSearch(true);
         spec.setAddToCompanyElasticSearchIndex(true);
@@ -523,7 +523,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createInternalCompanyElasticSearchIndexAsFalse() throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setAddToCompanyElasticSearchIndex(false);
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
@@ -556,14 +556,14 @@ class CreateCompanyWorkflowServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         CompanyProfileResponse result = creationService.createPublicCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, result, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
     }
 
     @Test
     void buildCompanyDataStructure_success() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
 
         RegistersRequest register = new RegistersRequest();
@@ -594,23 +594,23 @@ class CreateCompanyWorkflowServiceImplTest {
         CompanyRegisters companyRegisters = new CompanyRegisters();
         Disqualifications disqualifications = new Disqualifications();
 
-        when(companyProfileService.create(any(CompanyRequest.class))).thenReturn(companyProfile);
-        when(filingHistoryService.create(any(CompanyRequest.class))).thenReturn(filingHistory);
-        when(appointmentService.createAppointment(any(CompanyRequest.class)))
+        when(companyProfileService.create(any(InternalCompanyRequest.class))).thenReturn(companyProfile);
+        when(filingHistoryService.create(any(InternalCompanyRequest.class))).thenReturn(filingHistory);
+        when(appointmentService.createAppointment(any(InternalCompanyRequest.class)))
                 .thenReturn(appointments);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(authCode);
-        when(metricsService.create(any(CompanyRequest.class))).thenReturn(companyMetrics);
-        when(companyPscStatementService.createPscStatements(any(CompanyRequest.class)))
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(authCode);
+        when(metricsService.create(any(InternalCompanyRequest.class))).thenReturn(companyMetrics);
+        when(companyPscStatementService.createPscStatements(any(InternalCompanyRequest.class)))
                 .thenReturn(pscStatements);
-        when(companyPscService.create(any(CompanyRequest.class))).thenReturn(companyPscs);
-        when(companyRegistersService.create(any(CompanyRequest.class))).thenReturn(companyRegisters);
-        when(disqualificationsService.create(any(CompanyRequest.class)))
+        when(companyPscService.create(any(InternalCompanyRequest.class))).thenReturn(companyPscs);
+        when(companyRegistersService.create(any(InternalCompanyRequest.class))).thenReturn(companyRegisters);
+        when(disqualificationsService.create(any(InternalCompanyRequest.class)))
                 .thenReturn(disqualifications);
 
         PopulatedCompanyDetailsResponse response =
                 creationService.buildCompanyDataStructure(spec);
 
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
         assertTrue(capturedSpec.getCompanyWithPopulatedStructureOnly());
 
@@ -637,29 +637,29 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void buildCompanyDataStructure_noDefaultOfficerTrue_doesNotCreateAppointments()
             throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setNoDefaultOfficer(true);
 
         when(randomService.getNumber(anyInt())).thenReturn(Long.valueOf(COMPANY_NUMBER));
         when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
 
-        when(companyProfileService.create(any(CompanyRequest.class)))
+        when(companyProfileService.create(any(InternalCompanyRequest.class)))
                 .thenReturn(new CompanyProfile());
-        when(filingHistoryService.create(any(CompanyRequest.class)))
+        when(filingHistoryService.create(any(InternalCompanyRequest.class)))
                 .thenReturn(new FilingHistory());
         CompanyAuthCode authCode = new CompanyAuthCode();
         authCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(authCode);
-        when(metricsService.create(any(CompanyRequest.class))).thenReturn(new CompanyMetrics());
-        when(companyPscStatementService.createPscStatements(any(CompanyRequest.class)))
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(authCode);
+        when(metricsService.create(any(InternalCompanyRequest.class))).thenReturn(new CompanyMetrics());
+        when(companyPscStatementService.createPscStatements(any(InternalCompanyRequest.class)))
                 .thenReturn(Collections.emptyList());
-        when(companyPscService.create(any(CompanyRequest.class)))
+        when(companyPscService.create(any(InternalCompanyRequest.class)))
                 .thenReturn(Collections.emptyList());
 
         creationService.buildCompanyDataStructure(spec);
 
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verify(appointmentService, never()).createAppointment(capturedSpec);
     }
 
@@ -686,7 +686,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataDefaultSpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
 
@@ -694,33 +694,33 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 JurisdictionType.ENGLAND_WALES);
     }
 
     @Test
     void createCompanyDataScottishSpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 JurisdictionType.SCOTLAND);
     }
 
     @Test
     void createCompanyDataNISpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.NI);
         String expectedFullCompanyNumber = NI_COMPANY_PREFIX + COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 6, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
                 JurisdictionType.NI);
     }
@@ -728,7 +728,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createCompanyDataSpec() throws Exception {
         final String companyNumber = "12345678";
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         when(randomService.getNumber(8)).thenReturn(Long.valueOf(companyNumber));
         when(companyProfileService.companyExists(companyNumber)).thenReturn(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
@@ -736,7 +736,7 @@ class CreateCompanyWorkflowServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(companyNumber, capturedSpec.getCompanyNumber());
         assertEquals(JurisdictionType.ENGLAND_WALES, capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, companyNumber,
@@ -746,7 +746,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataExistingNumber() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         final String existingCompanyNumber = "555555";
         final String expectedFullCompanyNumber = SCOTTISH_COMPANY_PREFIX + COMPANY_NUMBER;
@@ -762,7 +762,7 @@ class CreateCompanyWorkflowServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(expectedFullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verifyCommonCompanyCreation(capturedSpec, createdCompany, expectedFullCompanyNumber,
@@ -772,7 +772,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataWithCompanyRegisters() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         RegistersRequest directorsRegister = new RegistersRequest();
         directorsRegister.setRegisterType("directors");
         directorsRegister.setRegisterMovedTo("Companies House");
@@ -780,7 +780,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
         verify(companyRegistersService, times(1)).create(capturedSpec);
@@ -788,7 +788,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataRollBack() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.NI);
         final String fullCompanyNumber =
                 spec.getJurisdiction().getCompanyNumberPrefix(spec) + COMPANY_NUMBER;
@@ -806,7 +806,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         assertEquals(pscStatementRuntimeException, thrown.getCause());
 
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(spec.getJurisdiction(), capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
@@ -818,7 +818,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataOverseasSpec() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.UNITED_KINGDOM);
         when(randomService.getNumber(6)).thenReturn(
                 Long.valueOf(OVERSEAS_COMPANY_NUMBER.substring(2)));
@@ -829,7 +829,7 @@ class CreateCompanyWorkflowServiceImplTest {
         when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         assertEquals(fullCompanyNumber, capturedSpec.getCompanyNumber());
         assertEquals(JurisdictionType.UNITED_KINGDOM, capturedSpec.getJurisdiction());
         verify(filingHistoryService).create(capturedSpec);
@@ -852,11 +852,11 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataWithNullRegisters() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setRegisters(null);
 
         CompanyProfileResponse createdCompany = createCompanyDataWithRegisters(spec);
-        CompanyRequest capturedSpec = captureCreatedSpec();
+        InternalCompanyRequest capturedSpec = captureCreatedSpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
 
@@ -866,11 +866,11 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataWithEmptyRegisters() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setRegisters(new ArrayList<>());
 
         CompanyProfileResponse createdCompany = createCompanyDataWithRegisters(spec);
-        CompanyRequest capturedSpec = captureCreatedSpec();
+        InternalCompanyRequest capturedSpec = captureCreatedSpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany, COMPANY_NUMBER,
                 JurisdictionType.ENGLAND_WALES);
     }
@@ -891,7 +891,7 @@ class CreateCompanyWorkflowServiceImplTest {
                                                     int expectedInvocationCount)
             throws Exception {
         creationService.setElasticSearchDeployed(isElasticSearchDeployed);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         spec.setAddToCompanyElasticSearchIndex(true);
@@ -901,7 +901,7 @@ class CreateCompanyWorkflowServiceImplTest {
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
                 expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(expectedInvocationCount))
@@ -914,7 +914,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyDataWithDisqualifications() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         DisqualificationsRequest disqSpec = new DisqualificationsRequest();
         disqSpec.setCorporateOfficer(false);
@@ -934,11 +934,11 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyData_appointmentCreatedWhenNoDefaultOfficerIsNull() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setNoDefaultOfficer(null);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(mockAuthCode);
 
         creationService.createCompany(spec);
 
@@ -947,11 +947,11 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyData_appointmentCreatedWhenNoDefaultOfficerIsFalse() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setNoDefaultOfficer(false);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(mockAuthCode);
 
         creationService.createCompany(spec);
 
@@ -960,25 +960,25 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createCompanyData_appointmentNotCreatedWhenNoDefaultOfficerIsTrue() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setNoDefaultOfficer(true);
         CompanyAuthCode mockAuthCode = new CompanyAuthCode();
         mockAuthCode.setAuthCode(AUTH_CODE);
-        when(companyAuthCodeService.create(any(CompanyRequest.class))).thenReturn(mockAuthCode);
+        when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(mockAuthCode);
 
         creationService.createCompany(spec);
 
         verify(appointmentService, never()).createAppointment(spec);
     }
 
-    private void validateElasticSearch(CompanyRequest spec) throws Exception {
+    private void validateElasticSearch(InternalCompanyRequest spec) throws Exception {
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setCompanyStatus("administration");
         String expectedFullCompanyNumber = COMPANY_NUMBER;
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, expectedFullCompanyNumber);
 
         CompanyProfileResponse createdCompany = creationService.createCompany(spec);
-        CompanyRequest capturedSpec = captureCompanySpec();
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
         verifyCommonCompanyCreation(capturedSpec, createdCompany,
                 expectedFullCompanyNumber, JurisdictionType.ENGLAND_WALES);
         verify(companySearchService, times(0))
@@ -993,7 +993,7 @@ class CreateCompanyWorkflowServiceImplTest {
     void testCreateCompanyElasticSearchIndexAsFalse()
             throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setAddToCompanyElasticSearchIndex(false);
         validateElasticSearch(spec);
     }
@@ -1002,7 +1002,7 @@ class CreateCompanyWorkflowServiceImplTest {
     void testCreateCompanyWithoutElasticSearchIndex()
             throws Exception {
         creationService.setElasticSearchDeployed(true);
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         validateElasticSearch(spec);
     }
 }

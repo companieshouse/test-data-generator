@@ -30,7 +30,7 @@ import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.core.JacksonException.Reference;
 
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 
@@ -116,7 +116,7 @@ public class GlobalExceptionHandlerTest {
                 "invalid-value",
                 String.class
         );
-        Reference ref = new Reference(CompanyRequest.class, "jurisdiction");
+        Reference ref = new Reference(InternalCompanyRequest.class, "jurisdiction");
 
         cause.prependPath(ref);
 

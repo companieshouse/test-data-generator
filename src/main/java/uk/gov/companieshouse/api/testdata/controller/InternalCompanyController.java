@@ -18,9 +18,10 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequestV2;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -57,6 +58,7 @@ public class InternalCompanyController {
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
+    private static final String API_VERSION_HEADER = "X-API-Version";
     private static final String STATUS = "status";
     private static final String ERROR = "error";
 
@@ -71,12 +73,26 @@ public class InternalCompanyController {
         this.companyProfileService = companyProfileService;
     }
 
+    @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
+    public ResponseEntity<CompanyProfileResponse> createCompanyV2(
+            @Valid @RequestBody(required = false) InternalCompanyRequestV2 request) throws DataException {
+        InternalCompanyRequest spec = request == null
+                ? new InternalCompanyRequest()
+                : request.toInternalCompanyRequest();
+        return createCompanyResponse(spec);
+    }
+
     @PostMapping("/company")
     public ResponseEntity<CompanyProfileResponse> createCompany(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
+            @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {
+        return createCompanyResponse(request);
+    }
 
-        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
+    private ResponseEntity<CompanyProfileResponse> createCompanyResponse(InternalCompanyRequest request)
+            throws DataException {
+
+        Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
+        InternalCompanyRequest spec = optionalRequest.orElse(new InternalCompanyRequest());
 
         CompanyProfileResponse createdCompany = createCompanyWorkflowService.createInternalCompany(spec);
 
@@ -107,10 +123,10 @@ public class InternalCompanyController {
 
     @PostMapping("/get-populated-company-structure")
     public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyDataStructure(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
+            @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {
 
-        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
+        Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
+        InternalCompanyRequest spec = optionalRequest.orElse(new InternalCompanyRequest());
 
         var companyData = createCompanyWorkflowService.buildCompanyDataStructure(spec);
         return new ResponseEntity<>(companyData, HttpStatus.OK);

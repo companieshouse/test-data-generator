@@ -19,7 +19,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.NameElements;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
@@ -86,7 +86,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     }
 
     @Override
-    public List<CompanyPscs> create(CompanyRequest spec) throws DataException {
+    public List<CompanyPscs> create(InternalCompanyRequest spec) throws DataException {
         LOG.info("Starting creation of PSCs for company number: " + spec.getCompanyNumber());
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType()) &&
@@ -120,7 +120,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return createPscsBasedOnCompanyType(spec, numberOfPsc);
     }
 
-    private boolean shouldReturnNullForCompaniesThatDoNotNeedPscs(CompanyRequest spec) {
+    private boolean shouldReturnNullForCompaniesThatDoNotNeedPscs(InternalCompanyRequest spec) {
         if (spec == null || spec.getCompanyType() == null) {
             return false;
         }
@@ -129,19 +129,19 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return result;
     }
 
-    private boolean shouldCreateSuperSecurePsc(CompanyRequest spec) {
+    private boolean shouldCreateSuperSecurePsc(InternalCompanyRequest spec) {
         boolean result = Boolean.TRUE.equals(spec.getHasSuperSecurePscs());
         LOG.debug("shouldCreateSuperSecurePsc: " + result);
         return result;
     }
 
-    private CompanyPscs createAppropriateSuperSecurePsc(CompanyRequest spec) {
+    private CompanyPscs createAppropriateSuperSecurePsc(InternalCompanyRequest spec) {
         return CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())
                 ? createSuperSecureBeneficialOwner(spec)
                 : createSuperSecurePsc(spec);
     }
 
-    private void validatePscTypeAndCount(CompanyRequest spec) throws DataException {
+    private void validatePscTypeAndCount(InternalCompanyRequest spec) throws DataException {
         if (hasPscTypesWithoutCount(spec)) {
             LOG.error("Validation failed: " +  PSC_ERROR_MESSAGE);
             throw new DataException(PSC_ERROR_MESSAGE);
@@ -153,13 +153,13 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         LOG.debug("Validation passed for PSC type and count.");
     }
 
-    private boolean hasPscTypesWithoutCount(CompanyRequest spec) {
+    private boolean hasPscTypesWithoutCount(InternalCompanyRequest spec) {
         return spec.getPscType() != null
                 && !spec.getPscType().isEmpty()
                 && (spec.getNumberOfPscs() == null || spec.getNumberOfPscs() <= 0);
     }
 
-    private boolean hasInvalidBeneficialOwnerType(CompanyRequest spec) {
+    private boolean hasInvalidBeneficialOwnerType(InternalCompanyRequest spec) {
         return spec.getPscType() != null
                 && spec.getPscType().stream().anyMatch(this::isBeneficialOwnerType)
                 && !CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType());
@@ -169,13 +169,13 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return type == PscType.INDIVIDUAL_BENEFICIAL_OWNER || type == PscType.CORPORATE_BENEFICIAL_OWNER;
     }
 
-    private int getNumberOfPsc(CompanyRequest spec) {
+    private int getNumberOfPsc(InternalCompanyRequest spec) {
         int numberOfPsc = Optional.ofNullable(spec.getNumberOfPscs()).orElse(DEFAULT_NUMBER_OF_PSC);
         LOG.debug("Number of PSCs determined: " + numberOfPsc);
         return numberOfPsc;
     }
 
-    private List<CompanyPscs> createPscsBasedOnCompanyType(CompanyRequest spec, int numberOfPsc) {
+    private List<CompanyPscs> createPscsBasedOnCompanyType(InternalCompanyRequest spec, int numberOfPsc) {
         LOG.info("Creating PSCs based on company type: " + spec.getCompanyType());
 
         if (numberOfPsc <= 0) {
@@ -234,7 +234,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
                 .orElse(0)];
     }
 
-    private CompanyPscs createSuperSecureBeneficialOwner(CompanyRequest spec) {
+    private CompanyPscs createSuperSecureBeneficialOwner(InternalCompanyRequest spec) {
         CompanyPscs superSecureBo = createBasePsc(spec, true);
         buildSuperSecureBeneficialOwner(superSecureBo);
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
@@ -243,7 +243,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(superSecureBo);
     }
 
-    private CompanyPscs createSuperSecurePsc(CompanyRequest spec) {
+    private CompanyPscs createSuperSecurePsc(InternalCompanyRequest spec) {
         CompanyPscs superSecurePsc = createBasePsc(spec, true);
         buildSuperSecurePsc(superSecurePsc);
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
@@ -252,7 +252,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(superSecurePsc);
     }
 
-    CompanyPscs createBasePsc(CompanyRequest spec, boolean isActive) {
+    CompanyPscs createBasePsc(InternalCompanyRequest spec, boolean isActive) {
         var companyPsc = new CompanyPscs();
         companyPsc.setCompanyNumber(spec.getCompanyNumber());
 
@@ -278,7 +278,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return companyPsc;
     }
 
-    private Instant getCreatedUpdatedAt(CompanyRequest spec) {
+    private Instant getCreatedUpdatedAt(InternalCompanyRequest spec) {
         if (StringUtils.hasText(spec.getAccountsDueStatus())) {
             LocalDate dueDateNow = randomService.generateAccountsDueDateByStatus(
                     spec.getAccountsDueStatus());
@@ -332,7 +332,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         companyPscs.setLinks(links);
     }
 
-    private CompanyPscs createPsc(CompanyRequest spec, PscType pscType, boolean isActive) {
+    private CompanyPscs createPsc(InternalCompanyRequest spec, PscType pscType, boolean isActive) {
         var companyPscs = createBasePsc(spec, isActive);
         switch (pscType) {
             case INDIVIDUAL:
@@ -350,7 +350,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(companyPscs);
     }
 
-    private CompanyPscs createBeneficialOwner(CompanyRequest spec, PscType pscType, boolean isActive) {
+    private CompanyPscs createBeneficialOwner(InternalCompanyRequest spec, PscType pscType, boolean isActive) {
         var beneficialOwner = createBasePsc(spec, isActive);
         switch (pscType) {
             case INDIVIDUAL_BENEFICIAL_OWNER:

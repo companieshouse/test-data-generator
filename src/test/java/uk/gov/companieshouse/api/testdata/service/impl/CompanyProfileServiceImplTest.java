@@ -41,7 +41,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OverseasEntity;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
@@ -89,16 +89,16 @@ class CompanyProfileServiceImplTest {
     @InjectMocks
     private CompanyProfileServiceImpl companyProfileService;
 
-    private CompanyRequest spec;
+    private InternalCompanyRequest spec;
     private CompanyProfile savedProfile;
-    private CompanyRequest overseasSpec;
-    private CompanyRequest overseaCompanySpec;
+    private InternalCompanyRequest overseasSpec;
+    private InternalCompanyRequest overseaCompanySpec;
 
     @BeforeEach
     void setUp() {
-        spec = new CompanyRequest();
-        overseasSpec = new CompanyRequest();
-        overseaCompanySpec = new CompanyRequest();
+        spec = new InternalCompanyRequest();
+        overseasSpec = new InternalCompanyRequest();
+        overseaCompanySpec = new InternalCompanyRequest();
         overseasSpec.setCompanyNumber(OVERSEA_COMPANY_NUMBER);
         overseasSpec.setCompanyType(OVERSEAS_ENTITY_TYPE);
         overseasSpec.setCompanyWithPopulatedStructureOnly(false);
@@ -112,7 +112,7 @@ class CompanyProfileServiceImplTest {
         savedProfile = new CompanyProfile();
     }
 
-    private void setupCommonMocks(CompanyRequest spec, Address mockAddress) {
+    private void setupCommonMocks(InternalCompanyRequest spec, Address mockAddress) {
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
         Mockito.lenient().when(repository.save(any())).thenReturn(savedProfile);
         Mockito.lenient().when(overseasEntityRepository.save(any()))
@@ -120,7 +120,7 @@ class CompanyProfileServiceImplTest {
         Mockito.lenient().when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
     }
 
-    private CompanyProfile createAndCapture(CompanyRequest spec) {
+    private CompanyProfile createAndCapture(InternalCompanyRequest spec) {
         Address mockAddress = new Address("", "", "", "", "", "");
         setupCommonMocks(spec, mockAddress);
         CompanyProfile returnedProfile = companyProfileService.create(spec);
@@ -305,13 +305,13 @@ class CompanyProfileServiceImplTest {
     @Test
     void testCreateOverseaLinks() throws Exception {
         CompanyType companyType = CompanyType.OVERSEA_COMPANY;
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         request.setHasUkEstablishment(true);
         JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
         LocalDate accountingReferenceDate = LocalDate.now();
 
         var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
-                "createOverseaLinks", String.class, CompanyType.class, CompanyRequest.class, JurisdictionType.class, LocalDate.class);
+                "createOverseaLinks", String.class, CompanyType.class, InternalCompanyRequest.class, JurisdictionType.class, LocalDate.class);
         method.setAccessible(true);
 
         Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
@@ -406,7 +406,7 @@ class CompanyProfileServiceImplTest {
 
     @Test
     void testCreate_overseasEntity() {
-        overseasSpec = new CompanyRequest();
+        overseasSpec = new InternalCompanyRequest();
         overseasSpec.setCompanyNumber(REGISTERED_OVERSEAS_ENTITY_NUMBER);
         overseasSpec.setJurisdiction(JurisdictionType.UNITED_KINGDOM);
         overseasSpec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);

@@ -5,11 +5,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import uk.gov.companieshouse.api.interceptor.InternalUserInterceptor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -43,5 +48,14 @@ class WebConfigTest {
     void shouldCreateInternalUserInterceptorBean() {
         InternalUserInterceptor interceptor = webConfig.internalUserInterceptor();
         assertNotNull(interceptor);
+    }
+
+    @Test
+    void shouldAddStrictV2ArgumentResolver() {
+        List<HandlerMethodArgumentResolver> resolvers = new ArrayList<>();
+
+        webConfig.addArgumentResolvers(resolvers);
+
+        assertTrue(resolvers.stream().anyMatch(PublicCompanyRequestV2ArgumentResolver.class::isInstance));
     }
 }

@@ -35,7 +35,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
@@ -77,7 +77,7 @@ class AppointmentsServiceImplTest {
     @Test
     void create() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -129,7 +129,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createScottish() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
@@ -193,7 +193,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createWithDefaultOfficerRole() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfAppointments(2);
@@ -220,7 +220,7 @@ class AppointmentsServiceImplTest {
     @Test
     void createWithMultipleAppointments() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "");
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNumberOfAppointments(3);
@@ -361,7 +361,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createAppointment_shouldHandleMultipleOfficerRoles() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setOfficerRoles(List.of(OfficerType.DIRECTOR, OfficerType.SECRETARY));
@@ -383,7 +383,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createAppointment_shouldNotCreateAppointmentIfNoDefaultOfficerTrue() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setNoDefaultOfficer(true);
@@ -395,7 +395,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerTrue() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(true);
@@ -409,7 +409,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerFalse() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(false);
@@ -423,7 +423,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createAppointment_shouldCreateAppointmentIfNoDefaultOfficerFalse() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setNoDefaultOfficer(false);
@@ -445,7 +445,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createBaseAppointment_shouldSetSecureOfficerTrue() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setSecureOfficer(true);
 
@@ -457,7 +457,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createBaseAppointment_shouldSetSecureOfficerFalse() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setSecureOfficer(false);
 
@@ -469,7 +469,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createBaseAppointment_shouldSetSecureOfficerFalseWhenNull() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setSecureOfficer(null);
 
@@ -481,7 +481,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerTrueAndReturnSingleItem() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(true);
@@ -496,7 +496,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerFalseAndReturnSingleItem() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(false);
@@ -511,7 +511,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createOfficerAppointmentItems_shouldSetSecureOfficerFalseWhenNullAndReturnSingleItem() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyNumber("12345678");
         spec.setSecureOfficer(null);
@@ -526,7 +526,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createAppointment_shouldNotSaveEntitiesWhenCompanyWithPopulatedStructureIsTrue() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(true);
         spec.setCompanyNumber(COMPANY_NUMBER);
 
@@ -549,7 +549,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createsTwoDirectorsAndOneSecretaryForPlcWhenNoAppointmentsSpecified() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyType(CompanyType.PLC);
         spec.setOfficerRoles(null);
@@ -577,7 +577,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createsTwoDirectorsAndOneSecretaryForPlcWhenAppointmentsSpecified() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyType(CompanyType.PLC);
         spec.setOfficerRoles(null);
@@ -605,7 +605,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createsFiveDirectorsAndOneSecretaryForPlcWhenAppointmentsSpecified() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyWithPopulatedStructureOnly(false);
         spec.setCompanyType(CompanyType.PLC);
         spec.setOfficerRoles(null);
@@ -635,7 +635,7 @@ class AppointmentsServiceImplTest {
     }
 
 
-    private AppointmentCreationRequest buildAppointmentCreationRequest(CompanyRequest spec) {
+    private AppointmentCreationRequest buildAppointmentCreationRequest(InternalCompanyRequest spec) {
         return AppointmentCreationRequest.builder()
                 .spec(spec)
                 .companyNumber(COMPANY_NUMBER)
@@ -659,10 +659,10 @@ class AppointmentsServiceImplTest {
     }
 
     private List<OfficerAppointmentItem> invokeCreateOfficerAppointmentItems(
-            CompanyRequest spec, String appointmentId, Instant dayNow, Instant dayTimeNow, String role) {
+            InternalCompanyRequest spec, String appointmentId, Instant dayNow, Instant dayTimeNow, String role) {
         try {
             var method = AppointmentsServiceImpl.class.getDeclaredMethod(
-                    "createOfficerAppointmentItems", CompanyRequest.class, String.class, Instant.class, Instant.class, String.class);
+                    "createOfficerAppointmentItems", InternalCompanyRequest.class, String.class, Instant.class, Instant.class, String.class);
             method.setAccessible(true);
             return (List<OfficerAppointmentItem>) method.invoke(appointmentsService, spec, appointmentId, dayNow, dayTimeNow, role);
         } catch (Exception e) {
