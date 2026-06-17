@@ -48,6 +48,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
@@ -82,6 +83,8 @@ class CompanyProfileServiceImplTest {
     private AddressService addressService;
     @Mock
     private CompanyProfileRepository repository;
+    @Mock
+    private OverseasEntityRepository overseasEntityRepository;
 
     @InjectMocks
     private CompanyProfileServiceImpl companyProfileService;
@@ -112,6 +115,8 @@ class CompanyProfileServiceImplTest {
     private void setupCommonMocks(CompanyRequest spec, Address mockAddress) {
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
         Mockito.lenient().when(repository.save(any())).thenReturn(savedProfile);
+        Mockito.lenient().when(overseasEntityRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
         Mockito.lenient().when(addressService.getAddress(spec.getJurisdiction())).thenReturn(mockAddress);
     }
 
@@ -119,6 +124,12 @@ class CompanyProfileServiceImplTest {
         Address mockAddress = new Address("", "", "", "", "", "");
         setupCommonMocks(spec, mockAddress);
         CompanyProfile returnedProfile = companyProfileService.create(spec);
+        if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(spec.getCompanyType())
+                || CompanyType.OVERSEA_COMPANY.equals(spec.getCompanyType())) {
+            ArgumentCaptor<OverseasEntity> captor = ArgumentCaptor.forClass(OverseasEntity.class);
+            verify(overseasEntityRepository).save(captor.capture());
+            return captor.getValue();
+        }
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
         return captor.getValue();
@@ -405,11 +416,10 @@ class CompanyProfileServiceImplTest {
         Address overseasAddress = new Address("1", "Gordon Cummins Hwy", "Grantley Adams International Airport", "Barbados", "Christ Church", "123125");
         when(addressService.getOverseasAddress()).thenReturn(overseasAddress);
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
 
         CompanyProfile result = companyProfileService.create(overseasSpec);
-        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(captor.capture());
+        ArgumentCaptor<OverseasEntity> captor = ArgumentCaptor.forClass(OverseasEntity.class);
+        verify(overseasEntityRepository).save(captor.capture());
         CompanyProfile savedEntity = captor.getValue();
         assertTrue(savedEntity instanceof OverseasEntity, "Expected an instance of OverseasEntity");
         assertEquals(REGISTERED_OVERSEAS_ENTITY_NUMBER, result.getId());
@@ -419,6 +429,11 @@ class CompanyProfileServiceImplTest {
         assertNotNull(result.getConfirmationStatement().getNextDue());
         assertNotNull(result.getConfirmationStatement().getNextMadeUpTo());
         assertNotNull(result.getRegisteredOfficeAddress());
+        assertFalse(result.getAccounts().getOverdue());
+        assertEquals("aa", result.getAccounts().getLastAccountsType());
+        assertNotNull(result.getAccounts().getLastAccountsPeriodStartOn());
+        assertNotNull(result.getAccounts().getLastAccountsPeriodEndOn());
+        assertNotNull(result.getAccounts().getLastAccountsMadeUpTo());
     }
 
     @Test
@@ -431,6 +446,11 @@ class CompanyProfileServiceImplTest {
         assertNull(profile.getLinks().getFilingHistory());
         assertNull(profile.getLinks().getOfficers());
         assertNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertFalse(profile.getAccounts().getOverdue());
+        assertEquals("aa", profile.getAccounts().getLastAccountsType());
+        assertNotNull(profile.getAccounts().getLastAccountsPeriodStartOn());
+        assertNotNull(profile.getAccounts().getLastAccountsPeriodEndOn());
+        assertNotNull(profile.getAccounts().getLastAccountsMadeUpTo());
     }
 
     @Test
@@ -650,11 +670,10 @@ class CompanyProfileServiceImplTest {
         Mockito.lenient().when(addressService.getAddress(overseasSpec.getJurisdiction()))
                 .thenReturn(new Address("", "", "", "", "", ""));
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
-        when(repository.save(any())).thenReturn(savedProfile);
 
         CompanyProfile result = companyProfileService.create(overseasSpec);
-        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
-        verify(repository).save(captor.capture());
+        ArgumentCaptor<OverseasEntity> captor = ArgumentCaptor.forClass(OverseasEntity.class);
+        verify(overseasEntityRepository).save(captor.capture());
         CompanyProfile savedEntity = captor.getValue();
 
         assertInstanceOf(OverseasEntity.class, savedEntity, "Expected an instance of OverseasEntity");

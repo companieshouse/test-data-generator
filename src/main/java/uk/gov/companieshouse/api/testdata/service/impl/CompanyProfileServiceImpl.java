@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang.BooleanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -27,6 +26,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
+import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -68,14 +68,23 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY_MUTUALS_PUBLIC_REGISTER =
             "full-data-available-from-financial-conduct-authority-mutuals-public-register";
 
-    @Autowired
-    private RandomService randomService;
+    private final RandomService randomService;
 
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
 
-    @Autowired
-    private CompanyProfileRepository repository;
+    private final CompanyProfileRepository companyProfileRepository;
+
+    private final OverseasEntityRepository overseasEntityRepository;
+
+    public CompanyProfileServiceImpl(RandomService randomService,
+                                     AddressService addressService,
+                                     CompanyProfileRepository companyProfileRepository,
+                                     OverseasEntityRepository overseasEntityRepository) {
+        this.randomService = randomService;
+        this.addressService = addressService;
+        this.companyProfileRepository = companyProfileRepository;
+        this.overseasEntityRepository = overseasEntityRepository;
+    }
 
     private boolean hasCompanyRegisters = false;
 
@@ -210,7 +219,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return profile;
         }
-        return repository.save(profile);
+        return companyProfileRepository.save(profile);
     }
 
     private OverseasEntity createOverseasEntity(String companyNumber,
@@ -306,34 +315,20 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         overseasEntity.setForeignCompanyDetails(foreignCompanyDetails);
 
         // Accounts
-        OverseasEntity.IAccounts accounts = OverseasEntity.createAccounts();
+        var accounts = overseasEntity.getAccounts();
         accounts.setOverdue(false);
         accounts.setNextMadeUpTo(dateInOneYear);
         accounts.setNextDue(dateInOneYearTwoWeeks);
-
-        // Accounting Reference Date
-        var overseasAccountingReferenceDate = new OverseasEntity.AccountingReferenceDate();
-        overseasAccountingReferenceDate.setDay("9");
-        overseasAccountingReferenceDate.setMonth("9");
-        accounts.setAccountingReferenceDate(overseasAccountingReferenceDate);
-
-        // Next Accounts
-        var nextAccounts = new OverseasEntity.NextAccounts();
-        nextAccounts.setOverdue(false);
-        nextAccounts.setDueOn(dateInOneYearTwoWeeks);
-        nextAccounts.setPeriodStartOn(dateNow);
-        nextAccounts.setPeriodEndOn(dateInOneYear);
-        accounts.setNextAccounts(nextAccounts);
-
-        // Last Accounts
-        var lastAccounts = new OverseasEntity.LastAccounts();
-        lastAccounts.setType("aa");
-        lastAccounts.setPeriodStartOn(dateOneYearAgo);
-        lastAccounts.setPeriodEndOn(dateNow);
-        lastAccounts.setMadeUpTo(dateInOneYear);
-        accounts.setLastAccounts(lastAccounts);
-
-        overseasEntity.setAccounts(accounts);
+        accounts.setNextAccountsOverdue(false);
+        accounts.setNextAccountsDueOn(dateInOneYearTwoWeeks);
+        accounts.setPeriodStart(dateNow);
+        accounts.setPeriodEnd(dateInOneYear);
+        accounts.setAccountingReferenceDateDay("9");
+        accounts.setAccountingReferenceDateMonth("9");
+        accounts.setLastAccountsType("aa");
+        accounts.setLastAccountsPeriodStartOn(dateOneYearAgo);
+        accounts.setLastAccountsPeriodEndOn(dateNow);
+        accounts.setLastAccountsMadeUpTo(dateInOneYear);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
@@ -352,7 +347,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             return overseasEntity;
         }
 
-        repository.save(overseasEntity);
+        overseasEntityRepository.save(overseasEntity);
         LOG.info("Returning a CompanyProfile view for " + entityType + ". " + companyNumber);
         return overseasEntity;
     }
@@ -392,7 +387,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         links.setOverseas(LINK_STEM + parentCompanyNumber);
         ukEstablishment.setLinks(links);
 
-        repository.save(ukEstablishment);
+        companyProfileRepository.save(ukEstablishment);
         LOG.info("Created UK establishment " + ukEstablishmentNumber);
 
         return ukEstablishmentNumber;
@@ -420,11 +415,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Override
     public boolean delete(String companyId) {
-        Optional<CompanyProfile> profile = repository.findByCompanyNumber(companyId)
-                .or(() -> repository.findById(companyId));
+        Optional<CompanyProfile> profile = companyProfileRepository.findByCompanyNumber(companyId)
+                .or(() -> companyProfileRepository.findById(companyId));
 
         if (profile.isPresent()) {
-            repository.delete(profile.get());
+            companyProfileRepository.delete(profile.get());
             return true;
         }
         return false;
@@ -432,7 +427,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Override
     public boolean companyExists(String companyNumber) {
-        return repository.findById(companyNumber).isPresent();
+        return companyProfileRepository.findById(companyNumber).isPresent();
     }
 
     private Links createLinks(String companyNumber) {
@@ -575,7 +570,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Override
     public List<String> findUkEstablishmentsByParent(String parentCompanyNumber) {
-        return repository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
+        return companyProfileRepository.findByBranchCompanyDetailsParentCompanyNumber(parentCompanyNumber)
                 .stream()
                 .map(CompanyProfile::getCompanyNumber)
                 .toList();
@@ -583,7 +578,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     @Override
     public Optional<CompanyProfile> getCompanyProfile(String companyNumber) {
-        return repository.findByCompanyNumber(companyNumber);
+        return companyProfileRepository.findByCompanyNumber(companyNumber);
     }
 
     @Override
@@ -594,7 +589,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             throw new DataException("companyNumber is required");
         }
 
-        CompanyProfile company = repository.findByCompanyNumber(request.getCompanyNumber())
+        CompanyProfile company = companyProfileRepository.findByCompanyNumber(request.getCompanyNumber())
                 .orElseThrow(() -> new NoDataFoundException(
                         "Company not found for number: " + request.getCompanyNumber()));
 
@@ -609,7 +604,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
 
         try {
-            return repository.save(company);
+            return companyProfileRepository.save(company);
         } catch (Exception ex) {
             throw new DataException("Failed to update company profile", ex);
         }
