@@ -429,6 +429,11 @@ class CompanyProfileServiceImplTest {
         assertNotNull(result.getConfirmationStatement().getNextDue());
         assertNotNull(result.getConfirmationStatement().getNextMadeUpTo());
         assertNotNull(result.getRegisteredOfficeAddress());
+        assertFalse(result.getAccounts().getOverdue());
+        assertEquals("aa", result.getAccounts().getLastAccountsType());
+        assertNotNull(result.getAccounts().getLastAccountsPeriodStartOn());
+        assertNotNull(result.getAccounts().getLastAccountsPeriodEndOn());
+        assertNotNull(result.getAccounts().getLastAccountsMadeUpTo());
     }
 
     @Test
@@ -441,6 +446,11 @@ class CompanyProfileServiceImplTest {
         assertNull(profile.getLinks().getFilingHistory());
         assertNull(profile.getLinks().getOfficers());
         assertNull(profile.getLinks().getPersonsWithSignificantControlStatement());
+        assertFalse(profile.getAccounts().getOverdue());
+        assertEquals("aa", profile.getAccounts().getLastAccountsType());
+        assertNotNull(profile.getAccounts().getLastAccountsPeriodStartOn());
+        assertNotNull(profile.getAccounts().getLastAccountsPeriodEndOn());
+        assertNotNull(profile.getAccounts().getLastAccountsMadeUpTo());
     }
 
     @Test

@@ -316,6 +316,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         // Accounts
         var accounts = overseasEntity.getAccounts();
+        accounts.setOverdue(false);
         accounts.setNextMadeUpTo(dateInOneYear);
         accounts.setNextDue(dateInOneYearTwoWeeks);
         accounts.setNextAccountsOverdue(false);
@@ -324,6 +325,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         accounts.setPeriodEnd(dateInOneYear);
         accounts.setAccountingReferenceDateDay("9");
         accounts.setAccountingReferenceDateMonth("9");
+        accounts.setLastAccountsType("aa");
+        accounts.setLastAccountsPeriodStartOn(dateOneYearAgo);
+        accounts.setLastAccountsPeriodEndOn(dateNow);
+        accounts.setLastAccountsMadeUpTo(dateInOneYear);
 
         if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
             foreignCompanyDetails.setRegistrationNumber(EXT_REGISTRATION_NUMBER);
