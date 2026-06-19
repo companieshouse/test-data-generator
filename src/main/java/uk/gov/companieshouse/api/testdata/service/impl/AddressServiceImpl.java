@@ -12,38 +12,47 @@ public class AddressServiceImpl implements AddressService {
 
     private static final Address ENGLAND_WALES_ADDRESS = new Address(
             "House Name",
-            "Companies House",
-            "Crownway",
+            "Old Admiralty Building",
+            "Admiralty Place",
             UNITED_KINGDOM,
-            "Cardiff",
-            "CF14 3UZ"
+            "London",
+            "SW1A 2DY"
     );
 
     private static final Address SCOTLAND_ADDRESS = new Address(
-            "The Centre",
-            "4th Floor Edinburgh Quay 2",
-            "139 Fountain Bridge",
+            "Building Name",
+            "Queen Elizabeth House",
+            "1 Sibbald Walk",
             UNITED_KINGDOM,
             "Edinburgh",
-            "EH3 9FF"
+            "EH8 8FT"
     );
 
     private static final Address NI_ADDRESS = new Address(
-            "The Place",
-            "Second Floor The Linenhall",
-            "32 - 38 Linenhall Street",
+            "Office Name",
+            "Erskine House",
+            "20-32 Chichester Street",
             UNITED_KINGDOM,
             "Belfast",
-            "BT2 8BG"
+            "BT1 4GF"
     );
 
     private static final Address ENGLAND_ADDRESS = new Address(
             "Business Centre",
-            "Companies House,4th Floor, The Linen Hall",
+            "4th Floor, The Linen Hall",
             "162-168 Regent Street",
             UNITED_KINGDOM,
             "London",
             "W1B 5TF"
+    );
+
+    private static final Address WALES_ADDRESS = new Address(
+            "Business Hub",
+            "Tŷ William Morgan",
+            "6 Central Square",
+            UNITED_KINGDOM,
+            "Cardiff",
+            "CF10 1EP"
     );
 
     private static final Address EUROPEAN_UNION_ADDRESS = new Address(
@@ -80,7 +89,8 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public Address getAddress(JurisdictionType jurisdiction) {
         return switch (jurisdiction) {
-            case ENGLAND_WALES, WALES -> ENGLAND_WALES_ADDRESS;
+            case ENGLAND_WALES -> ENGLAND_WALES_ADDRESS;
+            case WALES -> WALES_ADDRESS;
             case SCOTLAND -> SCOTLAND_ADDRESS;
             case NI -> NI_ADDRESS;
             case UNITED_KINGDOM -> OVERSEAS_ADDRESS;
@@ -93,11 +103,11 @@ public class AddressServiceImpl implements AddressService {
     @Override
     public String getCountryOfResidence(JurisdictionType jurisdiction) {
         return switch (jurisdiction) {
-            case ENGLAND_WALES, WALES -> "Wales";
+            case ENGLAND_WALES, ENGLAND -> "England";
+            case WALES -> "Wales";
             case SCOTLAND -> "Scotland";
             case NI -> "Northern Ireland";
             case UNITED_KINGDOM -> "Barbados";
-            case ENGLAND -> "England";
             case NON_EU -> "Panama";
             case EUROPEAN_UNION -> "Netherlands";
         };
