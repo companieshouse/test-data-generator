@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
@@ -38,8 +39,10 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreation
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
+import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -65,6 +68,8 @@ class AppointmentsServiceImplTest {
     private AppointmentsDataRepository appointmentsDataRepository;
     @Mock
     private OfficerRepository officerRepository;
+    @Mock
+    private CompanyProfileRepository companyProfileRepository;
     @Mock
     private RandomService randomService;
 
@@ -632,6 +637,64 @@ class AppointmentsServiceImplTest {
         assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(3).getOfficerRole());
         assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(4).getOfficerRole());
         assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(5).getOfficerRole());
+    }
+
+    @Test
+    void createAppointmentFromRequest_shouldReturnResponseAndPersistAppointment() {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setOfficerRoles(List.of(OfficerType.DIRECTOR));
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .spec(spec)
+                .companyNumber(COMPANY_NUMBER)
+                .countryOfResidence(COUNTRY)
+                .build();
+        request.setIsPre1992Appointment(true);
+        Instant resignedOn = Instant.parse("2020-01-01T00:00:00Z");
+        request.setResignedOn(resignedOn);
+        AppointmentCreationRequest.Identification identification = new AppointmentCreationRequest.Identification();
+        identification.setIdentificationType("passport");
+        request.setIdentification(identification);
+
+        CompanyProfile companyProfile = org.mockito.Mockito.mock(CompanyProfile.class);
+        when(companyProfile.getCompanyName()).thenReturn("Company under test");
+        when(companyProfile.getCompanyStatus()).thenReturn("active");
+
+        when(companyProfileRepository.findByCompanyNumber(COMPANY_NUMBER))
+                .thenReturn(Optional.of(companyProfile));
+        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
+        when(randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8))
+                .thenReturn(ENCODED_INTERNAL_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(addressService.getAddress(JurisdictionType.ENGLAND_WALES))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        AppointmentsResultResponse response = appointmentsService.createAppointmentFromRequest(request);
+
+        assertNotNull(response);
+        assertEquals(ENCODED_VALUE, response.getAppointmentId());
+        assertEquals(ENCODED_INTERNAL_ID, response.getOfficerId());
+        assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
+        assertEquals(OfficerType.DIRECTOR.getValue(), response.getOfficerRoles());
+        assertTrue(response.getPre1992Appointment());
+        assertEquals(resignedOn, response.getResignedOn());
+        assertEquals("passport", response.getIdentificationType());
+
+        ArgumentCaptor<Appointment> appointmentCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository).save(appointmentCaptor.capture());
+        Appointment savedAppointment = appointmentCaptor.getValue();
+
+        assertEquals(ENCODED_VALUE, savedAppointment.getAppointmentId());
+        assertEquals(ENCODED_INTERNAL_ID, savedAppointment.getOfficerId());
+        assertEquals("Company under test", savedAppointment.getCompanyName());
+        assertEquals("active", savedAppointment.getCompanyStatus());
+        assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointment.getOfficerRole());
+        assertTrue(savedAppointment.getIsPre1992Appointment());
+        assertNotNull(savedAppointment.getAppointmentBefore());
+        assertEquals(resignedOn, savedAppointment.getResignedOn());
+        assertEquals("passport", savedAppointment.getIdentificationType());
     }
 
 

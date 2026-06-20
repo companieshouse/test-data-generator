@@ -9,11 +9,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
-import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.entity.*;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
@@ -22,6 +18,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
@@ -60,6 +57,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private AppointmentsDataRepository appointmentsDataRepository;
     @Autowired
     private OfficerRepository officerRepository;
+    @Autowired
+    private CompanyProfileRepository companyProfileRepository;
 
     public AppointmentsResultResponse createAppointment(CompanyRequest spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
@@ -203,6 +202,76 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 + createdAppointmentsData.size()
                 + " appointments data with matching IDs for company number: " + companyNumber);
         return appointmentsResultData;
+    }
+
+    @Override
+    public AppointmentsResultResponse createAppointmentFromRequest(AppointmentCreationRequest req) {
+
+        CompanyProfile companyProfile = companyProfileRepository.findByCompanyNumber(req.getCompanyNumber())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Company profile not found for company number: " + req.getCompanyNumber()));
+
+        Instant now = Instant.now();
+        Instant today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+
+        //generate IDs
+        String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
+        String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+        String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
+
+        // build the appointment entity
+        Appointment ap = new Appointment();
+        ap.setAppointmentId(appointmentId);
+        ap.setOfficerId(officerId);
+        ap.setCompanyName(companyProfile.getCompanyName());
+        ap.setCompanyStatus(companyProfile.getCompanyStatus());
+        ap.setOfficerRole(req.getSpec().getOfficerRoles().get(0).getValue());
+        ap.setCreated(now);
+        ap.setUpdated(now);
+
+        if (Boolean.TRUE.equals(req.getIsPre1992Appointment())) {
+            ap.setIsPre1992Appointment(true);
+            ap.setAppointmentBefore(today);
+        } else {
+            ap.setIsPre1992Appointment(false);
+            ap.setAppointedOn(today);
+        }
+        if (req.getResignedOn() != null) {
+            ap.setResignedOn(req.getResignedOn());
+        }
+
+// Natural officer details
+        ap.setForename(FORENAME);
+        ap.setSurname(setRoleName(req.getSpec().getOfficerRoles().get(0).getValue()));
+        ap.setOccupation(setRoleName(req.getSpec().getOfficerRoles().get(0).getValue()));
+        ap.setNationality(NATIONALITY);
+        ap.setCountryOfResidence(req.getCountryOfResidence());
+        ap.setDateOfBirth(DOB_INSTANT);
+        ap.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
+        ap.setServiceAddress(addressService.getAddress(req.getSpec().getJurisdiction()));
+
+// corporate officer details
+        if (req.getIdentification() != null) {
+            // use the identification accessor provided in the request class
+            ap.setIdentificationType(req.getIdentification().getIdentificationType());
+        }
+        appointmentsRepository.save(ap);
+
+        // Build response
+        AppointmentsResultResponse response = new AppointmentsResultResponse();
+        response.setAppointmentId(appointmentId);
+        response.setOfficerId(officerId);
+        response.setCompanyNumber(req.getCompanyNumber());
+        response.setOfficerRoles(req.getSpec().getOfficerRoles().get(0).getValue());
+        response.setPre1992Appointment(req.getIsPre1992Appointment());
+        response.setResignedOn(req.getResignedOn());
+
+        if(req.getIdentification() != null) {
+            response.setIdentificationType(req.getIdentification().getIdentificationType());
+
+        }
+        return response;
+
     }
 
     @Override
