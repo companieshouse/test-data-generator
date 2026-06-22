@@ -31,6 +31,7 @@ import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.validation.CompanySubTypeRule;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -58,8 +59,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String TERMS_OF_PUBLICATION = "Terms of Account Publication";
     private static final String GOVERNED_BY = "Federal Government";
     private static final String COMMUNITY_INTEREST_COMPANY_SUB_TYPE = "community-interest-company";
-    private static final String PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE =
-            "private-fund-limited-partnership";
     public static final String
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY =
             "full-data-available-from-financial-conduct-authority";
@@ -510,8 +509,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void validateSubType(String subType, CompanyType companyType) {
-        if (PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE.equals(subType)
-                && !CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
+        if (!CompanySubTypeRule.isValidForCompanyType(subType, companyType)) {
             throw new HttpMessageNotReadableException("invalid request", null);
         }
     }
