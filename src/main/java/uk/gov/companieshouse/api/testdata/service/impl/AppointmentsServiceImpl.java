@@ -205,6 +205,130 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsResultData;
     }
 
+    public AppointmentsResultResponse createAppointment(AppointmentCreationRequest spec) {
+//        LOG.info("Starting creation of appointments with matching IDs for company number: "
+//                + spec.getCompanyNumber());
+//
+//        final var companyNumber = spec.getCompanyNumber();
+//        final String countryOfResidence = addressService.getCountryOfResidence(JurisdictionType.ENGLAND);
+//
+//
+//        List<OfficerType> officerRoleList = new ArrayList<>();
+//        List<OfficerType> providedRoles = spec.getOfficerRoles();
+//        int providedCount = (providedRoles != null) ? providedRoles.size() : 0;
+//        if (providedCount > 0) {
+//            officerRoleList.addAll(providedRoles);
+//            LOG.debug("Officer roles provided: " + providedRoles);
+//        }
+//        if (spec.getCompanyType() == CompanyType.PLC) {
+//            for (int i = providedCount; i < numberOfAppointments; i++) {
+//                OfficerType officerType = (i == 2) ? OfficerType.SECRETARY : OfficerType.DIRECTOR;
+//                officerRoleList.add(officerType);
+//            }
+//        } else {
+//            for (int i = providedCount; i < numberOfAppointments; i++) {
+//                officerRoleList.add(OfficerType.DIRECTOR);
+//            }
+//        }
+//
+//        List<String> appointmentIds = new ArrayList<>();
+//        for (var i = 0; i < numberOfAppointments; i++) {
+//            appointmentIds.add(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+//        }
+//
+//        List<Appointment> createdAppointments = new ArrayList<>();
+//        List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
+//        List<OfficerAppointment> createdOfficerAppointments = new ArrayList<>();
+//
+//        for (var i = 0; i < numberOfAppointments; i++) {
+//            OfficerType currentRoleEnum = officerRoleList.get(i);
+//            if (currentRoleEnum == null) {
+//                LOG.error("Invalid officer role: null at index " + i);
+//                throw new IllegalArgumentException("Invalid officer role: null");
+//            }
+//            String currentRole = currentRoleEnum.getValue();
+//            validateOfficerRole(currentRole);
+//
+//            LOG.debug("Processing appointment {} with role: " + (i + 1) + currentRole);
+//
+//            String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
+//            String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+//
+//            String appointmentId = appointmentIds.get(i);
+//
+//            LOG.debug("Generated IDs - Appointment ID: "
+//                    + appointmentId + ", Internal ID: "
+//                    + internalId + ", Officer ID: " + officerId);
+//
+//            Instant dateTimeNow = Instant.now();
+//            var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+//
+//            String roleName = setRoleName(currentRole);
+//            var request = AppointmentCreationRequest.builder()
+//                    .spec(spec)
+//                    .companyNumber(companyNumber)
+//                    .countryOfResidence(countryOfResidence)
+//                    .internalId(internalId)
+//                    .officerId(officerId)
+//                    .dateTimeNow(dateTimeNow)
+//                    .appointedOn(today)
+//                    .appointmentId(appointmentId)
+//                    .build();
+//
+//            var appointment = createBaseAppointment(request);
+//            appointment.setForename(FORENAME + (i + 1));
+//            appointment.setSurname(roleName);
+//            appointment.setOccupation(roleName);
+//            appointment.setOfficerRole(currentRole);
+//
+//            var links = createAppointmentLinks(companyNumber, officerId, appointmentId);
+//            appointment.setLinks(links);
+//
+//            LOG.debug("Creating officer appointment for officer ID: " + officerId);
+//            var officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
+//            createdOfficerAppointments.add(officerAppointment);
+//            if (Boolean.FALSE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+//                Appointment savedAppointment = appointmentsRepository.save(appointment);
+//                LOG.info("Appointment saved with ID: " + savedAppointment.getId());
+//            }
+//            createdAppointments.add(appointment);
+//
+//            // Create AppointmentsData with same appointmentId
+//            var appointmentsData = createBaseAppointmentsData(
+//                    spec, internalId, officerId, dateTimeNow, appointmentId);
+//            appointmentsData.setForename(FORENAME + (i + 1));
+//            appointmentsData.setSurname(roleName);
+//            appointmentsData.setOccupation(roleName);
+//            appointmentsData.setOfficerRole(currentRole);
+//
+//            var dataLinks = new AppointmentsData.Links();
+//            var dataOfficerLinks = new AppointmentsData.OfficerLinks();
+//            dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
+//            dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
+//            dataLinks.setOfficer(dataOfficerLinks);
+//            dataLinks.setSelf(COMPANY_LINK
+//                    + spec.getCompanyNumber() + "/appointments/" + appointmentId);
+//            appointmentsData.setLinks(dataLinks);
+//            if (Boolean.FALSE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+//                var savedData = appointmentsDataRepository.save(appointmentsData);
+//                LOG.info("AppointmentsData saved with ID: " + savedData.getId());
+//            }
+//            createdAppointmentsData.add(appointmentsData);
+//        }
+//        var appointmentsResultData = new AppointmentsResultResponse();
+//        appointmentsResultData.setAppointment(createdAppointments);
+//        appointmentsResultData.setAppointmentsData(createdAppointmentsData);
+//        appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
+//        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+//            return appointmentsResultData;
+//        }
+//        LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
+//                + createdAppointmentsData.size()
+//                + " appointments data with matching IDs for company number: " + companyNumber);
+//        return appointmentsResultData;
+    return null;
+    }
+
     @Override
     public boolean deleteAllAppointments(String companyNumber) {
         LOG.info("Starting deletion of all appointments and appointments data for company number: "
