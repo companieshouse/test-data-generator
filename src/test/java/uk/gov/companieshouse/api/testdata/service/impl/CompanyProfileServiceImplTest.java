@@ -273,12 +273,21 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithNonCicSubType() {
-        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
+    void createLimitedPartnershipWithPrivateFundLimitedPartnershipSubType() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
         spec.setSubType("private-fund-limited-partnership");
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("private-fund-limited-partnership", profile.getSubtype());
         assertFalse(profile.getIsCommunityInterestCompany());
+    }
+
+    @Test
+    void createLtdWithPrivateFundLimitedPartnershipSubTypeDoesNotApplySubType() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
+        spec.setSubType("private-fund-limited-partnership");
+        CompanyProfile profile = createAndCapture(spec);
+        assertNull(profile.getSubtype());
+        assertNull(profile.getIsCommunityInterestCompany());
     }
 
     @Test

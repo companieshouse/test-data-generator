@@ -56,6 +56,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String FOREIGN_ACCOUNT_TYPE = "ForeignAccountType";
     private static final String TERMS_OF_PUBLICATION = "Terms of Account Publication";
     private static final String GOVERNED_BY = "Federal Government";
+    private static final String COMMUNITY_INTEREST_COMPANY_SUB_TYPE = "community-interest-company";
+    private static final String PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE =
+            "private-fund-limited-partnership";
     public static final String
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY =
             "full-data-available-from-financial-conduct-authority";
@@ -213,7 +216,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasCharges(false);
         profile.setCanFile(true);
         setPartialDataOptions(profile, jurisdiction, companyType);
-        setSubType(profile, subType);
+        setSubType(profile, subType, companyType);
         setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
@@ -496,11 +499,17 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setSubType(CompanyProfile profile, String subType) {
-        if (subType != null) {
-            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
+    private void setSubType(CompanyProfile profile, String subType, CompanyType companyType) {
+        if (subType != null && isAllowedSubType(subType, companyType)) {
+            profile.setIsCommunityInterestCompany(
+                    subType.equals(COMMUNITY_INTEREST_COMPANY_SUB_TYPE));
             profile.setSubtype(subType);
         }
+    }
+
+    private boolean isAllowedSubType(String subType, CompanyType companyType) {
+        return !PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE.equals(subType)
+                || CompanyType.LIMITED_PARTNERSHIP.equals(companyType);
     }
 
     private void setCompanyStatusDetail(
