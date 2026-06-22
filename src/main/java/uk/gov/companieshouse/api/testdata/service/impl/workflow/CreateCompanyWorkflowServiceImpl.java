@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -13,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
@@ -42,6 +44,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     public static final String COMPANY_NUMBER = "company_number";
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final int COMPANY_NUMBER_LENGTH = 8;
+    private static final String PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE =
+            "private-fund-limited-partnership";
 
     private final CompanyProfileService companyProfileService;
     private final DataService<FilingHistory, CompanyRequest> filingHistoryService;
@@ -123,6 +127,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     @Override
     public PopulatedCompanyDetailsResponse buildCompanyDataStructure(
             CompanyRequest spec) throws DataException {
+        validateSubType(spec);
         assignCompanyNumber(spec);
 
         try {
@@ -233,6 +238,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
      * If any creation step fails, partial company data is rolled back via {@link #handleCreateFailure}.
      */
     protected CompanyProfileResponse createCompany(CompanyRequest companySpec) throws DataException {
+        validateSubType(companySpec);
         assignCompanyNumber(companySpec);
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -299,6 +305,14 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
     }
 
+    private void validateSubType(CompanyRequest spec) {
+        if (spec != null
+                && PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE.equals(spec.getSubType())
+                && !CompanyType.LIMITED_PARTNERSHIP.equals(spec.getCompanyType())) {
+            throw new HttpMessageNotReadableException("invalid request", null);
+        }
+    }
+
     private CompanyProfileResponse buildCompanyResponse(CompanyRequest spec, String authCode) {
         String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
         return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
@@ -359,5 +373,3 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         return data;
     }
 }
-
-

@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.StringUtils;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -500,16 +501,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void setSubType(CompanyProfile profile, String subType, CompanyType companyType) {
-        if (subType != null && isAllowedSubType(subType, companyType)) {
+        validateSubType(subType, companyType);
+        if (subType != null) {
             profile.setIsCommunityInterestCompany(
                     subType.equals(COMMUNITY_INTEREST_COMPANY_SUB_TYPE));
             profile.setSubtype(subType);
         }
     }
 
-    private boolean isAllowedSubType(String subType, CompanyType companyType) {
-        return !PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE.equals(subType)
-                || CompanyType.LIMITED_PARTNERSHIP.equals(companyType);
+    private void validateSubType(String subType, CompanyType companyType) {
+        if (PRIVATE_FUND_LIMITED_PARTNERSHIP_SUB_TYPE.equals(subType)
+                && !CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
+            throw new HttpMessageNotReadableException("invalid request", null);
+        }
     }
 
     private void setCompanyStatusDetail(

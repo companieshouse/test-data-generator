@@ -6,6 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
@@ -16,6 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
@@ -314,6 +316,39 @@ class CreateCompanyWorkflowServiceImplTest {
                 () -> creationService.createInternalCompany(null));
         verify(companyProfileService, never()).create(any());
         verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
+    }
+
+    @Test
+    void createInternalCompanyWithInvalidPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequest()
+            throws Exception {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setSubType("private-fund-limited-partnership");
+
+        HttpMessageNotReadableException thrown = assertThrows(HttpMessageNotReadableException.class,
+                () -> creationService.createInternalCompany(spec));
+
+        assertEquals("invalid request", thrown.getMessage());
+        verify(randomService, never()).getNumber(anyInt());
+        verify(companyProfileService, never()).create(any());
+        verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
+    }
+
+    @Test
+    void buildCompanyDataStructureWithInvalidPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequest()
+            throws Exception {
+        CompanyRequest spec = new CompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setCompanyType(CompanyType.LTD);
+        spec.setSubType("private-fund-limited-partnership");
+
+        HttpMessageNotReadableException thrown = assertThrows(HttpMessageNotReadableException.class,
+                () -> creationService.buildCompanyDataStructure(spec));
+
+        assertEquals("invalid request", thrown.getMessage());
+        verify(randomService, never()).getNumber(anyInt());
+        verify(companyProfileService, never()).create(any());
     }
 
     @Test
@@ -1006,5 +1041,3 @@ class CreateCompanyWorkflowServiceImplTest {
         validateElasticSearch(spec);
     }
 }
-
-
