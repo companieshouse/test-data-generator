@@ -14,6 +14,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -31,7 +32,7 @@ public class AppointmentController {
 
     }
 
-    @PostMapping("/appointments")
+    @PostMapping("/appointment")
     public ResponseEntity<AppointmentsResultResponse> createAppointment(
             @Valid @RequestBody AppointmentCreationRequest request) throws DataException {
 
@@ -43,5 +44,13 @@ public class AppointmentController {
         LOG.info("New officer appointment created", data);
         return new ResponseEntity<>(createAppointmentFromRequest, HttpStatus.CREATED);
 
+    }
+    @PostMapping("/appointments")
+    public ResponseEntity<List<AppointmentsResultResponse>> createListOfAppointments(
+            @RequestParam int count,
+            @RequestBody AppointmentCreationRequest request) throws DataException {
+        List<AppointmentsResultResponse> responses = appointmentService.createAppointments(request,count);
+        LOG.info("Created list of appointments: "+ responses.size());
+        return new ResponseEntity<>(responses, HttpStatus.CREATED);
     }
 }

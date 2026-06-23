@@ -275,6 +275,17 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     @Override
+    public List<AppointmentsResultResponse> createAppointments (AppointmentCreationRequest request,int count){
+        if(count < 1 || count >10){
+            throw new IllegalArgumentException("Count must be between 1 and 10");
+        }
+        List<AppointmentsResultResponse> results = new ArrayList<>();
+        for (int i=0;i<count ;i++){
+            results.add(createAppointmentFromRequest(request));
+        }
+        return results;
+    }
+    @Override
     public boolean deleteAllAppointments(String companyNumber) {
         LOG.info("Starting deletion of all appointments and appointments data for company number: "
                 + companyNumber);
