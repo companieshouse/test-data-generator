@@ -41,6 +41,7 @@ import java.util.Set;
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PublicCompanyController {
 
+    private static final String API_VERSION_HEADER = "X-API-Version";
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private final CreateCompanyWorkflowService createCompanyWorkflowService;
@@ -89,12 +90,14 @@ public class PublicCompanyController {
      * V2 endpoint: Handles PublicCompanyRequestV2 format.
      * INTERNAL ONLY - temporarily hosted at /internal/v2/company to avoid clashing
      * with InternalCompanyController's existing /internal/company?X-API-Version=2 mapping.
+     * Requires X-API-Version: 2 so clients/tests keep the same version-header behavior
+     * that will be used when this route moves to /company.
      * Added to internal path to prevent access from external clients until the new endpoint is
      * fully implemented and tested.
      * When V2 schema migration is complete this will move to the public /company path.
      * See: taf-api-karate/.../company_test_data/public/v2/README.md for full rationale.
      */
-    @PostMapping(value = "/internal/v2/company")
+    @PostMapping(value = "/internal/v2/company", headers = API_VERSION_HEADER + "=2")
     public ResponseEntity<CompanyProfileResponse> createPublicCompanyV2(
             @RequestBody(required = false) PublicCompanyRequestV2 request) throws DataException {
 
@@ -136,4 +139,3 @@ public class PublicCompanyController {
         }
     }
 }
-
