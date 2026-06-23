@@ -61,23 +61,23 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Autowired
     private OfficerRepository officerRepository;
 
-    public AppointmentsResultResponse createAppointment(InternalCompanyRequest spec) {
-        if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
+    public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest) {
+        if (Boolean.TRUE.equals(internalCompanyRequest.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
-                    + spec.getCompanyNumber());
+                    + internalCompanyRequest.getCompanyNumber());
             return null;
         }
 
         LOG.info("Starting creation of appointments with matching IDs for company number: "
-                + spec.getCompanyNumber());
+                + internalCompanyRequest.getCompanyNumber());
 
-        final var companyNumber = spec.getCompanyNumber();
+        final var companyNumber = internalCompanyRequest.getCompanyNumber();
         final String countryOfResidence = addressService.getCountryOfResidence(
-                spec.getJurisdiction());
-        Integer numberOfAppointments = spec.getNumberOfAppointments();
-        boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(spec);
+                internalCompanyRequest.getJurisdiction());
+        Integer numberOfAppointments = internalCompanyRequest.getNumberOfAppointments();
+        boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(internalCompanyRequest);
 
-        if (spec.getCompanyType() == CompanyType.PLC) {
+        if (internalCompanyRequest.getCompanyType() == CompanyType.PLC) {
             // Always ensure at least 2 directors and 1 secretary for PLC
             if (!explicitlySet || numberOfAppointments == null || numberOfAppointments < 3) {
                 LOG.info("PLC company type and numberOfAppointments not set or less than 3. Defaulting to 2 directors and 1 secretary");
@@ -91,13 +91,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
 
         List<OfficerType> officerRoleList = new ArrayList<>();
-        List<OfficerType> providedRoles = spec.getOfficerRoles();
+        List<OfficerType> providedRoles = internalCompanyRequest.getOfficerRoles();
         int providedCount = (providedRoles != null) ? providedRoles.size() : 0;
         if (providedCount > 0) {
             officerRoleList.addAll(providedRoles);
             LOG.debug("Officer roles provided: " + providedRoles);
         }
-        if (spec.getCompanyType() == CompanyType.PLC) {
+        if (internalCompanyRequest.getCompanyType() == CompanyType.PLC) {
             for (int i = providedCount; i < numberOfAppointments; i++) {
                 OfficerType officerType = (i == 2) ? OfficerType.SECRETARY : OfficerType.DIRECTOR;
                 officerRoleList.add(officerType);
@@ -142,7 +142,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
             String roleName = setRoleName(currentRole);
             var request = AppointmentCreationRequest.builder()
-                    .spec(spec)
+                    .spec(internalCompanyRequest)
                     .companyNumber(companyNumber)
                     .countryOfResidence(countryOfResidence)
                     .internalId(internalId)
@@ -162,9 +162,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setLinks(links);
 
             LOG.debug("Creating officer appointment for officer ID: " + officerId);
-            var officerAppointment = this.createOfficerAppointment(spec, officerId, appointmentId, currentRole);
+            var officerAppointment = this.createOfficerAppointment(internalCompanyRequest, officerId, appointmentId, currentRole);
             createdOfficerAppointments.add(officerAppointment);
-            if (Boolean.FALSE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            if (Boolean.FALSE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
                 Appointment savedAppointment = appointmentsRepository.save(appointment);
                 LOG.info("Appointment saved with ID: " + savedAppointment.getId());
             }
@@ -172,7 +172,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
             // Create AppointmentsData with same appointmentId
             var appointmentsData = createBaseAppointmentsData(
-                    spec, internalId, officerId, dateTimeNow, appointmentId);
+                    internalCompanyRequest, internalId, officerId, dateTimeNow, appointmentId);
             appointmentsData.setForename(FORENAME + (i + 1));
             appointmentsData.setSurname(roleName);
             appointmentsData.setOccupation(roleName);
@@ -184,9 +184,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
             dataLinks.setOfficer(dataOfficerLinks);
             dataLinks.setSelf(COMPANY_LINK
-                    + spec.getCompanyNumber() + "/appointments/" + appointmentId);
+                    + internalCompanyRequest.getCompanyNumber() + "/appointments/" + appointmentId);
             appointmentsData.setLinks(dataLinks);
-            if (Boolean.FALSE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+            if (Boolean.FALSE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
                 var savedData = appointmentsDataRepository.save(appointmentsData);
                 LOG.info("AppointmentsData saved with ID: " + savedData.getId());
             }
@@ -196,7 +196,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsResultData.setAppointment(createdAppointments);
         appointmentsResultData.setAppointmentsData(createdAppointmentsData);
         appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
-        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return appointmentsResultData;
         }
         LOG.info("Successfully created " + createdAppointments.size() + " appointments and "

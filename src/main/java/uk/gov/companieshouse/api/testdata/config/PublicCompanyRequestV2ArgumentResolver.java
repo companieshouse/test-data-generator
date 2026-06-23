@@ -1,8 +1,10 @@
 package uk.gov.companieshouse.api.testdata.config;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import org.jspecify.annotations.NonNull;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.server.ServletServerHttpRequest;
@@ -11,10 +13,7 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import org.springframework.util.StreamUtils;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequestV2;
-
-import java.nio.charset.StandardCharsets;
 
 /**
  * Parses PublicCompanyRequestV2 with strict unknown-field validation without changing v1 behavior.
@@ -31,28 +30,36 @@ public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgu
     }
 
     @Override
-    public Object resolveArgument(MethodParameter parameter,
+    public Object resolveArgument(@NonNull MethodParameter parameter,
                                   ModelAndViewContainer mavContainer,
-                                  NativeWebRequest webRequest,
-                                  WebDataBinderFactory binderFactory) throws Exception {
-        HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
-        if (servletRequest == null) {
+                                  @NonNull NativeWebRequest webRequest,
+                                  WebDataBinderFactory binderFactory) {
+        PublicCompanyRequestResolverSupport.RequestPayload requestPayload =
+                extractRequestPayload(webRequest);
+        if (requestPayload == null) {
             return null;
         }
 
-        String body = StreamUtils.copyToString(servletRequest.getInputStream(), StandardCharsets.UTF_8);
-        if (body == null || body.isBlank()) {
-            return null;
-        }
+        HttpServletRequest servletRequest = requestPayload.servletRequest();
 
         try {
-            return strictV2ObjectMapper.readValue(body, PublicCompanyRequestV2.class);
-        } catch (Exception ex) {
+            return strictV2ObjectMapper.readValue(requestPayload.body(), PublicCompanyRequestV2.class);
+        } catch (JsonProcessingException | IllegalArgumentException ex) {
             throw new HttpMessageNotReadableException(
                     "invalid request",
                     ex,
                     new ServletServerHttpRequest(servletRequest));
         }
     }
-}
 
+    private PublicCompanyRequestResolverSupport.RequestPayload extractRequestPayload(NativeWebRequest webRequest) {
+        try {
+            return PublicCompanyRequestResolverSupport.extractRequestPayload(webRequest);
+        } catch (PublicCompanyRequestResolverSupport.RequestPayloadReadException ex) {
+            throw new HttpMessageNotReadableException(
+                    "invalid request",
+                    ex,
+                    new ServletServerHttpRequest(ex.servletRequest()));
+        }
+    }
+}

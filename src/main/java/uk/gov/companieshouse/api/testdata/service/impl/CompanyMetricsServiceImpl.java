@@ -31,26 +31,27 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, In
     private RandomService randomService;
 
     @Override
-    public CompanyMetrics create(InternalCompanyRequest spec) {
+    public CompanyMetrics create(InternalCompanyRequest internalCompanyRequest) {
+
         LOG.info("Starting creation of CompanyMetrics for company number: "
-                + spec.getCompanyNumber());
-        CompanyMetrics metrics = initializeMetrics(spec);
+                + internalCompanyRequest.getCompanyNumber());
+        CompanyMetrics metrics = initializeMetrics(internalCompanyRequest);
 
-        setActivePscCount(metrics, spec);
-        setPscCount(metrics, spec);
-        setCeasedPscCount(metrics, spec);
-        setActiveDirectorsCount(metrics, spec);
+        setActivePscCount(metrics, internalCompanyRequest);
+        setPscCount(metrics, internalCompanyRequest);
+        setCeasedPscCount(metrics, internalCompanyRequest);
+        setActiveDirectorsCount(metrics, internalCompanyRequest);
 
-        if (spec.getRegisters() != null) {
+        if (internalCompanyRequest.getRegisters() != null) {
             LOG.debug("Registers are provided. Creating registers for the company.");
-            metrics.setRegisters(createRegisters(spec.getRegisters()));
+            metrics.setRegisters(createRegisters(internalCompanyRequest.getRegisters()));
         }
-        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return metrics;
         }
         CompanyMetrics savedMetrics = repository.save(metrics);
         LOG.info("Successfully created and saved CompanyMetrics for company number: "
-                + spec.getCompanyNumber());
+                + internalCompanyRequest.getCompanyNumber());
         return savedMetrics;
     }
 

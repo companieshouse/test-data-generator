@@ -55,51 +55,51 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     private AddressService addressService;
 
     @Override
-    public Disqualifications create(InternalCompanyRequest spec) throws DataException {
-        if (spec == null) {
+    public Disqualifications create(InternalCompanyRequest internalCompanyRequest) throws DataException {
+        if (internalCompanyRequest == null) {
             throw new IllegalArgumentException("InternalCompanyRequest cannot be null");
         }
 
-        List<DisqualificationsRequest> disqualificationsSpecs = spec.getDisqualifiedOfficers();
+        List<DisqualificationsRequest> disqualificationsSpecs = internalCompanyRequest.getDisqualifiedOfficers();
         List<Disqualifications> savedDisqualifications = new ArrayList<>();
 
         LOG.info("Starting creation of Disqualifications for company number: "
-                + spec.getCompanyNumber());
+                + internalCompanyRequest.getCompanyNumber());
 
         if (disqualificationsSpecs != null && !disqualificationsSpecs.isEmpty()) {
             for (DisqualificationsRequest disqSpec : disqualificationsSpecs) {
-                savedDisqualifications.add(createDisqualificationFromSpec(spec, disqSpec));
+                savedDisqualifications.add(createDisqualificationFromSpec(internalCompanyRequest, disqSpec));
             }
         } else {
             var defaultSpec = new DisqualificationsRequest();
             defaultSpec.setDisqualificationType("default-type");
             defaultSpec.setCorporateOfficer(false);
-            savedDisqualifications.add(createDisqualificationFromSpec(spec, defaultSpec));
+            savedDisqualifications.add(createDisqualificationFromSpec(internalCompanyRequest, defaultSpec));
         }
 
         return savedDisqualifications.get(savedDisqualifications.size() - 1);
     }
 
     private Disqualifications createDisqualificationFromSpec(
-            InternalCompanyRequest companySpec, DisqualificationsRequest spec) {
+            InternalCompanyRequest internalCompanyRequest, DisqualificationsRequest disqualificationsRequest) {
         var disqualifications = new Disqualifications();
         disqualifications.setId(generateId());
-        disqualifications.setCompanyNumber(companySpec.getCompanyNumber());
+        disqualifications.setCompanyNumber(internalCompanyRequest.getCompanyNumber());
         disqualifications.setPersonNumber(randomService.getNumber(10));
         disqualifications.setCountryOfRegistration(
-                addressService.getCountryOfResidence(companySpec.getJurisdiction()));
+                addressService.getCountryOfResidence(internalCompanyRequest.getJurisdiction()));
         disqualifications.setEtag(this.randomService.getEtag());
         disqualifications.setName(DEFAULT_NAME);
         disqualifications.setOfficerDisqId(randomService.getString(10));
         disqualifications.setOfficerDetailId(randomService.getString(10));
         disqualifications.setOfficerIdRaw(randomService.getString(8));
-        disqualifications.setIsCorporateOfficer(spec.getCorporateOfficer());
+        disqualifications.setIsCorporateOfficer(disqualificationsRequest.getCorporateOfficer());
         disqualifications.setDateOfBirth(java.util.Date.from(
                 java.time.LocalDate.of(1990, 1, 1)
                         .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
         ));
 
-        String officerSuffix = Boolean.TRUE.equals(spec.getCorporateOfficer())
+        String officerSuffix = Boolean.TRUE.equals(disqualificationsRequest.getCorporateOfficer())
                 ? URL_CORPORATE_SUFFIX
                 : URL_NATURAL_SUFFIX;
 
@@ -107,15 +107,15 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
                 URL_DISQUALIFIED_OFFICERS_PREFIX + officerSuffix + disqualifications.getId()
         );
 
-        disqualifications.setAddress(addressService.getAddress(companySpec.getJurisdiction()));
+        disqualifications.setAddress(addressService.getAddress(internalCompanyRequest.getJurisdiction()));
 
         disqualifications.setDisqCaseIdentifier(DEFAULT_CASE_IDENTIFIER_PREFIX
                 + randomService.getString(4));
         disqualifications.setDisqCompanyNames(
-                Collections.singletonList("COMPANY " + companySpec.getCompanyNumber() + " LIMITED")
+                Collections.singletonList("COMPANY " + internalCompanyRequest.getCompanyNumber() + " LIMITED")
         );
         disqualifications.setDisqCourtName(DISQUALIFICATION_COURT_NAME);
-        disqualifications.setDisqDisqualificationType(spec.getDisqualificationType());
+        disqualifications.setDisqDisqualificationType(disqualificationsRequest.getDisqualificationType());
         disqualifications.setDisqDisqualifiedFrom(DISQUALIFICATION_DATE);
         disqualifications.setDisqDisqualifiedUntil(DISQUALIFICATION_DATE
                 .atZone(ZoneId.of("UTC"))
@@ -140,15 +140,15 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setPtaExpiresOn(PERM_EXPIRES_ON);
         disqualifications.setPtaGrantedOn(PERM_GRANTED_ON);
         disqualifications.setPtaPurpose(PERM_PURPOSE);
-        disqualifications.setDisqDisqualificationType(spec.getDisqualificationType());
+        disqualifications.setDisqDisqualificationType(disqualificationsRequest.getDisqualificationType());
 
         setTimestamps(disqualifications);
-        if (Boolean.TRUE.equals(companySpec.getCompanyWithPopulatedStructureOnly())) {
+        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return disqualifications;
         }
         var savedDisqualifications = repository.save(disqualifications);
         LOG.info("Successfully created and saved Disqualifications for company: "
-                + companySpec.getCompanyNumber());
+                + internalCompanyRequest.getCompanyNumber());
         return savedDisqualifications;
     }
 

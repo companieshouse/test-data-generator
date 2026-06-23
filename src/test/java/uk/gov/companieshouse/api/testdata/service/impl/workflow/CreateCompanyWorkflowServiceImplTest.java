@@ -44,6 +44,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -546,6 +547,25 @@ class CreateCompanyWorkflowServiceImplTest {
     void createPublicCompanyWithNullSpec() throws DataException {
         PublicCompanyRequest spec = new PublicCompanyRequest();
         testPublicCompanySpec(spec);
+    }
+
+    @Test
+    void createPublicCompanyDoesNotLeakInternalSearchFlags() throws DataException {
+        PublicCompanyRequest spec = new PublicCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+
+        when(randomService.getNumber(8)).thenReturn(Long.valueOf(COMPANY_NUMBER));
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        creationService.createPublicCompany(spec);
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
+
+        assertNull(capturedSpec.getAlphabeticalSearch());
+        assertNull(capturedSpec.getAdvancedSearch());
+        assertNull(capturedSpec.getAddToCompanyElasticSearchIndex());
     }
 
     private void testPublicCompanySpec(PublicCompanyRequest spec) throws DataException {

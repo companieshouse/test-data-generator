@@ -65,22 +65,22 @@ public class FilingHistoryServiceImpl implements FilingHistoryService, DataServi
     private BarcodeService barcodeService;
 
     @Override
-    public FilingHistory create(InternalCompanyRequest spec) throws DataException {
-        List<FilingHistoryRequest> filingHistorySpecs = spec.getFilingHistoryList(); // New array-style getter
+    public FilingHistory create(InternalCompanyRequest internalCompanyRequest) throws DataException {
+        List<FilingHistoryRequest> filingHistorySpecs = internalCompanyRequest.getFilingHistoryList(); // New array-style getter
         List<FilingHistory> savedHistories = new ArrayList<>();
         LOG.info("Starting creation of FilingHistory for company number: "
-                + spec.getCompanyNumber());
+                + internalCompanyRequest.getCompanyNumber());
 
         String barcode;
-        final String accountsDueStatus = spec.getAccountsDueStatus();
+        final String accountsDueStatus = internalCompanyRequest.getAccountsDueStatus();
         try {
             LOG.debug("Attempting to retrieve barcode for company number: "
-                    + spec.getCompanyNumber());
+                    + internalCompanyRequest.getCompanyNumber());
             barcode = barcodeService.getBarcode();
             LOG.debug("Successfully retrieved barcode: " + barcode);
         } catch (BarcodeServiceException ex) {
             LOG.error("Failed to retrieve barcode for company number: "
-                    + spec.getCompanyNumber(), ex);
+                    + internalCompanyRequest.getCompanyNumber(), ex);
             throw new DataException(ex.getMessage(), ex);
         }
 
@@ -96,10 +96,10 @@ public class FilingHistoryServiceImpl implements FilingHistoryService, DataServi
 
         if (filingHistorySpecs != null && !filingHistorySpecs.isEmpty()) {
             for (FilingHistoryRequest fhSpec : filingHistorySpecs) {
-                savedHistories.add(createFilingHistoryFromSpec(spec, fhSpec, dayNow, dayTimeNow));
+                savedHistories.add(createFilingHistoryFromSpec(internalCompanyRequest, fhSpec, dayNow, dayTimeNow));
             }
         } else {
-            savedHistories.add(createFilingHistoryFromSpec(spec, null, dayNow, dayTimeNow));
+            savedHistories.add(createFilingHistoryFromSpec(internalCompanyRequest, null, dayNow, dayTimeNow));
         }
 
         return savedHistories.get(savedHistories.size() - 1);

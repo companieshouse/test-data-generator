@@ -1,6 +1,9 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import java.util.List;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
+import org.jspecify.annotations.NonNull;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -28,6 +31,18 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String INVALID_REQUEST = "invalid request";
+    public static final String INVALID = "invalid ";
+
+    @ExceptionHandler(value = {ConstraintViolationException.class})
+    protected ResponseEntity<ValidationErrors> handleConstraintViolation(ConstraintViolationException ex) {
+        logException(ex);
+        ValidationErrors errors = new ValidationErrors();
+        ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .map(this::createValidationError)
+                .forEach(errors::addError);
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(value = {DataException.class})
     @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
@@ -53,10 +68,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex,
-            HttpHeaders headers,
-            HttpStatusCode status,
-            WebRequest request) {
+            @NonNull HttpMessageNotReadableException ex,
+            @NonNull HttpHeaders headers,
+            @NonNull HttpStatusCode status,
+            @NonNull WebRequest request) {
 
         logException(ex);
 
@@ -69,13 +84,46 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     private String resolveMessage(HttpMessageNotReadableException ex) {
-        Throwable cause = ex.getCause();
-
-        if (!(cause instanceof tools.jackson.databind.exc.InvalidFormatException ife)) {
-            return INVALID_REQUEST;
+        // Handle Jackson 2.x exceptions thrown by PublicCompanyRequestV2ArgumentResolver
+        var upe = findCause(ex, com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class);
+        if (upe != null) {
+            return INVALID + upe.getPropertyName();
+        }
+        var ife2 = findCause(ex, com.fasterxml.jackson.databind.exc.InvalidFormatException.class);
+        if (ife2 != null && ife2.getPath() != null && !ife2.getPath().isEmpty()) {
+            // Use the leaf (last) path element so nested fields like company_type.type
+            // return "invalid type" rather than "invalid company_type"
+            var refs = ife2.getPath();
+            String fieldName = refs.getLast().getFieldName();
+            return fieldName != null ? INVALID + fieldName : INVALID_REQUEST;
+        }
+        // Handle other Jackson 2.x mapping exceptions (for example enum creator errors)
+        // that still carry path information even when they are not InvalidFormatException.
+        var jme2 = findCause(ex, com.fasterxml.jackson.databind.JsonMappingException.class);
+        if (jme2 != null && jme2.getPath() != null && !jme2.getPath().isEmpty()) {
+            var refs = jme2.getPath();
+            String fieldName = refs.getLast().getFieldName();
+            return fieldName != null ? INVALID + fieldName : INVALID_REQUEST;
         }
 
-        return extractFieldMessage(ife.getPath());
+        // Handle Jackson 3.x exceptions thrown by standard Spring message converters
+        var ife3 = findCause(ex, tools.jackson.databind.exc.InvalidFormatException.class);
+        if (ife3 != null) {
+            return extractFieldMessage(ife3.getPath());
+        }
+
+        return INVALID_REQUEST;
+    }
+
+    private <T extends Throwable> T findCause(Throwable throwable, Class<T> type) {
+        Throwable current = throwable;
+        while (current != null) {
+            if (type.isInstance(current)) {
+                return type.cast(current);
+            }
+            current = current.getCause();
+        }
+        return null;
     }
 
     private String extractFieldMessage(List<JacksonException.Reference> path) {
@@ -88,7 +136,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             String fieldName = extractFieldName(ref.getDescription());
 
             if (fieldName != null) {
-                return "invalid " + fieldName;
+                return INVALID + fieldName;
             }
         }
 
@@ -111,8 +159,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                                                                  HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+    protected ResponseEntity<Object> handleMethodArgumentNotValid(@NonNull MethodArgumentNotValidException ex,
+                                                                  @NonNull HttpHeaders headers, @NonNull HttpStatusCode status, @NonNull WebRequest request) {
         logException(ex);
 
         ValidationErrors errors = new ValidationErrors();

@@ -59,9 +59,9 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void create() throws Exception {
-        InternalCompanyRequest spec = new InternalCompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
@@ -70,7 +70,7 @@ class CompanyAuthCodeServiceImplTest {
 
         final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
                 .digest(String.valueOf(COMPANY_AUTH_CODE).getBytes(StandardCharsets.UTF_8));
-        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(spec);
+        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(internalCompanyRequest);
 
         assertEquals(savedAuthCode, returnedAuthCode);
 

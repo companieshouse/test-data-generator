@@ -1,12 +1,12 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,8 +41,6 @@ import java.util.Set;
 @RequestMapping(value = "${api.endpoint}", produces = MediaType.APPLICATION_JSON_VALUE)
 public class PublicCompanyController {
 
-    private static final String API_VERSION_HEADER = "X-API-Version";
-
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     private final CreateCompanyWorkflowService createCompanyWorkflowService;
@@ -69,47 +67,53 @@ public class PublicCompanyController {
     }
 
     /**
-     * V1 endpoint: Handles legacy PublicCompanyRequest format (flat company_type field).
+     * V1 endpoint: Handles legacy PublicCompanyRequest format.
      * This route is the default for /company and is used when no version header is provided.
      */
     @PostMapping("/company")
-    public ResponseEntity<CompanyProfileResponse> createCompanyV1(
+    public ResponseEntity<CompanyProfileResponse> createPublicCompanyV1(
             @Valid @RequestBody(required = false) PublicCompanyRequest request) throws DataException {
-        PublicCompanyRequest spec = request == null ? new PublicCompanyRequest() : request;
 
-        var createdCompany = createCompanyWorkflowService.createPublicCompany(spec);
+        PublicCompanyRequest publicCompanyRequest = request == null ? new PublicCompanyRequest() : request;
+
+        var createdCompany = createCompanyWorkflowService.createPublicCompany(publicCompanyRequest);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        data.put(JURISDICTION_DATA, publicCompanyRequest.getJurisdiction());
         LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     /**
-     * V2 endpoint: Handles PublicCompanyRequestV2 format (nested company_type)
-     * Routed via header: X-API-Version: 2
+     * V2 endpoint: Handles PublicCompanyRequestV2 format.
+     * INTERNAL ONLY - temporarily hosted at /internal/v2/company to avoid clashing
+     * with InternalCompanyController's existing /internal/company?X-API-Version=2 mapping.
+     * Added to internal path to prevent access from external clients until the new endpoint is
+     * fully implemented and tested.
+     * When V2 schema migration is complete this will move to the public /company path.
+     * See: taf-api-karate/.../company_test_data/public/v2/README.md for full rationale.
      */
-    @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
-    public ResponseEntity<CompanyProfileResponse> createCompanyV2(
+    @PostMapping(value = "/internal/v2/company")
+    public ResponseEntity<CompanyProfileResponse> createPublicCompanyV2(
             @RequestBody(required = false) PublicCompanyRequestV2 request) throws DataException {
 
-        PublicCompanyRequestV2 spec = request == null ? new PublicCompanyRequestV2() : request;
+        PublicCompanyRequestV2 publicCompanyRequestV2 = request == null ? new PublicCompanyRequestV2() : request;
 
-        validateV2(spec);
+        validateV2(publicCompanyRequestV2);
 
-        var createdCompany = createCompanyWorkflowServiceV2.createPublicCompanyV2(spec);
+        var createdCompany = createCompanyWorkflowServiceV2.createPublicCompanyV2(publicCompanyRequestV2);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        data.put(JURISDICTION_DATA, publicCompanyRequestV2.getJurisdiction());
         LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     @DeleteMapping({"/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
-            @PathVariable("companyNumber") String companyNumber,
+            @PathVariable String companyNumber,
             @Valid @RequestBody DeleteCompanyRequest request)
             throws DataException, InvalidAuthCodeException, NoDataFoundException {
 
@@ -125,14 +129,11 @@ public class PublicCompanyController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-
-    private void validateV2(PublicCompanyRequestV2 spec) {
-        Set<ConstraintViolation<PublicCompanyRequestV2>> violations = validator.validate(spec);
+    private void validateV2(PublicCompanyRequestV2 publicCompanyRequestV2) {
+        Set<ConstraintViolation<PublicCompanyRequestV2>> violations = validator.validate(publicCompanyRequestV2);
         if (!violations.isEmpty()) {
-            String errorMessage = violations.iterator().next().getMessage();
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errorMessage);
+            throw new ConstraintViolationException(violations);
         }
     }
-
 }
 

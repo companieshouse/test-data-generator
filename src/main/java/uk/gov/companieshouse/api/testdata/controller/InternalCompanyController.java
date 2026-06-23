@@ -74,38 +74,38 @@ public class InternalCompanyController {
     }
 
     @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
-    public ResponseEntity<CompanyProfileResponse> createCompanyV2(
-            @Valid @RequestBody(required = false) InternalCompanyRequestV2 request) throws DataException {
-        InternalCompanyRequest spec = request == null
+    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV2(
+            @Valid @RequestBody(required = false) InternalCompanyRequestV2 internalCompanyRequestV2) throws DataException {
+        InternalCompanyRequest internalCompanyRequest = internalCompanyRequestV2 == null
                 ? new InternalCompanyRequest()
-                : request.toInternalCompanyRequest();
-        return createCompanyResponse(spec);
+                : internalCompanyRequestV2.toInternalCompanyRequest();
+        return createCompanyResponse(internalCompanyRequest);
     }
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyProfileResponse> createCompany(
-            @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {
-        return createCompanyResponse(request);
+    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV1(
+            @Valid @RequestBody(required = false) InternalCompanyRequest internalCompanyRequest) throws DataException {
+        return createCompanyResponse(internalCompanyRequest);
     }
 
     private ResponseEntity<CompanyProfileResponse> createCompanyResponse(InternalCompanyRequest request)
             throws DataException {
 
         Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
-        InternalCompanyRequest spec = optionalRequest.orElse(new InternalCompanyRequest());
+        InternalCompanyRequest internalCompanyRequest = optionalRequest.orElse(new InternalCompanyRequest());
 
-        CompanyProfileResponse createdCompany = createCompanyWorkflowService.createInternalCompany(spec);
+        CompanyProfileResponse createdCompany = createCompanyWorkflowService.createInternalCompany(internalCompanyRequest);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        data.put(JURISDICTION_DATA, internalCompanyRequest.getJurisdiction());
         LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     @DeleteMapping({"/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
-            @PathVariable("companyNumber") String companyNumber,
+            @PathVariable String companyNumber,
             @Valid @RequestBody(required = false) DeleteCompanyRequest request)
             throws DataException, NoDataFoundException, InvalidAuthCodeException {
 
@@ -126,9 +126,9 @@ public class InternalCompanyController {
             @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {
 
         Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
-        InternalCompanyRequest spec = optionalRequest.orElse(new InternalCompanyRequest());
+        InternalCompanyRequest internalCompanyRequest = optionalRequest.orElse(new InternalCompanyRequest());
 
-        var companyData = createCompanyWorkflowService.buildCompanyDataStructure(spec);
+        var companyData = createCompanyWorkflowService.buildCompanyDataStructure(internalCompanyRequest);
         return new ResponseEntity<>(companyData, HttpStatus.OK);
     }
 
@@ -137,9 +137,9 @@ public class InternalCompanyController {
             @Valid @RequestBody(required = false) CompanyWithPopulatedStructureRequest request)
             throws DataException {
         Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyWithPopulatedStructureRequest spec =
+        CompanyWithPopulatedStructureRequest companyWithPopulatedStructureRequest =
                 optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = createCompanyWorkflowService.persistCompanyDataStructure(spec);
+        var createdCompany = createCompanyWorkflowService.persistCompanyDataStructure(companyWithPopulatedStructureRequest);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
         LOG.info(NEW_COMPANY_CREATED, data);

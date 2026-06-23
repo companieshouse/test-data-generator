@@ -92,30 +92,30 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
 
     @Override
-    public CompanyProfile create(InternalCompanyRequest spec) {
-        final String companyNumber = spec.getCompanyNumber();
-        final JurisdictionType jurisdiction = spec.getJurisdiction();
-        final CompanyType companyType = spec.getCompanyType();
-        final String subType = spec.getSubType();
-        final Boolean hasSuperSecurePscs = spec.getHasSuperSecurePscs();
-        final String companyStatusDetail = spec.getCompanyStatusDetail();
-        final String companyStatus = spec.getCompanyStatus();
-        final String accountsDueStatus = spec.getAccountsDueStatus();
-        final Boolean registeredOfficeIsInDispute = spec.getRegisteredOfficeIsInDispute();
+    public CompanyProfile create(InternalCompanyRequest internalCompanyRequest) {
+        final String companyNumber = internalCompanyRequest.getCompanyNumber();
+        final JurisdictionType jurisdiction = internalCompanyRequest.getJurisdiction();
+        final CompanyType companyType = internalCompanyRequest.getCompanyType();
+        final String subType = internalCompanyRequest.getSubType();
+        final Boolean hasSuperSecurePscs = internalCompanyRequest.getHasSuperSecurePscs();
+        final String companyStatusDetail = internalCompanyRequest.getCompanyStatusDetail();
+        final String companyStatus = internalCompanyRequest.getCompanyStatus();
+        final String accountsDueStatus = internalCompanyRequest.getAccountsDueStatus();
+        final Boolean registeredOfficeIsInDispute = internalCompanyRequest.getRegisteredOfficeIsInDispute();
 
         final LocalDate accountingReferenceDate = resolveAccountingReferenceDate(accountsDueStatus);
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
-            return createOverseasEntity(companyNumber, jurisdiction, spec, accountingReferenceDate,
+            return createOverseasEntity(companyNumber, jurisdiction, internalCompanyRequest, accountingReferenceDate,
                     OVERSEAS_ENTITY_TYPE, companyType, registeredOfficeIsInDispute);
         } else if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
-            return createOverseasEntity(companyNumber, jurisdiction, spec, accountingReferenceDate,
+            return createOverseasEntity(companyNumber, jurisdiction, internalCompanyRequest, accountingReferenceDate,
                     OVERSEA_COMPANY_TYPE, companyType, registeredOfficeIsInDispute);
         } else {
             DefaultCompanyProfileParams params = new DefaultCompanyProfileParams();
             params.companyNumber = companyNumber;
             params.jurisdiction = jurisdiction;
-            params.spec = spec;
+            params.spec = internalCompanyRequest;
             params.accountingReferenceDate = accountingReferenceDate;
             params.companyType = companyType;
             params.hasSuperSecurePscs = hasSuperSecurePscs;
@@ -131,7 +131,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private CompanyProfile createDefaultCompanyProfile(DefaultCompanyProfileParams params) {
         final String companyNumber = params.companyNumber;
         final JurisdictionType jurisdiction = params.jurisdiction;
-        final InternalCompanyRequest spec = params.spec;
+        final InternalCompanyRequest internalCompanyRequest = params.spec;
         final LocalDate accountingReferenceDate = params.accountingReferenceDate;
         final CompanyType companyType = params.companyType;
         final Boolean hasSuperSecurePscs = params.hasSuperSecurePscs;
@@ -155,7 +155,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setId(companyNumber);
         isCompanyTypeHasNoFilingHistory = hasNoFilingHistory(companyType);
         String companyTypeValue = companyType != null ? companyType.getValue() : "ltd";
-        setCompanyHasRegisters(spec);
+        setCompanyHasRegisters(internalCompanyRequest);
         profile.setCompanyNumber(companyNumber);
         String nonJurisdictionType = (jurisdiction != null)
                 ? checkNonJurisdictionTypes(jurisdiction, companyTypeValue) : "";
@@ -176,11 +176,11 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(companyTypeValue);
-        profile.setUndeliverableRegisteredOfficeAddress(BooleanUtils.isTrue(spec.getUndeliverableRegisteredOfficeAddress()));
+        profile.setUndeliverableRegisteredOfficeAddress(BooleanUtils.isTrue(internalCompanyRequest.getUndeliverableRegisteredOfficeAddress()));
 
         profile.setHasSuperSecurePscs(BooleanUtils.isTrue(hasSuperSecurePscs));
-        if (spec.getCompanyName() != null) {
-            profile.setCompanyName(spec.getCompanyName() + " " + companyNumber);
+        if (internalCompanyRequest.getCompanyName() != null) {
+            profile.setCompanyName(internalCompanyRequest.getCompanyName() + " " + companyNumber);
         } else {
             setCompanyName(profile, companyNumber, companyTypeValue);
         }
@@ -217,7 +217,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         setSubType(profile, subType);
         setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
-        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return profile;
         }
         return companyProfileRepository.save(profile);

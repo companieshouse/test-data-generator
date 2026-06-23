@@ -72,14 +72,14 @@ class PublicCompanyControllerTest {
     }
 
     @Test
-    void createCompanyV1() throws Exception {
+    void createPublicCompanyV1() throws Exception {
         PublicCompanyRequest request = new PublicCompanyRequest();
         request.setJurisdiction(JurisdictionType.SCOTLAND);
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
         when(createCompanyWorkflowService.createPublicCompany(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompanyV1(request);
+        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createPublicCompanyV1(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -91,19 +91,19 @@ class PublicCompanyControllerTest {
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
         when(createCompanyWorkflowService.createPublicCompany(any())).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompanyV1(null);
+        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createPublicCompanyV1(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
         verify(createCompanyWorkflowService).createPublicCompany(publicSpecCaptor.capture());
-        PublicCompanyRequest usedSpec = publicSpecCaptor.getValue();
+        PublicCompanyRequest usedPublicCompanyRequest = publicSpecCaptor.getValue();
 
-        assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
+        assertEquals(JurisdictionType.ENGLAND_WALES, usedPublicCompanyRequest.getJurisdiction());
     }
 
     @Test
-    void createCompanyV2() throws Exception {
+    void createPublicCompanyV2() throws Exception {
         PublicCompanyRequestV2 request = new PublicCompanyRequestV2();
         request.setJurisdiction(JurisdictionType.NI);
         CompanyProfileResponse company =
@@ -111,7 +111,7 @@ class PublicCompanyControllerTest {
 
         when(validator.validate(any(PublicCompanyRequestV2.class))).thenReturn(Collections.emptySet());
         when(createCompanyWorkflowServiceV2.createPublicCompanyV2(any(PublicCompanyRequestV2.class))).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompanyV2(request);
+        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createPublicCompanyV2(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -119,13 +119,13 @@ class PublicCompanyControllerTest {
     }
 
     @Test
-    void createCompanyV1DefaultJurisdiction() throws Exception {
+    void createPublicCompanyV1DefaultJurisdiction() throws Exception {
         PublicCompanyRequest request = new PublicCompanyRequest();
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
         when(createCompanyWorkflowService.createPublicCompany(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createCompanyV1(request);
+        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createPublicCompanyV1(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -133,19 +133,19 @@ class PublicCompanyControllerTest {
     }
 
     @Test
-    void createCompanyV1Exception() throws Exception {
+    void createPublicCompanyV1Exception() throws Exception {
         PublicCompanyRequest request = new PublicCompanyRequest();
         request.setJurisdiction(JurisdictionType.NI);
         DataException exception = new DataException("Error message");
         when(createCompanyWorkflowService.createPublicCompany(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                publicCompanyController.createCompanyV1(request));
+                publicCompanyController.createPublicCompanyV1(request));
         assertEquals(exception, thrown);
     }
 
     @Test
-    void createCompanyV2ValidationFailure() {
+    void createPublicCompanyV2ValidationFailure() {
         PublicCompanyRequestV2 request = new PublicCompanyRequestV2();
         @SuppressWarnings("unchecked")
         ConstraintViolation<PublicCompanyRequestV2> violation = mock(ConstraintViolation.class);
@@ -153,8 +153,8 @@ class PublicCompanyControllerTest {
         when(validator.validate(any(PublicCompanyRequestV2.class))).thenReturn(Set.of(violation));
         when(violation.getMessage()).thenReturn("Invalid company status");
 
-        assertThrows(org.springframework.web.server.ResponseStatusException.class,
-                () -> publicCompanyController.createCompanyV2(request));
+        assertThrows(jakarta.validation.ConstraintViolationException.class,
+                () -> publicCompanyController.createPublicCompanyV2(request));
     }
 
     @Test
