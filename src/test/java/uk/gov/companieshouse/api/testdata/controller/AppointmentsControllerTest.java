@@ -26,7 +26,7 @@ class AppointmentsControllerTest {
     private AppointmentsController appointmentsController;
 
     @Test
-    void deleteAppointments_success() throws Exception {
+    void deleteAppointments_success() {
         final String companyNumber = "12345678";
         when(appointmentService.deleteAllAppointments(companyNumber)).thenReturn(true);
 
@@ -38,7 +38,7 @@ class AppointmentsControllerTest {
     }
 
     @Test
-    void deleteAppointments_notFound() throws Exception {
+    void deleteAppointments_notFound() {
         final String companyNumber = "12345678";
         when(appointmentService.deleteAllAppointments(companyNumber)).thenReturn(false);
 
@@ -51,7 +51,7 @@ class AppointmentsControllerTest {
     }
 
     @Test
-    void deleteAppointments_exception() throws Exception {
+    void deleteAppointments_exception() {
         final String companyNumber = "12345678";
         RuntimeException exception = new RuntimeException("Error message");
         when(appointmentService.deleteAllAppointments(companyNumber)).thenThrow(exception);
