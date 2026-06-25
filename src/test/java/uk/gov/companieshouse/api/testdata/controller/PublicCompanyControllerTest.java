@@ -1,7 +1,5 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.Validator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +15,9 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequestV2;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
-import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowServiceV2;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,12 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.Set;
 
 @ExtendWith(MockitoExtension.class)
 class PublicCompanyControllerTest {
@@ -50,12 +42,6 @@ class PublicCompanyControllerTest {
     @Mock
     private CompanyAuthCodeService companyAuthCodeService;
 
-    @Mock
-    private CreateCompanyWorkflowServiceV2 createCompanyWorkflowServiceV2;
-
-    @Mock
-    private Validator validator;
-
     private PublicCompanyController publicCompanyController;
 
     @Captor
@@ -65,10 +51,8 @@ class PublicCompanyControllerTest {
     void setUp() {
         publicCompanyController = new PublicCompanyController(
                 createCompanyWorkflowService,
-                createCompanyWorkflowServiceV2,
                 deleteCompanyWorkflowService,
-                companyAuthCodeService,
-                validator);
+                companyAuthCodeService);
     }
 
     @Test
@@ -103,22 +87,6 @@ class PublicCompanyControllerTest {
     }
 
     @Test
-    void createPublicCompanyV2() throws Exception {
-        PublicCompanyRequestV2 request = new PublicCompanyRequestV2();
-        request.setJurisdiction(JurisdictionType.NI);
-        CompanyProfileResponse company =
-                new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
-
-        when(validator.validate(any(PublicCompanyRequestV2.class))).thenReturn(Collections.emptySet());
-        when(createCompanyWorkflowServiceV2.createPublicCompanyV2(any(PublicCompanyRequestV2.class))).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createPublicCompanyV2(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        verify(createCompanyWorkflowServiceV2).createPublicCompanyV2(any(PublicCompanyRequestV2.class));
-    }
-
-    @Test
     void createPublicCompanyV1DefaultJurisdiction() throws Exception {
         PublicCompanyRequest request = new PublicCompanyRequest();
         CompanyProfileResponse company =
@@ -142,19 +110,6 @@ class PublicCompanyControllerTest {
         DataException thrown = assertThrows(DataException.class, () ->
                 publicCompanyController.createPublicCompanyV1(request));
         assertEquals(exception, thrown);
-    }
-
-    @Test
-    void createPublicCompanyV2ValidationFailure() {
-        PublicCompanyRequestV2 request = new PublicCompanyRequestV2();
-        @SuppressWarnings("unchecked")
-        ConstraintViolation<PublicCompanyRequestV2> violation = mock(ConstraintViolation.class);
-
-        when(validator.validate(any(PublicCompanyRequestV2.class))).thenReturn(Set.of(violation));
-        when(violation.getMessage()).thenReturn("Invalid company status");
-
-        assertThrows(jakarta.validation.ConstraintViolationException.class,
-                () -> publicCompanyController.createPublicCompanyV2(request));
     }
 
     @Test
@@ -218,4 +173,3 @@ class PublicCompanyControllerTest {
         assertEquals(ex, thrown);
     }
 }
-

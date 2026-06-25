@@ -31,7 +31,7 @@ class ArgumentResolverConfigurerTest {
     }
 
     @Test
-    void shouldPrependV1AndV2ResolversBeforeExistingOnes() {
+    void shouldPrependV2ResolversBeforeExistingOnes() {
         HandlerMethodArgumentResolver existingResolver = mock(HandlerMethodArgumentResolver.class);
         when(requestMappingHandlerAdapter.getArgumentResolvers()).thenReturn(List.of(existingResolver));
 
@@ -43,8 +43,8 @@ class ArgumentResolverConfigurerTest {
 
         List<HandlerMethodArgumentResolver> result = captor.getValue();
         assertEquals(3, result.size());
-        assertInstanceOf(PublicCompanyRequestV1ArgumentResolver.class, result.get(0));
-        assertInstanceOf(PublicCompanyRequestV2ArgumentResolver.class, result.get(1));
+        assertInstanceOf(PublicCompanyRequestV2ArgumentResolver.class, result.get(0));
+        assertInstanceOf(InternalCompanyRequestV2ArgumentResolver.class, result.get(1));
         assertEquals(existingResolver, result.get(2));
     }
 }

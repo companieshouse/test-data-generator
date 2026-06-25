@@ -1,9 +1,6 @@
 package uk.gov.companieshouse.api.testdata.service;
 
-import java.util.List;
-
 import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.model.entity.Postcodes;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PostcodesResponse;
 
 public interface PostcodeService {

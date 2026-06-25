@@ -16,12 +16,12 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequestV2;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequestV2;
 
 /**
- * Parses PublicCompanyRequestV2 with strict unknown-field validation without changing v1 behavior.
+ * Parses InternalCompanyRequestV2 with strict unknown-field validation without changing v1 behavior.
  */
-public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgumentResolver {
+public class InternalCompanyRequestV2ArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final ObjectMapper strictV2ObjectMapper = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
@@ -29,7 +29,7 @@ public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgu
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return PublicCompanyRequestV2.class.equals(parameter.getParameterType())
+        return InternalCompanyRequestV2.class.equals(parameter.getParameterType())
                 && parameter.hasParameterAnnotation(RequestBody.class);
     }
 
@@ -47,8 +47,8 @@ public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgu
         HttpServletRequest servletRequest = requestPayload.servletRequest();
 
         try {
-            PublicCompanyRequestV2 resolved =
-                    strictV2ObjectMapper.readValue(requestPayload.body(), PublicCompanyRequestV2.class);
+            InternalCompanyRequestV2 resolved =
+                    strictV2ObjectMapper.readValue(requestPayload.body(), InternalCompanyRequestV2.class);
             var violations = validator.validate(resolved);
             if (!violations.isEmpty()) {
                 throw new ConstraintViolationException(violations);

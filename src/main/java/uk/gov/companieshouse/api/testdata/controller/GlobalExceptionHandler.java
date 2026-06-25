@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import tools.jackson.core.JacksonException;
@@ -32,6 +33,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String INVALID_REQUEST = "invalid request";
     public static final String INVALID = "invalid ";
+    private static final String API_VERSION_HEADER = "X-API-Version";
 
     @ExceptionHandler(value = {ConstraintViolationException.class})
     protected ResponseEntity<ValidationErrors> handleConstraintViolation(ConstraintViolationException ex) {
@@ -75,7 +77,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         logException(ex);
 
-        String message = resolveMessage(ex);
+        String message = resolveMessage(ex, request);
 
         ValidationErrors errors = new ValidationErrors();
         errors.addError(createValidationError(message));
@@ -83,7 +85,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 
-    private String resolveMessage(HttpMessageNotReadableException ex) {
+    private String resolveMessage(HttpMessageNotReadableException ex, WebRequest request) {
+        boolean isV2Request = isV2Request(request);
         // Handle Jackson 2.x exceptions thrown by PublicCompanyRequestV2ArgumentResolver
         var upe = findCause(ex, com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class);
         if (upe != null) {
@@ -91,25 +94,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
         var ife2 = findCause(ex, com.fasterxml.jackson.databind.exc.InvalidFormatException.class);
         if (ife2 != null && ife2.getPath() != null && !ife2.getPath().isEmpty()) {
-            // Use the leaf (last) path element so nested fields like company_type.type
-            // return "invalid type" rather than "invalid company_type"
-            var refs = ife2.getPath();
-            String fieldName = refs.getLast().getFieldName();
+            String fieldName = resolveJackson2FieldName(ife2.getPath());
             return fieldName != null ? INVALID + fieldName : INVALID_REQUEST;
         }
         // Handle other Jackson 2.x mapping exceptions (for example enum creator errors)
         // that still carry path information even when they are not InvalidFormatException.
         var jme2 = findCause(ex, com.fasterxml.jackson.databind.JsonMappingException.class);
         if (jme2 != null && jme2.getPath() != null && !jme2.getPath().isEmpty()) {
-            var refs = jme2.getPath();
-            String fieldName = refs.getLast().getFieldName();
+            String fieldName = resolveJackson2FieldName(jme2.getPath());
             return fieldName != null ? INVALID + fieldName : INVALID_REQUEST;
         }
 
         // Handle Jackson 3.x exceptions thrown by standard Spring message converters
         var ife3 = findCause(ex, tools.jackson.databind.exc.InvalidFormatException.class);
         if (ife3 != null) {
-            return extractFieldMessage(ife3.getPath());
+            return extractFieldMessage(ife3.getPath(), isV2Request);
         }
 
         return INVALID_REQUEST;
@@ -126,9 +125,19 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return null;
     }
 
-    private String extractFieldMessage(List<JacksonException.Reference> path) {
+    private String extractFieldMessage(List<JacksonException.Reference> path, boolean isV2Request) {
         if (path == null || path.isEmpty()) {
             return INVALID_REQUEST;
+        }
+
+        // Preserve legacy v1 behavior for collection element coercion errors.
+        // If Jackson path includes an array index, return generic invalid request.
+        if (!isV2Request) {
+            for (JacksonException.Reference ref : path) {
+                if (ref.getIndex() >= 0) {
+                    return INVALID_REQUEST;
+                }
+            }
         }
 
         for (JacksonException.Reference ref : path) {
@@ -156,6 +165,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         }
 
         return null;
+    }
+
+    private String resolveJackson2FieldName(List<com.fasterxml.jackson.databind.JsonMappingException.Reference> path) {
+        for (int i = path.size() - 1; i >= 0; i--) {
+            String fieldName = path.get(i).getFieldName();
+            if (fieldName != null) {
+                return fieldName;
+            }
+        }
+        return null;
+    }
+
+    private boolean isV2Request(WebRequest request) {
+        if (!(request instanceof ServletWebRequest servletWebRequest)) {
+            return false;
+        }
+        String versionHeader = servletWebRequest.getRequest().getHeader(API_VERSION_HEADER);
+        if ("2".equals(versionHeader)) {
+            return true;
+        }
+        String uri = servletWebRequest.getRequest().getRequestURI();
+        return uri != null && uri.contains("/v2/");
     }
 
     @Override
