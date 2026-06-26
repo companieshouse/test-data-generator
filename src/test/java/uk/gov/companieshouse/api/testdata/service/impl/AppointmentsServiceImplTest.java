@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -632,6 +633,142 @@ class AppointmentsServiceImplTest {
         assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(3).getOfficerRole());
         assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(4).getOfficerRole());
         assertEquals(OfficerType.DIRECTOR.getValue(), savedAppointments.get(5).getOfficerRole());
+    }
+
+    @Test
+    void createAppointment_api_shouldPopulateIdentificationFields() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("corporate-director"))
+                .identificationType(List.of("eea"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        var result = appointmentsService.createAppointment(request);
+
+        Appointment appointment = result.getAppointment().get(0);
+
+        assertNotNull(appointment.getIdentification());
+        assertEquals("eea", appointment.getIdentification().getIdentificationType());
+        assertEquals("Chapter 32", appointment.getIdentification().getLegalAuthority());
+        assertEquals("Hong Kong", appointment.getIdentification().getLegalForm());
+        assertEquals("United Kingdom", appointment.getIdentification().getPlaceRegistered());
+        assertEquals("38298", appointment.getIdentification().getRegistrationNumber());
+    }
+
+    @Test
+    void createAppointment_api_shouldCreateMultipleAppointmentsForMultipleIdentificationTypes() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("corporate-director"))
+                .identificationType(List.of("eea", "non-eea"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(request);
+
+        verify(appointmentsRepository, times(2)).save(any(Appointment.class));
+    }
+
+    @Test
+    void createAppointment_api_shouldSetResignedAndAdjustedAppointedDates() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("director"))
+                .resignedOn(true)
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        var result = appointmentsService.createAppointment(request);
+
+        Appointment appointment = result.getAppointment().get(0);
+
+        assertNotNull(appointment.getResignedOn());
+        assertNotNull(appointment.getAppointedOn());
+
+        assertTrue(appointment.getAppointedOn().isBefore(appointment.getResignedOn()));
+    }
+
+    @Test
+    void createAppointment_api_shouldNotSetIdentificationForNonCorporateRole() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("director"))
+                .identificationType(List.of("eea"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        var result = appointmentsService.createAppointment(request);
+
+        Appointment appointment = result.getAppointment().get(0);
+
+        assertNull(appointment.getIdentification());
+    }
+
+    @Test
+    void createAppointment_api_shouldHandleNullSpecSafely() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("director"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        assertDoesNotThrow(() -> appointmentsService.createAppointment(request));
     }
 
 
