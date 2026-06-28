@@ -28,6 +28,7 @@ public class PostcodeServiceImpl implements PostcodeService {
     @Autowired
     private RandomService randomService;
 
+    private static final String FAILED_TO_READ_POSTCODES = "Failed to read postcodes.json";
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Override
@@ -157,12 +158,12 @@ public class PostcodeServiceImpl implements PostcodeService {
             var mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
         } catch (IOException e) {
-            LOG.error("Failed to read postcodes.json", e);
-            throw new PostcodeLoadException("Failed to read postcodes.json", e);
+            LOG.error(FAILED_TO_READ_POSTCODES, e);
+            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, e);
         } catch (JacksonException e) {
             Exception cause = e.getCause() instanceof Exception ce ? ce : e;
-            LOG.error("Failed to read postcodes.json", cause);
-            throw new PostcodeLoadException("Failed to read postcodes.json", cause);
+            LOG.error(FAILED_TO_READ_POSTCODES, cause);
+            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, cause);
         }
     }
 

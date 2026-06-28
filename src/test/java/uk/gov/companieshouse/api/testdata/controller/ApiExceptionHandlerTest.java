@@ -37,7 +37,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors
 
 
 @ExtendWith(MockitoExtension.class)
-public class ApiExceptionHandlerTest {
+class ApiExceptionHandlerTest {
 
     private ApiExceptionHandler handler = new ApiExceptionHandler();
     private static Stream<String> invalidDescriptions() {

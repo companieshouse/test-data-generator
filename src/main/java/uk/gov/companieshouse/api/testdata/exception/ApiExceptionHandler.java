@@ -60,7 +60,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {InvalidAuthCodeException.class})
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
-    protected ResponseEntity<ValidationErrors> handleInvalidAuthCode(InvalidAuthCodeException ex) {
+    public ResponseEntity<ValidationErrors> handleInvalidAuthCode(InvalidAuthCodeException ex) {
         LOG.error("Incorrect company auth_code provided for company " + ex.getCompanyNumber());
 
         ValidationErrors errors = new ValidationErrors();

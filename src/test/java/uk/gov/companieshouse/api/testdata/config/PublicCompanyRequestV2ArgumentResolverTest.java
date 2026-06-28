@@ -120,9 +120,11 @@ class PublicCompanyRequestV2ArgumentResolverTest {
 
     private static class StubController {
         void v2(@RequestBody PublicCompanyRequestV2 request) {
+            // intentionally empty stub for resolver test
         }
 
         void v1(@RequestBody String request) {
+            // intentionally empty stub for resolver test
         }
     }
 }
