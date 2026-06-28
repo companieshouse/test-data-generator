@@ -133,31 +133,15 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             }
         }
 
-        for (JacksonException.Reference ref : path) {
-
-            String fieldName = extractFieldName(ref.getDescription());
-
+        // Iterate in reverse to get the innermost (most specific) field name.
+        for (int i = path.size() - 1; i >= 0; i--) {
+            String fieldName = path.get(i).getPropertyName();
             if (fieldName != null) {
                 return INVALID + fieldName;
             }
         }
 
         return INVALID_REQUEST;
-    }
-
-    private String extractFieldName(String desc) {
-        if (desc == null || !desc.contains("[\"")) {
-            return null;
-        }
-
-        int start = desc.indexOf("[\"") + 2;
-        int end = desc.indexOf("\"]");
-
-        if (start > 1 && end > start) {
-            return desc.substring(start, end);
-        }
-
-        return null;
     }
 
     private boolean isV2Request(WebRequest request) {
