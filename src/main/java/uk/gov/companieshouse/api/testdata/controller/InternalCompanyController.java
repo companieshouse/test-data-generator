@@ -73,18 +73,22 @@ public class InternalCompanyController {
         this.companyProfileService = companyProfileService;
     }
 
-    @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
-    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV2(
-            @Valid @RequestBody(required = false) InternalCompanyRequestV2 internalCompanyRequestV2) throws DataException {
-        InternalCompanyRequest internalCompanyRequest = internalCompanyRequestV2 == null
-                ? new InternalCompanyRequest()
-                : internalCompanyRequestV2.toInternalCompanyRequest();
-        return createCompanyResponse(internalCompanyRequest);
-    }
-
     @PostMapping("/company")
     public ResponseEntity<CompanyProfileResponse> createInternalCompanyV1(
             @Valid @RequestBody(required = false) InternalCompanyRequest internalCompanyRequest) throws DataException {
+        LOG.info("Received request to create a new company (v1) in internal company API");
+        return createCompanyResponse(internalCompanyRequest);
+    }
+
+    @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
+    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV2(
+            @Valid @RequestBody(required = false) InternalCompanyRequestV2 internalCompanyRequestV2) throws DataException {
+
+        LOG.info("Received request to create a new company (v2) in internal company API");
+
+        InternalCompanyRequest internalCompanyRequest = internalCompanyRequestV2 == null
+                ? new InternalCompanyRequest()
+                : internalCompanyRequestV2.toInternalCompanyRequest();
         return createCompanyResponse(internalCompanyRequest);
     }
 

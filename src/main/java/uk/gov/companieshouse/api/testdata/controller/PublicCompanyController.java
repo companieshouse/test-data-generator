@@ -61,6 +61,7 @@ public class PublicCompanyController {
     @PostMapping("/company")
     public ResponseEntity<CompanyProfileResponse> createPublicCompanyV1(
             @Valid @RequestBody(required = false) PublicCompanyRequest request) throws DataException {
+        LOG.info("Received request to create a new company (v1) in public company API");
 
         PublicCompanyRequest publicCompanyRequest = request == null ? new PublicCompanyRequest() : request;
 

@@ -60,6 +60,8 @@ public class PublicCompanyControllerV2 {
     public ResponseEntity<CompanyProfileResponse> createPublicCompanyV2(
             @RequestBody(required = false) PublicCompanyRequestV2 request) throws DataException {
 
+        LOG.info("Received request to create a new company (v2) in public company API");
+
         PublicCompanyRequestV2 publicCompanyRequestV2 = request == null ? new PublicCompanyRequestV2() : request;
 
         validateV2(publicCompanyRequestV2);
