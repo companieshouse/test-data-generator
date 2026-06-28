@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.exception;
+package uk.gov.companieshouse.api.testdata.controller;
 
 import java.util.List;
 import jakarta.validation.ConstraintViolation;
@@ -23,6 +23,9 @@ import tools.jackson.databind.DatabindException;
 import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import uk.gov.companieshouse.api.testdata.Application;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 import uk.gov.companieshouse.logging.Logger;
@@ -120,6 +123,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             return INVALID_REQUEST;
         }
 
+        // TODO: Remove this block when v1 is retired - v2 returns specific field names for collection errors.
         // Preserve legacy v1 behavior for collection element coercion errors.
         // If Jackson path includes an array index, return generic invalid request.
         if (!isV2Request) {
