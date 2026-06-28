@@ -29,6 +29,7 @@ import org.springframework.web.context.request.WebRequest;
 import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.core.JacksonException.Reference;
 
+import uk.gov.companieshouse.api.testdata.exception.ApiExceptionHandler;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
@@ -36,9 +37,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors
 
 
 @ExtendWith(MockitoExtension.class)
-public class GlobalExceptionHandlerTest {
+public class ApiExceptionHandlerTest {
 
-    private GlobalExceptionHandler handler = new GlobalExceptionHandler();
+    private ApiExceptionHandler handler = new ApiExceptionHandler();
     private static Stream<String> invalidDescriptions() {
         return Stream.of(
                 null,                 // null case
@@ -169,7 +170,7 @@ public class GlobalExceptionHandlerTest {
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
-        Method method = GlobalExceptionHandlerTest.class
+        Method method = ApiExceptionHandlerTest.class
                 .getDeclaredMethod("dummyMethod", String.class);
         MethodParameter methodParameter = new MethodParameter(method, 0);
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(

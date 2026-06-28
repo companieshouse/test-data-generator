@@ -7,9 +7,9 @@ import org.springframework.web.context.request.NativeWebRequest;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-final class PublicCompanyRequestResolverSupport {
+final class CompanyRequestResolverSupport {
 
-    private PublicCompanyRequestResolverSupport() {
+    private CompanyRequestResolverSupport() {
     }
 
     static RequestPayload extractRequestPayload(NativeWebRequest webRequest) {

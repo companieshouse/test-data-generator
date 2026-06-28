@@ -142,11 +142,6 @@
             <version>${tomcat-embed-el.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-helper-java</artifactId>
             <version>${api-helper-java.version}</version>

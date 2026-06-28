@@ -6,10 +6,11 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -158,6 +159,10 @@ public class PostcodeServiceImpl implements PostcodeService {
         } catch (IOException e) {
             LOG.error("Failed to read postcodes.json", e);
             throw new PostcodeLoadException("Failed to read postcodes.json", e);
+        } catch (JacksonException e) {
+            Exception cause = e.getCause() instanceof Exception ce ? ce : e;
+            LOG.error("Failed to read postcodes.json", cause);
+            throw new PostcodeLoadException("Failed to read postcodes.json", cause);
         }
     }
 

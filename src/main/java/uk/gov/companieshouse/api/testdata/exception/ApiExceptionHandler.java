@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.controller;
+package uk.gov.companieshouse.api.testdata.exception;
 
 import java.util.List;
 import jakarta.validation.ConstraintViolation;
@@ -19,17 +19,17 @@ import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DatabindException;
+import tools.jackson.databind.exc.InvalidFormatException;
+import tools.jackson.databind.exc.UnrecognizedPropertyException;
 import uk.gov.companieshouse.api.testdata.Application;
-import uk.gov.companieshouse.api.testdata.exception.DataException;
-import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
-import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @ControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
     private static final String INVALID_REQUEST = "invalid request";
     public static final String INVALID = "invalid ";
@@ -87,28 +87,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private String resolveMessage(HttpMessageNotReadableException ex, WebRequest request) {
         boolean isV2Request = isV2Request(request);
-        // Handle Jackson 2.x exceptions thrown by PublicCompanyRequestV2ArgumentResolver
-        var upe = findCause(ex, com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException.class);
+        var upe = findCause(ex, UnrecognizedPropertyException.class);
         if (upe != null) {
             return INVALID + upe.getPropertyName();
         }
-        var ife2 = findCause(ex, com.fasterxml.jackson.databind.exc.InvalidFormatException.class);
-        if (ife2 != null && ife2.getPath() != null && !ife2.getPath().isEmpty()) {
-            String fieldName = resolveJackson2FieldName(ife2.getPath());
-            return fieldName != null ? INVALID + fieldName : INVALID_REQUEST;
+        var ife = findCause(ex, InvalidFormatException.class);
+        if (ife != null) {
+            return extractFieldMessage(ife.getPath(), isV2Request);
         }
-        // Handle other Jackson 2.x mapping exceptions (for example enum creator errors)
-        // that still carry path information even when they are not InvalidFormatException.
-        var jme2 = findCause(ex, com.fasterxml.jackson.databind.JsonMappingException.class);
-        if (jme2 != null && jme2.getPath() != null && !jme2.getPath().isEmpty()) {
-            String fieldName = resolveJackson2FieldName(jme2.getPath());
-            return fieldName != null ? INVALID + fieldName : INVALID_REQUEST;
-        }
-
-        // Handle Jackson 3.x exceptions thrown by standard Spring message converters
-        var ife3 = findCause(ex, tools.jackson.databind.exc.InvalidFormatException.class);
-        if (ife3 != null) {
-            return extractFieldMessage(ife3.getPath(), isV2Request);
+        // Handle mapping exceptions that still carry path information even when they are not InvalidFormatException.
+        var jme = findCause(ex, DatabindException.class);
+        if (jme != null) {
+            return extractFieldMessage(jme.getPath(), isV2Request);
         }
 
         return INVALID_REQUEST;
@@ -164,16 +154,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             return desc.substring(start, end);
         }
 
-        return null;
-    }
-
-    private String resolveJackson2FieldName(List<com.fasterxml.jackson.databind.JsonMappingException.Reference> path) {
-        for (int i = path.size() - 1; i >= 0; i--) {
-            String fieldName = path.get(i).getFieldName();
-            if (fieldName != null) {
-                return fieldName;
-            }
-        }
         return null;
     }
 

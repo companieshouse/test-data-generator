@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.api.testdata.config;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -16,6 +13,10 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.DeserializationFeature;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequestV2;
 
 /**
@@ -23,8 +24,9 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyReques
  */
 public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgumentResolver {
 
-    private final ObjectMapper strictV2ObjectMapper = new ObjectMapper()
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+    private final ObjectMapper strictV2ObjectMapper = JsonMapper.builder()
+            .enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+            .build();
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     @Override
@@ -38,7 +40,7 @@ public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgu
                                   ModelAndViewContainer mavContainer,
                                   @NonNull NativeWebRequest webRequest,
                                   WebDataBinderFactory binderFactory) {
-        PublicCompanyRequestResolverSupport.RequestPayload requestPayload =
+        CompanyRequestResolverSupport.RequestPayload requestPayload =
                 extractRequestPayload(webRequest);
         if (requestPayload == null) {
             return null;
@@ -54,7 +56,7 @@ public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgu
                 throw new ConstraintViolationException(violations);
             }
             return resolved;
-        } catch (JsonProcessingException | IllegalArgumentException ex) {
+        } catch (JacksonException | IllegalArgumentException ex) {
             throw new HttpMessageNotReadableException(
                     "invalid request",
                     ex,
@@ -62,10 +64,10 @@ public class PublicCompanyRequestV2ArgumentResolver implements HandlerMethodArgu
         }
     }
 
-    private PublicCompanyRequestResolverSupport.RequestPayload extractRequestPayload(NativeWebRequest webRequest) {
+    private CompanyRequestResolverSupport.RequestPayload extractRequestPayload(NativeWebRequest webRequest) {
         try {
-            return PublicCompanyRequestResolverSupport.extractRequestPayload(webRequest);
-        } catch (PublicCompanyRequestResolverSupport.RequestPayloadReadException ex) {
+            return CompanyRequestResolverSupport.extractRequestPayload(webRequest);
+        } catch (CompanyRequestResolverSupport.RequestPayloadReadException ex) {
             throw new HttpMessageNotReadableException(
                     "invalid request",
                     ex,
