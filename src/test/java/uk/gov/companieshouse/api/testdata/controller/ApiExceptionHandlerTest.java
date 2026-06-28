@@ -30,7 +30,6 @@ import org.springframework.web.context.request.WebRequest;
 import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.core.JacksonException.Reference;
 
-import uk.gov.companieshouse.api.testdata.controller.ApiExceptionHandler;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
