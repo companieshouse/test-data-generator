@@ -49,12 +49,7 @@ public class PublicCompanyControllerV2 {
      * V2 endpoint: Handles PublicCompanyRequestV2 format.
      * INTERNAL ONLY - temporarily hosted at /internal/v2/company to avoid clashing
      * with InternalCompanyController's existing /internal/company?X-API-Version=2 mapping.
-     * Requires X-API-Version: 2 so clients/tests keep the same version-header behavior
-     * that will be used when this route moves to /company.
-     * Added to internal path to prevent access from external clients until the new endpoint is
-     * fully implemented and tested.
-     * When V2 schema migration is complete this will move to the public /company path.
-     * See: taf-api-karate/.../company_test_data/public/v2/README.md for full rationale.
+     * Requires X-API-Version 2 header.
      */
     @PostMapping(value = "/internal/v2/company", headers = API_VERSION_HEADER + "=2")
     public ResponseEntity<CompanyProfileResponse> createPublicCompanyV2(
