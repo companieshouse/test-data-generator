@@ -123,7 +123,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             return INVALID_REQUEST;
         }
 
-        // TODO: Remove this block when v1 is retired - v2 returns specific field names for collection errors.
         // Preserve legacy v1 behavior for collection element coercion errors.
         // If Jackson path includes an array index, return generic invalid request.
         if (!isV2Request) {

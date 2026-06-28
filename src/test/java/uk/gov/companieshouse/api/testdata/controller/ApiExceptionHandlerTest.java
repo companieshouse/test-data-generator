@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -128,6 +129,7 @@ class ApiExceptionHandlerTest {
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
+        assertNotNull(response.getBody());
         ValidationErrors errors = (ValidationErrors) response.getBody();
         ValidationError actual = errors.getErrors().iterator().next();
 
@@ -154,6 +156,7 @@ class ApiExceptionHandlerTest {
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
+        assertNotNull(response.getBody());
         ValidationErrors errors = (ValidationErrors) response.getBody();
 
         assertEquals("invalid request",
