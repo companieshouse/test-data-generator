@@ -1,8 +1,8 @@
 package uk.gov.companieshouse.api.testdata.config;
 
+import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoClients;
-import org.springframework.boot.mongodb.autoconfigure.MongoProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
@@ -15,11 +15,13 @@ import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 import org.springframework.data.mongodb.repository.support.MongoRepositoryFactoryBean;
 import org.springframework.data.repository.Repository;
 import uk.gov.companieshouse.api.testdata.repository.AccountPenaltiesRepository;
+import uk.gov.companieshouse.api.testdata.repository.AdminPermissionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspApplicationRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspMemberRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppealsRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
+import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -47,21 +49,21 @@ import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import java.io.Serializable;
 
 @Configuration
-@EnableConfigurationProperties(MongoProperties.class)
 public class MongoConfig {
+
+    @Value("${spring.mongodb.uri}")
+    private String mongoUri;
+
+    @Bean
+    public MongoClient mongoClient() {
+        return MongoClients.create(mongoUri);
+    }
 
     private static final String ACCOUNT_DATABASE = "account";
     private static final String ITEMS_DATABASE = "items";
     private static final String SIC_CODE_DATABASE = "sic_code";
     private static final String IDENTITY_VERIFICATION = "identity_verification";
     private static final String ORDERS_ITEM_GROUPS_DATABASE = "orders_item_groups";
-
-    private final MongoProperties mongoProperties;
-
-    public MongoConfig(MongoProperties mongoProperties) {
-        super();
-        this.mongoProperties = mongoProperties;
-    }
 
     @Bean
     public CompanyProfileRepository companyProfileRepository() {
@@ -79,6 +81,11 @@ public class MongoConfig {
     }
 
     @Bean
+    public AdminPermissionsRepository adminPermissionsRepository() {
+        return getMongoRepositoryBean(AdminPermissionsRepository.class, "admin_permissions");
+    }
+
+    @Bean
     public FilingHistoryRepository filingHistoryRepository() {
         return getMongoRepositoryBean(FilingHistoryRepository.class, "company_filing_history");
     }
@@ -91,6 +98,11 @@ public class MongoConfig {
     @Bean
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
+    }
+
+    @Bean
+    public AppointmentsDataRepository appointmentsDataRepository() {
+        return getMongoRepositoryBean(AppointmentsDataRepository.class, "appointments");
     }
 
     @Bean
@@ -219,7 +231,7 @@ public class MongoConfig {
 
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
-                MongoClients.create(this.mongoProperties.determineUri()), database);
+                mongoClient(), database);
         var mappingMongoConverter = getMappingMongoConverter(
                 simpleMongoDbFactory);
         return new MongoTemplate(simpleMongoDbFactory, mappingMongoConverter);
