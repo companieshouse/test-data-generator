@@ -82,7 +82,7 @@ public class MongoConfig {
 
     @Bean
     public AdminPermissionsRepository adminPermissionsRepository() {
-        return getMongoRepositoryBean(AdminPermissionsRepository.class, "admin_permissions");
+        return getMongoRepositoryBean(AdminPermissionsRepository.class, ACCOUNT_DATABASE);
     }
 
     @Bean
