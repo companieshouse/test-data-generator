@@ -157,13 +157,12 @@ public class PostcodeServiceImpl implements PostcodeService {
             }
             var mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
-        } catch (IOException e) {
-            LOG.error(FAILED_TO_READ_POSTCODES, e);
-            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, e);
-        } catch (JacksonException e) {
-            Exception cause = e.getCause() instanceof Exception ce ? ce : e;
-            LOG.error(FAILED_TO_READ_POSTCODES, cause);
-            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, cause);
+        } catch (IOException ioException) {
+            LOG.error(FAILED_TO_READ_POSTCODES, ioException);
+            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, ioException);
+        } catch (JacksonException jacksonException) {
+            LOG.error(FAILED_TO_READ_POSTCODES, jacksonException);
+            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, jacksonException);
         }
     }
 
