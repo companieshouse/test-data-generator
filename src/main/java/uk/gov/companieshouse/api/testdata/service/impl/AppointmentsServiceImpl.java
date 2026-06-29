@@ -206,11 +206,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsResultData;
     }
 
+    // After — clean, 2-arg calls
     @Override
     public AppointmentsResultResponse createAppointment(AppointmentCreationRequest spec) {
 
-        LOG.info("Starting bulk appointment creation via API for company: {}"
-        );
+        LOG.info("Starting bulk appointment creation via API for company: {}");
 
         String companyNumber = spec.getCompanyNumber();
         List<String> officerRoles = spec.getOfficerRoles();
@@ -221,55 +221,30 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
 
         Instant now = Instant.now();
-        Instant appointedOn = (spec.getAppointedOn() != null)
-                ? spec.getAppointedOn()
-                : now;
+        Instant appointedOn = (spec.getAppointedOn() != null) ? spec.getAppointedOn() : now;
 
-        List<Appointment> createdAppointments = new ArrayList<>();
-        List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
-        List<OfficerAppointment> createdOfficerAppointments = new ArrayList<>();
+        AppointmentAccumulator accumulator = new AppointmentAccumulator();
 
         for (String role : officerRoles) {
-
             validateOfficerRole(role);
 
             boolean isCorporate = role.contains("corporate");
 
             if (isCorporate && identificationTypes != null && !identificationTypes.isEmpty()) {
-
                 for (String identificationType : identificationTypes) {
-                    createSingleAppointment(
-                            spec,
-                            role,
-                            identificationType,
-                            companyNumber,
-                            now,
-                            appointedOn,
-                            createdAppointments,
-                            createdAppointmentsData,
-                            createdOfficerAppointments
-                    );
+                    SingleAppointmentContext ctx = new SingleAppointmentContext(
+                            spec, role, identificationType, companyNumber, now, appointedOn);
+                    createSingleAppointment(ctx, accumulator);
                 }
-
             } else {
-                createSingleAppointment(
-                        spec,
-                        role,
-                        null,
-                        companyNumber,
-                        now,
-                        appointedOn,
-                        createdAppointments,
-                        createdAppointmentsData,
-                        createdOfficerAppointments
-                );
+                SingleAppointmentContext ctx = new SingleAppointmentContext(
+                        spec, role, null, companyNumber, now, appointedOn);
+                createSingleAppointment(ctx, accumulator);
             }
         }
 
         AppointmentsResultResponse response = new AppointmentsResultResponse();
-        response.setAppointment(createdAppointments);
-        response.setAppointmentsData(createdAppointmentsData);
-        response.setOfficerAppointment(createdOfficerAppointments);
+        accumulator.applyTo(response);
 
         LOG.info("Created {} appointments via API for company {}");
 
@@ -277,45 +252,33 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private void createSingleAppointment(
-            AppointmentCreationRequest spec,
-            String role,
-            String identificationType,
-            String companyNumber,
-            Instant now,
-            Instant appointedOn,
-            List<Appointment> createdAppointments,
-            List<AppointmentsData> createdAppointmentsData,
-            List<OfficerAppointment> createdOfficerAppointments
-    ) {
+            SingleAppointmentContext ctx,
+            AppointmentAccumulator accumulator) {
 
         String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
         String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
 
-        // ✅ Safe CompanyRequest
-        CompanyRequest safeSpec = spec.getSpec();
+        CompanyRequest safeSpec = ctx.spec.getSpec();
         if (safeSpec == null) {
             safeSpec = new CompanyRequest();
-            safeSpec.setCompanyNumber(companyNumber);
+            safeSpec.setCompanyNumber(ctx.companyNumber);
             safeSpec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
             safeSpec.setSecureOfficer(false);
         }
 
-        // ✅ Country fallback
-        String countryOfResidence = (spec.getCountryOfResidence() != null)
-                ? spec.getCountryOfResidence()
+        String countryOfResidence = (ctx.spec.getCountryOfResidence() != null)
+                ? ctx.spec.getCountryOfResidence()
                 : "england-wales";
 
-        // ✅ ✅ DATE RULE IMPLEMENTATION
-        Instant appointedOnAdjusted = appointedOn;
+        Instant appointedOnAdjusted = ctx.appointedOn;
         Instant resignedOnAdjusted = null;
 
-        if (Boolean.TRUE.equals(spec.getResignedOn())) {
+        if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
             appointedOnAdjusted = LocalDate.now()
                     .minusYears(1)
                     .atStartOfDay(ZoneId.of("UTC"))
                     .toInstant();
-
             resignedOnAdjusted = LocalDate.now()
                     .minusMonths(1)
                     .atStartOfDay(ZoneId.of("UTC"))
@@ -324,37 +287,34 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
                 .spec(safeSpec)
-                .companyNumber(companyNumber)
+                .companyNumber(ctx.companyNumber)
                 .countryOfResidence(countryOfResidence)
                 .internalId(internalId)
                 .officerId(officerId)
-                .dateTimeNow(now)
-                .appointedOn(appointedOnAdjusted) // ✅ overridden
+                .dateTimeNow(ctx.now)
+                .appointedOn(appointedOnAdjusted)
                 .appointmentId(appointmentId)
                 .build();
 
         Appointment appointment = createBaseAppointment(request);
-
-        String roleName = setRoleName(role);
+        String roleName = setRoleName(ctx.role);
 
         appointment.setForename(FORENAME);
         appointment.setSurname(roleName);
         appointment.setOccupation(roleName);
-        appointment.setOfficerRole(role);
+        appointment.setOfficerRole(ctx.role);
 
-        // ✅ resigned logic
-        if (Boolean.TRUE.equals(spec.getResignedOn())) {
+        if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
             appointment.setResignedOn(resignedOnAdjusted);
         }
 
-        if (Boolean.TRUE.equals(spec.getIsPre1992Appointment())) {
+        if (Boolean.TRUE.equals(ctx.spec.getIsPre1992Appointment())) {
             appointment.setIsPre1992Appoinment(true);
         }
 
-        // ✅ Identification
-        if (identificationType != null) {
+        if (ctx.identificationType != null) {
             Identification identification = new Identification();
-            identification.setIdentificationType(identificationType);
+            identification.setIdentificationType(ctx.identificationType);
             identification.setLegalAuthority("Chapter 32");
             identification.setLegalForm("Hong Kong");
             identification.setPlaceRegistered("United Kingdom");
@@ -362,46 +322,34 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setIdentification(identification);
         }
 
-        appointment.setLinks(createAppointmentLinks(companyNumber, officerId, appointmentId));
+        appointment.setLinks(createAppointmentLinks(ctx.companyNumber, officerId, appointmentId));
 
         Appointment saved = appointmentsRepository.save(appointment);
-        createdAppointments.add(saved);
+        accumulator.appointments.add(saved);
 
-        // ✅ AppointmentsData
         AppointmentsData data = createBaseAppointmentsData(
-                safeSpec,
-                internalId,
-                officerId,
-                now,
-                appointmentId
-        );
+                safeSpec, internalId, officerId, ctx.now, appointmentId);
 
         data.setForename(FORENAME);
         data.setSurname(roleName);
         data.setOccupation(roleName);
-        data.setOfficerRole(role);
+        data.setOfficerRole(ctx.role);
 
         AppointmentsData.Links dataLinks = new AppointmentsData.Links();
         AppointmentsData.OfficerLinks officerLinks = new AppointmentsData.OfficerLinks();
-
         officerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
         officerLinks.setSelf(OFFICERS_LINK + officerId);
-
         dataLinks.setOfficer(officerLinks);
-        dataLinks.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + appointmentId);
-
+        dataLinks.setSelf(COMPANY_LINK + ctx.companyNumber + "/appointments/" + appointmentId);
         data.setLinks(dataLinks);
 
         AppointmentsData savedData = appointmentsDataRepository.save(data);
-        createdAppointmentsData.add(savedData);
+        accumulator.appointmentsData.add(savedData);
 
-        // ✅ Officer
         OfficerAppointment officerAppointment =
-                createOfficerAppointment(safeSpec, officerId, appointmentId, role);
-
-        createdOfficerAppointments.add(officerAppointment);
+                createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role);
+        accumulator.officerAppointments.add(officerAppointment);
     }
-
     @Override
     public boolean deleteAllAppointments(String companyNumber) {
         LOG.info("Starting deletion of all appointments and appointments data for company number: "
@@ -590,7 +538,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
         item.setCompanyNumber(companyNumber);
         item.setCompanyStatus(COMPANY_STATUS);
 
-        item.setSecureOfficer(Boolean.TRUE.equals(companySpec.getSecureOfficer()));
+        item.setSecureOfficer(
+                companySpec != null && Boolean.TRUE.equals(companySpec.getSecureOfficer())
+        );
+
 
         List<OfficerAppointmentItem> officerAppointmentItemList = new ArrayList<>();
         officerAppointmentItemList.add(item);
@@ -612,5 +563,51 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private boolean payloadExplicitlySetNumberOfAppointments(CompanyRequest spec) {
         return spec.isNumberOfAppointmentsSet();
+    }
+
+    /**
+     * Immutable context object grouping all inputs needed to create a single appointment.
+     * Replaces the 6 individual parameters on createSingleAppointment, resolving Sonar java:S107.
+     */
+    private static final class SingleAppointmentContext {
+
+        private final AppointmentCreationRequest spec;
+        private final String role;
+        private final String identificationType; // null for non-corporate roles
+        private final String companyNumber;
+        private final Instant now;
+        private final Instant appointedOn;
+
+        private SingleAppointmentContext(
+                AppointmentCreationRequest spec,
+                String role,
+                String identificationType,
+                String companyNumber,
+                Instant now,
+                Instant appointedOn) {
+            this.spec = spec;
+            this.role = role;
+            this.identificationType = identificationType;
+            this.companyNumber = companyNumber;
+            this.now = now;
+            this.appointedOn = appointedOn;
+        }
+    }
+
+    /**
+     * Mutable accumulator that collects results across multiple createSingleAppointment calls.
+     * Replaces the 3 List<> parameters passed into createSingleAppointment.
+     */
+    private static final class AppointmentAccumulator {
+
+        private final List<Appointment> appointments = new ArrayList<>();
+        private final List<AppointmentsData> appointmentsData = new ArrayList<>();
+        private final List<OfficerAppointment> officerAppointments = new ArrayList<>();
+
+        private void applyTo(AppointmentsResultResponse response) {
+            response.setAppointment(appointments);
+            response.setAppointmentsData(appointmentsData);
+            response.setOfficerAppointment(officerAppointments);
+        }
     }
 }
