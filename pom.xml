@@ -52,7 +52,7 @@
         <sonar.password/>
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
-        <sonar.coverage.exclusions>**/Application.java</sonar.coverage.exclusions>
+        <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
