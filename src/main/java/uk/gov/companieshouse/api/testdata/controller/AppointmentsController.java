@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +49,21 @@ public class AppointmentsController {
             return new ResponseEntity<>(createdAppointments, HttpStatus.CREATED);
         } catch (Exception ex) {
             throw new DataException("Error creating appointments", ex);
+        }
+    }
+
+    @DeleteMapping("/company/{companyNumber}/appointments")
+    public ResponseEntity<Map<String, Object>> deleteAppointments(@PathVariable String companyNumber) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("company-number", companyNumber);
+        boolean deleteAppointments = appointmentService.deleteAllAppointments(companyNumber);
+        if (deleteAppointments) {
+            LOG.info("Appointments deleted for company", response);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            response.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("No Appointments found for company", response);
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
     }
 }
