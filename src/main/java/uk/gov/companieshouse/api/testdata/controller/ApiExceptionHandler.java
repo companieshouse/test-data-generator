@@ -99,9 +99,9 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             return extractFieldMessage(ife.getPath(), isV2Request);
         }
         // Handle mapping exceptions that still carry path information even when they are not InvalidFormatException.
-        var jme = findCause(ex, DatabindException.class);
-        if (jme != null) {
-            return extractFieldMessage(jme.getPath(), isV2Request);
+        var dbe = findCause(ex, DatabindException.class);
+        if (dbe != null) {
+            return extractFieldMessage(dbe.getPath(), isV2Request);
         }
 
         return INVALID_REQUEST;
