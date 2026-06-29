@@ -428,6 +428,11 @@ In order to use the generator, there are different possible endpoints that can b
   A usage example looks like this: `{ "activity_description" : "Braunkohle waschen", "sic_description" : "Abbau von Braunkohle", "is_ch_activity" : false, "activity_description_search_field" : "braunkohle waschen" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/combined-sic-activities/{id}` will delete the `Sic Code and Keyword`.
 
+#### Appointments
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/internal/company/{companyNumber}/appointments` will delete all appointments for a given company. `companyNumber` is required in the URL path.
+  - Response: 204 NO_CONTENT on successful deletion
+  - Response: 404 NOT_FOUND if no appointments exist for the company
+
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
