@@ -44,6 +44,7 @@
         <private-api-sdk-java.version>4.0.416</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
         <test-data-generator-library.version>1.0.18-SNAPSHOT</test-data-generator-library.version>
+        <ch-boms.version>0.1.9</ch-boms.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
@@ -214,6 +215,13 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>test-data-generator-library</artifactId>
             <version>${test-data-generator-library.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>ch-dependency-bom</artifactId>
+            <version>${ch-boms.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
         </dependency>
 
     </dependencies>
