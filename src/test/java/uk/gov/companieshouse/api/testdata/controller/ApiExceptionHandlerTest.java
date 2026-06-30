@@ -132,7 +132,6 @@ class ApiExceptionHandlerTest {
                 new InvalidFormatException(null, "msg", "value", String.class);
 
         Reference ref = Mockito.mock(Reference.class);
-        when(ref.getIndex()).thenReturn(-1);
         when(ref.getPropertyName()).thenReturn(null);
 
         cause.prependPath(ref);

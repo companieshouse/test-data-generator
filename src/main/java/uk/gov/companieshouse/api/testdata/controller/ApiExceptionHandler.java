@@ -123,25 +123,46 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             return INVALID_REQUEST;
         }
 
-        // Preserve legacy v1 behavior for collection element coercion errors.
-        // If Jackson path includes an array index, return generic invalid request.
-        if (!isV2Request) {
-            for (JacksonException.Reference ref : path) {
-                if (ref.getIndex() >= 0) {
-                    return INVALID_REQUEST;
-                }
-            }
-        }
-
         // Iterate in reverse to get the innermost (most specific) field name.
         for (int i = path.size() - 1; i >= 0; i--) {
-            String fieldName = path.get(i).getPropertyName();
+            JacksonException.Reference ref = path.get(i);
+            
+            // Try to get field name from property name first
+            String fieldName = ref.getPropertyName();
+            
+            // If no property name (e.g., for array elements), try to extract from description
+            if (fieldName == null) {
+                fieldName = extractFieldName(ref.getDescription());
+            }
+            
             if (fieldName != null) {
+                // For V1, if this is an array element, use parent collection name instead
+                if (!isV2Request && ref.getIndex() >= 0 && i > 0) {
+                    String parentName = path.get(i - 1).getPropertyName();
+                    if (parentName != null) {
+                        return INVALID + parentName;
+                    }
+                }
                 return INVALID + fieldName;
             }
         }
 
         return INVALID_REQUEST;
+    }
+
+    private String extractFieldName(String desc) {
+        if (desc == null || !desc.contains("[\"")) {
+            return null;
+        }
+
+        int start = desc.indexOf("[\"") + 2;
+        int end = desc.indexOf("\"]");
+
+        if (start > 1 && end > start) {
+            return desc.substring(start, end);
+        }
+
+        return null;
     }
 
     private boolean isV2Request(WebRequest request) {
