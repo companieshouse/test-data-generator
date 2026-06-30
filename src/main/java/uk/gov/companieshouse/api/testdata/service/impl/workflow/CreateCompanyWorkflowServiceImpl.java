@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl.workflow;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -29,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyStructurePersistenceSer
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
+import uk.gov.companieshouse.api.testdata.service.validation.CompanySubTypeRule;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -123,6 +125,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     @Override
     public PopulatedCompanyDetailsResponse buildCompanyDataStructure(
             CompanyRequest spec) throws DataException {
+        validateSubType(spec);
         assignCompanyNumber(spec);
 
         try {
@@ -233,6 +236,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
      * If any creation step fails, partial company data is rolled back via {@link #handleCreateFailure}.
      */
     protected CompanyProfileResponse createCompany(CompanyRequest companySpec) throws DataException {
+        validateSubType(companySpec);
         assignCompanyNumber(companySpec);
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -299,6 +303,14 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
     }
 
+    private void validateSubType(CompanyRequest spec) {
+        if (spec != null
+                && !CompanySubTypeRule.isValidForCompanyType(
+                        spec.getSubType(), spec.getCompanyType())) {
+            throw new HttpMessageNotReadableException("invalid request", null);
+        }
+    }
+
     private CompanyProfileResponse buildCompanyResponse(CompanyRequest spec, String authCode) {
         String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
         return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
@@ -359,5 +371,3 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         return data;
     }
 }
-
-

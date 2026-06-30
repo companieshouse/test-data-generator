@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.util.StringUtils;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -30,6 +31,7 @@ import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
+import uk.gov.companieshouse.api.testdata.service.validation.CompanySubTypeRule;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
@@ -56,6 +58,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private static final String FOREIGN_ACCOUNT_TYPE = "ForeignAccountType";
     private static final String TERMS_OF_PUBLICATION = "Terms of Account Publication";
     private static final String GOVERNED_BY = "Federal Government";
+    private static final String COMMUNITY_INTEREST_COMPANY_SUB_TYPE = "community-interest-company";
     public static final String
             FULL_DATA_AVAILABLE_FROM_FINANCIAL_CONDUCT_AUTHORITY =
             "full-data-available-from-financial-conduct-authority";
@@ -213,7 +216,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasCharges(false);
         profile.setCanFile(true);
         setPartialDataOptions(profile, jurisdiction, companyType);
-        setSubType(profile, subType);
+        setSubType(profile, subType, companyType);
         setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
@@ -496,10 +499,18 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setSubType(CompanyProfile profile, String subType) {
+    private void setSubType(CompanyProfile profile, String subType, CompanyType companyType) {
+        validateSubType(subType, companyType);
         if (subType != null) {
-            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
+            profile.setIsCommunityInterestCompany(
+                    subType.equals(COMMUNITY_INTEREST_COMPANY_SUB_TYPE));
             profile.setSubtype(subType);
+        }
+    }
+
+    private void validateSubType(String subType, CompanyType companyType) {
+        if (!CompanySubTypeRule.isValidForCompanyType(subType, companyType)) {
+            throw new HttpMessageNotReadableException("invalid request", null);
         }
     }
 

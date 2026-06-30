@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -273,12 +274,22 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithNonCicSubType() {
-        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
+    void createLimitedPartnershipWithPrivateFundLimitedPartnershipSubType() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
         spec.setSubType("private-fund-limited-partnership");
         CompanyProfile profile = createAndCapture(spec);
         assertEquals("private-fund-limited-partnership", profile.getSubtype());
         assertFalse(profile.getIsCommunityInterestCompany());
+    }
+
+    @Test
+    void createLtdWithPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequestException() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
+        spec.setSubType("private-fund-limited-partnership");
+        HttpMessageNotReadableException thrown = assertThrows(HttpMessageNotReadableException.class,
+                () -> companyProfileService.create(spec));
+        assertEquals("invalid request", thrown.getMessage());
+        verify(repository, never()).save(any());
     }
 
     @Test
