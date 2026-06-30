@@ -43,7 +43,7 @@
         <api-security-java.version>2.0.25</api-security-java.version>
         <private-api-sdk-java.version>4.0.416</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
-        <test-data-generator-library.version>1.0.19</test-data-generator-library.version>
+        <test-data-generator-library.version>1.0.20</test-data-generator-library.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
