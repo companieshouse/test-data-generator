@@ -3,13 +3,14 @@ package uk.gov.companieshouse.api.testdata.service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 
 import java.util.List;
 import java.util.Optional;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 
-public interface CompanyProfileService extends DataService<CompanyProfile, CompanyRequest> {
+public interface CompanyProfileService extends DataService<CompanyProfile, InternalCompanyRequest> {
+
 
     /**
      * Checks whether a company with the given {@code companyNumber} is present

@@ -187,7 +187,7 @@ class PostcodeServiceImplTest {
                 PostcodeLoadException.class,
                 service::loadAllPostcodes);
         assertEquals("Failed to read postcodes.json", ex.getMessage());
-        assertEquals("Simulated IO error", ex.getCause().getMessage());
+        assertTrue(ex.getCause().getMessage().contains("Simulated IO error"));
     }
 
     @Test

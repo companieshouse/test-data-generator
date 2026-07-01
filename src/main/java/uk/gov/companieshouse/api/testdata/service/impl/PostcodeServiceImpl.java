@@ -6,10 +6,11 @@ import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
@@ -27,6 +28,7 @@ public class PostcodeServiceImpl implements PostcodeService {
     @Autowired
     private RandomService randomService;
 
+    private static final String FAILED_TO_READ_POSTCODES = "Failed to read postcodes.json";
     private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
 
     @Override
@@ -155,9 +157,12 @@ public class PostcodeServiceImpl implements PostcodeService {
             }
             var mapper = new ObjectMapper();
             return mapper.readValue(inputStream, new TypeReference<List<Postcodes>>() {});
-        } catch (IOException e) {
-            LOG.error("Failed to read postcodes.json", e);
-            throw new PostcodeLoadException("Failed to read postcodes.json", e);
+        } catch (IOException ioException) {
+            LOG.error(FAILED_TO_READ_POSTCODES, ioException);
+            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, ioException);
+        } catch (JacksonException jacksonException) {
+            LOG.error(FAILED_TO_READ_POSTCODES, jacksonException);
+            throw new PostcodeLoadException(FAILED_TO_READ_POSTCODES, jacksonException);
         }
     }
 

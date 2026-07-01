@@ -15,10 +15,11 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequestV2;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -63,20 +64,39 @@ class InternalCompanyControllerTest {
     private InternalCompanyController internalCompanyController;
 
     @Captor
-    private ArgumentCaptor<CompanyRequest> specCaptor;
+    private ArgumentCaptor<InternalCompanyRequest> internalCompanyRequestCaptor;
 
     @Test
     void createInternalCompany() throws Exception {
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         request.setJurisdiction(JurisdictionType.SCOTLAND);
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
         when(createCompanyWorkflowService.createInternalCompany(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(request);
+        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV1(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+    }
+
+    @Test
+    void createInternalCompanyV2() throws Exception {
+        InternalCompanyRequestV2 request = new InternalCompanyRequestV2();
+        request.setJurisdiction(JurisdictionType.SCOTLAND);
+        InternalCompanyRequestV2.CompanyTypeV2 companyTypeV2 = new InternalCompanyRequestV2.CompanyTypeV2();
+        companyTypeV2.setSubType("community-interest-company");
+        request.setCompanyTypeDetails(companyTypeV2);
+        CompanyProfileResponse company =
+                new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
+
+        when(createCompanyWorkflowService.createInternalCompany(any())).thenReturn(company);
+        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV2(request);
+
+        assertEquals(company, response.getBody());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        verify(createCompanyWorkflowService).createInternalCompany(internalCompanyRequestCaptor.capture());
+        assertEquals("community-interest-company", internalCompanyRequestCaptor.getValue().getSubType());
     }
 
     @Test
@@ -85,25 +105,25 @@ class InternalCompanyControllerTest {
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
         when(createCompanyWorkflowService.createInternalCompany(any())).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(null);
+        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV1(null);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
 
-        verify(createCompanyWorkflowService).createInternalCompany(specCaptor.capture());
-        CompanyRequest usedSpec = specCaptor.getValue();
+        verify(createCompanyWorkflowService).createInternalCompany(internalCompanyRequestCaptor.capture());
+        InternalCompanyRequest usedInternalCompanyRequest = internalCompanyRequestCaptor.getValue();
 
-        assertEquals(JurisdictionType.ENGLAND_WALES, usedSpec.getJurisdiction());
+        assertEquals(JurisdictionType.ENGLAND_WALES, usedInternalCompanyRequest.getJurisdiction());
     }
 
     @Test
     void createInternalCompanyDefaultJurisdiction() throws Exception {
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
         when(createCompanyWorkflowService.createInternalCompany(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(request);
+        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV1(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -112,7 +132,7 @@ class InternalCompanyControllerTest {
 
     @Test
     void createInternalCompanyWithDisqualifications() throws Exception {
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         request.setJurisdiction(JurisdictionType.SCOTLAND);
         DisqualificationsRequest disqSpec = new DisqualificationsRequest();
         disqSpec.setCorporateOfficer(false);
@@ -122,7 +142,7 @@ class InternalCompanyControllerTest {
                 new CompanyProfileResponse("12345678", "123456", "http://localhost:4001/company/12345678");
 
         when(createCompanyWorkflowService.createInternalCompany(request)).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createCompany(request);
+        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV1(request);
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
@@ -130,13 +150,13 @@ class InternalCompanyControllerTest {
 
     @Test
     void createInternalCompanyException() throws Exception {
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         request.setJurisdiction(JurisdictionType.NI);
         DataException exception = new DataException("Error message");
         when(createCompanyWorkflowService.createInternalCompany(request)).thenThrow(exception);
 
         DataException thrown = assertThrows(DataException.class, () ->
-                internalCompanyController.createCompany(request));
+                internalCompanyController.createInternalCompanyV1(request));
         assertEquals(exception, thrown);
     }
 
@@ -197,7 +217,7 @@ class InternalCompanyControllerTest {
 
     @Test
     void buildCompanyDataStructureSuccess() throws Exception {
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
         when(createCompanyWorkflowService.buildCompanyDataStructure(request)).thenReturn(responseObj);
 
@@ -212,7 +232,7 @@ class InternalCompanyControllerTest {
     @Test
     void buildCompanyDataStructureNullRequestUsesDefault() throws Exception {
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();
-        when(createCompanyWorkflowService.buildCompanyDataStructure(any(CompanyRequest.class)))
+        when(createCompanyWorkflowService.buildCompanyDataStructure(any(InternalCompanyRequest.class)))
                 .thenReturn(responseObj);
 
         ResponseEntity<PopulatedCompanyDetailsResponse> response =
@@ -220,12 +240,12 @@ class InternalCompanyControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responseObj, response.getBody());
-        verify(createCompanyWorkflowService, times(1)).buildCompanyDataStructure(any(CompanyRequest.class));
+        verify(createCompanyWorkflowService, times(1)).buildCompanyDataStructure(any(InternalCompanyRequest.class));
     }
 
     @Test
     void buildCompanyDataStructureThrowsDataException() throws Exception {
-        CompanyRequest request = new CompanyRequest();
+        InternalCompanyRequest request = new InternalCompanyRequest();
         DataException exception = new DataException("error");
         when(createCompanyWorkflowService.buildCompanyDataStructure(request)).thenThrow(exception);
 
@@ -334,7 +354,7 @@ class InternalCompanyControllerTest {
     }
 
     @Test
-    void findOrCreateCompanyAuthCodeSuccess() throws Exception {
+    void findOrCreateInternalCompanyV1AuthCodeSuccess() throws Exception {
         var authCode = new CompanyAuthCode();
         authCode.setId(COMPANY_NUMBER);
         authCode.setAuthCode("CODE123");
@@ -350,21 +370,21 @@ class InternalCompanyControllerTest {
     }
 
     @Test
-    void findOrCreateCompanyAuthCodeNullCompanyNumberThrowsDataException() {
+    void findOrCreateCompanyAuthCodeNullInternalCompanyV1NumberThrowsDataException() {
         DataException thrown = assertThrows(DataException.class, () ->
                 internalCompanyController.findOrCreateCompanyAuthCode(null));
         assertEquals("companyNumber query parameter is required", thrown.getMessage());
     }
 
     @Test
-    void findOrCreateCompanyAuthCodeEmptyCompanyNumberThrowsDataException() {
+    void findOrCreateCompanyAuthCodeEmptyInternalCompanyV1NumberThrowsDataException() {
         DataException thrown = assertThrows(DataException.class, () ->
                 internalCompanyController.findOrCreateCompanyAuthCode(""));
         assertEquals("companyNumber query parameter is required", thrown.getMessage());
     }
 
     @Test
-    void findOrCreateCompanyAuthCodeServiceThrowsDataException() throws Exception {
+    void findOrCreateInternalCompanyV1AuthCodeServiceThrowsDataException() throws Exception {
         DataException ex = new DataException("Service error");
         when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(ex);
 
@@ -374,7 +394,7 @@ class InternalCompanyControllerTest {
     }
 
     @Test
-    void findOrCreateCompanyAuthCodeServiceThrowsNoDataFoundException() throws Exception {
+    void findOrCreateInternalCompanyV1AuthCodeServiceThrowsNoDataFoundException() throws Exception {
         NoDataFoundException ex = new NoDataFoundException("Not found");
         when(companyAuthCodeService.findOrCreate(COMPANY_NUMBER)).thenThrow(ex);
 

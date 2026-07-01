@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -9,11 +10,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.MethodParameter;
@@ -30,22 +28,15 @@ import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.core.JacksonException.Reference;
 
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
 
 
 @ExtendWith(MockitoExtension.class)
-public class GlobalExceptionHandlerTest {
+class ApiExceptionHandlerTest {
 
-    private GlobalExceptionHandler handler = new GlobalExceptionHandler();
-    private static Stream<String> invalidDescriptions() {
-        return Stream.of(
-                null,                 // null case
-                "no-field-info",      // no [" pattern
-                "[\"field\""          // bad index (missing closing "])
-        );
-    }
+    private ApiExceptionHandler handler = new ApiExceptionHandler();
 
     @Test
     void handleHttpMessageNotReadableNullCause() throws Exception {
@@ -116,7 +107,7 @@ public class GlobalExceptionHandlerTest {
                 "invalid-value",
                 String.class
         );
-        Reference ref = new Reference(CompanyRequest.class, "jurisdiction");
+        Reference ref = new Reference(InternalCompanyRequest.class, "jurisdiction");
 
         cause.prependPath(ref);
 
@@ -127,21 +118,21 @@ public class GlobalExceptionHandlerTest {
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
+        assertNotNull(response.getBody());
         ValidationErrors errors = (ValidationErrors) response.getBody();
         ValidationError actual = errors.getErrors().iterator().next();
 
         assertEquals("invalid jurisdiction", actual.getError());
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidDescriptions")
-    void extractFieldNameInvalidDescriptionsReturnsInvalidRequest(String description) throws Exception {
+    @Test
+    void extractFieldNameNoPropertyNameReturnsInvalidRequest() throws Exception {
 
         InvalidFormatException cause =
                 new InvalidFormatException(null, "msg", "value", String.class);
 
         Reference ref = Mockito.mock(Reference.class);
-        when(ref.getDescription()).thenReturn(description);
+        when(ref.getPropertyName()).thenReturn(null);
 
         cause.prependPath(ref);
 
@@ -152,6 +143,7 @@ public class GlobalExceptionHandlerTest {
 
         ResponseEntity<Object> response = handler.handleException(ex, request);
 
+        assertNotNull(response.getBody());
         ValidationErrors errors = (ValidationErrors) response.getBody();
 
         assertEquals("invalid request",
@@ -168,7 +160,7 @@ public class GlobalExceptionHandlerTest {
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
-        Method method = GlobalExceptionHandlerTest.class
+        Method method = ApiExceptionHandlerTest.class
                 .getDeclaredMethod("dummyMethod", String.class);
         MethodParameter methodParameter = new MethodParameter(method, 0);
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(

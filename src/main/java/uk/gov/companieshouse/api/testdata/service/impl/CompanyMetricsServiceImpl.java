@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -21,7 +21,7 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service
-public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, CompanyRequest> {
+public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, InternalCompanyRequest> {
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanyMetricsServiceImpl.class));
@@ -31,26 +31,27 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
     private RandomService randomService;
 
     @Override
-    public CompanyMetrics create(CompanyRequest spec) {
+    public CompanyMetrics create(InternalCompanyRequest internalCompanyRequest) {
+
         LOG.info("Starting creation of CompanyMetrics for company number: "
-                + spec.getCompanyNumber());
-        CompanyMetrics metrics = initializeMetrics(spec);
+                + internalCompanyRequest.getCompanyNumber());
+        CompanyMetrics metrics = initializeMetrics(internalCompanyRequest);
 
-        setActivePscCount(metrics, spec);
-        setPscCount(metrics, spec);
-        setCeasedPscCount(metrics, spec);
-        setActiveDirectorsCount(metrics, spec);
+        setActivePscCount(metrics, internalCompanyRequest);
+        setPscCount(metrics, internalCompanyRequest);
+        setCeasedPscCount(metrics, internalCompanyRequest);
+        setActiveDirectorsCount(metrics, internalCompanyRequest);
 
-        if (spec.getRegisters() != null) {
+        if (internalCompanyRequest.getRegisters() != null) {
             LOG.debug("Registers are provided. Creating registers for the company.");
-            metrics.setRegisters(createRegisters(spec.getRegisters()));
+            metrics.setRegisters(createRegisters(internalCompanyRequest.getRegisters()));
         }
-        if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
+        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return metrics;
         }
         CompanyMetrics savedMetrics = repository.save(metrics);
         LOG.info("Successfully created and saved CompanyMetrics for company number: "
-                + spec.getCompanyNumber());
+                + internalCompanyRequest.getCompanyNumber());
         return savedMetrics;
     }
 
@@ -71,7 +72,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    private CompanyMetrics initializeMetrics(CompanyRequest spec) {
+    private CompanyMetrics initializeMetrics(InternalCompanyRequest spec) {
         var metrics = new CompanyMetrics();
         metrics.setId(spec.getCompanyNumber());
         metrics.setEtag(randomService.getEtag());
@@ -93,7 +94,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         return metrics;
     }
 
-    public void setActivePscCount(CompanyMetrics metrics, CompanyRequest spec) {
+    public void setActivePscCount(CompanyMetrics metrics, InternalCompanyRequest spec) {
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setActivePscCount(1);
             LOG.debug("Company has super secure PSCs. Set active PSC count to 1.");
@@ -110,7 +111,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    private void setActiveDirectorsCount(CompanyMetrics metrics, CompanyRequest spec) {
+    private void setActiveDirectorsCount(CompanyMetrics metrics, InternalCompanyRequest spec) {
         if (Boolean.TRUE.equals(spec.getNoDefaultOfficer())) {
             metrics.setActiveDirectorsCount(0);
             LOG.debug("No default officer specified. Set active directors count to 0.");
@@ -127,7 +128,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    public void setPscCount(CompanyMetrics metrics, CompanyRequest spec) {
+    public void setPscCount(CompanyMetrics metrics, InternalCompanyRequest spec) {
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             metrics.setPscCount(1);
             LOG.debug("Company has super secure PSCs. Set PSC count to 1.");
@@ -140,7 +141,7 @@ public class CompanyMetricsServiceImpl implements DataService<CompanyMetrics, Co
         }
     }
 
-    public void setCeasedPscCount(CompanyMetrics metrics, CompanyRequest spec) {
+    public void setCeasedPscCount(CompanyMetrics metrics, InternalCompanyRequest spec) {
         var ceasedCount = 0;
         if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
             LOG.debug("Company has super secure PSCs. Ceased PSC count remains 0.");

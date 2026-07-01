@@ -13,7 +13,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
@@ -46,15 +46,15 @@ class DeleteCompanyWorkflowServiceImplTest {
     private static final String UK_ESTABLISHMENT_NUMBER_2 = "BR654321";
 
     @Mock private CompanyProfileService companyProfileService;
-    @Mock private DataService<FilingHistory, CompanyRequest> filingHistoryService;
+    @Mock private DataService<FilingHistory, InternalCompanyRequest> filingHistoryService;
     @Mock private CompanyAuthCodeService companyAuthCodeService;
     @Mock private AppointmentService appointmentService;
     @Mock private CompanyPscStatementServiceImpl companyPscStatementService;
     @Mock private CompanyPscService companyPscService;
-    @Mock private DataService<CompanyMetrics, CompanyRequest> companyMetricsService;
+    @Mock private DataService<CompanyMetrics, InternalCompanyRequest> companyMetricsService;
     @Mock private CompanyAuthAllowListService companyAuthAllowListService;
-    @Mock private DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
-    @Mock private DataService<Disqualifications, CompanyRequest> disqualificationsService;
+    @Mock private DataService<CompanyRegisters, InternalCompanyRequest> companyRegistersService;
+    @Mock private DataService<Disqualifications, InternalCompanyRequest> disqualificationsService;
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
