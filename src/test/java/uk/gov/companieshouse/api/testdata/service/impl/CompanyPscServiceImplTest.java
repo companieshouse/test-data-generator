@@ -28,7 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
@@ -55,18 +55,18 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_OverseasEntity_CreatesBeneficialOwners() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPscs(3);
-        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        internalCompanyRequest.setNumberOfPscs(3);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
@@ -74,19 +74,19 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_SuperSecurePsc_CreatesSuperSecurePsc() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setHasSuperSecurePscs(true);
-        spec.setPscType(null);
-        spec.setNumberOfPscs(null);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setHasSuperSecurePscs(true);
+        internalCompanyRequest.setPscType(null);
+        internalCompanyRequest.setNumberOfPscs(null);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
 
@@ -100,17 +100,17 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_SuperSecureBeneficialOwner_CreatesCorrectType() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setHasSuperSecurePscs(true);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        internalCompanyRequest.setHasSuperSecurePscs(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
 
@@ -124,12 +124,12 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_OverseaCompany_ReturnsEmptyList() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.OVERSEA_COMPANY);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -138,12 +138,12 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithAccountsDueStatus_SetsCorrectDates() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setAccountsDueStatus("due-soon");
-        spec.setNumberOfPscs(1);
-        spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setAccountsDueStatus("due-soon");
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         LocalDate dueDate = LocalDate.now().plusDays(10);
 
@@ -152,7 +152,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(spec);
+        companyPscsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
         verify(repository, atLeastOnce()).save(captor.capture());
@@ -185,17 +185,17 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_StandardCompany_VerifyBaseFields() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(3);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(3);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(spec);
+        companyPscsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
         verify(repository, times(3)).save(captor.capture());
@@ -212,15 +212,15 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_PscTypeWithoutNumber_ThrowsException() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(0);
-        spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(0);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         DataException exception = assertThrows(DataException.class,
-                () -> companyPscsService.create(spec));
+                () -> companyPscsService.create(internalCompanyRequest));
 
         assertEquals("psc_type must be accompanied by number_of_psc", exception.getMessage());
         verify(repository, never()).save(any());
@@ -228,15 +228,15 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_BeneficialOwnerTypeWithNonOverseas_ThrowsException() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(2);
-        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(2);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         DataException exception = assertThrows(DataException.class,
-                () -> companyPscsService.create(spec));
+                () -> companyPscsService.create(internalCompanyRequest));
 
         assertEquals("Beneficial owner type is not allowed for this company type",
                 exception.getMessage());
@@ -245,18 +245,18 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_ValidPscTypeWithNumber_CreatesPscs() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(2);
-        spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(2);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         verify(repository, times(2)).save(any(CompanyPscs.class));
@@ -264,18 +264,18 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_ValidBeneficialOwnerType_CreatesBeneficialOwners() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPscs(2);
-        spec.setPscType(List.of(PscType.CORPORATE_BENEFICIAL_OWNER));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        internalCompanyRequest.setNumberOfPscs(2);
+        internalCompanyRequest.setPscType(List.of(PscType.CORPORATE_BENEFICIAL_OWNER));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         verify(repository, times(2)).save(any(CompanyPscs.class));
@@ -283,27 +283,27 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_NumberZeroWithPscType_ReturnsNull() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(0);
-        spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(0);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        assertThrows(DataException.class, () -> companyPscsService.create(spec));
+        assertThrows(DataException.class, () -> companyPscsService.create(internalCompanyRequest));
         verify(repository, never()).save(any());
     }
 
     @Test
     void createWithExcludedPscCompanyTypeReturnsEmptyList() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.OVERSEA_COMPANY);
-        spec.setPscType(null);
-        spec.setNumberOfPscs(null);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.OVERSEA_COMPANY);
+        internalCompanyRequest.setPscType(null);
+        internalCompanyRequest.setNumberOfPscs(null);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -312,18 +312,18 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithMultiplePscTypes_CreatesCorrectNumber() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(3);
-        spec.setPscType(List.of(PscType.INDIVIDUAL, PscType.LEGAL_PERSON));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(3);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL, PscType.LEGAL_PERSON));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
@@ -331,14 +331,14 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithZeroNumberOfPsc_AndNullPscType_ReturnsEmptyList() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(0);
-        spec.setPscType(null); // PscType is null
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(0);
+        internalCompanyRequest.setPscType(null); // PscType is null
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -347,14 +347,14 @@ class CompanyPscServiceImplTest {
 
     @Test
     void create_WithZeroNumberOfPsc_AndEmptyPscType_ReturnsEmptyList() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(0);
-        spec.setPscType(Collections.emptyList()); // PscType is an empty list
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(0);
+        internalCompanyRequest.setPscType(Collections.emptyList()); // PscType is an empty list
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -363,17 +363,17 @@ class CompanyPscServiceImplTest {
 
     @Test
     void createReturnsUnsavedPscsWhenCompanyWithDataStructureIsTrue() throws DataException {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.LTD);
-        spec.setNumberOfPscs(1);
-        spec.setPscType(List.of(PscType.INDIVIDUAL));
-        spec.setCompanyWithPopulatedStructureOnly(true);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(true);
 
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        List<CompanyPscs> result = companyPscsService.create(spec);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         assertEquals(1, result.size());

@@ -23,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
@@ -50,21 +50,21 @@ class CompanyMetricsServiceImplTest {
     void create() {
         var directorsText = "directors";
         var publicRegisterText = "public-register";
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         RegistersRequest registersSpec = new RegistersRequest();
         registersSpec.setRegisterType(directorsText);
         registersSpec.setRegisterMovedTo(publicRegisterText);
-        spec.setRegisters(List.of(registersSpec));
+        internalCompanyRequest.setRegisters(List.of(registersSpec));
 
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics returnedMetrics = this.metricsService.create(spec);
+        CompanyMetrics returnedMetrics = this.metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, returnedMetrics);
 
@@ -106,18 +106,18 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWhenCompanyTypeIsRegisteredOverseasEntity() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
-        spec.setNumberOfPscs(2);
-        spec.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER, PscType.CORPORATE_BENEFICIAL_OWNER));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        internalCompanyRequest.setNumberOfPscs(2);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER, PscType.CORPORATE_BENEFICIAL_OWNER));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics returnedMetrics = this.metricsService.create(spec);
+        CompanyMetrics returnedMetrics = this.metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, returnedMetrics);
         ArgumentCaptor<CompanyMetrics> metricsCaptor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -128,16 +128,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWhenHasSuperSecurePscsIsTrue() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setHasSuperSecurePscs(Boolean.TRUE);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setHasSuperSecurePscs(Boolean.TRUE);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics returnedMetrics = this.metricsService.create(spec);
+        CompanyMetrics returnedMetrics = this.metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, returnedMetrics);
         ArgumentCaptor<CompanyMetrics> metricsCaptor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -148,15 +148,15 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithDefaultActivePscCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics returnedMetrics = this.metricsService.create(spec);
+        CompanyMetrics returnedMetrics = this.metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, returnedMetrics);
         ArgumentCaptor<CompanyMetrics> metricsCaptor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -167,16 +167,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithSuperSecurePscs() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setHasSuperSecurePscs(true);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setHasSuperSecurePscs(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics result = metricsService.create(spec);
+        CompanyMetrics result = metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, result);
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -188,16 +188,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithNumberOfPsc() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPscs(5);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfPscs(5);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics result = metricsService.create(spec);
+        CompanyMetrics result = metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, result);
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -209,20 +209,20 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithRegisters() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         RegistersRequest register = new RegistersRequest();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("public-register");
-        spec.setRegisters(List.of(register));
+        internalCompanyRequest.setRegisters(List.of(register));
 
         when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics result = metricsService.create(spec);
+        CompanyMetrics result = metricsService.create(internalCompanyRequest);
 
         assertEquals(savedMetrics, result);
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
@@ -238,16 +238,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void testSetActiveDirectorsCountAndRegisters() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setNumberOfAppointments(5);
-        spec.setOfficerRoles(List.of(OfficerType.DIRECTOR));
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setNumberOfAppointments(5);
+        internalCompanyRequest.setOfficerRoles(List.of(OfficerType.DIRECTOR));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         RegistersRequest register = new RegistersRequest();
         register.setRegisterType("directors");
         register.setRegisterMovedTo("public-register");
-        spec.setRegisters(List.of(register));
+        internalCompanyRequest.setRegisters(List.of(register));
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -265,11 +265,11 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void testSetActiveDirectorsCountWithoutDirectorRole() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setNumberOfAppointments(5);
-        spec.setOfficerRoles(List.of(OfficerType.CIC_MANAGER));
-        spec.setCompanyWithPopulatedStructureOnly(false);
-        metricsService.create(spec);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setNumberOfAppointments(5);
+        internalCompanyRequest.setOfficerRoles(List.of(OfficerType.CIC_MANAGER));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -301,14 +301,14 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithActivePscStatementsCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setActiveStatements(3);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setActiveStatements(3);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -319,13 +319,13 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithDefaultActivePscStatementsCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -336,14 +336,14 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithGivenWithdrawnPscStatementsCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setWithdrawnStatements(4);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setWithdrawnStatements(4);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -354,13 +354,13 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createWithDefaultWithdrawnPscStatementsCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -371,76 +371,76 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void setPscCount_WhenPscActiveFalse_ShouldSetCorrectCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setNumberOfPscs(3);
-        spec.setPscActive(false);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setNumberOfPscs(3);
+        internalCompanyRequest.setPscActive(false);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         CompanyMetrics metrics = new CompanyMetrics();
-        metricsService.setPscCount(metrics, spec);
+        metricsService.setPscCount(metrics, internalCompanyRequest);
 
         assertEquals(3, metrics.getPscCount());
     }
 
     @Test
     void setPscCount_WhenPscActiveTrue_ShouldSetCorrectCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setNumberOfPscs(3);
-        spec.setPscActive(true);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setNumberOfPscs(3);
+        internalCompanyRequest.setPscActive(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
-        metricsService.setPscCount(metrics, spec);
+        metricsService.setPscCount(metrics, internalCompanyRequest);
 
         assertEquals(3, metrics.getPscCount());
     }
 
     @Test
     void setPscCount_WhenPscActiveNull_ShouldSetCorrectCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setNumberOfPscs(3);
-        spec.setPscActive(null);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setNumberOfPscs(3);
+        internalCompanyRequest.setPscActive(null);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
-        metricsService.setPscCount(metrics, spec);
+        metricsService.setPscCount(metrics, internalCompanyRequest);
 
         assertEquals(3, metrics.getPscCount());
     }
 
     @Test
     void setPscCount_WhenSuperSecurePscs_ShouldSetCountToOne() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setHasSuperSecurePscs(true);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setHasSuperSecurePscs(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         CompanyMetrics metrics = new CompanyMetrics();
-        metricsService.setPscCount(metrics, spec);
+        metricsService.setPscCount(metrics, internalCompanyRequest);
 
         assertEquals(1, metrics.getPscCount());
     }
 
     @Test
     void setPscCount_WhenNoPscCount_ShouldSetCountToZero() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         CompanyMetrics metrics = new CompanyMetrics();
-        metricsService.setPscCount(metrics, spec);
+        metricsService.setPscCount(metrics, internalCompanyRequest);
 
         assertEquals(1, metrics.getPscCount());
     }
 
     @Test
     void setPscActiveToFalse_ShouldSetCeasedPscCount() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPscs(5);
-        spec.setPscActive(false);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfPscs(5);
+        internalCompanyRequest.setPscActive(false);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -451,16 +451,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithPscActiveFalse_ShouldSetCorrectCounts() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPscs(4);
-        spec.setPscActive(false);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfPscs(4);
+        internalCompanyRequest.setPscActive(false);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -472,16 +472,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithPscActiveTrue_ShouldSetCorrectCounts() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPscs(4);
-        spec.setPscActive(true);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfPscs(4);
+        internalCompanyRequest.setPscActive(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -493,16 +493,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithPscActiveNull_ShouldSetCorrectCounts() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNumberOfPscs(4);
-        spec.setPscActive(null);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfPscs(4);
+        internalCompanyRequest.setPscActive(null);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyMetrics());
 
-        metricsService.create(spec);
+        metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -514,16 +514,16 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void create_WithNoDefaultOfficerTrue_SetsActiveDirectorsCountToZero() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setNoDefaultOfficer(true);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNoDefaultOfficer(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(randomService.getEtag()).thenReturn(ETAG);
         CompanyMetrics savedMetrics = new CompanyMetrics();
         when(repository.save(any())).thenReturn(savedMetrics);
 
-        CompanyMetrics result = metricsService.create(spec);
+        CompanyMetrics result = metricsService.create(internalCompanyRequest);
 
         ArgumentCaptor<CompanyMetrics> captor = ArgumentCaptor.forClass(CompanyMetrics.class);
         verify(repository).save(captor.capture());
@@ -535,13 +535,13 @@ class CompanyMetricsServiceImplTest {
 
     @Test
     void createReturnsUnsavedMetricsWhenCompanyWithDataStructureIsTrue() {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(true);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(true);
 
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        CompanyMetrics result = metricsService.create(spec);
+        CompanyMetrics result = metricsService.create(internalCompanyRequest);
 
         assertNotNull(result);
         assertEquals(COMPANY_NUMBER, result.getId());

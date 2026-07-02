@@ -18,9 +18,10 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequestV2;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -57,6 +58,7 @@ public class InternalCompanyController {
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
+    private static final String API_VERSION_HEADER = "X-API-Version";
     private static final String STATUS = "status";
     private static final String ERROR = "error";
 
@@ -72,24 +74,42 @@ public class InternalCompanyController {
     }
 
     @PostMapping("/company")
-    public ResponseEntity<CompanyProfileResponse> createCompany(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
+    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV1(
+            @Valid @RequestBody(required = false) InternalCompanyRequest internalCompanyRequest) throws DataException {
+        LOG.info("Received request to create a new company (v1) in internal company API");
+        return createCompanyResponse(internalCompanyRequest);
+    }
 
-        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
+    @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
+    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV2(
+            @Valid @RequestBody(required = false) InternalCompanyRequestV2 internalCompanyRequestV2) throws DataException {
 
-        CompanyProfileResponse createdCompany = createCompanyWorkflowService.createInternalCompany(spec);
+        LOG.info("Received request to create a new company (v2) in internal company API");
+
+        InternalCompanyRequest internalCompanyRequest = internalCompanyRequestV2 == null
+                ? new InternalCompanyRequest()
+                : internalCompanyRequestV2.toInternalCompanyRequest();
+        return createCompanyResponse(internalCompanyRequest);
+    }
+
+    private ResponseEntity<CompanyProfileResponse> createCompanyResponse(InternalCompanyRequest request)
+            throws DataException {
+
+        Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
+        InternalCompanyRequest internalCompanyRequest = optionalRequest.orElse(new InternalCompanyRequest());
+
+        CompanyProfileResponse createdCompany = createCompanyWorkflowService.createInternalCompany(internalCompanyRequest);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        data.put(JURISDICTION_DATA, internalCompanyRequest.getJurisdiction());
         LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     @DeleteMapping({"/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
-            @PathVariable("companyNumber") String companyNumber,
+            @PathVariable String companyNumber,
             @Valid @RequestBody(required = false) DeleteCompanyRequest request)
             throws DataException, NoDataFoundException, InvalidAuthCodeException {
 
@@ -107,12 +127,12 @@ public class InternalCompanyController {
 
     @PostMapping("/get-populated-company-structure")
     public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyDataStructure(
-            @Valid @RequestBody(required = false) CompanyRequest request) throws DataException {
+            @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {
 
-        Optional<CompanyRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyRequest spec = optionalRequest.orElse(new CompanyRequest());
+        Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
+        InternalCompanyRequest internalCompanyRequest = optionalRequest.orElse(new InternalCompanyRequest());
 
-        var companyData = createCompanyWorkflowService.buildCompanyDataStructure(spec);
+        var companyData = createCompanyWorkflowService.buildCompanyDataStructure(internalCompanyRequest);
         return new ResponseEntity<>(companyData, HttpStatus.OK);
     }
 
@@ -121,9 +141,9 @@ public class InternalCompanyController {
             @Valid @RequestBody(required = false) CompanyWithPopulatedStructureRequest request)
             throws DataException {
         Optional<CompanyWithPopulatedStructureRequest> optionalRequest = Optional.ofNullable(request);
-        CompanyWithPopulatedStructureRequest spec =
+        CompanyWithPopulatedStructureRequest companyWithPopulatedStructureRequest =
                 optionalRequest.orElse(new CompanyWithPopulatedStructureRequest());
-        var createdCompany = createCompanyWorkflowService.persistCompanyDataStructure(spec);
+        var createdCompany = createCompanyWorkflowService.persistCompanyDataStructure(companyWithPopulatedStructureRequest);
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
         LOG.info(NEW_COMPANY_CREATED, data);

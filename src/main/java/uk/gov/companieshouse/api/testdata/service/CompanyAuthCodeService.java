@@ -3,9 +3,9 @@ package uk.gov.companieshouse.api.testdata.service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 
-public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, CompanyRequest> {
+public interface CompanyAuthCodeService extends DataService<CompanyAuthCode, InternalCompanyRequest> {
 
     /**
      * Verify the given {@code authCode} against the company with {@code

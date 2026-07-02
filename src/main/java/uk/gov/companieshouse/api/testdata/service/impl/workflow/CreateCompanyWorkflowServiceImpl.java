@@ -13,7 +13,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -44,15 +44,15 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     private static final int COMPANY_NUMBER_LENGTH = 8;
 
     private final CompanyProfileService companyProfileService;
-    private final DataService<FilingHistory, CompanyRequest> filingHistoryService;
+    private final DataService<FilingHistory, InternalCompanyRequest> filingHistoryService;
     private final CompanyAuthCodeService companyAuthCodeService;
     private final AppointmentService appointmentService;
-    private final DataService<CompanyMetrics, CompanyRequest> companyMetricsService;
+    private final DataService<CompanyMetrics, InternalCompanyRequest> companyMetricsService;
     private final CompanyPscStatementServiceImpl companyPscStatementService;
     private final CompanyPscService companyPscService;
     private final RandomService randomService;
-    private final DataService<CompanyRegisters, CompanyRequest> companyRegistersService;
-    private final DataService<Disqualifications, CompanyRequest> disqualificationsService;
+    private final DataService<CompanyRegisters, InternalCompanyRequest> companyRegistersService;
+    private final DataService<Disqualifications, InternalCompanyRequest> disqualificationsService;
     private final CompanyStructurePersistenceService companyStructurePersistenceService;
     private final CompanySearchService companySearchService;
     private final CompanySearchService alphabeticalCompanySearch;
@@ -75,15 +75,15 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
 
     public CreateCompanyWorkflowServiceImpl(
             CompanyProfileService companyProfileService,
-            DataService<FilingHistory, CompanyRequest> filingHistoryService,
+            DataService<FilingHistory, InternalCompanyRequest> filingHistoryService,
             CompanyAuthCodeService companyAuthCodeService,
             AppointmentService appointmentService,
-            DataService<CompanyMetrics, CompanyRequest> companyMetricsService,
+            DataService<CompanyMetrics, InternalCompanyRequest> companyMetricsService,
             CompanyPscStatementServiceImpl companyPscStatementService,
             CompanyPscService companyPscService,
             RandomService randomService,
-            DataService<CompanyRegisters, CompanyRequest> companyRegistersService,
-            DataService<Disqualifications, CompanyRequest> disqualificationsService,
+            DataService<CompanyRegisters, InternalCompanyRequest> companyRegistersService,
+            DataService<Disqualifications, InternalCompanyRequest> disqualificationsService,
             CompanyStructurePersistenceService companyStructurePersistenceService,
             @Qualifier("companySearchService") CompanySearchService companySearchService,
             @Qualifier("alphabeticalCompanySearchService")
@@ -110,19 +110,19 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     @Override
     public CompanyProfileResponse createPublicCompany(PublicCompanyRequest companySpec)
             throws DataException {
-        var request = mapPublicCompanyToCompanyRequest(companySpec);
+        var request = mapPublicCompanyToInternalCompanyRequest(companySpec);
         return createCompany(request);
     }
 
     @Override
-    public CompanyProfileResponse createInternalCompany(CompanyRequest companySpec)
+    public CompanyProfileResponse createInternalCompany(InternalCompanyRequest companySpec)
             throws DataException {
         return createCompany(companySpec);
     }
 
     @Override
     public PopulatedCompanyDetailsResponse buildCompanyDataStructure(
-            CompanyRequest spec) throws DataException {
+            InternalCompanyRequest spec) throws DataException {
         assignCompanyNumber(spec);
 
         try {
@@ -192,8 +192,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         return new CompanyProfileResponse(companyNumber, authCode, companyUri);
     }
 
-    private CompanyRequest mapPublicCompanyToCompanyRequest(PublicCompanyRequest companySpec) {
-        var request = new CompanyRequest();
+    private InternalCompanyRequest mapPublicCompanyToInternalCompanyRequest(PublicCompanyRequest companySpec) {
+        var request = new InternalCompanyRequest();
         request.setJurisdiction(companySpec.getJurisdiction());
         request.setCompanyType(companySpec.getCompanyType());
         request.setCompanyStatus(companySpec.getCompanyStatus());
@@ -232,7 +232,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
      * Shared orchestration flow used by both public and internal company creation paths.
      * If any creation step fails, partial company data is rolled back via {@link #handleCreateFailure}.
      */
-    protected CompanyProfileResponse createCompany(CompanyRequest companySpec) throws DataException {
+    protected CompanyProfileResponse createCompany(InternalCompanyRequest companySpec) throws DataException {
         assignCompanyNumber(companySpec);
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
@@ -283,9 +283,9 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         }
     }
 
-    private void assignCompanyNumber(CompanyRequest spec) {
+    private void assignCompanyNumber(InternalCompanyRequest spec) {
         if (spec == null) {
-            throw new IllegalArgumentException("CompanyRequest can not be null");
+            throw new IllegalArgumentException("InternalCompanyRequest can not be null");
         }
 
         String companyNumberPrefix = spec.getJurisdiction().getCompanyNumberPrefix(spec);
@@ -299,7 +299,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         } while (companyProfileService.companyExists(spec.getCompanyNumber()));
     }
 
-    private CompanyProfileResponse buildCompanyResponse(CompanyRequest spec, String authCode) {
+    private CompanyProfileResponse buildCompanyResponse(InternalCompanyRequest spec, String authCode) {
         String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
         return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
     }
@@ -318,7 +318,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         return new DataException("Failed to create company data in service", ex);
     }
 
-    private void addCompanyToElasticSearchIndexes(CompanyRequest spec,
+    private void addCompanyToElasticSearchIndexes(InternalCompanyRequest spec,
                                                    CompanyProfileResponse companyData)
             throws DataException, ApiErrorResponseException, URIValidationException {
 
