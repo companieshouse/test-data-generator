@@ -259,9 +259,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
         String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
         String appointmentId = randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH);
 
-        CompanyRequest safeSpec = ctx.spec.getSpec();
+        InternalCompanyRequest safeSpec = ctx.spec.getSpec();
         if (safeSpec == null) {
-            safeSpec = new CompanyRequest();
+            safeSpec = new InternalCompanyRequest();
             safeSpec.setCompanyNumber(ctx.companyNumber);
             safeSpec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
             safeSpec.setSecureOfficer(false);
