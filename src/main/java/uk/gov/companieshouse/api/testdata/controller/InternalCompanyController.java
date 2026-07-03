@@ -21,7 +21,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequestV2;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -39,7 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Handles internal company endpoints for company creation, deletion, and
+ * Handles internal v1 company endpoints for company creation, deletion, and
  * pre-populated structure operations.
  * Auth code validation is only applied on internal delete requests when an auth
  * code is provided; create endpoints do not require an auth code.
@@ -58,7 +57,6 @@ public class InternalCompanyController {
     private static final String COMPANY_NUMBER_DATA = "company number";
     private static final String JURISDICTION_DATA = "jurisdiction";
     private static final String NEW_COMPANY_CREATED = "New company created";
-    private static final String API_VERSION_HEADER = "X-API-Version";
     private static final String STATUS = "status";
     private static final String ERROR = "error";
 
@@ -77,18 +75,6 @@ public class InternalCompanyController {
     public ResponseEntity<CompanyProfileResponse> createInternalCompanyV1(
             @Valid @RequestBody(required = false) InternalCompanyRequest internalCompanyRequest) throws DataException {
         LOG.info("Received request to create a new company (v1) in internal company API");
-        return createCompanyResponse(internalCompanyRequest);
-    }
-
-    @PostMapping(value = "/company", headers = API_VERSION_HEADER + "=2")
-    public ResponseEntity<CompanyProfileResponse> createInternalCompanyV2(
-            @Valid @RequestBody(required = false) InternalCompanyRequestV2 internalCompanyRequestV2) throws DataException {
-
-        LOG.info("Received request to create a new company (v2) in internal company API");
-
-        InternalCompanyRequest internalCompanyRequest = internalCompanyRequestV2 == null
-                ? new InternalCompanyRequest()
-                : internalCompanyRequestV2.toInternalCompanyRequest();
         return createCompanyResponse(internalCompanyRequest);
     }
 
@@ -128,6 +114,8 @@ public class InternalCompanyController {
     @PostMapping("/get-populated-company-structure")
     public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyDataStructure(
             @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {
+
+        LOG.info("Received request to build company data structure in internal company API V1");
 
         Optional<InternalCompanyRequest> optionalRequest = Optional.ofNullable(request);
         InternalCompanyRequest internalCompanyRequest = optionalRequest.orElse(new InternalCompanyRequest());
