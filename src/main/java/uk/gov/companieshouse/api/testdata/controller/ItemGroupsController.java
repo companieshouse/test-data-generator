@@ -26,7 +26,7 @@ public class ItemGroupsController {
         this.itemGroupsService = itemGroupsService;
     }
 
-    @DeleteMapping("/internal/item-groups/{orderNumber}")
+    @DeleteMapping("/item-groups/{orderNumber}")
     public ResponseEntity<Map<String, Object>> deleteItemGroups(@PathVariable("orderNumber")
                                                                 String orderNumber) {
         Map<String, Object> response = new HashMap<>();
