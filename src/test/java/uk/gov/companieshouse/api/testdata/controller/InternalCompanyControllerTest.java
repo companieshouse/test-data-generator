@@ -19,7 +19,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulate
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequestV2;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyAuthCodeResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -78,25 +77,6 @@ class InternalCompanyControllerTest {
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-    }
-
-    @Test
-    void createInternalCompanyV2() throws Exception {
-        InternalCompanyRequestV2 request = new InternalCompanyRequestV2();
-        request.setJurisdiction(JurisdictionType.SCOTLAND);
-        InternalCompanyRequestV2.CompanyTypeV2 companyTypeV2 = new InternalCompanyRequestV2.CompanyTypeV2();
-        companyTypeV2.setSubType("community-interest-company");
-        request.setCompanyTypeDetails(companyTypeV2);
-        CompanyProfileResponse company =
-                new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
-
-        when(createCompanyWorkflowService.createInternalCompany(any())).thenReturn(company);
-        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV2(request);
-
-        assertEquals(company, response.getBody());
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        verify(createCompanyWorkflowService).createInternalCompany(internalCompanyRequestCaptor.capture());
-        assertEquals("community-interest-company", internalCompanyRequestCaptor.getValue().getSubType());
     }
 
     @Test
