@@ -20,6 +20,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResp
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
+import uk.gov.companieshouse.api.testdata.service.CompanySubTypeValidator;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
@@ -124,6 +125,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     public PopulatedCompanyDetailsResponse buildCompanyDataStructure(
             InternalCompanyRequest spec) throws DataException {
         assignCompanyNumber(spec);
+        CompanySubTypeValidator.validate(spec.getSubType(), spec.getCompanyType());
 
         try {
             var response = new PopulatedCompanyDetailsResponse();
@@ -234,6 +236,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
      */
     protected CompanyProfileResponse createCompany(InternalCompanyRequest companySpec) throws DataException {
         assignCompanyNumber(companySpec);
+        CompanySubTypeValidator.validate(companySpec.getSubType(), companySpec.getCompanyType());
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
@@ -359,5 +362,4 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         return data;
     }
 }
-
 
