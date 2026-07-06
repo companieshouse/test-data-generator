@@ -25,7 +25,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * Handles public-facing company endpoints.
@@ -55,25 +54,29 @@ public class PublicCompanyController {
         this.companyAuthCodeService = companyAuthCodeService;
     }
 
+    /**
+     * V1 endpoint: Handles legacy PublicCompanyRequest format.
+     * This route is the default for /company and is used when no version header is provided.
+     */
     @PostMapping("/company")
-    public ResponseEntity<CompanyProfileResponse> createCompany(
+    public ResponseEntity<CompanyProfileResponse> createPublicCompanyV1(
             @Valid @RequestBody(required = false) PublicCompanyRequest request) throws DataException {
+        LOG.info("Received request to create a new company (v1) in public company API");
 
-        Optional<PublicCompanyRequest> optionalRequest = Optional.ofNullable(request);
-        PublicCompanyRequest spec = optionalRequest.orElse(new PublicCompanyRequest());
+        PublicCompanyRequest publicCompanyRequest = request == null ? new PublicCompanyRequest() : request;
 
-        var createdCompany = createCompanyWorkflowService.createPublicCompany(spec);
+        var createdCompany = createCompanyWorkflowService.createPublicCompany(publicCompanyRequest);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, createdCompany.getCompanyNumber());
-        data.put(JURISDICTION_DATA, spec.getJurisdiction());
+        data.put(JURISDICTION_DATA, publicCompanyRequest.getJurisdiction());
         LOG.info(NEW_COMPANY_CREATED, data);
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
     @DeleteMapping({"/company/{companyNumber}"})
     public ResponseEntity<Void> deleteCompany(
-            @PathVariable("companyNumber") String companyNumber,
+            @PathVariable String companyNumber,
             @Valid @RequestBody DeleteCompanyRequest request)
             throws DataException, InvalidAuthCodeException, NoDataFoundException {
 
@@ -89,4 +92,3 @@ public class PublicCompanyController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
-

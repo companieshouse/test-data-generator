@@ -38,20 +38,20 @@ public class TransactionsController {
             @Valid @RequestBody TransactionsRequest request) throws DataException {
 
         Optional<TransactionsRequest> optionalRequest = Optional.ofNullable(request);
-        TransactionsRequest spec = optionalRequest.orElse(new TransactionsRequest());
+        TransactionsRequest transactionsRequest = optionalRequest.orElse(new TransactionsRequest());
 
-        TransactionsResponse createdTransaction = transactionService.create(spec);
+        TransactionsResponse createdTransaction = transactionService.create(transactionsRequest);
 
         Map<String, Object> data = new HashMap<>();
         data.put("_id", createdTransaction.getId());
-        data.put("reference", spec.getReference());
+        data.put("reference", transactionsRequest.getReference());
         LOG.info("Transaction created", data);
         return new ResponseEntity<>(createdTransaction, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/transactions/{transactionId}")
     public ResponseEntity<Map<String, Object>> deleteTransaction(
-            @PathVariable("transactionId") String transactionId) {
+            @PathVariable String transactionId) {
 
         Map<String, Object> response = new HashMap<>();
         response.put("transaction_id", transactionId);

@@ -30,20 +30,20 @@
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 
-        <spring-boot-dependencies.version>4.0.7</spring-boot-dependencies.version>
-        <spring-boot-maven-plugin.version>4.0.7</spring-boot-maven-plugin.version>
+        <spring-boot-dependencies.version>4.1.0</spring-boot-dependencies.version>
+        <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
         <log4j2.version>2.25.4</log4j2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
-        <tomcat-embed-core.version>11.0.22</tomcat-embed-core.version>
-        <tomcat-embed-websocket.version>11.0.22</tomcat-embed-websocket.version>
+        <tomcat-embed-core.version>11.0.23</tomcat-embed-core.version>
+        <tomcat-embed-websocket.version>11.0.23</tomcat-embed-websocket.version>
         <tomcat-embed-el.version>11.0.22</tomcat-embed-el.version>
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.25</api-security-java.version>
         <private-api-sdk-java.version>4.0.416</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
-        <test-data-generator-library.version>1.0.19</test-data-generator-library.version>
+        <test-data-generator-library.version>1.0.21</test-data-generator-library.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
@@ -52,6 +52,7 @@
         <sonar.password/>
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
+        <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
     </properties>
 
     <dependencyManagement>
@@ -79,8 +80,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-mongodb</artifactId>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-sync</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-mongodb</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -141,11 +146,6 @@
             <artifactId>tomcat-embed-el</artifactId>
             <version>${tomcat-embed-el.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-annotations</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>api-helper-java</artifactId>
@@ -210,7 +210,12 @@
             <artifactId>test-data-generator-library</artifactId>
             <version>${test-data-generator-library.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.22.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 
     <build>

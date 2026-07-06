@@ -29,7 +29,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
@@ -50,7 +50,7 @@ class CompanyRegistersServiceImplTest {
     @InjectMocks
     private CompanyRegistersServiceImpl service;
 
-    private CompanyRequest companySpec;
+    private InternalCompanyRequest companySpec;
 
     private static final String DIRECTORS_TEXT = "directors";
     private static final String DIRECTORS_REGISTER_TYPE = "directors_register";
@@ -285,7 +285,7 @@ class CompanyRegistersServiceImplTest {
 
     @Test
     void createReturnsUnsavedRegistersWhenCompanyWithDataStructureIsTrue() throws DataException {
-        companySpec = new CompanyRequest();
+        companySpec = new InternalCompanyRequest();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
         RegistersRequest register = new RegistersRequest();
         register.setRegisterType(DIRECTORS_TEXT);
@@ -313,7 +313,7 @@ class CompanyRegistersServiceImplTest {
     }
 
     private void setCompanySpec(String registerType, String registerMovedTo) {
-        companySpec = new CompanyRequest();
+        companySpec = new InternalCompanyRequest();
         companySpec.setCompanyNumber(COMPANY_NUMBER);
         companySpec.setCompanyWithPopulatedStructureOnly(false);
         RegistersRequest register = new RegistersRequest();

@@ -30,7 +30,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -59,9 +59,9 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void create() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
-        spec.setCompanyNumber(COMPANY_NUMBER);
-        spec.setCompanyWithPopulatedStructureOnly(false);
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         when(this.randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
 
@@ -70,7 +70,7 @@ class CompanyAuthCodeServiceImplTest {
 
         final byte[] password = MessageDigest.getInstance(MessageDigestAlgorithms.SHA_256)
                 .digest(String.valueOf(COMPANY_AUTH_CODE).getBytes(StandardCharsets.UTF_8));
-        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(spec);
+        CompanyAuthCode returnedAuthCode = this.companyAuthCodeServiceImpl.create(internalCompanyRequest);
 
         assertEquals(savedAuthCode, returnedAuthCode);
 
@@ -188,7 +188,7 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createThrowsDataExceptionWhenEncryptFails() {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(false);
         when(randomService.getNumber(6)).thenReturn(COMPANY_AUTH_CODE);
@@ -196,7 +196,7 @@ class CompanyAuthCodeServiceImplTest {
         CompanyAuthCodeServiceImpl brokenService = new CompanyAuthCodeServiceImpl(
                 randomService, repository, companyProfileRepository) {
             @Override
-            public CompanyAuthCode create(CompanyRequest spec) throws DataException {
+            public CompanyAuthCode create(InternalCompanyRequest spec) throws DataException {
                 final String authCode = String.valueOf(randomService.getNumber(6));
                 CompanyAuthCode companyAuthCode = new CompanyAuthCode();
                 companyAuthCode.setId(spec.getCompanyNumber());
@@ -286,7 +286,7 @@ class CompanyAuthCodeServiceImplTest {
 
     @Test
     void createReturnsUnsavedAuthCodeWhenCompanyWithDataStructureIsTrue() throws Exception {
-        CompanyRequest spec = new CompanyRequest();
+        InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setCompanyNumber(COMPANY_NUMBER);
         spec.setCompanyWithPopulatedStructureOnly(true);
 

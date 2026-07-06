@@ -15,7 +15,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Register;
 import uk.gov.companieshouse.api.testdata.model.entity.RegisterItem;
-import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
 import uk.gov.companieshouse.api.testdata.repository.CompanyRegistersRepository;
 import uk.gov.companieshouse.api.testdata.repository.FilingHistoryRepository;
@@ -23,7 +23,7 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
-public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters, CompanyRequest> {
+public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters, InternalCompanyRequest> {
     @Autowired
     private RandomService randomService;
 
@@ -52,7 +52,7 @@ public class CompanyRegistersServiceImpl implements DataService<CompanyRegisters
 
 
     @Override
-    public CompanyRegisters create(CompanyRequest companySpec) throws DataException {
+    public CompanyRegisters create(InternalCompanyRequest companySpec) throws DataException {
         var now = LocalDate.now();
         var companyRegisters = new CompanyRegisters();
         companyRegisters.setId(companySpec.getCompanyNumber());
