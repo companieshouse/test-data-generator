@@ -34,6 +34,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
@@ -50,6 +51,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyReques
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.CompanySubTypeValidator;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -273,12 +275,24 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithNonCicSubType() {
-        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
-        internalCompanyRequest.setSubType("private-fund-limited-partnership");
+    void createLimitedPartnershipWithPrivateFundLimitedPartnershipSubType() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
-        assertEquals("private-fund-limited-partnership", profile.getSubtype());
+        assertEquals(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP, profile.getSubtype());
         assertFalse(profile.getIsCommunityInterestCompany());
+    }
+
+    @Test
+    void createLtdWithPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequestException() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP);
+
+        HttpMessageNotReadableException thrown = assertThrows(HttpMessageNotReadableException.class,
+                () -> companyProfileService.create(internalCompanyRequest));
+
+        assertEquals("invalid request", thrown.getMessage());
+        verify(repository, never()).save(any());
     }
 
     @Test
