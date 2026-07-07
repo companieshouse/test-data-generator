@@ -9,8 +9,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
+import uk.gov.companieshouse.api.testdata.model.entity.FormerName;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
@@ -206,7 +208,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsResultData;
     }
 
-    // After — clean, 2-arg calls
     @Override
     public AppointmentsResultResponse createAppointment(AppointmentCreationRequest spec) {
 
@@ -269,7 +270,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         String countryOfResidence = (ctx.spec.getCountryOfResidence() != null)
                 ? ctx.spec.getCountryOfResidence()
-                : "england-wales";
+                : "united-kingdom";
 
         Instant appointedOnAdjusted = ctx.appointedOn;
         Instant resignedOnAdjusted = null;
@@ -284,6 +285,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     .atStartOfDay(ZoneId.of("UTC"))
                     .toInstant();
         }
+
+        boolean isCorporate = ctx.role.contains("corporate");
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
                 .spec(safeSpec)
@@ -303,6 +306,43 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setSurname(roleName);
         appointment.setOccupation(roleName);
         appointment.setOfficerRole(ctx.role);
+
+        if (!isCorporate) {
+            if (request.getCountryOfResidence() != null){
+                appointment.setCountryOfResidence("United Kingdom");
+            } else {
+                appointment.setCountryOfResidence(request.getCountryOfResidence());
+            }
+
+            appointment.setForename("John");
+            appointment.setOtherForeNames("Michael");
+            appointment.setSurname("Smith");
+            appointment.setNationality("British");
+
+            appointment.setOccupation("Lawyer");
+
+            appointment.setTitle("Mr");
+
+            appointment.setDateOfBirth( LocalDate.now().minusYears(40).atStartOfDay(ZoneId.of("UTC")).toInstant());
+
+            FormerName formerName = new FormerName();
+            formerName.setForenames("David");
+            formerName.setSurname("Brown");
+
+            appointment.setFormerNames(List.of(formerName));
+
+            Address residentialAddress = new Address();
+            residentialAddress.setAddressLine1("ura_line1");
+            residentialAddress.setAddressLine2("ura_line2");
+            residentialAddress.setCountry("United Kingdom");
+            residentialAddress.setPoBox("ura_po");
+            residentialAddress.setPostalCode("CF2 1B6");
+            residentialAddress.setPremise("URA");
+            residentialAddress.setRegion("ura_region");
+
+            appointment.setUsualResidentialAddress(residentialAddress);
+        }
+
 
         if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
             appointment.setResignedOn(resignedOnAdjusted);
