@@ -52,6 +52,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final LocalDate DATE_OF_BIRTH = LocalDate.of(1951, 3, 4);
     private static final Instant DOB_INSTANT
             = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final String DEFAULT_COUNTRY = "United Kingdom";
 
     @Autowired
     private AddressService addressService;
@@ -309,7 +310,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         if (!isCorporate) {
             if (request.getCountryOfResidence() != null){
-                appointment.setCountryOfResidence("United Kingdom");
+                appointment.setCountryOfResidence(DEFAULT_COUNTRY);
             } else {
                 appointment.setCountryOfResidence(request.getCountryOfResidence());
             }
@@ -317,7 +318,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setForename("John");
             appointment.setOtherForeNames("Michael");
             appointment.setSurname("Smith");
-            appointment.setNationality("British");
+            appointment.setNationality(NATIONALITY);
 
             appointment.setOccupation("Lawyer");
 
@@ -334,7 +335,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             Address residentialAddress = new Address();
             residentialAddress.setAddressLine1("ura_line1");
             residentialAddress.setAddressLine2("ura_line2");
-            residentialAddress.setCountry("United Kingdom");
+            residentialAddress.setCountry(DEFAULT_COUNTRY);
             residentialAddress.setPoBox("ura_po");
             residentialAddress.setPostalCode("CF2 1B6");
             residentialAddress.setPremise("URA");
@@ -357,7 +358,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             identification.setIdentificationType(ctx.identificationType);
             identification.setLegalAuthority("Chapter 32");
             identification.setLegalForm("Hong Kong");
-            identification.setPlaceRegistered("United Kingdom");
+            identification.setPlaceRegistered(DEFAULT_COUNTRY);
             identification.setRegistrationNumber("38298");
             appointment.setIdentification(identification);
         }
