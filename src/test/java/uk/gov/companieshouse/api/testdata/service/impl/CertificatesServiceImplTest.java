@@ -144,7 +144,6 @@ class CertificatesServiceImplTest {
         directorDetailsRequest.setIncludeCountryOfResidence(true);
         directorDetailsRequest.setIncludeDobType("partial");
         directorDetailsRequest.setIncludeNationality(true);
-        directorDetailsRequest.setIncludeOccupation(true);
 
         SecretaryDetailsRequest secretaryDetailsRequest = new SecretaryDetailsRequest();
         secretaryDetailsRequest.setIncludeAddress(true);
@@ -153,7 +152,6 @@ class CertificatesServiceImplTest {
         secretaryDetailsRequest.setIncludeCountryOfResidence(true);
         secretaryDetailsRequest.setIncludeDobType("partial");
         secretaryDetailsRequest.setIncludeNationality(true);
-        secretaryDetailsRequest.setIncludeOccupation(true);
 
         RegisteredOfficeAddressDetailsSpec registeredOfficeAddressDetailsSpec = new RegisteredOfficeAddressDetailsSpec();
         registeredOfficeAddressDetailsSpec.setIncludeAddressRecordsType("all");
@@ -224,7 +222,6 @@ class CertificatesServiceImplTest {
         assertEquals(expected.getIncludeCountryOfResidence(), actual.getIncludeCountryOfResidence());
         assertEquals(expected.getIncludeDobType(), actual.getIncludeDobType());
         assertEquals(expected.getIncludeNationality(), actual.getIncludeNationality());
-        assertEquals(expected.getIncludeOccupation(), actual.getIncludeOccupation());
     }
 
     private void assertSecretaryFields(SecretaryDetailsRequest expected, SecretaryDetails actual) {
@@ -234,7 +231,6 @@ class CertificatesServiceImplTest {
         assertEquals(expected.getIncludeCountryOfResidence(), actual.getIncludeCountryOfResidence());
         assertEquals(expected.getIncludeDobType(), actual.getIncludeDobType());
         assertEquals(expected.getIncludeNationality(), actual.getIncludeNationality());
-        assertEquals(expected.getIncludeOccupation(), actual.getIncludeOccupation());
     }
 
     private void assertROAddressFields(RegisteredOfficeAddressDetailsSpec expected, RegisteredOfficeAddressDetails actual) {
