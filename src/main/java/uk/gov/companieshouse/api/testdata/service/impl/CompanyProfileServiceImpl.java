@@ -28,6 +28,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.CompanySubTypeValidator;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -98,6 +99,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final CompanyType companyType = internalCompanyRequest.getCompanyType();
         final String subType = internalCompanyRequest.getSubType();
         final Boolean hasSuperSecurePscs = internalCompanyRequest.getHasSuperSecurePscs();
+        CompanySubTypeValidator.validate(subType, companyType);
         final String companyStatusDetail = internalCompanyRequest.getCompanyStatusDetail();
         final String companyStatus = internalCompanyRequest.getCompanyStatus();
         final String accountsDueStatus = internalCompanyRequest.getAccountsDueStatus();
@@ -499,7 +501,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private void setSubType(CompanyProfile profile, String subType) {
         if (subType != null) {
-            profile.setIsCommunityInterestCompany(subType.equals("community-interest-company"));
+            profile.setIsCommunityInterestCompany(
+                    subType.equals(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY));
             profile.setSubtype(subType);
         }
     }
