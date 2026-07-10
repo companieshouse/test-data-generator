@@ -883,8 +883,124 @@ class AppointmentsServiceImplTest {
 
         var result = appointmentsService.createAppointment(request);
 
-        assertEquals("england-wales",
+        assertEquals("United Kingdom",
                 result.getAppointment().getFirst().getCountryOfResidence());
+    }
+
+    @Test
+    void createAppointmentShouldPopulateNonCorporateOfficerFields() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("director"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any()))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any()))
+                .thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any()))
+                .thenReturn(new AppointmentsData());
+
+        var result = appointmentsService.createAppointment(request);
+
+        Appointment appointment = result.getAppointment().getFirst();
+
+        assertEquals("John", appointment.getForename());
+        assertEquals("Michael", appointment.getOtherForeNames());
+        assertEquals("Smith", appointment.getSurname());
+        assertEquals("Mr", appointment.getTitle());
+        assertEquals("British", appointment.getNationality());
+        assertEquals("Lawyer", appointment.getOccupation());
+        assertEquals("United Kingdom", appointment.getCountryOfResidence());
+
+        assertNotNull(appointment.getDateOfBirth());
+
+        assertNotNull(appointment.getFormerNames());
+        assertEquals(1, appointment.getFormerNames().size());
+        assertEquals("David",
+                appointment.getFormerNames().getFirst().getForenames());
+        assertEquals("Brown",
+                appointment.getFormerNames().getFirst().getSurname());
+    }
+
+    @Test
+    void createAppointmentShouldPopulateUsualResidentialAddressForNonCorporateOfficer() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("director"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any()))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any()))
+                .thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any()))
+                .thenReturn(new AppointmentsData());
+
+        var result = appointmentsService.createAppointment(request);
+
+        Address ura =
+                result.getAppointment().getFirst().getUsualResidentialAddress();
+
+        assertNotNull(ura);
+        assertEquals("URA", ura.getPremise());
+        assertEquals("ura_line1", ura.getAddressLine1());
+        assertEquals("ura_line2", ura.getAddressLine2());
+        assertEquals("United Kingdom", ura.getCountry());
+        assertEquals("ura_po", ura.getPoBox());
+        assertEquals("CF2 1B6", ura.getPostalCode());
+        assertEquals("ura_region", ura.getRegion());
+    }
+
+    @Test
+    void createAppointmentShouldNotPopulateNaturalOfficerFieldsForCorporateRole() {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of("corporate-director"))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any()))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any()))
+                .thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any()))
+                .thenReturn(new AppointmentsData());
+
+        var result = appointmentsService.createAppointment(request);
+
+        Appointment appointment = result.getAppointment().getFirst();
+
+        assertNull(appointment.getFormerNames());
+        assertNull(appointment.getUsualResidentialAddress());
+        assertNull(appointment.getOtherForeNames());
+        assertNull(appointment.getTitle());
     }
 
     private AppointmentCreationRequest buildAppointmentCreationRequest(InternalCompanyRequest spec) {

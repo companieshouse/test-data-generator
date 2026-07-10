@@ -112,6 +112,22 @@ In order to use the generator, there are different possible endpoints that can b
 #### Getting authcode for a company without an authcode
 - GET: Sending a GET request on the endpoint `{Base URL}/test-data/internal/company/authcode?{companyNumber}` will return the default authcode for a company if it does not have an existing authcode or will return a `null` if the company has a valid existing `authcode`.
 
+#### Creating test appointments
+- POST: Sending a POST request to `{Base URL}/test-data/appointments` will generate a new appointments.
+  - `company_number`: The company number for which the appointments needs to be created.
+  - `officer_roles`: The array of officer roles for which appointments should be created. (e.g., [`corporate-director`, `cic-manager`]).
+  - `resigned_on`: Boolean, default to false. When set to true, a resigned_on date is added to the appointment documents created.
+  - `is_pre_1992_appointment`:  Boolean, defaults to false. When set to true, the is_pre_1992_appointment field is added with a value of true.
+  - `identification_type`: An array of identification types. This is required only when one or more values in officer_roles are corporate officer roles. For each corporate officer role, an appointment will be created for every identification type provided. (e.g. `uk-limited-company`, `eea`, `non-eea`, `other-corporate-body-or-firm`, `registered-overseas-entity-corporate-managing-officer`).
+
+For example, if one corporate officer role and five identification types are supplied, five appointments will be created.
+
+  - A usage example for creating corporate appointments looks like this: `{" company_number": "NI038379", "officer_roles": ["corporate-director", "corporate-llp-designated-member", "corporate-llp-member"], "resigned_on": false,
+    "is_pre_1992_appointment": false, "identification_type": [ "uk-limited-company", "eea", "non-eea", "other-corporate-body-or-firm", "registered-overseas-entity-corporate-managing-officer"]`, this will create corporate appointments with the combination of officer_roles with identification_type.
+  - A usage example for creating corporate appointments looks like this: `{" company_number": "NI038379", "officer_roles": ["cic-manager","director"], "resigned_on": false, "is_pre_1992_appointment": false]`, this will create natural appointments.
+
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/company/{companyNumber}/appointments` will delete the all the appointments associated with this company_number.
+
 #### Creating test users
 - POST: Sending a POST request to create users with the associated roles `{Base URL}/test-data/user` will generate a new test user. The request body must include `UserSpec` parameter to customise the generated user.
     - `email`: The email id of the user. This is an optional field which defaults to randomly generated string + a test email domain.

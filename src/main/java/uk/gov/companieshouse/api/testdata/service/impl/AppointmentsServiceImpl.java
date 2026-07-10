@@ -9,8 +9,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
+import uk.gov.companieshouse.api.testdata.model.entity.FormerName;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
@@ -50,6 +52,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final LocalDate DATE_OF_BIRTH = LocalDate.of(1951, 3, 4);
     private static final Instant DOB_INSTANT
             = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final String DEFAULT_COUNTRY = "United Kingdom";
 
     @Autowired
     private AddressService addressService;
@@ -204,7 +207,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsResultData;
     }
 
-    // After — clean, 2-arg calls
     @Override
     public AppointmentsResultResponse createAppointment(AppointmentCreationRequest spec) {
 
@@ -267,7 +269,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         String countryOfResidence = (ctx.spec.getCountryOfResidence() != null)
                 ? ctx.spec.getCountryOfResidence()
-                : "england-wales";
+                : "united-kingdom";
 
         Instant appointedOnAdjusted = ctx.appointedOn;
         Instant resignedOnAdjusted = null;
@@ -282,6 +284,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     .atStartOfDay(ZoneId.of("UTC"))
                     .toInstant();
         }
+
+        boolean isCorporate = ctx.role.contains("corporate");
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
                 .spec(safeSpec)
@@ -302,6 +306,43 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setOccupation(roleName);
         appointment.setOfficerRole(ctx.role);
 
+        if (!isCorporate) {
+            if (request.getCountryOfResidence() != null){
+                appointment.setCountryOfResidence(DEFAULT_COUNTRY);
+            } else {
+                appointment.setCountryOfResidence(request.getCountryOfResidence());
+            }
+
+            appointment.setForename("John");
+            appointment.setOtherForeNames("Michael");
+            appointment.setSurname("Smith");
+            appointment.setNationality(NATIONALITY);
+
+            appointment.setOccupation("Lawyer");
+
+            appointment.setTitle("Mr");
+
+            appointment.setDateOfBirth( LocalDate.now().minusYears(40).atStartOfDay(ZoneId.of("UTC")).toInstant());
+
+            FormerName formerName = new FormerName();
+            formerName.setForenames("David");
+            formerName.setSurname("Brown");
+
+            appointment.setFormerNames(List.of(formerName));
+
+            Address residentialAddress = new Address();
+            residentialAddress.setAddressLine1("ura_line1");
+            residentialAddress.setAddressLine2("ura_line2");
+            residentialAddress.setCountry(DEFAULT_COUNTRY);
+            residentialAddress.setPoBox("ura_po");
+            residentialAddress.setPostalCode("CF2 1B6");
+            residentialAddress.setPremise("URA");
+            residentialAddress.setRegion("ura_region");
+
+            appointment.setUsualResidentialAddress(residentialAddress);
+        }
+
+
         if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
             appointment.setResignedOn(resignedOnAdjusted);
         }
@@ -315,7 +356,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             identification.setIdentificationType(ctx.identificationType);
             identification.setLegalAuthority("Chapter 32");
             identification.setLegalForm("Hong Kong");
-            identification.setPlaceRegistered("United Kingdom");
+            identification.setPlaceRegistered(DEFAULT_COUNTRY);
             identification.setRegistrationNumber("38298");
             appointment.setIdentification(identification);
         }
