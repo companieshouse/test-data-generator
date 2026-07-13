@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
-import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.service.VerifiedIdentityService;
 import uk.gov.companieshouse.logging.Logger;
@@ -48,7 +46,7 @@ public class IdentityVerificationController {
 
     @DeleteMapping(value = "/identity/verification", params = {"identityemail", "userid"})
     public ResponseEntity<Map<String, Object>> deleteIdentity(  @RequestParam("identityemail") String identityEmail, @RequestParam("userid") String userId )
-            throws DataException, NoDataFoundException {
+            throws DataException {
         Map<String, Object> response = new HashMap<>();
         response.put("Identity Email", identityEmail);
 

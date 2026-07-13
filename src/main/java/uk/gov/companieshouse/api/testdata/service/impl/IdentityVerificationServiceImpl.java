@@ -125,19 +125,25 @@ public class IdentityVerificationServiceImpl implements
             throw ex;
         }
 
-        try {
-            identityRepository.deleteById(identityVerificationResponse.getIdentityId());
-            LOG.debug("Deleted identity id={}");
-        } catch (Exception ex) {
-            LOG.error("Failed to delete identity id={}");
-            throw ex;
-        }
+        executeDelete(
+                () -> identityRepository.deleteById(identityVerificationResponse.getIdentityId()),
+                "Deleted identity id={}",
+                "Failed to delete identity id={}"
+        );
 
+        executeDelete(
+                () -> backlogRepository.deleteByUserId(userId),
+                "Deleted backlog for userId={}",
+                "Failed to delete backlog for userId={}"
+        );
+    }
+
+    private void executeDelete(Runnable deleteAction, String successMessage, String failureMessage) {
         try {
-            backlogRepository.deleteByUserId(userId);
-            LOG.debug("Deleted backlog for userId={}");
+            deleteAction.run();
+            LOG.debug(successMessage);
         } catch (Exception ex) {
-            LOG.error("Failed to delete backlog for userId={}");
+            LOG.error(failureMessage, ex);
             throw ex;
         }
     }
