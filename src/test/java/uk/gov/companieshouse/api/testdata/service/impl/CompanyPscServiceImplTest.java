@@ -30,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -330,6 +331,46 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
+    void create_LegalPersonPsc_DoesNotSetPlaceRegisteredOrRegistrationNumber() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.LEGAL_PERSON));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        companyPscsService.create(internalCompanyRequest);
+
+        // placeRegistered is only set via getCountryOfResidence(ENGLAND) in buildCorporateEntityPsc
+        verify(addressService, never()).getCountryOfResidence(JurisdictionType.ENGLAND);
+        verify(repository).save(any(CompanyPscs.class));
+    }
+
+    @Test
+    void create_CorporateEntityPsc_SetPlaceRegisteredAndRegistrationNumber() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.CORPORATE_ENTITY));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        companyPscsService.create(internalCompanyRequest);
+
+        // placeRegistered is set via getCountryOfResidence(ENGLAND) only in buildCorporateEntityPsc
+        verify(addressService).getCountryOfResidence(JurisdictionType.ENGLAND);
+        verify(repository).save(any(CompanyPscs.class));
+    }
+
+    @Test
     void create_WithZeroNumberOfPsc_AndNullPscType_ReturnsEmptyList() throws DataException {
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -380,6 +421,44 @@ class CompanyPscServiceImplTest {
         assertEquals(COMPANY_NUMBER, result.get(0).getCompanyNumber());
         assertEquals(ENCODED_ID, result.get(0).getId());
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_BeneficialOwner_UsesEuropeanUnionServiceAddress() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.REGISTERED_OVERSEAS_ENTITY);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL_BENEFICIAL_OWNER));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        companyPscsService.create(internalCompanyRequest);
+
+        verify(addressService).getAddress(JurisdictionType.EUROPEAN_UNION);
+        verify(addressService, never()).getAddress(JurisdictionType.ENGLAND_WALES);
+    }
+
+    @Test
+    void create_NonBeneficialOwner_UsesEnglandWalesServiceAddress() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        companyPscsService.create(internalCompanyRequest);
+
+        verify(addressService).getAddress(JurisdictionType.ENGLAND_WALES);
+        verify(addressService, never()).getAddress(JurisdictionType.EUROPEAN_UNION);
     }
 
 }
