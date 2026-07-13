@@ -7,6 +7,7 @@ import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
@@ -22,13 +23,15 @@ public class IdentityVerificationServiceImpl implements
     private final IdentityRepository identityRepository;
     private final UvidRepository uvidRepository;
     private final UserRepository userRepository;
+    private final BacklogRepository backlogRepository;
 
     public IdentityVerificationServiceImpl(IdentityRepository identityRepository,
                                            UvidRepository uvidRepository,
-                                           UserRepository userRepository) {
+                                           UserRepository userRepository, BacklogRepository backlogRepository) {
         this.identityRepository = identityRepository;
         this.uvidRepository = uvidRepository;
         this.userRepository = userRepository;
+        this.backlogRepository = backlogRepository;
     }
 
     @Override
@@ -93,5 +96,49 @@ public class IdentityVerificationServiceImpl implements
         }
 
         return new String[]{firstName, lastName};
+    }
+
+    @Override
+    public boolean deleteIdentityData(
+            IdentityVerificationResponse identityVerificationResponse,
+            String userId) {
+
+        LOG.info("delete called for IdentityId " +  identityVerificationResponse.getIdentityId());
+
+        try {
+            LOG.info(String.valueOf(identityVerificationResponse));
+            deleteIdentity(identityVerificationResponse, userId);
+            return true;
+        } catch (Exception ex) {
+            LOG.error("Failed to delete identity data", ex);
+            return false;
+        }
+    }
+
+    private void deleteIdentity(IdentityVerificationResponse identityVerificationResponse, String userId) {
+
+        try {
+            uvidRepository.deleteByIdentityId(identityVerificationResponse.getIdentityId());
+            LOG.debug("Deleted UVIDs for identityId={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete UVIDs for identityId={}");
+            throw ex;
+        }
+
+        try {
+            identityRepository.deleteById(identityVerificationResponse.getIdentityId());
+            LOG.debug("Deleted identity id={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete identity id={}");
+            throw ex;
+        }
+
+        try {
+            backlogRepository.deleteByUserId(userId);
+            LOG.debug("Deleted backlog for userId={}");
+        } catch (Exception ex) {
+            LOG.error("Failed to delete backlog for userId={}");
+            throw ex;
+        }
     }
 }
