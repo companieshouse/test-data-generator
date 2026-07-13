@@ -159,7 +159,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
             var appointment = createBaseAppointment(request);
             appointment.setForename(FORENAME + (i + 1));
             appointment.setSurname(roleName);
-            appointment.setOccupation(roleName);
             appointment.setOfficerRole(currentRole);
 
             var links = createAppointmentLinks(companyNumber, officerId, appointmentId);
@@ -179,7 +178,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     internalCompanyRequest, internalId, officerId, dateTimeNow, appointmentId);
             appointmentsData.setForename(FORENAME + (i + 1));
             appointmentsData.setSurname(roleName);
-            appointmentsData.setOccupation(roleName);
             appointmentsData.setOfficerRole(currentRole);
 
             var dataLinks = new AppointmentsData.Links();
@@ -560,7 +558,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         String roleName = setRoleName(role);
 
         OfficerAppointmentItem item = new OfficerAppointmentItem();
-        item.setOccupation(roleName);
         item.setAddress(addressService.getAddress(jurisdiction));
         item.setForename(FORENAME);
         item.setSurname(roleName);

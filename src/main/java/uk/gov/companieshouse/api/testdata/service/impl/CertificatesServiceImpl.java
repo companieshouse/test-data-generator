@@ -131,7 +131,6 @@ public class CertificatesServiceImpl implements CertificatesService {
         Optional.ofNullable(director.getIncludeCountryOfResidence()).ifPresent(details::setIncludeCountryOfResidence);
         Optional.ofNullable(director.getIncludeDobType()).ifPresent(details::setIncludeDobType);
         Optional.ofNullable(director.getIncludeNationality()).ifPresent(details::setIncludeNationality);
-        Optional.ofNullable(director.getIncludeOccupation()).ifPresent(details::setIncludeOccupation);
 
         return details;
     }
@@ -146,7 +145,6 @@ public class CertificatesServiceImpl implements CertificatesService {
         Optional.ofNullable(secretary.getIncludeCountryOfResidence()).ifPresent(details::setIncludeCountryOfResidence);
         Optional.ofNullable(secretary.getIncludeDobType()).ifPresent(details::setIncludeDobType);
         Optional.ofNullable(secretary.getIncludeNationality()).ifPresent(details::setIncludeNationality);
-        Optional.ofNullable(secretary.getIncludeOccupation()).ifPresent(details::setIncludeOccupation);
 
         return details;
     }
