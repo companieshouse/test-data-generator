@@ -220,6 +220,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         request.setWithdrawnStatements(companySpec.getWithdrawnStatements());
         request.setActiveStatements(companySpec.getActiveStatements());
         request.setHasUkEstablishment(companySpec.getHasUkEstablishment());
+        request.setNumberOfUkEstablishments(companySpec.getNumberOfUkEstablishments());
         request.setRegisteredOfficeIsInDispute(companySpec.getRegisteredOfficeIsInDispute());
         request.setUndeliverableRegisteredOfficeAddress(
                 companySpec.getUndeliverableRegisteredOfficeAddress());

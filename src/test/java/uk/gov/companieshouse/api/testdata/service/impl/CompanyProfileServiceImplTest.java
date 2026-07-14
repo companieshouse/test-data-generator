@@ -1102,4 +1102,120 @@ class CompanyProfileServiceImplTest {
         );
     }
 
+    @Test
+    void testCreateOverseaCompanyWithNumberOfUkEstablishments_Zero() throws Exception {
+        CompanyType companyType = CompanyType.OVERSEA_COMPANY;
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setNumberOfUkEstablishments(0);
+        JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "createOverseaLinks", String.class, CompanyType.class, InternalCompanyRequest.class, JurisdictionType.class, LocalDate.class);
+        method.setAccessible(true);
+
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
+
+        assertNotNull(links);
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
+        assertNull(links.getUkEstablishments());
+        assertFalse(request.getHasUkEstablishment());
+    }
+
+    @Test
+    void testCreateOverseaCompanyWithNumberOfUkEstablishments_One() throws Exception {
+        CompanyType companyType = CompanyType.OVERSEA_COMPANY;
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setNumberOfUkEstablishments(1);
+        JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(jurisdiction)).thenReturn(new Address());
+
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "createOverseaLinks", String.class, CompanyType.class, InternalCompanyRequest.class, JurisdictionType.class, LocalDate.class);
+        method.setAccessible(true);
+
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
+
+        assertNotNull(links);
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER + "/uk-establishments", links.getUkEstablishments());
+        assertTrue(request.getHasUkEstablishment());
+        verify(repository).save(any(CompanyProfile.class));
+    }
+
+    @Test
+    void testCreateOverseaCompanyWithNumberOfUkEstablishments_Multiple() throws Exception {
+        CompanyType companyType = CompanyType.OVERSEA_COMPANY;
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setNumberOfUkEstablishments(3);
+        JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L, 234567L, 345678L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(jurisdiction)).thenReturn(new Address());
+
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "createOverseaLinks", String.class, CompanyType.class, InternalCompanyRequest.class, JurisdictionType.class, LocalDate.class);
+        method.setAccessible(true);
+
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
+
+        assertNotNull(links);
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER + "/uk-establishments", links.getUkEstablishments());
+        assertTrue(request.getHasUkEstablishment());
+        verify(repository, Mockito.times(3)).save(any(CompanyProfile.class));
+    }
+
+    @Test
+    void testCreateOverseaCompanyWithHasUkEstablishment_BackwardCompatibility() throws Exception {
+        CompanyType companyType = CompanyType.OVERSEA_COMPANY;
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setHasUkEstablishment(true);
+        JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(jurisdiction)).thenReturn(new Address());
+
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "createOverseaLinks", String.class, CompanyType.class, InternalCompanyRequest.class, JurisdictionType.class, LocalDate.class);
+        method.setAccessible(true);
+
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
+
+        assertNotNull(links);
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER + "/uk-establishments", links.getUkEstablishments());
+        assertTrue(request.getHasUkEstablishment());
+        verify(repository).save(any(CompanyProfile.class));
+    }
+
+    @Test
+    void testNumberOfUkEstablishments_TakesPrecedenceOverHasUkEstablishment() throws Exception {
+        CompanyType companyType = CompanyType.OVERSEA_COMPANY;
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setHasUkEstablishment(true);
+        request.setNumberOfUkEstablishments(0);
+        JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        var method = CompanyProfileServiceImpl.class.getDeclaredMethod(
+                "createOverseaLinks", String.class, CompanyType.class, InternalCompanyRequest.class, JurisdictionType.class, LocalDate.class);
+        method.setAccessible(true);
+
+        Links links = (Links) method.invoke(companyProfileService, OVERSEA_COMPANY_NUMBER, companyType, request, jurisdiction, accountingReferenceDate);
+
+        assertNotNull(links);
+        assertEquals("/company/" + OVERSEA_COMPANY_NUMBER, links.getSelf());
+        assertNull(links.getUkEstablishments());
+        assertFalse(request.getHasUkEstablishment());
+        verify(repository, never()).save(any(CompanyProfile.class));
+    }
 }
