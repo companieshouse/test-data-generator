@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,6 +59,80 @@ class IdentityVerificationControllerTest {
         assertEquals("No identity verification found for email: " + email, thrown.getMessage());
 
         verify(verifiedIdentityService, times(1)).getIdentityVerificationData(email);
+    }
+
+    @Test
+    void deleteIdentity_identityNotFound_returnsNotFound() throws Exception {
+        String identityEmail = "missing@example.com";
+        String userId = "user-123";
+
+        when(verifiedIdentityService.getIdentityVerificationData(identityEmail))
+                .thenReturn(null);
+
+        ResponseEntity<Map<String, Object>> response =
+                identityVerificationController.deleteIdentity(identityEmail, userId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        assertEquals(identityEmail, response.getBody().get("Identity Email"));
+
+        verify(verifiedIdentityService).getIdentityVerificationData(identityEmail);
+    }
+
+    @Test
+    void deleteIdentity_deleteSuccessful_returnsNoContent() throws Exception {
+        String identityEmail = "user@example.com";
+        String userId = "user-123";
+
+        IdentityVerificationResponse identity =
+                new IdentityVerificationResponse(
+                        "identity-id-123",
+                        "UVID-ABC",
+                        "Firstname",
+                        "Lastname");
+
+        when(verifiedIdentityService.getIdentityVerificationData(identityEmail))
+                .thenReturn(identity);
+
+        when(verifiedIdentityService.deleteIdentityData(identity, userId))
+                .thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response =
+                identityVerificationController.deleteIdentity(identityEmail, userId);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+
+        verify(verifiedIdentityService).getIdentityVerificationData(identityEmail);
+        verify(verifiedIdentityService).deleteIdentityData(identity, userId);
+    }
+
+    @Test
+    void deleteIdentity_deleteFails_returnsNotFound() throws Exception {
+        String identityEmail = "user@example.com";
+        String userId = "user-123";
+
+        IdentityVerificationResponse identity =
+                new IdentityVerificationResponse(
+                        "identity-id-123",
+                        "UVID-ABC",
+                        "Firstname",
+                        "Lastname");
+
+        when(verifiedIdentityService.getIdentityVerificationData(identityEmail))
+                .thenReturn(identity);
+
+        when(verifiedIdentityService.deleteIdentityData(identity, userId))
+                .thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response =
+                identityVerificationController.deleteIdentity(identityEmail, userId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        assertEquals(identityEmail, response.getBody().get("Identity Email"));
+
+        verify(verifiedIdentityService).getIdentityVerificationData(identityEmail);
+        verify(verifiedIdentityService).deleteIdentityData(identity, userId);
     }
 
 }
