@@ -188,7 +188,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void deleteIdentityData(Identity identity, String userId) {
+    public void deleteIdentityData(Identity identity, String userId) {
 
         try {
             uvidRepository.deleteByIdentityId(identity.getId());

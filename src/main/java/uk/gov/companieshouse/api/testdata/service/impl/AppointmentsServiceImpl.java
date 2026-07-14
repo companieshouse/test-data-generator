@@ -303,7 +303,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         appointment.setForename(FORENAME);
         appointment.setSurname(roleName);
-        appointment.setOccupation(roleName);
         appointment.setOfficerRole(ctx.role);
 
         if (!isCorporate) {
@@ -317,8 +316,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setOtherForeNames("Michael");
             appointment.setSurname("Smith");
             appointment.setNationality(NATIONALITY);
-
-            appointment.setOccupation("Lawyer");
 
             appointment.setTitle("Mr");
 
@@ -371,7 +368,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         data.setForename(FORENAME);
         data.setSurname(roleName);
-        data.setOccupation(roleName);
         data.setOfficerRole(ctx.role);
 
         AppointmentsData.Links dataLinks = new AppointmentsData.Links();

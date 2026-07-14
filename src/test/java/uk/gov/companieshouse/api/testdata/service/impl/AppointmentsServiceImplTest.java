@@ -919,7 +919,6 @@ class AppointmentsServiceImplTest {
         assertEquals("Smith", appointment.getSurname());
         assertEquals("Mr", appointment.getTitle());
         assertEquals("British", appointment.getNationality());
-        assertEquals("Lawyer", appointment.getOccupation());
         assertEquals("United Kingdom", appointment.getCountryOfResidence());
 
         assertNotNull(appointment.getDateOfBirth());

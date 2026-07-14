@@ -1,10 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
+import static com.mongodb.assertions.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -26,6 +29,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Identity;
 import uk.gov.companieshouse.api.testdata.model.entity.User;
 import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
 import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
+import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
@@ -49,6 +53,9 @@ class IdentityVerificationServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private BacklogRepository backlogRepository;
 
     @InjectMocks
     private IdentityVerificationServiceImpl service;
@@ -196,5 +203,81 @@ class IdentityVerificationServiceImplTest {
         assertEquals(FIRST_NAME, result.getFirstName());
         assertEquals(LAST_NAME, result.getLastName());
         verify(userRepository, times(1)).findById(USER_ID);
+    }
+
+    @Test
+    void deleteIdentityData_whenAllDeletesSucceed_returnsTrue() {
+        IdentityVerificationResponse response =
+                new IdentityVerificationResponse(
+                        IDENTITY_ID,
+                        UVID_VALUE,
+                        FIRST_NAME,
+                        LAST_NAME);
+        boolean result = service.deleteIdentityData(response, USER_ID);
+
+        assertTrue(result);
+        verify(uvidRepository).deleteByIdentityId(IDENTITY_ID);
+        verify(identityRepository).deleteById(IDENTITY_ID);
+        verify(backlogRepository).deleteByUserId(USER_ID);
+    }
+
+    @Test
+    void deleteIdentityData_whenIdentityDeleteFails_returnsFalse() {
+        IdentityVerificationResponse response =
+                new IdentityVerificationResponse(
+                        IDENTITY_ID,
+                        UVID_VALUE,
+                        FIRST_NAME,
+                        LAST_NAME);
+
+        doThrow(new RuntimeException("identity delete failed"))
+                .when(identityRepository)
+                .deleteById(IDENTITY_ID);
+        boolean result = service.deleteIdentityData(response, USER_ID);
+
+        assertFalse(result);
+        verify(uvidRepository).deleteByIdentityId(IDENTITY_ID);
+        verify(identityRepository).deleteById(IDENTITY_ID);
+        verify(backlogRepository, never()).deleteByUserId(USER_ID);
+    }
+
+    @Test
+    void deleteIdentityData_whenBacklogDeleteFails_returnsFalse() {
+        IdentityVerificationResponse response =
+                new IdentityVerificationResponse(
+                        IDENTITY_ID,
+                        UVID_VALUE,
+                        FIRST_NAME,
+                        LAST_NAME);
+
+        doThrow(new RuntimeException("backlog delete failed"))
+                .when(backlogRepository)
+                .deleteByUserId(USER_ID);
+        boolean result = service.deleteIdentityData(response, USER_ID);
+
+        assertFalse(result);
+        verify(uvidRepository).deleteByIdentityId(IDENTITY_ID);
+        verify(identityRepository).deleteById(IDENTITY_ID);
+        verify(backlogRepository).deleteByUserId(USER_ID);
+    }
+
+    @Test
+    void deleteIdentityData_whenUvidDeleteFails_returnsFalse() {
+        IdentityVerificationResponse response =
+                new IdentityVerificationResponse(
+                        IDENTITY_ID,
+                        UVID_VALUE,
+                        FIRST_NAME,
+                        LAST_NAME);
+
+        doThrow(new RuntimeException("uvid delete failed"))
+                .when(uvidRepository)
+                .deleteByIdentityId(IDENTITY_ID);
+        boolean result = service.deleteIdentityData(response, USER_ID);
+
+        assertFalse(result);
+        verify(uvidRepository).deleteByIdentityId(IDENTITY_ID);
+        verify(identityRepository, never()).deleteById(IDENTITY_ID);
+        verify(backlogRepository, never()).deleteByUserId(USER_ID);
     }
 }
