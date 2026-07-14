@@ -158,6 +158,8 @@ For example, if one corporate officer role and five identification types are sup
 - GET: Sending a GET request on the endpoint `{Base URL}/test-data/identity/?email=email@email.com` will return the `identity_id`, `uvid`, `firstname` and `lastname` for the user. `userId` is required to get the identity id and uvid.
     
     A usage example response looks like this: `{"identity_id": "d4b5f5e2-5f4e-4c3a-9f3e-2b5f5e25f4e4", "uvid": "XX4YBV22223"}`
+- 
+- DELETE: Sending a DELETE request using identity endpoint `{Base URL}/test-data/internal/identity/verification?identityemail={identityEmail}&userid={userId}` will delete the all the identity , uvid and backlog for the parameters.
 
 #### Creating Acsp Members and Acsp Profiles
 - POST: Sending a POST request to create Acsp Members and Acsp Profiles `{Base URL}/test-data/acsp-members` will generate a new Acsp Member and Acsp Profile. The request body must include mandatory `userId` and optional `AcspMembersSpec` and `AcspProfile` parameter to customise the generated Acsp Member and Acsp Profile.
