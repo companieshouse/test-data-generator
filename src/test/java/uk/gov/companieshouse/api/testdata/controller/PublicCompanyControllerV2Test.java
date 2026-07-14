@@ -49,6 +49,7 @@ class PublicCompanyControllerV2Test {
     void createPublicCompanyV2() throws Exception {
         PublicCompanyRequestV2 request = new PublicCompanyRequestV2();
         request.setJurisdiction(JurisdictionType.NI);
+        request.setNumberOfUkEstablishments(3);
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
@@ -59,7 +60,10 @@ class PublicCompanyControllerV2Test {
 
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        verify(createCompanyWorkflowService).createPublicCompany(any(PublicCompanyRequest.class));
+        var captor = org.mockito.ArgumentCaptor.forClass(PublicCompanyRequest.class);
+        verify(createCompanyWorkflowService).createPublicCompany(captor.capture());
+        PublicCompanyRequest passed = captor.getValue();
+        assertEquals(3, passed.getNumberOfUkEstablishments().intValue());
     }
 
     @Test
