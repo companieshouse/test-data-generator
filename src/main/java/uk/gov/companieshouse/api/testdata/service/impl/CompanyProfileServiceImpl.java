@@ -461,10 +461,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         var links = new Links();
         links.setSelf(LINK_STEM + companyNumber);
 
-        if (CompanyType.OVERSEA_COMPANY.equals(companyType)
-                && BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
-            createUkEstablishment(companyNumber, jurisdiction, accountingReferenceDate);
-            links.setUkEstablishments(LINK_STEM + companyNumber + "/uk-establishments");
+        if (CompanyType.OVERSEA_COMPANY.equals(companyType)) {
+            int numberOfEstablishments = determineNumberOfUkEstablishments(spec);
+
+            if (numberOfEstablishments > 0) {
+                for (int i = 0; i < numberOfEstablishments; i++) {
+                    createUkEstablishment(companyNumber, jurisdiction, accountingReferenceDate);
+                }
+                links.setUkEstablishments(LINK_STEM + companyNumber + "/uk-establishments");
+            }
+            spec.setHasUkEstablishment(numberOfEstablishments > 0);
         }
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(companyType)) {
@@ -475,6 +481,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
 
         return links;
+    }
+
+    private int determineNumberOfUkEstablishments(InternalCompanyRequest spec) {
+        if (spec.getNumberOfUkEstablishments() != null) {
+            return spec.getNumberOfUkEstablishments();
+        }
+        if (BooleanUtils.isTrue(spec.getHasUkEstablishment())) {
+            return 1;
+        }
+        return 0;
     }
 
     private String checkNonJurisdictionTypes(JurisdictionType jurisdiction, String companyType) {
