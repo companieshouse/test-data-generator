@@ -1235,16 +1235,16 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile capturedProfile = captor.getValue();
 
-        assertNotNull(savedProfile.getJurisdiction());
+        assertNotNull(capturedProfile.getJurisdiction());
         assertTrue(
-                savedProfile.getJurisdiction().equals("england-wales") ||
-                        savedProfile.getJurisdiction().equals("scotland") ||
-                        savedProfile.getJurisdiction().equals("ni") ||
-                        savedProfile.getJurisdiction().equals("england") ||
-                        savedProfile.getJurisdiction().equals("wales"),
-                "UK establishment should have a UK jurisdiction, but got: " + savedProfile.getJurisdiction()
+                capturedProfile.getJurisdiction().equals("england-wales") ||
+                        capturedProfile.getJurisdiction().equals("scotland") ||
+                        capturedProfile.getJurisdiction().equals("ni") ||
+                        capturedProfile.getJurisdiction().equals("england") ||
+                        capturedProfile.getJurisdiction().equals("wales"),
+                "UK establishment should have a UK jurisdiction, but got: " + capturedProfile.getJurisdiction()
         );
     }
 
