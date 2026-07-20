@@ -826,18 +826,18 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile capturedProfile = captor.getValue();
 
-        assertEquals(expectedUkEstablishmentNumber, savedProfile.getCompanyNumber());
-        assertEquals("COMPANY BR123456", savedProfile.getCompanyName());
-        assertEquals("open", savedProfile.getCompanyStatus());
-        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), savedProfile.getType());
-        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
-        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
-        assertEquals(mockAddress, savedProfile.getRegisteredOfficeAddress());
-        assertFalse(savedProfile.getHasCharges());
-        assertFalse(savedProfile.getHasSuperSecurePscs());
-        assertEquals(ETAG, savedProfile.getEtag());
+        assertEquals(expectedUkEstablishmentNumber, capturedProfile.getCompanyNumber());
+        assertEquals("COMPANY BR123456", capturedProfile.getCompanyName());
+        assertEquals("open", capturedProfile.getCompanyStatus());
+        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), capturedProfile.getType());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, capturedProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, capturedProfile.getLinks().getOverseas());
+        assertEquals(mockAddress, capturedProfile.getRegisteredOfficeAddress());
+        assertFalse(capturedProfile.getHasCharges());
+        assertFalse(capturedProfile.getHasSuperSecurePscs());
+        assertEquals(ETAG, capturedProfile.getEtag());
     }
 
     @Test
@@ -860,10 +860,10 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile capturedProfile = captor.getValue();
 
-        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
-        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, capturedProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, capturedProfile.getLinks().getOverseas());
     }
 
     @Test
@@ -1299,10 +1299,10 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile capturedProfile = captor.getValue();
 
-        assertNotNull(savedProfile.getRegisteredOfficeAddress());
-        assertEquals(ukAddress, savedProfile.getRegisteredOfficeAddress());
+        assertNotNull(capturedProfile.getRegisteredOfficeAddress());
+        assertEquals(ukAddress, capturedProfile.getRegisteredOfficeAddress());
     }
 
 }
