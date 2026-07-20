@@ -1230,7 +1230,7 @@ class CompanyProfileServiceImplTest {
         when(addressService.getAddress(any())).thenReturn(new Address());
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        String ukEstablishmentNumber = companyProfileService.createUkEstablishment(
+        companyProfileService.createUkEstablishment(
                 parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
