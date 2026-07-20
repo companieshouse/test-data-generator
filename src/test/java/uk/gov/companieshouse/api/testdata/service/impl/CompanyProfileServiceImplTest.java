@@ -1218,4 +1218,91 @@ class CompanyProfileServiceImplTest {
         assertFalse(request.getHasUkEstablishment());
         verify(repository, never()).save(any(CompanyProfile.class));
     }
+    @Test
+    void testUkEstablishment_HasUkJurisdiction() {
+        String parentCompanyNumber = "FC123456";
+        JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(0, 5)).thenReturn(java.util.OptionalLong.of(1));
+        when(addressService.getAddress(any())).thenReturn(new Address());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        String ukEstablishmentNumber = companyProfileService.createUkEstablishment(
+                parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile savedProfile = captor.getValue();
+
+        assertNotNull(savedProfile.getJurisdiction());
+        assertTrue(
+                savedProfile.getJurisdiction().equals("england-wales") ||
+                        savedProfile.getJurisdiction().equals("scotland") ||
+                        savedProfile.getJurisdiction().equals("ni") ||
+                        savedProfile.getJurisdiction().equals("england") ||
+                        savedProfile.getJurisdiction().equals("wales"),
+                "UK establishment should have a UK jurisdiction, but got: " + savedProfile.getJurisdiction()
+        );
+    }
+
+    @Test
+    void testMultipleUkEstablishments_HaveUniqueNames() {
+        String parentCompanyNumber = "FC123456";
+        JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L, 234567L, 345678L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(0, 5)).thenReturn(
+                java.util.OptionalLong.of(0),
+                java.util.OptionalLong.of(1),
+                java.util.OptionalLong.of(2)
+        );
+        when(addressService.getAddress(any())).thenReturn(new Address());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 1);
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 2);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository, Mockito.times(3)).save(captor.capture());
+
+        java.util.List<CompanyProfile> savedProfiles = captor.getAllValues();
+        assertEquals(3, savedProfiles.size());
+
+        assertEquals("COMPANY BR123456", savedProfiles.get(0).getCompanyName());
+
+        assertEquals("COMPANY BR234567-2", savedProfiles.get(1).getCompanyName());
+        assertEquals("COMPANY BR345678-3", savedProfiles.get(2).getCompanyName());
+    }
+
+    @Test
+    void testUkEstablishment_AddressIsUkBased() {
+        String parentCompanyNumber = "FC123456";
+        JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        Address ukAddress = new Address("UK Line 1", "UK Line 2", "UK Line 3", "United Kingdom", "London", "SW1A 2DY");
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(0, 5)).thenReturn(java.util.OptionalLong.of(0));
+        when(addressService.getAddress(JurisdictionType.ENGLAND_WALES)).thenReturn(ukAddress);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM)).thenReturn(new Address());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile savedProfile = captor.getValue();
+
+        assertNotNull(savedProfile.getRegisteredOfficeAddress());
+        assertEquals(ukAddress, savedProfile.getRegisteredOfficeAddress());
+    }
+
 }
