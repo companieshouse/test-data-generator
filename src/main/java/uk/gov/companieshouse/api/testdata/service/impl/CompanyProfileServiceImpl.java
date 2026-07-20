@@ -368,32 +368,93 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
         ukEstablishment.setParentCompanyNumber(parentCompanyNumber);
 
-        var branchDetails = new CompanyProfile.BranchCompanyDetails();
-        branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
-        branchDetails.setParentCompanyName(COMPANY_NAME_PREFIX
-                + parentCompanyNumber + getCompanyNameEnding(CompanyType.UK_ESTABLISHMENT));
-        branchDetails.setParentCompanyNumber(parentCompanyNumber);
-        ukEstablishment.setBranchCompanyDetails(branchDetails);
+        setBranchDetails(parentCompanyNumber, ukEstablishment);
 
         ukEstablishment.setCompanyName(COMPANY_NAME_PREFIX
                 + ukEstablishmentNumber + getCompanyNameEnding(CompanyType.UK_ESTABLISHMENT));
         ukEstablishment.setDateOfCreation(dateNow(accountingReferenceDate));
         ukEstablishment.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
 
-        ukEstablishment.setCompanyStatus("open");
-        ukEstablishment.setEtag(this.randomService.getEtag());
-        ukEstablishment.setHasCharges(false);
-        ukEstablishment.setHasSuperSecurePscs(false);
+        setUkEstablishmentCommonFields(ukEstablishment);
 
-        var links = new Links();
-        links.setSelf(LINK_STEM + ukEstablishmentNumber);
-        links.setOverseas(LINK_STEM + parentCompanyNumber);
-        ukEstablishment.setLinks(links);
+        setUkEstablishmentLinks(ukEstablishmentNumber, parentCompanyNumber, ukEstablishment);
 
         companyProfileRepository.save(ukEstablishment);
         LOG.info("Created UK establishment " + ukEstablishmentNumber);
 
         return ukEstablishmentNumber;
+    }
+
+    protected String createUkEstablishment(String parentCompanyNumber,
+                                           JurisdictionType parentJurisdiction,
+                                           LocalDate accountingReferenceDate,
+                                           int index) {
+        String ukEstablishmentNumber = "BR" + this.randomService.getNumber(6);
+        LOG.info("Creating UK establishment for parent company " + parentCompanyNumber + " (index: " + index + ")");
+
+        addressService.getAddress(parentJurisdiction);
+
+        JurisdictionType[] ukJurisdictions = new JurisdictionType[]{
+                JurisdictionType.ENGLAND_WALES,
+                JurisdictionType.SCOTLAND,
+                JurisdictionType.NI,
+                JurisdictionType.ENGLAND,
+                JurisdictionType.WALES
+        };
+        long randomIndex = this.randomService.getNumberInRange(0, ukJurisdictions.length).orElse(0L);
+        int choice = (int) randomIndex;
+        JurisdictionType chosenJurisdiction = ukJurisdictions[choice];
+
+        var ukEstablishment = new CompanyProfile();
+        ukEstablishment.setId(ukEstablishmentNumber);
+        ukEstablishment.setCompanyNumber(ukEstablishmentNumber);
+        ukEstablishment.setType(CompanyType.UK_ESTABLISHMENT.getValue());
+
+        ukEstablishment.setParentCompanyNumber(parentCompanyNumber);
+
+        setBranchDetails(parentCompanyNumber, ukEstablishment);
+
+        String name = COMPANY_NAME_PREFIX + ukEstablishmentNumber + getCompanyNameEnding(CompanyType.UK_ESTABLISHMENT);
+        if (index > 0) {
+            name = name + "-" + (index+1);
+        }
+        ukEstablishment.setCompanyName(name);
+        ukEstablishment.setDateOfCreation(dateNow(accountingReferenceDate));
+
+        ukEstablishment.setRegisteredOfficeAddress(addressService.getAddress(chosenJurisdiction));
+        ukEstablishment.setJurisdiction(chosenJurisdiction.toString());
+
+        setUkEstablishmentCommonFields(ukEstablishment);
+
+        setUkEstablishmentLinks(ukEstablishmentNumber, parentCompanyNumber, ukEstablishment);
+
+        companyProfileRepository.save(ukEstablishment);
+        LOG.info("Created UK establishment " + ukEstablishmentNumber + " (jurisdiction: " + chosenJurisdiction + ")");
+
+        return ukEstablishmentNumber;
+    }
+
+    private void setBranchDetails(String parentCompanyNumber, CompanyProfile ukEstablishment) {
+        var branchDetails = new CompanyProfile.BranchCompanyDetails();
+        branchDetails.setBusinessActivity(BUSINESS_ACTIVITY);
+        branchDetails.setParentCompanyName(COMPANY_NAME_PREFIX
+                + parentCompanyNumber + getCompanyNameEnding(CompanyType.UK_ESTABLISHMENT));
+        branchDetails.setParentCompanyNumber(parentCompanyNumber);
+        ukEstablishment.setBranchCompanyDetails(branchDetails);
+    }
+
+    private void setUkEstablishmentCommonFields(CompanyProfile ukEstablishment) {
+        ukEstablishment.setCompanyStatus("open");
+        ukEstablishment.setEtag(this.randomService.getEtag());
+        ukEstablishment.setHasCharges(false);
+        ukEstablishment.setHasSuperSecurePscs(false);
+    }
+
+    private void setUkEstablishmentLinks(String ukEstablishmentNumber, String parentCompanyNumber, CompanyProfile ukEstablishment) {
+        var links = new Links();
+        links.setSelf(LINK_STEM + ukEstablishmentNumber);
+        links.setOverseas(LINK_STEM + parentCompanyNumber);
+        ukEstablishment.setLinks(links);
     }
 
     private static Map<CompanyType, String> createPartialDataOptionsMap(
@@ -466,7 +527,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
             if (numberOfEstablishments > 0) {
                 for (int i = 0; i < numberOfEstablishments; i++) {
-                    createUkEstablishment(companyNumber, jurisdiction, accountingReferenceDate);
+                    createUkEstablishment(companyNumber, jurisdiction, accountingReferenceDate, i);
                 }
                 links.setUkEstablishments(LINK_STEM + companyNumber + "/uk-establishments");
             }
