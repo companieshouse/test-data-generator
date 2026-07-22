@@ -19,5 +19,13 @@ public final class CompanySubTypeValidator {
                 && !CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
             throw new HttpMessageNotReadableException(INVALID_REQUEST, (HttpInputMessage) null);
         }
+        if (COMMUNITY_INTEREST_COMPANY.equals(subType)
+                && !allowsCommunityInterestCompanySubType(companyType)) {
+            throw new HttpMessageNotReadableException(INVALID_REQUEST, (HttpInputMessage) null);
+        }
+    }
+
+    private static boolean allowsCommunityInterestCompanySubType(CompanyType companyType) {
+        return companyType == null || companyType.allowsCommunityInterestCompanySubType();
     }
 }

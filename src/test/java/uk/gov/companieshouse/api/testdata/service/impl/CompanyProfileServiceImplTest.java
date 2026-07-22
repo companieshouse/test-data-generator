@@ -296,6 +296,18 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
+    void createLimitedPartnershipWithCommunityInterestCompanySubTypeThrowsInvalidRequestException() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY);
+
+        HttpMessageNotReadableException thrown = assertThrows(HttpMessageNotReadableException.class,
+                () -> companyProfileService.create(internalCompanyRequest));
+
+        assertEquals("invalid request", thrown.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void createCompanyWithSuperSecurePscsTrue() {
         internalCompanyRequest.setHasSuperSecurePscs(true);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -1033,6 +1045,26 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " PLC", profile.getCompanyName());
     }
 
+    @ParameterizedTest
+    @MethodSource("communityInterestCompanyTypeAndExpectedNameEnding")
+    void createCommunityInterestCompanySetsExpectedCompanyNameEnding(CompanyType companyType,
+                                                                     String expectedEnding) {
+        internalCompanyRequest.setCompanyType(companyType);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY);
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(internalCompanyRequest);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        assertEquals("COMPANY " + COMPANY_NUMBER + " " + expectedEnding, profile.getCompanyName());
+    }
+
     @Test
     void createCompanyTypeWithoutNameEnding() {
         internalCompanyRequest.setCompanyType(CONVERTED_OR_CLOSED_TYPE);
@@ -1068,7 +1100,7 @@ class CompanyProfileServiceImplTest {
         method.setAccessible(true);
 
         try (MockedStatic<CompanyNameEnding> mocked = Mockito.mockStatic(CompanyNameEnding.class)) {
-            mocked.when(() -> CompanyNameEnding.fromTypeEnum(CompanyType.PLC))
+            mocked.when(() -> CompanyNameEnding.fromTypeEnum(CompanyType.PLC, null))
                     .thenThrow(new IllegalArgumentException("No mapping"));
 
             String result = (String) method.invoke(companyProfileService, CompanyType.PLC);
@@ -1099,6 +1131,14 @@ class CompanyProfileServiceImplTest {
                 Arguments.of(CompanyType.PROTECTED_CELL_COMPANY, "PCC LIMITED"),
                 Arguments.of(CompanyType.UKEIG, "UKEIG"),
                 Arguments.of(CompanyType.UNITED_KINGDOM_SOCIETAS, "UK SOCIETAS")
+        );
+    }
+
+    static Stream<Arguments> communityInterestCompanyTypeAndExpectedNameEnding() {
+        return Stream.of(
+                Arguments.of(CompanyType.LTD, "COMMUNITY INTEREST COMPANY"),
+                Arguments.of(CompanyType.PRIVATE_LIMITED_GUARANT_NSC, "COMMUNITY INTEREST COMPANY"),
+                Arguments.of(CompanyType.PLC, "COMMUNITY INTEREST PLC")
         );
     }
 
