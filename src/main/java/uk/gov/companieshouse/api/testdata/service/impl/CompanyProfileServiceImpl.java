@@ -184,7 +184,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (internalCompanyRequest.getCompanyName() != null) {
             profile.setCompanyName(internalCompanyRequest.getCompanyName() + " " + companyNumber);
         } else {
-            setCompanyName(profile, companyNumber, companyTypeValue);
+            setCompanyName(profile, companyNumber, companyTypeValue, subType);
         }
         profile.setSicCodes(Collections.singletonList("71200"));
 
@@ -621,10 +621,15 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private void setCompanyName(CompanyProfile profile, String companyNumber, String companyType) {
+        setCompanyName(profile, companyNumber, companyType, null);
+    }
+
+    private void setCompanyName(CompanyProfile profile, String companyNumber, String companyType, String subType) {
         if (companyType.equals(CompanyType.UNITED_KINGDOM_SOCIETAS.getValue())) {
             profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + " UK SOCIETAS");
         } else {
-            profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber + getCompanyNameEnding(CompanyType.fromValue(companyType)));
+            profile.setCompanyName(COMPANY_NAME_PREFIX + companyNumber
+                    + getCompanyNameEnding(CompanyType.fromValue(companyType), subType));
         }
     }
 
@@ -751,12 +756,16 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private String getCompanyNameEnding(CompanyType companyType) {
+        return getCompanyNameEnding(companyType, null);
+    }
+
+    private String getCompanyNameEnding(CompanyType companyType, String subType) {
         if (companyType == null) {
             LOG.info("getCompanyNameEnding called with null companyType");
             return "";
         }
         try {
-            String ending = CompanyNameEnding.fromTypeEnum(companyType).getEnding();
+            String ending = CompanyNameEnding.fromTypeEnum(companyType, subType).getEnding();
             return ending.isEmpty() ? "" : " " + ending;
         } catch (IllegalArgumentException ex) {
             LOG.error("No CompanyNameEnding mapping for CompanyType:}" + companyType, ex);
