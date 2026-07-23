@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -194,6 +195,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         ex.getBindingResult().getFieldErrors().stream().map(FieldError::getDefaultMessage)
                 .map(this::createValidationError)
                 .forEach(errors::addError);
+        ex.getBindingResult().getGlobalErrors().stream()
+                .map(ObjectError::getDefaultMessage)
+                .filter(message -> message != null && !message.isBlank())
+                .map(this::createValidationError)
+                .forEach(errors::addError);
+        if (errors.getErrorCount() == 0) {
+            errors.addError(createValidationError(INVALID_REQUEST));
+        }
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 

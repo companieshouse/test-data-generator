@@ -409,10 +409,19 @@ public class AppointmentsServiceImpl implements AppointmentService {
         Instant dateTimeNow = Instant.now();
         Instant appointedOn = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         String roleName = setRoleName(currentRole);
+        AppointmentCreationRequest creationRequest = AppointmentCreationRequest.builder()
+                .spec(request)
+                .companyNumber(companyNumber)
+                .countryOfResidence(countryOfResidence)
+                .internalId(internalId)
+                .officerId(officerId)
+                .dateTimeNow(dateTimeNow)
+                .appointedOn(appointedOn)
+                .appointmentId(appointmentId)
+                .build();
 
         Appointment appointment = buildCompanyAppointment(
-                request, companyNumber, countryOfResidence, internalId, officerId, dateTimeNow,
-                appointedOn, appointmentId, roleName, currentRole, index);
+                creationRequest, roleName, currentRole, index);
 
         LOG.debug("Creating officer appointment for officer ID: " + officerId);
         OfficerAppointment officerAppointment =
@@ -425,7 +434,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         accumulator.officerAppointments.add(officerAppointment);
 
         AppointmentsData appointmentsData = buildCompanyAppointmentsData(
-                request, internalId, officerId, dateTimeNow, appointmentId, roleName, currentRole, index);
+                creationRequest, roleName, currentRole, index);
         if (shouldPersistAppointmentData(request)) {
             AppointmentsData savedData = appointmentsDataRepository.save(appointmentsData);
             LOG.info("AppointmentsData saved with ID: " + savedData.getId());
@@ -434,50 +443,39 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private Appointment buildCompanyAppointment(
-            InternalCompanyRequest request,
-            String companyNumber,
-            String countryOfResidence,
-            String internalId,
-            String officerId,
-            Instant dateTimeNow,
-            Instant appointedOn,
-            String appointmentId,
+            AppointmentCreationRequest creationRequest,
             String roleName,
             String currentRole,
             int index) {
-        AppointmentCreationRequest creationRequest = AppointmentCreationRequest.builder()
-                .spec(request)
-                .companyNumber(companyNumber)
-                .countryOfResidence(countryOfResidence)
-                .internalId(internalId)
-                .officerId(officerId)
-                .dateTimeNow(dateTimeNow)
-                .appointedOn(appointedOn)
-                .appointmentId(appointmentId)
-                .build();
         Appointment appointment = createBaseAppointment(creationRequest);
         appointment.setForename(FORENAME + (index + 1));
         appointment.setSurname(roleName);
         appointment.setOfficerRole(currentRole);
-        appointment.setLinks(createAppointmentLinks(companyNumber, officerId, appointmentId));
+        appointment.setLinks(createAppointmentLinks(
+                creationRequest.getCompanyNumber(),
+                creationRequest.getOfficerId(),
+                creationRequest.getAppointmentId()));
         return appointment;
     }
 
     private AppointmentsData buildCompanyAppointmentsData(
-            InternalCompanyRequest request,
-            String internalId,
-            String officerId,
-            Instant dateTimeNow,
-            String appointmentId,
+            AppointmentCreationRequest creationRequest,
             String roleName,
             String currentRole,
             int index) {
         AppointmentsData appointmentsData = createBaseAppointmentsData(
-                request, internalId, officerId, dateTimeNow, appointmentId);
+                creationRequest.getSpec(),
+                creationRequest.getInternalId(),
+                creationRequest.getOfficerId(),
+                creationRequest.getDateTimeNow(),
+                creationRequest.getAppointmentId());
         appointmentsData.setForename(FORENAME + (index + 1));
         appointmentsData.setSurname(roleName);
         appointmentsData.setOfficerRole(currentRole);
-        appointmentsData.setLinks(createAppointmentsDataLinks(request.getCompanyNumber(), officerId, appointmentId));
+        appointmentsData.setLinks(createAppointmentsDataLinks(
+                creationRequest.getCompanyNumber(),
+                creationRequest.getOfficerId(),
+                creationRequest.getAppointmentId()));
         return appointmentsData;
     }
 
