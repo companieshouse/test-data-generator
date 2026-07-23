@@ -98,15 +98,15 @@ public class AppointmentsServiceImpl implements AppointmentService {
             );
         }
 
-        AppointmentsResultResponse response = new AppointmentsResultResponse();
-        accumulator.applyTo(response);
+        AppointmentsResultResponse appointmentsResult = new AppointmentsResultResponse();
+        accumulator.applyTo(appointmentsResult);
         if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
-            return response;
+            return appointmentsResult;
         }
         LOG.info("Successfully created " + accumulator.appointments.size() + " appointments and "
                 + accumulator.appointmentsData.size()
                 + " appointments data with matching IDs for company number: " + companyNumber);
-        return response;
+        return appointmentsResult;
     }
 
     @Override
@@ -145,12 +145,12 @@ public class AppointmentsServiceImpl implements AppointmentService {
             }
         }
 
-        AppointmentsResultResponse response = new AppointmentsResultResponse();
-        accumulator.applyTo(response);
+        AppointmentsResultResponse appointmentsResult = new AppointmentsResultResponse();
+        accumulator.applyTo(appointmentsResult);
 
         LOG.info("Created {} appointments via API for company {}");
 
-        return response;
+        return appointmentsResult;
     }
 
     private void createSingleAppointment(
