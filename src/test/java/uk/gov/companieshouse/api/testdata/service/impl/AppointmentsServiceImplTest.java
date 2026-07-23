@@ -696,6 +696,52 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
+    void createAppointmentForLlpShouldAllowEighteenMembersByAddingTwoDesignatedMembers() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyType(CompanyType.LLP);
+        internalCompanyRequest.setOfficerRoles(Collections.nCopies(18, OfficerType.LLP_MEMBER));
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(internalCompanyRequest);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(20)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        long designatedCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.LLP_DESIGNATED_MEMBER.getValue()
+                        .equals(appointment.getOfficerRole()))
+                .count();
+        long memberCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.LLP_MEMBER.getValue().equals(appointment.getOfficerRole()))
+                .count();
+        assertEquals(2, designatedCount);
+        assertEquals(18, memberCount);
+    }
+
+    @Test
+    void createAppointmentForLlpShouldRejectNineteenMembersBecauseTotalWouldExceedTwenty() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyType(CompanyType.LLP);
+        internalCompanyRequest.setOfficerRoles(Collections.nCopies(19, OfficerType.LLP_MEMBER));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentsService.createAppointment(internalCompanyRequest));
+
+        assertEquals("Total LLP appointments including mandatory designated members must not exceed 20",
+                exception.getMessage());
+    }
+
+    @Test
     void createAppointmentShouldRejectNonLlpRoleForLlpCompanyType() {
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyType(CompanyType.LLP);

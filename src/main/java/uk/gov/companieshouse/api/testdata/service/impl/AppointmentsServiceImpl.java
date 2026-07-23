@@ -366,7 +366,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         int adjustedNumberOfAppointments = Math.max(numberOfAppointments, officerRoleList.size());
         if (adjustedNumberOfAppointments > 20) {
-            throw new IllegalArgumentException("Number of appointments must not exceed 20");
+            throw new IllegalArgumentException(
+                    "Total LLP appointments including mandatory designated members must not exceed 20");
         }
 
         for (int i = officerRoleList.size(); i < adjustedNumberOfAppointments; i++) {
