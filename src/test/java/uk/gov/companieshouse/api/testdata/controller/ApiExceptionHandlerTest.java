@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -19,8 +18,10 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.context.request.WebRequest;
 
@@ -28,6 +29,7 @@ import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.core.JacksonException.Reference;
 
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
@@ -159,6 +161,7 @@ class ApiExceptionHandlerTest {
 
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
+        when(bindingResult.getGlobalErrors()).thenReturn(List.of());
 
         Method method = ApiExceptionHandlerTest.class
                 .getDeclaredMethod("dummyMethod", String.class);
@@ -180,6 +183,56 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
+    void handleMethodArgumentNotValidWithOnlyGlobalErrors() throws Exception {
+        List<ObjectError> globalErrors = List.of(new ObjectError("request", "Invalid company subtype"));
+
+        BindingResult bindingResult = Mockito.mock(BindingResult.class);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of());
+        when(bindingResult.getGlobalErrors()).thenReturn(globalErrors);
+
+        Method method = ApiExceptionHandlerTest.class
+                .getDeclaredMethod("dummyMethod", String.class);
+        MethodParameter methodParameter = new MethodParameter(method, 0);
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(
+                methodParameter, bindingResult);
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ValidationErrors);
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals(1, errors.getErrorCount());
+        ValidationError expectedError = new ValidationError(
+                "Invalid company subtype", null, null, "ch:validation");
+        assertTrue(errors.containsError(expectedError));
+    }
+
+    @Test
+    void handleMethodArgumentNotValidFallsBackToInvalidRequestWhenNoErrorsPresent() throws Exception {
+        BindingResult bindingResult = Mockito.mock(BindingResult.class);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of());
+        when(bindingResult.getGlobalErrors()).thenReturn(List.of());
+
+        Method method = ApiExceptionHandlerTest.class
+                .getDeclaredMethod("dummyMethod", String.class);
+        MethodParameter methodParameter = new MethodParameter(method, 0);
+        MethodArgumentNotValidException ex = new MethodArgumentNotValidException(
+                methodParameter, bindingResult);
+        WebRequest request = Mockito.mock(WebRequest.class);
+
+        ResponseEntity<Object> response = handler.handleException(ex, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertTrue(response.getBody() instanceof ValidationErrors);
+        ValidationErrors errors = (ValidationErrors) response.getBody();
+        assertEquals(1, errors.getErrorCount());
+        ValidationError expectedError = new ValidationError(
+                "invalid request", null, null, "ch:validation");
+        assertTrue(errors.containsError(expectedError));
+    }
+
+    @Test
     void handleNoDataFoundException() {
         final InvalidAuthCodeException ex = new InvalidAuthCodeException("1234");
 
@@ -190,6 +243,28 @@ class ApiExceptionHandlerTest {
 
         final ValidationError expectedError = new ValidationError("incorrect company auth_code", null, null, "ch:validation");
         assertTrue(response.getBody().containsError(expectedError));
+    }
+
+    @Test
+    void handleIllegalArgumentException() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid officer role for LLP company type: director");
+
+        ResponseEntity<ValidationErrors> response = handler.handleIllegalArgument(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(1, response.getBody().getErrorCount());
+        ValidationError expectedError = new ValidationError(
+                "Invalid officer role for LLP company type: director", null, null, "ch:validation");
+        assertTrue(response.getBody().containsError(expectedError));
+    }
+
+    @Test
+    void handleDataExceptionRemainsInternalServerError() throws Exception {
+        Method method = ApiExceptionHandler.class.getDeclaredMethod("handleDataException", DataException.class);
+        ResponseStatus responseStatus = method.getAnnotation(ResponseStatus.class);
+
+        assertNotNull(responseStatus);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseStatus.value());
     }
 
     @SuppressWarnings("unused")

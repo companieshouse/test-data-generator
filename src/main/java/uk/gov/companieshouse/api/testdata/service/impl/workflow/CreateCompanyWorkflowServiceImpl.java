@@ -282,6 +282,9 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             LOG.info("Successfully created all company data",
                     singleEntryData(COMPANY_NUMBER, companySpec.getCompanyNumber()));
             return companyData;
+        } catch (IllegalArgumentException ex) {
+            handleRollbackFailure(companySpec.getCompanyNumber());
+            throw ex;
         } catch (Exception ex) {
             throw handleCreateFailure(companySpec.getCompanyNumber(), ex);
         }
@@ -314,12 +317,16 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         data.put("error message", ex.getMessage());
         LOG.error("Failed to create company data for company number", ex, data);
 
+        handleRollbackFailure(companyNumber);
+        return new DataException("Failed to create company data in service", ex);
+    }
+
+    private void handleRollbackFailure(String companyNumber) {
         try {
             deleteCompanyWorkflowService.deleteCompany(companyNumber);
         } catch (Exception rollbackException) {
             LOG.error("Rollback delete failed for company number " + companyNumber, rollbackException);
         }
-        return new DataException("Failed to create company data in service", ex);
     }
 
     private void addCompanyToElasticSearchIndexes(InternalCompanyRequest spec,
@@ -363,4 +370,3 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         return data;
     }
 }
-

@@ -12,7 +12,9 @@ import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
@@ -98,6 +100,28 @@ class PublicCompanyControllerTest {
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(JurisdictionType.ENGLAND_WALES, request.getJurisdiction());
+    }
+
+    @Test
+    void createPublicCompanyV1AcceptsLlpPayloadThatV2Rejects() throws Exception {
+        PublicCompanyRequest request = new PublicCompanyRequest();
+        request.setCompanyType(CompanyType.LLP);
+        request.setNumberOfAppointments(1);
+        request.setOfficerRoles(java.util.List.of(OfficerType.LLP_MEMBER));
+        CompanyProfileResponse company =
+                new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
+
+        when(createCompanyWorkflowService.createPublicCompany(any(PublicCompanyRequest.class))).thenReturn(company);
+
+        ResponseEntity<CompanyProfileResponse> response = publicCompanyController.createPublicCompanyV1(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(company, response.getBody());
+        verify(createCompanyWorkflowService).createPublicCompany(publicSpecCaptor.capture());
+        PublicCompanyRequest usedPublicCompanyRequest = publicSpecCaptor.getValue();
+        assertEquals(CompanyType.LLP, usedPublicCompanyRequest.getCompanyType());
+        assertEquals(1, usedPublicCompanyRequest.getNumberOfAppointments());
+        assertEquals(java.util.List.of(OfficerType.LLP_MEMBER), usedPublicCompanyRequest.getOfficerRoles());
     }
 
     @Test
