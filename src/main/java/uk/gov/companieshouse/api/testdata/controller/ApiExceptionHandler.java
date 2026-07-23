@@ -55,6 +55,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         logException(ex);
     }
 
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    protected ResponseEntity<ValidationErrors> handleIllegalArgument(IllegalArgumentException ex) {
+        logException(ex);
+        ValidationErrors errors = new ValidationErrors();
+        errors.addError(createValidationError(ex.getMessage()));
+        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = {NoDataFoundException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     protected void handleNoDataFoundException(NoDataFoundException ex) {

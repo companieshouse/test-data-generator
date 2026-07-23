@@ -53,6 +53,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final Instant DOB_INSTANT
             = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String DEFAULT_COUNTRY = "United Kingdom";
+    private static final int DEFAULT_LLP_APPOINTMENTS = 2;
 
     @Autowired
     private AddressService addressService;
@@ -80,12 +81,18 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 internalCompanyRequest.getJurisdiction());
         Integer numberOfAppointments = internalCompanyRequest.getNumberOfAppointments();
         boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(internalCompanyRequest);
+        CompanyType companyType = internalCompanyRequest.getCompanyType();
 
-        if (internalCompanyRequest.getCompanyType() == CompanyType.PLC) {
+        if (companyType == CompanyType.PLC) {
             // Always ensure at least 2 directors and 1 secretary for PLC
             if (!explicitlySet || numberOfAppointments == null || numberOfAppointments < 3) {
                 LOG.info("PLC company type and numberOfAppointments not set or less than 3. Defaulting to 2 directors and 1 secretary");
                 numberOfAppointments = 3;
+            }
+        } else if (companyType == CompanyType.LLP) {
+            if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
+                LOG.info("LLP company type and numberOfAppointments not set or <= 0. Defaulting to 2 llp-designated-member officers");
+                numberOfAppointments = DEFAULT_LLP_APPOINTMENTS;
             }
         } else {
             if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
@@ -98,13 +105,35 @@ public class AppointmentsServiceImpl implements AppointmentService {
         List<OfficerType> providedRoles = internalCompanyRequest.getOfficerRoles();
         int providedCount = (providedRoles != null) ? providedRoles.size() : 0;
         if (providedCount > 0) {
+            for (OfficerType providedRole : providedRoles) {
+                validateOfficerRoleForCompanyType(providedRole, companyType);
+            }
             officerRoleList.addAll(providedRoles);
             LOG.debug("Officer roles provided: " + providedRoles);
         }
-        if (internalCompanyRequest.getCompanyType() == CompanyType.PLC) {
+        if (companyType == CompanyType.LLP) {
+            long designatedMembers = officerRoleList.stream()
+                    .filter(role -> role == OfficerType.LLP_DESIGNATED_MEMBER)
+                    .count();
+            while (designatedMembers < DEFAULT_LLP_APPOINTMENTS) {
+                officerRoleList.add(0, OfficerType.LLP_DESIGNATED_MEMBER);
+                designatedMembers++;
+            }
+            if (numberOfAppointments == null || numberOfAppointments < officerRoleList.size()) {
+                numberOfAppointments = officerRoleList.size();
+            }
+            if (numberOfAppointments > 20) {
+                throw new IllegalArgumentException("Number of appointments must not exceed 20");
+            }
+        }
+        if (companyType == CompanyType.PLC) {
             for (int i = providedCount; i < numberOfAppointments; i++) {
                 OfficerType officerType = (i == 2) ? OfficerType.SECRETARY : OfficerType.DIRECTOR;
                 officerRoleList.add(officerType);
+            }
+        } else if (companyType == CompanyType.LLP) {
+            for (int i = officerRoleList.size(); i < numberOfAppointments; i++) {
+                officerRoleList.add(OfficerType.LLP_DESIGNATED_MEMBER);
             }
         } else {
             for (int i = providedCount; i < numberOfAppointments; i++) {
@@ -597,6 +626,27 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private boolean payloadExplicitlySetNumberOfAppointments(InternalCompanyRequest spec) {
         return spec.isNumberOfAppointmentsSet();
+    }
+
+    private void validateOfficerRoleForCompanyType(OfficerType officerRole, CompanyType companyType) {
+        if (officerRole == null) {
+            throw new IllegalArgumentException("Invalid officer role: null");
+        }
+        boolean llpCompanyType = companyType == CompanyType.LLP;
+        boolean llpOfficerType = isLlpOfficerType(officerRole);
+        if (llpCompanyType && !llpOfficerType) {
+            throw new IllegalArgumentException("Invalid officer role for LLP company type: " + officerRole.getValue());
+        }
+        if (!llpCompanyType && llpOfficerType) {
+            throw new IllegalArgumentException("LLP officer role is only valid for LLP company type: " + officerRole.getValue());
+        }
+    }
+
+    private boolean isLlpOfficerType(OfficerType officerRole) {
+        return officerRole == OfficerType.LLP_MEMBER
+                || officerRole == OfficerType.LLP_DESIGNATED_MEMBER
+                || officerRole == OfficerType.CORPORATE_LLP_MEMBER
+                || officerRole == OfficerType.CORPORATE_LLP_DESIGNATED_MEMBER;
     }
 
     /**

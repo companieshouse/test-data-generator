@@ -636,6 +636,92 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
+    void createsTwoDesignatedMembersForLlpWhenNoAppointmentsSpecified() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyType(CompanyType.LLP);
+        internalCompanyRequest.setOfficerRoles(null);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(internalCompanyRequest);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(2)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(2, savedAppointments.size());
+        assertEquals(OfficerType.LLP_DESIGNATED_MEMBER.getValue(), savedAppointments.get(0).getOfficerRole());
+        assertEquals(OfficerType.LLP_DESIGNATED_MEMBER.getValue(), savedAppointments.get(1).getOfficerRole());
+    }
+
+    @Test
+    void createAppointmentForLlpAlwaysIncludesTwoDesignatedMembersAndProvidedRoles() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyType(CompanyType.LLP);
+        internalCompanyRequest.setNumberOfAppointments(1);
+        internalCompanyRequest.setOfficerRoles(List.of(OfficerType.LLP_MEMBER));
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(internalCompanyRequest);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(3, savedAppointments.size());
+        long designatedCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.LLP_DESIGNATED_MEMBER.getValue()
+                        .equals(appointment.getOfficerRole()))
+                .count();
+        long memberCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.LLP_MEMBER.getValue().equals(appointment.getOfficerRole()))
+                .count();
+        assertEquals(2, designatedCount);
+        assertEquals(1, memberCount);
+    }
+
+    @Test
+    void createAppointmentShouldRejectNonLlpRoleForLlpCompanyType() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyType(CompanyType.LLP);
+        internalCompanyRequest.setOfficerRoles(List.of(OfficerType.DIRECTOR));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentsService.createAppointment(internalCompanyRequest));
+
+        assertEquals("Invalid officer role for LLP company type: director", exception.getMessage());
+    }
+
+    @Test
+    void createAppointmentShouldRejectLlpRoleForNonLlpCompanyType() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setOfficerRoles(List.of(OfficerType.LLP_MEMBER));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentsService.createAppointment(internalCompanyRequest));
+
+        assertEquals("LLP officer role is only valid for LLP company type: llp-member", exception.getMessage());
+    }
+
+    @Test
     void createAppointmentShouldPopulateIdentificationFields() {
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()

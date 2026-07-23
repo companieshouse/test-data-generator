@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -31,11 +30,15 @@ class InternalCompanyControllerV2Test {
     @Mock
     private CreateCompanyWorkflowService createCompanyWorkflowService;
 
-    @InjectMocks
     private InternalCompanyControllerV2 internalCompanyControllerV2;
 
     @Captor
     private ArgumentCaptor<InternalCompanyRequest> internalCompanyRequestCaptor;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        internalCompanyControllerV2 = new InternalCompanyControllerV2(createCompanyWorkflowService);
+    }
 
     @Test
     void createInternalCompanyV2() throws Exception {

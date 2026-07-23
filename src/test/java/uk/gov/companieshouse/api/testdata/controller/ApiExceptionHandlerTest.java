@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -19,6 +18,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -28,6 +28,7 @@ import tools.jackson.databind.exc.InvalidFormatException;
 import tools.jackson.core.JacksonException.Reference;
 
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
@@ -190,6 +191,28 @@ class ApiExceptionHandlerTest {
 
         final ValidationError expectedError = new ValidationError("incorrect company auth_code", null, null, "ch:validation");
         assertTrue(response.getBody().containsError(expectedError));
+    }
+
+    @Test
+    void handleIllegalArgumentException() {
+        IllegalArgumentException ex = new IllegalArgumentException("Invalid officer role for LLP company type: director");
+
+        ResponseEntity<ValidationErrors> response = handler.handleIllegalArgument(ex);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals(1, response.getBody().getErrorCount());
+        ValidationError expectedError = new ValidationError(
+                "Invalid officer role for LLP company type: director", null, null, "ch:validation");
+        assertTrue(response.getBody().containsError(expectedError));
+    }
+
+    @Test
+    void handleDataExceptionRemainsInternalServerError() throws Exception {
+        Method method = ApiExceptionHandler.class.getDeclaredMethod("handleDataException", DataException.class);
+        ResponseStatus responseStatus = method.getAnnotation(ResponseStatus.class);
+
+        assertNotNull(responseStatus);
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseStatus.value());
     }
 
     @SuppressWarnings("unused")

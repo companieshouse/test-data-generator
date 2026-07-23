@@ -76,6 +76,23 @@ class InternalCompanyRequestV2ArgumentResolverTest {
                 () -> resolver.resolveArgument(parameter, null, webRequest, null));
     }
 
+    @Test
+    void rejectsLegacyV1LlpOfficerPayload() throws Exception {
+        String legacyV1Payload = """
+                {
+                  "type": "llp",
+                  "number_of_appointments": 1,
+                  "officer_roles": ["llp-member"]
+                }
+                """;
+        NativeWebRequest webRequest = webRequestWithBody(legacyV1Payload);
+        MethodParameter parameter = new MethodParameter(
+                StubController.class.getDeclaredMethod("v2", InternalCompanyRequestV2.class), 0);
+
+        assertThrows(HttpMessageNotReadableException.class,
+                () -> resolver.resolveArgument(parameter, null, webRequest, null));
+    }
+
     private NativeWebRequest webRequestWithBody(String body) throws IOException {
         HttpServletRequest servletRequest = mock(HttpServletRequest.class);
         when(servletRequest.getInputStream()).thenReturn(

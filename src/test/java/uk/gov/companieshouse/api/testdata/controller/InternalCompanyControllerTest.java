@@ -14,7 +14,9 @@ import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
@@ -108,6 +110,28 @@ class InternalCompanyControllerTest {
         assertEquals(company, response.getBody());
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(JurisdictionType.ENGLAND_WALES, request.getJurisdiction());
+    }
+
+    @Test
+    void createInternalCompanyV1AcceptsLlpPayloadThatV2Rejects() throws Exception {
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setCompanyType(CompanyType.LLP);
+        request.setNumberOfAppointments(1);
+        request.setOfficerRoles(java.util.List.of(OfficerType.LLP_MEMBER));
+        CompanyProfileResponse company =
+                new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
+
+        when(createCompanyWorkflowService.createInternalCompany(any(InternalCompanyRequest.class))).thenReturn(company);
+
+        ResponseEntity<CompanyProfileResponse> response = internalCompanyController.createInternalCompanyV1(request);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(company, response.getBody());
+        verify(createCompanyWorkflowService).createInternalCompany(internalCompanyRequestCaptor.capture());
+        InternalCompanyRequest usedInternalCompanyRequest = internalCompanyRequestCaptor.getValue();
+        assertEquals(CompanyType.LLP, usedInternalCompanyRequest.getCompanyType());
+        assertEquals(1, usedInternalCompanyRequest.getNumberOfAppointments());
+        assertEquals(java.util.List.of(OfficerType.LLP_MEMBER), usedInternalCompanyRequest.getOfficerRoles());
     }
 
     @Test

@@ -53,7 +53,7 @@ class PublicCompanyControllerV2Test {
         CompanyProfileResponse company =
                 new CompanyProfileResponse("12345678", "123456", COMPANY_URI);
 
-        when(validator.validate(any(PublicCompanyRequestV2.class))).thenReturn(Collections.emptySet());
+        when(validator.validate(any())).thenReturn(Collections.emptySet());
         when(createCompanyWorkflowService.createPublicCompany(any(PublicCompanyRequest.class))).thenReturn(company);
 
         ResponseEntity<CompanyProfileResponse> response = publicCompanyControllerV2.createPublicCompanyV2(request);
