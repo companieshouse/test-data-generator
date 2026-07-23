@@ -79,161 +79,34 @@ public class AppointmentsServiceImpl implements AppointmentService {
         final var companyNumber = internalCompanyRequest.getCompanyNumber();
         final String countryOfResidence = addressService.getCountryOfResidence(
                 internalCompanyRequest.getJurisdiction());
-        Integer numberOfAppointments = internalCompanyRequest.getNumberOfAppointments();
         boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(internalCompanyRequest);
         CompanyType companyType = internalCompanyRequest.getCompanyType();
+        int numberOfAppointments = resolveAppointmentCount(internalCompanyRequest, companyType, explicitlySet);
+        AppointmentRolePlan rolePlan = buildOfficerRolePlan(internalCompanyRequest, companyType, numberOfAppointments);
+        List<String> appointmentIds = generateAppointmentIds(rolePlan.appointmentCount());
 
-        if (companyType == CompanyType.PLC) {
-            // Always ensure at least 2 directors and 1 secretary for PLC
-            if (!explicitlySet || numberOfAppointments == null || numberOfAppointments < 3) {
-                LOG.info("PLC company type and numberOfAppointments not set or less than 3. Defaulting to 2 directors and 1 secretary");
-                numberOfAppointments = 3;
-            }
-        } else if (companyType == CompanyType.LLP) {
-            if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
-                LOG.info("LLP company type and numberOfAppointments not set or <= 0. Defaulting to 2 llp-designated-member officers");
-                numberOfAppointments = DEFAULT_LLP_APPOINTMENTS;
-            }
-        } else {
-            if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
-                LOG.info("Number of appointments not set or <= 0. Defaulting to 1.");
-                numberOfAppointments = 1;
-            }
+        AppointmentAccumulator accumulator = new AppointmentAccumulator();
+        for (int i = 0; i < rolePlan.appointmentCount(); i++) {
+            createAndCollectAppointmentAtIndex(
+                    internalCompanyRequest,
+                    companyNumber,
+                    countryOfResidence,
+                    rolePlan.officerRoles(),
+                    appointmentIds.get(i),
+                    i,
+                    accumulator
+            );
         }
 
-        List<OfficerType> officerRoleList = new ArrayList<>();
-        List<OfficerType> providedRoles = internalCompanyRequest.getOfficerRoles();
-        int providedCount = (providedRoles != null) ? providedRoles.size() : 0;
-        if (providedCount > 0) {
-            for (OfficerType providedRole : providedRoles) {
-                validateOfficerRoleForCompanyType(providedRole, companyType);
-            }
-            officerRoleList.addAll(providedRoles);
-            LOG.debug("Officer roles provided: " + providedRoles);
-        }
-        if (companyType == CompanyType.LLP) {
-            long designatedMembers = officerRoleList.stream()
-                    .filter(role -> role == OfficerType.LLP_DESIGNATED_MEMBER)
-                    .count();
-            while (designatedMembers < DEFAULT_LLP_APPOINTMENTS) {
-                officerRoleList.add(0, OfficerType.LLP_DESIGNATED_MEMBER);
-                designatedMembers++;
-            }
-            if (numberOfAppointments == null || numberOfAppointments < officerRoleList.size()) {
-                numberOfAppointments = officerRoleList.size();
-            }
-            if (numberOfAppointments > 20) {
-                throw new IllegalArgumentException("Number of appointments must not exceed 20");
-            }
-        }
-        if (companyType == CompanyType.PLC) {
-            for (int i = providedCount; i < numberOfAppointments; i++) {
-                OfficerType officerType = (i == 2) ? OfficerType.SECRETARY : OfficerType.DIRECTOR;
-                officerRoleList.add(officerType);
-            }
-        } else if (companyType == CompanyType.LLP) {
-            for (int i = officerRoleList.size(); i < numberOfAppointments; i++) {
-                officerRoleList.add(OfficerType.LLP_DESIGNATED_MEMBER);
-            }
-        } else {
-            for (int i = providedCount; i < numberOfAppointments; i++) {
-                officerRoleList.add(OfficerType.DIRECTOR);
-            }
-        }
-
-        List<String> appointmentIds = new ArrayList<>();
-        for (var i = 0; i < numberOfAppointments; i++) {
-            appointmentIds.add(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
-        }
-
-        List<Appointment> createdAppointments = new ArrayList<>();
-        List<AppointmentsData> createdAppointmentsData = new ArrayList<>();
-        List<OfficerAppointment> createdOfficerAppointments = new ArrayList<>();
-
-        for (var i = 0; i < numberOfAppointments; i++) {
-            OfficerType currentRoleEnum = officerRoleList.get(i);
-            if (currentRoleEnum == null) {
-                LOG.error("Invalid officer role: null at index " + i);
-                throw new IllegalArgumentException("Invalid officer role: null");
-            }
-            String currentRole = currentRoleEnum.getValue();
-            validateOfficerRole(currentRole);
-
-            LOG.debug("Processing appointment {} with role: " + (i + 1) + currentRole);
-
-            String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
-            String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
-
-            String appointmentId = appointmentIds.get(i);
-
-            LOG.debug("Generated IDs - Appointment ID: "
-                    + appointmentId + ", Internal ID: "
-                    + internalId + ", Officer ID: " + officerId);
-
-            Instant dateTimeNow = Instant.now();
-            var today = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-
-            String roleName = setRoleName(currentRole);
-            var request = AppointmentCreationRequest.builder()
-                    .spec(internalCompanyRequest)
-                    .companyNumber(companyNumber)
-                    .countryOfResidence(countryOfResidence)
-                    .internalId(internalId)
-                    .officerId(officerId)
-                    .dateTimeNow(dateTimeNow)
-                    .appointedOn(today)
-                    .appointmentId(appointmentId)
-                    .build();
-
-            var appointment = createBaseAppointment(request);
-            appointment.setForename(FORENAME + (i + 1));
-            appointment.setSurname(roleName);
-            appointment.setOfficerRole(currentRole);
-
-            var links = createAppointmentLinks(companyNumber, officerId, appointmentId);
-            appointment.setLinks(links);
-
-            LOG.debug("Creating officer appointment for officer ID: " + officerId);
-            var officerAppointment = this.createOfficerAppointment(internalCompanyRequest, officerId, appointmentId, currentRole);
-            createdOfficerAppointments.add(officerAppointment);
-            if (Boolean.FALSE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
-                Appointment savedAppointment = appointmentsRepository.save(appointment);
-                LOG.info("Appointment saved with ID: " + savedAppointment.getId());
-            }
-            createdAppointments.add(appointment);
-
-            // Create AppointmentsData with same appointmentId
-            var appointmentsData = createBaseAppointmentsData(
-                    internalCompanyRequest, internalId, officerId, dateTimeNow, appointmentId);
-            appointmentsData.setForename(FORENAME + (i + 1));
-            appointmentsData.setSurname(roleName);
-            appointmentsData.setOfficerRole(currentRole);
-
-            var dataLinks = new AppointmentsData.Links();
-            var dataOfficerLinks = new AppointmentsData.OfficerLinks();
-            dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
-            dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
-            dataLinks.setOfficer(dataOfficerLinks);
-            dataLinks.setSelf(COMPANY_LINK
-                    + internalCompanyRequest.getCompanyNumber() + "/appointments/" + appointmentId);
-            appointmentsData.setLinks(dataLinks);
-            if (Boolean.FALSE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
-                var savedData = appointmentsDataRepository.save(appointmentsData);
-                LOG.info("AppointmentsData saved with ID: " + savedData.getId());
-            }
-            createdAppointmentsData.add(appointmentsData);
-        }
-        var appointmentsResultData = new AppointmentsResultResponse();
-        appointmentsResultData.setAppointment(createdAppointments);
-        appointmentsResultData.setAppointmentsData(createdAppointmentsData);
-        appointmentsResultData.setOfficerAppointment(createdOfficerAppointments);
+        AppointmentsResultResponse response = new AppointmentsResultResponse();
+        accumulator.applyTo(response);
         if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
-            return appointmentsResultData;
+            return response;
         }
-        LOG.info("Successfully created " + createdAppointments.size() + " appointments and "
-                + createdAppointmentsData.size()
+        LOG.info("Successfully created " + accumulator.appointments.size() + " appointments and "
+                + accumulator.appointmentsData.size()
                 + " appointments data with matching IDs for company number: " + companyNumber);
-        return appointmentsResultData;
+        return response;
     }
 
     @Override
@@ -414,6 +287,217 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role);
         accumulator.officerAppointments.add(officerAppointment);
     }
+
+    private int resolveAppointmentCount(
+            InternalCompanyRequest request,
+            CompanyType companyType,
+            boolean explicitlySet) {
+        Integer numberOfAppointments = request.getNumberOfAppointments();
+        CompanyType effectiveCompanyType = companyType == null ? CompanyType.LTD : companyType;
+        return switch (effectiveCompanyType) {
+            case PLC -> {
+                if (!explicitlySet || numberOfAppointments == null || numberOfAppointments < 3) {
+                    LOG.info("PLC company type and numberOfAppointments not set or less than 3. Defaulting to 2 directors and 1 secretary");
+                    yield 3;
+                }
+                yield numberOfAppointments;
+            }
+            case LLP -> {
+                if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
+                    LOG.info("LLP company type and numberOfAppointments not set or <= 0. Defaulting to 2 llp-designated-member officers");
+                    yield DEFAULT_LLP_APPOINTMENTS;
+                }
+                yield numberOfAppointments;
+            }
+            default -> {
+                if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
+                    LOG.info("Number of appointments not set or <= 0. Defaulting to 1.");
+                    yield 1;
+                }
+                yield numberOfAppointments;
+            }
+        };
+    }
+
+    private AppointmentRolePlan buildOfficerRolePlan(
+            InternalCompanyRequest request,
+            CompanyType companyType,
+            int numberOfAppointments) {
+        CompanyType effectiveCompanyType = companyType == null ? CompanyType.LTD : companyType;
+        List<OfficerType> officerRoleList = new ArrayList<>();
+        List<OfficerType> providedRoles = request.getOfficerRoles();
+        int providedCount = providedRoles == null ? 0 : providedRoles.size();
+
+        if (providedCount > 0) {
+            for (OfficerType providedRole : providedRoles) {
+                validateOfficerRoleForCompanyType(providedRole, companyType);
+            }
+            officerRoleList.addAll(providedRoles);
+            LOG.debug("Officer roles provided: " + providedRoles);
+        }
+
+        return switch (effectiveCompanyType) {
+            case LLP -> buildLlpOfficerRolePlan(officerRoleList, numberOfAppointments);
+            case PLC -> {
+                for (int i = providedCount; i < numberOfAppointments; i++) {
+                    officerRoleList.add(i == 2 ? OfficerType.SECRETARY : OfficerType.DIRECTOR);
+                }
+                yield new AppointmentRolePlan(officerRoleList, numberOfAppointments);
+            }
+            default -> {
+                for (int i = providedCount; i < numberOfAppointments; i++) {
+                    officerRoleList.add(OfficerType.DIRECTOR);
+                }
+                yield new AppointmentRolePlan(officerRoleList, numberOfAppointments);
+            }
+        };
+    }
+
+    private AppointmentRolePlan buildLlpOfficerRolePlan(
+            List<OfficerType> officerRoleList,
+            int numberOfAppointments) {
+        long designatedMembers = officerRoleList.stream()
+                .filter(role -> role == OfficerType.LLP_DESIGNATED_MEMBER)
+                .count();
+        while (designatedMembers < DEFAULT_LLP_APPOINTMENTS) {
+            officerRoleList.add(0, OfficerType.LLP_DESIGNATED_MEMBER);
+            designatedMembers++;
+        }
+
+        int adjustedNumberOfAppointments = Math.max(numberOfAppointments, officerRoleList.size());
+        if (adjustedNumberOfAppointments > 20) {
+            throw new IllegalArgumentException("Number of appointments must not exceed 20");
+        }
+
+        for (int i = officerRoleList.size(); i < adjustedNumberOfAppointments; i++) {
+            officerRoleList.add(OfficerType.LLP_DESIGNATED_MEMBER);
+        }
+        return new AppointmentRolePlan(officerRoleList, adjustedNumberOfAppointments);
+    }
+
+    private List<String> generateAppointmentIds(int numberOfAppointments) {
+        List<String> appointmentIds = new ArrayList<>();
+        for (int i = 0; i < numberOfAppointments; i++) {
+            appointmentIds.add(randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
+        }
+        return appointmentIds;
+    }
+
+    private void createAndCollectAppointmentAtIndex(
+            InternalCompanyRequest request,
+            String companyNumber,
+            String countryOfResidence,
+            List<OfficerType> officerRoleList,
+            String appointmentId,
+            int index,
+            AppointmentAccumulator accumulator) {
+        OfficerType currentRoleEnum = officerRoleList.get(index);
+        if (currentRoleEnum == null) {
+            LOG.error("Invalid officer role: null at index " + index);
+            throw new IllegalArgumentException("Invalid officer role: null");
+        }
+        String currentRole = currentRoleEnum.getValue();
+        validateOfficerRole(currentRole);
+        LOG.debug("Processing appointment {} with role: " + (index + 1) + currentRole);
+
+        String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
+        String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
+        LOG.debug("Generated IDs - Appointment ID: "
+                + appointmentId + ", Internal ID: "
+                + internalId + ", Officer ID: " + officerId);
+
+        Instant dateTimeNow = Instant.now();
+        Instant appointedOn = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
+        String roleName = setRoleName(currentRole);
+
+        Appointment appointment = buildCompanyAppointment(
+                request, companyNumber, countryOfResidence, internalId, officerId, dateTimeNow,
+                appointedOn, appointmentId, roleName, currentRole, index);
+
+        LOG.debug("Creating officer appointment for officer ID: " + officerId);
+        OfficerAppointment officerAppointment =
+                createOfficerAppointment(request, officerId, appointmentId, currentRole);
+        if (shouldPersistAppointmentData(request)) {
+            Appointment savedAppointment = appointmentsRepository.save(appointment);
+            LOG.info("Appointment saved with ID: " + savedAppointment.getId());
+        }
+        accumulator.appointments.add(appointment);
+        accumulator.officerAppointments.add(officerAppointment);
+
+        AppointmentsData appointmentsData = buildCompanyAppointmentsData(
+                request, internalId, officerId, dateTimeNow, appointmentId, roleName, currentRole, index);
+        if (shouldPersistAppointmentData(request)) {
+            AppointmentsData savedData = appointmentsDataRepository.save(appointmentsData);
+            LOG.info("AppointmentsData saved with ID: " + savedData.getId());
+        }
+        accumulator.appointmentsData.add(appointmentsData);
+    }
+
+    private Appointment buildCompanyAppointment(
+            InternalCompanyRequest request,
+            String companyNumber,
+            String countryOfResidence,
+            String internalId,
+            String officerId,
+            Instant dateTimeNow,
+            Instant appointedOn,
+            String appointmentId,
+            String roleName,
+            String currentRole,
+            int index) {
+        AppointmentCreationRequest creationRequest = AppointmentCreationRequest.builder()
+                .spec(request)
+                .companyNumber(companyNumber)
+                .countryOfResidence(countryOfResidence)
+                .internalId(internalId)
+                .officerId(officerId)
+                .dateTimeNow(dateTimeNow)
+                .appointedOn(appointedOn)
+                .appointmentId(appointmentId)
+                .build();
+        Appointment appointment = createBaseAppointment(creationRequest);
+        appointment.setForename(FORENAME + (index + 1));
+        appointment.setSurname(roleName);
+        appointment.setOfficerRole(currentRole);
+        appointment.setLinks(createAppointmentLinks(companyNumber, officerId, appointmentId));
+        return appointment;
+    }
+
+    private AppointmentsData buildCompanyAppointmentsData(
+            InternalCompanyRequest request,
+            String internalId,
+            String officerId,
+            Instant dateTimeNow,
+            String appointmentId,
+            String roleName,
+            String currentRole,
+            int index) {
+        AppointmentsData appointmentsData = createBaseAppointmentsData(
+                request, internalId, officerId, dateTimeNow, appointmentId);
+        appointmentsData.setForename(FORENAME + (index + 1));
+        appointmentsData.setSurname(roleName);
+        appointmentsData.setOfficerRole(currentRole);
+        appointmentsData.setLinks(createAppointmentsDataLinks(request.getCompanyNumber(), officerId, appointmentId));
+        return appointmentsData;
+    }
+
+    private AppointmentsData.Links createAppointmentsDataLinks(
+            String companyNumber,
+            String officerId,
+            String appointmentId) {
+        AppointmentsData.Links dataLinks = new AppointmentsData.Links();
+        AppointmentsData.OfficerLinks dataOfficerLinks = new AppointmentsData.OfficerLinks();
+        dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
+        dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
+        dataLinks.setOfficer(dataOfficerLinks);
+        dataLinks.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + appointmentId);
+        return dataLinks;
+    }
+
+    private boolean shouldPersistAppointmentData(InternalCompanyRequest request) {
+        return Boolean.FALSE.equals(request.getCompanyWithPopulatedStructureOnly());
+    }
+
     @Override
     public boolean deleteAllAppointments(String companyNumber) {
         LOG.info("Starting deletion of all appointments and appointments data for company number: "
@@ -647,6 +731,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 || officerRole == OfficerType.LLP_DESIGNATED_MEMBER
                 || officerRole == OfficerType.CORPORATE_LLP_MEMBER
                 || officerRole == OfficerType.CORPORATE_LLP_DESIGNATED_MEMBER;
+    }
+
+    private record AppointmentRolePlan(List<OfficerType> officerRoles, int appointmentCount) {
     }
 
     /**
