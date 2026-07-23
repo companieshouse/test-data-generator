@@ -296,6 +296,18 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
+    void createLimitedPartnershipWithCommunityInterestCompanySubTypeThrowsInvalidRequestException() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY);
+
+        HttpMessageNotReadableException thrown = assertThrows(HttpMessageNotReadableException.class,
+                () -> companyProfileService.create(internalCompanyRequest));
+
+        assertEquals("invalid request", thrown.getMessage());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
     void createCompanyWithSuperSecurePscsTrue() {
         internalCompanyRequest.setHasSuperSecurePscs(true);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -826,18 +838,18 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile capturedProfile = captor.getValue();
 
-        assertEquals(expectedUkEstablishmentNumber, savedProfile.getCompanyNumber());
-        assertEquals("COMPANY BR123456", savedProfile.getCompanyName());
-        assertEquals("open", savedProfile.getCompanyStatus());
-        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), savedProfile.getType());
-        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
-        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
-        assertEquals(mockAddress, savedProfile.getRegisteredOfficeAddress());
-        assertFalse(savedProfile.getHasCharges());
-        assertFalse(savedProfile.getHasSuperSecurePscs());
-        assertEquals(ETAG, savedProfile.getEtag());
+        assertEquals(expectedUkEstablishmentNumber, capturedProfile.getCompanyNumber());
+        assertEquals("COMPANY BR123456", capturedProfile.getCompanyName());
+        assertEquals("open", capturedProfile.getCompanyStatus());
+        assertEquals(CompanyType.UK_ESTABLISHMENT.getValue(), capturedProfile.getType());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, capturedProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, capturedProfile.getLinks().getOverseas());
+        assertEquals(mockAddress, capturedProfile.getRegisteredOfficeAddress());
+        assertFalse(capturedProfile.getHasCharges());
+        assertFalse(capturedProfile.getHasSuperSecurePscs());
+        assertEquals(ETAG, capturedProfile.getEtag());
     }
 
     @Test
@@ -860,10 +872,10 @@ class CompanyProfileServiceImplTest {
 
         ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
         verify(repository).save(captor.capture());
-        CompanyProfile savedProfile = captor.getValue();
+        CompanyProfile capturedProfile = captor.getValue();
 
-        assertEquals("/company/" + expectedUkEstablishmentNumber, savedProfile.getLinks().getSelf());
-        assertEquals("/company/" + parentCompanyNumber, savedProfile.getLinks().getOverseas());
+        assertEquals("/company/" + expectedUkEstablishmentNumber, capturedProfile.getLinks().getSelf());
+        assertEquals("/company/" + parentCompanyNumber, capturedProfile.getLinks().getOverseas());
     }
 
     @Test
@@ -1033,6 +1045,26 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " PLC", profile.getCompanyName());
     }
 
+    @ParameterizedTest
+    @MethodSource("communityInterestCompanyTypeAndExpectedNameEnding")
+    void createCommunityInterestCompanySetsExpectedCompanyNameEnding(CompanyType companyType,
+                                                                     String expectedEnding) {
+        internalCompanyRequest.setCompanyType(companyType);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY);
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(savedProfile);
+
+        companyProfileService.create(internalCompanyRequest);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile profile = captor.getValue();
+
+        assertEquals("COMPANY " + COMPANY_NUMBER + " " + expectedEnding, profile.getCompanyName());
+    }
+
     @Test
     void createCompanyTypeWithoutNameEnding() {
         internalCompanyRequest.setCompanyType(CONVERTED_OR_CLOSED_TYPE);
@@ -1068,7 +1100,7 @@ class CompanyProfileServiceImplTest {
         method.setAccessible(true);
 
         try (MockedStatic<CompanyNameEnding> mocked = Mockito.mockStatic(CompanyNameEnding.class)) {
-            mocked.when(() -> CompanyNameEnding.fromTypeEnum(CompanyType.PLC))
+            mocked.when(() -> CompanyNameEnding.fromTypeEnum(CompanyType.PLC, null))
                     .thenThrow(new IllegalArgumentException("No mapping"));
 
             String result = (String) method.invoke(companyProfileService, CompanyType.PLC);
@@ -1099,6 +1131,14 @@ class CompanyProfileServiceImplTest {
                 Arguments.of(CompanyType.PROTECTED_CELL_COMPANY, "PCC LIMITED"),
                 Arguments.of(CompanyType.UKEIG, "UKEIG"),
                 Arguments.of(CompanyType.UNITED_KINGDOM_SOCIETAS, "UK SOCIETAS")
+        );
+    }
+
+    static Stream<Arguments> communityInterestCompanyTypeAndExpectedNameEnding() {
+        return Stream.of(
+                Arguments.of(CompanyType.LTD, "COMMUNITY INTEREST COMPANY"),
+                Arguments.of(CompanyType.PRIVATE_LIMITED_GUARANT_NSC, "COMMUNITY INTEREST COMPANY"),
+                Arguments.of(CompanyType.PLC, "COMMUNITY INTEREST PLC")
         );
     }
 
@@ -1218,4 +1258,91 @@ class CompanyProfileServiceImplTest {
         assertFalse(request.getHasUkEstablishment());
         verify(repository, never()).save(any(CompanyProfile.class));
     }
+    @Test
+    void testUkEstablishment_HasUkJurisdiction() {
+        String parentCompanyNumber = "FC123456";
+        JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(0, 5)).thenReturn(java.util.OptionalLong.of(1));
+        when(addressService.getAddress(any())).thenReturn(new Address());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyProfileService.createUkEstablishment(
+                parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile capturedProfile = captor.getValue();
+
+        assertNotNull(capturedProfile.getJurisdiction());
+        assertTrue(
+                capturedProfile.getJurisdiction().equals("england-wales") ||
+                        capturedProfile.getJurisdiction().equals("scotland") ||
+                        capturedProfile.getJurisdiction().equals("ni") ||
+                        capturedProfile.getJurisdiction().equals("england") ||
+                        capturedProfile.getJurisdiction().equals("wales"),
+                "UK establishment should have a UK jurisdiction, but got: " + capturedProfile.getJurisdiction()
+        );
+    }
+
+    @Test
+    void testMultipleUkEstablishments_HaveUniqueNames() {
+        String parentCompanyNumber = "FC123456";
+        JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        when(randomService.getNumber(6)).thenReturn(123456L, 234567L, 345678L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(0, 5)).thenReturn(
+                java.util.OptionalLong.of(0),
+                java.util.OptionalLong.of(1),
+                java.util.OptionalLong.of(2)
+        );
+        when(addressService.getAddress(any())).thenReturn(new Address());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 1);
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 2);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository, Mockito.times(3)).save(captor.capture());
+
+        java.util.List<CompanyProfile> savedProfiles = captor.getAllValues();
+        assertEquals(3, savedProfiles.size());
+
+        assertEquals("COMPANY BR123456", savedProfiles.get(0).getCompanyName());
+
+        assertEquals("COMPANY BR234567-2", savedProfiles.get(1).getCompanyName());
+        assertEquals("COMPANY BR345678-3", savedProfiles.get(2).getCompanyName());
+    }
+
+    @Test
+    void testUkEstablishment_AddressIsUkBased() {
+        String parentCompanyNumber = "FC123456";
+        JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
+        LocalDate accountingReferenceDate = LocalDate.now();
+
+        Address ukAddress = new Address("UK Line 1", "UK Line 2", "UK Line 3", "United Kingdom", "London", "SW1A 2DY");
+
+        when(randomService.getNumber(6)).thenReturn(123456L);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumberInRange(0, 5)).thenReturn(java.util.OptionalLong.of(0));
+        when(addressService.getAddress(JurisdictionType.ENGLAND_WALES)).thenReturn(ukAddress);
+        when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM)).thenReturn(new Address());
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyProfileService.createUkEstablishment(parentCompanyNumber, parentJurisdiction, accountingReferenceDate, 0);
+
+        ArgumentCaptor<CompanyProfile> captor = ArgumentCaptor.forClass(CompanyProfile.class);
+        verify(repository).save(captor.capture());
+        CompanyProfile capturedProfile = captor.getValue();
+
+        assertNotNull(capturedProfile.getRegisteredOfficeAddress());
+        assertEquals(ukAddress, capturedProfile.getRegisteredOfficeAddress());
+    }
+
 }
