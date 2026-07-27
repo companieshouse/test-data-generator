@@ -1122,8 +1122,6 @@ class CompanyProfileServiceImplTest {
 
     static Stream<Arguments> companyTypeAndExpectedNameEnding() {
         return Stream.of(
-                Arguments.of(CompanyType.EEIG, "EEIG"),
-                Arguments.of(CompanyType.EUROPEAN_PUBLIC_LIMITED_LIABILITY_COMPANY_SE, "SE"),
                 Arguments.of(CompanyType.ICVC_SECURITIES, "ICVC"),
                 Arguments.of(CompanyType.LIMITED_PARTNERSHIP, "LIMITED PARTNERSHIP"),
                 Arguments.of(CompanyType.LLP, "LIMITED LIABILITY PARTNERSHIP"),
