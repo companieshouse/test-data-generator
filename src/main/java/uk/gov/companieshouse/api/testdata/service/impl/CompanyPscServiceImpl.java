@@ -84,7 +84,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
      * <ul>
      *   <li>FCA-regulated investment vehicles (ICVC, assurance, protected cell, investment companies)</li>
      *   <li>Charities regulated outside Companies House (CIOs, SCIOs, further education corporations)</li>
-     *   <li>European and UK economic interest groupings (EEIG, EEIG Establishment, UKEIG)</li>
+     *   <li>UK economic interest groupings (UKEIG)</li>
      *   <li>Overseas and establishment companies (oversea-company, UK establishment)</li>
      *   <li>Entities exempt by structure (limited partnerships, registered societies, royal charter)</li>
      *   <li>Historical company types (old public company)</li>
@@ -93,8 +93,6 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     private static final Set<CompanyType> EXCLUDED_COMPANY_TYPES = Set.of(
             CompanyType.ASSURANCE_COMPANY,
             CompanyType.CHARITABLE_INCORPORATED_ORGANISATION,
-            CompanyType.EEIG,
-            CompanyType.EEIG_ESTABLISHMENT,
             CompanyType.FURTHER_EDUCATION_OR_SIXTH_FORM_COLLEGE_CORPORATION,
             CompanyType.ICVC_SECURITIES,
             CompanyType.ICVC_UMBRELLA,
