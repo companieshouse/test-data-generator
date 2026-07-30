@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.PscStatementType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -55,19 +56,45 @@ public class CompanyPscStatementServiceImpl implements
 
         pscStatement.setNotifiedOn(LocalDate.now().atStartOfDay(ZONE_ID_UTC).toInstant());
 
-        if (spec.getCompanyType() == CompanyType.REGISTERED_OVERSEAS_ENTITY) {
-            pscStatement.setStatement(PscStatement.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getStatement());
-        } else if (BooleanUtils.isTrue(spec.getHasSuperSecurePscs())) {
-            pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
-        } else if (Boolean.TRUE.equals(spec.getPscActive())) {
-            pscStatement.setStatement(PscStatement.PSC_EXISTS_BUT_NOT_IDENTIFIED.getStatement());
-        } else if (spec.getWithdrawnStatements() > 0) {
-            pscStatement.setStatement(PscStatement.BENEFICIAL_ACTIVE_OR_CEASED.getStatement());
+        boolean isRoe = spec.getCompanyType() == CompanyType.REGISTERED_OVERSEAS_ENTITY;
+        boolean isPartnership = spec.getCompanyType() == CompanyType.SCOTTISH_PARTNERSHIP
+                || spec.getCompanyType() == CompanyType.LIMITED_PARTNERSHIP;
+        boolean hasSuperSecure = BooleanUtils.isTrue(spec.getHasSuperSecurePscs());
+        boolean hasWithdrawn = spec.getWithdrawnStatements() != null
+                && spec.getWithdrawnStatements() > 0;
+
+        if (isRoe && hasWithdrawn) {
+            pscStatement.setStatement(
+                    PscStatementType.SOMEBODY_HAS_BECOME_OR_CEASED_TO_BE_A_BENEFICIAL_OWNER
+                            .getValue());
+            pscStatement.setCeasedOn(LocalDate.now().minusDays(30)
+                    .atStartOfDay(ZONE_ID_UTC).toInstant());
+        } else if (isRoe) {
+            pscStatement.setStatement(
+                    PscStatementType.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getValue());
+        } else if (isPartnership && hasSuperSecure) {
+            pscStatement.setStatement(
+                    PscStatementType.PSC_HAS_FAILED_TO_CONFIRM_CHANGED_DETAILS_PARTNERSHIP
+                            .getValue());
+        } else if (isPartnership && hasWithdrawn) {
+            pscStatement.setStatement(
+                    PscStatementType.PSC_CONTACTED_BUT_NO_RESPONSE_PARTNERSHIP.getValue());
+            pscStatement.setCeasedOn(LocalDate.now().minusDays(30)
+                    .atStartOfDay(ZONE_ID_UTC).toInstant());
+        } else if (isPartnership) {
+            pscStatement.setStatement(
+                    PscStatementType.PSC_EXISTS_BUT_NOT_IDENTIFIED_PARTNERSHIP.getValue());
+        } else if (hasSuperSecure) {
+            pscStatement.setStatement(
+                    PscStatementType.PSC_HAS_FAILED_TO_CONFIRM_CHANGED_DETAILS.getValue());
+        } else if (hasWithdrawn) {
+            pscStatement.setStatement(
+                    PscStatementType.PSC_DETAILS_NOT_CONFIRMED.getValue());
             pscStatement.setCeasedOn(LocalDate.now().minusDays(30)
                     .atStartOfDay(ZONE_ID_UTC).toInstant());
         } else {
             pscStatement.setStatement(
-                    PscStatement.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getStatement());
+                    PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue());
         }
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return pscStatement;
@@ -166,24 +193,5 @@ public class CompanyPscStatementServiceImpl implements
             return true;
         }
         return false;
-    }
-
-    public enum PscStatement {
-        NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL(
-                "no-individual-or-entity-with-signficant-control"),
-        PSC_EXISTS_BUT_NOT_IDENTIFIED("psc-exists-but-not-identified"),
-        ALL_BENEFICIAL_OWNERS_IDENTIFIED("all-beneficial-owners-identified"),
-        BENEFICIAL_ACTIVE_OR_CEASED("somebody-has-become-or-ceased-to-be-a-beneficial-owner"),
-        NO_ACTIVE_BENEFICIAL_OWNER("nobody-has-become-or-ceased-to-be-a-beneficial-owner"),
-        AT_LEAST_ONE_BENEFICIAL_OWNER("at-least-one-beneficial-owner-unidentified");
-        private final String statement;
-
-        PscStatement(String statement) {
-            this.statement = statement;
-        }
-
-        public String getStatement() {
-            return statement;
-        }
     }
 }
