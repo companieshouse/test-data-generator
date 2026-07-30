@@ -40,8 +40,6 @@ class CompanyPscStatementServiceImplTest {
     private static final String COMPANY_NUMBER = "12345678";
     private static final String ENCODED_VALUE = "abc123def456";
     private static final String ETAG = "etag";
-    private static final String PSC_STATEMENT_2 = "no-individual-or-entity-with-signficant-control";
-    private static final String PSC_STATEMENT_3 = "all-beneficial-owners-identified";
     private static final String PSC_ID = "PSC1234567";
     private static final ZoneId ZONE_ID_UTC = ZoneId.of("UTC");
 
@@ -90,7 +88,7 @@ class CompanyPscStatementServiceImplTest {
         assertNotNull(links);
         assertEquals("/company/" + COMPANY_NUMBER + "/persons-with-significant-control-statements/" + ENCODED_VALUE, links.getSelf());
 
-        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), capturedStatement.getStatement());
     }
 
     @Test
@@ -184,7 +182,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository, times(1)).save(captor.capture());
         CompanyPscStatement capturedStatement = captor.getValue();
 
-        assertEquals(PSC_STATEMENT_2, pscStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), pscStatement.getStatement());
         assertNull(pscStatement.getCeasedOn());
         assertEquals(pscStatement, capturedStatement);
     }
@@ -208,7 +206,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository, times(1)).save(captor.capture());
         CompanyPscStatement capturedStatement = captor.getValue();
 
-        assertEquals(PSC_STATEMENT_2, pscStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), pscStatement.getStatement());
         assertNull(pscStatement.getCeasedOn());
         assertEquals(pscStatement, capturedStatement);
     }
@@ -315,7 +313,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository, times(1)).save(captor.capture());
         CompanyPscStatement capturedStatement = captor.getValue();
 
-        assertEquals(PSC_STATEMENT_2, pscStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), pscStatement.getStatement());
         assertNull(pscStatement.getCeasedOn());
         assertEquals(pscStatement, capturedStatement);
     }
@@ -374,7 +372,7 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals(PSC_STATEMENT_3, capturedStatement.getStatement());
+        assertEquals(PscStatementType.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getValue(), capturedStatement.getStatement());
     }
 
     @Test
@@ -393,7 +391,7 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), capturedStatement.getStatement());
     }
 
     @Test
@@ -413,7 +411,7 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), capturedStatement.getStatement());
     }
 
     @Test
@@ -433,7 +431,7 @@ class CompanyPscStatementServiceImplTest {
         ArgumentCaptor<CompanyPscStatement> statementCaptor = ArgumentCaptor.forClass(CompanyPscStatement.class);
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
-        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), capturedStatement.getStatement());
     }
 
     @Test
@@ -560,7 +558,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
         assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals("all-beneficial-owners-identified", capturedStatement.getStatement());
+        assertEquals(PscStatementType.ALL_BENEFICIAL_OWNERS_IDENTIFIED.getValue(), capturedStatement.getStatement());
     }
 
     @Test
@@ -580,7 +578,7 @@ class CompanyPscStatementServiceImplTest {
         verify(repository).save(statementCaptor.capture());
         CompanyPscStatement capturedStatement = statementCaptor.getValue();
         assertEquals("persons-with-significant-control-statement", capturedStatement.getKind());
-        assertEquals(PSC_STATEMENT_2, capturedStatement.getStatement());
+        assertEquals(PscStatementType.NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL.getValue(), capturedStatement.getStatement());
     }
 
     @Test
