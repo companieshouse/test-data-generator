@@ -41,6 +41,8 @@ import uk.gov.companieshouse.api.testdata.repository.ItemGroupsRepository;
 import uk.gov.companieshouse.api.testdata.repository.MissingImageDeliveriesRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
+import uk.gov.companieshouse.api.testdata.repository.PscDiscrepanciesRepository;
+import uk.gov.companieshouse.api.testdata.repository.PscDiscrepancyReportsRepository;
 import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
@@ -64,6 +66,7 @@ public class MongoConfig {
     private static final String SIC_CODE_DATABASE = "sic_code";
     private static final String IDENTITY_VERIFICATION = "identity_verification";
     private static final String ORDERS_ITEM_GROUPS_DATABASE = "orders_item_groups";
+    private static final String PSC_DISCREPANCIES_DATABASE = "psc_discrepancies";
 
     @Bean
     public CompanyProfileRepository companyProfileRepository() {
@@ -227,6 +230,13 @@ public class MongoConfig {
     @Bean
     public CombinedSicActivitiesRepository combinedSicActivitiesRepository() {
         return getMongoRepositoryBean(CombinedSicActivitiesRepository.class, SIC_CODE_DATABASE);
+    }
+
+    @Bean
+    public PscDiscrepanciesRepository pscDiscrepanciesRepository() {
+        return getMongoRepositoryBean(
+                PscDiscrepanciesRepository.class,
+                PSC_DISCREPANCIES_DATABASE);
     }
 
     private MongoTemplate createMongoTemplate(final String database) {
