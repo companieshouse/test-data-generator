@@ -127,7 +127,7 @@ public class PscDiscrepanciesServiceImpl implements PscDiscrepanciesService {
         report.setStatus("INCOMPLETE");
         report.setLinks(links);
         report.setEncryptedDiscrepancyData(encryptedReportData);
-
+        report.setPscType(request.getPscType());
         return report;
     }
 

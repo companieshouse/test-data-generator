@@ -39,40 +39,35 @@ public class PscDiscrepanciesController {
     }
 
     @PostMapping("/pscdiscrepancies")
-    public ResponseEntity<String> test() {
-        return ResponseEntity.ok("PSC endpoint works");
-    }
+    public ResponseEntity<PscDiscrepanciesResponse> createPscDiscrepancy(
+            @Valid @RequestBody PscDiscrepanciesRequest request)
+            throws DataException {
 
-//    @PostMapping("/pscdiscrepancies")
-//    public ResponseEntity<PscDiscrepanciesResponse> createPscDiscrepancy(
-//            @Valid @RequestBody PscDiscrepanciesRequest request)
-//            throws DataException {
-//
-//        try {
-//            var createdPscDiscrepancy =
-//                    pscDiscrepanciesService.create(request);
-//
-//            Map<String, Object> data = new HashMap<>();
-//            data.put(
-//                    "psc-discrepancies-id",
-//                    createdPscDiscrepancy.getPscDiscrepanciesId());
-//
-//            data.put(
-//                    "psc-discrepancy-report-id",
-//                    createdPscDiscrepancy.getPscDiscrepancyReportId());
-//
-//            LOG.info("New PSC discrepancy created", data);
-//
-//            return new ResponseEntity<>(
-//                    createdPscDiscrepancy,
-//                    HttpStatus.CREATED);
-//
-//        } catch (Exception ex) {
-//            throw new DataException(
-//                    "Error creating PSC discrepancy",
-//                    ex);
-//        }
-//    }
+        try {
+            var createdPscDiscrepancy =
+                    pscDiscrepanciesService.create(request);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put(
+                    "psc-discrepancies-id",
+                    createdPscDiscrepancy.getPscDiscrepanciesId());
+
+            data.put(
+                    "psc-discrepancy-report-id",
+                    createdPscDiscrepancy.getPscDiscrepancyReportId());
+
+            LOG.info("New PSC discrepancy created", data);
+
+            return new ResponseEntity<>(
+                    createdPscDiscrepancy,
+                    HttpStatus.CREATED);
+
+        } catch (Exception ex) {
+            throw new DataException(
+                    "Error creating PSC discrepancy",
+                    ex);
+        }
+    }
 
     @DeleteMapping("/pscdiscrepancies/{pscDiscrepanciesId}")
     public ResponseEntity<Map<String, Object>> deletePscDiscrepancy(

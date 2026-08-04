@@ -234,11 +234,13 @@ public class MongoConfig {
 
     @Bean
     public PscDiscrepanciesRepository pscDiscrepanciesRepository() {
-        return getMongoRepositoryBean(
-                PscDiscrepanciesRepository.class,
-                PSC_DISCREPANCIES_DATABASE);
+        return getMongoRepositoryBean( PscDiscrepanciesRepository.class, PSC_DISCREPANCIES_DATABASE);
     }
 
+    @Bean
+    public PscDiscrepancyReportsRepository pscDiscrepancyReportsRepository() {
+        return getMongoRepositoryBean( PscDiscrepancyReportsRepository.class, PSC_DISCREPANCIES_DATABASE);
+    }
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 mongoClient(), database);
