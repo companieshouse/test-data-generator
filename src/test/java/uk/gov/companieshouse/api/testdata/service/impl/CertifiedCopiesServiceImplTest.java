@@ -86,7 +86,7 @@ class CertifiedCopiesServiceImplTest {
 
         ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
         itemOptionsRequest.setDeliveryMethod("standard");
-        itemOptionsRequest.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument));
+        itemOptionsRequest.setFilingHistoryDocuments(List.of(filingHistoryDocument));
 
         ItemCostsRequest itemCostsRequest = new ItemCostsRequest();
         itemCostsRequest.setDiscountApplied("0");
@@ -177,7 +177,7 @@ class CertifiedCopiesServiceImplTest {
         itemOptionsRequest.setCollectionLocation("wales");
         itemOptionsRequest.setContactNumber("844740192");
         itemOptionsRequest.setDeliveryTimescale("same-day");
-        itemOptionsRequest.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocumentsSpec));
+        itemOptionsRequest.setFilingHistoryDocuments(List.of(filingHistoryDocumentsSpec));
         itemOptionsRequest.setForeName("John");
         itemOptionsRequest.setSurName("Test");
 
@@ -335,7 +335,7 @@ class CertifiedCopiesServiceImplTest {
         ItemOptionsRequest itemOption1 = new ItemOptionsRequest();
         itemOption1.setDeliveryTimescale("postal");
         itemOption1.setDeliveryMethod("standard");
-        itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
+        itemOption1.setFilingHistoryDocuments(List.of(filingHistoryDocument1));
 
         filingHistoryDocument1.setFilingHistoryDate("2019-11-23");
         filingHistoryDocument1.setFilingHistoryDescription("incorporation-company");
@@ -344,9 +344,9 @@ class CertifiedCopiesServiceImplTest {
         filingHistoryDocument1.setFilingHistoryCost("30");
 
         ItemOptionsRequest itemOption2 = new ItemOptionsRequest();
-        itemOption1.setDeliveryTimescale("postal");
-        itemOption1.setDeliveryMethod("standard");
-        itemOption1.setFilingHistoryDocumentsSpec(List.of(filingHistoryDocument1));
+        itemOption2.setDeliveryTimescale("postal");
+        itemOption2.setDeliveryMethod("standard");
+        itemOption2.setFilingHistoryDocuments(List.of(filingHistoryDocument1));
 
         certifiedCopiesRequest.setItemOptions(List.of(itemOption1, itemOption2));
 
@@ -446,7 +446,7 @@ class CertifiedCopiesServiceImplTest {
         docSpec.setFilingHistoryCost("1");
 
         ItemOptionsRequest itemOptionsRequest = new ItemOptionsRequest();
-        itemOptionsRequest.setFilingHistoryDocumentsSpec(List.of(docSpec));
+        itemOptionsRequest.setFilingHistoryDocuments(List.of(docSpec));
 
         CertifiedCopiesRequest spec = new CertifiedCopiesRequest();
         spec.setItemOptions(List.of(itemOptionsRequest));
