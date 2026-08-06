@@ -451,7 +451,17 @@ For example, if one corporate officer role and five identification types are sup
 #### Appointments
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/internal/company/{companyNumber}/appointments` will delete all appointments for a given company. `companyNumber` is required in the URL path.
   - Response: 204 NO_CONTENT on successful deletion
-  - Response: 404 NOT_FOUND if no appointments exist for the company
+  - Response: 404 NOT_FOUND if no appointments exist for the company 
+
+#### Creating and Deleting PSC Discrepancies
+
+- POST: Sending a POST request to create PSC Discrepancies `{Base URL}/test-data/internal/pscdiscrepancies` will create a PSC Discrepancy Report and an associated PSC Discrepancy entry.
+  - `user_id`: The user ID associated with the PSC discrepancy report. This is mandatory.
+  - `psc_type`: The PSC type associated with the discrepancy(eg., `corporate-entity-person-with-significant-control`, `PSC is missing`, `psc-is-missing`, `legal-person-beneficial-owner`, `individual-beneficial-owner`, `legal-person-with-significant-control`, `corporate-entity-beneficial-owner`, `individual-person-with-significant-control`, `legal-person-person-with-significant-control`). This is mandatory
+  - `status`: The status for the Psc discrepancy reports and psc discrepancies(eg., `INCOMPLETE`, `COMPLETE`, `FAILED_TO_SUBMIT`, `SUBMITTED`). This is mandatory
+
+  A usage example looks like this: `{"user_id": "QdMXdyxwQBmCxxUoPlGFyScmiUK", "psc_type": "PSC is missing","status": "INCOMPLETE"}`
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/internal/pscdiscrepancies/{pscdiscrepanciesid}` will delete the `Psc discrepancies and psc discrepancy reports`.
 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
