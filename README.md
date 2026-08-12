@@ -463,6 +463,13 @@ For example, if one corporate officer role and five identification types are sup
   A usage example looks like this: `{"user_id": "QdMXdyxwQBmCxxUoPlGFyScmiUK", "psc_type": "PSC is missing","status": "INCOMPLETE"}`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/internal/pscdiscrepancies/{pscdiscrepanciesid}` will delete the `Psc discrepancies and psc discrepancy reports`.
 
+#### Updating the Backlog
+
+- PATCH: Sending a PATCH request to update backlog `{Base URL}/test-data/identity/verification/backlog/{backlogid}` will update backlog details. `backlogid` is required in the URL path
+  - `case_id`: The case id value needs to be updated. This is mandatory
+ 
+  A usage example looks like this: `{"case_id": "HW013063"}`
+- 
 ## Environment Variables
 The supported environmental variables have been categorised by use case and are as follows.
 
