@@ -465,7 +465,7 @@ For example, if one corporate officer role and five identification types are sup
 
 #### Updating the Backlog
 
-- PATCH: Sending a PATCH request to update backlog `{Base URL}/test-data/identity/verification/backlog/{backlogid}` will update backlog details. `backlogid` is required in the URL path
+- PUT: Sending a PUT request to update backlog `{Base URL}/test-data/identity/verification/update-backlog/{backlogid}` will update backlog details. `backlogid` is required in the URL path
   - `case_id`: The case id value needs to be updated. This is mandatory
  
   A usage example looks like this: `{"case_id": "HW013063"}`
