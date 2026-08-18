@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
+import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 
 public interface AddressService {
@@ -18,4 +19,6 @@ public interface AddressService {
      * @return the country of residence for the given {@code jurisdiction}
      */
     String getCountryOfResidence(JurisdictionType jurisdiction);
+
+    UsualResidentialAddress getUsualResidentialAddress();
 }

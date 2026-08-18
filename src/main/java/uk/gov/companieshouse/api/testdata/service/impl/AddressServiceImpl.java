@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
+import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
 
@@ -111,5 +112,20 @@ public class AddressServiceImpl implements AddressService {
             case NON_EU -> "Panama";
             case EUROPEAN_UNION -> "Netherlands";
         };
+    }
+
+    @Override
+    public UsualResidentialAddress getUsualResidentialAddress() {
+        UsualResidentialAddress residentialAddress = new UsualResidentialAddress();
+        residentialAddress.setAddressLine1("Glass Wharf");
+        residentialAddress.setAddressLine2("Avon Street");
+        residentialAddress.setCareOf(null);
+        residentialAddress.setCountry("United Kingdom");
+        residentialAddress.setLocality("Bristol");
+        residentialAddress.setPoBox(null);
+        residentialAddress.setPostalCode("BS2 0EL");
+        residentialAddress.setPremises("3");
+        residentialAddress.setRegion("Bristol");
+        return residentialAddress;
     }
 }
