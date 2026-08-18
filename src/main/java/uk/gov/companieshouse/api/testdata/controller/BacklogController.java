@@ -32,7 +32,7 @@ public class BacklogController {
         this.backlogService = backlogService;
     }
 
-    @PutMapping("/identity/verification/backlog/{backlogId}")
+    @PutMapping("/identity/verification/update-backlog/{backlogId}")
     public ResponseEntity<Void> updateBacklogCaseId(
             @PathVariable String backlogId,
             @RequestBody BacklogRequest backlogRequest)
