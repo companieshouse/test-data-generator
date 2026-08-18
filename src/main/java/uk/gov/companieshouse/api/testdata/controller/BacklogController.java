@@ -4,6 +4,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +32,7 @@ public class BacklogController {
         this.backlogService = backlogService;
     }
 
-    @PatchMapping("/identity/verification/backlog/{backlogId}")
+    @PutMapping("/identity/verification/backlog/{backlogId}")
     public ResponseEntity<Void> updateBacklogCaseId(
             @PathVariable String backlogId,
             @RequestBody BacklogRequest backlogRequest)
