@@ -586,7 +586,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsData.setCompanyNumber(spec.getCompanyNumber());
         appointmentsData.setUpdated(now);
         appointmentsData.setSecureOfficer(Boolean.TRUE.equals(spec.getSecureOfficer()));
-        appointmentsData.setSecureOfficer(Boolean.TRUE.equals(spec.getSecureOfficer()));
 
         return appointmentsData;
     }
