@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
 import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.FormerName;
@@ -17,6 +16,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
@@ -228,18 +228,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
             formerName.setSurname("Brown");
 
             appointment.setFormerNames(List.of(formerName));
-
-            Address residentialAddress = new Address();
-            residentialAddress.setAddressLine1("ura_line1");
-            residentialAddress.setAddressLine2("ura_line2");
-            residentialAddress.setCountry(DEFAULT_COUNTRY);
-            residentialAddress.setPoBox("ura_po");
-            residentialAddress.setPostalCode("CF2 1B6");
-            residentialAddress.setPremise("URA");
-            residentialAddress.setRegion("ura_region");
-
-            appointment.setUsualResidentialAddress(residentialAddress);
         }
+        applyUsualResidentialAddressForOfficerRole(appointment, ctx.role);
 
 
         if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
@@ -271,6 +261,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         data.setForename(FORENAME);
         data.setSurname(roleName);
         data.setOfficerRole(ctx.role);
+        applyUsualResidentialAddressForOfficerRole(data, ctx.role);
 
         AppointmentsData.Links dataLinks = new AppointmentsData.Links();
         AppointmentsData.OfficerLinks officerLinks = new AppointmentsData.OfficerLinks();
@@ -452,6 +443,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setForename(FORENAME + (index + 1));
         appointment.setSurname(roleName);
         appointment.setOfficerRole(currentRole);
+        applyUsualResidentialAddressForOfficerRole(appointment, currentRole);
         appointment.setLinks(createAppointmentLinks(
                 creationRequest.getCompanyNumber(),
                 creationRequest.getOfficerId(),
@@ -473,6 +465,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsData.setForename(FORENAME + (index + 1));
         appointmentsData.setSurname(roleName);
         appointmentsData.setOfficerRole(currentRole);
+        applyUsualResidentialAddressForOfficerRole(appointmentsData, currentRole);
         appointmentsData.setLinks(createAppointmentsDataLinks(
                 creationRequest.getCompanyNumber(),
                 creationRequest.getOfficerId(),
@@ -592,7 +585,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointmentsData.setOfficerId(officerId);
         appointmentsData.setCompanyNumber(spec.getCompanyNumber());
         appointmentsData.setUpdated(now);
-
         appointmentsData.setSecureOfficer(Boolean.TRUE.equals(spec.getSecureOfficer()));
 
         return appointmentsData;
@@ -700,6 +692,31 @@ public class AppointmentsServiceImpl implements AppointmentService {
         links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + appointmentId);
         links.setCompany(COMPANY_LINK + companyNumber);
         return links;
+    }
+
+    private UsualResidentialAddress getUsualResidentialAddressOrDefault() {
+        UsualResidentialAddress usualResidentialAddress = addressService.getUsualResidentialAddress();
+        return usualResidentialAddress != null ? usualResidentialAddress : new UsualResidentialAddress();
+    }
+
+    private void applyUsualResidentialAddressForOfficerRole(Appointment appointment, String officerRole) {
+        if (isCorporateOfficerRole(officerRole)) {
+            appointment.setUsualResidentialAddress(null);
+            return;
+        }
+        appointment.setUsualResidentialAddress(getUsualResidentialAddressOrDefault());
+    }
+
+    private void applyUsualResidentialAddressForOfficerRole(AppointmentsData appointmentsData, String officerRole) {
+        if (isCorporateOfficerRole(officerRole)) {
+            appointmentsData.setUsualResidentialAddress(null);
+            return;
+        }
+        appointmentsData.setUsualResidentialAddress(getUsualResidentialAddressOrDefault());
+    }
+
+    private boolean isCorporateOfficerRole(String officerRole) {
+        return officerRole != null && officerRole.toLowerCase().contains("corporate");
     }
 
     private String setRoleName(String role) {

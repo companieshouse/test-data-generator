@@ -23,6 +23,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -34,6 +36,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
+import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreationRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
@@ -1040,7 +1043,7 @@ class AppointmentsServiceImplTest {
         when(appointmentsRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(appointmentsDataRepository.save(any()))
-                .thenReturn(new AppointmentsData());
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = appointmentsService.createAppointment(request);
 
@@ -1063,12 +1066,73 @@ class AppointmentsServiceImplTest {
                 appointment.getFormerNames().getFirst().getSurname());
     }
 
-    @Test
-    void createAppointmentShouldPopulateUsualResidentialAddressForNonCorporateOfficer() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "director",
+            "secretary",
+            "llp-member",
+            "llp-designated-member",
+            "managing-officer",
+            "nominee-director",
+            "nominee-secretary",
+            "cic-manager",
+            "manager-of-an-eeig",
+            "member-of-a-management-organ",
+            "member-of-a-supervisory-organ",
+            "member-of-an-administrative-organ",
+            "person-authorised-to-accept",
+            "person-authorised-to-represent",
+            "person-authorised-to-represent-and-accept",
+            "receiver-and-manager",
+            "judicial-factor",
+            "general-partner-in-a-limited-partnership",
+            "limited-partner-in-a-limited-partnership"
+    })
+    void createAppointmentShouldPopulateUsualResidentialAddressForNaturalOfficerRoles(String officerRole) {
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
                 .companyNumber(COMPANY_NUMBER)
-                .officerRoles(List.of("director"))
+                .officerRoles(List.of(officerRole))
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+
+        when(addressService.getAddress(any()))
+                .thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any()))
+                .thenReturn(COUNTRY);
+
+        when(appointmentsRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(appointmentsDataRepository.save(any()))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = appointmentsService.createAppointment(request);
+
+        UsualResidentialAddress appointmentUra =
+                result.getAppointment().getFirst().getUsualResidentialAddress();
+        UsualResidentialAddress appointmentsDataUra =
+                result.getAppointmentsData().getFirst().getUsualResidentialAddress();
+
+        assertNotNull(appointmentUra);
+        assertNotNull(appointmentsDataUra);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "corporate-director",
+            "corporate-secretary",
+            "corporate-llp-member",
+            "corporate-llp-designated-member"
+    })
+    void createAppointmentShouldNotPopulateUsualResidentialAddressForCorporateRoles(String officerRole) {
+
+        AppointmentCreationRequest request = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of(officerRole))
                 .build();
 
         when(randomService.getNumber(anyInt())).thenReturn(123L);
@@ -1088,17 +1152,11 @@ class AppointmentsServiceImplTest {
 
         var result = appointmentsService.createAppointment(request);
 
-        Address ura =
-                result.getAppointment().getFirst().getUsualResidentialAddress();
+        Appointment appointment = result.getAppointment().getFirst();
+        AppointmentsData appointmentsData = result.getAppointmentsData().getFirst();
 
-        assertNotNull(ura);
-        assertEquals("URA", ura.getPremise());
-        assertEquals("ura_line1", ura.getAddressLine1());
-        assertEquals("ura_line2", ura.getAddressLine2());
-        assertEquals("United Kingdom", ura.getCountry());
-        assertEquals("ura_po", ura.getPoBox());
-        assertEquals("CF2 1B6", ura.getPostalCode());
-        assertEquals("ura_region", ura.getRegion());
+        assertNull(appointment.getUsualResidentialAddress());
+        assertNull(appointmentsData.getUsualResidentialAddress());
     }
 
     @Test
