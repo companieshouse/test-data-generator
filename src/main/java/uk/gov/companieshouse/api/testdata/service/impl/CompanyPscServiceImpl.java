@@ -60,6 +60,8 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             "right-to-appoint-and-remove-directors-as-firm-registered-overseas-entity"};
     private static final int ID_LENGTH = 10;
     private static final int SALT_LENGTH = 8;
+    private static final int INTERNAL_ID_LENGTH = 9;
+    private static final String INTERNAL_ID_PREFIX = "9";
     public static final String NATIONALITY = "British";
     public static final String REGISTRATION_NUMBER = "12345678";
     public static final String RLE_LEGAL_FORM = "Private Limited Company";
@@ -303,6 +305,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
         companyPsc.setId(this.randomService.getEncodedIdWithSalt(ID_LENGTH, SALT_LENGTH));
         companyPsc.setEtag(this.randomService.getEtag());
+        
+        String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
+        companyPsc.setInternalId(Long.parseLong(internalId));
+        
         companyPsc.setStatementType("statement type");
 
         JurisdictionType serviceAddressJurisdiction = isBeneficialOwner
