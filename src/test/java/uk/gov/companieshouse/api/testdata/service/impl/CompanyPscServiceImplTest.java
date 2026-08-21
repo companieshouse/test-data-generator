@@ -461,4 +461,28 @@ class CompanyPscServiceImplTest {
         verify(addressService, never()).getAddress(JurisdictionType.EUROPEAN_UNION);
     }
 
+    @Test
+    void createPscShouldPopulateInternalIdUnderSensitiveData() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(randomService.getNumber(9)).thenReturn(123456789L);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        companyPscsService.create(internalCompanyRequest);
+
+        ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
+        verify(repository, atLeastOnce()).save(captor.capture());
+
+        CompanyPscs savedPsc = captor.getValue();
+        assertNotNull(savedPsc, "PSC should not be null");
+        assertNotNull(savedPsc.getInternalId(), "Internal ID should not be null");
+        assertEquals(9123456789L, savedPsc.getInternalId(), "Internal ID should be prefix '9' + 9-digit number");
+    }
+
 }
