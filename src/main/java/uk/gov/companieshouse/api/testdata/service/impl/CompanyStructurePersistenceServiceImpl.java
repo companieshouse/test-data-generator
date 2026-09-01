@@ -61,7 +61,6 @@ public class CompanyStructurePersistenceServiceImpl
         saveCompanyProfile(companySpec);
         saveAuthCode(companySpec);
         saveFilingHistory(companySpec);
-        saveAppointmentsData(companySpec);
         saveAppointments(companySpec);
         saveOfficerAppointments(companySpec);
         saveCompanyMetrics(companySpec);
@@ -87,10 +86,6 @@ public class CompanyStructurePersistenceServiceImpl
         if (companySpec.getFilingHistory() != null) {
             filingHistoryRepository.save(companySpec.getFilingHistory());
         }
-    }
-
-    private void saveAppointmentsData(CompanyWithPopulatedStructureRequest companySpec) {
-        // AppointmentsData no longer used - appointments only handled via saveAppointments
     }
 
     private void saveAppointments(CompanyWithPopulatedStructureRequest companySpec) {
