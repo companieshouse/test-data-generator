@@ -140,6 +140,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             return Collections.emptyList();
         }
 
+        if (isScottishLimitedPartnership(internalCompanyRequest)) {
+            applyScottishLimitedPartnershipDefaults(internalCompanyRequest);
+        }
+
         if (shouldCreateSuperSecurePsc(internalCompanyRequest)) {
             List<CompanyPscs> superSecurePscList = new ArrayList<>();
             superSecurePscList.add(createAppropriateSuperSecurePsc(internalCompanyRequest));
@@ -163,9 +167,30 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         if (internalCompanyRequest == null || internalCompanyRequest.getCompanyType() == null) {
             return false;
         }
+        if (isScottishLimitedPartnership(internalCompanyRequest)) {
+            return false;
+        }
         boolean result = EXCLUDED_COMPANY_TYPES.contains(internalCompanyRequest.getCompanyType());
         LOG.debug("shouldSkipPscCreation: " + result);
         return result;
+    }
+
+    private boolean isScottishLimitedPartnership(InternalCompanyRequest internalCompanyRequest) {
+        return CompanyType.LIMITED_PARTNERSHIP.equals(internalCompanyRequest.getCompanyType())
+                && JurisdictionType.SCOTLAND.equals(internalCompanyRequest.getJurisdiction());
+    }
+
+    /**
+     * Scottish limited partnerships require a minimum of 1 individual PSC (LP5(s)).
+     * If no PSC type or count was explicitly specified, default to 1 individual PSC.
+     */
+    private void applyScottishLimitedPartnershipDefaults(InternalCompanyRequest internalCompanyRequest) {
+        if (internalCompanyRequest.getPscType() == null || internalCompanyRequest.getPscType().isEmpty()) {
+            internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        }
+        if (internalCompanyRequest.getNumberOfPscs() == null || internalCompanyRequest.getNumberOfPscs() <= 0) {
+            internalCompanyRequest.setNumberOfPscs(DEFAULT_NUMBER_OF_PSCS);
+        }
     }
 
     private boolean shouldCreateSuperSecurePsc(InternalCompanyRequest internalCompanyRequest) {
