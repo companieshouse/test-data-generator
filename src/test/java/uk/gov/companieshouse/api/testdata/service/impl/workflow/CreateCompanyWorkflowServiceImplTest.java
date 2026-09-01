@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
@@ -53,6 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -656,7 +658,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         when(companyProfileService.create(any(InternalCompanyRequest.class))).thenReturn(companyProfile);
         when(filingHistoryService.create(any(InternalCompanyRequest.class))).thenReturn(filingHistory);
-        when(appointmentService.createAppointment(any(InternalCompanyRequest.class)))
+        when(appointmentService.createAppointment(any(), any()))
                 .thenReturn(appointments);
         when(companyAuthCodeService.create(any(InternalCompanyRequest.class))).thenReturn(authCode);
         when(metricsService.create(any(InternalCompanyRequest.class))).thenReturn(companyMetrics);
@@ -675,7 +677,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertTrue(capturedSpec.getCompanyWithPopulatedStructureOnly());
 
         verify(filingHistoryService, times(1)).create(capturedSpec);
-        verify(appointmentService, times(1)).createAppointment(capturedSpec);
+        verify(appointmentService, times(1)).createAppointment(eq(capturedSpec), any());
         verify(companyAuthCodeService, times(1)).create(capturedSpec);
         verify(metricsService, times(1)).create(capturedSpec);
         verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);

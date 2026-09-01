@@ -32,7 +32,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
@@ -42,7 +41,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AppointmentCreation
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -66,8 +64,6 @@ class AppointmentsServiceImplTest {
     @Mock
     private AppointmentsRepository appointmentsRepository;
     @Mock
-    private AppointmentsDataRepository appointmentsDataRepository;
-    @Mock
     private OfficerRepository officerRepository;
     @Mock
     private RandomService randomService;
@@ -80,7 +76,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void create() {
-        final Address mockServiceAddress = new Address("", "", "", "", "", "");
+        final Address mockServiceAddress = new Address("", "", "", "", "", "", "");
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -96,7 +92,6 @@ class AppointmentsServiceImplTest {
                 .thenReturn("Wales");
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -132,7 +127,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createScottish() {
-        final Address mockServiceAddress = new Address("", "", "", "", "", "");
+        final Address mockServiceAddress = new Address("", "", "", "", "", "", "");
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -151,7 +146,6 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -196,7 +190,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createWithDefaultOfficerRole() {
-        final Address mockServiceAddress = new Address("", "", "", "", "", "");
+        final Address mockServiceAddress = new Address("", "", "", "", "", "", "");
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -214,7 +208,6 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -223,7 +216,7 @@ class AppointmentsServiceImplTest {
 
     @Test
     void createWithMultipleAppointments() {
-        final Address mockServiceAddress = new Address("", "", "", "", "", "");
+        final Address mockServiceAddress = new Address("", "", "", "", "", "", "");
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -242,7 +235,6 @@ class AppointmentsServiceImplTest {
 
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -324,29 +316,6 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
-    void deleteAppointmentsData_shouldDeleteAppointmentsData() {
-        AppointmentsData data = new AppointmentsData();
-        List<AppointmentsData> dataList = List.of(data);
-
-        when(appointmentsDataRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(dataList);
-
-        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
-
-        assertTrue(result);
-        verify(appointmentsDataRepository).deleteAll(dataList);
-    }
-
-    @Test
-    void deleteAppointmentsData_shouldReturnFalseIfNoDataFound() {
-        when(appointmentsDataRepository.findAllByCompanyNumber(COMPANY_NUMBER)).thenReturn(Collections.emptyList());
-
-        boolean result = appointmentsService.deleteAllAppointments(COMPANY_NUMBER);
-
-        assertFalse(result);
-        verify(appointmentsDataRepository, never()).deleteAll(anyList());
-    }
-
-    @Test
     void setRoleName_shouldCapitalizeFirstLetter() {
         String result = invokeSetRoleName("director");
         assertEquals("Director", result);
@@ -375,10 +344,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -404,7 +372,7 @@ class AppointmentsServiceImplTest {
         internalCompanyRequest.setCompanyNumber("12345678");
         internalCompanyRequest.setSecureOfficer(true);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(internalCompanyRequest, "APPT_ID", Instant.now(), Instant.now(), "director");
@@ -418,7 +386,7 @@ class AppointmentsServiceImplTest {
         internalCompanyRequest.setCompanyNumber("12345678");
         internalCompanyRequest.setSecureOfficer(false);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(internalCompanyRequest, "APPT_ID", Instant.now(), Instant.now(), "director");
@@ -436,15 +404,13 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
         verify(appointmentsRepository).save(any());
-        verify(appointmentsDataRepository).save(any());
     }
 
     @Test
@@ -490,7 +456,7 @@ class AppointmentsServiceImplTest {
         internalCompanyRequest.setCompanyNumber("12345678");
         internalCompanyRequest.setSecureOfficer(true);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(internalCompanyRequest, "APPT_ID", Instant.now(), Instant.now(), "director");
@@ -505,7 +471,7 @@ class AppointmentsServiceImplTest {
         internalCompanyRequest.setCompanyNumber("12345678");
         internalCompanyRequest.setSecureOfficer(false);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(internalCompanyRequest, "APPT_ID", Instant.now(), Instant.now(), "director");
@@ -520,7 +486,7 @@ class AppointmentsServiceImplTest {
         internalCompanyRequest.setCompanyNumber("12345678");
         internalCompanyRequest.setSecureOfficer(null);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
 
         List<OfficerAppointmentItem> items = invokeCreateOfficerAppointmentItems(internalCompanyRequest, "APPT_ID", Instant.now(), Instant.now(), "director");
@@ -538,16 +504,14 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
         var result = appointmentsService.createAppointment(internalCompanyRequest);
 
         verify(appointmentsRepository, never()).save(any());
-        verify(appointmentsDataRepository, never()).save(any());
         assertNotNull(result);
         assertNotNull(result.getAppointment());
-        assertNotNull(result.getAppointmentsData());
         assertNotNull(result.getOfficerAppointment());
     }
 
@@ -563,10 +527,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -591,10 +554,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -619,10 +581,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -649,10 +610,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -676,10 +636,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -709,10 +668,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -784,11 +742,10 @@ class AppointmentsServiceImplTest {
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -816,11 +773,10 @@ class AppointmentsServiceImplTest {
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(request);
 
@@ -841,11 +797,10 @@ class AppointmentsServiceImplTest {
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -871,11 +826,10 @@ class AppointmentsServiceImplTest {
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -897,11 +851,10 @@ class AppointmentsServiceImplTest {
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         assertDoesNotThrow(() -> appointmentsService.createAppointment(request));
     }
@@ -937,10 +890,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -961,10 +913,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -985,13 +936,12 @@ class AppointmentsServiceImplTest {
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        Address address = new Address("", "", "", "", "", "");
+        Address address = new Address("", "", "", "", "", "", "");
         when(addressService.getAddress(JurisdictionType.ENGLAND_WALES)).thenReturn(address);
         when(addressService.getCountryOfResidence(JurisdictionType.ENGLAND_WALES))
                 .thenReturn("England");
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -1011,10 +961,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn("England");
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
@@ -1036,13 +985,11 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
 
         when(addressService.getAddress(any()))
-                .thenReturn(new Address("", "", "", "", "", ""));
+                .thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any()))
                 .thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = appointmentsService.createAppointment(request);
@@ -1101,24 +1048,19 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
 
         when(addressService.getAddress(any()))
-                .thenReturn(new Address("", "", "", "", "", ""));
+                .thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any()))
                 .thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any()))
-                .thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = appointmentsService.createAppointment(request);
 
         UsualResidentialAddress appointmentUra =
                 result.getAppointment().getFirst().getUsualResidentialAddress();
-        UsualResidentialAddress appointmentsDataUra =
-                result.getAppointmentsData().getFirst().getUsualResidentialAddress();
 
         assertNotNull(appointmentUra);
-        assertNotNull(appointmentsDataUra);
     }
 
     @ParameterizedTest
@@ -1141,22 +1083,18 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
 
         when(addressService.getAddress(any()))
-                .thenReturn(new Address("", "", "", "", "", ""));
+                .thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any()))
                 .thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any()))
-                .thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 
         Appointment appointment = result.getAppointment().getFirst();
-        AppointmentsData appointmentsData = result.getAppointmentsData().getFirst();
 
         assertNull(appointment.getUsualResidentialAddress());
-        assertNull(appointmentsData.getUsualResidentialAddress());
     }
 
     @Test
@@ -1173,14 +1111,12 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
 
         when(addressService.getAddress(any()))
-                .thenReturn(new Address("", "", "", "", "", ""));
+                .thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any()))
                 .thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any()))
                 .thenAnswer(invocation -> invocation.getArgument(0));
-        when(appointmentsDataRepository.save(any()))
-                .thenReturn(new AppointmentsData());
 
         var result = appointmentsService.createAppointment(request);
 

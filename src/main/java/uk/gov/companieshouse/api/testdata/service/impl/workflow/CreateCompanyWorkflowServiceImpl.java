@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
@@ -140,7 +141,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             response.setFilingHistory(filingHistory);
 
             if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                var appointments = appointmentService.createAppointment(spec);
+                Address registeredOfficeAddress = (companyProfile != null) ? companyProfile.getRegisteredOfficeAddress() : null;
+                var appointments = appointmentService.createAppointment(spec, registeredOfficeAddress);
                 LOG.info("Successfully get appointments ");
                 response.setAppointmentsData(appointments);
             }

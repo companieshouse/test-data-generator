@@ -17,7 +17,8 @@ public class AddressServiceImpl implements AddressService {
             "Admiralty Place",
             UNITED_KINGDOM,
             "London",
-            "SW1A 2DY"
+            "SW1A 2DY",
+            "England"
     );
 
     private static final Address SCOTLAND_ADDRESS = new Address(
@@ -26,7 +27,8 @@ public class AddressServiceImpl implements AddressService {
             "1 Sibbald Walk",
             UNITED_KINGDOM,
             "Edinburgh",
-            "EH8 8FT"
+            "EH8 8FT",
+            "Scotland"
     );
 
     private static final Address NI_ADDRESS = new Address(
@@ -35,7 +37,8 @@ public class AddressServiceImpl implements AddressService {
             "20-32 Chichester Street",
             UNITED_KINGDOM,
             "Belfast",
-            "BT1 4GF"
+            "BT1 4GF",
+            "Northern Ireland"
     );
 
     private static final Address ENGLAND_ADDRESS = new Address(
@@ -44,7 +47,8 @@ public class AddressServiceImpl implements AddressService {
             "162-168 Regent Street",
             UNITED_KINGDOM,
             "London",
-            "W1B 5TF"
+            "W1B 5TF",
+            "England"
     );
 
     private static final Address WALES_ADDRESS = new Address(
@@ -53,7 +57,8 @@ public class AddressServiceImpl implements AddressService {
             "6 Central Square",
             UNITED_KINGDOM,
             "Cardiff",
-            "CF10 1EP"
+            "CF10 1EP",
+            "Wales"
     );
 
     private static final Address EUROPEAN_UNION_ADDRESS = new Address(
@@ -62,7 +67,8 @@ public class AddressServiceImpl implements AddressService {
             "1118bk Schiphol",
             "Netherlands",
             "Amsterdam",
-            "123123"
+            "123123",
+            ""
     );
 
     private static final Address NON_EU_ADDRESS = new Address(
@@ -71,7 +77,8 @@ public class AddressServiceImpl implements AddressService {
             "Calle 53 Este",
             "Panama",
             "Marbella",
-            "123124"
+            "123124",
+            ""
     );
 
     private static final Address OVERSEAS_ADDRESS = new Address(
@@ -80,7 +87,8 @@ public class AddressServiceImpl implements AddressService {
             "Grantley Adams International Airport",
             "Barbados",
             "Christ Church",
-            "123125"
+            "123125",
+            ""
     );
 
     public Address getOverseasAddress() {

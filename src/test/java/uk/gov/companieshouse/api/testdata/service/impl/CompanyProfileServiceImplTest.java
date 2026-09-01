@@ -120,7 +120,7 @@ class CompanyProfileServiceImplTest {
     }
 
     private CompanyProfile createAndCapture(InternalCompanyRequest internalCompanyRequest) {
-        Address mockAddress = new Address("", "", "", "", "", "");
+        Address mockAddress = new Address("", "", "", "", "", "", "");
         setupCommonMocks(internalCompanyRequest, mockAddress);
 
         // Call the service method
@@ -351,7 +351,7 @@ class CompanyProfileServiceImplTest {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setAccountsDueStatus("due-soon");
 
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(internalCompanyRequest.getJurisdiction())).thenReturn(mockRegisteredAddress);
@@ -372,7 +372,7 @@ class CompanyProfileServiceImplTest {
     void createCompanyWithAccountsOverdue() {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setAccountsDueStatus("overdue");
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(internalCompanyRequest.getJurisdiction())).thenReturn(mockRegisteredAddress);
@@ -394,7 +394,7 @@ class CompanyProfileServiceImplTest {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setAccountsDueStatus(null);
 
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(internalCompanyRequest.getJurisdiction())).thenReturn(mockRegisteredAddress);
@@ -439,7 +439,7 @@ class CompanyProfileServiceImplTest {
         overseasSpec.setCompanyStatus(OVERSEAS_STATUS_REGISTERED);
         overseasSpec.setCompanyWithPopulatedStructureOnly(false);
 
-        Address overseasAddress = new Address("1", "Gordon Cummins Hwy", "Grantley Adams International Airport", "Barbados", "Christ Church", "123125");
+        Address overseasAddress = new Address("1", "Gordon Cummins Hwy", "Grantley Adams International Airport", "Barbados", "Christ Church", "123125", "");
         when(addressService.getOverseasAddress()).thenReturn(overseasAddress);
         when(randomService.getEtag()).thenReturn(ETAG);
 
@@ -567,7 +567,7 @@ class CompanyProfileServiceImplTest {
     }
 
     private ArgumentCaptor<CompanyProfile> createCompanyProfile() {
-        Address mockRegisteredAddress = new Address("", "", "", "", "", "");
+        Address mockRegisteredAddress = new Address("", "", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
         when(addressService.getAddress(internalCompanyRequest.getJurisdiction())).thenReturn(mockRegisteredAddress);
@@ -694,7 +694,7 @@ class CompanyProfileServiceImplTest {
     @Test
     void testCreateOverseasEntityWithOutType() {
         Mockito.lenient().when(addressService.getAddress(overseasSpec.getJurisdiction()))
-                .thenReturn(new Address("", "", "", "", "", ""));
+                .thenReturn(new Address("", "", "", "", "", "", ""));
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
 
         CompanyProfile result = companyProfileService.create(overseasSpec);
@@ -825,7 +825,7 @@ class CompanyProfileServiceImplTest {
         LocalDate accountingReferenceDate = LocalDate.now();
         String expectedUkEstablishmentNumber = "BR123456";
 
-        Address mockAddress = new Address("Line1", "Line2", "City", "Region", "Country", "Postcode");
+        Address mockAddress = new Address("", "Line1", "Line2", "Country", "City", "Postcode", "Region");
         when(randomService.getNumber(6)).thenReturn(123456L);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(jurisdiction)).thenReturn(mockAddress);
@@ -859,7 +859,7 @@ class CompanyProfileServiceImplTest {
         JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
         LocalDate accountingReferenceDate = LocalDate.now();
 
-        Address mockAddress = new Address("Line1", "Line2", "City", "Region", "Country", "Postcode");
+        Address mockAddress = new Address("", "Line1", "Line2", "Country", "City", "Postcode", "Region");
         when(randomService.getNumber(6)).thenReturn(654321L);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(jurisdiction)).thenReturn(mockAddress);
@@ -901,7 +901,7 @@ class CompanyProfileServiceImplTest {
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(true);
 
         when(randomService.getEtag()).thenReturn(ETAG);
-        Address mockAddress = new Address("", "", "", "", "", "");
+        Address mockAddress = new Address("", "", "", "", "", "", "");
         when(addressService.getAddress(internalCompanyRequest.getJurisdiction())).thenReturn(mockAddress);
 
         CompanyProfile result = companyProfileService.create(internalCompanyRequest);
@@ -1324,7 +1324,7 @@ class CompanyProfileServiceImplTest {
         JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
         LocalDate accountingReferenceDate = LocalDate.now();
 
-        Address ukAddress = new Address("UK Line 1", "UK Line 2", "UK Line 3", "United Kingdom", "London", "SW1A 2DY");
+        Address ukAddress = new Address("", "UK Line 1", "UK Line 2", "United Kingdom", "London", "SW1A 2DY", "");
 
         when(randomService.getNumber(6)).thenReturn(123456L);
         when(randomService.getEtag()).thenReturn(ETAG);

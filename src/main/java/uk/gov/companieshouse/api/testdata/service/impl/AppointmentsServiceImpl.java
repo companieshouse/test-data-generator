@@ -10,11 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.FormerName;
+import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
-import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointmentItem;
 import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
@@ -23,7 +23,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResult
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
 import uk.gov.companieshouse.api.testdata.service.AddressService;
@@ -61,8 +60,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private RandomService randomService;
     @Autowired
     private AppointmentsRepository appointmentsRepository;
-    @Autowired
-    private AppointmentsDataRepository appointmentsDataRepository;
     @Autowired
     private OfficerRepository officerRepository;
 
@@ -103,10 +100,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
         if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return appointmentsResult;
         }
-        LOG.info("Successfully created " + accumulator.appointments.size() + " appointments and "
-                + accumulator.appointmentsData.size()
-                + " appointments data with matching IDs for company number: " + companyNumber);
+        LOG.info("Successfully created " + accumulator.appointments.size() + " appointments with matching IDs for company number: " + companyNumber);
         return appointmentsResult;
+    }
+
+    @Override
+    public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) {
+        return createAppointment(internalCompanyRequest);
     }
 
     @Override
@@ -254,25 +254,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         Appointment saved = appointmentsRepository.save(appointment);
         accumulator.appointments.add(saved);
-
-        AppointmentsData data = createBaseAppointmentsData(
-                safeSpec, internalId, officerId, ctx.now, appointmentId);
-
-        data.setForename(FORENAME);
-        data.setSurname(roleName);
-        data.setOfficerRole(ctx.role);
-        applyUsualResidentialAddressForOfficerRole(data, ctx.role);
-
-        AppointmentsData.Links dataLinks = new AppointmentsData.Links();
-        AppointmentsData.OfficerLinks officerLinks = new AppointmentsData.OfficerLinks();
-        officerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
-        officerLinks.setSelf(OFFICERS_LINK + officerId);
-        dataLinks.setOfficer(officerLinks);
-        dataLinks.setSelf(COMPANY_LINK + ctx.companyNumber + "/appointments/" + appointmentId);
-        data.setLinks(dataLinks);
-
-        AppointmentsData savedData = appointmentsDataRepository.save(data);
-        accumulator.appointmentsData.add(savedData);
 
         OfficerAppointment officerAppointment =
                 createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role);
@@ -424,14 +405,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
         accumulator.appointments.add(appointment);
         accumulator.officerAppointments.add(officerAppointment);
-
-        AppointmentsData appointmentsData = buildCompanyAppointmentsData(
-                creationRequest, roleName, currentRole, index);
-        if (shouldPersistAppointmentData(request)) {
-            AppointmentsData savedData = appointmentsDataRepository.save(appointmentsData);
-            LOG.info("AppointmentsData saved with ID: " + savedData.getId());
-        }
-        accumulator.appointmentsData.add(appointmentsData);
     }
 
     private Appointment buildCompanyAppointment(
@@ -451,52 +424,16 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointment;
     }
 
-    private AppointmentsData buildCompanyAppointmentsData(
-            AppointmentCreationRequest creationRequest,
-            String roleName,
-            String currentRole,
-            int index) {
-        AppointmentsData appointmentsData = createBaseAppointmentsData(
-                creationRequest.getSpec(),
-                creationRequest.getInternalId(),
-                creationRequest.getOfficerId(),
-                creationRequest.getDateTimeNow(),
-                creationRequest.getAppointmentId());
-        appointmentsData.setForename(FORENAME + (index + 1));
-        appointmentsData.setSurname(roleName);
-        appointmentsData.setOfficerRole(currentRole);
-        applyUsualResidentialAddressForOfficerRole(appointmentsData, currentRole);
-        appointmentsData.setLinks(createAppointmentsDataLinks(
-                creationRequest.getCompanyNumber(),
-                creationRequest.getOfficerId(),
-                creationRequest.getAppointmentId()));
-        return appointmentsData;
-    }
-
-    private AppointmentsData.Links createAppointmentsDataLinks(
-            String companyNumber,
-            String officerId,
-            String appointmentId) {
-        AppointmentsData.Links dataLinks = new AppointmentsData.Links();
-        AppointmentsData.OfficerLinks dataOfficerLinks = new AppointmentsData.OfficerLinks();
-        dataOfficerLinks.setAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
-        dataOfficerLinks.setSelf(OFFICERS_LINK + officerId);
-        dataLinks.setOfficer(dataOfficerLinks);
-        dataLinks.setSelf(COMPANY_LINK + companyNumber + "/appointments/" + appointmentId);
-        return dataLinks;
-    }
-
     private boolean shouldPersistAppointmentData(InternalCompanyRequest request) {
         return Boolean.FALSE.equals(request.getCompanyWithPopulatedStructureOnly());
     }
 
     @Override
     public boolean deleteAllAppointments(String companyNumber) {
-        LOG.info("Starting deletion of all appointments and appointments data for company number: "
+        LOG.info("Starting deletion of all appointments for company number: "
                 + companyNumber);
 
         var appointmentsDeleted = false;
-        var appointmentsDataDeleted = false;
 
         List<Appointment> foundAppointments =
                 appointmentsRepository.findAllByCompanyNumber(companyNumber);
@@ -518,18 +455,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             LOG.info("No appointments found for company number: " + companyNumber);
         }
 
-        List<AppointmentsData> foundData =
-                appointmentsDataRepository.findAllByCompanyNumber(companyNumber);
-        if (!foundData.isEmpty()) {
-            appointmentsDataRepository.deleteAll(foundData);
-            LOG.info("Successfully deleted all appointments data for company number: "
-                    + companyNumber);
-            appointmentsDataDeleted = true;
-        } else {
-            LOG.info("No appointments data found for company number: " + companyNumber);
-        }
-
-        return appointmentsDeleted || appointmentsDataDeleted;
+        return appointmentsDeleted;
     }
 
     private Appointment createBaseAppointment(AppointmentCreationRequest request) {
@@ -559,35 +485,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setSecureOfficer(secureOfficer != null && secureOfficer);
 
         return appointment;
-    }
-
-    private AppointmentsData createBaseAppointmentsData(
-            InternalCompanyRequest spec, String internalId, String officerId,
-            Instant now, String appointmentId) {
-        var appointmentsData = new AppointmentsData();
-        String countryOfResidence = addressService.getCountryOfResidence(spec.getJurisdiction());
-
-        appointmentsData.setId(appointmentId);
-        appointmentsData.setCreated(now);
-        appointmentsData.setInternalId(internalId);
-        appointmentsData.setAppointmentId(appointmentId);
-        appointmentsData.setNationality(NATIONALITY);
-        appointmentsData.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
-        appointmentsData.setCountryOfResidence(countryOfResidence);
-        appointmentsData.setUpdatedAt(now);
-        appointmentsData.setAppointedOn(now);
-        appointmentsData.setEtag(randomService.getEtag());
-        appointmentsData.setServiceAddress(addressService.getAddress(spec.getJurisdiction()));
-        appointmentsData.setDataCompanyNumber(spec.getCompanyNumber());
-        appointmentsData.setDateOfBirth(DOB_INSTANT);
-        appointmentsData.setCompanyName("Company" + " " + spec.getCompanyNumber());
-        appointmentsData.setCompanyStatus(COMPANY_STATUS);
-        appointmentsData.setOfficerId(officerId);
-        appointmentsData.setCompanyNumber(spec.getCompanyNumber());
-        appointmentsData.setUpdated(now);
-        appointmentsData.setSecureOfficer(Boolean.TRUE.equals(spec.getSecureOfficer()));
-
-        return appointmentsData;
     }
 
     private Links createAppointmentLinks(
@@ -707,14 +604,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setUsualResidentialAddress(getUsualResidentialAddressOrDefault());
     }
 
-    private void applyUsualResidentialAddressForOfficerRole(AppointmentsData appointmentsData, String officerRole) {
-        if (isCorporateOfficerRole(officerRole)) {
-            appointmentsData.setUsualResidentialAddress(null);
-            return;
-        }
-        appointmentsData.setUsualResidentialAddress(getUsualResidentialAddressOrDefault());
-    }
-
     private boolean isCorporateOfficerRole(String officerRole) {
         return officerRole != null && officerRole.toLowerCase().contains("corporate");
     }
@@ -783,17 +672,15 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     /**
      * Mutable accumulator that collects results across multiple createSingleAppointment calls.
-     * Replaces the 3 List<> parameters passed into createSingleAppointment.
+     * Replaces the List<> parameters passed into createSingleAppointment.
      */
     private static final class AppointmentAccumulator {
 
         private final List<Appointment> appointments = new ArrayList<>();
-        private final List<AppointmentsData> appointmentsData = new ArrayList<>();
         private final List<OfficerAppointment> officerAppointments = new ArrayList<>();
 
         private void applyTo(AppointmentsResultResponse response) {
             response.setAppointment(appointments);
-            response.setAppointmentsData(appointmentsData);
             response.setOfficerAppointment(officerAppointments);
         }
     }
