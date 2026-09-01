@@ -144,7 +144,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
                 Address registeredOfficeAddress = (companyProfile != null) ? companyProfile.getRegisteredOfficeAddress() : null;
                 var appointments = appointmentService.createAppointment(spec, registeredOfficeAddress);
                 LOG.info("Successfully get appointments ");
-                response.setAppointmentsData(appointments);
+                response.setAppointments(appointments);
             }
 
             var authCode = companyAuthCodeService.create(spec);

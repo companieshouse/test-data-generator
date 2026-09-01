@@ -687,7 +687,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         assertSame(companyProfile, response.getCompanyProfile());
         assertSame(filingHistory, response.getFilingHistory());
-        assertSame(appointments, response.getAppointmentsData());
+        assertSame(appointments, response.getAppointments());
         assertSame(authCode, response.getCompanyAuthCode());
         assertSame(companyMetrics, response.getCompanyMetrics());
         assertSame(pscStatements, response.getCompanyPscStatement());
