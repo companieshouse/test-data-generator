@@ -14,6 +14,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscStatementType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.DataService;
@@ -59,6 +60,9 @@ public class CompanyPscStatementServiceImpl implements
         boolean isRoe = spec.getCompanyType() == CompanyType.REGISTERED_OVERSEAS_ENTITY;
         boolean isPartnership = spec.getCompanyType() == CompanyType.SCOTTISH_PARTNERSHIP
                 || spec.getCompanyType() == CompanyType.LIMITED_PARTNERSHIP;
+        boolean isScottishLimitedPartnership =
+                spec.getCompanyType() == CompanyType.LIMITED_PARTNERSHIP
+                        && JurisdictionType.SCOTLAND.equals(spec.getJurisdiction());
         boolean hasSuperSecure = BooleanUtils.isTrue(spec.getHasSuperSecurePscs());
         boolean hasWithdrawn = spec.getWithdrawnStatements() != null
                 && spec.getWithdrawnStatements() > 0;
@@ -81,6 +85,11 @@ public class CompanyPscStatementServiceImpl implements
                     PscStatementType.PSC_CONTACTED_BUT_NO_RESPONSE_PARTNERSHIP.getValue());
             pscStatement.setCeasedOn(LocalDate.now().minusDays(30)
                     .atStartOfDay(ZONE_ID_UTC).toInstant());
+        } else if (isScottishLimitedPartnership) {
+            pscStatement.setStatement(
+                    PscStatementType
+                            .NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL_PARTNERSHIP
+                            .getValue());
         } else if (isPartnership) {
             pscStatement.setStatement(
                     PscStatementType.PSC_EXISTS_BUT_NOT_IDENTIFIED_PARTNERSHIP.getValue());
@@ -147,6 +156,7 @@ public class CompanyPscStatementServiceImpl implements
             var tempSpec = new InternalCompanyRequest();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
+            tempSpec.setJurisdiction(spec.getJurisdiction());
             tempSpec.setWithdrawnStatements(1);
             tempSpec.setNumberOfPscs(0);
             tempSpec.setPscActive(false);
@@ -171,6 +181,7 @@ public class CompanyPscStatementServiceImpl implements
             var tempSpec = new InternalCompanyRequest();
             tempSpec.setCompanyNumber(spec.getCompanyNumber());
             tempSpec.setCompanyType(spec.getCompanyType());
+            tempSpec.setJurisdiction(spec.getJurisdiction());
             tempSpec.setWithdrawnStatements(0);
             tempSpec.setNumberOfPscs(1);
             tempSpec.setPscActive(true);

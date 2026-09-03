@@ -208,6 +208,62 @@ class CompanyPscServiceImplTest {
     }
 
     @Test
+    void create_ScottishLimitedPartnership_WithActiveStatements_CreatesNoPscs() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setJurisdiction(JurisdictionType.SCOTLAND);
+        internalCompanyRequest.setActiveStatements(1);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, internalCompanyRequest.getNumberOfPscs());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_ScottishLimitedPartnership_ActiveStatementsOverrideExplicitPscRequest()
+            throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setJurisdiction(JurisdictionType.SCOTLAND);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setNumberOfPscs(2);
+        internalCompanyRequest.setActiveStatements(1);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+
+        assertTrue(result.isEmpty());
+        assertEquals(0, internalCompanyRequest.getNumberOfPscs());
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void create_ScottishLimitedPartnership_ZeroActiveStatements_KeepsDefaultIndividualPsc()
+            throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setJurisdiction(JurisdictionType.SCOTLAND);
+        internalCompanyRequest.setActiveStatements(0);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenReturn(new CompanyPscs());
+
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+
+        assertEquals(1, result.size());
+        assertEquals(List.of(PscType.INDIVIDUAL), internalCompanyRequest.getPscType());
+        verify(repository, times(1)).save(any());
+    }
+
+    @Test
     void create_WithAccountsDueStatus_SetsCorrectDates() throws DataException {
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);

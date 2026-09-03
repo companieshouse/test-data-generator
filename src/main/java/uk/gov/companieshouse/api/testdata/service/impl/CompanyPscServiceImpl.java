@@ -141,6 +141,12 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         }
 
         if (isScottishLimitedPartnership(internalCompanyRequest)) {
+            if (hasActiveStatements(internalCompanyRequest)) {
+                LOG.info("Scottish limited partnership with active statements requested. "
+                        + "No PSCs will be created; a PSC statement is used instead.");
+                internalCompanyRequest.setNumberOfPscs(0);
+                return Collections.emptyList();
+            }
             applyScottishLimitedPartnershipDefaults(internalCompanyRequest);
         }
 
@@ -180,9 +186,16 @@ public class CompanyPscServiceImpl implements CompanyPscService {
                 && JurisdictionType.SCOTLAND.equals(internalCompanyRequest.getJurisdiction());
     }
 
+    private boolean hasActiveStatements(InternalCompanyRequest internalCompanyRequest) {
+        return internalCompanyRequest.getActiveStatements() != null
+                && internalCompanyRequest.getActiveStatements() > 0;
+    }
+
     /**
      * Scottish limited partnerships require a minimum of 1 individual PSC (LP5(s)).
      * If no PSC type or count was explicitly specified, default to 1 individual PSC.
+     * This default does not apply when active statements are requested, in which case
+     * a PSC statement is recorded in place of any PSC.
      */
     private void applyScottishLimitedPartnershipDefaults(InternalCompanyRequest internalCompanyRequest) {
         if (internalCompanyRequest.getPscType() == null || internalCompanyRequest.getPscType().isEmpty()) {
