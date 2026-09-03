@@ -44,7 +44,6 @@
         <private-api-sdk-java.version>7.0.9</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
         <test-data-generator-library.version>1.0.36</test-data-generator-library.version>
-        <ch-boms.version>0.1.20</ch-boms.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
