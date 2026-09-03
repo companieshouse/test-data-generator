@@ -32,14 +32,7 @@
 
         <spring-boot-dependencies.version>4.1.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
-        <spring-core.version>7.0.9</spring-core.version>
-        <spring-tx.version>7.0.9</spring-tx.version>
-        <spring-aop.version>7.0.9</spring-aop.version>
-        <spring-web.version>7.0.9</spring-web.version>
-        <spring-beans.version>7.0.9</spring-beans.version>
-        <spring-webmvc.version>7.0.9</spring-webmvc.version>
-        <spring-context.version>7.0.9</spring-context.version>
-        <spring-expression.version>7.0.9</spring-expression.version>
+        <spring-framework.version>7.0.9</spring-framework.version>
         <spring-security-crypto.version>7.1.1</spring-security-crypto.version>
         <log4j2.version>2.26.1</log4j2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
@@ -104,42 +97,42 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring-core.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>${spring-tx.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring-aop.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>${spring-web.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring-beans.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>${spring-webmvc.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring-context.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>${spring-expression.version}</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
