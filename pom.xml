@@ -32,18 +32,21 @@
 
         <spring-boot-dependencies.version>4.1.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
+        <spring-framework.version>7.0.9</spring-framework.version>
+        <spring-security-crypto.version>7.1.1</spring-security-crypto.version>
         <log4j2.version>2.26.1</log4j2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
-        <tomcat-embed-core.version>11.0.24</tomcat-embed-core.version>
-        <tomcat-embed-websocket.version>11.0.24</tomcat-embed-websocket.version>
-        <tomcat-embed-el.version>11.0.24</tomcat-embed-el.version>
+        <tomcat-embed-core.version>11.0.25</tomcat-embed-core.version>
+        <tomcat-embed-websocket.version>11.0.25</tomcat-embed-websocket.version>
+        <tomcat-embed-el.version>11.0.25</tomcat-embed-el.version>
+        <jackson-bind.version>2.22.1</jackson-bind.version>
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.25</api-security-java.version>
         <private-api-sdk-java.version>7.0.9</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
-        <test-data-generator-library.version>1.0.34</test-data-generator-library.version>
+        <test-data-generator-library.version>1.0.36</test-data-generator-library.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
@@ -94,42 +97,47 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-tx</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>7.0.8</version>
+            <version>${spring-framework.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+            <version>${spring-security-crypto.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.tomcat.embed</groupId>
@@ -151,12 +159,6 @@
             <artifactId>api-helper-java</artifactId>
             <version>${api-helper-java.version}</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>structured-logging</artifactId>
@@ -213,7 +215,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.22.0</version>
+            <version>${jackson-bind.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
