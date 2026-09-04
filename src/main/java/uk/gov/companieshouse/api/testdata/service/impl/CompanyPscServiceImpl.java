@@ -140,6 +140,16 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             return Collections.emptyList();
         }
 
+        if (isScottishLimitedPartnership(internalCompanyRequest)) {
+            if (hasActiveStatements(internalCompanyRequest)) {
+                LOG.info("Scottish limited partnership with active statements requested. "
+                        + "No PSCs will be created; a PSC statement is used instead.");
+                internalCompanyRequest.setNumberOfPscs(0);
+                return Collections.emptyList();
+            }
+            applyScottishLimitedPartnershipDefaults(internalCompanyRequest);
+        }
+
         if (shouldCreateSuperSecurePsc(internalCompanyRequest)) {
             List<CompanyPscs> superSecurePscList = new ArrayList<>();
             superSecurePscList.add(createAppropriateSuperSecurePsc(internalCompanyRequest));
@@ -163,9 +173,37 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         if (internalCompanyRequest == null || internalCompanyRequest.getCompanyType() == null) {
             return false;
         }
+        if (isScottishLimitedPartnership(internalCompanyRequest)) {
+            return false;
+        }
         boolean result = EXCLUDED_COMPANY_TYPES.contains(internalCompanyRequest.getCompanyType());
         LOG.debug("shouldSkipPscCreation: " + result);
         return result;
+    }
+
+    private boolean isScottishLimitedPartnership(InternalCompanyRequest internalCompanyRequest) {
+        return CompanyType.LIMITED_PARTNERSHIP.equals(internalCompanyRequest.getCompanyType())
+                && JurisdictionType.SCOTLAND.equals(internalCompanyRequest.getJurisdiction());
+    }
+
+    private boolean hasActiveStatements(InternalCompanyRequest internalCompanyRequest) {
+        return internalCompanyRequest.getActiveStatements() != null
+                && internalCompanyRequest.getActiveStatements() > 0;
+    }
+
+    /**
+     * Scottish limited partnerships require a minimum of 1 individual PSC (LP5(s)).
+     * If no PSC type or count was explicitly specified, default to 1 individual PSC.
+     * This default does not apply when active statements are requested, in which case
+     * a PSC statement is recorded in place of any PSC.
+     */
+    private void applyScottishLimitedPartnershipDefaults(InternalCompanyRequest internalCompanyRequest) {
+        if (internalCompanyRequest.getPscType() == null || internalCompanyRequest.getPscType().isEmpty()) {
+            internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        }
+        if (internalCompanyRequest.getNumberOfPscs() == null || internalCompanyRequest.getNumberOfPscs() <= 0) {
+            internalCompanyRequest.setNumberOfPscs(DEFAULT_NUMBER_OF_PSCS);
+        }
     }
 
     private boolean shouldCreateSuperSecurePsc(InternalCompanyRequest internalCompanyRequest) {
