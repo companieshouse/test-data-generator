@@ -771,6 +771,138 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
+    void createsGeneralAndLimitedPartnerForLimitedPartnershipWhenNoAppointmentsSpecified() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setOfficerRoles(null);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(internalCompanyRequest);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(2)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(2, savedAppointments.size());
+        assertEquals(OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP.getValue(),
+                savedAppointments.get(0).getOfficerRole());
+        assertEquals(OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP.getValue(),
+                savedAppointments.get(1).getOfficerRole());
+    }
+
+    @Test
+    void createAppointmentForLimitedPartnershipAlwaysIncludesMandatoryPartnersAndProvidedRoles() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setNumberOfAppointments(1);
+        internalCompanyRequest.setOfficerRoles(List.of(OfficerType.DIRECTOR));
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(internalCompanyRequest);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        assertEquals(3, savedAppointments.size());
+        long generalPartnerCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP.getValue()
+                        .equals(appointment.getOfficerRole()))
+                .count();
+        long limitedPartnerCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP.getValue()
+                        .equals(appointment.getOfficerRole()))
+                .count();
+        long directorCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.DIRECTOR.getValue().equals(appointment.getOfficerRole()))
+                .count();
+        assertEquals(1, generalPartnerCount);
+        assertEquals(1, limitedPartnerCount);
+        assertEquals(1, directorCount);
+    }
+
+    @Test
+    void createAppointmentForLimitedPartnershipDoesNotDuplicateProvidedMandatoryRoles() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setOfficerRoles(List.of(
+                OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP,
+                OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP));
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenReturn(new Appointment());
+        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
+
+        appointmentsService.createAppointment(internalCompanyRequest);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository, times(2)).save(aptCaptor.capture());
+        List<Appointment> savedAppointments = aptCaptor.getAllValues();
+        long generalPartnerCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP.getValue()
+                        .equals(appointment.getOfficerRole()))
+                .count();
+        long limitedPartnerCount = savedAppointments.stream()
+                .filter(appointment -> OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP.getValue()
+                        .equals(appointment.getOfficerRole()))
+                .count();
+        assertEquals(1, generalPartnerCount);
+        assertEquals(1, limitedPartnerCount);
+    }
+
+    @Test
+    void createAppointmentShouldRejectGeneralPartnerRoleForNonLimitedPartnershipCompanyType() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setOfficerRoles(
+                List.of(OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentsService.createAppointment(internalCompanyRequest));
+
+        assertEquals("Limited partnership officer role is only valid for limited-partnership company type: "
+                + "general-partner-in-a-limited-partnership", exception.getMessage());
+    }
+
+    @Test
+    void createAppointmentShouldRejectLimitedPartnerRoleForNonLimitedPartnershipCompanyType() {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyType(CompanyType.PLC);
+        internalCompanyRequest.setOfficerRoles(
+                List.of(OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> appointmentsService.createAppointment(internalCompanyRequest));
+
+        assertEquals("Limited partnership officer role is only valid for limited-partnership company type: "
+                + "limited-partner-in-a-limited-partnership", exception.getMessage());
+    }
+
+    @Test
     void createAppointmentShouldPopulateIdentificationFields() {
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
