@@ -27,6 +27,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
@@ -457,7 +458,7 @@ class CompanyPscServiceImplTest {
 
         companyPscsService.create(internalCompanyRequest);
 
-        verify(addressService).getAddress(JurisdictionType.ENGLAND_WALES);
+        verify(addressService, times(3)).getAddress(JurisdictionType.ENGLAND_WALES);
         verify(addressService, never()).getAddress(JurisdictionType.EUROPEAN_UNION);
     }
 
@@ -483,6 +484,53 @@ class CompanyPscServiceImplTest {
         assertNotNull(savedPsc, "PSC should not be null");
         assertNotNull(savedPsc.getInternalId(), "Internal ID should not be null");
         assertEquals(9123456789L, savedPsc.getInternalId(), "Internal ID should be prefix '9' + 9-digit number");
+    }
+
+    @Test
+    void create_IndividualPsc_CallsGetAddressTwiceForDifferentAddresses() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        
+        // getAddress is called 3 times: once in createBasePsc, twice in buildIndividualPsc
+        Address address1 = createMockAddress("10 Main Street");
+        Address address2 = createMockAddress("20 High Street");
+        Address address3 = createMockAddress("30 Park Lane");
+        when(addressService.getAddress(JurisdictionType.ENGLAND_WALES))
+                .thenReturn(address1)
+                .thenReturn(address2)
+                .thenReturn(address3);
+
+        companyPscsService.create(internalCompanyRequest);
+
+        // Verify getAddress was called 3 times for the jurisdiction
+        verify(addressService, times(3)).getAddress(JurisdictionType.ENGLAND_WALES);
+        
+        // Verify the PSC has both addresses set
+        ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
+        verify(repository, atLeastOnce()).save(captor.capture());
+
+        CompanyPscs savedPsc = captor.getValue();
+        assertNotNull(savedPsc.getAddress(), "Address should not be null");
+        assertNotNull(savedPsc.getUsualResidentialAddress(), "Usual residential address should not be null");
+        // The second and third calls to getAddress() are used for address and usualResidentialAddress
+        assertEquals("20 High Street", savedPsc.getAddress().getAddressLine1());
+        assertEquals("30 Park Lane", savedPsc.getUsualResidentialAddress().getAddressLine1());
+    }
+
+    private Address createMockAddress(String line1) {
+        Address address = new Address();
+        address.setAddressLine1(line1);
+        address.setPostalCode("SW1A 1AA");
+        address.setCountry("England");
+        return address;
     }
 
 }

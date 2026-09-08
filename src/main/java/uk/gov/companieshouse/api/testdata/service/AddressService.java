@@ -21,4 +21,5 @@ public interface AddressService {
     String getCountryOfResidence(JurisdictionType jurisdiction);
 
     UsualResidentialAddress getUsualResidentialAddress();
+    UsualResidentialAddress getUsualResidentialAddress(JurisdictionType jurisdiction);
 }

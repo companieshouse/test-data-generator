@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import net.datafaker.Faker;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -53,6 +55,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
             = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
     private static final String DEFAULT_COUNTRY = "United Kingdom";
     private static final int DEFAULT_LLP_APPOINTMENTS = 2;
+    private static final Faker NAME_FAKER = new Faker(Locale.UK);
 
     @Autowired
     private AddressService addressService;
@@ -91,24 +94,55 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     rolePlan.officerRoles(),
                     appointmentIds.get(i),
                     i,
-                    accumulator
+                    accumulator,
+                    null
             );
         }
-
+ 
         AppointmentsResultResponse appointmentsResult = new AppointmentsResultResponse();
         accumulator.applyTo(appointmentsResult);
-        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
-            return appointmentsResult;
-        }
-        LOG.info("Successfully created " + accumulator.appointments.size() + " appointments with matching IDs for company number: " + companyNumber);
         return appointmentsResult;
     }
 
     @Override
     public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) {
-        return createAppointment(internalCompanyRequest);
-    }
+        if (Boolean.TRUE.equals(internalCompanyRequest.getNoDefaultOfficer())) {
+            LOG.info("No default officer request, skipping appointment creation for: "
+                    + internalCompanyRequest.getCompanyNumber());
+            return null;
+        }
 
+        LOG.info("Starting creation of appointments with matching IDs for company number: "
+                + internalCompanyRequest.getCompanyNumber());
+
+        final var companyNumber = internalCompanyRequest.getCompanyNumber();
+        final String countryOfResidence = addressService.getCountryOfResidence(
+                internalCompanyRequest.getJurisdiction());
+        boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(internalCompanyRequest);
+        CompanyType companyType = internalCompanyRequest.getCompanyType();
+        int numberOfAppointments = resolveAppointmentCount(internalCompanyRequest, companyType, explicitlySet);
+        AppointmentRolePlan rolePlan = buildOfficerRolePlan(internalCompanyRequest, companyType, numberOfAppointments);
+        List<String> appointmentIds = generateAppointmentIds(rolePlan.appointmentCount());
+
+        AppointmentAccumulator accumulator = new AppointmentAccumulator();
+        for (int i = 0; i < rolePlan.appointmentCount(); i++) {
+            createAndCollectAppointmentAtIndex(
+                    internalCompanyRequest,
+                    companyNumber,
+                    countryOfResidence,
+                    rolePlan.officerRoles(),
+                    appointmentIds.get(i),
+                    i,
+                    accumulator,
+                    registeredOfficeAddress
+            );
+        }
+
+        AppointmentsResultResponse appointmentsResult = new AppointmentsResultResponse();
+        accumulator.applyTo(appointmentsResult);
+        return appointmentsResult;
+    }
+ 
     @Override
     public AppointmentsResultResponse createAppointment(AppointmentCreationRequest spec) {
 
@@ -363,7 +397,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
             List<OfficerType> officerRoleList,
             String appointmentId,
             int index,
-            AppointmentAccumulator accumulator) {
+            AppointmentAccumulator accumulator,
+            Address registeredOfficeAddress) {
         OfficerType currentRoleEnum = officerRoleList.get(index);
         if (currentRoleEnum == null) {
             LOG.error("Invalid officer role: null at index " + index);
@@ -394,7 +429,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .build();
 
         Appointment appointment = buildCompanyAppointment(
-                creationRequest, roleName, currentRole, index);
+                creationRequest, roleName, currentRole, index, registeredOfficeAddress);
 
         LOG.debug("Creating officer appointment for officer ID: " + officerId);
         OfficerAppointment officerAppointment =
@@ -411,10 +446,12 @@ public class AppointmentsServiceImpl implements AppointmentService {
             AppointmentCreationRequest creationRequest,
             String roleName,
             String currentRole,
-            int index) {
-        Appointment appointment = createBaseAppointment(creationRequest);
-        appointment.setForename(FORENAME + (index + 1));
-        appointment.setSurname(roleName);
+            int index,
+            Address registeredOfficeAddress) {
+        Appointment appointment = createBaseAppointment(creationRequest, registeredOfficeAddress);
+        appointment.setForename(NAME_FAKER.name().firstName());
+        appointment.setOtherForeNames(NAME_FAKER.name().firstName());
+        appointment.setSurname(NAME_FAKER.name().lastName());
         appointment.setOfficerRole(currentRole);
         applyUsualResidentialAddressForOfficerRole(appointment, currentRole);
         appointment.setLinks(createAppointmentLinks(
@@ -458,7 +495,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsDeleted;
     }
 
-    private Appointment createBaseAppointment(AppointmentCreationRequest request) {
+    private Appointment createBaseAppointment(AppointmentCreationRequest request, Address registeredOfficeAddress) {
         var appointment = new Appointment();
 
         appointment.setId(request.getAppointmentId());
@@ -466,13 +503,24 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setInternalId(request.getInternalId());
         appointment.setAppointmentId(request.getAppointmentId());
         appointment.setNationality(NATIONALITY);
-        appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
+        
+        // Apply the serviceAddressIsSameAsRegisteredOfficeAddress flag from request
+        Boolean sameAsRegistered = request.getSpec().getServiceAddressIsSameAsRegisteredOfficeAddress();
+        appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(
+            sameAsRegistered != null ? sameAsRegistered : true);
+        
         appointment.setCountryOfResidence(request.getCountryOfResidence());
         appointment.setUpdatedAt(request.getDateTimeNow());
         appointment.setAppointedOn(request.getAppointedOn());
         appointment.setEtag(randomService.getEtag());
-        appointment.setServiceAddress(
-                addressService.getAddress(request.getSpec().getJurisdiction()));
+        
+        // Set service address based on flag
+        if (Boolean.TRUE.equals(sameAsRegistered) && registeredOfficeAddress != null) {
+            appointment.setServiceAddress(registeredOfficeAddress);
+        } else {
+            appointment.setServiceAddress(addressService.getAddress(request.getSpec().getJurisdiction()));
+        }
+        
         appointment.setDataCompanyNumber(request.getCompanyNumber());
         appointment.setDateOfBirth(DOB_INSTANT);
         appointment.setCompanyName("Company " + request.getCompanyNumber());
@@ -485,6 +533,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setSecureOfficer(secureOfficer != null && secureOfficer);
 
         return appointment;
+    }
+
+    private Appointment createBaseAppointment(AppointmentCreationRequest request) {
+        return createBaseAppointment(request, null);
     }
 
     private Links createAppointmentLinks(

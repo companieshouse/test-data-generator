@@ -109,7 +109,8 @@ class AppointmentsServiceImplTest {
         assertNotNull(appointment.getUpdated());
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertNotNull(appointment.getUpdatedAt());
-        assertTrue(appointment.getForename().startsWith("Test"));
+        assertNotNull(appointment.getForename());
+        assertTrue(!appointment.getForename().isBlank());
         assertNotNull(appointment.getAppointedOn());
         assertEquals(OfficerType.DIRECTOR.getValue(), appointment.getOfficerRole());
         assertEquals(ETAG, appointment.getEtag());
@@ -121,7 +122,10 @@ class AppointmentsServiceImplTest {
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
 
-        assertEquals("Director", appointment.getSurname());
+        assertNotNull(appointment.getSurname());
+        assertTrue(!appointment.getSurname().isBlank());
+        assertNotNull(appointment.getOtherForeNames());
+        assertTrue(!appointment.getOtherForeNames().isBlank());
         assertNotNull(appointment.getDateOfBirth());
     }
 
@@ -164,7 +168,8 @@ class AppointmentsServiceImplTest {
 
         assertEquals("Company " + COMPANY_NUMBER, appointment.getCompanyName());
         assertEquals("active", appointment.getCompanyStatus());
-        assertTrue(appointment.getForename().startsWith("Test"));
+        assertNotNull(appointment.getForename());
+        assertTrue(!appointment.getForename().isBlank());
         assertNotNull(appointment.getAppointedOn());
         assertEquals(OfficerType.DIRECTOR.getValue(), appointment.getOfficerRole());
         assertEquals(ETAG, appointment.getEtag());
@@ -176,7 +181,10 @@ class AppointmentsServiceImplTest {
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
 
-        assertEquals("Director", appointment.getSurname());
+        assertNotNull(appointment.getSurname());
+        assertTrue(!appointment.getSurname().isBlank());
+        assertNotNull(appointment.getOtherForeNames());
+        assertTrue(!appointment.getOtherForeNames().isBlank());
         assertNotNull(appointment.getDateOfBirth());
     }
 

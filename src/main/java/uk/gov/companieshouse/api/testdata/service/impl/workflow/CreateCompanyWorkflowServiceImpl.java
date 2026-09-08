@@ -9,6 +9,7 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
@@ -141,7 +142,11 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             response.setFilingHistory(filingHistory);
 
             if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                Address registeredOfficeAddress = (companyProfile != null) ? companyProfile.getRegisteredOfficeAddress() : null;
+                Address registeredOfficeAddress = null;
+                if (Boolean.TRUE.equals(spec.getServiceAddressIsSameAsRegisteredOfficeAddress())
+                        && companyProfile != null) {
+                    registeredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
+                }
                 var appointments = appointmentService.createAppointment(spec, registeredOfficeAddress);
                 LOG.info("Successfully get appointments ");
                 response.setAppointments(appointments);
@@ -160,7 +165,12 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
 
-            var companyPscs = companyPscService.create(spec);
+            Address pscRegisteredOfficeAddress = null;
+            if (Boolean.TRUE.equals(spec.getServiceAddressIsSameAsRegisteredOfficeAddress())
+                    && companyProfile != null) {
+                pscRegisteredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
+            }
+            var companyPscs = companyPscService.create(spec, pscRegisteredOfficeAddress);
             LOG.info("Successfully get PSCs");
             response.setCompanyPscs(companyPscs);
 
@@ -226,6 +236,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         request.setRegisteredOfficeIsInDispute(companySpec.getRegisteredOfficeIsInDispute());
         request.setUndeliverableRegisteredOfficeAddress(
                 companySpec.getUndeliverableRegisteredOfficeAddress());
+        request.setServiceAddressIsSameAsRegisteredOfficeAddress(
+                companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress());
         if (companySpec.getForeignCompanyLegalForm() != null
                 && !companySpec.getForeignCompanyLegalForm().isBlank()) {
             request.setForeignCompanyLegalForm(companySpec.getForeignCompanyLegalForm());
@@ -243,14 +255,19 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
-            companyProfileService.create(companySpec);
+            CompanyProfile companyProfile = companyProfileService.create(companySpec);
             LOG.info("Successfully created company profile");
 
             filingHistoryService.create(companySpec);
             LOG.info("Successfully created filing history");
 
             if (companySpec.getNoDefaultOfficer() == null || !companySpec.getNoDefaultOfficer()) {
-                appointmentService.createAppointment(companySpec);
+                Address registeredOfficeAddress = null;
+                if (Boolean.TRUE.equals(companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress())
+                        && companyProfile != null) {
+                    registeredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
+                }
+                appointmentService.createAppointment(companySpec, registeredOfficeAddress);
                 LOG.info("Successfully created appointments ");
             }
 
@@ -263,7 +280,12 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             companyPscStatementService.createPscStatements(companySpec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            companyPscService.create(companySpec);
+            Address pscRegisteredOfficeAddress = null;
+            if (Boolean.TRUE.equals(companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress())
+                    && companyProfile != null) {
+                pscRegisteredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
+            }
+            companyPscService.create(companySpec, pscRegisteredOfficeAddress);
             LOG.info("Successfully created PSCs");
 
             if (companySpec.getRegisters() != null && !companySpec.getRegisters().isEmpty()) {

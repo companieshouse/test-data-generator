@@ -53,6 +53,7 @@
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
         <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
+        <datafaker.version>2.5.2</datafaker.version>
     </properties>
 
     <dependencyManagement>
@@ -216,7 +217,12 @@
             <version>2.22.0</version>
             <scope>compile</scope>
         </dependency>
-    </dependencies>
+            <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
+        </dependency>
+</dependencies>
 
     <build>
         <plugins>

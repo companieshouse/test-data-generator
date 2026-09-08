@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
+import net.datafaker.Faker;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.entity.DateOfBirth;
 import uk.gov.companieshouse.api.testdata.model.entity.Identification;
@@ -115,6 +118,8 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     private final CompanyPscsRepository repository;
     private final AddressService addressService;
 
+    private static final Faker NAME_FAKER = new Faker(Locale.UK);
+ 
     @Autowired
     public CompanyPscServiceImpl(RandomService randomService,
                                  CompanyPscsRepository repository,
@@ -126,6 +131,11 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
     @Override
     public List<CompanyPscs> create(InternalCompanyRequest internalCompanyRequest) throws DataException {
+        return create(internalCompanyRequest, null);
+    }
+
+    @Override
+    public List<CompanyPscs> create(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) throws DataException {
         LOG.info("Starting creation of PSCs for company number: " + internalCompanyRequest.getCompanyNumber());
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(internalCompanyRequest.getCompanyType()) &&
@@ -156,7 +166,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         }
 
         LOG.info("Creating " + numberOfPsc + " PSCs for company number: " + internalCompanyRequest.getCompanyNumber());
-        return createPscsBasedOnCompanyType(internalCompanyRequest, numberOfPsc);
+        return createPscsBasedOnCompanyType(internalCompanyRequest, numberOfPsc, registeredOfficeAddress);
     }
 
     private boolean shouldSkipPscCreation(InternalCompanyRequest internalCompanyRequest) {
@@ -214,7 +224,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return numberOfPsc;
     }
 
-    private List<CompanyPscs> createPscsBasedOnCompanyType(InternalCompanyRequest internalCompanyRequest, int numberOfPsc) {
+    private List<CompanyPscs> createPscsBasedOnCompanyType(InternalCompanyRequest internalCompanyRequest, int numberOfPsc, Address registeredOfficeAddress) {
         LOG.info("Creating PSCs based on company type: " + internalCompanyRequest.getCompanyType());
 
         if (numberOfPsc <= 0) {
@@ -233,8 +243,8 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             boolean isActive = !(ceaseFirstPsc && i == 0);
 
             CompanyPscs psc = isOverseasEntity
-                    ? createBeneficialOwner(internalCompanyRequest, getBeneficialOwnerType(internalCompanyRequest.getPscType(), i), isActive)
-                    : createPsc(internalCompanyRequest, getRegularPscType(internalCompanyRequest.getPscType(), i), isActive);
+                    ? createBeneficialOwner(internalCompanyRequest, getBeneficialOwnerType(internalCompanyRequest.getPscType(), i), isActive, registeredOfficeAddress)
+                    : createPsc(internalCompanyRequest, getRegularPscType(internalCompanyRequest.getPscType(), i), isActive, registeredOfficeAddress);
 
             listOfCommonPscs.add(psc);
         }
@@ -379,14 +389,14 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         companyPscs.setLinks(links);
     }
 
-    private CompanyPscs createPsc(InternalCompanyRequest spec, PscType pscType, boolean isActive) {
+    private CompanyPscs createPsc(InternalCompanyRequest spec, PscType pscType, boolean isActive, Address registeredOfficeAddress) {
         var companyPscs = createBasePsc(spec, isActive, false);
         switch (pscType) {
             case INDIVIDUAL:
-                buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
+                buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType(), spec.getJurisdiction(), spec.getServiceAddressIsSameAsRegisteredOfficeAddress(), registeredOfficeAddress);
                 break;
             case LEGAL_PERSON:
-                buildLegalPersonPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
+                buildLegalPersonPsc(companyPscs, pscType.getKind(), pscType.getLinkType(), spec.getJurisdiction());
                 break;
             case CORPORATE_ENTITY:
                 buildCorporateEntityPsc(companyPscs, pscType.getKind(), pscType.getLinkType());
@@ -400,7 +410,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(companyPscs);
     }
 
-    private CompanyPscs createBeneficialOwner(InternalCompanyRequest spec, PscType pscType, boolean isActive) {
+    private CompanyPscs createBeneficialOwner(InternalCompanyRequest spec, PscType pscType, boolean isActive, Address registeredOfficeAddress) {
         var beneficialOwner = createBasePsc(spec, isActive, true);
         switch (pscType) {
             case INDIVIDUAL_BENEFICIAL_OWNER:
@@ -465,20 +475,29 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     /**
      * Builds an individual PSC (filing name - PSC01).
      */
-    private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType) {
+    private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType, JurisdictionType jurisdiction, Boolean sameAsRegistered, Address registeredOfficeAddress) {
         companyPsc.setKind(pscType);
-        companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(JurisdictionType.WALES));
-        companyPsc.setAddress(addressService.getAddress(JurisdictionType.WALES));
-        companyPsc.setUsualResidentialAddress(addressService.getAddress(JurisdictionType.WALES));
+        companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
+        
+        // Apply address logic based on flag
+        if (Boolean.TRUE.equals(sameAsRegistered) && registeredOfficeAddress != null) {
+            companyPsc.setAddress(registeredOfficeAddress);
+        } else {
+            companyPsc.setAddress(addressService.getAddress(jurisdiction));
+        }
+        
+        // usualResidentialAddress should always be a different address from the service address
+        companyPsc.setUsualResidentialAddress(addressService.getAddress(jurisdiction));
+        
         companyPsc.setResidentialAddressSameAsServiceAddress(false);
         companyPsc.setNationality(NATIONALITY);
         companyPsc.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 
         NameElements nameElements = new NameElements();
-        nameElements.setTitle("Mr");
-        nameElements.setForename("Person");
-        nameElements.setOtherForenames(FIRST_NAME);
-        nameElements.setSurname("PSC");
+        nameElements.setTitle(NAME_FAKER.name().prefix());
+        nameElements.setForename(NAME_FAKER.name().firstName());
+        nameElements.setOtherForenames(NAME_FAKER.name().firstName());
+        nameElements.setSurname(NAME_FAKER.name().lastName());
         companyPsc.setNameElements(nameElements);
         companyPsc.setName(nameElements.getTitle() + " " + nameElements.getForename()
                 + " " + nameElements.getOtherForenames() + " " + nameElements.getSurname());
@@ -518,12 +537,12 @@ public class CompanyPscServiceImpl implements CompanyPscService {
      * Builds a Legal Person also known as Other Registrable Person (filing name - PSC03).
      */
     private void buildLegalPersonPsc(
-            CompanyPscs companyPsc, String pscType, String linkType) {
+            CompanyPscs companyPsc, String pscType, String linkType, JurisdictionType jurisdiction) {
         companyPsc.setKind(pscType);
 
         Identification identification = new Identification();
         identification.setCountryRegistered(
-                addressService.getCountryOfResidence(JurisdictionType.SCOTLAND));
+                addressService.getCountryOfResidence(jurisdiction));
         identification.setLegalAuthority(LEGAL_AUTHORITY);
         identification.setLegalForm(ORP_LEGAL_FORM);
         companyPsc.setIdentification(identification);
