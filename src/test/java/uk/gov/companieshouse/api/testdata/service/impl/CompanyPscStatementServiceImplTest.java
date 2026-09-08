@@ -30,6 +30,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.Links;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscStatementType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscStatementRepository;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -335,6 +336,50 @@ class CompanyPscStatementServiceImplTest {
         assertEquals(PscStatementType.PSC_EXISTS_BUT_NOT_IDENTIFIED_PARTNERSHIP.getValue(),
                 pscStatement.getStatement());
         assertNull(pscStatement.getCeasedOn());
+    }
+
+    @Test
+    void createCompanyPscStatement_scottishLimitedPartnership_activeStatement() {
+        when(randomService.getEncodedIdWithSalt(any(Integer.class), any(Integer.class)))
+                .thenReturn(PSC_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any(CompanyPscStatement.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        spec.setJurisdiction(JurisdictionType.SCOTLAND);
+        spec.setHasSuperSecurePscs(false);
+        spec.setWithdrawnStatements(0);
+
+        CompanyPscStatement pscStatement = companyPscStatementService.create(spec);
+
+        assertEquals(PscStatementType
+                        .NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL_PARTNERSHIP.getValue(),
+                pscStatement.getStatement());
+        assertNull(pscStatement.getCeasedOn());
+    }
+
+    @Test
+    void createPscStatements_scottishLimitedPartnership_propagatesJurisdiction() {
+        when(randomService.getEncodedIdWithSalt(any(Integer.class), any(Integer.class)))
+                .thenReturn(PSC_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any(CompanyPscStatement.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        spec.setJurisdiction(JurisdictionType.SCOTLAND);
+        spec.setHasSuperSecurePscs(false);
+        spec.setWithdrawnStatements(0);
+        spec.setActiveStatements(2);
+
+        List<CompanyPscStatement> statements =
+                companyPscStatementService.createPscStatements(spec);
+
+        assertEquals(2, statements.size());
+        statements.forEach(statement -> assertEquals(PscStatementType
+                        .NO_INDIVIDUAL_OR_ENTITY_WITH_SIGNIFICANT_CONTROL_PARTNERSHIP.getValue(),
+                statement.getStatement()));
     }
 
     @Test

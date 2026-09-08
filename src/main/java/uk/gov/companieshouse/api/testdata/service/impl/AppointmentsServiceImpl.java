@@ -56,6 +56,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final String DEFAULT_COUNTRY = "United Kingdom";
     private static final int DEFAULT_LLP_APPOINTMENTS = 2;
     private static final Faker NAME_FAKER = new Faker(Locale.UK);
+    private static final int DEFAULT_LP_APPOINTMENTS = 2;
 
     @Autowired
     private AddressService addressService;
@@ -98,7 +99,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     null
             );
         }
- 
+
         AppointmentsResultResponse appointmentsResult = new AppointmentsResultResponse();
         accumulator.applyTo(appointmentsResult);
         return appointmentsResult;
@@ -142,7 +143,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         accumulator.applyTo(appointmentsResult);
         return appointmentsResult;
     }
- 
+
     @Override
     public AppointmentsResultResponse createAppointment(AppointmentCreationRequest spec) {
 
@@ -315,6 +316,14 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 }
                 yield numberOfAppointments;
             }
+            case LIMITED_PARTNERSHIP -> {
+                if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
+                    LOG.info("Limited partnership company type and numberOfAppointments not set or <= 0. "
+                            + "Defaulting to 1 general partner and 1 limited partner");
+                    yield DEFAULT_LP_APPOINTMENTS;
+                }
+                yield numberOfAppointments;
+            }
             default -> {
                 if (!explicitlySet || numberOfAppointments == null || numberOfAppointments <= 0) {
                     LOG.info("Number of appointments not set or <= 0. Defaulting to 1.");
@@ -344,6 +353,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         return switch (effectiveCompanyType) {
             case LLP -> buildLlpOfficerRolePlan(officerRoleList, numberOfAppointments);
+            case LIMITED_PARTNERSHIP ->
+                    buildLimitedPartnershipOfficerRolePlan(officerRoleList, numberOfAppointments);
             case PLC -> {
                 for (int i = providedCount; i < numberOfAppointments; i++) {
                     officerRoleList.add(i == 2 ? OfficerType.SECRETARY : OfficerType.DIRECTOR);
@@ -378,6 +389,33 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         for (int i = officerRoleList.size(); i < adjustedNumberOfAppointments; i++) {
             officerRoleList.add(OfficerType.LLP_DESIGNATED_MEMBER);
+        }
+        return new AppointmentRolePlan(officerRoleList, adjustedNumberOfAppointments);
+    }
+
+    /**
+     * Limited partnerships require a minimum of 1 general partner and 1 limited partner.
+     * Any missing mandatory role is prepended to the roles supplied by the caller, who
+     * remains free to add further officer roles on top of that minimum.
+     */
+    private AppointmentRolePlan buildLimitedPartnershipOfficerRolePlan(
+            List<OfficerType> officerRoleList,
+            int numberOfAppointments) {
+        if (!officerRoleList.contains(OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP)) {
+            officerRoleList.add(0, OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP);
+        }
+        if (!officerRoleList.contains(OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP)) {
+            officerRoleList.add(0, OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP);
+        }
+
+        int adjustedNumberOfAppointments = Math.max(numberOfAppointments, officerRoleList.size());
+        if (adjustedNumberOfAppointments > 20) {
+            throw new IllegalArgumentException(
+                    "Total limited partnership appointments including mandatory partners must not exceed 20");
+        }
+
+        for (int i = officerRoleList.size(); i < adjustedNumberOfAppointments; i++) {
+            officerRoleList.add(OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP);
         }
         return new AppointmentRolePlan(officerRoleList, adjustedNumberOfAppointments);
     }
@@ -503,24 +541,24 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setInternalId(request.getInternalId());
         appointment.setAppointmentId(request.getAppointmentId());
         appointment.setNationality(NATIONALITY);
-        
+
         // Apply the serviceAddressIsSameAsRegisteredOfficeAddress flag from request
         Boolean sameAsRegistered = request.getSpec().getServiceAddressIsSameAsRegisteredOfficeAddress();
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(
             sameAsRegistered != null ? sameAsRegistered : true);
-        
+
         appointment.setCountryOfResidence(request.getCountryOfResidence());
         appointment.setUpdatedAt(request.getDateTimeNow());
         appointment.setAppointedOn(request.getAppointedOn());
         appointment.setEtag(randomService.getEtag());
-        
+
         // Set service address based on flag
         if (Boolean.TRUE.equals(sameAsRegistered) && registeredOfficeAddress != null) {
             appointment.setServiceAddress(registeredOfficeAddress);
         } else {
             appointment.setServiceAddress(addressService.getAddress(request.getSpec().getJurisdiction()));
         }
-        
+
         appointment.setDataCompanyNumber(request.getCompanyNumber());
         appointment.setDateOfBirth(DOB_INSTANT);
         appointment.setCompanyName("Company " + request.getCompanyNumber());
@@ -681,6 +719,16 @@ public class AppointmentsServiceImpl implements AppointmentService {
         if (!llpCompanyType && llpOfficerType) {
             throw new IllegalArgumentException("LLP officer role is only valid for LLP company type: " + officerRole.getValue());
         }
+        if (companyType != CompanyType.LIMITED_PARTNERSHIP && isLimitedPartnershipOfficerType(officerRole)) {
+            throw new IllegalArgumentException(
+                    "Limited partnership officer role is only valid for limited-partnership company type: "
+                            + officerRole.getValue());
+        }
+    }
+
+    private boolean isLimitedPartnershipOfficerType(OfficerType officerRole) {
+        return officerRole == OfficerType.GENERAL_PARTNER_IN_A_LIMITED_PARTNERSHIP
+                || officerRole == OfficerType.LIMITED_PARTNER_IN_A_LIMITED_PARTNERSHIP;
     }
 
     private boolean isLlpOfficerType(OfficerType officerRole) {
