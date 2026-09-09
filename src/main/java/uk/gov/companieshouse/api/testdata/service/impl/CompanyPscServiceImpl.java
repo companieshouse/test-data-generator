@@ -524,6 +524,9 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             companyPsc.setAddress(addressService.getAddress(jurisdiction));
         }
         
+        // Set the flag on the PSC object
+        companyPsc.setServiceAddressSameAsRegisteredOfficeAddress(sameAsRegistered);
+        
         // usualResidentialAddress should always be a different address from the service address
         companyPsc.setUsualResidentialAddress(addressService.getAddress(jurisdiction));
         

@@ -747,10 +747,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -776,10 +775,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 
@@ -816,10 +814,9 @@ class AppointmentsServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
         when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
         when(randomService.getEtag()).thenReturn(ETAG);
-        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", ""));
+        when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
-        when(appointmentsDataRepository.save(any())).thenReturn(new AppointmentsData());
 
         appointmentsService.createAppointment(internalCompanyRequest);
 

@@ -68,41 +68,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private OfficerRepository officerRepository;
 
     public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest) {
-        if (Boolean.TRUE.equals(internalCompanyRequest.getNoDefaultOfficer())) {
-            LOG.info("No default officer request, skipping appointment creation for: "
-                    + internalCompanyRequest.getCompanyNumber());
-            return null;
-        }
-
-        LOG.info("Starting creation of appointments with matching IDs for company number: "
-                + internalCompanyRequest.getCompanyNumber());
-
-        final var companyNumber = internalCompanyRequest.getCompanyNumber();
-        final String countryOfResidence = addressService.getCountryOfResidence(
-                internalCompanyRequest.getJurisdiction());
-        boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(internalCompanyRequest);
-        CompanyType companyType = internalCompanyRequest.getCompanyType();
-        int numberOfAppointments = resolveAppointmentCount(internalCompanyRequest, companyType, explicitlySet);
-        AppointmentRolePlan rolePlan = buildOfficerRolePlan(internalCompanyRequest, companyType, numberOfAppointments);
-        List<String> appointmentIds = generateAppointmentIds(rolePlan.appointmentCount());
-
-        AppointmentAccumulator accumulator = new AppointmentAccumulator();
-        for (int i = 0; i < rolePlan.appointmentCount(); i++) {
-            createAndCollectAppointmentAtIndex(
-                    internalCompanyRequest,
-                    companyNumber,
-                    countryOfResidence,
-                    rolePlan.officerRoles(),
-                    appointmentIds.get(i),
-                    i,
-                    accumulator,
-                    null
-            );
-        }
-
-        AppointmentsResultResponse appointmentsResult = new AppointmentsResultResponse();
-        accumulator.applyTo(appointmentsResult);
-        return appointmentsResult;
+        return createAppointment(internalCompanyRequest, null);
     }
 
     @Override
