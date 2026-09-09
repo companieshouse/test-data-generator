@@ -142,11 +142,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             response.setFilingHistory(filingHistory);
 
             if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                Address registeredOfficeAddress = null;
-                if (Boolean.TRUE.equals(spec.getServiceAddressIsSameAsRegisteredOfficeAddress())
-                        && companyProfile != null) {
-                    registeredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
-                }
+                Address registeredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
                 var appointments = appointmentService.createAppointment(spec, registeredOfficeAddress);
                 LOG.info("Successfully get appointments ");
                 response.setAppointments(appointments);
@@ -165,11 +161,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
 
-            Address pscRegisteredOfficeAddress = null;
-            if (Boolean.TRUE.equals(spec.getServiceAddressIsSameAsRegisteredOfficeAddress())
-                    && companyProfile != null) {
-                pscRegisteredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
-            }
+            Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
             var companyPscs = companyPscService.create(spec, pscRegisteredOfficeAddress);
             LOG.info("Successfully get PSCs");
             response.setCompanyPscs(companyPscs);
@@ -262,11 +254,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             LOG.info("Successfully created filing history");
 
             if (companySpec.getNoDefaultOfficer() == null || !companySpec.getNoDefaultOfficer()) {
-                Address registeredOfficeAddress = null;
-                if (Boolean.TRUE.equals(companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress())
-                        && companyProfile != null) {
-                    registeredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
-                }
+                Address registeredOfficeAddress = resolveRegisteredOfficeAddress(companySpec, companyProfile);
                 appointmentService.createAppointment(companySpec, registeredOfficeAddress);
                 LOG.info("Successfully created appointments ");
             }
@@ -280,11 +268,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             companyPscStatementService.createPscStatements(companySpec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            Address pscRegisteredOfficeAddress = null;
-            if (Boolean.TRUE.equals(companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress())
-                    && companyProfile != null) {
-                pscRegisteredOfficeAddress = companyProfile.getRegisteredOfficeAddress();
-            }
+            Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(companySpec, companyProfile);
             companyPscService.create(companySpec, pscRegisteredOfficeAddress);
             LOG.info("Successfully created PSCs");
 
@@ -333,6 +317,14 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     private CompanyProfileResponse buildCompanyResponse(InternalCompanyRequest spec, String authCode) {
         String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
         return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
+    }
+
+    private Address resolveRegisteredOfficeAddress(InternalCompanyRequest companySpec, CompanyProfile companyProfile) {
+        if (Boolean.TRUE.equals(companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress())
+                && companyProfile != null) {
+            return companyProfile.getRegisteredOfficeAddress();
+        }
+        return null;
     }
 
     private DataException handleCreateFailure(String companyNumber, Exception ex) {
