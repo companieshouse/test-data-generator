@@ -357,10 +357,10 @@ public class AddressServiceImpl implements AddressService {
     }
 
     private UsualResidentialAddress normalizeResidentialAddress(UsualResidentialAddress address) {
-        String locality = firstNonBlank(address.getLocality(), "TEST LOCALITY");
-        address.setAddressLine1(firstNonBlank(address.getAddressLine1(), locality));
+        
+        address.setAddressLine1(address.getAddressLine1());
         address.setAddressLine2(firstNonBlank(address.getAddressLine2(), address.getAddressLine1(), TEST_DATA_MARKER));
-        address.setRegion(firstNonBlank(address.getRegion(), locality, UNITED_KINGDOM));
+        address.setRegion(firstNonBlank(address.getRegion(), UNITED_KINGDOM));
         return address;
     }
 }
