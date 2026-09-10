@@ -33,13 +33,11 @@ public class AddressServiceImpl implements AddressService {
         final String locality;
         final String area;
         final String region;
-        final String[] postcodeOutwards;
 
-        LocalityCluster(String locality, String area, String region, String[] postcodeOutwards) {
+        LocalityCluster(String locality, String area, String region) {
             this.locality = locality;
             this.area = area;
             this.region = region;
-            this.postcodeOutwards = postcodeOutwards;
         }
     }
 
@@ -64,150 +62,150 @@ public class AddressServiceImpl implements AddressService {
     }
 
     private static final LocalityCluster[] ENGLAND_CLUSTERS = {
-            new LocalityCluster("LONDON", "CAMDEN", "GREATER LONDON", new String[]{"WC1", "NW1", "N1"}),
-            new LocalityCluster("LONDON", "ISLINGTON", "GREATER LONDON", new String[]{"N1", "N7", "EC1"}),
-            new LocalityCluster("LONDON", "CHELSEA", "GREATER LONDON", new String[]{"SW3", "SW10", "SW1"}),
-            new LocalityCluster("MANCHESTER", "DIDSBURY", "GREATER MANCHESTER", new String[]{"M20", "M21", "M1"}),
-            new LocalityCluster("MANCHESTER", "CHORLTON", "GREATER MANCHESTER", new String[]{"M16", "M21", "M32"}),
-            new LocalityCluster("BIRMINGHAM", "EDGBASTON", "WEST MIDLANDS", new String[]{"B1", "B15", "B16"}),
-            new LocalityCluster("BIRMINGHAM", "MOSELEY", "WEST MIDLANDS", new String[]{"B13", "B14", "B15"}),
-            new LocalityCluster("BRISTOL", "CLIFTON", "SOUTH WEST ENGLAND", new String[]{"BS1", "BS3", "BS8"}),
-            new LocalityCluster("BRISTOL", "REDLAND", "SOUTH WEST ENGLAND", new String[]{"BS6", "BS7", "BS8"}),
-            new LocalityCluster("LEEDS", "HEADINGLEY", "WEST YORKSHIRE", new String[]{"LS1", "LS2", "LS6"}),
-            new LocalityCluster("LEEDS", "MEANWOOD", "WEST YORKSHIRE", new String[]{"LS6", "LS7", "LS8"}),
-            new LocalityCluster("LIVERPOOL", "TOXTETH", "MERSEYSIDE", new String[]{"L1", "L8", "L15"}),
-            new LocalityCluster("LIVERPOOL", "WAVERTREE", "MERSEYSIDE", new String[]{"L15", "L16", "L18"}),
-            new LocalityCluster("NEWCASTLE", "GOSFORTH", "TYNE AND WEAR", new String[]{"NE1", "NE2", "NE3"}),
-            new LocalityCluster("NEWCASTLE", "JESMOND", "TYNE AND WEAR", new String[]{"NE2", "NE3", "NE7"}),
-            new LocalityCluster("CAMBRIDGE", "NEWNHAM", "CAMBRIDGESHIRE", new String[]{"CB1", "CB2", "CB3"}),
-            new LocalityCluster("CAMBRIDGE", "CHESTERTON", "CAMBRIDGESHIRE", new String[]{"CB4", "CB5", "CB1"}),
-            new LocalityCluster("OXFORD", "CITY CENTRE", "OXFORDSHIRE", new String[]{"OX1", "OX2", "OX3"}),
-            new LocalityCluster("OXFORD", "JERICHO", "OXFORDSHIRE", new String[]{"OX2", "OX1", "OX4"}),
-            new LocalityCluster("YORK", "CITY CENTRE", "NORTH YORKSHIRE", new String[]{"YO1", "YO2", "YO19"}),
-            new LocalityCluster("CHESTER", "CITY CENTRE", "CHESHIRE", new String[]{"CH1", "CH2", "CH3"}),
-            new LocalityCluster("BATH", "CITY CENTRE", "BATH AND NORTH EAST SOMERSET", new String[]{"BA1", "BA2", "BA15"}),
-            new LocalityCluster("NOTTINGHAM", "CITY CENTRE", "NOTTINGHAMSHIRE", new String[]{"NG1", "NG2", "NG7"}),
-            new LocalityCluster("LEICESTER", "CITY CENTRE", "LEICESTERSHIRE", new String[]{"LE1", "LE2", "LE3"}),
-            new LocalityCluster("COVENTRY", "CITY CENTRE", "WEST MIDLANDS", new String[]{"CV1", "CV2", "CV6"}),
-            new LocalityCluster("BRIGHTON", "CITY CENTRE", "EAST SUSSEX", new String[]{"BN1", "BN2", "BN3"}),
-            new LocalityCluster("SOUTHAMPTON", "CITY CENTRE", "HAMPSHIRE", new String[]{"SO14", "SO15", "SO16"})
+            new LocalityCluster("LONDON", "CAMDEN", "GREATER LONDON"),
+            new LocalityCluster("LONDON", "ISLINGTON", "GREATER LONDON"),
+            new LocalityCluster("LONDON", "CHELSEA", "GREATER LONDON"),
+            new LocalityCluster("MANCHESTER", "DIDSBURY", "GREATER MANCHESTER"),
+            new LocalityCluster("MANCHESTER", "CHORLTON", "GREATER MANCHESTER"),
+            new LocalityCluster("BIRMINGHAM", "EDGBASTON", "WEST MIDLANDS"),
+            new LocalityCluster("BIRMINGHAM", "MOSELEY", "WEST MIDLANDS"),
+            new LocalityCluster("BRISTOL", "CLIFTON", "SOUTH WEST ENGLAND"),
+            new LocalityCluster("BRISTOL", "REDLAND", "SOUTH WEST ENGLAND"),
+            new LocalityCluster("LEEDS", "HEADINGLEY", "WEST YORKSHIRE"),
+            new LocalityCluster("LEEDS", "MEANWOOD", "WEST YORKSHIRE"),
+            new LocalityCluster("LIVERPOOL", "TOXTETH", "MERSEYSIDE"),
+            new LocalityCluster("LIVERPOOL", "WAVERTREE", "MERSEYSIDE"),
+            new LocalityCluster("NEWCASTLE", "GOSFORTH", "TYNE AND WEAR"),
+            new LocalityCluster("NEWCASTLE", "JESMOND", "TYNE AND WEAR"),
+            new LocalityCluster("CAMBRIDGE", "NEWNHAM", "CAMBRIDGESHIRE"),
+            new LocalityCluster("CAMBRIDGE", "CHESTERTON", "CAMBRIDGESHIRE"),
+            new LocalityCluster("OXFORD", "CITY CENTRE", "OXFORDSHIRE"),
+            new LocalityCluster("OXFORD", "JERICHO", "OXFORDSHIRE"),
+            new LocalityCluster("YORK", "CITY CENTRE", "NORTH YORKSHIRE"),
+            new LocalityCluster("CHESTER", "CITY CENTRE", "CHESHIRE"),
+            new LocalityCluster("BATH", "CITY CENTRE", "BATH AND NORTH EAST SOMERSET"),
+            new LocalityCluster("NOTTINGHAM", "CITY CENTRE", "NOTTINGHAMSHIRE"),
+            new LocalityCluster("LEICESTER", "CITY CENTRE", "LEICESTERSHIRE"),
+            new LocalityCluster("COVENTRY", "CITY CENTRE", "WEST MIDLANDS"),
+            new LocalityCluster("BRIGHTON", "CITY CENTRE", "EAST SUSSEX"),
+            new LocalityCluster("SOUTHAMPTON", "CITY CENTRE", "HAMPSHIRE")
     };
 
     private static final LocalityCluster[] WALES_CLUSTERS = {
-            new LocalityCluster("CARDIFF", "CATHAYS", "SOUTH GLAMORGAN", new String[]{"CF10", "CF11", "CF24"}),
-            new LocalityCluster("CARDIFF", "PONTCANNA", "SOUTH GLAMORGAN", new String[]{"CF5", "CF11", "CF14"}),
-            new LocalityCluster("CARDIFF", "GRANGETOWN", "SOUTH GLAMORGAN", new String[]{"CF10", "CF11", "CF24"}),
-            new LocalityCluster("SWANSEA", "UPLANDS", "WEST GLAMORGAN", new String[]{"SA1", "SA2", "SA3"}),
-            new LocalityCluster("SWANSEA", "MUMBLES", "WEST GLAMORGAN", new String[]{"SA2", "SA3", "SA4"}),
-            new LocalityCluster("NEWPORT", "STOW HILL", "MONMOUTHSHIRE", new String[]{"NP19", "NP20", "NP10"}),
-            new LocalityCluster("NEWPORT", "ROGERSTONE", "MONMOUTHSHIRE", new String[]{"NP10", "NP18", "NP19"}),
-            new LocalityCluster("WREXHAM", "TOWN CENTRE", "CLWYD", new String[]{"LL11", "LL12", "LL13"}),
-            new LocalityCluster("WREXHAM", "ACTON", "CLWYD", new String[]{"LL11", "LL12", "LL13"}),
-            new LocalityCluster("ABERYSTWYTH", "TOWN CENTRE", "CEREDIGION", new String[]{"SY23", "SY24", "SY25"}),
-            new LocalityCluster("BANGOR", "TOWN CENTRE", "GWYNEDD", new String[]{"LL57", "LL58", "LL59"}),
-            new LocalityCluster("LLANDRINDOD WELLS", "TOWN CENTRE", "POWYS", new String[]{"LD1", "LD2", "LD3"})
+            new LocalityCluster("CARDIFF", "CATHAYS", "SOUTH GLAMORGAN"),
+            new LocalityCluster("CARDIFF", "PONTCANNA", "SOUTH GLAMORGAN"),
+            new LocalityCluster("CARDIFF", "GRANGETOWN", "SOUTH GLAMORGAN"),
+            new LocalityCluster("SWANSEA", "UPLANDS", "WEST GLAMORGAN"),
+            new LocalityCluster("SWANSEA", "MUMBLES", "WEST GLAMORGAN"),
+            new LocalityCluster("NEWPORT", "STOW HILL", "MONMOUTHSHIRE"),
+            new LocalityCluster("NEWPORT", "ROGERSTONE", "MONMOUTHSHIRE"),
+            new LocalityCluster("WREXHAM", "TOWN CENTRE", "CLWYD"),
+            new LocalityCluster("WREXHAM", "ACTON", "CLWYD"),
+            new LocalityCluster("ABERYSTWYTH", "TOWN CENTRE", "CEREDIGION"),
+            new LocalityCluster("BANGOR", "TOWN CENTRE", "GWYNEDD"),
+            new LocalityCluster("LLANDRINDOD WELLS", "TOWN CENTRE", "POWYS")
     };
 
     private static final LocalityCluster[] SCOTLAND_CLUSTERS = {
-            new LocalityCluster("EDINBURGH", "LEITH", "CITY OF EDINBURGH", new String[]{"EH1", "EH2", "EH6"}),
-            new LocalityCluster("EDINBURGH", "MORNINGSIDE", "CITY OF EDINBURGH", new String[]{"EH10", "EH11", "EH16"}),
-            new LocalityCluster("EDINBURGH", "STOCKBRIDGE", "CITY OF EDINBURGH", new String[]{"EH3", "EH4", "EH5"}),
-            new LocalityCluster("GLASGOW", "PARTICK", "GLASGOW CITY", new String[]{"G1", "G11", "G12"}),
-            new LocalityCluster("GLASGOW", "GOVAN", "GLASGOW CITY", new String[]{"G51", "G52", "G41"}),
-            new LocalityCluster("GLASGOW", "MERCHANT CITY", "GLASGOW CITY", new String[]{"G1", "G2", "G4"}),
-            new LocalityCluster("ABERDEEN", "WEST END", "ABERDEENSHIRE", new String[]{"AB10", "AB11", "AB15"}),
-            new LocalityCluster("ABERDEEN", "ROSEMOUNT", "ABERDEENSHIRE", new String[]{"AB15", "AB16", "AB25"}),
-            new LocalityCluster("DUNDEE", "BROUGHTY FERRY", "DUNDEE CITY", new String[]{"DD1", "DD2", "DD5"}),
-            new LocalityCluster("DUNDEE", "WEST END", "DUNDEE CITY", new String[]{"DD1", "DD2", "DD3"}),
-            new LocalityCluster("STIRLING", "CITY CENTRE", "STIRLING", new String[]{"FK8", "FK9", "FK7"}),
-            new LocalityCluster("PERTH", "CITY CENTRE", "PERTH AND KINROSS", new String[]{"PH1", "PH2", "PH3"}),
-            new LocalityCluster("INVERNESS", "CITY CENTRE", "HIGHLAND", new String[]{"IV1", "IV2", "IV3"})
+            new LocalityCluster("EDINBURGH", "LEITH", "CITY OF EDINBURGH"),
+            new LocalityCluster("EDINBURGH", "MORNINGSIDE", "CITY OF EDINBURGH"),
+            new LocalityCluster("EDINBURGH", "STOCKBRIDGE", "CITY OF EDINBURGH"),
+            new LocalityCluster("GLASGOW", "PARTICK", "GLASGOW CITY"),
+            new LocalityCluster("GLASGOW", "GOVAN", "GLASGOW CITY"),
+            new LocalityCluster("GLASGOW", "MERCHANT CITY", "GLASGOW CITY"),
+            new LocalityCluster("ABERDEEN", "WEST END", "ABERDEENSHIRE"),
+            new LocalityCluster("ABERDEEN", "ROSEMOUNT", "ABERDEENSHIRE"),
+            new LocalityCluster("DUNDEE", "BROUGHTY FERRY", "DUNDEE CITY"),
+            new LocalityCluster("DUNDEE", "WEST END", "DUNDEE CITY"),
+            new LocalityCluster("STIRLING", "CITY CENTRE", "STIRLING"),
+            new LocalityCluster("PERTH", "CITY CENTRE", "PERTH AND KINROSS"),
+            new LocalityCluster("INVERNESS", "CITY CENTRE", "HIGHLAND")
     };
 
     private static final LocalityCluster[] NI_CLUSTERS = {
-            new LocalityCluster("BELFAST", "BOTANIC", "COUNTY ANTRIM", new String[]{"BT1", "BT2", "BT9"}),
-            new LocalityCluster("BELFAST", "ORMEAU", "COUNTY ANTRIM", new String[]{"BT6", "BT7", "BT8"}),
-            new LocalityCluster("BELFAST", "CATHEDRAL QUARTER", "COUNTY ANTRIM", new String[]{"BT1", "BT2", "BT15"}),
-            new LocalityCluster("BELFAST", "TITANIC QUARTER", "COUNTY ANTRIM", new String[]{"BT3", "BT4", "BT5"}),
-            new LocalityCluster("DERRY", "BOGSIDE", "COUNTY LONDONDERRY", new String[]{"BT47", "BT48", "BT49"}),
-            new LocalityCluster("LISBURN", "TOWN CENTRE", "LISBURN AND CASTLEREAGH CITY", new String[]{"BT27", "BT28", "BT29"}),
-            new LocalityCluster("LISBURN", "LAMBEG", "LISBURN AND CASTLEREAGH CITY", new String[]{"BT27", "BT28", "BT39"}),
-            new LocalityCluster("NEWRY", "HILL STREET", "MOURNE AND DOWN", new String[]{"BT34", "BT35", "BT60"}),
-            new LocalityCluster("NEWRY", "WARRENPOINT", "MOURNE AND DOWN", new String[]{"BT34", "BT35", "BT62"}),
-            new LocalityCluster("ARMAGH", "TOWN CENTRE", "ARMAGH, BANBRIDGE AND CRAIGAVON", new String[]{"BT60", "BT61", "BT62"}),
-            new LocalityCluster("OMAGH", "TOWN CENTRE", "FERMANAGH AND OMAGH", new String[]{"BT78", "BT79", "BT82"}),
-            new LocalityCluster("STRABANE", "TOWN CENTRE", "FERMANAGH AND OMAGH", new String[]{"BT82", "BT81", "BT80"}),
-            new LocalityCluster("BANGOR", "TOWN CENTRE", "NORTH DOWN AND ARDS", new String[]{"BT19", "BT20", "BT21"})
+            new LocalityCluster("BELFAST", "BOTANIC", "COUNTY ANTRIM"),
+            new LocalityCluster("BELFAST", "ORMEAU", "COUNTY ANTRIM"),
+            new LocalityCluster("BELFAST", "CATHEDRAL QUARTER", "COUNTY ANTRIM"),
+            new LocalityCluster("BELFAST", "TITANIC QUARTER", "COUNTY ANTRIM"),
+            new LocalityCluster("DERRY", "BOGSIDE", "COUNTY LONDONDERRY"),
+            new LocalityCluster("LISBURN", "TOWN CENTRE", "LISBURN AND CASTLEREAGH CITY"),
+            new LocalityCluster("LISBURN", "LAMBEG", "LISBURN AND CASTLEREAGH CITY"),
+            new LocalityCluster("NEWRY", "HILL STREET", "MOURNE AND DOWN"),
+            new LocalityCluster("NEWRY", "WARRENPOINT", "MOURNE AND DOWN"),
+            new LocalityCluster("ARMAGH", "TOWN CENTRE", "ARMAGH, BANBRIDGE AND CRAIGAVON"),
+            new LocalityCluster("OMAGH", "TOWN CENTRE", "FERMANAGH AND OMAGH"),
+            new LocalityCluster("STRABANE", "TOWN CENTRE", "FERMANAGH AND OMAGH"),
+            new LocalityCluster("BANGOR", "TOWN CENTRE", "NORTH DOWN AND ARDS")
     };
 
     private static final LocalityCluster[] NETHERLANDS_CLUSTERS = {
-            new LocalityCluster("AMSTERDAM", "CENTRUM", "NOORD-HOLLAND", new String[]{"1012", "1017", "1054"}),
-            new LocalityCluster("AMSTERDAM", "DE PIJP", "NOORD-HOLLAND", new String[]{"1072", "1073", "1074"}),
-            new LocalityCluster("ROTTERDAM", "KRALINGEN", "ZUID-HOLLAND", new String[]{"3011", "3062", "3072"}),
-            new LocalityCluster("ROTTERDAM", "DELFSHAVEN", "ZUID-HOLLAND", new String[]{"3025", "3026", "3027"}),
-            new LocalityCluster("UTRECHT", "BINNENSTAD", "UTRECHT PROVINCE", new String[]{"3511", "3512", "3581"}),
-            new LocalityCluster("UTRECHT", "LOMBOK", "UTRECHT PROVINCE", new String[]{"3531", "3532", "3521"}),
-            new LocalityCluster("EINDHOVEN", "STRIJP", "NOORD-BRABANT", new String[]{"5611", "5612", "5652"}),
-            new LocalityCluster("EINDHOVEN", "GESTEL", "NOORD-BRABANT", new String[]{"5614", "5623", "5654"}),
-            new LocalityCluster("GRONINGEN", "BINNENSTAD", "GRONINGEN PROVINCE", new String[]{"9711", "9712", "9724"}),
-            new LocalityCluster("GRONINGEN", "SELWERD", "GRONINGEN PROVINCE", new String[]{"9716", "9717", "9741"}),
-            new LocalityCluster("MAASTRICHT", "WYCK", "LIMBURG", new String[]{"6211", "6212", "6221"}),
-            new LocalityCluster("MAASTRICHT", "JEKERKWARTIER", "LIMBURG", new String[]{"6211", "6214", "6216"}),
-            new LocalityCluster("THE HAGUE", "CENTRUM", "ZUID-HOLLAND", new String[]{"2511", "2512", "2513"}),
-            new LocalityCluster("THE HAGUE", "SCHEVENINGEN", "ZUID-HOLLAND", new String[]{"2586", "2587", "2588"}),
-            new LocalityCluster("HAARLEM", "CITY CENTRE", "NOORD-HOLLAND", new String[]{"2011", "2012", "2013"}),
-            new LocalityCluster("LEIDEN", "CITY CENTRE", "ZUID-HOLLAND", new String[]{"2311", "2312", "2313"}),
-            new LocalityCluster("DELFT", "CITY CENTRE", "ZUID-HOLLAND", new String[]{"2611", "2612", "2613"}),
-            new LocalityCluster("ARNHEM", "CITY CENTRE", "GELDERLAND", new String[]{"6811", "6812", "6813"}),
-            new LocalityCluster("NIJMEGEN", "CITY CENTRE", "GELDERLAND", new String[]{"6511", "6512", "6513"})
+            new LocalityCluster("AMSTERDAM", "CENTRUM", "NOORD-HOLLAND"),
+            new LocalityCluster("AMSTERDAM", "DE PIJP", "NOORD-HOLLAND"),
+            new LocalityCluster("ROTTERDAM", "KRALINGEN", "ZUID-HOLLAND"),
+            new LocalityCluster("ROTTERDAM", "DELFSHAVEN", "ZUID-HOLLAND"),
+            new LocalityCluster("UTRECHT", "BINNENSTAD", "UTRECHT PROVINCE"),
+            new LocalityCluster("UTRECHT", "LOMBOK", "UTRECHT PROVINCE"),
+            new LocalityCluster("EINDHOVEN", "STRIJP", "NOORD-BRABANT"),
+            new LocalityCluster("EINDHOVEN", "GESTEL", "NOORD-BRABANT"),
+            new LocalityCluster("GRONINGEN", "BINNENSTAD", "GRONINGEN PROVINCE"),
+            new LocalityCluster("GRONINGEN", "SELWERD", "GRONINGEN PROVINCE"),
+            new LocalityCluster("MAASTRICHT", "WYCK", "LIMBURG"),
+            new LocalityCluster("MAASTRICHT", "JEKERKWARTIER", "LIMBURG"),
+            new LocalityCluster("THE HAGUE", "CENTRUM", "ZUID-HOLLAND"),
+            new LocalityCluster("THE HAGUE", "SCHEVENINGEN", "ZUID-HOLLAND"),
+            new LocalityCluster("HAARLEM", "CITY CENTRE", "NOORD-HOLLAND"),
+            new LocalityCluster("LEIDEN", "CITY CENTRE", "ZUID-HOLLAND"),
+            new LocalityCluster("DELFT", "CITY CENTRE", "ZUID-HOLLAND"),
+            new LocalityCluster("ARNHEM", "CITY CENTRE", "GELDERLAND"),
+            new LocalityCluster("NIJMEGEN", "CITY CENTRE", "GELDERLAND")
     };
 
     private static final LocalityCluster[] PANAMA_CLUSTERS = {
-            new LocalityCluster("PANAMA CITY", "BELLA VISTA", "PANAMA", new String[]{"0801", "0802", "0804"}),
-            new LocalityCluster("PANAMA CITY", "SAN FRANCISCO", "PANAMA", new String[]{"0819", "0820", "0823"}),
-            new LocalityCluster("PANAMA CITY", "OBARRIO", "PANAMA", new String[]{"0832", "0833", "0834"}),
-            new LocalityCluster("PANAMA CITY", "EL CANGREJO", "PANAMA", new String[]{"0831", "0832", "0835"}),
-            new LocalityCluster("COLON", "BARRIO NORTE", "COLON PROVINCE", new String[]{"0301", "0302", "0311"}),
-            new LocalityCluster("COLON", "CRISTOBAL", "COLON PROVINCE", new String[]{"0301", "0303", "0305"}),
-            new LocalityCluster("DAVID", "CENTRO", "CHIRIQUI", new String[]{"0426", "0427", "0430"}),
-            new LocalityCluster("DAVID", "SAN MATEO", "CHIRIQUI", new String[]{"0427", "0428", "0431"}),
-            new LocalityCluster("SANTIAGO", "BARRIO SUR", "VERAGUAS", new String[]{"0901", "0902", "0903"}),
-            new LocalityCluster("SANTIAGO", "BARRIO CENTRAL", "VERAGUAS", new String[]{"0902", "0903", "0904"}),
-            new LocalityCluster("CHITRE", "CENTRO", "HERRERA", new String[]{"0601", "0602", "0603"}),
-            new LocalityCluster("CHITRE", "LA ARENA", "HERRERA", new String[]{"0602", "0603", "0604"}),
-            new LocalityCluster("LA PALMA", "TOWN CENTRE", "DARIEN", new String[]{"0902", "0903", "0904"}),
-            new LocalityCluster("BOCAS DEL TORO", "BOCAS TOWN", "BOCAS DEL TORO", new String[]{"0701", "0702", "0703"})
+            new LocalityCluster("PANAMA CITY", "BELLA VISTA", "PANAMA"),
+            new LocalityCluster("PANAMA CITY", "SAN FRANCISCO", "PANAMA"),
+            new LocalityCluster("PANAMA CITY", "OBARRIO", "PANAMA"),
+            new LocalityCluster("PANAMA CITY", "EL CANGREJO", "PANAMA"),
+            new LocalityCluster("COLON", "BARRIO NORTE", "COLON PROVINCE"),
+            new LocalityCluster("COLON", "CRISTOBAL", "COLON PROVINCE"),
+            new LocalityCluster("DAVID", "CENTRO", "CHIRIQUI"),
+            new LocalityCluster("DAVID", "SAN MATEO", "CHIRIQUI"),
+            new LocalityCluster("SANTIAGO", "BARRIO SUR", "VERAGUAS"),
+            new LocalityCluster("SANTIAGO", "BARRIO CENTRAL", "VERAGUAS"),
+            new LocalityCluster("CHITRE", "CENTRO", "HERRERA"),
+            new LocalityCluster("CHITRE", "LA ARENA", "HERRERA"),
+            new LocalityCluster("LA PALMA", "TOWN CENTRE", "DARIEN"),
+            new LocalityCluster("BOCAS DEL TORO", "BOCAS TOWN", "BOCAS DEL TORO")
     };
 
     private static final LocalityCluster[] CANADA_CLUSTERS = {
-            new LocalityCluster("TORONTO", "DOWNTOWN", "ONTARIO", new String[]{"M5V", "M4B", "M6J"}),
-            new LocalityCluster("TORONTO", "NORTH YORK", "ONTARIO", new String[]{"M2N", "M3A", "M3H"}),
-            new LocalityCluster("VANCOUVER", "KITSILANO", "BRITISH COLUMBIA", new String[]{"V6K", "V6J", "V5N"}),
-            new LocalityCluster("VANCOUVER", "YALETOWN", "BRITISH COLUMBIA", new String[]{"V6B", "V6E", "V6Z"}),
-            new LocalityCluster("MONTREAL", "PLATEAU", "QUEBEC", new String[]{"H2X", "H2W", "H2T"}),
-            new LocalityCluster("MONTREAL", "VERDUN", "QUEBEC", new String[]{"H3E", "H4G", "H4H"}),
-            new LocalityCluster("CALGARY", "BELTLINE", "ALBERTA", new String[]{"T2R", "T2P", "T2G"}),
-            new LocalityCluster("OTTAWA", "CENTRETOWN", "ONTARIO", new String[]{"K1R", "K1S", "K2P"}),
-            new LocalityCluster("WINNIPEG", "DOWNTOWN", "MANITOBA", new String[]{"R3B", "R3C", "R3A"}),
-            new LocalityCluster("EDMONTON", "DOWNTOWN", "ALBERTA", new String[]{"T5J", "T5K", "T5G"}),
-            new LocalityCluster("QUEBEC CITY", "VIEUX-QUEBEC", "QUEBEC", new String[]{"G1R", "G1S", "G1A"}),
-            new LocalityCluster("HALIFAX", "DOWNTOWN", "NOVA SCOTIA", new String[]{"B3H", "B3J", "B3K"})
+            new LocalityCluster("TORONTO", "DOWNTOWN", "ONTARIO"),
+            new LocalityCluster("TORONTO", "NORTH YORK", "ONTARIO"),
+            new LocalityCluster("VANCOUVER", "KITSILANO", "BRITISH COLUMBIA"),
+            new LocalityCluster("VANCOUVER", "YALETOWN", "BRITISH COLUMBIA"),
+            new LocalityCluster("MONTREAL", "PLATEAU", "QUEBEC"),
+            new LocalityCluster("MONTREAL", "VERDUN", "QUEBEC"),
+            new LocalityCluster("CALGARY", "BELTLINE", "ALBERTA"),
+            new LocalityCluster("OTTAWA", "CENTRETOWN", "ONTARIO"),
+            new LocalityCluster("WINNIPEG", "DOWNTOWN", "MANITOBA"),
+            new LocalityCluster("EDMONTON", "DOWNTOWN", "ALBERTA"),
+            new LocalityCluster("QUEBEC CITY", "VIEUX-QUEBEC", "QUEBEC"),
+            new LocalityCluster("HALIFAX", "DOWNTOWN", "NOVA SCOTIA")
     };
 
     private static final LocalityCluster[] AUSTRALIA_CLUSTERS = {
-            new LocalityCluster("SYDNEY", "SURRY HILLS", "NEW SOUTH WALES", new String[]{"2000", "2010", "2011"}),
-            new LocalityCluster("SYDNEY", "NEWTOWN", "NEW SOUTH WALES", new String[]{"2042", "2043", "2050"}),
-            new LocalityCluster("MELBOURNE", "SOUTH YARRA", "VICTORIA", new String[]{"3004", "3141", "3142"}),
-            new LocalityCluster("MELBOURNE", "FITZROY", "VICTORIA", new String[]{"3065", "3066", "3002"}),
-            new LocalityCluster("BRISBANE", "FORTITUDE VALLEY", "QUEENSLAND", new String[]{"4006", "4005", "4000"}),
-            new LocalityCluster("PERTH", "SUBIACO", "WESTERN AUSTRALIA", new String[]{"6008", "6009", "6010"}),
-            new LocalityCluster("ADELAIDE", "NORTH ADELAIDE", "SOUTH AUSTRALIA", new String[]{"5006", "5000", "5001"}),
-            new LocalityCluster("CANBERRA", "BRADDON", "AUSTRALIAN CAPITAL TERRITORY", new String[]{"2612", "2601", "2602"}),
-            new LocalityCluster("BRISBANE", "SOUTH BANK", "QUEENSLAND", new String[]{"4101", "4100", "4102"}),
-            new LocalityCluster("HOBART", "CITY CENTRE", "TASMANIA", new String[]{"7000", "7001", "7002"}),
-            new LocalityCluster("DARWIN", "CITY CENTRE", "NORTHERN TERRITORY", new String[]{"0800", "0801", "0802"}),
-            new LocalityCluster("PERTH", "CITY CENTRE", "WESTERN AUSTRALIA", new String[]{"6000", "6001", "6002"}),
-            new LocalityCluster("ADELAIDE", "CITY CENTRE", "SOUTH AUSTRALIA", new String[]{"5000", "5001", "5002"})
+            new LocalityCluster("SYDNEY", "SURRY HILLS", "NEW SOUTH WALES"),
+            new LocalityCluster("SYDNEY", "NEWTOWN", "NEW SOUTH WALES"),
+            new LocalityCluster("MELBOURNE", "SOUTH YARRA", "VICTORIA"),
+            new LocalityCluster("MELBOURNE", "FITZROY", "VICTORIA"),
+            new LocalityCluster("BRISBANE", "FORTITUDE VALLEY", "QUEENSLAND"),
+            new LocalityCluster("PERTH", "SUBIACO", "WESTERN AUSTRALIA"),
+            new LocalityCluster("ADELAIDE", "NORTH ADELAIDE", "SOUTH AUSTRALIA"),
+            new LocalityCluster("CANBERRA", "BRADDON", "AUSTRALIAN CAPITAL TERRITORY"),
+            new LocalityCluster("BRISBANE", "SOUTH BANK", "QUEENSLAND"),
+            new LocalityCluster("HOBART", "CITY CENTRE", "TASMANIA"),
+            new LocalityCluster("DARWIN", "CITY CENTRE", "NORTHERN TERRITORY"),
+            new LocalityCluster("PERTH", "CITY CENTRE", "WESTERN AUSTRALIA"),
+            new LocalityCluster("ADELAIDE", "CITY CENTRE", "SOUTH AUSTRALIA")
     };
 
     private static final NonEuProfile[] NON_EU_PROFILES = {
