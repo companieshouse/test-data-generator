@@ -267,7 +267,7 @@ public class AddressServiceImpl implements AddressService {
             residentialAddress.setLocality(cluster.locality);
             residentialAddress.setPostalCode(generateUkPostcode());
             residentialAddress.setRegion(cluster.region);
-            return normalizeResidentialAddress(residentialAddress);
+            return residentialAddress;
         }
 
         if (effectiveJurisdiction == JurisdictionType.EUROPEAN_UNION) {
@@ -278,7 +278,7 @@ public class AddressServiceImpl implements AddressService {
             residentialAddress.setLocality(cluster.locality);
             residentialAddress.setPostalCode(generateDutchPostcode());
             residentialAddress.setRegion(cluster.region);
-            return normalizeResidentialAddress(residentialAddress);
+            return residentialAddress;
         }
 
         NonEuProfile profile = FAKER.options().option(NON_EU_PROFILES);
@@ -290,7 +290,7 @@ public class AddressServiceImpl implements AddressService {
         residentialAddress.setPostalCode(generateNonEuPostcode(profile.postcodeType));
         residentialAddress.setRegion(cluster.region);
 
-        return normalizeResidentialAddress(residentialAddress);
+        return residentialAddress;
     }
 
     private LocalityCluster getUkClusterForJurisdiction(JurisdictionType jurisdiction) {
@@ -354,13 +354,5 @@ public class AddressServiceImpl implements AddressService {
             }
         }
         return null;
-    }
-
-    private UsualResidentialAddress normalizeResidentialAddress(UsualResidentialAddress address) {
-        
-        address.setAddressLine1(address.getAddressLine1());
-        address.setAddressLine2(firstNonBlank(address.getAddressLine2(), address.getAddressLine1(), TEST_DATA_MARKER));
-        address.setRegion(firstNonBlank(address.getRegion(), UNITED_KINGDOM));
-        return address;
     }
 }
