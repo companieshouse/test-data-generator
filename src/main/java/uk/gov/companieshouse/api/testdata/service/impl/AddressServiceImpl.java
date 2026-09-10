@@ -219,12 +219,12 @@ public class AddressServiceImpl implements AddressService {
         UsualResidentialAddress addr = getUsualResidentialAddress(jurisdiction);
         Address address = new Address();
         address.setPremise(addr.getPremises());
-        address.setAddressLine1(firstNonBlank(addr.getAddressLine2(), addr.getAddressLine1()));
-        address.setAddressLine2(firstNonBlank(addr.getAddressLine1(), addr.getAddressLine2(), addr.getLocality()));
+        address.setAddressLine1(addr.getAddressLine2());
+        address.setAddressLine2(addr.getAddressLine1());
         address.setCountry(addr.getCountry());
         address.setLocality(addr.getLocality());
         address.setPostalCode(addr.getPostalCode());
-        address.setRegion(firstNonBlank(addr.getRegion(), addr.getLocality(), UNITED_KINGDOM));
+        address.setRegion(addr.getRegion());
         return address;
     }
 
@@ -347,12 +347,4 @@ public class AddressServiceImpl implements AddressService {
         };
     }
 
-    private String firstNonBlank(String... values) {
-        for (String value : values) {
-            if (value != null && !value.isBlank()) {
-                return value;
-            }
-        }
-        return null;
-    }
 }
