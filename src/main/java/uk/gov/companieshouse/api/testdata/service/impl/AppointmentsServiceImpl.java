@@ -67,10 +67,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
     @Autowired
     private OfficerRepository officerRepository;
 
-    public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest) {
-        return createAppointment(internalCompanyRequest, null);
-    }
-
     @Override
     public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) {
         if (Boolean.TRUE.equals(internalCompanyRequest.getNoDefaultOfficer())) {
@@ -519,7 +515,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setEtag(randomService.getEtag());
 
         // Set service address based on flag
-        if (Boolean.TRUE.equals(sameAsRegistered) && registeredOfficeAddress != null) {
+        if (Boolean.TRUE.equals(sameAsRegistered)) {
             appointment.setServiceAddress(registeredOfficeAddress);
         } else {
             appointment.setServiceAddress(addressService.getAddress(request.getSpec().getJurisdiction()));
@@ -540,7 +536,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private Appointment createBaseAppointment(AppointmentCreationRequest request) {
-        return createBaseAppointment(request, null);
+        JurisdictionType jurisdiction = request.getSpec() != null ? request.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
+        Address registeredOfficeAddress = addressService.getAddress(jurisdiction);
+        return createBaseAppointment(request, registeredOfficeAddress);
     }
 
     private Links createAppointmentLinks(

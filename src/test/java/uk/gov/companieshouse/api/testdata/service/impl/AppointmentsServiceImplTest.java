@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -73,6 +74,13 @@ class AppointmentsServiceImplTest {
 
     @Mock
     private Appointment commonAppointment;
+    
+    private Address mockServiceAddress;
+    
+    @BeforeEach
+    void setUp() {
+        mockServiceAddress = new Address("", "", "", "", "", "", "");
+    }
 
     @Test
     void create() {
@@ -93,7 +101,7 @@ class AppointmentsServiceImplTest {
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -151,7 +159,7 @@ class AppointmentsServiceImplTest {
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository).save(aptCaptor.capture());
@@ -217,7 +225,7 @@ class AppointmentsServiceImplTest {
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
     }
@@ -244,7 +252,7 @@ class AppointmentsServiceImplTest {
         Appointment savedApt = new Appointment();
         when(appointmentsRepository.save(any())).thenReturn(savedApt);
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         verify(appointmentsRepository, times(3)).save(any(Appointment.class));
     }
@@ -356,7 +364,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         verify(appointmentsRepository, times(2)).save(any(Appointment.class));
     }
@@ -368,7 +376,7 @@ class AppointmentsServiceImplTest {
         internalCompanyRequest.setCompanyNumber("12345678");
         internalCompanyRequest.setNoDefaultOfficer(true);
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         verify(appointmentsRepository, never()).save(any());
     }
@@ -416,7 +424,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         verify(appointmentsRepository).save(any());
     }
@@ -515,7 +523,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
 
-        var result = appointmentsService.createAppointment(internalCompanyRequest);
+        var result = appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         verify(appointmentsRepository, never()).save(any());
         assertNotNull(result);
@@ -539,7 +547,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
@@ -566,7 +574,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
@@ -593,7 +601,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(6)).save(aptCaptor.capture());
@@ -622,7 +630,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(2)).save(aptCaptor.capture());
@@ -648,7 +656,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
@@ -680,7 +688,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(20)).save(aptCaptor.capture());
@@ -704,7 +712,7 @@ class AppointmentsServiceImplTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> appointmentsService.createAppointment(internalCompanyRequest));
+                () -> appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress));
 
         assertEquals("Total LLP appointments including mandatory designated members must not exceed 20",
                 exception.getMessage());
@@ -718,7 +726,7 @@ class AppointmentsServiceImplTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> appointmentsService.createAppointment(internalCompanyRequest));
+                () -> appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress));
 
         assertEquals("Invalid officer role for LLP company type: director", exception.getMessage());
     }
@@ -731,7 +739,7 @@ class AppointmentsServiceImplTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> appointmentsService.createAppointment(internalCompanyRequest));
+                () -> appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress));
 
         assertEquals("LLP officer role is only valid for LLP company type: llp-member", exception.getMessage());
     }
@@ -751,7 +759,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(2)).save(aptCaptor.capture());
@@ -779,7 +787,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(3)).save(aptCaptor.capture());
@@ -818,7 +826,7 @@ class AppointmentsServiceImplTest {
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
-        appointmentsService.createAppointment(internalCompanyRequest);
+        appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
         ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentsRepository, times(2)).save(aptCaptor.capture());
@@ -844,7 +852,7 @@ class AppointmentsServiceImplTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> appointmentsService.createAppointment(internalCompanyRequest));
+                () -> appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress));
 
         assertEquals("Limited partnership officer role is only valid for limited-partnership company type: "
                 + "general-partner-in-a-limited-partnership", exception.getMessage());
@@ -859,7 +867,7 @@ class AppointmentsServiceImplTest {
 
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> appointmentsService.createAppointment(internalCompanyRequest));
+                () -> appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress));
 
         assertEquals("Limited partnership officer role is only valid for limited-partnership company type: "
                 + "limited-partner-in-a-limited-partnership", exception.getMessage());

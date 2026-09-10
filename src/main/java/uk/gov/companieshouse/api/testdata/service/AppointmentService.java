@@ -6,7 +6,6 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequ
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 
 public interface AppointmentService {
-    AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest);
     AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress);
     AppointmentsResultResponse createAppointment(AppointmentCreationRequest request);
 
