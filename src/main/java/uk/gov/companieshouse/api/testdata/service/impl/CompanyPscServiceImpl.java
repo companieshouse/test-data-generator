@@ -473,10 +473,11 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         beneficialOwner.setNationality(NATIONALITY);
         beneficialOwner.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 
-        beneficialOwner.setNameTitle(TITLE);
-        beneficialOwner.setNameForename(FIRST_NAME);
-        beneficialOwner.setNameSurname(LAST_NAME);
-        beneficialOwner.setName(TITLE + " " + FIRST_NAME + " " + LAST_NAME);
+        beneficialOwner.setNameTitle(NAME_FAKER.name().prefix());
+        beneficialOwner.setNameForename(NAME_FAKER.name().firstName());
+        beneficialOwner.setNameSurname(NAME_FAKER.name().lastName());
+        String fullName = NAME_FAKER.name().prefix() + " " + NAME_FAKER.name().firstName() + " " + NAME_FAKER.name().lastName();
+        beneficialOwner.setName(fullName);
 
         beneficialOwner.setSanctioned(false);
         beneficialOwner.setIsSanctioned(false);
@@ -492,7 +493,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
     private void buildCorporateBeneficialOwner(CompanyPscs beneficialOwner) {
         beneficialOwner.setKind(PscType.CORPORATE_BENEFICIAL_OWNER.getKind());
-        beneficialOwner.setName("Overseas Corporate Company");
+        beneficialOwner.setName(NAME_FAKER.company().name());
 
         var links = new Links();
         links.setSelf(URL_PREFIX + beneficialOwner.getCompanyNumber()
@@ -565,7 +566,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
        identification.setRegistrationNumber(REGISTRATION_NUMBER);
        companyPsc.setIdentification(identification);
 
-       companyPsc.setName("Relevant Legal Entity (RLE) PSC");
+       companyPsc.setName(NAME_FAKER.company().name());
 
        Links links = new Links();
        links.setSelf(URL_PREFIX + companyPsc.getCompanyNumber()
@@ -588,7 +589,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         identification.setLegalForm(ORP_LEGAL_FORM);
         companyPsc.setIdentification(identification);
 
-        companyPsc.setName("Other Registrable Person (ORP) PSC");
+        companyPsc.setName(NAME_FAKER.company().name());
 
         Links links = new Links();
         links.setSelf(URL_PREFIX + companyPsc.getCompanyNumber()

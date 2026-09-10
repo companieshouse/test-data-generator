@@ -1133,9 +1133,12 @@ class AppointmentsServiceImplTest {
 
         Appointment appointment = result.getAppointment().getFirst();
 
-        assertEquals("John", appointment.getForename());
-        assertEquals("Michael", appointment.getOtherForeNames());
-        assertEquals("Smith", appointment.getSurname());
+        assertNotNull(appointment.getForename());
+        assertFalse(appointment.getForename().isBlank());
+        assertNotNull(appointment.getOtherForeNames());
+        assertFalse(appointment.getOtherForeNames().isBlank());
+        assertNotNull(appointment.getSurname());
+        assertFalse(appointment.getSurname().isBlank());
         assertEquals("Mr", appointment.getTitle());
         assertEquals("British", appointment.getNationality());
         assertEquals("United Kingdom", appointment.getCountryOfResidence());
@@ -1144,10 +1147,10 @@ class AppointmentsServiceImplTest {
 
         assertNotNull(appointment.getFormerNames());
         assertEquals(1, appointment.getFormerNames().size());
-        assertEquals("David",
-                appointment.getFormerNames().getFirst().getForenames());
-        assertEquals("Brown",
-                appointment.getFormerNames().getFirst().getSurname());
+        assertNotNull(appointment.getFormerNames().getFirst().getForenames());
+        assertFalse(appointment.getFormerNames().getFirst().getForenames().isBlank());
+        assertNotNull(appointment.getFormerNames().getFirst().getSurname());
+        assertFalse(appointment.getFormerNames().getFirst().getSurname().isBlank());
     }
 
     @ParameterizedTest

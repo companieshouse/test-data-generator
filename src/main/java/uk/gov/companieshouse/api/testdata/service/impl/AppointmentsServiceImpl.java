@@ -215,9 +215,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 appointment.setCountryOfResidence(request.getCountryOfResidence());
             }
 
-            appointment.setForename("John");
-            appointment.setOtherForeNames("Michael");
-            appointment.setSurname("Smith");
+            appointment.setForename(NAME_FAKER.name().firstName());
+            appointment.setOtherForeNames(NAME_FAKER.name().firstName());
+            appointment.setSurname(NAME_FAKER.name().lastName());
             appointment.setNationality(NATIONALITY);
 
             appointment.setTitle("Mr");
@@ -225,8 +225,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setDateOfBirth( LocalDate.now().minusYears(40).atStartOfDay(ZoneId.of("UTC")).toInstant());
 
             FormerName formerName = new FormerName();
-            formerName.setForenames("David");
-            formerName.setSurname("Brown");
+            formerName.setForenames(NAME_FAKER.name().firstName());
+            formerName.setSurname(NAME_FAKER.name().lastName());
 
             appointment.setFormerNames(List.of(formerName));
         }

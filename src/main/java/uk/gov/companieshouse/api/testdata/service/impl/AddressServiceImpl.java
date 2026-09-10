@@ -80,7 +80,17 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("NEWCASTLE", "GOSFORTH", "TYNE AND WEAR", new String[]{"NE1", "NE2", "NE3"}),
             new LocalityCluster("NEWCASTLE", "JESMOND", "TYNE AND WEAR", new String[]{"NE2", "NE3", "NE7"}),
             new LocalityCluster("CAMBRIDGE", "NEWNHAM", "CAMBRIDGESHIRE", new String[]{"CB1", "CB2", "CB3"}),
-            new LocalityCluster("CAMBRIDGE", "CHESTERTON", "CAMBRIDGESHIRE", new String[]{"CB4", "CB5", "CB1"})
+            new LocalityCluster("CAMBRIDGE", "CHESTERTON", "CAMBRIDGESHIRE", new String[]{"CB4", "CB5", "CB1"}),
+            new LocalityCluster("OXFORD", "CITY CENTRE", "OXFORDSHIRE", new String[]{"OX1", "OX2", "OX3"}),
+            new LocalityCluster("OXFORD", "JERICHO", "OXFORDSHIRE", new String[]{"OX2", "OX1", "OX4"}),
+            new LocalityCluster("YORK", "CITY CENTRE", "NORTH YORKSHIRE", new String[]{"YO1", "YO2", "YO19"}),
+            new LocalityCluster("CHESTER", "CITY CENTRE", "CHESHIRE", new String[]{"CH1", "CH2", "CH3"}),
+            new LocalityCluster("BATH", "CITY CENTRE", "BATH AND NORTH EAST SOMERSET", new String[]{"BA1", "BA2", "BA15"}),
+            new LocalityCluster("NOTTINGHAM", "CITY CENTRE", "NOTTINGHAMSHIRE", new String[]{"NG1", "NG2", "NG7"}),
+            new LocalityCluster("LEICESTER", "CITY CENTRE", "LEICESTERSHIRE", new String[]{"LE1", "LE2", "LE3"}),
+            new LocalityCluster("COVENTRY", "CITY CENTRE", "WEST MIDLANDS", new String[]{"CV1", "CV2", "CV6"}),
+            new LocalityCluster("BRIGHTON", "CITY CENTRE", "EAST SUSSEX", new String[]{"BN1", "BN2", "BN3"}),
+            new LocalityCluster("SOUTHAMPTON", "CITY CENTRE", "HAMPSHIRE", new String[]{"SO14", "SO15", "SO16"})
     };
 
     private static final LocalityCluster[] WALES_CLUSTERS = {
@@ -92,7 +102,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("NEWPORT", "STOW HILL", "MONMOUTHSHIRE", new String[]{"NP19", "NP20", "NP10"}),
             new LocalityCluster("NEWPORT", "ROGERSTONE", "MONMOUTHSHIRE", new String[]{"NP10", "NP18", "NP19"}),
             new LocalityCluster("WREXHAM", "TOWN CENTRE", "CLWYD", new String[]{"LL11", "LL12", "LL13"}),
-            new LocalityCluster("WREXHAM", "ACTON", "CLWYD", new String[]{"LL11", "LL12", "LL13"})
+            new LocalityCluster("WREXHAM", "ACTON", "CLWYD", new String[]{"LL11", "LL12", "LL13"}),
+            new LocalityCluster("ABERYSTWYTH", "TOWN CENTRE", "CEREDIGION", new String[]{"SY23", "SY24", "SY25"}),
+            new LocalityCluster("BANGOR", "TOWN CENTRE", "GWYNEDD", new String[]{"LL57", "LL58", "LL59"}),
+            new LocalityCluster("LLANDRINDOD WELLS", "TOWN CENTRE", "POWYS", new String[]{"LD1", "LD2", "LD3"})
     };
 
     private static final LocalityCluster[] SCOTLAND_CLUSTERS = {
@@ -105,7 +118,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("ABERDEEN", "WEST END", "ABERDEENSHIRE", new String[]{"AB10", "AB11", "AB15"}),
             new LocalityCluster("ABERDEEN", "ROSEMOUNT", "ABERDEENSHIRE", new String[]{"AB15", "AB16", "AB25"}),
             new LocalityCluster("DUNDEE", "BROUGHTY FERRY", "DUNDEE CITY", new String[]{"DD1", "DD2", "DD5"}),
-            new LocalityCluster("DUNDEE", "WEST END", "DUNDEE CITY", new String[]{"DD1", "DD2", "DD3"})
+            new LocalityCluster("DUNDEE", "WEST END", "DUNDEE CITY", new String[]{"DD1", "DD2", "DD3"}),
+            new LocalityCluster("STIRLING", "CITY CENTRE", "STIRLING", new String[]{"FK8", "FK9", "FK7"}),
+            new LocalityCluster("PERTH", "CITY CENTRE", "PERTH AND KINROSS", new String[]{"PH1", "PH2", "PH3"}),
+            new LocalityCluster("INVERNESS", "CITY CENTRE", "HIGHLAND", new String[]{"IV1", "IV2", "IV3"})
     };
 
     private static final LocalityCluster[] NI_CLUSTERS = {
@@ -116,8 +132,12 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("DERRY", "BOGSIDE", "COUNTY LONDONDERRY", new String[]{"BT47", "BT48", "BT49"}),
             new LocalityCluster("LISBURN", "TOWN CENTRE", "LISBURN AND CASTLEREAGH CITY", new String[]{"BT27", "BT28", "BT29"}),
             new LocalityCluster("LISBURN", "LAMBEG", "LISBURN AND CASTLEREAGH CITY", new String[]{"BT27", "BT28", "BT39"}),
-            new LocalityCluster("NEWRY", "HILL STREET", "NEWRY, MOURNE AND DOWN", new String[]{"BT34", "BT35", "BT60"}),
-            new LocalityCluster("NEWRY", "WARRENPOINT", "NEWRY, MOURNE AND DOWN", new String[]{"BT34", "BT35", "BT62"})
+            new LocalityCluster("NEWRY", "HILL STREET", "MOURNE AND DOWN", new String[]{"BT34", "BT35", "BT60"}),
+            new LocalityCluster("NEWRY", "WARRENPOINT", "MOURNE AND DOWN", new String[]{"BT34", "BT35", "BT62"}),
+            new LocalityCluster("ARMAGH", "TOWN CENTRE", "ARMAGH, BANBRIDGE AND CRAIGAVON", new String[]{"BT60", "BT61", "BT62"}),
+            new LocalityCluster("OMAGH", "TOWN CENTRE", "FERMANAGH AND OMAGH", new String[]{"BT78", "BT79", "BT82"}),
+            new LocalityCluster("STRABANE", "TOWN CENTRE", "FERMANAGH AND OMAGH", new String[]{"BT82", "BT81", "BT80"}),
+            new LocalityCluster("BANGOR", "TOWN CENTRE", "NORTH DOWN AND ARDS", new String[]{"BT19", "BT20", "BT21"})
     };
 
     private static final LocalityCluster[] NETHERLANDS_CLUSTERS = {
@@ -132,7 +152,14 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("GRONINGEN", "BINNENSTAD", "GRONINGEN PROVINCE", new String[]{"9711", "9712", "9724"}),
             new LocalityCluster("GRONINGEN", "SELWERD", "GRONINGEN PROVINCE", new String[]{"9716", "9717", "9741"}),
             new LocalityCluster("MAASTRICHT", "WYCK", "LIMBURG", new String[]{"6211", "6212", "6221"}),
-            new LocalityCluster("MAASTRICHT", "JEKERKWARTIER", "LIMBURG", new String[]{"6211", "6214", "6216"})
+            new LocalityCluster("MAASTRICHT", "JEKERKWARTIER", "LIMBURG", new String[]{"6211", "6214", "6216"}),
+            new LocalityCluster("THE HAGUE", "CENTRUM", "ZUID-HOLLAND", new String[]{"2511", "2512", "2513"}),
+            new LocalityCluster("THE HAGUE", "SCHEVENINGEN", "ZUID-HOLLAND", new String[]{"2586", "2587", "2588"}),
+            new LocalityCluster("HAARLEM", "CITY CENTRE", "NOORD-HOLLAND", new String[]{"2011", "2012", "2013"}),
+            new LocalityCluster("LEIDEN", "CITY CENTRE", "ZUID-HOLLAND", new String[]{"2311", "2312", "2313"}),
+            new LocalityCluster("DELFT", "CITY CENTRE", "ZUID-HOLLAND", new String[]{"2611", "2612", "2613"}),
+            new LocalityCluster("ARNHEM", "CITY CENTRE", "GELDERLAND", new String[]{"6811", "6812", "6813"}),
+            new LocalityCluster("NIJMEGEN", "CITY CENTRE", "GELDERLAND", new String[]{"6511", "6512", "6513"})
     };
 
     private static final LocalityCluster[] PANAMA_CLUSTERS = {
@@ -147,7 +174,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("SANTIAGO", "BARRIO SUR", "VERAGUAS", new String[]{"0901", "0902", "0903"}),
             new LocalityCluster("SANTIAGO", "BARRIO CENTRAL", "VERAGUAS", new String[]{"0902", "0903", "0904"}),
             new LocalityCluster("CHITRE", "CENTRO", "HERRERA", new String[]{"0601", "0602", "0603"}),
-            new LocalityCluster("CHITRE", "LA ARENA", "HERRERA", new String[]{"0602", "0603", "0604"})
+            new LocalityCluster("CHITRE", "LA ARENA", "HERRERA", new String[]{"0602", "0603", "0604"}),
+            new LocalityCluster("LA PALMA", "TOWN CENTRE", "DARIEN", new String[]{"0902", "0903", "0904"}),
+            new LocalityCluster("BOCAS DEL TORO", "BOCAS TOWN", "BOCAS DEL TORO", new String[]{"0701", "0702", "0703"})
     };
 
     private static final LocalityCluster[] CANADA_CLUSTERS = {
@@ -158,7 +187,11 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("MONTREAL", "PLATEAU", "QUEBEC", new String[]{"H2X", "H2W", "H2T"}),
             new LocalityCluster("MONTREAL", "VERDUN", "QUEBEC", new String[]{"H3E", "H4G", "H4H"}),
             new LocalityCluster("CALGARY", "BELTLINE", "ALBERTA", new String[]{"T2R", "T2P", "T2G"}),
-            new LocalityCluster("OTTAWA", "CENTRETOWN", "ONTARIO", new String[]{"K1R", "K1S", "K2P"})
+            new LocalityCluster("OTTAWA", "CENTRETOWN", "ONTARIO", new String[]{"K1R", "K1S", "K2P"}),
+            new LocalityCluster("WINNIPEG", "DOWNTOWN", "MANITOBA", new String[]{"R3B", "R3C", "R3A"}),
+            new LocalityCluster("EDMONTON", "DOWNTOWN", "ALBERTA", new String[]{"T5J", "T5K", "T5G"}),
+            new LocalityCluster("QUEBEC CITY", "VIEUX-QUEBEC", "QUEBEC", new String[]{"G1R", "G1S", "G1A"}),
+            new LocalityCluster("HALIFAX", "DOWNTOWN", "NOVA SCOTIA", new String[]{"B3H", "B3J", "B3K"})
     };
 
     private static final LocalityCluster[] AUSTRALIA_CLUSTERS = {
@@ -169,7 +202,12 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("BRISBANE", "FORTITUDE VALLEY", "QUEENSLAND", new String[]{"4006", "4005", "4000"}),
             new LocalityCluster("PERTH", "SUBIACO", "WESTERN AUSTRALIA", new String[]{"6008", "6009", "6010"}),
             new LocalityCluster("ADELAIDE", "NORTH ADELAIDE", "SOUTH AUSTRALIA", new String[]{"5006", "5000", "5001"}),
-            new LocalityCluster("CANBERRA", "BRADDON", "AUSTRALIAN CAPITAL TERRITORY", new String[]{"2612", "2601", "2602"})
+            new LocalityCluster("CANBERRA", "BRADDON", "AUSTRALIAN CAPITAL TERRITORY", new String[]{"2612", "2601", "2602"}),
+            new LocalityCluster("BRISBANE", "SOUTH BANK", "QUEENSLAND", new String[]{"4101", "4100", "4102"}),
+            new LocalityCluster("HOBART", "CITY CENTRE", "TASMANIA", new String[]{"7000", "7001", "7002"}),
+            new LocalityCluster("DARWIN", "CITY CENTRE", "NORTHERN TERRITORY", new String[]{"0800", "0801", "0802"}),
+            new LocalityCluster("PERTH", "CITY CENTRE", "WESTERN AUSTRALIA", new String[]{"6000", "6001", "6002"}),
+            new LocalityCluster("ADELAIDE", "CITY CENTRE", "SOUTH AUSTRALIA", new String[]{"5000", "5001", "5002"})
     };
 
     private static final NonEuProfile[] NON_EU_PROFILES = {
