@@ -47,6 +47,7 @@ import uk.gov.companieshouse.api.testdata.repository.TransactionsRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserCompanyAssociationRepository;
 import uk.gov.companieshouse.api.testdata.repository.UserRepository;
 import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
+import uk.gov.companieshouse.api.testdata.repository.CompanyExemptionsRepository;
 
 import java.io.Serializable;
 
@@ -67,6 +68,7 @@ public class MongoConfig {
     private static final String IDENTITY_VERIFICATION = "identity_verification";
     private static final String ORDERS_ITEM_GROUPS_DATABASE = "orders_item_groups";
     private static final String PSC_DISCREPANCIES_DATABASE = "psc_discrepancies";
+    private static final String COMPANY_EXEMPTIONS_DATABASE = "company_exemptions";
 
     @Bean
     public CompanyProfileRepository companyProfileRepository() {
@@ -241,6 +243,12 @@ public class MongoConfig {
     public PscDiscrepancyReportsRepository pscDiscrepancyReportsRepository() {
         return getMongoRepositoryBean( PscDiscrepancyReportsRepository.class, PSC_DISCREPANCIES_DATABASE);
     }
+
+    @Bean
+    public CompanyExemptionsRepository companyExemptionsRepository() {
+        return getMongoRepositoryBean(CompanyExemptionsRepository.class, COMPANY_EXEMPTIONS_DATABASE);
+    }
+
     private MongoTemplate createMongoTemplate(final String database) {
         var simpleMongoDbFactory = new SimpleMongoClientDatabaseFactory(
                 mongoClient(), database);
