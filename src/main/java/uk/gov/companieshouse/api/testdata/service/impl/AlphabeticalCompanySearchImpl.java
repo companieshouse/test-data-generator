@@ -15,6 +15,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 @Service("alphabeticalCompanySearchService")
 public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
+    protected String instance;
     private static final String ALPHABETICAL_SEARCH_URI = "/alphabetical-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
 
@@ -23,16 +24,16 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
 
     public AlphabeticalCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
         this.internalApiClientSupplier = internalApiClientSupplier;
+        this.instance = "";
     }
 
     @Override
     public void addCompanyIntoElasticSearchIndex(CompanyProfileResponse data) throws
             ApiErrorResponseException, URIValidationException {
         String companyNumber = data.getCompanyNumber();
-        var formattedAlphabeticalSearchUri = String.format(ALPHABETICAL_SEARCH_URI,
+        var formattedAlphabeticalSearchUri = String.format(instance + ALPHABETICAL_SEARCH_URI,
                 companyNumber);
-        LOG.info("Adding company into alphabetical search index for company number: "
-                + companyNumber);
+        LOG.info("Adding company into " + instance + " alphabetical search index for company number: " + companyNumber);
         var companyProfileApi = getCompanyProfile(companyNumber);
         upsertCompanyProfileForAlphaSearch(
                 formattedAlphabeticalSearchUri, companyProfileApi, companyNumber);
@@ -41,20 +42,19 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
 
     @Override
     public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
-        var uri = String.format(ALPHABETICAL_SEARCH_URI,
+        var uri = String.format(instance + ALPHABETICAL_SEARCH_URI,
                 companyNumber);
-        LOG.info("Deleting company profile from alphabetical search for company number: "
-                + companyNumber);
+        LOG.info("Deleting company profile from " + instance + " alphabetical search for company number: " + companyNumber);
         try {
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()
                     .alphabeticalCompanySearch()
                     .delete(uri)
                     .execute();
-            LOG.info("Company profile deleted successfully from alphabetical search for company number: "
+            LOG.info("Company profile deleted successfully from " + instance + " alphabetical search for company number: "
                     + companyNumber);
         } catch (ApiErrorResponseException | URIValidationException ex) {
-            LOG.error("Failed to delete company profile from alphabetical search "
+            LOG.error("Failed to delete company profile from " + instance + " alphabetical search "
                     + "for company number: " + companyNumber);
         }
     }
@@ -62,14 +62,14 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     private void upsertCompanyProfileForAlphaSearch(
             String uri, CompanyProfileApi profileData, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
-        LOG.info("Upserting company for alphabetical search with company number: "
+        LOG.info("Upserting company for " + instance + " alphabetical search with company number: "
                 + companyNumber);
         internalApiClientSupplier.get()
                 .privateSearchResourceHandler()
                 .alphabeticalCompanySearch()
                 .put(uri, profileData)
                 .execute();
-        LOG.info("Company profile upsert into alphabetical search is successful for company number:"
+        LOG.info("Company profile upsert into " + instance + " alphabetical search is successful for company number:"
                 + companyNumber);
     }
 
