@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanySubTypeValidator;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -90,7 +90,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private boolean hasCompanyRegisters = false;
 
     private boolean isCompanyTypeHasNoFilingHistory = true;
-
 
     @Override
     public CompanyProfile create(InternalCompanyRequest internalCompanyRequest) {

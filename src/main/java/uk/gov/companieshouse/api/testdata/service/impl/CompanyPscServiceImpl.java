@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.PscType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyPscsRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -136,6 +136,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
     @Override
     public List<CompanyPscs> create(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) throws DataException {
+        return createInternal(internalCompanyRequest, registeredOfficeAddress);
+    }
+
+    private List<CompanyPscs> createInternal(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) throws DataException {
         LOG.info("Starting creation of PSCs for company number: " + internalCompanyRequest.getCompanyNumber());
 
         if (CompanyType.REGISTERED_OVERSEAS_ENTITY.equals(internalCompanyRequest.getCompanyType()) &&
@@ -281,7 +285,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             boolean isActive = !(ceaseFirstPsc && i == 0);
 
             CompanyPscs psc = isOverseasEntity
-                    ? createBeneficialOwner(internalCompanyRequest, getBeneficialOwnerType(internalCompanyRequest.getPscType(), i), isActive, registeredOfficeAddress)
+                    ? createBeneficialOwner(internalCompanyRequest, getBeneficialOwnerType(internalCompanyRequest.getPscType(), i), isActive, registeredOfficeAddress, internalCompanyRequest.getJurisdiction())
                     : createPsc(internalCompanyRequest, getRegularPscType(internalCompanyRequest.getPscType(), i), isActive, registeredOfficeAddress);
 
             listOfCommonPscs.add(psc);
@@ -448,14 +452,14 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(companyPscs);
     }
 
-    private CompanyPscs createBeneficialOwner(InternalCompanyRequest spec, PscType pscType, boolean isActive, Address registeredOfficeAddress) {
+    private CompanyPscs createBeneficialOwner(InternalCompanyRequest spec, PscType pscType, boolean isActive, Address registeredOfficeAddress, JurisdictionType jurisdiction) {
         var beneficialOwner = createBasePsc(spec, isActive, true);
         switch (pscType) {
             case INDIVIDUAL_BENEFICIAL_OWNER:
-                buildIndividualBeneficialOwner(beneficialOwner);
+                buildIndividualBeneficialOwner(beneficialOwner, jurisdiction);
                 break;
             case CORPORATE_BENEFICIAL_OWNER:
-                buildCorporateBeneficialOwner(beneficialOwner);
+                buildCorporateBeneficialOwner(beneficialOwner, jurisdiction);
                 break;
             default:
                 throw new IllegalArgumentException("Unsupported beneficial owner type: " + pscType);
@@ -466,10 +470,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(beneficialOwner);
     }
 
-    private void buildIndividualBeneficialOwner(CompanyPscs beneficialOwner) {
+    private void buildIndividualBeneficialOwner(CompanyPscs beneficialOwner, JurisdictionType jurisdiction) {
         beneficialOwner.setKind(PscType.INDIVIDUAL_BENEFICIAL_OWNER.getKind());
         beneficialOwner.setCountryOfResidence(addressService
-                .getCountryOfResidence(JurisdictionType.NON_EU));
+                .getCountryFromSelectedProfile(jurisdiction));
         beneficialOwner.setNationality(NATIONALITY);
         beneficialOwner.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 
@@ -487,11 +491,12 @@ public class CompanyPscServiceImpl implements CompanyPscService {
                 + PSC_SUFFIX + PscType.INDIVIDUAL_BENEFICIAL_OWNER.getLinkType()
                 + "/" + beneficialOwner.getId());
 
-        beneficialOwner.setUsualResidentialAddress(addressService.getAddress(JurisdictionType.NON_EU));
+        beneficialOwner.setUsualResidentialAddress(
+                addressService.getAddress(JurisdictionType.NON_EU));
         beneficialOwner.setResidentialAddressSameAsServiceAddress(false);
     }
 
-    private void buildCorporateBeneficialOwner(CompanyPscs beneficialOwner) {
+    private void buildCorporateBeneficialOwner(CompanyPscs beneficialOwner, JurisdictionType jurisdiction) {
         beneficialOwner.setKind(PscType.CORPORATE_BENEFICIAL_OWNER.getKind());
         beneficialOwner.setName(NAME_FAKER.company().name());
 
@@ -503,7 +508,8 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         beneficialOwner.setSanctioned(false);
         beneficialOwner.setIsSanctioned(false);
 
-        beneficialOwner.setPrincipalOfficeAddress(addressService.getAddress(JurisdictionType.NON_EU));
+        beneficialOwner.setPrincipalOfficeAddress(
+                addressService.getAddress(jurisdiction));
 
         var identification = new Identification();
         identification.setLegalAuthority(ROE_LEGAL_AUTHORITY);
@@ -516,7 +522,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
      */
     private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType, JurisdictionType jurisdiction, Boolean sameAsRegistered, Address registeredOfficeAddress) {
         companyPsc.setKind(pscType);
-        companyPsc.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
+        companyPsc.setCountryOfResidence(addressService.getCountryFromSelectedProfile(jurisdiction));
         
         // Apply address logic based on flag
         if (Boolean.TRUE.equals(sameAsRegistered) && registeredOfficeAddress != null) {

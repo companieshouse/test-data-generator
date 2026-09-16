@@ -30,6 +30,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
@@ -44,10 +46,11 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class AppointmentsServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
@@ -362,6 +365,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -422,6 +426,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -522,6 +527,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
 
         var result = appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
 
@@ -545,6 +551,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -572,6 +579,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -599,6 +607,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -628,6 +637,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -654,6 +664,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -686,6 +697,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -757,6 +769,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -785,6 +798,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -824,6 +838,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         appointmentsService.createAppointment(internalCompanyRequest, mockServiceAddress);
@@ -889,6 +904,7 @@ class AppointmentsServiceImplTest {
 
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -920,6 +936,7 @@ class AppointmentsServiceImplTest {
 
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
@@ -944,6 +961,7 @@ class AppointmentsServiceImplTest {
 
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -973,6 +991,7 @@ class AppointmentsServiceImplTest {
 
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -998,6 +1017,7 @@ class AppointmentsServiceImplTest {
 
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
 
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
@@ -1037,6 +1057,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var result = appointmentsService.createAppointment(request);
@@ -1060,6 +1081,7 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(new Address("", "", "", "", "", "", ""));
         when(addressService.getCountryOfResidence(any())).thenReturn(COUNTRY);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
         when(appointmentsRepository.save(any())).thenReturn(new Appointment());
 
         var result = appointmentsService.createAppointment(request);

@@ -32,7 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)

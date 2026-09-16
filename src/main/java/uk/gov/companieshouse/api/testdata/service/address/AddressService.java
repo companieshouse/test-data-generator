@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.api.testdata.service;
+package uk.gov.companieshouse.api.testdata.service.address;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
@@ -19,6 +19,14 @@ public interface AddressService {
      * @return the country of residence for the given {@code jurisdiction}
      */
     String getCountryOfResidence(JurisdictionType jurisdiction);
+
+    /**
+     * Returns the country name from the currently selected profile for the jurisdiction.
+     * If no profile is cached, returns the default country for the jurisdiction.
+     * @param jurisdiction jurisdiction to get the country for
+     * @return the country name from the cached profile or default
+     */
+    String getCountryFromSelectedProfile(JurisdictionType jurisdiction);
 
     UsualResidentialAddress getUsualResidentialAddress();
     UsualResidentialAddress getUsualResidentialAddress(JurisdictionType jurisdiction);

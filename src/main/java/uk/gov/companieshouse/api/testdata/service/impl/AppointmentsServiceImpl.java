@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.OfficerRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -69,6 +69,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentsResultResponse createAppointment(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) {
+        return createAppointmentInternal(internalCompanyRequest, registeredOfficeAddress);
+    }
+
+    private AppointmentsResultResponse createAppointmentInternal(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) {
         if (Boolean.TRUE.equals(internalCompanyRequest.getNoDefaultOfficer())) {
             LOG.info("No default officer request, skipping appointment creation for: "
                     + internalCompanyRequest.getCompanyNumber());
@@ -79,7 +83,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 + internalCompanyRequest.getCompanyNumber());
 
         final var companyNumber = internalCompanyRequest.getCompanyNumber();
-        final String countryOfResidence = addressService.getCountryOfResidence(
+        final String countryOfResidence = addressService.getCountryFromSelectedProfile(
                 internalCompanyRequest.getJurisdiction());
         boolean explicitlySet = payloadExplicitlySetNumberOfAppointments(internalCompanyRequest);
         CompanyType companyType = internalCompanyRequest.getCompanyType();
@@ -226,7 +230,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
             appointment.setFormerNames(List.of(formerName));
         }
-        applyUsualResidentialAddressForOfficerRole(appointment, ctx.role);
+        applyUsualResidentialAddressForOfficerRole(appointment, ctx.role, safeSpec.getJurisdiction());
 
 
         if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
@@ -453,12 +457,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setOtherForeNames(NAME_FAKER.name().firstName());
         appointment.setSurname(NAME_FAKER.name().lastName());
         appointment.setOfficerRole(currentRole);
-        applyUsualResidentialAddressForOfficerRole(appointment, currentRole);
-        appointment.setLinks(createAppointmentLinks(
-                creationRequest.getCompanyNumber(),
-                creationRequest.getOfficerId(),
-                creationRequest.getAppointmentId()));
-        return appointment;
+       JurisdictionType jurisdiction = creationRequest.getSpec() != null ? creationRequest.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
+       applyUsualResidentialAddressForOfficerRole(appointment, currentRole, jurisdiction);
+       appointment.setLinks(createAppointmentLinks(
+               creationRequest.getCompanyNumber(),
+               creationRequest.getOfficerId(),
+               creationRequest.getAppointmentId()));
+       return appointment;
     }
 
     private boolean shouldPersistAppointmentData(InternalCompanyRequest request) {
@@ -518,7 +523,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         if (Boolean.TRUE.equals(sameAsRegistered)) {
             appointment.setServiceAddress(registeredOfficeAddress);
         } else {
-            appointment.setServiceAddress(addressService.getAddress(request.getSpec().getJurisdiction()));
+            JurisdictionType jurisdiction = request.getSpec().getJurisdiction();
+            appointment.setServiceAddress(addressService.getAddress(jurisdiction));
         }
 
         appointment.setDataCompanyNumber(request.getCompanyNumber());
@@ -618,7 +624,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         item.setSurname(roleName);
         item.setOfficerRole(role);
         item.setLinks(createOfficerAppointmentItemLinks(companyNumber, appointmentId));
-        item.setCountryOfResidence(addressService.getCountryOfResidence(jurisdiction));
+        item.setCountryOfResidence(addressService.getCountryFromSelectedProfile(jurisdiction));
         item.setAppointedOn(dayNow);
         item.setNationality(NATIONALITY);
         item.setUpdatedAt(dayTimeNow);
@@ -645,17 +651,17 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return links;
     }
 
-    private UsualResidentialAddress getUsualResidentialAddressOrDefault() {
-        UsualResidentialAddress usualResidentialAddress = addressService.getUsualResidentialAddress();
+    private UsualResidentialAddress getUsualResidentialAddressOrDefault(JurisdictionType jurisdiction) {
+        UsualResidentialAddress usualResidentialAddress = addressService.getUsualResidentialAddress(jurisdiction);
         return usualResidentialAddress != null ? usualResidentialAddress : new UsualResidentialAddress();
     }
 
-    private void applyUsualResidentialAddressForOfficerRole(Appointment appointment, String officerRole) {
+    private void applyUsualResidentialAddressForOfficerRole(Appointment appointment, String officerRole, JurisdictionType jurisdiction) {
         if (isCorporateOfficerRole(officerRole)) {
             appointment.setUsualResidentialAddress(null);
             return;
         }
-        appointment.setUsualResidentialAddress(getUsualResidentialAddressOrDefault());
+        appointment.setUsualResidentialAddress(getUsualResidentialAddressOrDefault(jurisdiction));
     }
 
     private boolean isCorporateOfficerRole(String officerRole) {
