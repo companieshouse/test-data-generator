@@ -16,7 +16,7 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     protected String instance;
-    private static final String ALPHABETICAL_SEARCH_URI = "/alphabetical-search/companies/%s";
+    private static final String ALPHABETICAL_SEARCH_URI = "%s/alphabetical-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
 
     private static final Logger LOG =
@@ -31,7 +31,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     public void addCompanyIntoElasticSearchIndex(CompanyProfileResponse data) throws
             ApiErrorResponseException, URIValidationException {
         String companyNumber = data.getCompanyNumber();
-        var formattedAlphabeticalSearchUri = String.format(instance + ALPHABETICAL_SEARCH_URI,
+        var formattedAlphabeticalSearchUri = String.format(ALPHABETICAL_SEARCH_URI, instance,
                 companyNumber);
         LOG.info("Adding company into " + instance + " alphabetical search index for company number: " + companyNumber);
         var companyProfileApi = getCompanyProfile(companyNumber);
@@ -42,7 +42,7 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
 
     @Override
     public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
-        var uri = String.format(instance + ALPHABETICAL_SEARCH_URI,
+        var uri = String.format(ALPHABETICAL_SEARCH_URI, instance,
                 companyNumber);
         LOG.info("Deleting company profile from " + instance + " alphabetical search for company number: " + companyNumber);
         try {
