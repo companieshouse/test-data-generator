@@ -245,45 +245,52 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
 
         if (isElasticSearchDeployed) {
             try {
-                LOG.info("Attempting to delete company from ElasticSearch index for company number: "
+                LOG.info("Attempting to delete company from ElasticSearch indices for company number: "
                         + companyNumber);
-                companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber);
-                LOG.info("Deleted company from ElasticSearch index for company number: "
-                        + companyNumber);
-            } catch (Exception ex) {
-                LOG.error("Failed to delete company from ElasticSearch index for company number: "
-                        + companyNumber, ex);
-            }
-             try {
-                LOG.info("Attempting to delete company from AlphabeticalSearch index for company number: "
-                        + companyNumber);
-                alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
-                LOG.info("Deleted company from AlphabeticalSearch index for company number: "
+                deleteCompanyFromSearchIndex(companyNumber);
+                LOG.info("Deleted company from ElasticSearch indices for company number: "
                         + companyNumber);
             } catch (Exception ex) {
-                LOG.error("Failed to delete company from AlphabeticalSearch index for company number: "
+                LOG.error("Failed to delete company from ElasticSearch indices for company number: "
                         + companyNumber, ex);
             }
-            try {
-                LOG.info("Attempting to delete company from GreenAlphabeticalSearch index for company number: "
-                        + companyNumber);
-                greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
-                LOG.info("Deleted company from GreenAlphabeticalSearch index for company number: "
-                        + companyNumber);
-            } catch (Exception ex) {
-                LOG.error("Failed to delete company from GreenAlphabeticalSearch index for company number: "
-                        + companyNumber, ex);
-            }
-            try {
-                LOG.info("Attempting to delete company from AdvancedSearch index for company number: "
-                        + companyNumber);
-                advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
-                LOG.info("Deleted company from AdvancedSearch index for company number: "
-                        + companyNumber);
-            } catch (Exception ex) {
-                LOG.error("Failed to delete company from AdvancedSearch index for company number: "
-                        + companyNumber, ex);
-            }
+        }
+    }
+
+    private void deleteCompanyFromSearchIndex(String companyNumber) {
+        try {
+            LOG.info("Attempting to delete company from ElasticSearch index for company number: "
+                    + companyNumber);
+            companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber);
+            LOG.info("Deleted company from ElasticSearch index for company number: "
+                    + companyNumber);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete company from ElasticSearch index for company number: "
+                    + companyNumber, ex);
+        }
+        try {
+            LOG.info("Attempting to delete company from AlphabeticalSearch index for company number: "
+                    + companyNumber);
+            alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete company from AlphabeticalSearch index for company number: "
+                    + companyNumber, ex);
+        }
+        try {
+            LOG.info("Attempting to delete company from GreenAlphabeticalSearch index for company number: "
+                    + companyNumber);
+            greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete company from GreenAlphabeticalSearch index for company number: "
+                    + companyNumber, ex);
+        }
+        try {
+            LOG.info("Attempting to delete company from AdvancedSearch index for company number: "
+                    + companyNumber);
+            advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+        } catch (Exception ex) {
+            LOG.error("Failed to delete company from AdvancedSearch index for company number: "
+                    + companyNumber, ex);
         }
     }
 }
