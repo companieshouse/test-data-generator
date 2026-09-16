@@ -1,0 +1,41 @@
+package uk.gov.companieshouse.api.testdata.controller;
+
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import uk.gov.companieshouse.api.testdata.Application;
+import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyExemptionsResponse;
+import uk.gov.companieshouse.api.testdata.service.CompanyExemptionsService;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
+
+@RestController
+@RequestMapping(value = "${api.endpoint}/internal", produces = MediaType.APPLICATION_JSON_VALUE)
+public class CompanyExemptionsController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Application.APPLICATION_NAME);
+    private static final String STATUS = "status";
+
+    private final CompanyExemptionsService companyExemptionsService;
+
+    public CompanyExemptionsController(CompanyExemptionsService companyExemptionsService) {
+        this.companyExemptionsService = companyExemptionsService;
+    }
+
+    @PostMapping("/exemptions")
+    public ResponseEntity<CompanyExemptionsResponse> createOrUpdateCompanyExemptions(
+            @Valid @RequestBody CompanyExemptionsRequest request) throws DataException {
+
+        var createdExemptions = companyExemptionsService.createOrUpdate(request);
+        LOG.info("Company exemptions created or updated for company number: "
+                + createdExemptions.getCompanyNumber());
+        return new ResponseEntity<>(createdExemptions, HttpStatus.CREATED);
+    }
+}

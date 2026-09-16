@@ -1065,9 +1065,10 @@ class CompanyProfileServiceImplTest {
         assertEquals("COMPANY " + COMPANY_NUMBER + " " + expectedEnding, profile.getCompanyName());
     }
 
-    @Test
-    void createCompanyTypeWithoutNameEnding() {
-        internalCompanyRequest.setCompanyType(CONVERTED_OR_CLOSED_TYPE);
+    @ParameterizedTest
+    @MethodSource("companyTypesWithoutNameEndings")
+    void createCompanyTypeWithoutNameEnding(CompanyType companyType) {
+        internalCompanyRequest.setCompanyType(companyType);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
 
         when(randomService.getEtag()).thenReturn(ETAG);
@@ -1080,6 +1081,22 @@ class CompanyProfileServiceImplTest {
         CompanyProfile profile = captor.getValue();
 
         assertEquals("COMPANY " + COMPANY_NUMBER, profile.getCompanyName());
+    }
+
+    static Stream<Arguments> companyTypesWithoutNameEndings() {
+        return Stream.of(
+                Arguments.of(CompanyType.CHARITABLE_INCORPORATED_ORGANISATION),
+                Arguments.of(CompanyType.CONVERTED_OR_CLOSED),
+                Arguments.of(CompanyType.FURTHER_EDUCATION_OR_SIXTH_FORM_COLLEGE_CORPORATION),
+                Arguments.of(CompanyType.PRIVATE_LIMITED_GUARANT_NSC_LIMITED_EXEMPTION),
+                Arguments.of(CompanyType.PRIVATE_LIMITED_SHARES_SECTION_30_EXEMPTION),
+                Arguments.of(CompanyType.PRIVATE_UNLIMITED),
+                Arguments.of(CompanyType.PRIVATE_UNLIMITED_NSC),
+                Arguments.of(CompanyType.ROYAL_CHARTER),
+                Arguments.of(CompanyType.SCOTTISH_CHARITABLE_INCORPORATED_ORGANISATION),
+                Arguments.of(CompanyType.SCOTTISH_PARTNERSHIP),
+                Arguments.of(CompanyType.UK_ESTABLISHMENT)
+        );
     }
 
     @Test
@@ -1125,7 +1142,6 @@ class CompanyProfileServiceImplTest {
                 Arguments.of(CompanyType.ICVC_SECURITIES, "ICVC"),
                 Arguments.of(CompanyType.LIMITED_PARTNERSHIP, "LIMITED PARTNERSHIP"),
                 Arguments.of(CompanyType.LLP, "LIMITED LIABILITY PARTNERSHIP"),
-                Arguments.of(CompanyType.PRIVATE_UNLIMITED, "UNLIMITED"),
                 Arguments.of(CompanyType.PROTECTED_CELL_COMPANY, "PCC LIMITED"),
                 Arguments.of(CompanyType.UKEIG, "UKEIG"),
                 Arguments.of(CompanyType.UNITED_KINGDOM_SOCIETAS, "UK SOCIETAS")
