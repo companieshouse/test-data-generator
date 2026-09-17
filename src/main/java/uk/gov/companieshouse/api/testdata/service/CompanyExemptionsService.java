@@ -17,4 +17,12 @@ public interface CompanyExemptionsService {
      * @throws DataException if an error occurs during creation or update
      */
     CompanyExemptionsResponse createOrUpdate(CompanyExemptionsRequest request) throws DataException;
+
+    /**
+     * Deletes a company exemptions entry by its company number.
+     *
+     * @param companyNumber the company number
+     * @return true if the exemption was deleted, false if not found
+     */
+    boolean deleteByCompanyNumber(String companyNumber);
 }

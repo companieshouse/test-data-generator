@@ -1,12 +1,14 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
-
+import java.util.Map;
+import java.util.Objects;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,5 +52,30 @@ class CompanyExemptionsControllerTest {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(responseBody, response.getBody());
         verify(companyExemptionsService, times(1)).createOrUpdate(request);
+    }
+
+    @Test
+    void deleteCompanyExemptions() {
+        when(companyExemptionsService.deleteByCompanyNumber(COMPANY_NUMBER)).thenReturn(true);
+
+        ResponseEntity<Map<String, Object>> response =
+                companyExemptionsController.deleteCompanyExemptions(COMPANY_NUMBER);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertNull(response.getBody());
+        verify(companyExemptionsService, times(1)).deleteByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyExemptionsNotFound() {
+        when(companyExemptionsService.deleteByCompanyNumber(COMPANY_NUMBER)).thenReturn(false);
+
+        ResponseEntity<Map<String, Object>> response =
+                companyExemptionsController.deleteCompanyExemptions(COMPANY_NUMBER);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals(COMPANY_NUMBER, Objects.requireNonNull(response.getBody()).get("company_number"));
+        assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
+        verify(companyExemptionsService, times(1)).deleteByCompanyNumber(COMPANY_NUMBER);
     }
 }
