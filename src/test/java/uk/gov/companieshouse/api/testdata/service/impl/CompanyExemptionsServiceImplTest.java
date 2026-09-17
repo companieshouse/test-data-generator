@@ -1,11 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +15,6 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -149,5 +150,26 @@ class CompanyExemptionsServiceImplTest {
         doThrow(new RuntimeException("db error")).when(repository).save(any(CompanyExemptions.class));
 
         assertThrows(DataException.class, () -> service.createOrUpdate(request));
+    }
+
+    @Test
+    void deleteCompanyExemptions() {
+        CompanyExemptions entity = new CompanyExemptions();
+        entity.setId(COMPANY_NUMBER);
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(entity));
+        boolean deleted = service.deleteByCompanyNumber(COMPANY_NUMBER);
+
+        assertTrue(deleted);
+        verify(repository, times(1)).delete(entity);
+    }
+
+    @Test
+    void deleteCompanyExemptionsNotFound() {
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        boolean deleted = service.deleteByCompanyNumber(COMPANY_NUMBER);
+
+        assertFalse(deleted);
+        verify(repository, never()).delete(any(CompanyExemptions.class));
     }
 }

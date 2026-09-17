@@ -1,9 +1,13 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
 import jakarta.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,5 +41,21 @@ public class CompanyExemptionsController {
         LOG.info("Company exemptions created or updated for company number: "
                 + createdExemptions.getCompanyNumber());
         return new ResponseEntity<>(createdExemptions, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/exemptions/{companyNumber}")
+    public ResponseEntity<Map<String, Object>> deleteCompanyExemptions(
+            @PathVariable("companyNumber") String companyNumber) {
+        boolean deleted = companyExemptionsService.deleteByCompanyNumber(companyNumber);
+        if (deleted) {
+            LOG.info("Company exemptions is deleted for company number: " + companyNumber);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            Map<String, Object> body = new HashMap<>();
+            body.put("company_number", companyNumber);
+            body.put(STATUS, HttpStatus.NOT_FOUND);
+            LOG.info("Company exemptions not found for company number: " + companyNumber);
+            return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        }
     }
 }
