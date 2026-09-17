@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.service.CompanyPscService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.impl.AdvancedCompanySearchImpl;
 import uk.gov.companieshouse.api.testdata.service.impl.AlphabeticalCompanySearchImpl;
+import uk.gov.companieshouse.api.testdata.service.impl.GreenAlphabeticalCompanySearchImpl;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanySearchServiceImpl;
 
@@ -57,6 +58,7 @@ class DeleteCompanyWorkflowServiceImplTest {
     @Mock private DataService<Disqualifications, InternalCompanyRequest> disqualificationsService;
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Mock private GreenAlphabeticalCompanySearchImpl greenAlphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
 
     private DeleteCompanyWorkflowServiceImpl deletionService;
@@ -76,6 +78,7 @@ class DeleteCompanyWorkflowServiceImplTest {
                 disqualificationsService,
                 companySearchService,
                 alphabeticalCompanySearch,
+                greenAlphabeticalCompanySearch,
                 advancedCompanySearch);
         when(companyProfileService.companyExists(anyString())).thenReturn(true);
         deletionService.setElasticSearchDeployed(false);
@@ -250,6 +253,8 @@ class DeleteCompanyWorkflowServiceImplTest {
         verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
         verify(alphabeticalCompanySearch, times(1))
                 .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(greenAlphabeticalCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
         verify(advancedCompanySearch, times(1))
                 .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
     }
@@ -261,6 +266,8 @@ class DeleteCompanyWorkflowServiceImplTest {
 
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
         verify(alphabeticalCompanySearch, never())
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(greenAlphabeticalCompanySearch, never())
                 .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
         verify(advancedCompanySearch, never())
                 .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
