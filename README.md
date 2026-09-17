@@ -184,7 +184,7 @@ For example, if one corporate officer role and five identification types are sup
 
 #### Getting acsp profile document
 - GET: Sending a GET request on the endpoint `{Base URL}/test-data/internal/acsp-profile/{id}` will return the entire acsp profile document for the id. 
-- 
+
 #### Deleting Appeals
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/appeals` will delete the appeals by providing 
   - `company_number`: The company number of the company. This is mandatory.
