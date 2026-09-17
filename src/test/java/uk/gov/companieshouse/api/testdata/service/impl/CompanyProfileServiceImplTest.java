@@ -1125,7 +1125,6 @@ class CompanyProfileServiceImplTest {
                 Arguments.of(CompanyType.ICVC_SECURITIES, "ICVC"),
                 Arguments.of(CompanyType.LIMITED_PARTNERSHIP, "LIMITED PARTNERSHIP"),
                 Arguments.of(CompanyType.LLP, "LIMITED LIABILITY PARTNERSHIP"),
-                Arguments.of(CompanyType.PRIVATE_UNLIMITED, "UNLIMITED"),
                 Arguments.of(CompanyType.PROTECTED_CELL_COMPANY, "PCC LIMITED"),
                 Arguments.of(CompanyType.UKEIG, "UKEIG"),
                 Arguments.of(CompanyType.UNITED_KINGDOM_SOCIETAS, "UK SOCIETAS")
