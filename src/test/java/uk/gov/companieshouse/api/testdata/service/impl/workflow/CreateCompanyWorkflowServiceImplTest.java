@@ -296,6 +296,48 @@ class CreateCompanyWorkflowServiceImplTest {
     }
 
     @Test
+    void createInternalCompanyWithActiveStatementsSkipsPscCreation() throws Exception {
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setActiveStatements(2);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
+
+        assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
+        assertEquals(JurisdictionType.ENGLAND_WALES, capturedSpec.getJurisdiction());
+        verify(companyPscStatementService, times(1)).createPscStatements(capturedSpec);
+        verify(companyPscService, never()).create(capturedSpec);
+        assertEquals(COMPANY_NUMBER, result.getCompanyNumber());
+    }
+
+    @Test
+    void createInternalCompanyWithZeroActiveStatementsCreatesPsc() throws Exception {
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setActiveStatements(0);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
+
+        assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
+        verify(companyPscService, times(1)).create(capturedSpec);
+    }
+
+    @Test
+    void createInternalCompanyWithNullActiveStatementsCreatesPsc() throws Exception {
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setActiveStatements(null);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
+
+        assertEquals(COMPANY_NUMBER, capturedSpec.getCompanyNumber());
+        verify(companyPscService, times(1)).create(capturedSpec);
+    }
+
+    @Test
     void createInternalCompanyExistingNumber() throws Exception {
         InternalCompanyRequest spec = new InternalCompanyRequest();
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
@@ -987,6 +1029,43 @@ class CreateCompanyWorkflowServiceImplTest {
                 .addCompanyIntoElasticSearchIndex(createdCompany);
         verify(advancedCompanySearch, times(expectedInvocationCount))
                 .addCompanyIntoElasticSearchIndex(createdCompany);
+    }
+
+    @Test
+    void createCompanyDataWithActiveStatementsSkipsPscCreation() throws Exception {
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setActiveStatements(3);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createCompany(spec);
+
+        assertNotNull(result);
+        verify(companyPscStatementService, times(1)).createPscStatements(spec);
+        verify(companyPscService, never()).create(spec);
+    }
+
+    @Test
+    void createCompanyDataWithZeroActiveStatementsCreatesPsc() throws Exception {
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setActiveStatements(0);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createCompany(spec);
+
+        assertNotNull(result);
+        verify(companyPscService, times(1)).create(spec);
+    }
+
+    @Test
+    void createCompanyDataWithNullActiveStatementsCreatesPsc() throws Exception {
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setActiveStatements(null);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createCompany(spec);
+
+        assertNotNull(result);
+        verify(companyPscService, times(1)).create(spec);
     }
 
     @Test
