@@ -158,9 +158,13 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
 
-            var companyPscs = companyPscService.create(spec);
-            LOG.info("Successfully get PSCs");
-            response.setCompanyPscs(companyPscs);
+            if(spec.getActiveStatements() != null && spec.getActiveStatements() > 0) {
+                LOG.info("Skipping creation of company PSCs as active statements are available");
+            } else {
+                var companyPscs = companyPscService.create(spec);
+                LOG.info("Successfully get PSCs");
+                response.setCompanyPscs(companyPscs);
+            }
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 var companyRegisters = companyRegistersService.create(spec);
@@ -261,8 +265,12 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             companyPscStatementService.createPscStatements(companySpec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            companyPscService.create(companySpec);
-            LOG.info("Successfully created PSCs");
+            if(companySpec.getActiveStatements() != null && companySpec.getActiveStatements() > 0) {
+                LOG.info("Skipping creation of company PSCs as active statements are available");
+            } else {
+                companyPscService.create(companySpec);
+                LOG.info("Successfully created PSCs");
+            }
 
             if (companySpec.getRegisters() != null && !companySpec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company",
