@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.function.Supplier;
 
-// import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -12,7 +11,6 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-// @Service("alphabeticalCompanySearchService")
 public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private final String instance;
