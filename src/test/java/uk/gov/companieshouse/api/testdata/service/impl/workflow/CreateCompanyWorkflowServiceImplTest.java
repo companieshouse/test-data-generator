@@ -38,7 +38,6 @@ import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.api.testdata.service.impl.AdvancedCompanySearchImpl;
 import uk.gov.companieshouse.api.testdata.service.impl.AlphabeticalCompanySearchImpl;
-import uk.gov.companieshouse.api.testdata.service.impl.GreenAlphabeticalCompanySearchImpl;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanyPscStatementServiceImpl;
 import uk.gov.companieshouse.api.testdata.service.impl.CompanySearchServiceImpl;
 
@@ -84,7 +83,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Mock private CompanyStructurePersistenceService companyStructurePersistenceService;
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
-    @Mock private GreenAlphabeticalCompanySearchImpl greenAlphabeticalCompanySearch;
+    @Mock private AlphabeticalCompanySearchImpl greenAlphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock private DeleteCompanyWorkflowService deleteCompanyWorkflowService;
     @Mock private Appointment commonAppointment;

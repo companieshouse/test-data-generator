@@ -2,7 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.function.Supplier;
 
-import org.springframework.stereotype.Service;
+// import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -12,19 +12,19 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-@Service("alphabeticalCompanySearchService")
+// @Service("alphabeticalCompanySearchService")
 public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
-    protected String instance;
+    private final String instance;
     private static final String ALPHABETICAL_SEARCH_URI = "%s/alphabetical-search/companies/%s";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AlphabeticalCompanySearchImpl.class));
 
-    public AlphabeticalCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
+    public AlphabeticalCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier, String instance) {
         this.internalApiClientSupplier = internalApiClientSupplier;
-        this.instance = "";
+        this.instance = instance;
     }
 
     @Override
