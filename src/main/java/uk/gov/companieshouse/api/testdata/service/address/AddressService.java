@@ -14,13 +14,6 @@ public interface AddressService {
     Address getOverseasAddress();
 
     /**
-     * Returns the country of residence string for the given {@code jurisdiction}
-     * @param jurisdiction jurisdiction of the country of residence to return
-     * @return the country of residence for the given {@code jurisdiction}
-     */
-    String getCountryOfResidence(JurisdictionType jurisdiction);
-
-    /**
      * Returns the country name from the currently selected profile for the jurisdiction.
      * If no profile is cached, returns the default country for the jurisdiction.
      * @param jurisdiction jurisdiction to get the country for

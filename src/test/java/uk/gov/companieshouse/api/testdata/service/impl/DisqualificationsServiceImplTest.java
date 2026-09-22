@@ -224,7 +224,7 @@ class DisqualificationsServiceImplTest {
         when(randomService.getEtag()).thenReturn("etag");
         when(randomService.getString(10)).thenReturn("officerId");
         when(randomService.getString(8)).thenReturn("officerRaw");
-        when(addressService.getCountryOfResidence(any())).thenReturn("England");
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn("England");
         when(addressService.getAddress(any())).thenReturn(null);
 
         Disqualifications result = service.create(spec);

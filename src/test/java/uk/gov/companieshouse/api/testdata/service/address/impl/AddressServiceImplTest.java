@@ -44,9 +44,20 @@ class AddressServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("countryOfResidenceByJurisdiction")
-    void getCountryOfResidenceByJurisdiction(JurisdictionType jurisdiction, String expectedCountryOfResidence) {
-        String actualCountryOfResidence = addressService.getCountryOfResidence(jurisdiction);
-        assertEquals(expectedCountryOfResidence, actualCountryOfResidence);
+    void getCountryFromSelectedProfileByJurisdiction(JurisdictionType jurisdiction, java.util.List<String> expectedCountries) {
+        String actualCountryOfResidence = addressService.getCountryFromSelectedProfile(jurisdiction);
+        assertTrue(expectedCountries.contains(actualCountryOfResidence),
+                "Expected one of " + expectedCountries + " but got " + actualCountryOfResidence);
+    }
+
+    @ParameterizedTest
+    @MethodSource("countryOfResidenceByJurisdiction")
+    void getCountryFromSelectedProfileConsistentAcrossCalls(JurisdictionType jurisdiction, java.util.List<String> expectedCountries) {
+        String country1 = addressService.getCountryFromSelectedProfile(jurisdiction);
+        String country2 = addressService.getCountryFromSelectedProfile(jurisdiction);
+        assertEquals(country1, country2, "Country should be consistent across calls for " + jurisdiction);
+        assertTrue(expectedCountries.contains(country1), 
+                "Expected one of " + expectedCountries + " but got " + country1);
     }
 
     @Test
@@ -75,11 +86,12 @@ class AddressServiceImplTest {
         // Get address first
         UsualResidentialAddress address = addressService.getUsualResidentialAddress(JurisdictionType.ENGLAND_WALES);
         assertNotNull(address.getCountry());
-        assertEquals("United Kingdom", address.getCountry());
+        assertTrue(isValidUkCountry(address.getCountry()),
+                "Address country should be England or Wales, but was: " + address.getCountry());
         
         // Get country from selected profile
         String selectedCountry = addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND_WALES);
-        assertTrue(selectedCountry.equals("England") || selectedCountry.equals("Wales"));
+        assertEquals(address.getCountry(), selectedCountry, "Address country should match selected profile country");
     }
 
     @Test
@@ -109,13 +121,19 @@ class AddressServiceImplTest {
         UsualResidentialAddress addr1 = addressService.getUsualResidentialAddress(JurisdictionType.ENGLAND_WALES);
         UsualResidentialAddress addr2 = addressService.getUsualResidentialAddress(JurisdictionType.ENGLAND_WALES);
         
-        // Both should be from UK
-        assertEquals("United Kingdom", addr1.getCountry());
-        assertEquals("United Kingdom", addr2.getCountry());
+        // Both should be valid UK countries
+        assertTrue(isValidUkCountry(addr1.getCountry()),
+                "Address 1 country should be a UK country, but was: " + addr1.getCountry());
+        assertTrue(isValidUkCountry(addr2.getCountry()),
+                "Address 2 country should be a UK country, but was: " + addr2.getCountry());
+        
+        // Both should be from the same country (cached in context)
+        assertEquals(addr1.getCountry(), addr2.getCountry(),
+                "Both addresses should be from the same cached country");
         
         // Get the selected country
         String selectedCountry = addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND_WALES);
-        assertTrue(selectedCountry.equals("England") || selectedCountry.equals("Wales"));
+        assertEquals(addr1.getCountry(), selectedCountry, "Address country should match selected profile country");
     }
 
     @Test
@@ -169,11 +187,24 @@ class AddressServiceImplTest {
         } else if (jurisdiction == JurisdictionType.EUROPEAN_UNION) {
             assertEuCountry(address.getCountry());
             assertEuPostcode(address.getPostalCode());
+        } else if (isUkJurisdiction(jurisdiction)) {
+            assertTrue(isValidUkCountry(address.getCountry()),
+                    "Country should be one of the UK countries, but was: " + address.getCountry());
+            assertEquals(postalCode, address.getPostalCode());
         } else {
             assertEquals(country, address.getCountry());
             assertEquals(postalCode, address.getPostalCode());
         }
         assertNotNull(address.getLocality());
+    }
+
+    private boolean isUkJurisdiction(JurisdictionType jurisdiction) {
+        return jurisdiction == JurisdictionType.ENGLAND_WALES ||
+               jurisdiction == JurisdictionType.SCOTLAND ||
+               jurisdiction == JurisdictionType.NI ||
+               jurisdiction == JurisdictionType.WALES ||
+               jurisdiction == JurisdictionType.ENGLAND ||
+               jurisdiction == JurisdictionType.UNITED_KINGDOM;
     }
 
     private void assertEuCountry(String country) {
@@ -220,14 +251,14 @@ class AddressServiceImplTest {
 
     private static Stream<Arguments> countryOfResidenceByJurisdiction() {
         return Stream.of(
-                Arguments.of(JurisdictionType.ENGLAND_WALES, "England"),
-                Arguments.of(JurisdictionType.SCOTLAND, "Scotland"),
-                Arguments.of(JurisdictionType.NI, "Northern Ireland"),
-                Arguments.of(JurisdictionType.UNITED_KINGDOM, "United Kingdom"),
-                Arguments.of(JurisdictionType.ENGLAND, "England"),
-                Arguments.of(JurisdictionType.WALES, "Wales"),
-                Arguments.of(JurisdictionType.EUROPEAN_UNION, "Netherlands"),
-                Arguments.of(JurisdictionType.NON_EU, "Panama")
+                Arguments.of(JurisdictionType.ENGLAND_WALES, java.util.List.of("England", "Wales")),
+                Arguments.of(JurisdictionType.SCOTLAND, java.util.List.of("Scotland")),
+                Arguments.of(JurisdictionType.NI, java.util.List.of("Northern Ireland")),
+                Arguments.of(JurisdictionType.UNITED_KINGDOM, java.util.List.of("England", "Scotland", "Wales", "Northern Ireland")),
+                Arguments.of(JurisdictionType.ENGLAND, java.util.List.of("England")),
+                Arguments.of(JurisdictionType.WALES, java.util.List.of("Wales")),
+                Arguments.of(JurisdictionType.EUROPEAN_UNION, java.util.List.of("Netherlands", "Germany", "France", "Spain", "Italy", "Poland")),
+                Arguments.of(JurisdictionType.NON_EU, java.util.List.of("Panama", "Canada", "Australia", "Jersey", "Malta", "Cyprus", "Bermuda"))
         );
     }
 }

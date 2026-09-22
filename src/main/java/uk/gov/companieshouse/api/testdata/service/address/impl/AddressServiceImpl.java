@@ -161,12 +161,12 @@ public class AddressServiceImpl implements AddressService {
     };
 
     private static final LocalityCluster[] GERMANY_CLUSTERS = {
-            new LocalityCluster("BERLIN", "MITTE", "BERLIN"),
-            new LocalityCluster("BERLIN", "CHARLOTTENBURG", "BERLIN"),
+            new LocalityCluster("BERLIN", "MITTE", "BERLIN STATE"),
+            new LocalityCluster("BERLIN", "CHARLOTTENBURG", "BERLIN STATE"),
             new LocalityCluster("MUNICH", "ALTSTADT", "BAVARIA"),
             new LocalityCluster("MUNICH", "SCHWABING", "BAVARIA"),
-            new LocalityCluster("HAMBURG", "ALTSTADT", "HAMBURG"),
-            new LocalityCluster("HAMBURG", "NEUSTADT", "HAMBURG"),
+            new LocalityCluster("HAMBURG", "ALTSTADT", "HAMBURG STATE"),
+            new LocalityCluster("HAMBURG", "NEUSTADT", "HAMBURG STATE"),
             new LocalityCluster("COLOGNE", "ALTSTADT", "NORTH RHINE-WESTPHALIA"),
             new LocalityCluster("FRANKFURT", "SACHSENHAUSEN", "HESSE"),
             new LocalityCluster("FRANKFURT", "WESTEND", "HESSE"),
@@ -191,9 +191,9 @@ public class AddressServiceImpl implements AddressService {
     };
 
     private static final LocalityCluster[] SPAIN_CLUSTERS = {
-            new LocalityCluster("MADRID", "SOL", "MADRID"),
-            new LocalityCluster("MADRID", "GRAN VÍA", "MADRID"),
-            new LocalityCluster("MADRID", "MALASAÑA", "MADRID"),
+            new LocalityCluster("MADRID", "SOL", "COMMUNITY OF MADRID"),
+            new LocalityCluster("MADRID", "GRAN VÍA", "COMMUNITY OF MADRID"),
+            new LocalityCluster("MADRID", "MALASAÑA", "COMMUNITY OF MADRID"),
             new LocalityCluster("BARCELONA", "GÒTIC", "CATALONIA"),
             new LocalityCluster("BARCELONA", "EIXAMPLE", "CATALONIA"),
             new LocalityCluster("BARCELONA", "GRACIA", "CATALONIA"),
@@ -236,36 +236,36 @@ public class AddressServiceImpl implements AddressService {
     };
 
     private static final LocalityCluster[] JERSEY_CLUSTERS = {
-            new LocalityCluster("ST. HELIER", "TOWN CENTRE", "JERSEY"),
-            new LocalityCluster("ST. HELIER", "WATERFRONT", "JERSEY"),
-            new LocalityCluster("ST. BRELADE", "BAY AREA", "JERSEY"),
-            new LocalityCluster("ST. CLEMENT", "CENTRE", "JERSEY"),
-            new LocalityCluster("ST. LAWRENCE", "CENTRE", "JERSEY"),
-            new LocalityCluster("ST. MARTIN", "CENTRE", "JERSEY"),
-            new LocalityCluster("ST. OUEN", "CENTRE", "JERSEY"),
-            new LocalityCluster("ST. PETER", "CENTRE", "JERSEY")
+            new LocalityCluster("ST. HELIER", "TOWN CENTRE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. HELIER", "WATERFRONT", "JERSEY ISLAND"),
+            new LocalityCluster("ST. BRELADE", "BAY AREA", "JERSEY ISLAND"),
+            new LocalityCluster("ST. CLEMENT", "CENTRE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. LAWRENCE", "CENTRE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. MARTIN", "CENTRE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. OUEN", "CENTRE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. PETER", "CENTRE", "JERSEY ISLAND")
     };
 
     private static final LocalityCluster[] MALTA_CLUSTERS = {
-            new LocalityCluster("VALLETTA", "CENTRE", "MALTA"),
-            new LocalityCluster("SLIEMA", "CENTRE", "MALTA"),
-            new LocalityCluster("MOSTA", "CENTRE", "MALTA"),
-            new LocalityCluster("BIRKIRKARA", "CENTRE", "MALTA"),
-            new LocalityCluster("QORMI", "CENTRE", "MALTA"),
-            new LocalityCluster("NAXXAR", "CENTRE", "MALTA"),
-            new LocalityCluster("MELLIEHA", "CENTRE", "MALTA"),
-            new LocalityCluster("BIRGU", "CENTRE", "MALTA")
+            new LocalityCluster("VALLETTA", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("SLIEMA", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("MOSTA", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("BIRKIRKARA", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("QORMI", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("NAXXAR", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("MELLIEHA", "CENTRE", "MALTA ISLAND"),
+            new LocalityCluster("BIRGU", "CENTRE", "MALTA ISLAND")
     };
 
     private static final LocalityCluster[] CYPRUS_CLUSTERS = {
-            new LocalityCluster("NICOSIA", "CENTRE", "CYPRUS"),
-            new LocalityCluster("LIMASSOL", "CENTRE", "CYPRUS"),
-            new LocalityCluster("LARNACA", "CENTRE", "CYPRUS"),
-            new LocalityCluster("PAPHOS", "CENTRE", "CYPRUS"),
-            new LocalityCluster("FAMAGUSTA", "CENTRE", "CYPRUS"),
-            new LocalityCluster("KYRENIA", "CENTRE", "CYPRUS"),
-            new LocalityCluster("MORFOU", "CENTRE", "CYPRUS"),
-            new LocalityCluster("LEFKOSIA", "CENTRE", "CYPRUS")
+            new LocalityCluster("NICOSIA", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("LIMASSOL", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("LARNACA", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("PAPHOS", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("FAMAGUSTA", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("KYRENIA", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("MORFOU", "CENTRE", "CYPRUS ISLAND"),
+            new LocalityCluster("LEFKOSIA", "CENTRE", "CYPRUS ISLAND")
     };
 
     private static final LocalityCluster[] BERMUDA_CLUSTERS = {
@@ -280,10 +280,10 @@ public class AddressServiceImpl implements AddressService {
     };
 
     private static final LocalityCluster[] PANAMA_CLUSTERS = {
-            new LocalityCluster("PANAMA CITY", "BELLA VISTA", "PANAMA"),
-            new LocalityCluster("PANAMA CITY", "SAN FRANCISCO", "PANAMA"),
-            new LocalityCluster("PANAMA CITY", "OBARRIO", "PANAMA"),
-            new LocalityCluster("PANAMA CITY", "EL CANGREJO", "PANAMA"),
+            new LocalityCluster("PANAMA CITY", "BELLA VISTA", "PANAMA PROVINCE"),
+            new LocalityCluster("PANAMA CITY", "SAN FRANCISCO", "PANAMA PROVINCE"),
+            new LocalityCluster("PANAMA CITY", "OBARRIO", "PANAMA PROVINCE"),
+            new LocalityCluster("PANAMA CITY", "EL CANGREJO", "PANAMA PROVINCE"),
             new LocalityCluster("COLON", "BARRIO NORTE", "COLON PROVINCE"),
             new LocalityCluster("COLON", "CRISTOBAL", "COLON PROVINCE"),
             new LocalityCluster("DAVID", "CENTRO", "CHIRIQUI"),
@@ -366,19 +366,6 @@ public class AddressServiceImpl implements AddressService {
     }
 
     @Override
-    public String getCountryOfResidence(JurisdictionType jurisdiction) {
-        return switch (jurisdiction) {
-            case ENGLAND_WALES, ENGLAND -> "England";
-            case WALES -> "Wales";
-            case SCOTLAND -> "Scotland";
-            case NI -> "Northern Ireland";
-            case UNITED_KINGDOM -> "United Kingdom";
-            case NON_EU -> "Panama";
-            case EUROPEAN_UNION -> "Netherlands";
-        };
-    }
-
-    @Override
     public String getCountryFromSelectedProfile(JurisdictionType jurisdiction) {
         if (jurisdiction == JurisdictionType.EUROPEAN_UNION) {
             EuProfile euProfile = getOrSelectEuProfile();
@@ -409,7 +396,7 @@ public class AddressServiceImpl implements AddressService {
             residentialAddress.setAddressLine1(cluster.area);
             residentialAddress.setAddressLine2(
                     UK_FAKER.address().streetName().toUpperCase(Locale.UK) + " " + TEST_DATA_MARKER);
-            residentialAddress.setCountry(UNITED_KINGDOM);
+            residentialAddress.setCountry(getOrSelectUkCountry(effectiveJurisdiction));
             residentialAddress.setLocality(cluster.locality);
             residentialAddress.setPostalCode(generateUkPostcode());
             residentialAddress.setRegion(cluster.region);

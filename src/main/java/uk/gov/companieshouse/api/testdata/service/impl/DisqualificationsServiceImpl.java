@@ -87,7 +87,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setCompanyNumber(internalCompanyRequest.getCompanyNumber());
         disqualifications.setPersonNumber(randomService.getNumber(10));
         disqualifications.setCountryOfRegistration(
-                addressService.getCountryOfResidence(internalCompanyRequest.getJurisdiction()));
+                addressService.getCountryFromSelectedProfile(internalCompanyRequest.getJurisdiction()));
         disqualifications.setEtag(this.randomService.getEtag());
         disqualifications.setName(DEFAULT_NAME);
         disqualifications.setOfficerDisqId(randomService.getString(10));

@@ -565,10 +565,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
        Identification identification = new Identification();
        identification.setCountryRegistered(
-               addressService.getCountryOfResidence(JurisdictionType.ENGLAND_WALES));
+               addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND_WALES));
        identification.setLegalAuthority(LEGAL_AUTHORITY);
        identification.setLegalForm(RLE_LEGAL_FORM);
-       identification.setPlaceRegistered(addressService.getCountryOfResidence(JurisdictionType.ENGLAND));
+       identification.setPlaceRegistered(addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND));
        identification.setRegistrationNumber(REGISTRATION_NUMBER);
        companyPsc.setIdentification(identification);
 
@@ -590,7 +590,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
 
         Identification identification = new Identification();
         identification.setCountryRegistered(
-                addressService.getCountryOfResidence(jurisdiction));
+                addressService.getCountryFromSelectedProfile(jurisdiction));
         identification.setLegalAuthority(LEGAL_AUTHORITY);
         identification.setLegalForm(ORP_LEGAL_FORM);
         companyPsc.setIdentification(identification);

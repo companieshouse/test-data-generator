@@ -99,7 +99,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
             soleTraderDetails.setSurname(soleTraderSurname + acspNumber);
             soleTraderDetails.setNationality(nationality);
             soleTraderDetails.setUsualResidentialCountry(
-                    addressService.getCountryOfResidence(JurisdictionType.ENGLAND));
+                    addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND));
             profile.setSoleTraderDetails(soleTraderDetails);
         }
         AuditDetails created = new AuditDetails();

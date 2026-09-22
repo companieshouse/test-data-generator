@@ -472,8 +472,8 @@ class CompanyPscServiceImplTest {
 
         companyPscsService.create(internalCompanyRequest);
 
-        // placeRegistered is only set via getCountryOfResidence(ENGLAND) in buildCorporateEntityPsc
-        verify(addressService, never()).getCountryOfResidence(JurisdictionType.ENGLAND);
+        // placeRegistered is only set via getCountryFromSelectedProfile(ENGLAND) in buildCorporateEntityPsc
+        verify(addressService, never()).getCountryFromSelectedProfile(JurisdictionType.ENGLAND);
         verify(repository).save(any(CompanyPscs.class));
     }
 
@@ -492,8 +492,8 @@ class CompanyPscServiceImplTest {
 
         companyPscsService.create(internalCompanyRequest);
 
-        // placeRegistered is set via getCountryOfResidence(ENGLAND) only in buildCorporateEntityPsc
-        verify(addressService).getCountryOfResidence(JurisdictionType.ENGLAND);
+        // placeRegistered is set via getCountryFromSelectedProfile(ENGLAND) only in buildCorporateEntityPsc
+        verify(addressService).getCountryFromSelectedProfile(JurisdictionType.ENGLAND);
         verify(repository).save(any(CompanyPscs.class));
     }
 
