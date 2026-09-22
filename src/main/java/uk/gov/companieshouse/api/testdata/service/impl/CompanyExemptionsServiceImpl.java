@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptions;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptionsTimestamp;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
@@ -60,6 +61,13 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
         } catch (Exception ex) {
             throw new DataException("Failed to create or update company exemptions", ex);
         }
+    }
+
+    @Override
+    public CompanyExemptionsResponse getByCompanyNumber(String companyNumber) throws NoDataFoundException {
+        var exemptions = repository.findById(companyNumber)
+                .orElseThrow(() -> new NoDataFoundException("no company exemptions"));
+        return mapToResponse(exemptions);
     }
 
     @Override
