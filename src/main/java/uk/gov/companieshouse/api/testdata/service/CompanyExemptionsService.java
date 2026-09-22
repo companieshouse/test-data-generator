@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.api.testdata.service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyExemptionsResponse;
 
@@ -17,6 +18,15 @@ public interface CompanyExemptionsService {
      * @throws DataException if an error occurs during creation or update
      */
     CompanyExemptionsResponse createOrUpdate(CompanyExemptionsRequest request) throws DataException;
+
+    /**
+     * Retrieves a company exemptions entry by its company number.
+     *
+     * @param companyNumber the company number
+     * @return the {@link CompanyExemptionsResponse}
+     * @throws NoDataFoundException if the company exemptions entry is not found
+     */
+    CompanyExemptionsResponse getByCompanyNumber(String companyNumber) throws NoDataFoundException;
 
     /**
      * Deletes a company exemptions entry by its company number.

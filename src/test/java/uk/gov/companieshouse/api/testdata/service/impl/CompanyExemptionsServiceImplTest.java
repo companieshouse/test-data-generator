@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptions;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptionsTimestamp;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
@@ -150,6 +151,23 @@ class CompanyExemptionsServiceImplTest {
         doThrow(new RuntimeException("db error")).when(repository).save(any(CompanyExemptions.class));
 
         assertThrows(DataException.class, () -> service.createOrUpdate(request));
+    }
+
+    @Test
+    void getCompanyExemptions() throws NoDataFoundException {
+        CompanyExemptions entity = new CompanyExemptions();
+        entity.setId(COMPANY_NUMBER);
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(entity));
+        CompanyExemptionsResponse response = service.getByCompanyNumber(COMPANY_NUMBER);
+
+        assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
+    }
+
+    @Test
+    void getCompanyExemptionsNotFound() {
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertThrows(NoDataFoundException.class, () -> service.getByCompanyNumber(COMPANY_NUMBER));
     }
 
     @Test

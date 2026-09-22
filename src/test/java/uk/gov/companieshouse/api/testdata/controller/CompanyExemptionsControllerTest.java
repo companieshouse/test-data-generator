@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyExemptionsResponse;
 import uk.gov.companieshouse.api.testdata.service.CompanyExemptionsService;
@@ -52,6 +53,21 @@ class CompanyExemptionsControllerTest {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(responseBody, response.getBody());
         verify(companyExemptionsService, times(1)).createOrUpdate(request);
+    }
+
+    @Test
+    void getCompanyExemptions() throws NoDataFoundException {
+        CompanyExemptionsResponse responseBody = new CompanyExemptionsResponse();
+        responseBody.setCompanyNumber(COMPANY_NUMBER);
+
+        when(companyExemptionsService.getByCompanyNumber(COMPANY_NUMBER)).thenReturn(responseBody);
+
+        ResponseEntity<CompanyExemptionsResponse> response =
+                companyExemptionsController.getCompanyExemptions(COMPANY_NUMBER);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseBody, response.getBody());
+        verify(companyExemptionsService, times(1)).getByCompanyNumber(COMPANY_NUMBER);
     }
 
     @Test
