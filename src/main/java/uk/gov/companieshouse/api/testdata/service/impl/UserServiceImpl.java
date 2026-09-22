@@ -192,25 +192,25 @@ public class UserServiceImpl implements UserService {
 
         try {
             uvidRepository.deleteByIdentityId(identity.getId());
-            LOG.debug("Deleted UVIDs for identityId={}");
+            LOG.debug("Deleted UVIDs for identityId=" + identity.getId());
         } catch (Exception ex) {
-            LOG.error("Failed to delete UVIDs for identityId={}");
+            LOG.error("Failed to delete UVIDs for identityId=" + identity.getId());
             throw ex;
         }
 
         try {
             identityRepository.delete(identity);
-            LOG.debug("Deleted identity id={}");
+            LOG.debug("Deleted identity id=" + identity.getId());
         } catch (Exception ex) {
-            LOG.error("Failed to delete identity id={}");
+            LOG.error("Failed to delete identity id=" + identity.getId());
             throw ex;
         }
 
         try {
             backlogRepository.deleteByUserId(userId);
-            LOG.debug("Deleted backlog for userId={}");
+            LOG.debug("Deleted backlog for userId=" + userId);
         } catch (Exception ex) {
-            LOG.error("Failed to delete backlog for userId={}");
+            LOG.error("Failed to delete backlog for userId=" + userId);
             throw ex;
         }
     }
@@ -220,19 +220,18 @@ public class UserServiceImpl implements UserService {
         if (identityOpt.isPresent()) {
             Identity identity = identityOpt.get();
 
-            LOG.info("Found identity for userId={} identityId={}"
-            );
+            LOG.info("Found identity for userId=" + user.getId() + " identityId=" + identity.getId());
 
             deleteIdentityData(identity, user.getId());
         } else {
-            LOG.debug("No identity associated with userId={}");
+            LOG.debug("No identity associated with userId=" + user.getId());
         }
 
         try {
             repository.delete(user);
-            LOG.info("Deleted user id={}");
+            LOG.info("Deleted user id=" + user.getId());
         } catch (Exception ex) {
-            LOG.error("Failed to delete user id={}");
+            LOG.error("Failed to delete user id=" + user.getId());
             throw ex;
         }
     }
@@ -241,12 +240,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean delete(String userId) {
 
-        LOG.info("delete called for userId={}");
+        LOG.info("delete called for userId=" + userId);
 
         var userOpt = repository.findById(userId);
 
         if (userOpt.isEmpty()) {
-            LOG.debug("User not found for id={}");
+            LOG.debug("User not found for id=" + userId);
             return false;
         }
 
@@ -261,12 +260,12 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public boolean deleteByEmail(String email) {
 
-        LOG.info("delete called for email={}");
+        LOG.info("delete called for email=" + email);
 
         var userOpt = repository.findByEmail(email);
 
         if (userOpt.isEmpty()) {
-            LOG.debug("User not found for email={}");
+            LOG.debug("User not found for email=" + email);
             return false;
         }
 
@@ -279,17 +278,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<User> getUserById(String userId) {
-        LOG.debug("getUserById called for userId= " + userId);
+        LOG.debug("getUserById called for userId=" + userId);
         var result = repository.findById(userId);
-        LOG.debug("getUserById found={}");
+        LOG.debug("getUserById found=" + result.isPresent());
         return result;
     }
 
     @Override
     public Optional<User> getUserByEmail(String email) {
-        LOG.debug("getUserByEmail called for email= " + email);
+        LOG.debug("getUserByEmail called for email=" + email);
         var result = repository.findByEmail(email);
-        LOG.debug("getUserByEmail found={}");
+        LOG.debug("getUserByEmail found=" + result.isPresent());
         return result;
     }
 
