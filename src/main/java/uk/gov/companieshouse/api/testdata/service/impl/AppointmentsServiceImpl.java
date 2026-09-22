@@ -230,7 +230,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
             appointment.setFormerNames(List.of(formerName));
         }
-        applyUsualResidentialAddressForOfficerRole(appointment, ctx.role, safeSpec.getJurisdiction());
+        applyUsualResidentialAddressForOfficerRole(
+                appointment,
+                ctx.role,
+                safeSpec.getJurisdiction(),
+                safeSpec.getResidentialAddressIsSameAsServiceAddress());
 
 
         if (Boolean.TRUE.equals(ctx.spec.getResignedOn())) {
@@ -458,7 +462,14 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setSurname(NAME_FAKER.name().lastName());
         appointment.setOfficerRole(currentRole);
        JurisdictionType jurisdiction = creationRequest.getSpec() != null ? creationRequest.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
-       applyUsualResidentialAddressForOfficerRole(appointment, currentRole, jurisdiction);
+       Boolean residentialAddressSameAsServiceAddress = creationRequest.getSpec() != null
+               ? creationRequest.getSpec().getResidentialAddressIsSameAsServiceAddress()
+               : null;
+       applyUsualResidentialAddressForOfficerRole(
+               appointment,
+               currentRole,
+               jurisdiction,
+               residentialAddressSameAsServiceAddress);
        appointment.setLinks(createAppointmentLinks(
                creationRequest.getCompanyNumber(),
                creationRequest.getOfficerId(),
@@ -511,8 +522,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         // Apply the serviceAddressIsSameAsRegisteredOfficeAddress flag from request
         Boolean sameAsRegistered = request.getSpec().getServiceAddressIsSameAsRegisteredOfficeAddress();
+        boolean isServiceAddressSameAsRegisteredOfficeAddress =
+                sameAsRegistered == null || Boolean.TRUE.equals(sameAsRegistered);
         appointment.setServiceAddressIsSameAsRegisteredOfficeAddress(
-            sameAsRegistered != null ? sameAsRegistered : true);
+                isServiceAddressSameAsRegisteredOfficeAddress);
 
         appointment.setCountryOfResidence(request.getCountryOfResidence());
         appointment.setUpdatedAt(request.getDateTimeNow());
@@ -520,7 +533,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         appointment.setEtag(randomService.getEtag());
 
         // Set service address based on flag
-        if (Boolean.TRUE.equals(sameAsRegistered)) {
+        if (isServiceAddressSameAsRegisteredOfficeAddress) {
             appointment.setServiceAddress(registeredOfficeAddress);
         } else {
             JurisdictionType jurisdiction = request.getSpec().getJurisdiction();
@@ -656,12 +669,37 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return usualResidentialAddress != null ? usualResidentialAddress : new UsualResidentialAddress();
     }
 
-    private void applyUsualResidentialAddressForOfficerRole(Appointment appointment, String officerRole, JurisdictionType jurisdiction) {
+    private UsualResidentialAddress toUsualResidentialAddress(Address address) {
+        UsualResidentialAddress usualResidentialAddress = new UsualResidentialAddress();
+        usualResidentialAddress.setPremises(address.getPremise());
+        usualResidentialAddress.setAddressLine1(address.getAddressLine1());
+        usualResidentialAddress.setAddressLine2(address.getAddressLine2());
+        usualResidentialAddress.setCareOf(null);
+        usualResidentialAddress.setCountry(address.getCountry());
+        usualResidentialAddress.setLocality(address.getLocality());
+        usualResidentialAddress.setPoBox(address.getPoBox());
+        usualResidentialAddress.setPostalCode(address.getPostalCode());
+        usualResidentialAddress.setRegion(address.getRegion());
+        return usualResidentialAddress;
+    }
+
+    private void applyUsualResidentialAddressForOfficerRole(
+            Appointment appointment,
+            String officerRole,
+            JurisdictionType jurisdiction,
+            Boolean residentialAddressSameAsServiceAddress) {
         if (isCorporateOfficerRole(officerRole)) {
             appointment.setUsualResidentialAddress(null);
+            appointment.setResidentialAddressIsSameAsServiceAddress(false);
             return;
         }
-        appointment.setUsualResidentialAddress(getUsualResidentialAddressOrDefault(jurisdiction));
+        boolean isResidentialAddressSameAsServiceAddress =
+                Boolean.TRUE.equals(residentialAddressSameAsServiceAddress);
+        appointment.setUsualResidentialAddress(isResidentialAddressSameAsServiceAddress
+                ? toUsualResidentialAddress(appointment.getServiceAddress())
+                : getUsualResidentialAddressOrDefault(jurisdiction));
+        appointment.setResidentialAddressIsSameAsServiceAddress(
+                isResidentialAddressSameAsServiceAddress);
     }
 
     private boolean isCorporateOfficerRole(String officerRole) {

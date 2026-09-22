@@ -649,6 +649,40 @@ class CompanyPscServiceImplTest {
         // The second and third calls to getAddress() are used for address and usualResidentialAddress
         assertEquals("20 High Street", savedPsc.getAddress().getAddressLine1());
         assertEquals("30 Park Lane", savedPsc.getUsualResidentialAddress().getAddressLine1());
+        assertFalse(savedPsc.getResidentialAddressSameAsServiceAddress());
+    }
+
+    @Test
+    void create_IndividualPsc_UsesServiceAddressForResidentialAddressWhenFlagIsTrue() throws DataException {
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setCompanyType(CompanyType.LTD);
+        internalCompanyRequest.setNumberOfPscs(1);
+        internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
+        internalCompanyRequest.setResidentialAddressIsSameAsServiceAddress(true);
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Address baseAddress = createMockAddress("10 Main Street");
+        Address serviceAddress = createMockAddress("20 High Street");
+        when(addressService.getAddress(JurisdictionType.ENGLAND_WALES))
+                .thenReturn(baseAddress)
+                .thenReturn(serviceAddress);
+
+        companyPscsService.create(internalCompanyRequest);
+
+        verify(addressService, times(2)).getAddress(JurisdictionType.ENGLAND_WALES);
+
+        ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
+        verify(repository, atLeastOnce()).save(captor.capture());
+
+        CompanyPscs savedPsc = captor.getValue();
+        assertEquals("20 High Street", savedPsc.getAddress().getAddressLine1());
+        assertEquals(savedPsc.getAddress(), savedPsc.getUsualResidentialAddress());
+        assertTrue(savedPsc.getResidentialAddressSameAsServiceAddress());
     }
 
     private Address createMockAddress(String line1) {

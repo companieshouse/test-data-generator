@@ -435,7 +435,14 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         var companyPscs = createBasePsc(spec, isActive, false);
         switch (pscType) {
             case INDIVIDUAL:
-                buildIndividualPsc(companyPscs, pscType.getKind(), pscType.getLinkType(), spec.getJurisdiction(), spec.getServiceAddressIsSameAsRegisteredOfficeAddress(), registeredOfficeAddress);
+                buildIndividualPsc(
+                        companyPscs,
+                        pscType.getKind(),
+                        pscType.getLinkType(),
+                        spec.getJurisdiction(),
+                        spec.getServiceAddressIsSameAsRegisteredOfficeAddress(),
+                        spec.getResidentialAddressIsSameAsServiceAddress(),
+                        registeredOfficeAddress);
                 break;
             case LEGAL_PERSON:
                 buildLegalPersonPsc(companyPscs, pscType.getKind(), pscType.getLinkType(), spec.getJurisdiction());
@@ -456,7 +463,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         var beneficialOwner = createBasePsc(spec, isActive, true);
         switch (pscType) {
             case INDIVIDUAL_BENEFICIAL_OWNER:
-                buildIndividualBeneficialOwner(beneficialOwner, jurisdiction);
+                buildIndividualBeneficialOwner(
+                        beneficialOwner,
+                        jurisdiction,
+                        spec.getResidentialAddressIsSameAsServiceAddress());
                 break;
             case CORPORATE_BENEFICIAL_OWNER:
                 buildCorporateBeneficialOwner(beneficialOwner, jurisdiction);
@@ -470,7 +480,10 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         return repository.save(beneficialOwner);
     }
 
-    private void buildIndividualBeneficialOwner(CompanyPscs beneficialOwner, JurisdictionType jurisdiction) {
+    private void buildIndividualBeneficialOwner(
+            CompanyPscs beneficialOwner,
+            JurisdictionType jurisdiction,
+            Boolean residentialAddressSameAsServiceAddress) {
         beneficialOwner.setKind(PscType.INDIVIDUAL_BENEFICIAL_OWNER.getKind());
         beneficialOwner.setCountryOfResidence(addressService
                 .getCountryFromSelectedProfile(jurisdiction));
@@ -491,9 +504,13 @@ public class CompanyPscServiceImpl implements CompanyPscService {
                 + PSC_SUFFIX + PscType.INDIVIDUAL_BENEFICIAL_OWNER.getLinkType()
                 + "/" + beneficialOwner.getId());
 
-        beneficialOwner.setUsualResidentialAddress(
-                addressService.getAddress(JurisdictionType.NON_EU));
-        beneficialOwner.setResidentialAddressSameAsServiceAddress(false);
+        boolean isResidentialAddressSameAsServiceAddress =
+                Boolean.TRUE.equals(residentialAddressSameAsServiceAddress);
+        beneficialOwner.setUsualResidentialAddress(isResidentialAddressSameAsServiceAddress
+                ? beneficialOwner.getAddress()
+                : addressService.getAddress(JurisdictionType.NON_EU));
+        beneficialOwner.setResidentialAddressSameAsServiceAddress(
+                isResidentialAddressSameAsServiceAddress);
     }
 
     private void buildCorporateBeneficialOwner(CompanyPscs beneficialOwner, JurisdictionType jurisdiction) {
@@ -520,7 +537,14 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     /**
      * Builds an individual PSC (filing name - PSC01).
      */
-    private void buildIndividualPsc(CompanyPscs companyPsc, String pscType, String linkType, JurisdictionType jurisdiction, Boolean sameAsRegistered, Address registeredOfficeAddress) {
+    private void buildIndividualPsc(
+            CompanyPscs companyPsc,
+            String pscType,
+            String linkType,
+            JurisdictionType jurisdiction,
+            Boolean sameAsRegistered,
+            Boolean residentialAddressSameAsServiceAddress,
+            Address registeredOfficeAddress) {
         companyPsc.setKind(pscType);
         companyPsc.setCountryOfResidence(addressService.getCountryFromSelectedProfile(jurisdiction));
         
@@ -533,11 +557,14 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         
         // Set the flag on the PSC object
         companyPsc.setServiceAddressSameAsRegisteredOfficeAddress(sameAsRegistered);
-        
-        // usualResidentialAddress should always be a different address from the service address
-        companyPsc.setUsualResidentialAddress(addressService.getAddress(jurisdiction));
-        
-        companyPsc.setResidentialAddressSameAsServiceAddress(false);
+
+        boolean isResidentialAddressSameAsServiceAddress =
+                Boolean.TRUE.equals(residentialAddressSameAsServiceAddress);
+        companyPsc.setUsualResidentialAddress(isResidentialAddressSameAsServiceAddress
+                ? companyPsc.getAddress()
+                : addressService.getAddress(jurisdiction));
+        companyPsc.setResidentialAddressSameAsServiceAddress(
+                isResidentialAddressSameAsServiceAddress);
         companyPsc.setNationality(NATIONALITY);
         companyPsc.setDateOfBirth(new DateOfBirth(20, 9, 1975));
 

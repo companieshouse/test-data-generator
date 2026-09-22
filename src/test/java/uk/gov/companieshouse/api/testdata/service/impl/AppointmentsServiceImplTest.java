@@ -234,6 +234,77 @@ class AppointmentsServiceImplTest {
     }
 
     @Test
+    void createAppointment_usesServiceAddressForResidentialAddressWhenFlagIsTrue() {
+        Address serviceAddress = new Address("19", "CHELSEA", "HAMILL SQUARE TEST DATA",
+                "United Kingdom", "LONDON", "ZZ1 1ZZ", "GREATER LONDON");
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfAppointments(1);
+        internalCompanyRequest.setOfficerRoles(Collections.singletonList(OfficerType.DIRECTOR));
+        internalCompanyRequest.setResidentialAddressIsSameAsServiceAddress(true);
+
+        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8))
+                .thenReturn(ENCODED_INTERNAL_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND_WALES))
+                .thenReturn("Wales");
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        appointmentsService.createAppointment(internalCompanyRequest, serviceAddress);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository).save(aptCaptor.capture());
+
+        Appointment appointment = aptCaptor.getValue();
+        assertTrue(appointment.getResidentialAddressIsSameAsServiceAddress());
+        assertEquals(serviceAddress.getPremise(), appointment.getUsualResidentialAddress().getPremises());
+        assertEquals(serviceAddress.getAddressLine1(), appointment.getUsualResidentialAddress().getAddressLine1());
+        assertEquals(serviceAddress.getAddressLine2(), appointment.getUsualResidentialAddress().getAddressLine2());
+        assertEquals(serviceAddress.getLocality(), appointment.getUsualResidentialAddress().getLocality());
+        assertEquals(serviceAddress.getPostalCode(), appointment.getUsualResidentialAddress().getPostalCode());
+        assertEquals(serviceAddress.getCountry(), appointment.getUsualResidentialAddress().getCountry());
+        assertEquals(serviceAddress.getRegion(), appointment.getUsualResidentialAddress().getRegion());
+    }
+
+    @Test
+    void createAppointment_defaultsResidentialAddressSameAsServiceAddressToFalse() {
+        Address serviceAddress = new Address("299", "ENRIQUE CREST TEST DATA", "PONTCANNA",
+                "United Kingdom", "CARDIFF", "ZZ1 1ZZ", "SOUTH GLAMORGAN");
+        UsualResidentialAddress usualResidentialAddress = createUsualResidentialAddress(
+                "19", "CHELSEA", "HAMILL SQUARE TEST DATA", "United Kingdom",
+                "LONDON", "ZZ1 1ZZ", "GREATER LONDON");
+        InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
+        internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
+        internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
+        internalCompanyRequest.setNumberOfAppointments(1);
+        internalCompanyRequest.setOfficerRoles(Collections.singletonList(OfficerType.DIRECTOR));
+
+        when(randomService.getNumber(INTERNAL_ID_LENGTH)).thenReturn(GENERATED_ID);
+        when(randomService.getEncodedIdWithSalt(10, 8)).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(INTERNAL_ID_PREFIX + GENERATED_ID, 8))
+                .thenReturn(ENCODED_INTERNAL_ID);
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND_WALES))
+                .thenReturn("Wales");
+        when(addressService.getUsualResidentialAddress(JurisdictionType.ENGLAND_WALES))
+                .thenReturn(usualResidentialAddress);
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        appointmentsService.createAppointment(internalCompanyRequest, serviceAddress);
+
+        ArgumentCaptor<Appointment> aptCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentsRepository).save(aptCaptor.capture());
+
+        Appointment appointment = aptCaptor.getValue();
+        assertFalse(appointment.getResidentialAddressIsSameAsServiceAddress());
+        assertEquals(usualResidentialAddress, appointment.getUsualResidentialAddress());
+        assertEquals(serviceAddress, appointment.getServiceAddress());
+    }
+
+    @Test
     void createWithMultipleAppointments() {
         final Address mockServiceAddress = new Address("", "", "", "", "", "", "");
         InternalCompanyRequest internalCompanyRequest = new InternalCompanyRequest();
@@ -1309,6 +1380,25 @@ class AppointmentsServiceImplTest {
                 .appointedOn(Instant.now())
                 .appointmentId("APPT_ID")
                 .build();
+    }
+
+    private UsualResidentialAddress createUsualResidentialAddress(
+            String premises,
+            String addressLine1,
+            String addressLine2,
+            String country,
+            String locality,
+            String postalCode,
+            String region) {
+        UsualResidentialAddress usualResidentialAddress = new UsualResidentialAddress();
+        usualResidentialAddress.setPremises(premises);
+        usualResidentialAddress.setAddressLine1(addressLine1);
+        usualResidentialAddress.setAddressLine2(addressLine2);
+        usualResidentialAddress.setCountry(country);
+        usualResidentialAddress.setLocality(locality);
+        usualResidentialAddress.setPostalCode(postalCode);
+        usualResidentialAddress.setRegion(region);
+        return usualResidentialAddress;
     }
 
     private Appointment invokeCreateBaseAppointment(AppointmentCreationRequest request) {
