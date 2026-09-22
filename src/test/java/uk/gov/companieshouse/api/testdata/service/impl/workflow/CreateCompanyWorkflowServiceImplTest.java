@@ -83,6 +83,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Mock private CompanyStructurePersistenceService companyStructurePersistenceService;
     @Mock private CompanySearchServiceImpl companySearchService;
     @Mock private AlphabeticalCompanySearchImpl alphabeticalCompanySearch;
+    @Mock private AlphabeticalCompanySearchImpl greenAlphabeticalCompanySearch;
     @Mock private AdvancedCompanySearchImpl advancedCompanySearch;
     @Mock private DeleteCompanyWorkflowService deleteCompanyWorkflowService;
     @Mock private Appointment commonAppointment;
@@ -134,6 +135,7 @@ class CreateCompanyWorkflowServiceImplTest {
                 companyStructurePersistenceService,
                 companySearchService,
                 alphabeticalCompanySearch,
+                greenAlphabeticalCompanySearch,
                 advancedCompanySearch,
                 deleteCompanyWorkflowService);
         creationService.setAPIUrl(API_URL);
@@ -544,6 +546,7 @@ class CreateCompanyWorkflowServiceImplTest {
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setAddToCompanyElasticSearchIndex(true);
         spec.setAlphabeticalSearch(true);
+        spec.setGreenAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
@@ -551,6 +554,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         verify(companySearchService, times(1)).addCompanyIntoElasticSearchIndex(result);
         verify(alphabeticalCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
+        verify(greenAlphabeticalCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
         verify(advancedCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
     }
 
@@ -561,6 +565,7 @@ class CreateCompanyWorkflowServiceImplTest {
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setAddToCompanyElasticSearchIndex(true);
         spec.setAlphabeticalSearch(true);
+        spec.setGreenAlphabeticalSearch(true);
         spec.setAdvancedSearch(true);
         setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
 
@@ -568,6 +573,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         verify(companySearchService, never()).addCompanyIntoElasticSearchIndex(result);
         verify(alphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(greenAlphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
         verify(advancedCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
     }
 
@@ -584,6 +590,24 @@ class CreateCompanyWorkflowServiceImplTest {
 
         verify(companySearchService, times(1)).addCompanyIntoElasticSearchIndex(result);
         verify(alphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(advancedCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    @Test
+    void createInternalCompanyWithoutGreenAlphabeticalSearch() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(true);
+        spec.setAdvancedSearch(true);
+        spec.setAddToCompanyElasticSearchIndex(true);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(companySearchService, times(1)).addCompanyIntoElasticSearchIndex(result);
+        verify(alphabeticalCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
+        verify(greenAlphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
         verify(advancedCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
     }
 
@@ -646,6 +670,7 @@ class CreateCompanyWorkflowServiceImplTest {
         InternalCompanyRequest capturedSpec = captureCompanySpec();
 
         assertNull(capturedSpec.getAlphabeticalSearch());
+        assertNull(capturedSpec.getGreenAlphabeticalSearch());
         assertNull(capturedSpec.getAdvancedSearch());
         assertNull(capturedSpec.getAddToCompanyElasticSearchIndex());
     }
