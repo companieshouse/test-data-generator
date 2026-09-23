@@ -25,6 +25,8 @@ public class EuProfile {
         FRANCE,
         SPAIN,
         ITALY,
-        POLAND
+        POLAND,
+        MALTA,
+        CYPRUS
     }
 }

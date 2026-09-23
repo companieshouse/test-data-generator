@@ -118,13 +118,13 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     public CompanyProfileResponse createPublicCompany(PublicCompanyRequest companySpec)
             throws DataException {
         var request = mapPublicCompanyToInternalCompanyRequest(companySpec);
-        return createCompany(request);
+        return buildAndPersistCompanyDataStructure(request);
     }
 
     @Override
     public CompanyProfileResponse createInternalCompany(InternalCompanyRequest companySpec)
             throws DataException {
-        return createCompany(companySpec);
+        return buildAndPersistCompanyDataStructure(companySpec);
     }
 
     @Override
@@ -168,15 +168,11 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             if(spec.getActiveStatements() != null && spec.getActiveStatements() > 0) {
                 LOG.info("Skipping creation of company PSCs as active statements are available");
             } else {
-                var companyPscs = companyPscService.create(spec);
+                Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
+                var companyPscs = companyPscService.create(spec, pscRegisteredOfficeAddress);
                 LOG.info("Successfully get PSCs");
                 response.setCompanyPscs(companyPscs);
             }
-
-            Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
-            var companyPscs = companyPscService.create(spec, pscRegisteredOfficeAddress);
-            LOG.info("Successfully get PSCs");
-            response.setCompanyPscs(companyPscs);
 
             if (spec.getRegisters() != null && !spec.getRegisters().isEmpty()) {
                 var companyRegisters = companyRegistersService.create(spec);
@@ -251,9 +247,12 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
 
     /**
      * Shared orchestration flow used by both public and internal company creation paths.
+     * Unlike {@link #buildCompanyDataStructure}, each step here creates and persists its own
+     * data incrementally (service-by-service) rather than returning an in-memory structure for
+     * later bulk persistence via {@link #persistCompanyDataStructure}.
      * If any creation step fails, partial company data is rolled back via {@link #handleCreateFailure}.
      */
-    protected CompanyProfileResponse createCompany(InternalCompanyRequest companySpec) throws DataException {
+    protected CompanyProfileResponse buildAndPersistCompanyDataStructure(InternalCompanyRequest companySpec) throws DataException {
         assignCompanyNumber(companySpec);
         CompanySubTypeValidator.validate(companySpec.getSubType(), companySpec.getCompanyType());
         companySpec.setCompanyWithPopulatedStructureOnly(false);

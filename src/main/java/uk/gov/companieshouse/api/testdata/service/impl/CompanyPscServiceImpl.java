@@ -130,11 +130,6 @@ public class CompanyPscServiceImpl implements CompanyPscService {
     }
 
     @Override
-    public List<CompanyPscs> create(InternalCompanyRequest internalCompanyRequest) throws DataException {
-        return create(internalCompanyRequest, null);
-    }
-
-    @Override
     public List<CompanyPscs> create(InternalCompanyRequest internalCompanyRequest, Address registeredOfficeAddress) throws DataException {
         return createInternal(internalCompanyRequest, registeredOfficeAddress);
     }

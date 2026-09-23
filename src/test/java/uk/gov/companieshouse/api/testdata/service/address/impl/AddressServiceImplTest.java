@@ -209,25 +209,29 @@ class AddressServiceImplTest {
 
     private void assertEuCountry(String country) {
         boolean valid = "Netherlands".equals(country) || "Germany".equals(country) || "France".equals(country)
-                || "Spain".equals(country) || "Italy".equals(country) || "Poland".equals(country);
+                || "Spain".equals(country) || "Italy".equals(country) || "Poland".equals(country)
+                || "Malta".equals(country) || "Cyprus".equals(country);
         assertTrue(valid, "Country should be one of the EU countries, but was: " + country);
     }
 
     private void assertEuPostcode(String postalCode) {
         boolean valid = "0000 ZZ".equals(postalCode) || "00000".equals(postalCode) || "75000".equals(postalCode)
-                || "28000".equals(postalCode) || "00-000".equals(postalCode);
+                || "28000".equals(postalCode) || "00-000".equals(postalCode)
+                || "VLT 1000".equals(postalCode) || "1000".equals(postalCode);
         assertTrue(valid, "Postcode should be one of the EU postcodes, but was: " + postalCode);
     }
 
     private void assertNonEuCountry(String country) {
         boolean valid = "Panama".equals(country) || "Canada".equals(country) || "Australia".equals(country)
-                || "Jersey".equals(country) || "Malta".equals(country) || "Cyprus".equals(country) || "Bermuda".equals(country);
+                || "Jersey".equals(country) || "Guernsey".equals(country) || "Isle of Man".equals(country)
+                || "Bermuda".equals(country);
         assertTrue(valid, "Country should be one of the non-EU countries, but was: " + country);
     }
 
     private void assertNonEuPostcode(String postalCode) {
         boolean valid = "0000-0000".equals(postalCode) || "Z9Z 9Z9".equals(postalCode) || "0000".equals(postalCode)
-                || "JE1 1AA".equals(postalCode) || "VLT 1000".equals(postalCode) || "1000".equals(postalCode) || "HM 11".equals(postalCode);
+                || "JE1 1AA".equals(postalCode) || "GY1 1AA".equals(postalCode) || "IM1 1AA".equals(postalCode)
+                || "HM 11".equals(postalCode);
         assertTrue(valid, "Postcode should be one of the non-EU postcodes, but was: " + postalCode);
     }
 
@@ -257,8 +261,8 @@ class AddressServiceImplTest {
                 Arguments.of(JurisdictionType.UNITED_KINGDOM, java.util.List.of("England", "Scotland", "Wales", "Northern Ireland")),
                 Arguments.of(JurisdictionType.ENGLAND, java.util.List.of("England")),
                 Arguments.of(JurisdictionType.WALES, java.util.List.of("Wales")),
-                Arguments.of(JurisdictionType.EUROPEAN_UNION, java.util.List.of("Netherlands", "Germany", "France", "Spain", "Italy", "Poland")),
-                Arguments.of(JurisdictionType.NON_EU, java.util.List.of("Panama", "Canada", "Australia", "Jersey", "Malta", "Cyprus", "Bermuda"))
+                Arguments.of(JurisdictionType.EUROPEAN_UNION, java.util.List.of("Netherlands", "Germany", "France", "Spain", "Italy", "Poland", "Malta", "Cyprus")),
+                Arguments.of(JurisdictionType.NON_EU, java.util.List.of("Panama", "Canada", "Australia", "Jersey", "Guernsey", "Isle of Man", "Bermuda"))
         );
     }
 }

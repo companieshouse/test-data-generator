@@ -68,7 +68,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
@@ -88,7 +88,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
 
@@ -112,7 +112,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
 
@@ -131,7 +131,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setCompanyType(CompanyType.OVERSEA_COMPANY);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -146,7 +146,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -161,7 +161,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setJurisdiction(null);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -180,7 +180,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertEquals(1, result.size());
         assertEquals(1, internalCompanyRequest.getNumberOfPscs());
@@ -202,7 +202,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertEquals(2, result.size());
         verify(repository, times(2)).save(any());
@@ -217,7 +217,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setActiveStatements(1);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertTrue(result.isEmpty());
         assertEquals(0, internalCompanyRequest.getNumberOfPscs());
@@ -236,7 +236,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setActiveStatements(1);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertTrue(result.isEmpty());
         assertEquals(0, internalCompanyRequest.getNumberOfPscs());
@@ -257,7 +257,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertEquals(1, result.size());
         assertEquals(List.of(PscType.INDIVIDUAL), internalCompanyRequest.getPscType());
@@ -280,7 +280,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
         verify(repository, atLeastOnce()).save(captor.capture());
@@ -323,7 +323,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
         verify(repository, times(3)).save(captor.capture());
@@ -348,7 +348,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         DataException exception = assertThrows(DataException.class,
-                () -> companyPscsService.create(internalCompanyRequest));
+                () -> companyPscsService.create(internalCompanyRequest, null));
 
         assertEquals("psc_type must be accompanied by number_of_psc", exception.getMessage());
         verify(repository, never()).save(any());
@@ -364,7 +364,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
         DataException exception = assertThrows(DataException.class,
-                () -> companyPscsService.create(internalCompanyRequest));
+                () -> companyPscsService.create(internalCompanyRequest, null));
 
         assertEquals("Beneficial owner type is not allowed for this company type",
                 exception.getMessage());
@@ -384,7 +384,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         verify(repository, times(2)).save(any(CompanyPscs.class));
@@ -403,7 +403,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         verify(repository, times(2)).save(any(CompanyPscs.class));
@@ -418,7 +418,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setPscType(List.of(PscType.INDIVIDUAL));
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        assertThrows(DataException.class, () -> companyPscsService.create(internalCompanyRequest));
+        assertThrows(DataException.class, () -> companyPscsService.create(internalCompanyRequest, null));
         verify(repository, never()).save(any());
     }
 
@@ -431,7 +431,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setNumberOfPscs(null);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -451,7 +451,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         verify(repository, times(3)).save(any(CompanyPscs.class));
@@ -470,7 +470,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         // placeRegistered is only set via getCountryFromSelectedProfile(ENGLAND) in buildCorporateEntityPsc
         verify(addressService, never()).getCountryFromSelectedProfile(JurisdictionType.ENGLAND);
@@ -490,7 +490,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         // placeRegistered is set via getCountryFromSelectedProfile(ENGLAND) only in buildCorporateEntityPsc
         verify(addressService).getCountryFromSelectedProfile(JurisdictionType.ENGLAND);
@@ -506,7 +506,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setPscType(null); // PscType is null
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -522,7 +522,7 @@ class CompanyPscServiceImplTest {
         internalCompanyRequest.setPscType(Collections.emptyList()); // PscType is an empty list
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(false);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -541,7 +541,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_ID);
         when(randomService.getEtag()).thenReturn(ETAG);
 
-        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest);
+        List<CompanyPscs> result = companyPscsService.create(internalCompanyRequest, null);
 
         assertNotNull(result);
         assertEquals(1, result.size());
@@ -563,7 +563,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         verify(addressService).getAddress(JurisdictionType.EUROPEAN_UNION);
         verify(addressService, never()).getAddress(JurisdictionType.ENGLAND_WALES);
@@ -582,7 +582,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(new CompanyPscs());
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         verify(addressService, times(3)).getAddress(JurisdictionType.ENGLAND_WALES);
         verify(addressService, never()).getAddress(JurisdictionType.EUROPEAN_UNION);
@@ -601,7 +601,7 @@ class CompanyPscServiceImplTest {
         when(randomService.getNumber(9)).thenReturn(123456789L);
         when(repository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         ArgumentCaptor<CompanyPscs> captor = ArgumentCaptor.forClass(CompanyPscs.class);
         verify(repository, atLeastOnce()).save(captor.capture());
@@ -634,7 +634,7 @@ class CompanyPscServiceImplTest {
                 .thenReturn(address2)
                 .thenReturn(address3);
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         // Verify getAddress was called 3 times for the jurisdiction
         verify(addressService, times(3)).getAddress(JurisdictionType.ENGLAND_WALES);
@@ -672,7 +672,7 @@ class CompanyPscServiceImplTest {
                 .thenReturn(baseAddress)
                 .thenReturn(serviceAddress);
 
-        companyPscsService.create(internalCompanyRequest);
+        companyPscsService.create(internalCompanyRequest, null);
 
         verify(addressService, times(2)).getAddress(JurisdictionType.ENGLAND_WALES);
 

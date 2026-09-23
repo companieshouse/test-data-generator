@@ -24,8 +24,8 @@ public class NonEuProfile {
         CANADA,
         AUSTRALIA,
         JERSEY,
-        MALTA,
-        CYPRUS,
+        GUERNSEY,
+        ISLE_OF_MAN,
         BERMUDA
     }
 }

@@ -57,6 +57,11 @@ public class AddressServiceImpl implements AddressService {
     private static final Faker FAKER = new Faker(Locale.UK);
     private static final Faker UK_FAKER = new Faker(Locale.UK);
     private static final Faker NETHERLANDS_FAKER = new Faker(new Locale("nl", "NL"));
+    private static final Faker GERMANY_FAKER = new Faker(Locale.GERMANY);
+    private static final Faker FRANCE_FAKER = new Faker(Locale.FRANCE);
+    private static final Faker SPAIN_FAKER = new Faker(new Locale("es", "ES"));
+    private static final Faker ITALY_FAKER = new Faker(Locale.ITALY);
+    private static final Faker POLAND_FAKER = new Faker(new Locale("pl"));
     private static final Faker PANAMA_FAKER = new Faker(new Locale("es"));
     private static final Faker CANADA_FAKER = new Faker(Locale.CANADA);
     private static final Faker AUSTRALIA_FAKER = new Faker(new Locale("en", "AU"));
@@ -239,44 +244,66 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("ST. HELIER", "TOWN CENTRE", "JERSEY ISLAND"),
             new LocalityCluster("ST. HELIER", "WATERFRONT", "JERSEY ISLAND"),
             new LocalityCluster("ST. BRELADE", "BAY AREA", "JERSEY ISLAND"),
-            new LocalityCluster("ST. CLEMENT", "CENTRE", "JERSEY ISLAND"),
-            new LocalityCluster("ST. LAWRENCE", "CENTRE", "JERSEY ISLAND"),
-            new LocalityCluster("ST. MARTIN", "CENTRE", "JERSEY ISLAND"),
-            new LocalityCluster("ST. OUEN", "CENTRE", "JERSEY ISLAND"),
-            new LocalityCluster("ST. PETER", "CENTRE", "JERSEY ISLAND")
+            new LocalityCluster("ST. CLEMENT", "SAMARES", "JERSEY ISLAND"),
+            new LocalityCluster("ST. LAWRENCE", "BEAUMONT", "JERSEY ISLAND"),
+            new LocalityCluster("ST. MARTIN", "GOREY VILLAGE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. OUEN", "LE BRAYE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. PETER", "SAINT PETER'S VALLEY", "JERSEY ISLAND")
+    };
+
+    private static final LocalityCluster[] GUERNSEY_CLUSTERS = {
+            new LocalityCluster("ST. PETER PORT", "TOWN CENTRE", "GUERNSEY ISLAND"),
+            new LocalityCluster("ST. PETER PORT", "SOUTH ESPLANADE", "GUERNSEY ISLAND"),
+            new LocalityCluster("ST. SAMPSON", "BRIDGE", "GUERNSEY ISLAND"),
+            new LocalityCluster("VALE", "L'ANCRESSE", "GUERNSEY ISLAND"),
+            new LocalityCluster("CASTEL", "COBO", "GUERNSEY ISLAND"),
+            new LocalityCluster("ST. MARTIN", "SAUMAREZ PARK", "GUERNSEY ISLAND"),
+            new LocalityCluster("FOREST", "TORTEVAL ROAD", "GUERNSEY ISLAND"),
+            new LocalityCluster("TORTEVAL", "PLEINMONT", "GUERNSEY ISLAND")
+    };
+
+    private static final LocalityCluster[] ISLE_OF_MAN_CLUSTERS = {
+            new LocalityCluster("DOUGLAS", "TOWN CENTRE", "ISLE OF MAN"),
+            new LocalityCluster("DOUGLAS", "ONCHAN", "ISLE OF MAN"),
+            new LocalityCluster("RAMSEY", "MOONEY'S TERRACE", "ISLE OF MAN"),
+            new LocalityCluster("PEEL", "GLENFABA", "ISLE OF MAN"),
+            new LocalityCluster("CASTLETOWN", "MALEW STREET", "ISLE OF MAN"),
+            new LocalityCluster("PORT ERIN", "STATION ROAD", "ISLE OF MAN"),
+            new LocalityCluster("PORT ST. MARY", "CHURCH ROAD", "ISLE OF MAN"),
+            new LocalityCluster("LAXEY", "GLEN ROAD", "ISLE OF MAN")
     };
 
     private static final LocalityCluster[] MALTA_CLUSTERS = {
-            new LocalityCluster("VALLETTA", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("SLIEMA", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("MOSTA", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("BIRKIRKARA", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("QORMI", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("NAXXAR", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("MELLIEHA", "CENTRE", "MALTA ISLAND"),
-            new LocalityCluster("BIRGU", "CENTRE", "MALTA ISLAND")
+            new LocalityCluster("VALLETTA", "ST. ELMO", "MALTA ISLAND"),
+            new LocalityCluster("SLIEMA", "TIGNE", "MALTA ISLAND"),
+            new LocalityCluster("MOSTA", "IT-TARGA", "MALTA ISLAND"),
+            new LocalityCluster("BIRKIRKARA", "SANTA VENERA", "MALTA ISLAND"),
+            new LocalityCluster("QORMI", "MRIEHEL", "MALTA ISLAND"),
+            new LocalityCluster("NAXXAR", "SALINA", "MALTA ISLAND"),
+            new LocalityCluster("MELLIEHA", "MARFA", "MALTA ISLAND"),
+            new LocalityCluster("BIRGU", "COTTONERA", "MALTA ISLAND")
     };
 
     private static final LocalityCluster[] CYPRUS_CLUSTERS = {
-            new LocalityCluster("NICOSIA", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("LIMASSOL", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("LARNACA", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("PAPHOS", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("FAMAGUSTA", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("KYRENIA", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("MORFOU", "CENTRE", "CYPRUS ISLAND"),
-            new LocalityCluster("LEFKOSIA", "CENTRE", "CYPRUS ISLAND")
+            new LocalityCluster("NICOSIA", "ENGOMI", "CYPRUS ISLAND"),
+            new LocalityCluster("LIMASSOL", "AGIOS NIKOLAOS", "CYPRUS ISLAND"),
+            new LocalityCluster("LARNACA", "FINIKOUDES", "CYPRUS ISLAND"),
+            new LocalityCluster("PAPHOS", "KATO PAFOS", "CYPRUS ISLAND"),
+            new LocalityCluster("FAMAGUSTA", "VAROSHA", "CYPRUS ISLAND"),
+            new LocalityCluster("KYRENIA", "KARAKUM", "CYPRUS ISLAND"),
+            new LocalityCluster("MORFOU", "TILLYRIA", "CYPRUS ISLAND"),
+            new LocalityCluster("AYIA NAPA", "PROTARAS", "CYPRUS ISLAND")
     };
 
     private static final LocalityCluster[] BERMUDA_CLUSTERS = {
-            new LocalityCluster("HAMILTON", "CENTRE", "PEMBROKE"),
-            new LocalityCluster("ST. GEORGE", "CENTRE", "ST. GEORGE"),
-            new LocalityCluster("DOCKYARD", "CENTRE", "SANDYS"),
-            new LocalityCluster("SOMERSET", "CENTRE", "SANDYS"),
-            new LocalityCluster("DEVONSHIRE", "CENTRE", "DEVONSHIRE"),
-            new LocalityCluster("WARWICK", "CENTRE", "WARWICK"),
-            new LocalityCluster("SOUTHAMPTON", "CENTRE", "SOUTHAMPTON"),
-            new LocalityCluster("SMITHS", "CENTRE", "SMITHS")
+            new LocalityCluster("HAMILTON", "FRONT STREET", "PEMBROKE"),
+            new LocalityCluster("ST. GEORGE", "OLD TOWN", "ST. GEORGE"),
+            new LocalityCluster("DOCKYARD", "IRELAND ISLAND", "SANDYS"),
+            new LocalityCluster("SOMERSET", "MANGROVE BAY", "SANDYS"),
+            new LocalityCluster("DEVONSHIRE", "DEVONSHIRE MARSH", "DEVONSHIRE"),
+            new LocalityCluster("WARWICK", "BELMONT", "WARWICK"),
+            new LocalityCluster("SOUTHAMPTON", "WHALE BAY", "SOUTHAMPTON"),
+            new LocalityCluster("SMITHS", "SPITTAL POND", "SMITHS")
     };
 
     private static final LocalityCluster[] PANAMA_CLUSTERS = {
@@ -328,21 +355,24 @@ public class AddressServiceImpl implements AddressService {
     };
 
     private static final EuProfile[] EU_PROFILES = {
-            new EuProfile("Netherlands", FAKER, NETHERLANDS_CLUSTERS, EuPostcodeType.NETHERLANDS),
-            new EuProfile("Germany", FAKER, GERMANY_CLUSTERS, EuPostcodeType.GERMANY),
-            new EuProfile("France", FAKER, FRANCE_CLUSTERS, EuPostcodeType.FRANCE),
-            new EuProfile("Spain", FAKER, SPAIN_CLUSTERS, EuPostcodeType.SPAIN),
-            new EuProfile("Italy", FAKER, ITALY_CLUSTERS, EuPostcodeType.ITALY),
-            new EuProfile("Poland", FAKER, POLAND_CLUSTERS, EuPostcodeType.POLAND)
+            new EuProfile("Netherlands", NETHERLANDS_FAKER, NETHERLANDS_CLUSTERS, EuPostcodeType.NETHERLANDS),
+            new EuProfile("Germany", GERMANY_FAKER, GERMANY_CLUSTERS, EuPostcodeType.GERMANY),
+            new EuProfile("France", FRANCE_FAKER, FRANCE_CLUSTERS, EuPostcodeType.FRANCE),
+            new EuProfile("Spain", SPAIN_FAKER, SPAIN_CLUSTERS, EuPostcodeType.SPAIN),
+            new EuProfile("Italy", ITALY_FAKER, ITALY_CLUSTERS, EuPostcodeType.ITALY),
+            new EuProfile("Poland", POLAND_FAKER, POLAND_CLUSTERS, EuPostcodeType.POLAND),
+            // Malta and Cyprus are EU member states (joined 2004), not non-EU jurisdictions.
+            new EuProfile("Malta", FAKER, MALTA_CLUSTERS, EuPostcodeType.MALTA),
+            new EuProfile("Cyprus", FAKER, CYPRUS_CLUSTERS, EuPostcodeType.CYPRUS)
     };
 
     private static final NonEuProfile[] NON_EU_PROFILES = {
-            new NonEuProfile("Panama", FAKER, PANAMA_CLUSTERS, NonEuPostcodeType.PANAMA),
-            new NonEuProfile("Canada", FAKER, CANADA_CLUSTERS, NonEuPostcodeType.CANADA),
-            new NonEuProfile("Australia", FAKER, AUSTRALIA_CLUSTERS, NonEuPostcodeType.AUSTRALIA),
+            new NonEuProfile("Panama", PANAMA_FAKER, PANAMA_CLUSTERS, NonEuPostcodeType.PANAMA),
+            new NonEuProfile("Canada", CANADA_FAKER, CANADA_CLUSTERS, NonEuPostcodeType.CANADA),
+            new NonEuProfile("Australia", AUSTRALIA_FAKER, AUSTRALIA_CLUSTERS, NonEuPostcodeType.AUSTRALIA),
             new NonEuProfile("Jersey", FAKER, JERSEY_CLUSTERS, NonEuPostcodeType.JERSEY),
-            new NonEuProfile("Malta", FAKER, MALTA_CLUSTERS, NonEuPostcodeType.MALTA),
-            new NonEuProfile("Cyprus", FAKER, CYPRUS_CLUSTERS, NonEuPostcodeType.CYPRUS),
+            new NonEuProfile("Guernsey", FAKER, GUERNSEY_CLUSTERS, NonEuPostcodeType.GUERNSEY),
+            new NonEuProfile("Isle of Man", FAKER, ISLE_OF_MAN_CLUSTERS, NonEuPostcodeType.ISLE_OF_MAN),
             new NonEuProfile("Bermuda", FAKER, BERMUDA_CLUSTERS, NonEuPostcodeType.BERMUDA)
     };
 
@@ -482,7 +512,7 @@ public class AddressServiceImpl implements AddressService {
 
     private UsualResidentialAddress buildAddressFromEuProfile(UsualResidentialAddress addr, EuProfile euProfile) {
         LocalityCluster cluster = FAKER.options().option(euProfile.clusters);
-        addr.setAddressLine1(FAKER.address().streetName());
+        addr.setAddressLine1(euProfile.faker.address().streetName().toUpperCase(Locale.UK));
         addr.setAddressLine2(cluster.area + " " + TEST_DATA_MARKER);
         addr.setCountry(euProfile.country);
         addr.setLocality(cluster.locality);
@@ -493,7 +523,7 @@ public class AddressServiceImpl implements AddressService {
 
     private UsualResidentialAddress buildAddressFromNonEuProfile(UsualResidentialAddress addr, NonEuProfile nonEuProfile) {
         LocalityCluster cluster = FAKER.options().option(nonEuProfile.clusters);
-        addr.setAddressLine1(FAKER.address().streetName());
+        addr.setAddressLine1(nonEuProfile.faker.address().streetName().toUpperCase(Locale.UK));
         addr.setAddressLine2(cluster.area + " " + TEST_DATA_MARKER);
         addr.setCountry(nonEuProfile.country);
         addr.setLocality(cluster.locality);
@@ -551,6 +581,8 @@ public class AddressServiceImpl implements AddressService {
             case SPAIN -> "28000";
             case ITALY -> "00000";
             case POLAND -> "00-000";
+            case MALTA -> generateMaltaPostcode();
+            case CYPRUS -> generateCyprusPostcode();
         };
     }
 
@@ -568,6 +600,14 @@ public class AddressServiceImpl implements AddressService {
 
     private String generateJerseyPostcode() {
         return "JE1 1AA";
+    }
+
+    private String generateGuernseyPostcode() {
+        return "GY1 1AA";
+    }
+
+    private String generateIsleOfManPostcode() {
+        return "IM1 1AA";
     }
 
     private String generateMaltaPostcode() {
@@ -588,8 +628,8 @@ public class AddressServiceImpl implements AddressService {
             case CANADA -> generateCanadaPostcode();
             case AUSTRALIA -> generateAustraliaPostcode();
             case JERSEY -> generateJerseyPostcode();
-            case MALTA -> generateMaltaPostcode();
-            case CYPRUS -> generateCyprusPostcode();
+            case GUERNSEY -> generateGuernseyPostcode();
+            case ISLE_OF_MAN -> generateIsleOfManPostcode();
             case BERMUDA -> generateBermudaPostcode();
         };
     }

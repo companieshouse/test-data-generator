@@ -8,7 +8,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 
 public interface CompanyPscService {
-    List<CompanyPscs> create(InternalCompanyRequest companySpec) throws DataException;
     List<CompanyPscs> create(InternalCompanyRequest companySpec, Address registeredOfficeAddress) throws DataException;
     boolean delete(String id);
 }
