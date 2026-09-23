@@ -68,7 +68,9 @@ public class IdentityVerificationServiceImpl implements
                 identity.getId(),
                 uvid.getValue(),
                 names[0],
-                names[1]
+                names[1],
+                null,
+                null
         );
 
         LOG.debug("Returning IdentityVerificationData for email "

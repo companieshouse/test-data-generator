@@ -9,23 +9,29 @@ import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.model.entity.EncryptedDiscrepancyData;
 import uk.gov.companieshouse.api.testdata.model.entity.Identity;
+import uk.gov.companieshouse.api.testdata.model.entity.Uvid;
 import uk.gov.companieshouse.api.testdata.model.rest.request.IdentityVerificationRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityResponse;
+import uk.gov.companieshouse.api.testdata.model.rest.response.IdentityVerificationResponse;
 import uk.gov.companieshouse.api.testdata.repository.IdentityRepository;
+import uk.gov.companieshouse.api.testdata.repository.UvidRepository;
 import uk.gov.companieshouse.api.testdata.service.IdentityService;
+import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
 public class IdentityServiceImpl implements IdentityService {
 
     private final IdentityRepository identityRepository;
+    private final UvidRepository uvidRepository;
+    private final RandomService randomService;
 
-    public IdentityServiceImpl(IdentityRepository identityRepository) {
+    public IdentityServiceImpl(IdentityRepository identityRepository, UvidRepository uvidRepository, RandomService randomService) {
         this.identityRepository = identityRepository;
+        this.uvidRepository = uvidRepository;
+        this.randomService = randomService;
     }
 
     @Override
-    public IdentityResponse createIdentity(
-            IdentityVerificationRequest request) {
+    public IdentityVerificationResponse createIdentity(IdentityVerificationRequest request) {
         String contextId = UUID.randomUUID().toString();
 
         Identity identity = new Identity();
@@ -55,37 +61,51 @@ public class IdentityServiceImpl implements IdentityService {
 
         identityRepository.save(identity);
 
-        return new IdentityResponse(
+        var uvid = new Uvid();
+        uvid.setValue(randomService.getString(10).toUpperCase());
+        uvid.setType("PERMANENT");
+        uvid.setIdentityId(identity.getId());
+        uvid.setCreated(Instant.now());
+        uvidRepository.save(uvid);
+
+        return new IdentityVerificationResponse(
                 identity.getId(),
+                uvid.getId(),
+                null,
+                null,
                 identity.getAcspId(),
                 identity.getAcspUserId());
     }
 
     @Override
-    public IdentityResponse getIdentity(String identityId) {
+    public IdentityVerificationResponse getIdentity(String identityId) {
 
         Optional<Identity> identity =
                 identityRepository.findById(identityId);
-
+        var uvid = uvidRepository.findByIdentityId(identityId);
         if (identity.isEmpty()) {
             return null;
         }
 
-        return new IdentityResponse(
+        return new IdentityVerificationResponse(
                 identity.get().getId(),
+                uvid.get().getId(),
+                null,
+                null,
                 identity.get().getAcspId(),
-                identity.get().getAcspUserId());
+                identity.get().getAcspUserId()
+                );
     }
 
     @Override
     public boolean deleteIdentity(String identityId) {
-
-        if (!identityRepository.existsById(identityId)) {
+        var identity = identityRepository.findById(identityId);
+        if (identity.isEmpty()) {
             return false;
         }
 
+        uvidRepository.deleteByIdentityId(identityId);
         identityRepository.deleteById(identityId);
-
         return true;
     }
 }
