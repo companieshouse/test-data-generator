@@ -6,10 +6,11 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptions;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptionsTimestamp;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
@@ -60,6 +61,23 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
         } catch (Exception ex) {
             throw new DataException("Failed to create or update company exemptions", ex);
         }
+    }
+
+    @Override
+    public CompanyExemptionsResponse getByCompanyNumber(String companyNumber) throws NoDataFoundException {
+        var exemptions = repository.findById(companyNumber)
+                .orElseThrow(() -> new NoDataFoundException("no company exemptions"));
+        return mapToResponse(exemptions);
+    }
+
+    @Override
+    public boolean deleteByCompanyNumber(String companyNumber) {
+        Optional<CompanyExemptions> exemptions = repository.findById(companyNumber);
+        if (exemptions.isEmpty()) {
+            return false;
+        }
+        repository.delete(exemptions.get());
+        return true;
     }
 
     private Map<String, Object> buildExemptionData(String companyNumber, String exemptionType) {

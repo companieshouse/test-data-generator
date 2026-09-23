@@ -59,6 +59,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     private final CompanyStructurePersistenceService companyStructurePersistenceService;
     private final CompanySearchService companySearchService;
     private final CompanySearchService alphabeticalCompanySearch;
+    private final CompanySearchService greenAlphabeticalCompanySearch;
     private final CompanySearchService advancedCompanySearch;
     private final DeleteCompanyWorkflowService deleteCompanyWorkflowService;
 
@@ -91,6 +92,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             @Qualifier("companySearchService") CompanySearchService companySearchService,
             @Qualifier("alphabeticalCompanySearchService")
             CompanySearchService alphabeticalCompanySearch,
+            @Qualifier("greenAlphabeticalCompanySearchService")
+            CompanySearchService greenAlphabeticalCompanySearch,
             @Qualifier("advancedCompanySearchService") CompanySearchService advancedCompanySearch,
             DeleteCompanyWorkflowService deleteCompanyWorkflowService) {
         this.companyProfileService = companyProfileService;
@@ -106,6 +109,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         this.companyStructurePersistenceService = companyStructurePersistenceService;
         this.companySearchService = companySearchService;
         this.alphabeticalCompanySearch = alphabeticalCompanySearch;
+        this.greenAlphabeticalCompanySearch = greenAlphabeticalCompanySearch;
         this.advancedCompanySearch = advancedCompanySearch;
         this.deleteCompanyWorkflowService = deleteCompanyWorkflowService;
     }
@@ -160,6 +164,14 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
                     companyPscStatementService.createPscStatements(spec);
             LOG.info("Successfully get all PSC statements based on spec counts.");
             response.setCompanyPscStatement(companyPscStatements);
+
+            if(spec.getActiveStatements() != null && spec.getActiveStatements() > 0) {
+                LOG.info("Skipping creation of company PSCs as active statements are available");
+            } else {
+                var companyPscs = companyPscService.create(spec);
+                LOG.info("Successfully get PSCs");
+                response.setCompanyPscs(companyPscs);
+            }
 
             Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
             var companyPscs = companyPscService.create(spec, pscRegisteredOfficeAddress);
@@ -268,9 +280,13 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             companyPscStatementService.createPscStatements(companySpec);
             LOG.info("Successfully created all PSC statements based on spec counts.");
 
-            Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(companySpec, companyProfile);
-            companyPscService.create(companySpec, pscRegisteredOfficeAddress);
-            LOG.info("Successfully created PSCs");
+            if(companySpec.getActiveStatements() != null && companySpec.getActiveStatements() > 0) {
+                LOG.info("Skipping creation of company PSCs as active statements are available");
+            } else {
+                Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(companySpec, companyProfile);
+                companyPscService.create(companySpec, pscRegisteredOfficeAddress);
+                LOG.info("Successfully created PSCs");
+            }
 
             if (companySpec.getRegisters() != null && !companySpec.getRegisters().isEmpty()) {
                 LOG.info("Creating company registers for company",
@@ -356,12 +372,19 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         }
 
         boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
+        boolean addGreenAlphabeticalIndex = spec.getGreenAlphabeticalSearch() != null;
         boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
 
         if (Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())) {
             LOG.info("Adding company to ElasticSearch index",
                     singleEntryData(COMPANY_NUMBER, spec.getCompanyNumber()));
             companySearchService.addCompanyIntoElasticSearchIndex(companyData);
+        }
+
+        if (addGreenAlphabeticalIndex) {
+            LOG.info("Adding company to Green Alphabetical Search index(Open Search): "
+                    + spec.getCompanyNumber());
+            greenAlphabeticalCompanySearch.addCompanyIntoElasticSearchIndex(companyData);
         }
 
         if (addAlphabeticalIndex) {
