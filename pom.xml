@@ -236,7 +236,7 @@
             <artifactId>datafaker</artifactId>
             <version>${datafaker.version}</version>
         </dependency>
-</dependencies>
+    </dependencies>
 
     <build>
         <plugins>
