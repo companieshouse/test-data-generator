@@ -164,17 +164,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setLinks(nonJurisdictionType.isEmpty()
                 ? createLinkForSelf(companyNumber) : createLinks(companyNumber));
 
-        var accounts = profile.getAccounts();
-        accounts.setNextDue(dateInOneYearNineMonths);
-        accounts.setPeriodStart(dateNow);
-        accounts.setPeriodEnd(dateInOneYear);
-        accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
-        accounts.setNextAccountsOverdue(false);
-        accounts.setNextMadeUpTo(dateInOneYear);
-        accounts.setAccountingReferenceDateDay(
-                String.valueOf(accountingReferenceDate.getDayOfMonth()));
-        accounts.setAccountingReferenceDateMonth(
-                String.valueOf(accountingReferenceDate.getMonthValue()));
+        if (!hasNoAccounts(companyType)) {
+            var accounts = profile.getAccounts();
+            accounts.setNextDue(dateInOneYearNineMonths);
+            accounts.setPeriodStart(dateNow);
+            accounts.setPeriodEnd(dateInOneYear);
+            accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
+            accounts.setNextAccountsOverdue(false);
+            accounts.setNextMadeUpTo(dateInOneYear);
+            accounts.setAccountingReferenceDateDay(
+                    String.valueOf(accountingReferenceDate.getDayOfMonth()));
+            accounts.setAccountingReferenceDateMonth(
+                    String.valueOf(accountingReferenceDate.getMonthValue()));
+        }
 
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(companyTypeValue);
@@ -652,6 +654,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         );
 
         return noFilingHistoryCompanyTypes.contains(companyType.getValue());
+    }
+
+    private boolean hasNoAccounts(CompanyType companyType) {
+        return CompanyType.LIMITED_PARTNERSHIP.equals(companyType);
     }
 
     @Override
