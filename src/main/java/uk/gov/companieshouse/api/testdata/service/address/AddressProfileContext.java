@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.service.address;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.RequestScope;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.service.address.profile.EuProfile;
 import uk.gov.companieshouse.api.testdata.service.address.profile.NonEuProfile;
 
@@ -16,6 +17,7 @@ public class AddressProfileContext {
     private EuProfile euProfile;
     private NonEuProfile nonEuProfile;
     private String selectedUkCountry;
+    private JurisdictionType selectedUnitedKingdomProfileType;
     
     public EuProfile getEuProfile() {
         return euProfile;
@@ -40,10 +42,19 @@ public class AddressProfileContext {
     public void setSelectedUkCountry(String selectedUkCountry) {
         this.selectedUkCountry = selectedUkCountry;
     }
+
+    public JurisdictionType getSelectedUnitedKingdomProfileType() {
+        return selectedUnitedKingdomProfileType;
+    }
+
+    public void setSelectedUnitedKingdomProfileType(JurisdictionType selectedUnitedKingdomProfileType) {
+        this.selectedUnitedKingdomProfileType = selectedUnitedKingdomProfileType;
+    }
     
     public void clear() {
         this.euProfile = null;
         this.nonEuProfile = null;
         this.selectedUkCountry = null;
+        this.selectedUnitedKingdomProfileType = null;
     }
 }

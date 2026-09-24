@@ -95,14 +95,13 @@ class AddressServiceImplTest {
     }
 
     @Test
-    @DisplayName("For UNITED_KINGDOM, getCountryFromSelectedProfile should be consistent across multiple calls")
+    @DisplayName("For UNITED_KINGDOM, an overseas country should be consistent across multiple calls")
     void testUnitedKingdomCountryConsistency() {
         mockContext.clear();
         
         // First call selects and caches a country
         String country1 = addressService.getCountryFromSelectedProfile(JurisdictionType.UNITED_KINGDOM);
-        assertTrue(isValidUkCountry(country1), 
-                   "Country should be one of the UK countries, but was: " + country1);
+        assertOverseasCountry(country1);
         
         // Subsequent calls should return the same cached country
         String country2 = addressService.getCountryFromSelectedProfile(JurisdictionType.UNITED_KINGDOM);
@@ -110,6 +109,32 @@ class AddressServiceImplTest {
         
         String country3 = addressService.getCountryFromSelectedProfile(JurisdictionType.UNITED_KINGDOM);
         assertEquals(country1, country3, "Country should remain consistent across multiple calls");
+    }
+
+    @Test
+    @DisplayName("For UNITED_KINGDOM, an EU profile generates an EU address")
+    void testUnitedKingdomUsesEuProfile() {
+        mockContext.clear();
+        mockContext.setSelectedUnitedKingdomProfileType(JurisdictionType.EUROPEAN_UNION);
+
+        UsualResidentialAddress address =
+                addressService.getUsualResidentialAddress(JurisdictionType.UNITED_KINGDOM);
+
+        assertEuCountry(address.getCountry());
+        assertEuPostcode(address.getPostalCode());
+    }
+
+    @Test
+    @DisplayName("For UNITED_KINGDOM, a non-EU profile generates a non-EU address")
+    void testUnitedKingdomUsesNonEuProfile() {
+        mockContext.clear();
+        mockContext.setSelectedUnitedKingdomProfileType(JurisdictionType.NON_EU);
+
+        UsualResidentialAddress address =
+                addressService.getUsualResidentialAddress(JurisdictionType.UNITED_KINGDOM);
+
+        assertNonEuCountry(address.getCountry());
+        assertNonEuPostcode(address.getPostalCode());
     }
 
     @Test
@@ -187,6 +212,9 @@ class AddressServiceImplTest {
         } else if (jurisdiction == JurisdictionType.EUROPEAN_UNION) {
             assertEuCountry(address.getCountry());
             assertEuPostcode(address.getPostalCode());
+        } else if (jurisdiction == JurisdictionType.UNITED_KINGDOM) {
+            assertOverseasCountry(address.getCountry());
+            assertOverseasPostcode(address.getPostalCode());
         } else if (isUkJurisdiction(jurisdiction)) {
             assertTrue(isValidUkCountry(address.getCountry()),
                     "Country should be one of the UK countries, but was: " + address.getCountry());
@@ -203,8 +231,7 @@ class AddressServiceImplTest {
                jurisdiction == JurisdictionType.SCOTLAND ||
                jurisdiction == JurisdictionType.NI ||
                jurisdiction == JurisdictionType.WALES ||
-               jurisdiction == JurisdictionType.ENGLAND ||
-               jurisdiction == JurisdictionType.UNITED_KINGDOM;
+               jurisdiction == JurisdictionType.ENGLAND;
     }
 
     private void assertEuCountry(String country) {
@@ -235,6 +262,25 @@ class AddressServiceImplTest {
         assertTrue(valid, "Postcode should be one of the non-EU postcodes, but was: " + postalCode);
     }
 
+    private void assertOverseasCountry(String country) {
+        boolean valid = "Netherlands".equals(country) || "Germany".equals(country) || "France".equals(country)
+                || "Spain".equals(country) || "Italy".equals(country) || "Poland".equals(country)
+                || "Malta".equals(country) || "Cyprus".equals(country) || "Panama".equals(country)
+                || "Canada".equals(country) || "Australia".equals(country) || "Jersey".equals(country)
+                || "Guernsey".equals(country) || "Isle of Man".equals(country) || "Bermuda".equals(country);
+        assertTrue(valid, "Country should be an EU or non-EU overseas country, but was: " + country);
+    }
+
+    private void assertOverseasPostcode(String postalCode) {
+        boolean valid = "0000 ZZ".equals(postalCode) || "00000".equals(postalCode)
+                || "75000".equals(postalCode) || "28000".equals(postalCode) || "00-000".equals(postalCode)
+                || "VLT 1000".equals(postalCode) || "1000".equals(postalCode)
+                || "0000-0000".equals(postalCode) || "Z9Z 9Z9".equals(postalCode)
+                || "JE1 1AA".equals(postalCode) || "GY1 1AA".equals(postalCode)
+                || "IM1 1AA".equals(postalCode) || "HM 11".equals(postalCode);
+        assertTrue(valid, "Postcode should be an EU or non-EU overseas postcode, but was: " + postalCode);
+    }
+
     private boolean isValidUkCountry(String country) {
         return "England".equals(country) || "Wales".equals(country) || 
                "Scotland".equals(country) || "Northern Ireland".equals(country);
@@ -246,7 +292,7 @@ class AddressServiceImplTest {
                 Arguments.of(JurisdictionType.SCOTLAND, "United Kingdom", "ZZ1 1ZZ"),
                 Arguments.of(JurisdictionType.NI, "United Kingdom", "ZZ1 1ZZ"),
                 Arguments.of(JurisdictionType.WALES, "United Kingdom", "ZZ1 1ZZ"),
-                Arguments.of(JurisdictionType.UNITED_KINGDOM, "United Kingdom", "ZZ1 1ZZ"),
+                Arguments.of(JurisdictionType.UNITED_KINGDOM, "", ""),
                 Arguments.of(JurisdictionType.ENGLAND, "United Kingdom", "ZZ1 1ZZ"),
                 Arguments.of(JurisdictionType.EUROPEAN_UNION, "Netherlands", "0000 ZZ"),
                 Arguments.of(JurisdictionType.NON_EU, "", "0000-0000")
@@ -258,7 +304,9 @@ class AddressServiceImplTest {
                 Arguments.of(JurisdictionType.ENGLAND_WALES, java.util.List.of("England", "Wales")),
                 Arguments.of(JurisdictionType.SCOTLAND, java.util.List.of("Scotland")),
                 Arguments.of(JurisdictionType.NI, java.util.List.of("Northern Ireland")),
-                Arguments.of(JurisdictionType.UNITED_KINGDOM, java.util.List.of("England", "Scotland", "Wales", "Northern Ireland")),
+                Arguments.of(JurisdictionType.UNITED_KINGDOM, java.util.List.of(
+                        "Netherlands", "Germany", "France", "Spain", "Italy", "Poland", "Malta", "Cyprus",
+                        "Panama", "Canada", "Australia", "Jersey", "Guernsey", "Isle of Man", "Bermuda")),
                 Arguments.of(JurisdictionType.ENGLAND, java.util.List.of("England")),
                 Arguments.of(JurisdictionType.WALES, java.util.List.of("Wales")),
                 Arguments.of(JurisdictionType.EUROPEAN_UNION, java.util.List.of("Netherlands", "Germany", "France", "Spain", "Italy", "Poland", "Malta", "Cyprus")),

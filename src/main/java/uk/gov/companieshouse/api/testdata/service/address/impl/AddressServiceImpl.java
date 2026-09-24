@@ -93,7 +93,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("LEICESTER", "CITY CENTRE", "LEICESTERSHIRE"),
             new LocalityCluster("COVENTRY", "CITY CENTRE", "WEST MIDLANDS"),
             new LocalityCluster("BRIGHTON", "CITY CENTRE", "EAST SUSSEX"),
-            new LocalityCluster("SOUTHAMPTON", "CITY CENTRE", "HAMPSHIRE")
+            new LocalityCluster("SOUTHAMPTON", "CITY CENTRE", "HAMPSHIRE"),
+            new LocalityCluster("EXETER", "ST. LEONARDS", "DEVON"),
+            new LocalityCluster("READING", "CAVERSHAM", "BERKSHIRE"),
+            new LocalityCluster("NORWICH", "TOMBLAND", "NORFOLK")
     };
 
     private static final LocalityCluster[] WALES_CLUSTERS = {
@@ -108,7 +111,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("WREXHAM", "ACTON", "CLWYD"),
             new LocalityCluster("ABERYSTWYTH", "TOWN CENTRE", "CEREDIGION"),
             new LocalityCluster("BANGOR", "TOWN CENTRE", "GWYNEDD"),
-            new LocalityCluster("LLANDRINDOD WELLS", "TOWN CENTRE", "POWYS")
+            new LocalityCluster("LLANDRINDOD WELLS", "TOWN CENTRE", "POWYS"),
+            new LocalityCluster("CAERPHILLY", "CASTLE QUARTER", "CAERPHILLY"),
+            new LocalityCluster("CARMARTHEN", "JOHN STREET", "CARMARTHENSHIRE"),
+            new LocalityCluster("HOLYHEAD", "PORT AREA", "ISLE OF ANGLESEY")
     };
 
     private static final LocalityCluster[] SCOTLAND_CLUSTERS = {
@@ -124,7 +130,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("DUNDEE", "WEST END", "DUNDEE CITY"),
             new LocalityCluster("STIRLING", "CITY CENTRE", "STIRLING"),
             new LocalityCluster("PERTH", "CITY CENTRE", "PERTH AND KINROSS"),
-            new LocalityCluster("INVERNESS", "CITY CENTRE", "HIGHLAND")
+            new LocalityCluster("INVERNESS", "CITY CENTRE", "HIGHLAND"),
+            new LocalityCluster("PAISLEY", "GLENBURN", "RENFREWSHIRE"),
+            new LocalityCluster("FALKIRK", "GRAHAMSTON", "FALKIRK"),
+            new LocalityCluster("AYR", "KINCALDRA", "SOUTH AYRSHIRE")
     };
 
     private static final LocalityCluster[] NI_CLUSTERS = {
@@ -140,7 +149,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("ARMAGH", "TOWN CENTRE", "ARMAGH, BANBRIDGE AND CRAIGAVON"),
             new LocalityCluster("OMAGH", "TOWN CENTRE", "FERMANAGH AND OMAGH"),
             new LocalityCluster("STRABANE", "TOWN CENTRE", "FERMANAGH AND OMAGH"),
-            new LocalityCluster("BANGOR", "TOWN CENTRE", "NORTH DOWN AND ARDS")
+            new LocalityCluster("BANGOR", "TOWN CENTRE", "NORTH DOWN AND ARDS"),
+            new LocalityCluster("COLERAINE", "LONG COMMON", "COUNTY LONDONDERRY"),
+            new LocalityCluster("ENNISKILLEN", "TOWN CENTRE", "FERMANAGH AND OMAGH"),
+            new LocalityCluster("DOWNPATRICK", "MARKET STREET", "DOWN")
     };
 
     private static final LocalityCluster[] NETHERLANDS_CLUSTERS = {
@@ -162,7 +174,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("LEIDEN", "CITY CENTRE", "ZUID-HOLLAND"),
             new LocalityCluster("DELFT", "CITY CENTRE", "ZUID-HOLLAND"),
             new LocalityCluster("ARNHEM", "CITY CENTRE", "GELDERLAND"),
-            new LocalityCluster("NIJMEGEN", "CITY CENTRE", "GELDERLAND")
+            new LocalityCluster("NIJMEGEN", "CITY CENTRE", "GELDERLAND"),
+            new LocalityCluster("ALMERE", "STADSCENTRUM", "FLEVOLAND"),
+            new LocalityCluster("BREDA", "GINNEKEN", "NOORD-BRABANT"),
+            new LocalityCluster("TILBURG", "OUDE MARKT", "NOORD-BRABANT")
     };
 
     private static final LocalityCluster[] GERMANY_CLUSTERS = {
@@ -177,7 +192,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("FRANKFURT", "WESTEND", "HESSE"),
             new LocalityCluster("LEIPZIG", "MITTE", "SAXONY"),
             new LocalityCluster("DRESDEN", "ALTSTADT", "SAXONY"),
-            new LocalityCluster("HEIDELBERG", "ALTSTADT", "BADEN-WÜRTTEMBERG")
+            new LocalityCluster("HEIDELBERG", "ALTSTADT", "BADEN-WÜRTTEMBERG"),
+            new LocalityCluster("STUTTGART", "MITTE", "BADEN-WÜRTTEMBERG"),
+            new LocalityCluster("DÜSSELDORF", "ALTSTADT", "NORTH RHINE-WESTPHALIA"),
+            new LocalityCluster("BREMEN", "SCHNOOR", "BREMEN STATE")
     };
 
     private static final LocalityCluster[] FRANCE_CLUSTERS = {
@@ -192,7 +210,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("NICE", "VIEUX NICE", "PROVENCE-ALPES-CÔTE D'AZUR"),
             new LocalityCluster("NANTES", "VIEILLE VILLE", "PAYS DE LA LOIRE"),
             new LocalityCluster("BORDEAUX", "CHARTRONS", "NOUVELLE-AQUITAINE"),
-            new LocalityCluster("LILLE", "VIEUX-LILLE", "HAUTS-DE-FRANCE")
+            new LocalityCluster("LILLE", "VIEUX-LILLE", "HAUTS-DE-FRANCE"),
+            new LocalityCluster("MONTPELLIER", "ECUSSON", "OCCITANIE"),
+            new LocalityCluster("STRASBOURG", "PETITE FRANCE", "GRAND EST"),
+            new LocalityCluster("RENNES", "CENTRE", "BRITTANY")
     };
 
     private static final LocalityCluster[] SPAIN_CLUSTERS = {
@@ -207,7 +228,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("SEVILLE", "TRIANA", "ANDALUSIA"),
             new LocalityCluster("BILBAO", "CASCO VIEJO", "BASQUE COUNTRY"),
             new LocalityCluster("MALAGA", "CENTRO", "ANDALUSIA"),
-            new LocalityCluster("PALMA", "CASCO ANTIGUO", "BALEARIC ISLANDS")
+            new LocalityCluster("PALMA", "CASCO ANTIGUO", "BALEARIC ISLANDS"),
+            new LocalityCluster("ZARAGOZA", "EL GANCHO", "ARAGON"),
+            new LocalityCluster("ALICANTE", "SANTA CRUZ", "VALENCIA"),
+            new LocalityCluster("GRANADA", "ALBAYZIN", "ANDALUSIA")
     };
 
     private static final LocalityCluster[] ITALY_CLUSTERS = {
@@ -222,7 +246,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("VENICE", "SAN MARCO", "VENETO"),
             new LocalityCluster("VENICE", "CANNAREGIO", "VENETO"),
             new LocalityCluster("TURIN", "CENTRO", "PIEDMONT"),
-            new LocalityCluster("NAPLES", "CENTRO", "CAMPANIA")
+            new LocalityCluster("NAPLES", "CENTRO", "CAMPANIA"),
+            new LocalityCluster("BOLOGNA", "SANTO STEFANO", "EMILIA-ROMAGNA"),
+            new LocalityCluster("GENOA", "BASSI", "LIGURIA"),
+            new LocalityCluster("PALERMO", "KALSA", "SICILY")
     };
 
     private static final LocalityCluster[] POLAND_CLUSTERS = {
@@ -237,7 +264,10 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("GDANSK", "STARE MIASTO", "POMERANIA"),
             new LocalityCluster("GDANSK", "WRZESZCZ", "POMERANIA"),
             new LocalityCluster("POZNAŃ", "STARE MIASTO", "GREATER POLAND"),
-            new LocalityCluster("ŁÓDŹ", "STARE MIASTO", "ŁÓDŹ VOIVODESHIP")
+            new LocalityCluster("ŁÓDŹ", "PIOTRKOWSKA", "ŁÓDŹ VOIVODESHIP"),
+            new LocalityCluster("SZCZECIN", "PODMURZE", "WEST POMERANIA"),
+            new LocalityCluster("LUBLIN", "WÓLKA", "LUBLIN VOIVODESHIP"),
+            new LocalityCluster("TORUŃ", "CHEŁMIŃSKIE", "KUYAVIA-POMERANIA")
     };
 
     private static final LocalityCluster[] JERSEY_CLUSTERS = {
@@ -248,7 +278,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("ST. LAWRENCE", "BEAUMONT", "JERSEY ISLAND"),
             new LocalityCluster("ST. MARTIN", "GOREY VILLAGE", "JERSEY ISLAND"),
             new LocalityCluster("ST. OUEN", "LE BRAYE", "JERSEY ISLAND"),
-            new LocalityCluster("ST. PETER", "SAINT PETER'S VALLEY", "JERSEY ISLAND")
+            new LocalityCluster("ST. PETER", "SAINT PETER'S VALLEY", "JERSEY ISLAND"),
+            new LocalityCluster("ST. HELIER", "LIBERATION SQUARE", "JERSEY ISLAND"),
+            new LocalityCluster("ST. SAVIOUR", "MILLBROOK", "JERSEY ISLAND")
     };
 
     private static final LocalityCluster[] GUERNSEY_CLUSTERS = {
@@ -259,7 +291,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("CASTEL", "COBO", "GUERNSEY ISLAND"),
             new LocalityCluster("ST. MARTIN", "SAUMAREZ PARK", "GUERNSEY ISLAND"),
             new LocalityCluster("FOREST", "TORTEVAL ROAD", "GUERNSEY ISLAND"),
-            new LocalityCluster("TORTEVAL", "PLEINMONT", "GUERNSEY ISLAND")
+            new LocalityCluster("TORTEVAL", "PLEINMONT", "GUERNSEY ISLAND"),
+            new LocalityCluster("ST. ANDREW", "PERYGROVE", "GUERNSEY ISLAND"),
+            new LocalityCluster("ST. MARTIN", "ROUTE DE LA HOUMETTE", "GUERNSEY ISLAND")
     };
 
     private static final LocalityCluster[] ISLE_OF_MAN_CLUSTERS = {
@@ -270,7 +304,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("CASTLETOWN", "MALEW STREET", "ISLE OF MAN"),
             new LocalityCluster("PORT ERIN", "STATION ROAD", "ISLE OF MAN"),
             new LocalityCluster("PORT ST. MARY", "CHURCH ROAD", "ISLE OF MAN"),
-            new LocalityCluster("LAXEY", "GLEN ROAD", "ISLE OF MAN")
+            new LocalityCluster("LAXEY", "GLEN ROAD", "ISLE OF MAN"),
+            new LocalityCluster("KIRK MICHAEL", "BALLAUGH", "ISLE OF MAN"),
+            new LocalityCluster("RAMSEY", "NORTH SHORE", "ISLE OF MAN")
     };
 
     private static final LocalityCluster[] MALTA_CLUSTERS = {
@@ -281,7 +317,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("QORMI", "MRIEHEL", "MALTA ISLAND"),
             new LocalityCluster("NAXXAR", "SALINA", "MALTA ISLAND"),
             new LocalityCluster("MELLIEHA", "MARFA", "MALTA ISLAND"),
-            new LocalityCluster("BIRGU", "COTTONERA", "MALTA ISLAND")
+            new LocalityCluster("BIRGU", "COTTONERA", "MALTA ISLAND"),
+            new LocalityCluster("MARSASKALA", "ZONQOR", "MALTA ISLAND"),
+            new LocalityCluster("RABAT", "HOWARD GARDENS", "MALTA ISLAND")
     };
 
     private static final LocalityCluster[] CYPRUS_CLUSTERS = {
@@ -292,7 +330,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("FAMAGUSTA", "VAROSHA", "CYPRUS ISLAND"),
             new LocalityCluster("KYRENIA", "KARAKUM", "CYPRUS ISLAND"),
             new LocalityCluster("MORFOU", "TILLYRIA", "CYPRUS ISLAND"),
-            new LocalityCluster("AYIA NAPA", "PROTARAS", "CYPRUS ISLAND")
+            new LocalityCluster("AYIA NAPA", "PROTARAS", "CYPRUS ISLAND"),
+            new LocalityCluster("PARALIMNI", "KAPPARIS", "CYPRUS ISLAND"),
+            new LocalityCluster("POLIS", "AKAMAS", "CYPRUS ISLAND")
     };
 
     private static final LocalityCluster[] BERMUDA_CLUSTERS = {
@@ -303,7 +343,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("DEVONSHIRE", "DEVONSHIRE MARSH", "DEVONSHIRE"),
             new LocalityCluster("WARWICK", "BELMONT", "WARWICK"),
             new LocalityCluster("SOUTHAMPTON", "WHALE BAY", "SOUTHAMPTON"),
-            new LocalityCluster("SMITHS", "SPITTAL POND", "SMITHS")
+            new LocalityCluster("SMITHS", "SPITTAL POND", "SMITHS"),
+            new LocalityCluster("PAGET", "ELBOW BEACH", "PAGET"),
+            new LocalityCluster("PEMBROKE", "PAR-LA-VILLE", "PEMBROKE")
     };
 
     private static final LocalityCluster[] PANAMA_CLUSTERS = {
@@ -320,7 +362,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("CHITRE", "CENTRO", "HERRERA"),
             new LocalityCluster("CHITRE", "LA ARENA", "HERRERA"),
             new LocalityCluster("LA PALMA", "TOWN CENTRE", "DARIEN"),
-            new LocalityCluster("BOCAS DEL TORO", "BOCAS TOWN", "BOCAS DEL TORO")
+            new LocalityCluster("BOCAS DEL TORO", "BOCAS TOWN", "BOCAS DEL TORO"),
+            new LocalityCluster("PENONOME", "LOS CERRITOS", "COCLE"),
+            new LocalityCluster("LAS TABLAS", "LA ERMITA", "LOS SANTOS")
     };
 
     private static final LocalityCluster[] CANADA_CLUSTERS = {
@@ -335,7 +379,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("WINNIPEG", "DOWNTOWN", "MANITOBA"),
             new LocalityCluster("EDMONTON", "DOWNTOWN", "ALBERTA"),
             new LocalityCluster("QUEBEC CITY", "VIEUX-QUEBEC", "QUEBEC"),
-            new LocalityCluster("HALIFAX", "DOWNTOWN", "NOVA SCOTIA")
+            new LocalityCluster("HALIFAX", "DOWNTOWN", "NOVA SCOTIA"),
+            new LocalityCluster("KITCHENER", "UPTOWN", "ONTARIO"),
+            new LocalityCluster("VICTORIA", "JAMES BAY", "BRITISH COLUMBIA")
     };
 
     private static final LocalityCluster[] AUSTRALIA_CLUSTERS = {
@@ -351,7 +397,9 @@ public class AddressServiceImpl implements AddressService {
             new LocalityCluster("HOBART", "CITY CENTRE", "TASMANIA"),
             new LocalityCluster("DARWIN", "CITY CENTRE", "NORTHERN TERRITORY"),
             new LocalityCluster("PERTH", "CITY CENTRE", "WESTERN AUSTRALIA"),
-            new LocalityCluster("ADELAIDE", "CITY CENTRE", "SOUTH AUSTRALIA")
+            new LocalityCluster("ADELAIDE", "CITY CENTRE", "SOUTH AUSTRALIA"),
+            new LocalityCluster("GEELONG", "NEW TOWN", "VICTORIA"),
+            new LocalityCluster("WOLLONGONG", "NORTH BEACH", "NEW SOUTH WALES")
     };
 
     private static final EuProfile[] EU_PROFILES = {
@@ -401,11 +449,15 @@ public class AddressServiceImpl implements AddressService {
             EuProfile euProfile = getOrSelectEuProfile();
             return euProfile.country;
         }
-        if (jurisdiction == JurisdictionType.NON_EU) {
+        if (jurisdiction == JurisdictionType.NON_EU
+                || jurisdiction == JurisdictionType.UNITED_KINGDOM) {
+            if (jurisdiction == JurisdictionType.UNITED_KINGDOM
+                    && getOrSelectUnitedKingdomProfileType() == JurisdictionType.EUROPEAN_UNION) {
+                return getOrSelectEuProfile().country;
+            }
             NonEuProfile nonEuProfile = getOrSelectNonEuProfile();
             return nonEuProfile.country;
         }
-        // For UK jurisdictions, return the selected UK country
         return getOrSelectUkCountry(jurisdiction);
     }
 
@@ -420,6 +472,13 @@ public class AddressServiceImpl implements AddressService {
                 jurisdiction != null ? jurisdiction : JurisdictionType.ENGLAND_WALES;
         UsualResidentialAddress residentialAddress = new UsualResidentialAddress();
         residentialAddress.setPremises(String.valueOf(FAKER.number().numberBetween(1, 300)));
+
+        if (effectiveJurisdiction == JurisdictionType.UNITED_KINGDOM) {
+            if (getOrSelectUnitedKingdomProfileType() == JurisdictionType.EUROPEAN_UNION) {
+                return buildAddressFromEuProfile(residentialAddress, getOrSelectEuProfile());
+            }
+            return buildAddressFromNonEuProfile(residentialAddress, getOrSelectNonEuProfile());
+        }
 
         if (isUkJurisdiction(effectiveJurisdiction)) {
             LocalityCluster cluster = getUkClusterForJurisdiction(effectiveJurisdiction);
@@ -466,6 +525,19 @@ public class AddressServiceImpl implements AddressService {
         return nonEuProfile;
     }
 
+    private JurisdictionType getOrSelectUnitedKingdomProfileType() {
+        if (addressProfileContext == null) {
+            return FAKER.options().option(JurisdictionType.EUROPEAN_UNION, JurisdictionType.NON_EU);
+        }
+        JurisdictionType selectedProfileType = addressProfileContext.getSelectedUnitedKingdomProfileType();
+        if (selectedProfileType == null) {
+            selectedProfileType = FAKER.options().option(
+                    JurisdictionType.EUROPEAN_UNION, JurisdictionType.NON_EU);
+            addressProfileContext.setSelectedUnitedKingdomProfileType(selectedProfileType);
+        }
+        return selectedProfileType;
+    }
+
     private String getOrSelectUkCountry(JurisdictionType jurisdiction) {
         if (addressProfileContext == null) {
             return resolveUkCountry(jurisdiction);
@@ -491,21 +563,6 @@ public class AddressServiceImpl implements AddressService {
             case WALES -> "Wales";
             case SCOTLAND -> "Scotland";
             case NI -> "Northern Ireland";
-            case UNITED_KINGDOM -> {
-                // Randomly pick one of the four countries
-                JurisdictionType selected = FAKER.options().option(
-                        JurisdictionType.ENGLAND,
-                        JurisdictionType.WALES,
-                        JurisdictionType.SCOTLAND,
-                        JurisdictionType.NI);
-                yield switch (selected) {
-                    case ENGLAND -> "England";
-                    case WALES -> "Wales";
-                    case SCOTLAND -> "Scotland";
-                    case NI -> "Northern Ireland";
-                    default -> "United Kingdom";
-                };
-            }
             default -> "United Kingdom";
         };
     }
@@ -543,25 +600,15 @@ public class AddressServiceImpl implements AddressService {
             case WALES -> FAKER.options().option(WALES_CLUSTERS);
             case SCOTLAND -> FAKER.options().option(SCOTLAND_CLUSTERS);
             case NI -> FAKER.options().option(NI_CLUSTERS);
-            case UNITED_KINGDOM -> {
-                String selectedCountry = getOrSelectUkCountry(jurisdiction);
-                JurisdictionType selectedJurisdiction = switch (selectedCountry) {
-                    case "England" -> JurisdictionType.ENGLAND;
-                    case "Wales" -> JurisdictionType.WALES;
-                    case "Scotland" -> JurisdictionType.SCOTLAND;
-                    case "Northern Ireland" -> JurisdictionType.NI;
-                    default -> JurisdictionType.ENGLAND;
-                };
-                yield getUkClusterForJurisdiction(selectedJurisdiction);
-            }
-            case EUROPEAN_UNION, NON_EU -> throw new IllegalStateException("Unexpected non-UK jurisdiction");
+            case EUROPEAN_UNION, NON_EU, UNITED_KINGDOM ->
+                    throw new IllegalStateException("Unexpected non-UK jurisdiction");
         };
     }
 
     private boolean isUkJurisdiction(JurisdictionType jurisdiction) {
         return switch (jurisdiction) {
-            case ENGLAND_WALES, WALES, SCOTLAND, NI, ENGLAND, UNITED_KINGDOM -> true;
-            case EUROPEAN_UNION, NON_EU -> false;
+            case ENGLAND_WALES, WALES, SCOTLAND, NI, ENGLAND -> true;
+            case EUROPEAN_UNION, NON_EU, UNITED_KINGDOM -> false;
         };
     }
 
