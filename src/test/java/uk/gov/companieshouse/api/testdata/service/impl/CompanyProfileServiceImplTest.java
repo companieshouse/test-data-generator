@@ -284,6 +284,38 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
+    void createLimitedPartnershipDoesNotPopulateAccounts() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+
+        CompanyProfile.Accounts accounts = profile.getAccounts();
+        assertNull(accounts.getNextDue());
+        assertNull(accounts.getPeriodStart());
+        assertNull(accounts.getPeriodEnd());
+        assertNull(accounts.getNextAccountsDueOn());
+        assertNull(accounts.getNextAccountsOverdue());
+        assertNull(accounts.getNextMadeUpTo());
+        assertNull(accounts.getAccountingReferenceDateDay());
+        assertNull(accounts.getAccountingReferenceDateMonth());
+    }
+
+    @Test
+    void createLimitedPartnershipStillPopulatesConfirmationStatement() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+
+        assertOnConfirmationStatement(profile.getConfirmationStatement());
+    }
+
+    @Test
+    void createNonLimitedPartnershipStillPopulatesAccounts() {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+
+        assertOnAccounts(profile.getAccounts());
+    }
+
+    @Test
     void createLtdWithPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequestException() {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
         internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP);
