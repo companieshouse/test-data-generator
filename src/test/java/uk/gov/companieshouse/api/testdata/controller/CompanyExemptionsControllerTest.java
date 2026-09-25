@@ -2,6 +2,7 @@ package uk.gov.companieshouse.api.testdata.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -71,6 +72,28 @@ class CompanyExemptionsControllerTest {
     }
 
     @Test
+    void updateCompanyExemptions() throws NoDataFoundException, DataException {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("psc_exempt_as_trading_on_regulated_market");
+
+        CompanyExemptionsResponse responseBody = new CompanyExemptionsResponse();
+        responseBody.setCompanyNumber(COMPANY_NUMBER);
+        responseBody.setDeltaAt("2026-08-19T11:00:00Z");
+        responseBody.setCreatedAt(Instant.parse("2026-08-19T10:00:00Z"));
+        responseBody.setUpdatedAt(Instant.parse("2026-08-19T11:00:00Z"));
+
+        when(companyExemptionsService.updateByCompanyNumber(COMPANY_NUMBER, request)).thenReturn(responseBody);
+
+        ResponseEntity<CompanyExemptionsResponse> response =
+                companyExemptionsController.updateCompanyExemptions(COMPANY_NUMBER, request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(responseBody, response.getBody());
+        verify(companyExemptionsService, times(1)).updateByCompanyNumber(COMPANY_NUMBER, request);
+    }
+
+    @Test
     void deleteCompanyExemptions() {
         when(companyExemptionsService.deleteByCompanyNumber(COMPANY_NUMBER)).thenReturn(true);
 
@@ -93,5 +116,79 @@ class CompanyExemptionsControllerTest {
         assertEquals(COMPANY_NUMBER, Objects.requireNonNull(response.getBody()).get("company_number"));
         assertEquals(HttpStatus.NOT_FOUND, response.getBody().get("status"));
         verify(companyExemptionsService, times(1)).deleteByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void createOrUpdateCompanyExemptionsWithInvalidExemptionType() throws DataException {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("invalid_exemption_type");
+
+        when(companyExemptionsService.createOrUpdate(request))
+                .thenThrow(new IllegalArgumentException("Invalid exemption type: invalid_exemption_type. Allowed types: [...]"));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> companyExemptionsController.createOrUpdateCompanyExemptions(request));
+
+        assertEquals("Invalid exemption type: invalid_exemption_type. Allowed types: [...]", exception.getMessage());
+        verify(companyExemptionsService, times(1)).createOrUpdate(request);
+    }
+
+    @Test
+    void updateCompanyExemptionsWithInvalidExemptionType() throws NoDataFoundException, DataException {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("psc_exempt_as_shares_admittedn_on_market");
+
+        when(companyExemptionsService.updateByCompanyNumber(COMPANY_NUMBER, request))
+                .thenThrow(new IllegalArgumentException("Invalid exemption type: psc_exempt_as_shares_admittedn_on_market. Allowed types: [...]"));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> companyExemptionsController.updateCompanyExemptions(COMPANY_NUMBER, request));
+
+        assertEquals("Invalid exemption type: psc_exempt_as_shares_admittedn_on_market. Allowed types: [...]", exception.getMessage());
+        verify(companyExemptionsService, times(1)).updateByCompanyNumber(COMPANY_NUMBER, request);
+    }
+
+    @Test
+    void getCompanyExemptionsNotFound() throws NoDataFoundException {
+        when(companyExemptionsService.getByCompanyNumber(COMPANY_NUMBER))
+                .thenThrow(new NoDataFoundException("no company exemptions"));
+
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class,
+                () -> companyExemptionsController.getCompanyExemptions(COMPANY_NUMBER));
+
+        assertEquals("no company exemptions", exception.getMessage());
+        verify(companyExemptionsService, times(1)).getByCompanyNumber(COMPANY_NUMBER);
+    }
+
+    @Test
+    void updateCompanyExemptionsNotFound() throws NoDataFoundException, DataException {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        when(companyExemptionsService.updateByCompanyNumber(COMPANY_NUMBER, request))
+                .thenThrow(new NoDataFoundException("no company exemptions"));
+
+        NoDataFoundException exception = assertThrows(NoDataFoundException.class,
+                () -> companyExemptionsController.updateCompanyExemptions(COMPANY_NUMBER, request));
+
+        assertEquals("no company exemptions", exception.getMessage());
+        verify(companyExemptionsService, times(1)).updateByCompanyNumber(COMPANY_NUMBER, request);
+    }
+
+    @Test
+    void updateCompanyExemptionsThrowsDataException() throws NoDataFoundException, DataException {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        when(companyExemptionsService.updateByCompanyNumber(COMPANY_NUMBER, request))
+                .thenThrow(new DataException("Failed to update company exemptions", null));
+
+        DataException exception = assertThrows(DataException.class,
+                () -> companyExemptionsController.updateCompanyExemptions(COMPANY_NUMBER, request));
+
+        assertEquals("Failed to update company exemptions", exception.getMessage());
+        verify(companyExemptionsService, times(1)).updateByCompanyNumber(COMPANY_NUMBER, request);
     }
 }
