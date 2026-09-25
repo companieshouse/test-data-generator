@@ -370,9 +370,9 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             return;
         }
 
-        boolean addAlphabeticalIndex = spec.getAlphabeticalSearch() != null;
-        boolean addGreenAlphabeticalIndex = spec.getGreenAlphabeticalSearch() != null;
-        boolean addAdvancedIndex = spec.getAdvancedSearch() != null;
+        boolean addAlphabeticalIndex = Boolean.TRUE.equals(spec.getAlphabeticalSearch());
+        boolean addGreenAlphabeticalIndex = Boolean.TRUE.equals(spec.getGreenAlphabeticalSearch());
+        boolean addAdvancedIndex = Boolean.TRUE.equals(spec.getAdvancedSearch());
 
         if (Boolean.TRUE.equals(spec.getAddToCompanyElasticSearchIndex())) {
             LOG.info("Adding company to ElasticSearch index",
