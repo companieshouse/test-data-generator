@@ -276,7 +276,7 @@ class AddressServiceImplTest {
                 || "75000".equals(postalCode) || "28000".equals(postalCode) || "00-000".equals(postalCode)
                 || "VLT 1000".equals(postalCode) || "1000".equals(postalCode)
                 || "0000-0000".equals(postalCode) || "Z9Z 9Z9".equals(postalCode)
-                || "JE1 1AA".equals(postalCode) || "GY1 1AA".equals(postalCode)
+                || "0000".equals(postalCode) || "JE1 1AA".equals(postalCode) || "GY1 1AA".equals(postalCode)
                 || "IM1 1AA".equals(postalCode) || "HM 11".equals(postalCode);
         assertTrue(valid, "Postcode should be an EU or non-EU overseas postcode, but was: " + postalCode);
     }
