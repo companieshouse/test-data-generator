@@ -343,20 +343,33 @@ For example, if one corporate officer role and five identification types are sup
   - Adding multiple missing image deliveries example: `{"company_name": "ACME Company", "company_number": "SC172618", "customer_reference": "test", "item_costs": [ { "discount_applied": "0", "item_cost": "15", "calculated_cost": "15", "product_type": "certified-copy" } ], "item_options": [ { "filing_history_date": "2018-04-06", "filing_history_description": "accounts-with-accounts-type-small", "filing_history_description_values": { "capital": [ { "figure": "34,253,377", "currency": "GBP" } ], "charge_number": "908484848", "date": "2019-11-10", "made_up_date": "2019-12-10", "officer_name": "Officer test" }, "filing_history_id": "MzIwMTkzODk1NGFkaXF6a2N6", "filing_history_type": "AA", "filing_history_category": "accounts", "filing_history_barcode": "L72QXI0Y" }, { "filing_history_date": "2018-04-23", "filing_history_description": "mortgage-create-with-deed-with-charge-number", "filing_history_description_values": { "charge_number": "029231400009" }, "filing_history_id": "MzIwMzkwNTUxNmFkaXF6a2N0", "filing_history_type": "MR01", "filing_history_category": "mortgage", "filing_history_barcode": "J74HTP8H" } ], "kind": "item#missing-image-delivery", "quantity": 1, "postal_delivery": false, "user_id": "Y2VkZWVlMzhlZWFjY2M4MzQ3MT", "basket": { "forename": "John", "surname": "Doe", "enrolled": true }, "postage_cost": "0", "total_item_cost": "30" }`
 - DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/missing-image-deliveries/{id}` will delete the test missing image deliveries.
 
-#### Creating, Retrieving, and Deleting Company Exemptions
+#### Creating, Retrieving, Updating and Deleting Company Exemptions
 - POST: Sending a POST request to `{Base URL}/test-data/internal/exemptions` will create or update a company exemptions entry in the `company_exemptions` db collection. The exemption document is auto-generated based on the type provided.
   - `company_number`: Company number used as the exemptions document `_id`. Mandatory.
-  - `exemption_type`: The type of exemption to generate. Optional — if omitted, a random type is selected from: `psc_exempt_as_trading_on_regulated_market`, `psc_exempt_as_shares_admitted_on_market`, `psc_exempt_as_trading_on_uk_regulated_market`, `psc_exempt_as_trading_on_eu_regulated_market`, `disclosure_transparency_rules_chapter_five_applies`.
+  - `exemption_type`: The type of exemption to generate. Optional — if omitted, a random type is selected from the allowed list below. Must be one of the allowed types, otherwise a validation error is returned.
   - `data`: Optional custom exemption data. If omitted, data is auto-generated.
+
+  **Allowed Exemption Types:**
+  - `psc_exempt_as_trading_on_regulated_market`
+  - `psc_exempt_as_shares_admitted_on_market`
+  - `psc_exempt_as_trading_on_uk_regulated_market`
+  - `psc_exempt_as_trading_on_eu_regulated_market`
+  - `disclosure_transparency_rules_chapter_five_applies`
 
   **Supported Request Types:**
   1. Minimal (auto-generate random type): `{"company_number":"AC123456"}`
   2. With specific exemption type: `{"company_number":"AC123456","exemption_type":"psc_exempt_as_trading_on_regulated_market"}`
   3. With custom data: `{"company_number":"AC123456","data":{...custom exemption data...}}`
 
-- GET: Sending a GET request to `{Base URL}/test-data/internal/exemptions/{companyNumber}` will retrieve the company exemptions entry by company number.
+  **Error Responses:**
+  - Invalid exemption type: Returns 400 Bad Request with error message listing allowed types
+  - Missing company_number: Returns 400 Bad Request
 
-- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/internal/exemptions/{companyNumber}` will delete the company exemptions entry.
+- GET: Sending a GET request to `{Base URL}/test-data/internal/exemptions/{companyNumber}` will retrieve the company exemptions entry by company number. Returns 200 OK on success, 404 Not Found if the exemption does not exist.
+
+- PUT: Sending a PUT request to `{Base URL}/test-data/internal/exemptions/{companyNumber}` will update an existing company exemptions entry. The exemption must exist, and the created timestamp is preserved while the updated timestamp is set to now. Supports the same exemption_type validation as POST. Returns 200 OK on success, 404 Not Found if exemption does not exist, 400 Bad Request for invalid exemption type.
+
+- DELETE: Sending a DELETE request on the endpoint `{Base URL}/test-data/internal/exemptions/{companyNumber}` will delete the company exemptions entry. Returns 204 No Content on success, 404 Not Found if exemption does not exist.
 
 #### Creating, Retrieving, Updating and Deleting Account Penalties
 - POST: Sending a POST request to create Account Penalties `{Base URL}/test-data/penalties` will create an Account Penalties entry in the account_penalties db collection. The request body must include all mandatory fields of `companyCode`, `customer_code` and `amount` then optional fields of `createdAt`, `closedAt`, `isPaid`, `amount`, `number_of_penalties`, `type_description`, `ledger_code`, `dunning_status`, `account_status`, `outstandingAMount`, `transaction_type` and `transaction_sub_type` parameters.
