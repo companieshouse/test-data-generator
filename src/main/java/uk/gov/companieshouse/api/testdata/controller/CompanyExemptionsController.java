@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,7 +38,11 @@ public class CompanyExemptionsController {
 
     @PostMapping("/exemptions")
     public ResponseEntity<CompanyExemptionsResponse> createOrUpdateCompanyExemptions(
-            @Valid @RequestBody CompanyExemptionsRequest request) throws DataException {
+            @Valid @RequestBody CompanyExemptionsRequest request) throws DataException, IllegalArgumentException {
+
+        if (request.getCompanyNumber() == null || request.getCompanyNumber().isEmpty()) {
+            throw new DataException("Company number is required");
+        }
 
         var createdExemptions = companyExemptionsService.createOrUpdate(request);
         LOG.info("Company exemptions created or updated for company number: "
@@ -49,6 +54,20 @@ public class CompanyExemptionsController {
     public ResponseEntity<CompanyExemptionsResponse> getCompanyExemptions(
             @PathVariable("companyNumber") String companyNumber) throws NoDataFoundException {
         return ResponseEntity.ok(companyExemptionsService.getByCompanyNumber(companyNumber));
+    }
+
+    @PutMapping("/exemptions/{companyNumber}")
+    public ResponseEntity<CompanyExemptionsResponse> updateCompanyExemptions(
+            @PathVariable("companyNumber") String companyNumber,
+            @Valid @RequestBody CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException {
+
+        if (companyNumber == null || companyNumber.isEmpty()) {
+            throw new DataException("Company number is required");
+        }
+
+        var updatedExemptions = companyExemptionsService.updateByCompanyNumber(companyNumber, request);
+        LOG.info("Company exemptions updated for company number: " + companyNumber);
+        return ResponseEntity.ok(updatedExemptions);
     }
 
     @DeleteMapping("/exemptions/{companyNumber}")

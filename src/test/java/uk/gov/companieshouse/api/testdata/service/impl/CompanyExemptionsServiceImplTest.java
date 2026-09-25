@@ -154,6 +154,34 @@ class CompanyExemptionsServiceImplTest {
     }
 
     @Test
+    void createCompanyExemptionsThrowsIllegalArgumentExceptionForInvalidExemptionType() {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("invalid_exemption_type");
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.createOrUpdate(request));
+        assertTrue(exception.getMessage().contains("Invalid exemption type"));
+        assertTrue(exception.getMessage().contains("invalid_exemption_type"));
+    }
+
+    @Test
+    void updateCompanyExemptionsThrowsIllegalArgumentExceptionForInvalidExemptionType() {
+        CompanyExemptions existing = new CompanyExemptions();
+        existing.setId(COMPANY_NUMBER);
+
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("psc_exempt_as_shares_admittedn_on_market");  // Typo: admittedn instead of admitted
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(existing));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateByCompanyNumber(COMPANY_NUMBER, request));
+        assertTrue(exception.getMessage().contains("Invalid exemption type"));
+    }
+
+    @Test
     void getCompanyExemptions() throws NoDataFoundException {
         CompanyExemptions entity = new CompanyExemptions();
         entity.setId(COMPANY_NUMBER);
@@ -168,6 +196,38 @@ class CompanyExemptionsServiceImplTest {
     void getCompanyExemptionsNotFound() {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         assertThrows(NoDataFoundException.class, () -> service.getByCompanyNumber(COMPANY_NUMBER));
+    }
+
+    @Test
+    void updateCompanyExemptions() throws NoDataFoundException, DataException {
+        CompanyExemptions existing = new CompanyExemptions();
+        existing.setId(COMPANY_NUMBER);
+        CompanyExemptionsTimestamp created = new CompanyExemptionsTimestamp();
+        created.setAt(Instant.parse("2026-08-18T00:00:00Z"));
+        existing.setCreated(created);
+
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("psc_exempt_as_trading_on_uk_regulated_market");
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(existing));
+        when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CompanyExemptionsResponse response = service.updateByCompanyNumber(COMPANY_NUMBER, request);
+
+        assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
+        assertEquals(Instant.parse("2026-08-18T00:00:00Z"), response.getCreatedAt());
+        assertNotNull(response.getUpdatedAt());
+        verify(repository, times(1)).save(any(CompanyExemptions.class));
+    }
+
+    @Test
+    void updateCompanyExemptionsNotFound() {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertThrows(NoDataFoundException.class, () -> service.updateByCompanyNumber(COMPANY_NUMBER, request));
     }
 
     @Test

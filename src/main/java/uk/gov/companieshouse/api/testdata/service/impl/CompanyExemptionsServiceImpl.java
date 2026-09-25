@@ -35,7 +35,7 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
     private CompanyExemptionsRepository repository;
 
     @Override
-    public CompanyExemptionsResponse createOrUpdate(CompanyExemptionsRequest request) throws DataException {
+    public CompanyExemptionsResponse createOrUpdate(CompanyExemptionsRequest request) throws DataException, IllegalArgumentException {
         Instant now = Instant.now();
         String companyNumber = request.getCompanyNumber();
 
@@ -44,20 +44,22 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
 
         exemptions.setId(companyNumber);
 
-        if (request.getData() != null && !request.getData().isEmpty()) {
-            exemptions.setData(request.getData());
-        } else {
-            exemptions.setData(buildExemptionData(companyNumber, request.getExemptionType()));
-        }
-        exemptions.setDeltaAt(now.toString());
-
-        if (exemptions.getCreated() == null || exemptions.getCreated().getAt() == null) {
-            exemptions.setCreated(buildTimestamp(now));
-        }
-        exemptions.setUpdated(buildTimestamp(now));
-
         try {
+            if (request.getData() != null && !request.getData().isEmpty()) {
+                exemptions.setData(request.getData());
+            } else {
+                exemptions.setData(buildExemptionData(companyNumber, request.getExemptionType()));
+            }
+            exemptions.setDeltaAt(now.toString());
+
+            if (exemptions.getCreated() == null || exemptions.getCreated().getAt() == null) {
+                exemptions.setCreated(buildTimestamp(now));
+            }
+            exemptions.setUpdated(buildTimestamp(now));
+
             return mapToResponse(repository.save(exemptions));
+        } catch (IllegalArgumentException ex) {
+            throw ex;
         } catch (Exception ex) {
             throw new DataException("Failed to create or update company exemptions", ex);
         }
@@ -71,6 +73,30 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
     }
 
     @Override
+    public CompanyExemptionsResponse updateByCompanyNumber(String companyNumber, CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException {
+        Instant now = Instant.now();
+
+        CompanyExemptions exemptions = repository.findById(companyNumber)
+                .orElseThrow(() -> new NoDataFoundException("no company exemptions"));
+
+        try {
+            if (request.getData() != null && !request.getData().isEmpty()) {
+                exemptions.setData(request.getData());
+            } else {
+                exemptions.setData(buildExemptionData(companyNumber, request.getExemptionType()));
+            }
+            exemptions.setDeltaAt(now.toString());
+            exemptions.setUpdated(buildTimestamp(now));
+
+            return mapToResponse(repository.save(exemptions));
+        } catch (IllegalArgumentException ex) {
+            throw ex;
+        } catch (Exception ex) {
+            throw new DataException("Failed to update company exemptions", ex);
+        }
+    }
+
+    @Override
     public boolean deleteByCompanyNumber(String companyNumber) {
         Optional<CompanyExemptions> exemptions = repository.findById(companyNumber);
         if (exemptions.isEmpty()) {
@@ -81,9 +107,17 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
     }
 
     private Map<String, Object> buildExemptionData(String companyNumber, String exemptionType) {
-        String selectedType = (exemptionType == null || exemptionType.isBlank())
-                ? EXEMPTION_TYPES.get(SECURE_RANDOM.nextInt(EXEMPTION_TYPES.size()))
-                : exemptionType;
+        String selectedType;
+
+        if (exemptionType == null || exemptionType.isBlank()) {
+            selectedType = EXEMPTION_TYPES.get(SECURE_RANDOM.nextInt(EXEMPTION_TYPES.size()));
+        } else {
+            if (!EXEMPTION_TYPES.contains(exemptionType)) {
+                throw new IllegalArgumentException("Invalid exemption type: " + exemptionType
+                        + ". Allowed types: " + EXEMPTION_TYPES);
+            }
+            selectedType = exemptionType;
+        }
 
         String exemptionTypeValue = selectedType.replace("_", "-");
 
