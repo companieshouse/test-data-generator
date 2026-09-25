@@ -47,7 +47,7 @@
         <api-security-java.version>2.0.25</api-security-java.version>
         <private-api-sdk-java.version>7.2.19</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
-        <test-data-generator-library.version>1.0.42</test-data-generator-library.version>
+        <test-data-generator-library.version>1.0.43</test-data-generator-library.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
@@ -57,6 +57,7 @@
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
         <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
+        <datafaker.version>2.5.2</datafaker.version>
     </properties>
 
     <dependencyManagement>
@@ -229,6 +230,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-bind.version}</version>
             <scope>compile</scope>
+        </dependency>
+            <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
         </dependency>
     </dependencies>
 

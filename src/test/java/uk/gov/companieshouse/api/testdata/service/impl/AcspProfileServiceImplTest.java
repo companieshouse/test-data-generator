@@ -32,7 +32,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AcspProfileRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @ExtendWith(MockitoExtension.class)
@@ -246,7 +246,7 @@ class AcspProfileServiceImplTest {
         when(randomService.getNumber(6)).thenReturn(Long.valueOf("100001"));
         when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM)).thenReturn(new Address());
         when(addressService
-                .getCountryOfResidence(JurisdictionType.ENGLAND)).thenReturn("England");
+                .getCountryFromSelectedProfile(JurisdictionType.ENGLAND)).thenReturn("England");
         when(repository.save(any(AcspProfile.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -273,7 +273,7 @@ class AcspProfileServiceImplTest {
         when(randomService.getNumber(6)).thenReturn(Long.valueOf("100001"));
         when(addressService.getAddress(JurisdictionType.UNITED_KINGDOM)).thenReturn(new Address());
         when(addressService
-                .getCountryOfResidence(JurisdictionType.ENGLAND)).thenReturn("England");
+                .getCountryFromSelectedProfile(JurisdictionType.ENGLAND)).thenReturn("England");
         when(repository.save(any(AcspProfile.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 

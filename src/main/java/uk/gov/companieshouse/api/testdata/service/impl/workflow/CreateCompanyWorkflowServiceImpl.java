@@ -9,10 +9,12 @@ import uk.gov.companieshouse.api.handler.exception.URIValidationException;
 import uk.gov.companieshouse.api.testdata.Application;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
+import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
+import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
@@ -116,13 +118,13 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     public CompanyProfileResponse createPublicCompany(PublicCompanyRequest companySpec)
             throws DataException {
         var request = mapPublicCompanyToInternalCompanyRequest(companySpec);
-        return createCompany(request);
+        return buildAndPersistCompanyDataStructure(request);
     }
 
     @Override
     public CompanyProfileResponse createInternalCompany(InternalCompanyRequest companySpec)
             throws DataException {
-        return createCompany(companySpec);
+        return buildAndPersistCompanyDataStructure(companySpec);
     }
 
     @Override
@@ -144,9 +146,10 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             response.setFilingHistory(filingHistory);
 
             if (spec.getNoDefaultOfficer() == null || !spec.getNoDefaultOfficer()) {
-                var appointments = appointmentService.createAppointment(spec);
+                Address registeredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
+                var appointments = appointmentService.createAppointment(spec, registeredOfficeAddress);
                 LOG.info("Successfully get appointments ");
-                response.setAppointmentsData(appointments);
+                response.setAppointments(appointments);
             }
 
             var authCode = companyAuthCodeService.create(spec);
@@ -165,7 +168,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             if(spec.getActiveStatements() != null && spec.getActiveStatements() > 0) {
                 LOG.info("Skipping creation of company PSCs as active statements are available");
             } else {
-                var companyPscs = companyPscService.create(spec);
+                Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(spec, companyProfile);
+                var companyPscs = companyPscService.create(spec, pscRegisteredOfficeAddress);
                 LOG.info("Successfully get PSCs");
                 response.setCompanyPscs(companyPscs);
             }
@@ -232,6 +236,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         request.setRegisteredOfficeIsInDispute(companySpec.getRegisteredOfficeIsInDispute());
         request.setUndeliverableRegisteredOfficeAddress(
                 companySpec.getUndeliverableRegisteredOfficeAddress());
+        request.setServiceAddressIsSameAsRegisteredOfficeAddress(
+                companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress());
         if (companySpec.getForeignCompanyLegalForm() != null
                 && !companySpec.getForeignCompanyLegalForm().isBlank()) {
             request.setForeignCompanyLegalForm(companySpec.getForeignCompanyLegalForm());
@@ -241,22 +247,26 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
 
     /**
      * Shared orchestration flow used by both public and internal company creation paths.
+     * Unlike {@link #buildCompanyDataStructure}, each step here creates and persists its own
+     * data incrementally (service-by-service) rather than returning an in-memory structure for
+     * later bulk persistence via {@link #persistCompanyDataStructure}.
      * If any creation step fails, partial company data is rolled back via {@link #handleCreateFailure}.
      */
-    protected CompanyProfileResponse createCompany(InternalCompanyRequest companySpec) throws DataException {
+    protected CompanyProfileResponse buildAndPersistCompanyDataStructure(InternalCompanyRequest companySpec) throws DataException {
         assignCompanyNumber(companySpec);
         CompanySubTypeValidator.validate(companySpec.getSubType(), companySpec.getCompanyType());
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
-            companyProfileService.create(companySpec);
+            CompanyProfile companyProfile = companyProfileService.create(companySpec);
             LOG.info("Successfully created company profile");
 
             filingHistoryService.create(companySpec);
             LOG.info("Successfully created filing history");
 
             if (companySpec.getNoDefaultOfficer() == null || !companySpec.getNoDefaultOfficer()) {
-                appointmentService.createAppointment(companySpec);
+                Address registeredOfficeAddress = resolveRegisteredOfficeAddress(companySpec, companyProfile);
+                appointmentService.createAppointment(companySpec, registeredOfficeAddress);
                 LOG.info("Successfully created appointments ");
             }
 
@@ -272,7 +282,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             if(companySpec.getActiveStatements() != null && companySpec.getActiveStatements() > 0) {
                 LOG.info("Skipping creation of company PSCs as active statements are available");
             } else {
-                companyPscService.create(companySpec);
+                Address pscRegisteredOfficeAddress = resolveRegisteredOfficeAddress(companySpec, companyProfile);
+                companyPscService.create(companySpec, pscRegisteredOfficeAddress);
                 LOG.info("Successfully created PSCs");
             }
 
@@ -321,6 +332,14 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     private CompanyProfileResponse buildCompanyResponse(InternalCompanyRequest spec, String authCode) {
         String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
         return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
+    }
+
+    private Address resolveRegisteredOfficeAddress(InternalCompanyRequest companySpec, CompanyProfile companyProfile) {
+        if (Boolean.TRUE.equals(companySpec.getServiceAddressIsSameAsRegisteredOfficeAddress())
+                && companyProfile != null) {
+            return companyProfile.getRegisteredOfficeAddress();
+        }
+        return null;
     }
 
     private DataException handleCreateFailure(String companyNumber, Exception ex) {

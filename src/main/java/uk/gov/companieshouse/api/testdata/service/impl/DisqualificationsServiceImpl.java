@@ -17,7 +17,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.repository.DisqualificationsRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.DataService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
@@ -87,7 +87,7 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
         disqualifications.setCompanyNumber(internalCompanyRequest.getCompanyNumber());
         disqualifications.setPersonNumber(randomService.getNumber(10));
         disqualifications.setCountryOfRegistration(
-                addressService.getCountryOfResidence(internalCompanyRequest.getJurisdiction()));
+                addressService.getCountryFromSelectedProfile(internalCompanyRequest.getJurisdiction()));
         disqualifications.setEtag(this.randomService.getEtag());
         disqualifications.setName(DEFAULT_NAME);
         disqualifications.setOfficerDisqId(randomService.getString(10));
