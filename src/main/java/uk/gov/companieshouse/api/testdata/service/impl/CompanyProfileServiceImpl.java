@@ -221,7 +221,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setCanFile(true);
         setPartialDataOptions(profile, jurisdiction, companyType);
         setSubType(profile, subType, jurisdiction, companyType);
-        setTerm(profile, limitedPartnershipTerm, subType);
+        setTerm(profile, limitedPartnershipTerm);
         setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
         if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
@@ -602,8 +602,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setTerm(CompanyProfile profile, String term, String subType) throws DataException {
+    private void setTerm(CompanyProfile profile, String term) throws DataException {
         if (CompanyType.LIMITED_PARTNERSHIP.getValue().equals(profile.getType())) {
+            String subType = profile.getSubtype();
             if (isTermRequired(subType)) {
                 if (term != null && !term.trim().isEmpty()) {
                     if (!isValidTermValue(term)) {
@@ -628,8 +629,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private boolean isValidTermValue(String term) {
-        return "by_agreement".equals(term) || "until_dissolution".equals(term) || "none".equals(term) ||
-               "by-agreement".equals(term) || "until-dissolution".equals(term);
+        return "by-agreement".equals(term) || "until-dissolution".equals(term) || "none".equals(term);
     }
 
     private void setCompanyStatusDetail(
