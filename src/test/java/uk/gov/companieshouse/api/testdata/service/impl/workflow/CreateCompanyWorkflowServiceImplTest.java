@@ -1241,4 +1241,100 @@ class CreateCompanyWorkflowServiceImplTest {
         InternalCompanyRequest spec = new InternalCompanyRequest();
         validateElasticSearch(spec);
     }
+
+    @Test
+    void testAlphabeticalSearchFlagWithTrueValue() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(true);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(alphabeticalCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    @Test
+    void testAlphabeticalSearchFlagWithFalseValue() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(false);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(alphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    @Test
+    void testAlphabeticalSearchFlagWithNullValue() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(null);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(alphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    @Test
+    void testAllSearchFlagsWithMixedNullFlaseAndTrueValues() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(true);
+        spec.setGreenAlphabeticalSearch(false);
+        spec.setAdvancedSearch(null);
+        spec.setAddToCompanyElasticSearchIndex(true);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(alphabeticalCompanySearch, times(1)).addCompanyIntoElasticSearchIndex(result);
+        verify(greenAlphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(advancedCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(companySearchService, times(1)).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    @Test
+    void testAllSearchFlagsWithAllNullValues() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(null);
+        spec.setGreenAlphabeticalSearch(null);
+        spec.setAdvancedSearch(null);
+        spec.setAddToCompanyElasticSearchIndex(null);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(alphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(greenAlphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(advancedCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(companySearchService, never()).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    @Test
+    void testAllSearchFlagsWithAllFalseValues() throws Exception {
+        creationService.setElasticSearchDeployed(true);
+        InternalCompanyRequest spec = new InternalCompanyRequest();
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setAlphabeticalSearch(false);
+        spec.setGreenAlphabeticalSearch(false);
+        spec.setAdvancedSearch(false);
+        spec.setAddToCompanyElasticSearchIndex(false);
+        setupCompanyCreationMocks(COMPANY_NUMBER, 8, COMPANY_NUMBER);
+
+        CompanyProfileResponse result = creationService.createInternalCompany(spec);
+
+        verify(alphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(greenAlphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(advancedCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
+        verify(companySearchService, never()).addCompanyIntoElasticSearchIndex(result);
+    }
 }
