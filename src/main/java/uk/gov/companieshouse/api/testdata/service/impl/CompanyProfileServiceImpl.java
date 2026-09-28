@@ -91,12 +91,13 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
 
     private boolean isCompanyTypeHasNoFilingHistory = true;
 
-    @Override
-    public CompanyProfile create(InternalCompanyRequest internalCompanyRequest) {
+     @Override
+    public CompanyProfile create(InternalCompanyRequest internalCompanyRequest) throws DataException {
         final String companyNumber = internalCompanyRequest.getCompanyNumber();
         final JurisdictionType jurisdiction = internalCompanyRequest.getJurisdiction();
         final CompanyType companyType = internalCompanyRequest.getCompanyType();
         final String subType = internalCompanyRequest.getSubType();
+        final String limitedPartnershipTerm = internalCompanyRequest.getLimitedPartnershipTerm();
         final Boolean hasSuperSecurePscs = internalCompanyRequest.getHasSuperSecurePscs();
         CompanySubTypeValidator.validate(subType, companyType);
         final String companyStatusDetail = internalCompanyRequest.getCompanyStatusDetail();
@@ -125,11 +126,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
             params.companyStatusDetail = companyStatusDetail;
             params.registeredOfficeIsInDispute = registeredOfficeIsInDispute;
             params.accountsDueStatus = accountsDueStatus;
+            params.limitedPartnershipTerm = limitedPartnershipTerm;
             return createDefaultCompanyProfile(params);
         }
     }
 
-    private CompanyProfile createDefaultCompanyProfile(DefaultCompanyProfileParams params) {
+    private CompanyProfile createDefaultCompanyProfile(DefaultCompanyProfileParams params) throws DataException {
         final String companyNumber = params.companyNumber;
         final JurisdictionType jurisdiction = params.jurisdiction;
         final InternalCompanyRequest internalCompanyRequest = params.spec;
@@ -138,6 +140,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         final Boolean hasSuperSecurePscs = params.hasSuperSecurePscs;
         final String companyStatus = params.companyStatus;
         final String subType = params.subType;
+        final String limitedPartnershipTerm = params.limitedPartnershipTerm;
         final String companyStatusDetail = params.companyStatusDetail;
         final Boolean registeredOfficeIsInDispute = params.registeredOfficeIsInDispute;
         final String accountsDueStatus = params.accountsDueStatus;
@@ -217,7 +220,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setHasCharges(false);
         profile.setCanFile(true);
         setPartialDataOptions(profile, jurisdiction, companyType);
-        setSubType(profile, subType);
+        setSubType(profile, subType, jurisdiction, companyType);
+        setTerm(profile, limitedPartnershipTerm, subType);
         setCompanyStatusDetail(profile, companyStatusDetail, companyTypeValue);
 
         if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
@@ -577,12 +581,52 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         }
     }
 
-    private void setSubType(CompanyProfile profile, String subType) {
-        if (subType != null) {
+    private void setSubType(CompanyProfile profile, String subType, JurisdictionType jurisdiction, CompanyType companyType) {
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
+            String finalSubType = subType;
+            if (finalSubType == null || finalSubType.trim().isEmpty()) {
+                // Apply jurisdiction-based defaults for LP
+                if (JurisdictionType.SCOTLAND.equals(jurisdiction)) {
+                    finalSubType = CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP;
+                } else {
+                    finalSubType = CompanySubTypeValidator.LIMITED_PARTNERSHIP;
+                }
+                LOG.info("Applied default LP subtype: " + finalSubType + " for jurisdiction: " + jurisdiction);
+            }
+            profile.setIsCommunityInterestCompany(false);
+            profile.setSubtype(finalSubType);
+        } else if (subType != null) {
             profile.setIsCommunityInterestCompany(
                     subType.equals(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY));
             profile.setSubtype(subType);
         }
+    }
+
+    private void setTerm(CompanyProfile profile, String term, String subType) throws DataException {
+        if (CompanyType.LIMITED_PARTNERSHIP.getValue().equals(profile.getType())) {
+            if (isTermRequired(subType)) {
+                if (term != null && !term.trim().isEmpty()) {
+                    if (!isValidTermValue(term)) {
+                        throw new DataException("Invalid limited partnership term: " + term, new IllegalArgumentException());
+                    }
+                    profile.setTerm(term);
+                } else {
+                    profile.setTerm("none");
+                    LOG.info("Applied default term 'none' for subtype: " + subType);
+                }
+            } else if (term != null && !term.trim().isEmpty()) {
+                LOG.info("Term provided for subtype " + subType + " which does not require term field, ignoring");
+            }
+        }
+    }
+
+    private boolean isTermRequired(String subType) {
+        return CompanySubTypeValidator.LIMITED_PARTNERSHIP.equals(subType) ||
+               CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP.equals(subType);
+    }
+
+    private boolean isValidTermValue(String term) {
+        return "by_agreement".equals(term) || "until_dissolution".equals(term) || "none".equals(term);
     }
 
     private void setCompanyStatusDetail(
@@ -758,6 +802,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         private String companyStatusDetail;
         private Boolean registeredOfficeIsInDispute;
         private String accountsDueStatus;
+        private String limitedPartnershipTerm;
     }
 
     private String getCompanyNameEnding(CompanyType companyType) {
