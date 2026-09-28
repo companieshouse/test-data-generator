@@ -609,7 +609,9 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                     if (!isValidTermValue(term)) {
                         throw new DataException("Invalid limited partnership term: " + term, new IllegalArgumentException());
                     }
-                    profile.setTerm(term);
+                    // Normalize underscores to hyphens for storage (MongoDB format)
+                    String normalizedTerm = term.replace("_", "-");
+                    profile.setTerm(normalizedTerm);
                 } else {
                     profile.setTerm("none");
                     LOG.info("Applied default term 'none' for subtype: " + subType);
@@ -626,7 +628,8 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     }
 
     private boolean isValidTermValue(String term) {
-        return "by_agreement".equals(term) || "until_dissolution".equals(term) || "none".equals(term);
+        return "by_agreement".equals(term) || "until_dissolution".equals(term) || "none".equals(term) ||
+               "by-agreement".equals(term) || "until-dissolution".equals(term);
     }
 
     private void setCompanyStatusDetail(
