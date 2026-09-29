@@ -203,7 +203,11 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         var authCode = companySpec.getCompanyAuthCode().getAuthCode();
         companyStructurePersistenceService.persistCompanyWithStructure(companySpec);
         String companyUri = this.apiUrl + "/company/" + companyNumber;
-        return new CompanyProfileResponse(companyNumber, authCode, companyUri);
+        return CompanyProfileResponse.builder()
+                .companyNumber(companyNumber)
+                .authCode(authCode)
+                .companyUri(companyUri)
+                .build();
     }
 
     private InternalCompanyRequest mapPublicCompanyToInternalCompanyRequest(PublicCompanyRequest companySpec) {
@@ -331,7 +335,11 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
 
     private CompanyProfileResponse buildCompanyResponse(InternalCompanyRequest spec, String authCode) {
         String companyUri = this.apiUrl + "/company/" + spec.getCompanyNumber();
-        return new CompanyProfileResponse(spec.getCompanyNumber(), authCode, companyUri);
+        return CompanyProfileResponse.builder()
+                .companyNumber(spec.getCompanyNumber())
+                .authCode(authCode)
+                .companyUri(companyUri)
+                .build();
     }
 
     private Address resolveRegisteredOfficeAddress(InternalCompanyRequest companySpec, CompanyProfile companyProfile) {

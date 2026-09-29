@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.model.entity.DisqualificationEntry;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
@@ -81,74 +82,152 @@ public class DisqualificationsServiceImpl implements DataService<Disqualificatio
     }
 
     private Disqualifications createDisqualificationFromSpec(
-            InternalCompanyRequest internalCompanyRequest, DisqualificationsRequest disqualificationsRequest) {
-        var disqualifications = new Disqualifications();
-        disqualifications.setId(generateId());
-        disqualifications.setCompanyNumber(internalCompanyRequest.getCompanyNumber());
-        disqualifications.setPersonNumber(randomService.getNumber(10));
-        disqualifications.setCountryOfRegistration(
-                addressService.getCountryFromSelectedProfile(internalCompanyRequest.getJurisdiction()));
-        disqualifications.setEtag(this.randomService.getEtag());
-        disqualifications.setName(DEFAULT_NAME);
-        disqualifications.setOfficerDisqId(randomService.getString(10));
-        disqualifications.setOfficerDetailId(randomService.getString(10));
-        disqualifications.setOfficerIdRaw(randomService.getString(8));
-        disqualifications.setIsCorporateOfficer(disqualificationsRequest.getCorporateOfficer());
-        disqualifications.setDateOfBirth(java.util.Date.from(
-                java.time.LocalDate.of(1990, 1, 1)
-                        .atStartOfDay(java.time.ZoneId.of("UTC")).toInstant()
-        ));
+            InternalCompanyRequest internalCompanyRequest,
+            DisqualificationsRequest disqualificationsRequest) {
 
-        String officerSuffix = Boolean.TRUE.equals(disqualificationsRequest.getCorporateOfficer())
-                ? URL_CORPORATE_SUFFIX
-                : URL_NATURAL_SUFFIX;
+        var disqualifications = new Disqualifications();
+
+        disqualifications.setId(generateId());
+        disqualifications.setCompanyNumber(
+                internalCompanyRequest.getCompanyNumber());
+
+        disqualifications.setPersonNumber(
+                randomService.getNumber(10));
+
+        disqualifications.setCountryOfRegistration(
+                addressService.getCountryFromSelectedProfile(
+                        internalCompanyRequest.getJurisdiction()));
+
+        disqualifications.setEtag(randomService.getEtag());
+
+        disqualifications.setName(DEFAULT_NAME);
+
+        disqualifications.setOfficerDisqId(
+                randomService.getString(10));
+
+        disqualifications.setOfficerDetailId(
+                randomService.getString(10));
+
+        disqualifications.setOfficerIdRaw(
+                randomService.getString(8));
+
+        disqualifications.setIsCorporateOfficer(
+                disqualificationsRequest.getCorporateOfficer());
+
+        disqualifications.setDateOfBirth(
+                java.util.Date.from(
+                        LocalDate.of(1990, 1, 1)
+                                .atStartOfDay(ZoneId.of("UTC"))
+                                .toInstant()));
+
+        String officerSuffix =
+                Boolean.TRUE.equals(
+                        disqualificationsRequest.getCorporateOfficer())
+                        ? URL_CORPORATE_SUFFIX
+                        : URL_NATURAL_SUFFIX;
 
         disqualifications.setLinksSelf(
-                URL_DISQUALIFIED_OFFICERS_PREFIX + officerSuffix + disqualifications.getId()
-        );
+                URL_DISQUALIFIED_OFFICERS_PREFIX
+                        + officerSuffix
+                        + disqualifications.getId());
 
-        disqualifications.setAddress(addressService.getAddress(internalCompanyRequest.getJurisdiction()));
+        // -------------------------------------------------
+        // Disqualification Entry
+        // -------------------------------------------------
 
-        disqualifications.setDisqCaseIdentifier(DEFAULT_CASE_IDENTIFIER_PREFIX
-                + randomService.getString(4));
-        disqualifications.setDisqCompanyNames(
-                Collections.singletonList("COMPANY " + internalCompanyRequest.getCompanyNumber() + " LIMITED")
-        );
-        disqualifications.setDisqCourtName(DISQUALIFICATION_COURT_NAME);
-        disqualifications.setDisqDisqualificationType(disqualificationsRequest.getDisqualificationType());
-        disqualifications.setDisqDisqualifiedFrom(DISQUALIFICATION_DATE);
-        disqualifications.setDisqDisqualifiedUntil(DISQUALIFICATION_DATE
-                .atZone(ZoneId.of("UTC"))
-                .plusYears(15)
-                .toInstant());
+        DisqualificationEntry entry =
+                new DisqualificationEntry();
 
-        disqualifications.setDisqHeardOn(DISQUALIFICATION_DATE
-                .atZone(ZoneId.of("UTC"))
-                .minusDays(1)
-                .toInstant());
+        entry.setAddress(
+                addressService.getAddress(
+                        internalCompanyRequest.getJurisdiction()));
 
-        disqualifications.setDisqLastVariationVariedOn(LAST_VARIATION_VARIED_ON);
-        disqualifications.setDisqLastVariationCaseIdentifier(LAST_VARIATION_CASE_IDENTIFIER);
-        disqualifications.setDisqLastVariationCourtName(LAST_VARIATION_COURT_NAME);
+        entry.setCaseIdentifier(
+                DEFAULT_CASE_IDENTIFIER_PREFIX
+                        + randomService.getString(4));
 
-        disqualifications.setDisqReasonAct("default-act");
-        disqualifications.setDisqReasonDescriptionIdentifier("default-description");
-        disqualifications.setDisqReasonArticle("default-article");
+        entry.setCompanyNames(
+                Collections.singletonList(
+                        "COMPANY "
+                                + internalCompanyRequest.getCompanyNumber()
+                                + " LIMITED"));
 
-        disqualifications.setPtaCompanyNames(PERM_COMPANY_NAMES);
-        disqualifications.setPtaCourtName(PERM_COURT_NAME);
-        disqualifications.setPtaExpiresOn(PERM_EXPIRES_ON);
-        disqualifications.setPtaGrantedOn(PERM_GRANTED_ON);
-        disqualifications.setPtaPurpose(PERM_PURPOSE);
-        disqualifications.setDisqDisqualificationType(disqualificationsRequest.getDisqualificationType());
+        entry.setCourtName(DISQUALIFICATION_COURT_NAME);
+
+        entry.setDisqualificationType(
+                disqualificationsRequest.getDisqualificationType());
+
+        entry.setDisqualifiedFrom(
+                DISQUALIFICATION_DATE);
+
+        entry.setDisqualifiedUntil(
+                DISQUALIFICATION_DATE
+                        .atZone(ZoneId.of("UTC"))
+                        .plusYears(15)
+                        .toInstant());
+
+        entry.setHeardOn(
+                DISQUALIFICATION_DATE
+                        .atZone(ZoneId.of("UTC"))
+                        .minusDays(1)
+                        .toInstant());
+
+        entry.setReasonAct("default-act");
+        entry.setReasonDescriptionIdentifier(
+                "default-description");
+        entry.setReasonSection("2");
+
+        entry.setLastVariationCaseIdentifier(
+                LAST_VARIATION_CASE_IDENTIFIER);
+
+        entry.setLastVariationCourtName(
+                LAST_VARIATION_COURT_NAME);
+
+        entry.setLastVariationVariedOn(
+                LAST_VARIATION_VARIED_ON);
+
+        disqualifications.setDisqualificationsEntry(
+                Collections.singletonList(entry));
+
+        // -------------------------------------------------
+        // Permissions To Act
+        // -------------------------------------------------
+
+        PermissionsToAct permission =
+                new PermissionsToAct();
+
+        permission.setCompanyNames(
+                PERM_COMPANY_NAMES);
+
+        permission.setCourtName(
+                PERM_COURT_NAME);
+
+        permission.setExpiresOn(
+                PERM_EXPIRES_ON);
+
+        permission.setGrantedOn(
+                PERM_GRANTED_ON);
+
+        permission.setPurpose(
+                PERM_PURPOSE);
+
+        disqualifications.setPermissionsToAct(
+                Collections.singletonList(permission));
 
         setTimestamps(disqualifications);
-        if (Boolean.TRUE.equals(internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
+
+        if (Boolean.TRUE.equals(
+                internalCompanyRequest.getCompanyWithPopulatedStructureOnly())) {
             return disqualifications;
         }
-        var savedDisqualifications = repository.save(disqualifications);
-        LOG.info("Successfully created and saved Disqualifications for company: "
-                + internalCompanyRequest.getCompanyNumber());
+
+        Disqualifications savedDisqualifications =
+                repository.save(disqualifications);
+
+        LOG.info(
+                "Successfully created and saved Disqualifications for company: "
+                        + internalCompanyRequest.getCompanyNumber());
+
         return savedDisqualifications;
     }
 
