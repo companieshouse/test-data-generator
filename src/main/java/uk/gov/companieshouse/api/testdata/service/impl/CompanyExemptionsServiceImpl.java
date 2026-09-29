@@ -35,7 +35,7 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
     private CompanyExemptionsRepository repository;
 
     @Override
-    public CompanyExemptionsResponse createOrUpdate(CompanyExemptionsRequest request) throws DataException, IllegalArgumentException {
+    public CompanyExemptionsResponse createExemptions(CompanyExemptionsRequest request) throws DataException, IllegalArgumentException {
         Instant now = Instant.now();
         String companyNumber = request.getCompanyNumber();
 
@@ -66,14 +66,14 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
     }
 
     @Override
-    public CompanyExemptionsResponse getByCompanyNumber(String companyNumber) throws NoDataFoundException {
+    public CompanyExemptionsResponse getExemption(String companyNumber) throws NoDataFoundException {
         var exemptions = repository.findById(companyNumber)
                 .orElseThrow(() -> new NoDataFoundException("no company exemptions"));
         return mapToResponse(exemptions);
     }
 
     @Override
-    public CompanyExemptionsResponse updateByCompanyNumber(String companyNumber, CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException {
+    public CompanyExemptionsResponse updateExemptions(String companyNumber, CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException {
         Instant now = Instant.now();
 
         CompanyExemptions exemptions = repository.findById(companyNumber)
@@ -97,7 +97,7 @@ public class CompanyExemptionsServiceImpl implements CompanyExemptionsService {
     }
 
     @Override
-    public boolean deleteByCompanyNumber(String companyNumber) {
+    public boolean deleteExemptions(String companyNumber) {
         Optional<CompanyExemptions> exemptions = repository.findById(companyNumber);
         if (exemptions.isEmpty()) {
             return false;

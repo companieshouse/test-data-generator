@@ -18,7 +18,7 @@ public interface CompanyExemptionsService {
      * @throws DataException if an error occurs during creation or update
      * @throws IllegalArgumentException if exemption_type is invalid
      */
-    CompanyExemptionsResponse createOrUpdate(CompanyExemptionsRequest request) throws DataException, IllegalArgumentException;
+    CompanyExemptionsResponse createExemptions(CompanyExemptionsRequest request) throws DataException, IllegalArgumentException;
 
     /**
      * Retrieves a company exemptions entry by its company number.
@@ -27,7 +27,7 @@ public interface CompanyExemptionsService {
      * @return the {@link CompanyExemptionsResponse}
      * @throws NoDataFoundException if the company exemptions entry is not found
      */
-    CompanyExemptionsResponse getByCompanyNumber(String companyNumber) throws NoDataFoundException;
+    CompanyExemptionsResponse getExemption(String companyNumber) throws NoDataFoundException;
 
     /**
      * Updates an existing company exemptions entry by its company number. The exemption must
@@ -40,7 +40,7 @@ public interface CompanyExemptionsService {
      * @throws DataException if an error occurs during update
      * @throws IllegalArgumentException if exemption_type is invalid
      */
-    CompanyExemptionsResponse updateByCompanyNumber(String companyNumber, CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException;
+    CompanyExemptionsResponse updateExemptions(String companyNumber, CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException;
 
     /**
      * Deletes a company exemptions entry by its company number.
@@ -48,5 +48,5 @@ public interface CompanyExemptionsService {
      * @param companyNumber the company number
      * @return true if the exemption was deleted, false if not found
      */
-    boolean deleteByCompanyNumber(String companyNumber);
+    boolean deleteExemptions(String companyNumber);
 }

@@ -37,14 +37,14 @@ public class CompanyExemptionsController {
     }
 
     @PostMapping("/exemptions")
-    public ResponseEntity<CompanyExemptionsResponse> createOrUpdateCompanyExemptions(
+    public ResponseEntity<CompanyExemptionsResponse> createCompanyExemptions(
             @Valid @RequestBody CompanyExemptionsRequest request) throws DataException, IllegalArgumentException {
 
         if (request.getCompanyNumber() == null || request.getCompanyNumber().isEmpty()) {
-            throw new DataException("Company number is required");
+            throw new IllegalArgumentException("Company number is required");
         }
 
-        var createdExemptions = companyExemptionsService.createOrUpdate(request);
+        var createdExemptions = companyExemptionsService.createExemptions(request);
         LOG.info("Company exemptions created or updated for company number: "
                 + createdExemptions.getCompanyNumber());
         return new ResponseEntity<>(createdExemptions, HttpStatus.CREATED);
@@ -53,7 +53,7 @@ public class CompanyExemptionsController {
     @GetMapping("/exemptions/{companyNumber}")
     public ResponseEntity<CompanyExemptionsResponse> getCompanyExemptions(
             @PathVariable("companyNumber") String companyNumber) throws NoDataFoundException {
-        return ResponseEntity.ok(companyExemptionsService.getByCompanyNumber(companyNumber));
+        return ResponseEntity.ok(companyExemptionsService.getExemption(companyNumber));
     }
 
     @PutMapping("/exemptions/{companyNumber}")
@@ -62,10 +62,10 @@ public class CompanyExemptionsController {
             @Valid @RequestBody CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException {
 
         if (companyNumber == null || companyNumber.isEmpty()) {
-            throw new DataException("Company number is required");
+            throw new IllegalArgumentException("Company number is required");
         }
 
-        var updatedExemptions = companyExemptionsService.updateByCompanyNumber(companyNumber, request);
+        var updatedExemptions = companyExemptionsService.updateExemptions(companyNumber, request);
         LOG.info("Company exemptions updated for company number: " + companyNumber);
         return ResponseEntity.ok(updatedExemptions);
     }
@@ -73,7 +73,7 @@ public class CompanyExemptionsController {
     @DeleteMapping("/exemptions/{companyNumber}")
     public ResponseEntity<Map<String, Object>> deleteCompanyExemptions(
             @PathVariable("companyNumber") String companyNumber) {
-        boolean deleted = companyExemptionsService.deleteByCompanyNumber(companyNumber);
+        boolean deleted = companyExemptionsService.deleteExemptions(companyNumber);
         if (deleted) {
             LOG.info("Company exemptions is deleted for company number: " + companyNumber);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
