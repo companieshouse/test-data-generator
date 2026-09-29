@@ -65,7 +65,6 @@ public class CompanySearchServiceImpl implements CompanySearchService {
 
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile for company number: " + companyNumber, ex);
-            throw new DataException("Failed to delete company profile: " + ex.getMessage(), ex);
         }
     }
 
@@ -121,11 +120,16 @@ public class CompanySearchServiceImpl implements CompanySearchService {
             throws ApiErrorResponseException, URIValidationException {
         LOG.info("Deleting company profile from ElasticSearch for company number: "
                 + companyNumber);
-        internalApiClientSupplier.get()
-                .privateSearchResourceHandler()
-                .companySearch()
-                .deleteCompanyProfile(uri)
-                .execute();
+        try {
+            internalApiClientSupplier.get()
+                    .privateSearchResourceHandler()
+                    .companySearch()
+                    .deleteCompanyProfile(uri)
+                    .execute();
+        } catch (ApiErrorResponseException | URIValidationException ex) {
+            LOG.error("Failed to delete company profile for company number: "
+                    + companyNumber + " from company elasticsearch");
+        }
         LOG.info("Company profile deleted successfully for company number: " + companyNumber);
     }
 
