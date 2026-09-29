@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,10 +37,14 @@ public class CompanyExemptionsController {
     }
 
     @PostMapping("/exemptions")
-    public ResponseEntity<CompanyExemptionsResponse> createOrUpdateCompanyExemptions(
-            @Valid @RequestBody CompanyExemptionsRequest request) throws DataException {
+    public ResponseEntity<CompanyExemptionsResponse> createCompanyExemptions(
+            @Valid @RequestBody CompanyExemptionsRequest request) throws DataException, IllegalArgumentException {
 
-        var createdExemptions = companyExemptionsService.createOrUpdate(request);
+        if (request.getCompanyNumber() == null || request.getCompanyNumber().isEmpty()) {
+            throw new IllegalArgumentException("Company number is required");
+        }
+
+        var createdExemptions = companyExemptionsService.createExemptions(request);
         LOG.info("Company exemptions created or updated for company number: "
                 + createdExemptions.getCompanyNumber());
         return new ResponseEntity<>(createdExemptions, HttpStatus.CREATED);
@@ -48,13 +53,27 @@ public class CompanyExemptionsController {
     @GetMapping("/exemptions/{companyNumber}")
     public ResponseEntity<CompanyExemptionsResponse> getCompanyExemptions(
             @PathVariable("companyNumber") String companyNumber) throws NoDataFoundException {
-        return ResponseEntity.ok(companyExemptionsService.getByCompanyNumber(companyNumber));
+        return ResponseEntity.ok(companyExemptionsService.getExemption(companyNumber));
+    }
+
+    @PutMapping("/exemptions/{companyNumber}")
+    public ResponseEntity<CompanyExemptionsResponse> updateCompanyExemptions(
+            @PathVariable("companyNumber") String companyNumber,
+            @Valid @RequestBody CompanyExemptionsRequest request) throws NoDataFoundException, DataException, IllegalArgumentException {
+
+        if (companyNumber == null || companyNumber.isEmpty()) {
+            throw new IllegalArgumentException("Company number is required");
+        }
+
+        var updatedExemptions = companyExemptionsService.updateExemptions(companyNumber, request);
+        LOG.info("Company exemptions updated for company number: " + companyNumber);
+        return ResponseEntity.ok(updatedExemptions);
     }
 
     @DeleteMapping("/exemptions/{companyNumber}")
     public ResponseEntity<Map<String, Object>> deleteCompanyExemptions(
             @PathVariable("companyNumber") String companyNumber) {
-        boolean deleted = companyExemptionsService.deleteByCompanyNumber(companyNumber);
+        boolean deleted = companyExemptionsService.deleteExemptions(companyNumber);
         if (deleted) {
             LOG.info("Company exemptions is deleted for company number: " + companyNumber);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
