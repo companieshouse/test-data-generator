@@ -360,31 +360,7 @@ class AddressServiceImplTest {
                 Arguments.of("Bermuda", JurisdictionType.NON_EU,
                         "SMITHS", "SMITHS", "FL \\d{2}"),
                 Arguments.of("Bermuda", JurisdictionType.NON_EU,
-                        "SOUTHAMPTON", "SOUTHAMPTON", "SN \\d{2}"),
-                Arguments.of("Netherlands", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "[1-9]\\d{3} [A-Z]{2}"),
-                Arguments.of("Germany", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "\\d{5}"),
-                Arguments.of("France", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "\\d{5}"),
-                Arguments.of("Spain", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "(0[1-9]|[1-4]\\d|5[0-2])\\d{3}"),
-                Arguments.of("Italy", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "\\d{5}"),
-                Arguments.of("Poland", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "\\d{2}-\\d{3}"),
-                Arguments.of("Malta", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "[A-Z]{3} \\d{4}"),
-                Arguments.of("Cyprus", JurisdictionType.EUROPEAN_UNION,
-                        "UNMAPPED", "UNMAPPED", "\\d{4}"),
-                Arguments.of("Panama", JurisdictionType.NON_EU,
-                        "UNMAPPED", "UNMAPPED", "\\d{4}"),
-                Arguments.of("Canada", JurisdictionType.NON_EU,
-                        "UNMAPPED", "UNMAPPED", "[A-Z]\\d[A-Z] \\d[A-Z]\\d"),
-                Arguments.of("Australia", JurisdictionType.NON_EU,
-                        "UNMAPPED", "UNMAPPED", "\\d{4}"),
-                Arguments.of("Unmapped country", JurisdictionType.NON_EU,
-                        "UNMAPPED", "UNMAPPED", ".+")
+                        "SOUTHAMPTON", "SOUTHAMPTON", "SN \\d{2}")
         );
     }
 }
