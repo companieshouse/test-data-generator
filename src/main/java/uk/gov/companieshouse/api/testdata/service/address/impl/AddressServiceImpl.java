@@ -870,30 +870,15 @@ public class AddressServiceImpl implements AddressService {
         String forwardSortationArea = switch (locality) {
             case "TORONTO" -> "M" + FAKER.number().numberBetween(1, 10);
             case "OTTAWA" -> "K" + FAKER.number().numberBetween(1, 3);
-            case "HAMILTON" -> "L" + FAKER.number().numberBetween(8, 10);
             case "KITCHENER" -> "N2";
-            case "LONDON" -> "N" + FAKER.number().numberBetween(5, 7);
-            case "WINDSOR" -> "N" + FAKER.number().numberBetween(8, 10);
             case "VANCOUVER" -> "V" + FAKER.number().numberBetween(5, 7);
             case "VICTORIA" -> "V" + FAKER.number().numberBetween(8, 10);
-            case "SURREY" -> "V3";
-            case "BURNABY" -> "V5";
-            case "RICHMOND" -> "V" + FAKER.number().numberBetween(6, 8);
-            case "KELOWNA" -> "V1";
             case "CALGARY" -> "T" + FAKER.number().numberBetween(1, 4);
             case "EDMONTON" -> "T" + FAKER.number().numberBetween(5, 7);
             case "WINNIPEG" -> "R" + FAKER.number().numberBetween(2, 4);
-            case "SASKATOON" -> "S7";
-            case "REGINA" -> "S4";
             case "HALIFAX" -> "B3";
-            case "SYDNEY" -> "B1";
-            case "DARTMOUTH" -> "B2";
             case "MONTREAL" -> "H" + FAKER.number().numberBetween(1, 6);
             case "QUEBEC CITY" -> "G" + FAKER.number().numberBetween(1, 3);
-            case "LAVAL" -> "H7";
-            case "GATINEAU" -> "J" + FAKER.number().numberBetween(8, 10);
-            case "SHERBROOKE" -> "J1";
-            case "TROIS-RIVIERES" -> "G" + FAKER.number().numberBetween(8, 10);
             default -> randomLetters(CANADIAN_POSTCODE_LETTERS, 1)
                     + FAKER.number().digit();
         };
@@ -908,33 +893,15 @@ public class AddressServiceImpl implements AddressService {
     private String generateAustralianPostcode(String locality) {
         int[] range = switch (locality) {
             case "SYDNEY" -> new int[]{2000, 2240};
-            case "NEWCASTLE" -> new int[]{2280, 2320};
             case "WOLLONGONG" -> new int[]{2500, 2531};
-            case "WAGGA WAGGA" -> new int[]{2650, 2670};
             case "MELBOURNE" -> new int[]{3000, 3210};
             case "GEELONG" -> new int[]{3211, 3221};
-            case "BALLARAT" -> new int[]{3350, 3361};
-            case "BENDIGO" -> new int[]{3550, 3561};
             case "BRISBANE" -> new int[]{4000, 4180};
-            case "GOLD COAST" -> new int[]{4200, 4231};
-            case "SUNSHINE COAST" -> new int[]{4550, 4582};
-            case "TOWNSVILLE" -> new int[]{4810, 4821};
             case "ADELAIDE" -> new int[]{5000, 5200};
-            case "MOUNT GAMBIER" -> new int[]{5290, 5301};
-            case "PORT AUGUSTA" -> new int[]{5700, 5711};
             case "PERTH" -> new int[]{6000, 6210};
-            case "FREMANTLE" -> new int[]{6157, 6164};
-            case "BUNBURY" -> new int[]{6230, 6241};
-            case "ALBANY" -> new int[]{6330, 6341};
             case "HOBART" -> new int[]{7000, 7110};
-            case "LAUNCESTON" -> new int[]{7248, 7260};
-            case "DEVONPORT" -> new int[]{7310, 7321};
-            case "BURNIE" -> new int[]{7320, 7331};
             case "DARWIN" -> new int[]{800, 900};
-            case "PALMERSTON" -> new int[]{830, 841};
-            case "ALICE SPRINGS" -> new int[]{870, 880};
             case "CANBERRA" -> new int[]{2600, 2620};
-            case "TUGGERANONG" -> new int[]{2900, 2915};
             default -> new int[]{800, 10000};
         };
         return String.format(
