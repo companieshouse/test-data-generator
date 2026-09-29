@@ -565,7 +565,7 @@ public class AddressServiceImpl implements AddressService {
         addr.setAddressLine2(cluster.area + " " + TEST_DATA_MARKER);
         addr.setCountry(euProfile.country);
         addr.setLocality(cluster.locality);
-        addr.setPostalCode(generatePostcode(euProfile.country, cluster));
+        addr.setPostalCode(generateOverseasPostcode(euProfile.country, cluster));
         addr.setRegion(cluster.region);
         return addr;
     }
@@ -576,7 +576,7 @@ public class AddressServiceImpl implements AddressService {
         addr.setAddressLine2(cluster.area + " " + TEST_DATA_MARKER);
         addr.setCountry(nonEuProfile.country);
         addr.setLocality(cluster.locality);
-        addr.setPostalCode(generatePostcode(nonEuProfile.country, cluster));
+        addr.setPostalCode(generateOverseasPostcode(nonEuProfile.country, cluster));
         addr.setRegion(cluster.region);
         return addr;
     }
@@ -604,7 +604,7 @@ public class AddressServiceImpl implements AddressService {
         };
     }
 
-    private String generatePostcode(String country, LocalityCluster cluster) {
+    private String generateOverseasPostcode(String country, LocalityCluster cluster) {
         return switch (country) {
             case NETHERLANDS -> generateDutchPostcode(cluster.locality);
             case GERMANY -> generateGermanPostcode(cluster.locality);
