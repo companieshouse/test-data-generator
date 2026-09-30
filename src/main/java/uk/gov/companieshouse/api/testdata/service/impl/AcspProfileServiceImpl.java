@@ -20,7 +20,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.request.AmlRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.service.AcspProfileService;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -99,7 +99,7 @@ public class AcspProfileServiceImpl implements AcspProfileService {
             soleTraderDetails.setSurname(soleTraderSurname + acspNumber);
             soleTraderDetails.setNationality(nationality);
             soleTraderDetails.setUsualResidentialCountry(
-                    addressService.getCountryOfResidence(JurisdictionType.ENGLAND));
+                    addressService.getCountryFromSelectedProfile(JurisdictionType.ENGLAND));
             profile.setSoleTraderDetails(soleTraderDetails);
         }
         AuditDetails created = new AuditDetails();

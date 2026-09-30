@@ -27,7 +27,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyNameEnding;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.repository.CompanyProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.OverseasEntityRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.CompanySubTypeValidator;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
@@ -90,7 +90,6 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
     private boolean hasCompanyRegisters = false;
 
     private boolean isCompanyTypeHasNoFilingHistory = true;
-
 
     @Override
     public CompanyProfile create(InternalCompanyRequest internalCompanyRequest) {
@@ -164,17 +163,19 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         profile.setLinks(nonJurisdictionType.isEmpty()
                 ? createLinkForSelf(companyNumber) : createLinks(companyNumber));
 
-        var accounts = profile.getAccounts();
-        accounts.setNextDue(dateInOneYearNineMonths);
-        accounts.setPeriodStart(dateNow);
-        accounts.setPeriodEnd(dateInOneYear);
-        accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
-        accounts.setNextAccountsOverdue(false);
-        accounts.setNextMadeUpTo(dateInOneYear);
-        accounts.setAccountingReferenceDateDay(
-                String.valueOf(accountingReferenceDate.getDayOfMonth()));
-        accounts.setAccountingReferenceDateMonth(
-                String.valueOf(accountingReferenceDate.getMonthValue()));
+        if (!hasNoAccounts(companyType)) {
+            var accounts = profile.getAccounts();
+            accounts.setNextDue(dateInOneYearNineMonths);
+            accounts.setPeriodStart(dateNow);
+            accounts.setPeriodEnd(dateInOneYear);
+            accounts.setNextAccountsDueOn(dateInOneYearNineMonths);
+            accounts.setNextAccountsOverdue(false);
+            accounts.setNextMadeUpTo(dateInOneYear);
+            accounts.setAccountingReferenceDateDay(
+                    String.valueOf(accountingReferenceDate.getDayOfMonth()));
+            accounts.setAccountingReferenceDateMonth(
+                    String.valueOf(accountingReferenceDate.getMonthValue()));
+        }
 
         profile.setDateOfCreation(dateOneYearAgo);
         profile.setType(companyTypeValue);
@@ -652,6 +653,10 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         );
 
         return noFilingHistoryCompanyTypes.contains(companyType.getValue());
+    }
+
+    private boolean hasNoAccounts(CompanyType companyType) {
+        return CompanyType.LIMITED_PARTNERSHIP.equals(companyType);
     }
 
     @Override

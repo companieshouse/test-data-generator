@@ -25,7 +25,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.Basket;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.BasketRequest;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
-import uk.gov.companieshouse.api.testdata.service.AddressService;
+import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 
 @ExtendWith(MockitoExtension.class)
 class BasketServiceImplTest {

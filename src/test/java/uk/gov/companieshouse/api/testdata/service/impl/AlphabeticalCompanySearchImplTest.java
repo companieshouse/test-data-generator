@@ -36,6 +36,8 @@ class AlphabeticalCompanySearchImplTest {
     private static final ApiResponse<Void> SUCCESS_RESPONSE = new ApiResponse<>(200, null);
     private static final String COMPANY_NUMBER = "12345678";
     private static final String URI = "/alphabetical-search/companies/%s".formatted(COMPANY_NUMBER);
+    private static final String GREEN_INSTANCE = "/green";
+    private static final String GREEN_URI = "/green/alphabetical-search/companies/%s".formatted(COMPANY_NUMBER);
 
     @Mock
     private Supplier<InternalApiClient> internalApiClientSupplier;
@@ -63,6 +65,7 @@ class AlphabeticalCompanySearchImplTest {
 
     @BeforeEach
     void setUp() {
+        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, "");
         when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         when(internalApiClient.privateSearchResourceHandler())
                 .thenReturn(privateSearchResourceHandler);
@@ -128,5 +131,34 @@ class AlphabeticalCompanySearchImplTest {
         verify(privateAlphabeticalCompanySearchHandler).delete(URI);
         // Verify that the error is logged
         verify(privateAlphabeticalCompanySearchDelete).execute();
+    }
+
+    @Test
+    void addCompanyIntoElasticSearchIndex_ShouldUpsertWithGreenPrefix() throws Exception {
+        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, GREEN_INSTANCE);
+        when(internalApiClient.company()).thenReturn(companyResourceHandler);
+        when(companyResourceHandler.get(anyString())).thenReturn(companyGet);
+        when(companyGet.execute()).thenReturn(apiResponse);
+        when(apiResponse.getData()).thenReturn(companyProfileApi);
+        when(privateAlphabeticalCompanySearchHandler.put(anyString(), any()))
+                .thenReturn(privateAlphabeticalCompanySearchUpsert);
+        when(privateAlphabeticalCompanySearchUpsert.execute()).thenReturn(SUCCESS_RESPONSE);
+
+        CompanyProfileResponse companyData = new CompanyProfileResponse(COMPANY_NUMBER, "authCode", "companyUri");
+        service.addCompanyIntoElasticSearchIndex(companyData);
+
+        verify(privateAlphabeticalCompanySearchHandler).put(GREEN_URI, companyProfileApi);
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldDeleteWithGreenPrefix() throws Exception {
+        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, GREEN_INSTANCE);
+        when(privateAlphabeticalCompanySearchHandler.delete(anyString()))
+                .thenReturn(privateAlphabeticalCompanySearchDelete);
+        when(privateAlphabeticalCompanySearchDelete.execute()).thenReturn(SUCCESS_RESPONSE);
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+
+        verify(privateAlphabeticalCompanySearchHandler).delete(GREEN_URI);
     }
 }

@@ -21,7 +21,6 @@ import uk.gov.companieshouse.api.testdata.repository.AcspMemberRepository;
 import uk.gov.companieshouse.api.testdata.repository.AcspProfileRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppealsRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.BacklogRepository;
 import uk.gov.companieshouse.api.testdata.repository.BasketRepository;
 import uk.gov.companieshouse.api.testdata.repository.CertificatesRepository;
@@ -103,11 +102,6 @@ public class MongoConfig {
     @Bean
     public AppointmentsRepository appointmentsRepository() {
         return getMongoRepositoryBean(AppointmentsRepository.class, "appointments");
-    }
-
-    @Bean
-    public AppointmentsDataRepository appointmentsDataRepository() {
-        return getMongoRepositoryBean(AppointmentsDataRepository.class, "appointments");
     }
 
     @Bean

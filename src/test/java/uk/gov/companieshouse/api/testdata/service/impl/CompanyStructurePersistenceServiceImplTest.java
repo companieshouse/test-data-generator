@@ -14,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import uk.gov.companieshouse.api.testdata.model.entity.Appointment;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyAuthCode;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyMetrics;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
@@ -27,7 +26,6 @@ import uk.gov.companieshouse.api.testdata.model.entity.OfficerAppointment;
 import uk.gov.companieshouse.api.testdata.model.rest.response.AppointmentsResultResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
@@ -48,8 +46,6 @@ class CompanyStructurePersistenceServiceImplTest {
     private CompanyAuthCodeRepository authCodeRepository;
     @Mock
     private FilingHistoryRepository filingHistoryRepository;
-    @Mock
-    private AppointmentsDataRepository appointmentsDataRepository;
     @Mock
     private AppointmentsRepository appointmentRepository;
     @Mock
@@ -81,17 +77,14 @@ class CompanyStructurePersistenceServiceImplTest {
         FilingHistory filingHistory = new FilingHistory();
         spec.setFilingHistory(filingHistory);
 
-        AppointmentsData data1 = new AppointmentsData();
-        AppointmentsData data2 = new AppointmentsData();
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
-        AppointmentsResultResponse appointmentsDataList = new AppointmentsResultResponse();
-        appointmentsDataList.setAppointmentsData(List.of(data1, data2));
-        appointmentsDataList.setAppointment(List.of(appointment1, appointment2));
-        appointmentsDataList.setOfficerAppointment(List.of(officerAppointment));
-        spec.setAppointmentsData(appointmentsDataList);
+        AppointmentsResultResponse appointmentsList = new AppointmentsResultResponse();
+        appointmentsList.setAppointment(List.of(appointment1, appointment2));
+        appointmentsList.setOfficerAppointment(List.of(officerAppointment));
+        spec.setAppointments(appointmentsList);
 
         CompanyMetrics metrics = new CompanyMetrics();
         spec.setCompanyMetrics(metrics);
@@ -113,7 +106,6 @@ class CompanyStructurePersistenceServiceImplTest {
         verify(companyProfileRepository).save(profile);
         verify(authCodeRepository).save(authCode);
         verify(filingHistoryRepository).save(filingHistory);
-        verify(appointmentsDataRepository, times(2)).save(any(AppointmentsData.class));
         verify(appointmentRepository, times(2)).save(any(Appointment.class));
         verify(officerRepository).save(officerAppointment);
         verify(companyMetricsRepository).save(metrics);
@@ -133,42 +125,40 @@ class CompanyStructurePersistenceServiceImplTest {
 
         verify(companyProfileRepository).save(any(CompanyProfile.class));
         verifyNoInteractions(authCodeRepository, filingHistoryRepository,
-                appointmentsDataRepository,
                 appointmentRepository, officerRepository, companyMetricsRepository,
                 companyPscStatementRepository, companyPscsRepository, companyRegistersRepository,
                 disqualificationsRepository);
     }
 
     @Test
-    void createCompany_WithPopulatedStructure_appointmentsDataWithNullLists_doesNotSave() {
+    void createCompany_WithPopulatedStructure_appointmentsWithNullLists_doesNotSave() {
         CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
         spec.setCompanyProfile(new CompanyProfile());
-        AppointmentsResultResponse appointmentsData = new AppointmentsResultResponse();
+        AppointmentsResultResponse appointments = new AppointmentsResultResponse();
         // All sublists are null
-        spec.setAppointmentsData(appointmentsData);
+        spec.setAppointments(appointments);
 
         service.persistCompanyWithStructure(spec);
 
         verify(companyProfileRepository).save(any());
-        verifyNoInteractions(appointmentsDataRepository, appointmentRepository, officerRepository);
+        verifyNoInteractions(appointmentRepository, officerRepository);
     }
 
     @Test
     void createCompany_WithPopulatedStructure_emptyLists_doesNotSave() {
         CompanyWithPopulatedStructureRequest spec = new CompanyWithPopulatedStructureRequest();
         spec.setCompanyProfile(new CompanyProfile());
-        AppointmentsResultResponse appointmentsData = new AppointmentsResultResponse();
-        appointmentsData.setAppointmentsData(List.of());
-        appointmentsData.setAppointment(List.of());
-        appointmentsData.setOfficerAppointment(List.of());
-        spec.setAppointmentsData(appointmentsData);
+        AppointmentsResultResponse appointments = new AppointmentsResultResponse();
+        appointments.setAppointment(List.of());
+        appointments.setOfficerAppointment(List.of());
+        spec.setAppointments(appointments);
         spec.setCompanyPscStatement(List.of());
         spec.setCompanyPscs(List.of());
 
         service.persistCompanyWithStructure(spec);
 
         verify(companyProfileRepository).save(any());
-        verifyNoInteractions(appointmentsDataRepository, appointmentRepository, officerRepository,
+        verifyNoInteractions(appointmentRepository, officerRepository,
                 companyPscStatementRepository, companyPscsRepository);
     }
 

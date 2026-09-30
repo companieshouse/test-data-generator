@@ -2,11 +2,9 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.api.testdata.model.entity.AppointmentsData;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscStatement;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyPscs;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
-import uk.gov.companieshouse.api.testdata.repository.AppointmentsDataRepository;
 import uk.gov.companieshouse.api.testdata.repository.AppointmentsRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyAuthCodeRepository;
 import uk.gov.companieshouse.api.testdata.repository.CompanyMetricsRepository;
@@ -26,7 +24,6 @@ public class CompanyStructurePersistenceServiceImpl
     private final CompanyProfileRepository companyProfileRepository;
     private final CompanyAuthCodeRepository authCodeRepository;
     private final FilingHistoryRepository filingHistoryRepository;
-    private final AppointmentsDataRepository appointmentsDataRepository;
     private final AppointmentsRepository appointmentRepository;
     private final CompanyMetricsRepository companyMetricsRepository;
     private final CompanyPscStatementRepository companyPscStatementRepository;
@@ -40,7 +37,6 @@ public class CompanyStructurePersistenceServiceImpl
             CompanyProfileRepository companyProfileRepository,
             CompanyAuthCodeRepository authCodeRepository,
             FilingHistoryRepository filingHistoryRepository,
-            AppointmentsDataRepository appointmentsDataRepository,
             AppointmentsRepository appointmentRepository,
             CompanyMetricsRepository companyMetricsRepository,
             CompanyPscStatementRepository companyPscStatementRepository,
@@ -51,7 +47,6 @@ public class CompanyStructurePersistenceServiceImpl
         this.companyProfileRepository = companyProfileRepository;
         this.authCodeRepository = authCodeRepository;
         this.filingHistoryRepository = filingHistoryRepository;
-        this.appointmentsDataRepository = appointmentsDataRepository;
         this.appointmentRepository = appointmentRepository;
         this.companyMetricsRepository = companyMetricsRepository;
         this.companyPscStatementRepository = companyPscStatementRepository;
@@ -66,7 +61,6 @@ public class CompanyStructurePersistenceServiceImpl
         saveCompanyProfile(companySpec);
         saveAuthCode(companySpec);
         saveFilingHistory(companySpec);
-        saveAppointmentsData(companySpec);
         saveAppointments(companySpec);
         saveOfficerAppointments(companySpec);
         saveCompanyMetrics(companySpec);
@@ -94,31 +88,21 @@ public class CompanyStructurePersistenceServiceImpl
         }
     }
 
-    private void saveAppointmentsData(CompanyWithPopulatedStructureRequest companySpec) {
-        var appointmentsDataContainer = companySpec.getAppointmentsData();
-        if (appointmentsDataContainer != null
-                && appointmentsDataContainer.getAppointmentsData() != null) {
-            for (AppointmentsData data : appointmentsDataContainer.getAppointmentsData()) {
-                appointmentsDataRepository.save(data);
-            }
-        }
-    }
-
     private void saveAppointments(CompanyWithPopulatedStructureRequest companySpec) {
-        var appointmentsDataContainer = companySpec.getAppointmentsData();
-        if (appointmentsDataContainer != null
-                && appointmentsDataContainer.getAppointment() != null) {
-            for (var appointment : appointmentsDataContainer.getAppointment()) {
+        var appointmentsContainer = companySpec.getAppointments();
+        if (appointmentsContainer != null
+                && appointmentsContainer.getAppointment() != null) {
+            for (var appointment : appointmentsContainer.getAppointment()) {
                 appointmentRepository.save(appointment);
             }
         }
     }
 
     private void saveOfficerAppointments(CompanyWithPopulatedStructureRequest companySpec) {
-        var appointmentsDataContainer = companySpec.getAppointmentsData();
-        if (appointmentsDataContainer != null
-                && appointmentsDataContainer.getOfficerAppointment() != null) {
-            for (var officerAppointment : appointmentsDataContainer.getOfficerAppointment()) {
+        var appointmentsContainer = companySpec.getAppointments();
+        if (appointmentsContainer != null
+                && appointmentsContainer.getOfficerAppointment() != null) {
+            for (var officerAppointment : appointmentsContainer.getOfficerAppointment()) {
                 officerRepository.save(officerAppointment);
             }
         }

@@ -1,11 +1,13 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,13 +15,13 @@ import static org.mockito.Mockito.when;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptions;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyExemptionsTimestamp;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyExemptionsRequest;
@@ -49,7 +51,7 @@ class CompanyExemptionsServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CompanyExemptionsResponse response = service.createOrUpdate(request);
+        CompanyExemptionsResponse response = service.createExemptions(request);
 
         assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
         assertNotNull(response.getDeltaAt());
@@ -70,7 +72,7 @@ class CompanyExemptionsServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CompanyExemptionsResponse response = service.createOrUpdate(request);
+        CompanyExemptionsResponse response = service.createExemptions(request);
 
         assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
         @SuppressWarnings("unchecked")
@@ -92,7 +94,7 @@ class CompanyExemptionsServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(existing));
         when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CompanyExemptionsResponse response = service.createOrUpdate(request);
+        CompanyExemptionsResponse response = service.createExemptions(request);
 
         assertEquals(Instant.parse("2026-08-18T00:00:00Z"), response.getCreatedAt());
         assertNotNull(response.getUpdatedAt());
@@ -116,7 +118,7 @@ class CompanyExemptionsServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CompanyExemptionsResponse response = service.createOrUpdate(request);
+        CompanyExemptionsResponse response = service.createExemptions(request);
 
         assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
         assertEquals("custom-etag", response.getData().get("etag"));
@@ -133,7 +135,7 @@ class CompanyExemptionsServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        CompanyExemptionsResponse response = service.createOrUpdate(request);
+        CompanyExemptionsResponse response = service.createExemptions(request);
 
         assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
         assertEquals("exemptions#exemptions", response.getData().get("kind"));
@@ -148,6 +150,104 @@ class CompanyExemptionsServiceImplTest {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         doThrow(new RuntimeException("db error")).when(repository).save(any(CompanyExemptions.class));
 
-        assertThrows(DataException.class, () -> service.createOrUpdate(request));
+        assertThrows(DataException.class, () -> service.createExemptions(request));
+    }
+
+    @Test
+    void createCompanyExemptionsThrowsIllegalArgumentExceptionForInvalidExemptionType() {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("invalid_exemption_type");
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.createExemptions(request));
+        assertTrue(exception.getMessage().contains("Invalid exemption type"));
+        assertTrue(exception.getMessage().contains("invalid_exemption_type"));
+    }
+
+    @Test
+    void updateCompanyExemptionsThrowsIllegalArgumentExceptionForInvalidExemptionType() {
+        CompanyExemptions existing = new CompanyExemptions();
+        existing.setId(COMPANY_NUMBER);
+
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("psc_exempt_as_shares_admittedn_on_market");  // Typo: admittedn instead of admitted
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(existing));
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> service.updateExemptions(COMPANY_NUMBER, request));
+        assertTrue(exception.getMessage().contains("Invalid exemption type"));
+    }
+
+    @Test
+    void getCompanyExemptions() throws NoDataFoundException {
+        CompanyExemptions entity = new CompanyExemptions();
+        entity.setId(COMPANY_NUMBER);
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(entity));
+        CompanyExemptionsResponse response = service.getExemption(COMPANY_NUMBER);
+
+        assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
+    }
+
+    @Test
+    void getCompanyExemptionsNotFound() {
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertThrows(NoDataFoundException.class, () -> service.getExemption(COMPANY_NUMBER));
+    }
+
+    @Test
+    void updateCompanyExemptions() throws NoDataFoundException, DataException {
+        CompanyExemptions existing = new CompanyExemptions();
+        existing.setId(COMPANY_NUMBER);
+        CompanyExemptionsTimestamp created = new CompanyExemptionsTimestamp();
+        created.setAt(Instant.parse("2026-08-18T00:00:00Z"));
+        existing.setCreated(created);
+
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setExemptionType("psc_exempt_as_trading_on_uk_regulated_market");
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(existing));
+        when(repository.save(any(CompanyExemptions.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        CompanyExemptionsResponse response = service.updateExemptions(COMPANY_NUMBER, request);
+
+        assertEquals(COMPANY_NUMBER, response.getCompanyNumber());
+        assertEquals(Instant.parse("2026-08-18T00:00:00Z"), response.getCreatedAt());
+        assertNotNull(response.getUpdatedAt());
+        verify(repository, times(1)).save(any(CompanyExemptions.class));
+    }
+
+    @Test
+    void updateCompanyExemptionsNotFound() {
+        CompanyExemptionsRequest request = new CompanyExemptionsRequest();
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        assertThrows(NoDataFoundException.class, () -> service.updateExemptions(COMPANY_NUMBER, request));
+    }
+
+    @Test
+    void deleteCompanyExemptions() {
+        CompanyExemptions entity = new CompanyExemptions();
+        entity.setId(COMPANY_NUMBER);
+
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(entity));
+        boolean deleted = service.deleteExemptions(COMPANY_NUMBER);
+
+        assertTrue(deleted);
+        verify(repository, times(1)).delete(entity);
+    }
+
+    @Test
+    void deleteCompanyExemptionsNotFound() {
+        when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
+        boolean deleted = service.deleteExemptions(COMPANY_NUMBER);
+
+        assertFalse(deleted);
+        verify(repository, never()).delete(any(CompanyExemptions.class));
     }
 }

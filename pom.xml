@@ -34,6 +34,7 @@
         <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
         <spring-framework.version>7.0.9</spring-framework.version>
         <spring-security-crypto.version>7.1.1</spring-security-crypto.version>
+        <mongodb-driver-version>5.11.1</mongodb-driver-version>
         <log4j2.version>2.26.1</log4j2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
@@ -44,7 +45,7 @@
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.25</api-security-java.version>
-        <private-api-sdk-java.version>7.0.9</private-api-sdk-java.version>
+        <private-api-sdk-java.version>7.2.19</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
         <test-data-generator-library.version>1.0.46</test-data-generator-library.version>
 
@@ -56,6 +57,7 @@
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
         <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
+        <datafaker.version>2.5.2</datafaker.version>
     </properties>
 
     <dependencyManagement>
@@ -85,6 +87,17 @@
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver-sync</artifactId>
+            <version>${mongodb-driver-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>mongodb-driver-core</artifactId>
+            <version>${mongodb-driver-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>${mongodb-driver-version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
@@ -217,6 +230,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson-bind.version}</version>
             <scope>compile</scope>
+        </dependency>
+            <dependency>
+            <groupId>net.datafaker</groupId>
+            <artifactId>datafaker</artifactId>
+            <version>${datafaker.version}</version>
         </dependency>
     </dependencies>
 
