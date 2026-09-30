@@ -3,8 +3,10 @@ package uk.gov.companieshouse.api.testdata.service.address.impl;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Locale;
 import java.util.stream.Stream;
 
+import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,9 @@ import uk.gov.companieshouse.api.testdata.model.entity.Address;
 import uk.gov.companieshouse.api.testdata.model.entity.UsualResidentialAddress;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.service.address.AddressProfileContext;
+import uk.gov.companieshouse.api.testdata.service.address.profile.EuProfile;
+import uk.gov.companieshouse.api.testdata.service.address.profile.LocalityCluster;
+import uk.gov.companieshouse.api.testdata.service.address.profile.NonEuProfile;
 
 class AddressServiceImplTest {
 
@@ -37,9 +42,9 @@ class AddressServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("addressByJurisdiction")
-    void getAddressForAllJurisdictions(JurisdictionType jurisdiction, String country, String postalCode) {
+    void getAddressForAllJurisdictions(JurisdictionType jurisdiction) {
         Address address = addressService.getAddress(jurisdiction);
-        assertAddress(address, jurisdiction, country, postalCode);
+        assertAddress(address, jurisdiction);
     }
 
     @ParameterizedTest
@@ -121,7 +126,7 @@ class AddressServiceImplTest {
                 addressService.getUsualResidentialAddress(JurisdictionType.UNITED_KINGDOM);
 
         assertEuCountry(address.getCountry());
-        assertEuPostcode(address.getPostalCode());
+        assertGeneratedPostcode(address.getPostalCode());
     }
 
     @Test
@@ -134,7 +139,33 @@ class AddressServiceImplTest {
                 addressService.getUsualResidentialAddress(JurisdictionType.UNITED_KINGDOM);
 
         assertNonEuCountry(address.getCountry());
-        assertNonEuPostcode(address.getPostalCode());
+        assertGeneratedPostcode(address.getPostalCode());
+    }
+
+    @ParameterizedTest
+    @MethodSource("profilePostcodeFormats")
+    void generatesPostcodeInProfileFormat(
+            String country,
+            JurisdictionType jurisdiction,
+            String locality,
+            String region,
+            String postcodePattern) {
+        LocalityCluster[] clusters = {
+                new LocalityCluster(locality, "AREA", region)
+        };
+        Faker faker = new Faker(Locale.UK);
+        if (jurisdiction == JurisdictionType.EUROPEAN_UNION) {
+            mockContext.setEuProfile(new EuProfile(country, faker, clusters));
+        } else {
+            mockContext.setNonEuProfile(new NonEuProfile(country, faker, clusters));
+        }
+
+        UsualResidentialAddress address = addressService.getUsualResidentialAddress(jurisdiction);
+
+        assertTrue((address.getAddressLine1() + " " + address.getAddressLine2())
+                .contains("TEST DATA"));
+        assertTrue(address.getPostalCode().matches(postcodePattern),
+                "Unexpected " + country + " postcode: " + address.getPostalCode());
     }
 
     @Test
@@ -201,28 +232,25 @@ class AddressServiceImplTest {
         assertNotNull(country2);
     }
 
-    private void assertAddress(
-            Address address, JurisdictionType jurisdiction, String country, String postalCode) {
+    private void assertAddress(Address address, JurisdictionType jurisdiction) {
         assertNotNull(address);
         assertNotNull(address.getAddressLine1());
         assertNotNull(address.getAddressLine2());
+        assertTrue((address.getAddressLine1() + " " + address.getAddressLine2())
+                .contains("TEST DATA"));
         if (jurisdiction == JurisdictionType.NON_EU) {
             assertNonEuCountry(address.getCountry());
-            assertNonEuPostcode(address.getPostalCode());
         } else if (jurisdiction == JurisdictionType.EUROPEAN_UNION) {
             assertEuCountry(address.getCountry());
-            assertEuPostcode(address.getPostalCode());
         } else if (jurisdiction == JurisdictionType.UNITED_KINGDOM) {
             assertOverseasCountry(address.getCountry());
-            assertOverseasPostcode(address.getPostalCode());
         } else if (isUkJurisdiction(jurisdiction)) {
             assertTrue(isValidUkCountry(address.getCountry()),
                     "Country should be one of the UK countries, but was: " + address.getCountry());
-            assertEquals(postalCode, address.getPostalCode());
-        } else {
-            assertEquals(country, address.getCountry());
-            assertEquals(postalCode, address.getPostalCode());
+            assertTrue(address.getPostalCode().matches("[A-Z]{1,2}\\d{1,2} \\d[A-Z]{2}"),
+                    "Unexpected UK postcode: " + address.getPostalCode());
         }
+        assertGeneratedPostcode(address.getPostalCode());
         assertNotNull(address.getLocality());
     }
 
@@ -241,25 +269,11 @@ class AddressServiceImplTest {
         assertTrue(valid, "Country should be one of the EU countries, but was: " + country);
     }
 
-    private void assertEuPostcode(String postalCode) {
-        boolean valid = "0000 ZZ".equals(postalCode) || "00000".equals(postalCode) || "75000".equals(postalCode)
-                || "28000".equals(postalCode) || "00-000".equals(postalCode)
-                || "VLT 1000".equals(postalCode) || "1000".equals(postalCode);
-        assertTrue(valid, "Postcode should be one of the EU postcodes, but was: " + postalCode);
-    }
-
     private void assertNonEuCountry(String country) {
         boolean valid = "Panama".equals(country) || "Canada".equals(country) || "Australia".equals(country)
                 || "Jersey".equals(country) || "Guernsey".equals(country) || "Isle of Man".equals(country)
                 || "Bermuda".equals(country);
         assertTrue(valid, "Country should be one of the non-EU countries, but was: " + country);
-    }
-
-    private void assertNonEuPostcode(String postalCode) {
-        boolean valid = "0000-0000".equals(postalCode) || "Z9Z 9Z9".equals(postalCode) || "0000".equals(postalCode)
-                || "JE1 1AA".equals(postalCode) || "GY1 1AA".equals(postalCode) || "IM1 1AA".equals(postalCode)
-                || "HM 11".equals(postalCode);
-        assertTrue(valid, "Postcode should be one of the non-EU postcodes, but was: " + postalCode);
     }
 
     private void assertOverseasCountry(String country) {
@@ -271,14 +285,9 @@ class AddressServiceImplTest {
         assertTrue(valid, "Country should be an EU or non-EU overseas country, but was: " + country);
     }
 
-    private void assertOverseasPostcode(String postalCode) {
-        boolean valid = "0000 ZZ".equals(postalCode) || "00000".equals(postalCode)
-                || "75000".equals(postalCode) || "28000".equals(postalCode) || "00-000".equals(postalCode)
-                || "VLT 1000".equals(postalCode) || "1000".equals(postalCode)
-                || "0000-0000".equals(postalCode) || "Z9Z 9Z9".equals(postalCode)
-                || "0000".equals(postalCode) || "JE1 1AA".equals(postalCode) || "GY1 1AA".equals(postalCode)
-                || "IM1 1AA".equals(postalCode) || "HM 11".equals(postalCode);
-        assertTrue(valid, "Postcode should be an EU or non-EU overseas postcode, but was: " + postalCode);
+    private void assertGeneratedPostcode(String postalCode) {
+        assertNotNull(postalCode);
+        assertTrue(!postalCode.isBlank(), "Postcode should be generated");
     }
 
     private boolean isValidUkCountry(String country) {
@@ -286,17 +295,8 @@ class AddressServiceImplTest {
                "Scotland".equals(country) || "Northern Ireland".equals(country);
     }
 
-    private static Stream<Arguments> addressByJurisdiction() {
-        return Stream.of(
-                Arguments.of(JurisdictionType.ENGLAND_WALES, "United Kingdom", "ZZ1 1ZZ"),
-                Arguments.of(JurisdictionType.SCOTLAND, "United Kingdom", "ZZ1 1ZZ"),
-                Arguments.of(JurisdictionType.NI, "United Kingdom", "ZZ1 1ZZ"),
-                Arguments.of(JurisdictionType.WALES, "United Kingdom", "ZZ1 1ZZ"),
-                Arguments.of(JurisdictionType.UNITED_KINGDOM, "", ""),
-                Arguments.of(JurisdictionType.ENGLAND, "United Kingdom", "ZZ1 1ZZ"),
-                Arguments.of(JurisdictionType.EUROPEAN_UNION, "Netherlands", "0000 ZZ"),
-                Arguments.of(JurisdictionType.NON_EU, "", "0000-0000")
-        );
+    private static Stream<JurisdictionType> addressByJurisdiction() {
+        return Stream.of(JurisdictionType.values());
     }
 
     private static Stream<Arguments> countryOfResidenceByJurisdiction() {
@@ -311,6 +311,56 @@ class AddressServiceImplTest {
                 Arguments.of(JurisdictionType.WALES, java.util.List.of("Wales")),
                 Arguments.of(JurisdictionType.EUROPEAN_UNION, java.util.List.of("Netherlands", "Germany", "France", "Spain", "Italy", "Poland", "Malta", "Cyprus")),
                 Arguments.of(JurisdictionType.NON_EU, java.util.List.of("Panama", "Canada", "Australia", "Jersey", "Guernsey", "Isle of Man", "Bermuda"))
+        );
+    }
+
+    private static Stream<Arguments> profilePostcodeFormats() {
+        return Stream.of(
+                Arguments.of("Netherlands", JurisdictionType.EUROPEAN_UNION,
+                        "AMSTERDAM", "NOORD-HOLLAND", "[1-9]\\d{3} [A-Z]{2}"),
+                Arguments.of("Germany", JurisdictionType.EUROPEAN_UNION,
+                        "BERLIN", "BERLIN STATE", "\\d{5}"),
+                Arguments.of("Germany", JurisdictionType.EUROPEAN_UNION,
+                        "DRESDEN", "SAXONY", "01(0[6-9]|[12]\\d|3[0-2])\\d"),
+                Arguments.of("Germany", JurisdictionType.EUROPEAN_UNION,
+                        "MUNICH", "BAVARIA", "8\\d{4}"),
+                Arguments.of("France", JurisdictionType.EUROPEAN_UNION,
+                        "PARIS", "ILE-DE-FRANCE", "\\d{5}"),
+                Arguments.of("Spain", JurisdictionType.EUROPEAN_UNION,
+                        "MADRID", "COMMUNITY OF MADRID", "(0[1-9]|[1-4]\\d|5[0-2])\\d{3}"),
+                Arguments.of("Italy", JurisdictionType.EUROPEAN_UNION,
+                        "ROME", "LAZIO", "\\d{5}"),
+                Arguments.of("Poland", JurisdictionType.EUROPEAN_UNION,
+                        "WARSAW", "MAZOVIA", "\\d{2}-\\d{3}"),
+                Arguments.of("Malta", JurisdictionType.EUROPEAN_UNION,
+                        "VALLETTA", "MALTA ISLAND", "VLT \\d{4}"),
+                Arguments.of("Cyprus", JurisdictionType.EUROPEAN_UNION,
+                        "NICOSIA", "CYPRUS ISLAND", "\\d{4}"),
+                Arguments.of("Panama", JurisdictionType.NON_EU,
+                        "PANAMA CITY", "PANAMA PROVINCE", "\\d{4}"),
+                Arguments.of("Canada", JurisdictionType.NON_EU,
+                        "TORONTO", "ONTARIO", "M\\d[A-Z] \\d[A-Z]\\d"),
+                Arguments.of("Australia", JurisdictionType.NON_EU,
+                        "SYDNEY", "NEW SOUTH WALES", "2\\d{3}"),
+                Arguments.of("Jersey", JurisdictionType.NON_EU,
+                        "ST. HELIER", "JERSEY ISLAND", "JE[12] \\d[A-Z]{2}"),
+                Arguments.of("Jersey", JurisdictionType.NON_EU,
+                        "ST. BRELADE", "JERSEY ISLAND", "JE3 \\d[A-Z]{2}"),
+                Arguments.of("Guernsey", JurisdictionType.NON_EU,
+                        "ST. PETER PORT", "GUERNSEY ISLAND", "GY1 \\d[A-Z]{2}"),
+                Arguments.of("Guernsey", JurisdictionType.NON_EU,
+                        "VALE", "GUERNSEY ISLAND", "GY3 \\d[A-Z]{2}"),
+                Arguments.of("Isle of Man", JurisdictionType.NON_EU,
+                        "DOUGLAS", "ISLE OF MAN", "IM[12] \\d[A-Z]{2}"),
+                Arguments.of("Isle of Man", JurisdictionType.NON_EU,
+                        "RAMSEY", "ISLE OF MAN", "IM8 \\d[A-Z]{2}"),
+                Arguments.of("Bermuda", JurisdictionType.NON_EU,
+                        "HAMILTON", "PEMBROKE",
+                        "HM \\d{2}"),
+                Arguments.of("Bermuda", JurisdictionType.NON_EU,
+                        "SMITHS", "SMITHS", "FL \\d{2}"),
+                Arguments.of("Bermuda", JurisdictionType.NON_EU,
+                        "SOUTHAMPTON", "SOUTHAMPTON", "SN \\d{2}")
         );
     }
 }
