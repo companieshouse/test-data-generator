@@ -212,6 +212,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         request.setCompanyType(companySpec.getCompanyType());
         request.setCompanyStatus(companySpec.getCompanyStatus());
         request.setSubType(companySpec.getSubType());
+        request.setLimitedPartnershipTerm(companySpec.getLimitedPartnershipTerm());
         request.setHasSuperSecurePscs(companySpec.getHasSuperSecurePscs());
         if (companySpec.getNumberOfAppointments() != null) {
             request.setNumberOfAppointments(companySpec.getNumberOfAppointments());

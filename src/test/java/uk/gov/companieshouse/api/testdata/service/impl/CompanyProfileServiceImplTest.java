@@ -1391,4 +1391,192 @@ class CompanyProfileServiceImplTest {
         assertEquals(ukAddress, capturedProfile.getRegisteredOfficeAddress());
     }
 
+    // ============= TDG-189: Limited Partnership Subtype and Term Tests =============
+
+    @Test
+    void createLimitedPartnershipWithDefaultLpSubtypeForEnglandWales() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("lp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithDefaultSlpSubtypeForScotland() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("slp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithDefaultLpSubtypeForNorthernIreland() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.NI, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("lp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithExplicitLpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.LIMITED_PARTNERSHIP, profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithExplicitSlpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP, profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithPflpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP_SHORT);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP_SHORT, profile.getSubtype());
+        assertEquals("pflp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithSpflpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_PRIVATE_FUND_LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.SCOTTISH_PRIVATE_FUND_LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("spflp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithTermUntilDissolution() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("until-dissolution");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("until-dissolution", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithTermByAgreement() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("by-agreement");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("by-agreement", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithTermNone() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("none");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithDefaultTermNoneWhenNotProvided() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipLpSubtypeRequiresTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("until-dissolution");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("lp", profile.getSubtype());
+        assertEquals("until-dissolution", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipSlpSubtypeRequiresTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("by-agreement");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("slp", profile.getSubtype());
+        assertEquals("by-agreement", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipPflpSubtypeDoesNotRequireTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP_SHORT);
+        internalCompanyRequest.setLimitedPartnershipTerm("until-dissolution");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("pflp", profile.getSubtype());
+        assertNull(profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipSpflpSubtypeDoesNotRequireTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_PRIVATE_FUND_LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("by-agreement");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("spflp", profile.getSubtype());
+        assertNull(profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipLpWithoutTermSetsDefaultNone() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("lp", profile.getSubtype());
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipSlpWithoutTermSetsDefaultNone() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("slp", profile.getSubtype());
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithInvalidTermThrowsException() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("invalid-term");
+        
+        assertThrows(DataException.class, () -> createAndCapture(internalCompanyRequest));
+    }
+
+    @Test
+    void createLimitedPartnershipSetsCommunityInterestCompanyFalse() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertFalse(profile.getIsCommunityInterestCompany());
+    }
+
 }
