@@ -10,10 +10,8 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.service.address.AddressService;
 import uk.gov.companieshouse.api.testdata.service.address.AddressProfileContext;
 import uk.gov.companieshouse.api.testdata.service.address.profile.EuProfile;
-import uk.gov.companieshouse.api.testdata.service.address.profile.EuProfile.EuPostcodeType;
 import uk.gov.companieshouse.api.testdata.service.address.profile.LocalityCluster;
 import uk.gov.companieshouse.api.testdata.service.address.profile.NonEuProfile;
-import uk.gov.companieshouse.api.testdata.service.address.profile.NonEuProfile.NonEuPostcodeType;
 import uk.gov.companieshouse.api.testdata.service.RandomService;
 
 @Service
@@ -36,24 +34,18 @@ public class AddressServiceImpl implements AddressService {
     private static final String CANADA = "Canada";
     private static final String AUSTRALIA = "Australia";
     private static final String JERSEY = "Jersey";
+    private static final String GUERNSEY = "Guernsey";
+    private static final String ISLE_OF_MAN = "Isle of Man";
     private static final String MALTA = "Malta";
     private static final String CYPRUS = "Cyprus";
     private static final String BERMUDA = "Bermuda";
     private static final String TEST_DATA_MARKER = "TEST DATA";
-    private static final String UK_SENTINEL_POSTCODE = "ZZ1 1ZZ";
-    private static final String NETHERLANDS_SENTINEL_POSTCODE = "0000 ZZ";
-    private static final String GERMANY_SENTINEL_POSTCODE = "00000";
-    private static final String FRANCE_SENTINEL_POSTCODE = "75000";
-    private static final String SPAIN_SENTINEL_POSTCODE = "28000";
-    private static final String ITALY_SENTINEL_POSTCODE = "00000";
-    private static final String POLAND_SENTINEL_POSTCODE = "00-000";
-    private static final String PANAMA_SENTINEL_POSTCODE = "0000-0000";
-    private static final String CANADA_SENTINEL_POSTCODE = "Z9Z 9Z9";
-    private static final String AUSTRALIA_SENTINEL_POSTCODE = "0000";
-    private static final String JERSEY_SENTINEL_POSTCODE = "JE1 1AA";
-    private static final String MALTA_SENTINEL_POSTCODE = "VLT 1000";
-    private static final String CYPRUS_SENTINEL_POSTCODE = "1000";
-    private static final String BERMUDA_SENTINEL_POSTCODE = "HM 11";
+    private static final String CANADIAN_POSTCODE_LETTERS = "ABCEGHJKLMNPRSTVWXYZ";
+    private static final String DUTCH_POSTCODE_LETTERS = "ABCDEFGHJKLMNPRSTVWXZ";
+    private static final String UK_POSTCODE_LETTERS = "ABDEFGHJLNPQRSTUWXYZ";
+    private static final String[] BERMUDA_POSTCODE_PREFIXES = {
+            "CR", "DD", "DV", "FL", "GE", "HA", "HM", "HS", "MA", "PG", "SB", "SN", "WK"
+    };
     private static final Faker FAKER = new Faker(Locale.UK);
     private static final Faker UK_FAKER = new Faker(Locale.UK);
     private static final Faker NETHERLANDS_FAKER = new Faker(new Locale("nl", "NL"));
@@ -403,25 +395,25 @@ public class AddressServiceImpl implements AddressService {
     };
 
     private static final EuProfile[] EU_PROFILES = {
-            new EuProfile("Netherlands", NETHERLANDS_FAKER, NETHERLANDS_CLUSTERS, EuPostcodeType.NETHERLANDS),
-            new EuProfile("Germany", GERMANY_FAKER, GERMANY_CLUSTERS, EuPostcodeType.GERMANY),
-            new EuProfile("France", FRANCE_FAKER, FRANCE_CLUSTERS, EuPostcodeType.FRANCE),
-            new EuProfile("Spain", SPAIN_FAKER, SPAIN_CLUSTERS, EuPostcodeType.SPAIN),
-            new EuProfile("Italy", ITALY_FAKER, ITALY_CLUSTERS, EuPostcodeType.ITALY),
-            new EuProfile("Poland", POLAND_FAKER, POLAND_CLUSTERS, EuPostcodeType.POLAND),
+            new EuProfile("Netherlands", NETHERLANDS_FAKER, NETHERLANDS_CLUSTERS),
+            new EuProfile("Germany", GERMANY_FAKER, GERMANY_CLUSTERS),
+            new EuProfile("France", FRANCE_FAKER, FRANCE_CLUSTERS),
+            new EuProfile("Spain", SPAIN_FAKER, SPAIN_CLUSTERS),
+            new EuProfile("Italy", ITALY_FAKER, ITALY_CLUSTERS),
+            new EuProfile("Poland", POLAND_FAKER, POLAND_CLUSTERS),
             // Malta and Cyprus are EU member states (joined 2004), not non-EU jurisdictions.
-            new EuProfile("Malta", FAKER, MALTA_CLUSTERS, EuPostcodeType.MALTA),
-            new EuProfile("Cyprus", FAKER, CYPRUS_CLUSTERS, EuPostcodeType.CYPRUS)
+            new EuProfile("Malta", FAKER, MALTA_CLUSTERS),
+            new EuProfile("Cyprus", FAKER, CYPRUS_CLUSTERS)
     };
 
     private static final NonEuProfile[] NON_EU_PROFILES = {
-            new NonEuProfile("Panama", PANAMA_FAKER, PANAMA_CLUSTERS, NonEuPostcodeType.PANAMA),
-            new NonEuProfile("Canada", CANADA_FAKER, CANADA_CLUSTERS, NonEuPostcodeType.CANADA),
-            new NonEuProfile("Australia", AUSTRALIA_FAKER, AUSTRALIA_CLUSTERS, NonEuPostcodeType.AUSTRALIA),
-            new NonEuProfile("Jersey", FAKER, JERSEY_CLUSTERS, NonEuPostcodeType.JERSEY),
-            new NonEuProfile("Guernsey", FAKER, GUERNSEY_CLUSTERS, NonEuPostcodeType.GUERNSEY),
-            new NonEuProfile("Isle of Man", FAKER, ISLE_OF_MAN_CLUSTERS, NonEuPostcodeType.ISLE_OF_MAN),
-            new NonEuProfile("Bermuda", FAKER, BERMUDA_CLUSTERS, NonEuPostcodeType.BERMUDA)
+            new NonEuProfile("Panama", PANAMA_FAKER, PANAMA_CLUSTERS),
+            new NonEuProfile("Canada", CANADA_FAKER, CANADA_CLUSTERS),
+            new NonEuProfile("Australia", AUSTRALIA_FAKER, AUSTRALIA_CLUSTERS),
+            new NonEuProfile("Jersey", FAKER, JERSEY_CLUSTERS),
+            new NonEuProfile("Guernsey", FAKER, GUERNSEY_CLUSTERS),
+            new NonEuProfile("Isle of Man", FAKER, ISLE_OF_MAN_CLUSTERS),
+            new NonEuProfile("Bermuda", FAKER, BERMUDA_CLUSTERS)
     };
 
     @Override
@@ -487,7 +479,7 @@ public class AddressServiceImpl implements AddressService {
                     UK_FAKER.address().streetName().toUpperCase(Locale.UK) + " " + TEST_DATA_MARKER);
             residentialAddress.setCountry(getOrSelectUkCountry(effectiveJurisdiction));
             residentialAddress.setLocality(cluster.locality);
-            residentialAddress.setPostalCode(generateUkPostcode());
+            residentialAddress.setPostalCode(generateUkPostcode(cluster, effectiveJurisdiction));
             residentialAddress.setRegion(cluster.region);
             return residentialAddress;
         }
@@ -573,7 +565,7 @@ public class AddressServiceImpl implements AddressService {
         addr.setAddressLine2(cluster.area + " " + TEST_DATA_MARKER);
         addr.setCountry(euProfile.country);
         addr.setLocality(cluster.locality);
-        addr.setPostalCode(generateEuPostcode(euProfile.postcodeType));
+        addr.setPostalCode(generateOverseasPostcode(euProfile.country, cluster));
         addr.setRegion(cluster.region);
         return addr;
     }
@@ -584,7 +576,7 @@ public class AddressServiceImpl implements AddressService {
         addr.setAddressLine2(cluster.area + " " + TEST_DATA_MARKER);
         addr.setCountry(nonEuProfile.country);
         addr.setLocality(cluster.locality);
-        addr.setPostalCode(generateNonEuPostcode(nonEuProfile.postcodeType));
+        addr.setPostalCode(generateOverseasPostcode(nonEuProfile.country, cluster));
         addr.setRegion(cluster.region);
         return addr;
     }
@@ -612,73 +604,389 @@ public class AddressServiceImpl implements AddressService {
         };
     }
 
-    private String generateUkPostcode() {
-        return UK_SENTINEL_POSTCODE;
-    }
-
-    private String generateDutchPostcode() {
-        return NETHERLANDS_SENTINEL_POSTCODE;
-    }
-
-    private String generateEuPostcode(EuPostcodeType postcodeType) {
-        return switch (postcodeType) {
-            case NETHERLANDS -> NETHERLANDS_SENTINEL_POSTCODE;
-            case GERMANY -> "00000";
-            case FRANCE -> "75000";
-            case SPAIN -> "28000";
-            case ITALY -> "00000";
-            case POLAND -> "00-000";
-            case MALTA -> generateMaltaPostcode();
-            case CYPRUS -> generateCyprusPostcode();
+    private String generateOverseasPostcode(String country, LocalityCluster cluster) {
+        return switch (country) {
+            case NETHERLANDS -> generateDutchPostcode(cluster.locality);
+            case GERMANY -> generateGermanPostcode(cluster.locality);
+            case FRANCE -> generateFrenchPostcode(cluster.locality);
+            case SPAIN -> generateSpanishPostcode(cluster.locality);
+            case ITALY -> generateItalianPostcode(cluster.locality);
+            case POLAND -> generatePolishPostcode(cluster.locality);
+            case MALTA -> getMaltaPostcodePrefix(cluster.locality) + " "
+                    + FAKER.number().numberBetween(1000, 10000);
+            case CYPRUS -> generateCyprusPostcode(cluster.locality);
+            case PANAMA -> generatePanamaPostcode(cluster.locality);
+            case CANADA -> generateCanadianPostcode(cluster.locality);
+            case AUSTRALIA -> generateAustralianPostcode(cluster.locality);
+            case JERSEY -> generateCrownDependencyPostcode(
+                    getJerseyPostcodeArea(cluster.locality));
+            case GUERNSEY -> generateCrownDependencyPostcode(
+                    getGuernseyPostcodeArea(cluster.locality));
+            case ISLE_OF_MAN -> generateCrownDependencyPostcode(
+                    getIsleOfManPostcodeArea(cluster.locality));
+            case BERMUDA -> generateBermudaPostcode(cluster.locality);
+            default -> FAKER.address().zipCode();
         };
     }
 
-    private String generatePanamaPostcode() {
-        return PANAMA_SENTINEL_POSTCODE;
-    }
-
-    private String generateCanadaPostcode() {
-        return CANADA_SENTINEL_POSTCODE;
-    }
-
-    private String generateAustraliaPostcode() {
-        return AUSTRALIA_SENTINEL_POSTCODE;
-    }
-
-    private String generateJerseyPostcode() {
-        return "JE1 1AA";
-    }
-
-    private String generateGuernseyPostcode() {
-        return "GY1 1AA";
-    }
-
-    private String generateIsleOfManPostcode() {
-        return "IM1 1AA";
-    }
-
-    private String generateMaltaPostcode() {
-        return "VLT 1000";
-    }
-
-    private String generateCyprusPostcode() {
-        return "1000";
-    }
-
-    private String generateBermudaPostcode() {
-        return "HM 11";
-    }
-
-    private String generateNonEuPostcode(NonEuPostcodeType postcodeType) {
-        return switch (postcodeType) {
-            case PANAMA -> generatePanamaPostcode();
-            case CANADA -> generateCanadaPostcode();
-            case AUSTRALIA -> generateAustraliaPostcode();
-            case JERSEY -> generateJerseyPostcode();
-            case GUERNSEY -> generateGuernseyPostcode();
-            case ISLE_OF_MAN -> generateIsleOfManPostcode();
-            case BERMUDA -> generateBermudaPostcode();
+    private String generateUkPostcode(
+            LocalityCluster cluster, JurisdictionType jurisdiction) {
+        String outwardCode = switch (cluster.locality) {
+            case "LONDON" -> switch (cluster.area) {
+                case "CAMDEN" -> "NW1";
+                case "ISLINGTON" -> "N1";
+                case "CHELSEA" -> "SW3";
+                default -> FAKER.options().option("E1", "EC1", "N1", "NW1", "SE1", "SW1", "W1", "WC1");
+            };
+            case "MANCHESTER" -> switch (cluster.area) {
+                case "DIDSBURY" -> "M20";
+                case "CHORLTON" -> "M21";
+                default -> "M1";
+            };
+            case "BIRMINGHAM" -> "EDGBASTON".equals(cluster.area) ? "B15" : "B13";
+            case "BRISTOL" -> "CLIFTON".equals(cluster.area) ? "BS8" : "BS6";
+            case "LEEDS" -> "LS6";
+            case "LIVERPOOL" -> "TOXTETH".equals(cluster.area) ? "L8" : "L15";
+            case "NEWCASTLE" -> "GOSFORTH".equals(cluster.area) ? "NE3" : "NE2";
+            case "CAMBRIDGE" -> "NEWNHAM".equals(cluster.area) ? "CB3" : "CB4";
+            case "OXFORD" -> "CITY CENTRE".equals(cluster.area) ? "OX1" : "OX2";
+            case "YORK" -> "YO1";
+            case "CHESTER" -> "CH1";
+            case "BATH" -> "BA1";
+            case "NOTTINGHAM" -> "NG1";
+            case "LEICESTER" -> "LE1";
+            case "COVENTRY" -> "CV1";
+            case "BRIGHTON" -> "BN1";
+            case "SOUTHAMPTON" -> "SO14";
+            case "EXETER" -> "EX1";
+            case "READING" -> "RG4";
+            case "NORWICH" -> "NR1";
+            case "CARDIFF" -> switch (cluster.area) {
+                case "CATHAYS" -> "CF24";
+                case "PONTCANNA", "GRANGETOWN" -> "CF11";
+                default -> "CF10";
+            };
+            case "CAERPHILLY" -> "CF83";
+            case "SWANSEA" -> "MUMBLES".equals(cluster.area) ? "SA3" : "SA2";
+            case "CARMARTHEN" -> "SA31";
+            case "NEWPORT" -> "ROGERSTONE".equals(cluster.area) ? "NP10" : "NP20";
+            case "WREXHAM" -> "LL11";
+            case "BANGOR" -> jurisdiction == JurisdictionType.NI ? "BT19" : "LL57";
+            case "HOLYHEAD" -> "LL65";
+            case "ABERYSTWYTH" -> "SY23";
+            case "LLANDRINDOD WELLS" -> "LD1";
+            case "EDINBURGH" -> switch (cluster.area) {
+                case "LEITH" -> "EH6";
+                case "MORNINGSIDE" -> "EH10";
+                case "STOCKBRIDGE" -> "EH3";
+                default -> "EH1";
+            };
+            case "GLASGOW" -> switch (cluster.area) {
+                case "PARTICK" -> "G11";
+                case "GOVAN" -> "G51";
+                default -> "G1";
+            };
+            case "ABERDEEN" -> "AB10";
+            case "DUNDEE" -> "BROUGHTY FERRY".equals(cluster.area) ? "DD5" : "DD1";
+            case "STIRLING" -> "FK8";
+            case "FALKIRK" -> "FK1";
+            case "PERTH" -> "PH1";
+            case "INVERNESS" -> "IV1";
+            case "PAISLEY" -> "PA2";
+            case "AYR" -> "KA7";
+            case "BELFAST" -> switch (cluster.area) {
+                case "BOTANIC", "ORMEAU" -> "BT7";
+                case "TITANIC QUARTER" -> "BT3";
+                default -> "BT1";
+            };
+            case "DERRY" -> FAKER.options().option("BT47", "BT48");
+            case "LISBURN" -> "LAMBEG".equals(cluster.area) ? "BT27" : "BT28";
+            case "NEWRY" -> "WARRENPOINT".equals(cluster.area) ? "BT34" : "BT35";
+            case "ARMAGH" -> "BT61";
+            case "OMAGH" -> "BT78";
+            case "STRABANE" -> "BT82";
+            case "COLERAINE" -> "BT52";
+            case "ENNISKILLEN" -> "BT74";
+            case "DOWNPATRICK" -> "BT30";
+            default -> jurisdiction == JurisdictionType.NI
+                    ? "BT1"
+                    : FAKER.options().option(
+                            "B1", "BS1", "CB1", "L1", "LE1", "LS1", "M1",
+                            "NE1", "NG1", "OX1", "RG1", "SO14", "YO1");
         };
+        return outwardCode + " "
+                + FAKER.number().digit()
+                + randomLetters(UK_POSTCODE_LETTERS, 2);
+    }
+
+    private String generateDutchPostcode(String locality) {
+        int base = switch (locality) {
+            case "AMSTERDAM" -> 1000;
+            case "ALMERE" -> 1300;
+            case "HAARLEM" -> 2000;
+            case "LEIDEN" -> 2300;
+            case "THE HAGUE" -> 2500;
+            case "DELFT" -> 2600;
+            case "ROTTERDAM" -> 3000;
+            case "UTRECHT" -> 3500;
+            case "BREDA" -> 4800;
+            case "TILBURG" -> 5000;
+            case "EINDHOVEN" -> 5600;
+            case "MAASTRICHT" -> 6200;
+            case "NIJMEGEN" -> 6500;
+            case "ARNHEM" -> 6800;
+            case "GRONINGEN" -> 9700;
+            default -> FAKER.number().numberBetween(1000, 9900);
+        };
+        return (base + FAKER.number().numberBetween(0, 100))
+                + " " + randomLetters(DUTCH_POSTCODE_LETTERS, 2);
+    }
+
+    private String generateGermanPostcode(String locality) {
+        int[] range = switch (locality) {
+            case "DRESDEN" -> new int[]{1067, 1329};
+            case "LEIPZIG" -> new int[]{4100, 4400};
+            case "BERLIN" -> new int[]{10115, 14200};
+            case "HAMBURG" -> new int[]{20095, 22770};
+            case "BREMEN" -> new int[]{28195, 28780};
+            case "DÜSSELDORF" -> new int[]{40200, 40700};
+            case "COLOGNE" -> new int[]{50600, 51200};
+            case "FRANKFURT" -> new int[]{60300, 60600};
+            case "HEIDELBERG" -> new int[]{69100, 69200};
+            case "STUTTGART" -> new int[]{70100, 70700};
+            case "MUNICH" -> new int[]{80300, 82000};
+            default -> new int[]{1000, 100000};
+        };
+        return formatFiveDigitPostcode(randomInRange(range));
+    }
+
+    private String generateFrenchPostcode(String locality) {
+        int[] range = switch (locality) {
+            case "NICE" -> new int[]{6000, 6300};
+            case "MARSEILLE" -> new int[]{13001, 13017};
+            case "TOULOUSE" -> new int[]{31000, 31600};
+            case "BORDEAUX" -> new int[]{33000, 33900};
+            case "MONTPELLIER" -> new int[]{34000, 34900};
+            case "RENNES" -> new int[]{35000, 35900};
+            case "NANTES" -> new int[]{44000, 44900};
+            case "LILLE" -> new int[]{59000, 59900};
+            case "STRASBOURG" -> new int[]{67000, 67900};
+            case "LYON" -> new int[]{69001, 69010};
+            case "PARIS" -> new int[]{75001, 75021};
+            default -> new int[]{1000, 96000};
+        };
+        return formatFiveDigitPostcode(randomInRange(range));
+    }
+
+    private String generateSpanishPostcode(String locality) {
+        String province = switch (locality) {
+            case "ALICANTE" -> "03";
+            case "PALMA" -> "07";
+            case "BARCELONA" -> "08";
+            case "GRANADA" -> "18";
+            case "MADRID" -> "28";
+            case "MALAGA" -> "29";
+            case "SEVILLE" -> "41";
+            case "VALENCIA" -> "46";
+            case "BILBAO" -> "48";
+            case "ZARAGOZA" -> "50";
+            default -> String.format(
+                    Locale.UK, "%02d", FAKER.number().numberBetween(1, 53));
+        };
+        return province + FAKER.numerify("###");
+    }
+
+    private String generateItalianPostcode(String locality) {
+        String prefix = switch (locality) {
+            case "ROME" -> "001";
+            case "TURIN" -> "101";
+            case "GENOA" -> "161";
+            case "MILAN" -> "201";
+            case "VENICE" -> "301";
+            case "BOLOGNA" -> "401";
+            case "FLORENCE" -> "501";
+            case "NAPLES" -> "801";
+            case "PALERMO" -> "901";
+            default -> FAKER.numerify("###");
+        };
+        return prefix + FAKER.numerify("##");
+    }
+
+    private String generatePolishPostcode(String locality) {
+        String area = switch (locality) {
+            case "WARSAW" -> FAKER.options().option("00", "01", "02");
+            case "LUBLIN" -> "20";
+            case "KRAKOW" -> FAKER.options().option("30", "31");
+            case "WROCLAW" -> FAKER.options().option("50", "51", "52", "53", "54");
+            case "POZNAŃ" -> FAKER.options().option("60", "61");
+            case "SZCZECIN" -> FAKER.options().option("70", "71");
+            case "GDANSK" -> "80";
+            case "TORUŃ" -> "87";
+            case "ŁÓDŹ" -> FAKER.options().option("90", "91", "92", "93", "94");
+            default -> FAKER.numerify("##");
+        };
+        return area + "-" + FAKER.numerify("###");
+    }
+
+    private String generateCyprusPostcode(String locality) {
+        int[] range = switch (locality) {
+            case "NICOSIA" -> new int[]{1000, 3000};
+            case "LIMASSOL" -> new int[]{3000, 5000};
+            case "FAMAGUSTA", "AYIA NAPA", "PARALIMNI" -> new int[]{5000, 6000};
+            case "LARNACA" -> new int[]{6000, 8000};
+            case "PAPHOS", "POLIS" -> new int[]{8000, 9000};
+            case "KYRENIA", "MORFOU" -> new int[]{9000, 10000};
+            default -> new int[]{1000, 10000};
+        };
+        return String.valueOf(randomInRange(range));
+    }
+
+    private String generatePanamaPostcode(String locality) {
+        int base = switch (locality) {
+            case "BOCAS DEL TORO" -> 100;
+            case "PENONOME" -> 200;
+            case "COLON" -> 300;
+            case "DAVID" -> 400;
+            case "LA PALMA" -> 500;
+            case "CHITRE" -> 600;
+            case "LAS TABLAS" -> 700;
+            case "PANAMA CITY" -> 800;
+            case "SANTIAGO" -> 900;
+            default -> 0;
+        };
+        return String.format(
+                Locale.UK, "%04d", base + FAKER.number().numberBetween(1, 100));
+    }
+
+    private int randomInRange(int[] range) {
+        return FAKER.number().numberBetween(range[0], range[1]);
+    }
+
+    private String formatFiveDigitPostcode(int postcode) {
+        return String.format(Locale.UK, "%05d", postcode);
+    }
+
+    private String generateCanadianPostcode(String locality) {
+        String forwardSortationArea = switch (locality) {
+            case "TORONTO" -> "M" + FAKER.number().numberBetween(1, 10);
+            case "OTTAWA" -> "K" + FAKER.number().numberBetween(1, 3);
+            case "KITCHENER" -> "N2";
+            case "VANCOUVER" -> "V" + FAKER.number().numberBetween(5, 7);
+            case "VICTORIA" -> "V" + FAKER.number().numberBetween(8, 10);
+            case "CALGARY" -> "T" + FAKER.number().numberBetween(1, 4);
+            case "EDMONTON" -> "T" + FAKER.number().numberBetween(5, 7);
+            case "WINNIPEG" -> "R" + FAKER.number().numberBetween(2, 4);
+            case "HALIFAX" -> "B3";
+            case "MONTREAL" -> "H" + FAKER.number().numberBetween(1, 6);
+            case "QUEBEC CITY" -> "G" + FAKER.number().numberBetween(1, 3);
+            default -> randomLetters(CANADIAN_POSTCODE_LETTERS, 1)
+                    + FAKER.number().digit();
+        };
+        return forwardSortationArea
+                + randomLetters(CANADIAN_POSTCODE_LETTERS, 1)
+                + " "
+                + FAKER.number().digit()
+                + randomLetters(CANADIAN_POSTCODE_LETTERS, 1)
+                + FAKER.number().digit();
+    }
+
+    private String generateAustralianPostcode(String locality) {
+        int[] range = switch (locality) {
+            case "SYDNEY" -> new int[]{2000, 2240};
+            case "WOLLONGONG" -> new int[]{2500, 2531};
+            case "MELBOURNE" -> new int[]{3000, 3210};
+            case "GEELONG" -> new int[]{3211, 3221};
+            case "BRISBANE" -> new int[]{4000, 4180};
+            case "ADELAIDE" -> new int[]{5000, 5200};
+            case "PERTH" -> new int[]{6000, 6210};
+            case "HOBART" -> new int[]{7000, 7110};
+            case "DARWIN" -> new int[]{800, 900};
+            case "CANBERRA" -> new int[]{2600, 2620};
+            default -> new int[]{800, 10000};
+        };
+        return String.format(
+                Locale.UK, "%04d", FAKER.number().numberBetween(range[0], range[1]));
+    }
+
+    private String getMaltaPostcodePrefix(String locality) {
+        return switch (locality) {
+            case "VALLETTA" -> "VLT";
+            case "SLIEMA" -> "SLM";
+            case "MOSTA" -> "MST";
+            case "BIRKIRKARA" -> "BKR";
+            case "QORMI" -> "QRM";
+            case "NAXXAR" -> "NXR";
+            case "MELLIEHA" -> "MLH";
+            case "BIRGU" -> "BRG";
+            case "MARSASKALA" -> "MSK";
+            case "RABAT" -> "RBT";
+            default -> randomLetters(UK_POSTCODE_LETTERS, 3);
+        };
+    }
+
+    private String generateCrownDependencyPostcode(String outwardCode) {
+        return outwardCode + " "
+                + FAKER.number().digit()
+                + randomLetters(UK_POSTCODE_LETTERS, 2);
+    }
+
+    private String getJerseyPostcodeArea(String locality) {
+        return switch (locality) {
+            case "ST. HELIER" -> FAKER.options().option("JE1", "JE2");
+            case "ST. CLEMENT", "ST. SAVIOUR" -> "JE2";
+            case "ST. BRELADE", "ST. LAWRENCE", "ST. MARTIN", "ST. OUEN", "ST. PETER" -> "JE3";
+            default -> "JE1";
+        };
+    }
+
+    private String getGuernseyPostcodeArea(String locality) {
+        return switch (locality) {
+            case "ST. PETER PORT" -> "GY1";
+            case "ST. SAMPSON" -> "GY2";
+            case "VALE" -> "GY3";
+            case "ST. MARTIN" -> "GY4";
+            case "CASTEL" -> "GY5";
+            case "ST. ANDREW" -> "GY6";
+            case "FOREST", "TORTEVAL" -> "GY8";
+            default -> "GY1";
+        };
+    }
+
+    private String getIsleOfManPostcodeArea(String locality) {
+        return switch (locality) {
+            case "DOUGLAS" -> FAKER.options().option("IM1", "IM2");
+            case "LAXEY" -> "IM4";
+            case "PEEL" -> "IM5";
+            case "KIRK MICHAEL" -> "IM6";
+            case "RAMSEY" -> "IM8";
+            case "CASTLETOWN", "PORT ERIN", "PORT ST. MARY" -> "IM9";
+            default -> "IM1";
+        };
+    }
+
+    private String generateBermudaPostcode(String locality) {
+        String prefix = switch (locality) {
+            case "HAMILTON", "PEMBROKE" -> "HM";
+            case "ST. GEORGE" -> "GE";
+            case "DOCKYARD", "SOMERSET" -> FAKER.options().option("MA", "SB");
+            case "DEVONSHIRE" -> FAKER.options().option("DD", "DV");
+            case "WARWICK" -> "WK";
+            case "SOUTHAMPTON" -> "SN";
+            case "SMITHS" -> "FL";
+            case "PAGET" -> "PG";
+            default -> FAKER.options().option(BERMUDA_POSTCODE_PREFIXES);
+        };
+        return String.format(
+                Locale.UK, "%s %02d", prefix, FAKER.number().numberBetween(1, 100));
+    }
+
+    private String randomLetters(String allowedLetters, int length) {
+        StringBuilder result = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            result.append(allowedLetters.charAt(
+                    FAKER.number().numberBetween(0, allowedLetters.length())));
+        }
+        return result.toString();
     }
 
 }
