@@ -212,7 +212,9 @@ class IdentityVerificationServiceImplTest {
                         IDENTITY_ID,
                         UVID_VALUE,
                         FIRST_NAME,
-                        LAST_NAME);
+                        LAST_NAME,
+                        null,
+                        null);
         boolean result = service.deleteIdentityData(response, USER_ID);
 
         assertTrue(result);
@@ -228,7 +230,9 @@ class IdentityVerificationServiceImplTest {
                         IDENTITY_ID,
                         UVID_VALUE,
                         FIRST_NAME,
-                        LAST_NAME);
+                        LAST_NAME,
+                        null,
+                        null);
 
         doThrow(new RuntimeException("identity delete failed"))
                 .when(identityRepository)
@@ -248,7 +252,9 @@ class IdentityVerificationServiceImplTest {
                         IDENTITY_ID,
                         UVID_VALUE,
                         FIRST_NAME,
-                        LAST_NAME);
+                        LAST_NAME,
+                        null,
+                        null);
 
         doThrow(new RuntimeException("backlog delete failed"))
                 .when(backlogRepository)
@@ -268,7 +274,9 @@ class IdentityVerificationServiceImplTest {
                         IDENTITY_ID,
                         UVID_VALUE,
                         FIRST_NAME,
-                        LAST_NAME);
+                        LAST_NAME,
+                        null,
+                        null);
 
         doThrow(new RuntimeException("uvid delete failed"))
                 .when(uvidRepository)

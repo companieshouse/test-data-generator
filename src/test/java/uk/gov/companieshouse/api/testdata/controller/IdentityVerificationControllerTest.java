@@ -32,7 +32,7 @@ class IdentityVerificationControllerTest {
     void getIdentityVerification_serviceReturnsData_returnsOk() throws Exception {
         final String email = "user@example.com";
         var data = new IdentityVerificationResponse("identity-id-123", "UVID-ABC",
-                "Firstname", "Lastname");
+                "Firstname", "Lastname", null, null);
 
         when(this.verifiedIdentityService.getIdentityVerificationData(email))
                 .thenReturn(data);
@@ -89,7 +89,9 @@ class IdentityVerificationControllerTest {
                         "identity-id-123",
                         "UVID-ABC",
                         "Firstname",
-                        "Lastname");
+                        "Lastname",
+                        null,
+                        null);
 
         when(verifiedIdentityService.getIdentityVerificationData(identityEmail))
                 .thenReturn(identity);
@@ -116,7 +118,9 @@ class IdentityVerificationControllerTest {
                         "identity-id-123",
                         "UVID-ABC",
                         "Firstname",
-                        "Lastname");
+                        "Lastname",
+                        null,
+                        null);
 
         when(verifiedIdentityService.getIdentityVerificationData(identityEmail))
                 .thenReturn(identity);
