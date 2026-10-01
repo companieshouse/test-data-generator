@@ -48,8 +48,14 @@ In order to use the generator, there are different possible endpoints that can b
   - `number_of_uk_establishments`: Integer value to specify the number of UK establishments to create for an overseas company (0-20). When provided, this field takes precedence over `has_uk_establishment`. `has_uk_establishment` will be derived automatically (`0` → `false`, `>0` → `true`). Used alongside `oversea-company` company type. Maximum value is 20.
   - UK Establishment Addresses: Each UK establishment created will be assigned a random UK-based address (from England/Wales, Scotland, Northern Ireland, England, or Wales jurisdictions).
   - Unique Names: When creating multiple UK establishments, each will have a unique name with an index appended (e.g., "COMPANY BR123456", "COMPANY BR234567-2", "COMPANY BR345678-3").
-  - `sub_type`: The subtype of the company (e.g., `community-interest-company`, `private-fund-limited-partnership`). Defaults to no subtype.
+  - `sub_type`: The subtype of the company. For `limited-partnership` companies, the following subtypes are supported:
+    - `lp` (Limited Partnership) - Default for england-wales and northern-ireland jurisdictions
+    - `slp` (Scottish Limited Partnership) - Default for scotland jurisdiction
+    - `pflp` (Private Fund Limited Partnership) - Must be explicitly provided
+    - `spflp` (Scottish Private Fund Limited Partnership) - Must be explicitly provided
+    - Other subtypes: `community-interest-company`, `private-fund-limited-partnership`. Defaults to no subtype.
   - `has_super_secure_pscs`: Boolean value to determine if the company has super secure PSCs. Defaults to false, `true` value will create a Psc entry of `super-secure-person-with-significant-control` or `super-secure-beneficial-owner` depending on CompanyType.
+  - `limited_partnership_term`: The term of a limited partnership. Only applicable when company type is `limited-partnership` and subtype is `lp` or `slp`. Not applicable for `pflp` and `spflp` subtypes. Possible values are: `none`, `by-agreement`, `until-dissolution`. Defaults to `none` if not provided for `lp` and `slp` subtypes.
   - `registers` : The registers of the company (e.g., `directors`, `persons-with-significant-control`, ``). Defaults to no registers.
   - `number_of_appointments`: Used alongside `officer_roles` to determine the number of appointments to create. Defaults to 1 director. Defaults to 2 directors and 1 secretary for PLC companies. Defaults to 1 general partner and 1 limited partner for `limited-partnership` companies. Has a maximum allowed value of 20.
   - `officer_roles`: This takes a list of officer roles (`director`, `secretary`). Defaults to director when no role is passed. For `limited-partnership` companies, 1 `general-partner-in-a-limited-partnership` and 1 `limited-partner-in-a-limited-partnership` are always created to satisfy the minimum LP requirement, and any additional roles passed are created on top of those. The `general-partner-in-a-limited-partnership` and `limited-partner-in-a-limited-partnership` roles can only be used when the company type is `limited-partnership`.
@@ -103,6 +109,9 @@ In order to use the generator, there are different possible endpoints that can b
   - A usage example for creating a company with alphabetical search: `{ "alphabetical_search": true }`
   - A usage example for creating a company with advanced search: `{ "advanced_search": true }`
   - A usage example for creating a company with disqualified officers: `{ "disqualified_officers": [ { "disqualification_type": "court-order", "is_corporate_officer": false }]}`
+  - A usage example for creating a limited partnership with default subtype and term: `{ "type": "limited-partnership", "jurisdiction": "england-wales" }` - This will create a company with subtype `lp` and term `none`.
+  - A usage example for creating a limited partnership with explicit term: `{ "type": "limited-partnership", "jurisdiction": "scotland", "limited_partnership_term": "by-agreement" }` - This will create a company with subtype `slp` (default for scotland) and term `by-agreement`.
+  - A usage example for creating a private fund limited partnership: `{ "type": "limited-partnership", "sub_type": "pflp", "jurisdiction": "england-wales" }` - This will create a company with subtype `pflp` and no term field set.
 
 - PUT: Sending a PUT request to update Company Profile for a specific company `{Base URL}/test-data/internal/update-company` will update a Company Profile entry. The request body must include `company_number` and can include optional `etag` parameter.
   - `company_number`: The Company Number of the Company Profile entry in the company_profile db collection. This is mandatory.

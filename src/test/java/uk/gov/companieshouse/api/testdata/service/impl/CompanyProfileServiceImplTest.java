@@ -94,7 +94,7 @@ class CompanyProfileServiceImplTest {
     private InternalCompanyRequest overseasSpec;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws DataException {
         internalCompanyRequest = new InternalCompanyRequest();
         overseasSpec = new InternalCompanyRequest();
         InternalCompanyRequest overseaCompanySpec = new InternalCompanyRequest();
@@ -111,7 +111,7 @@ class CompanyProfileServiceImplTest {
         savedProfile = new CompanyProfile();
     }
 
-    private void setupCommonMocks(InternalCompanyRequest internalCompanyRequest, Address mockAddress) {
+    private void setupCommonMocks(InternalCompanyRequest internalCompanyRequest, Address mockAddress) throws DataException {
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
         Mockito.lenient().when(repository.save(any())).thenReturn(savedProfile);
         Mockito.lenient().when(overseasEntityRepository.save(any()))
@@ -119,7 +119,7 @@ class CompanyProfileServiceImplTest {
         Mockito.lenient().when(addressService.getAddress(internalCompanyRequest.getJurisdiction())).thenReturn(mockAddress);
     }
 
-    private CompanyProfile createAndCapture(InternalCompanyRequest internalCompanyRequest) {
+    private CompanyProfile createAndCapture(InternalCompanyRequest internalCompanyRequest) throws DataException {
         Address mockAddress = new Address("", "", "", "", "", "", "");
         setupCommonMocks(internalCompanyRequest, mockAddress);
 
@@ -138,7 +138,7 @@ class CompanyProfileServiceImplTest {
     }
 
     private void assertCreatedProfile(CompanyProfile profile, String companyStatus, String jurisdiction,
-                                      String companyType, Boolean hasInsolvencyHistory) {
+                                      String companyType, Boolean hasInsolvencyHistory) throws DataException {
         assertEquals(COMPANY_NUMBER, profile.getId());
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
         // Dynamically determine the expected company name ending
@@ -175,13 +175,13 @@ class CompanyProfileServiceImplTest {
 
     }
 
-    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement cs) {
+    private void assertOnConfirmationStatement(CompanyProfile.ConfirmationStatement cs) throws DataException {
         assertNotNull(cs.getNextMadeUpTo());
         assertFalse(cs.getOverdue());
         assertNotNull(cs.getNextDue());
     }
 
-    private void assertOnAccounts(CompanyProfile.Accounts accounts) {
+    private void assertOnAccounts(CompanyProfile.Accounts accounts) throws DataException {
         assertNotNull(accounts);
         assertNotNull(accounts.getNextDue());
         assertNotNull(accounts.getPeriodStart());
@@ -193,7 +193,7 @@ class CompanyProfileServiceImplTest {
         assertNotNull(accounts.getAccountingReferenceDateMonth());
     }
 
-    private void assertOnDateOfCreation(Instant dateOfCreation) {
+    private void assertOnDateOfCreation(Instant dateOfCreation) throws DataException {
         assertNotNull(dateOfCreation);
         Instant now = Instant.now();
         assertTrue(now.isAfter(dateOfCreation));
@@ -205,7 +205,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithoutCompanyTypeAndWithEnglandWales() {
+    void createCompanyWithoutCompanyTypeAndWithEnglandWales() throws DataException {
         internalCompanyRequest.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         internalCompanyRequest.setCompanyStatus(COMPANY_STATUS_ADMINISTRATION);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -214,7 +214,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithoutCompanyStatusAndWithScotland() {
+    void createCompanyWithoutCompanyStatusAndWithScotland() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND,CompanyType.LTD);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE,
@@ -222,7 +222,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createDissolvedCompany() {
+    void createDissolvedCompany() throws DataException {
         internalCompanyRequest.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         internalCompanyRequest.setCompanyStatus(COMPANY_STATUS_DISSOLVED);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -231,7 +231,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createPlcCompany() {
+    void createPlcCompany() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.PLC);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertCreatedProfile(profile, COMPANY_STATUS_ACTIVE,
@@ -239,7 +239,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void delete() {
+    void delete() throws DataException {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.of(savedProfile));
 
@@ -248,7 +248,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void deleteNoCompanyProfile() {
+    void deleteNoCompanyProfile() throws DataException {
         when(repository.findByCompanyNumber(COMPANY_NUMBER))
                 .thenReturn(Optional.empty());
 
@@ -257,7 +257,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithSubType() {
+    void createCompanyWithSubType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setSubType("community-interest-company");
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -266,7 +266,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithoutSubType() {
+    void createCompanyWithoutSubType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setSubType(null);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -275,7 +275,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createLimitedPartnershipWithPrivateFundLimitedPartnershipSubType() {
+    void createLimitedPartnershipWithPrivateFundLimitedPartnershipSubType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
         internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -284,7 +284,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createLimitedPartnershipDoesNotPopulateAccounts() {
+    void createLimitedPartnershipDoesNotPopulateAccounts() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
 
@@ -300,7 +300,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createLimitedPartnershipStillPopulatesConfirmationStatement() {
+    void createLimitedPartnershipStillPopulatesConfirmationStatement() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
 
@@ -308,7 +308,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createNonLimitedPartnershipStillPopulatesAccounts() {
+    void createNonLimitedPartnershipStillPopulatesAccounts() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
 
@@ -316,7 +316,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createLtdWithPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequestException() {
+    void createLtdWithPrivateFundLimitedPartnershipSubTypeThrowsInvalidRequestException() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
         internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP);
 
@@ -328,7 +328,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createLimitedPartnershipWithCommunityInterestCompanySubTypeThrowsInvalidRequestException() {
+    void createLimitedPartnershipWithCommunityInterestCompanySubTypeThrowsInvalidRequestException() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
         internalCompanyRequest.setSubType(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY);
 
@@ -340,21 +340,21 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithSuperSecurePscsTrue() {
+    void createCompanyWithSuperSecurePscsTrue() throws DataException {
         internalCompanyRequest.setHasSuperSecurePscs(true);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertTrue(profile.getHasSuperSecurePscs());
     }
 
     @Test
-    void createCompanyWithSuperSecurePscsFalse() {
+    void createCompanyWithSuperSecurePscsFalse() throws DataException {
         internalCompanyRequest.setHasSuperSecurePscs(false);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertFalse(profile.getHasSuperSecurePscs());
     }
 
     @Test
-    void createCompanyWithSuperSecurePscsNull() {
+    void createCompanyWithSuperSecurePscsNull() throws DataException {
         internalCompanyRequest.setHasSuperSecurePscs(null);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertFalse(profile.getHasSuperSecurePscs());
@@ -379,7 +379,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithAccountsDueSoon() {
+    void createCompanyWithAccountsDueSoon() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setAccountsDueStatus("due-soon");
 
@@ -401,7 +401,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithAccountsOverdue() {
+    void createCompanyWithAccountsOverdue() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setAccountsDueStatus("overdue");
         Address mockRegisteredAddress = new Address("", "", "", "", "", "", "");
@@ -422,7 +422,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithAccountsDueStatusNull() {
+    void createCompanyWithAccountsDueStatusNull() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setAccountsDueStatus(null);
 
@@ -443,7 +443,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithRegisters() {
+    void createCompanyWithRegisters() throws DataException {
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
 
         RegistersRequest directorsRegister = new RegistersRequest();
@@ -455,7 +455,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithoutRegisters() {
+    void createCompanyWithoutRegisters() throws DataException {
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
         internalCompanyRequest.setRegisters(Collections.emptyList());
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -463,7 +463,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testCreate_overseasEntity() {
+    void testCreate_overseasEntity() throws DataException {
         overseasSpec = new InternalCompanyRequest();
         overseasSpec.setCompanyNumber(REGISTERED_OVERSEAS_ENTITY_NUMBER);
         overseasSpec.setJurisdiction(JurisdictionType.UNITED_KINGDOM);
@@ -495,7 +495,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithOverseaCompanyType() {
+    void createCompanyWithOverseaCompanyType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.UNITED_KINGDOM, CompanyType.OVERSEA_COMPANY);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         System.out.println(profile);
@@ -512,7 +512,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void deleteCompanyProfileNotExists() {
+    void deleteCompanyProfileNotExists() throws DataException {
         String missingCompanyNumber = "MISSING123";
         when(repository.findByCompanyNumber(missingCompanyNumber)).thenReturn(Optional.empty());
 
@@ -523,7 +523,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithCompanyStatusDetail() {
+    void createCompanyWithCompanyStatusDetail() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setCompanyStatusDetail("status-detail");
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
@@ -532,7 +532,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithoutCompanyStatusDetail() {
+    void createCompanyWithoutCompanyStatusDetail() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setCompanyStatusDetail(null);
         ArgumentCaptor<CompanyProfile> companyProfileCaptor = createCompanyProfile();
@@ -541,7 +541,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createRoyalCharterCompanyAndVerifyPartialData() {
+    void createRoyalCharterCompanyAndVerifyPartialData() throws DataException {
         internalCompanyRequest.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         internalCompanyRequest.setCompanyType(COMPANY_TYPE_ROYAL_CHARTER);
         internalCompanyRequest.setCompanyStatusDetail(null);
@@ -560,7 +560,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createEnglandWalesIndustrialAndProvidentCompanyAndVerifyPartialData() {
+    void createEnglandWalesIndustrialAndProvidentCompanyAndVerifyPartialData() throws DataException {
         internalCompanyRequest.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         internalCompanyRequest.setCompanyType(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
         internalCompanyRequest.setSubType(null);
@@ -573,7 +573,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createNortherIrelandIndustrialAndProvidentCompanyAndVerifyPartialData() {
+    void createNortherIrelandIndustrialAndProvidentCompanyAndVerifyPartialData() throws DataException {
         internalCompanyRequest.setJurisdiction(JurisdictionType.NI);
         internalCompanyRequest.setCompanyType(CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
         internalCompanyRequest.setSubType(null);
@@ -586,7 +586,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createLtdCompanyAndVerifyNoPartialData() {
+    void createLtdCompanyAndVerifyNoPartialData() throws DataException {
         internalCompanyRequest.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         internalCompanyRequest.setCompanyType(COMPANY_TYPE_LTD);
         internalCompanyRequest.setSubType(null);
@@ -598,7 +598,7 @@ class CompanyProfileServiceImplTest {
         assertNull(profile.getPartialDataAvailable());
     }
 
-    private ArgumentCaptor<CompanyProfile> createCompanyProfile() {
+    private ArgumentCaptor<CompanyProfile> createCompanyProfile() throws DataException {
         Address mockRegisteredAddress = new Address("", "", "", "", "", "", "");
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -612,7 +612,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithEmptyJurisdiction() {
+    void createCompanyWithEmptyJurisdiction() throws DataException {
         setCompanyJurisdictionAndType(null,CompanyType.UK_ESTABLISHMENT);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -629,7 +629,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithJurisdictionAndCompanyType() {
+    void createCompanyWithJurisdictionAndCompanyType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,COMPANY_TYPE_LTD);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
@@ -640,7 +640,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithJurisdictionAndNoCompanyType() {
+    void createCompanyWithJurisdictionAndNoCompanyType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,null);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertEquals(COMPANY_NUMBER, profile.getCompanyNumber());
@@ -651,7 +651,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithNoJurisdictionAndNoCompanyType() {
+    void createCompanyWithNoJurisdictionAndNoCompanyType() throws DataException {
         setCompanyJurisdictionAndType(null,null);
         when(randomService.getEtag()).thenReturn(ETAG);
         when(repository.save(any())).thenReturn(savedProfile);
@@ -667,35 +667,35 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testGetCompanyNumberPrefixEnglandWales() {
+    void testGetCompanyNumberPrefixEnglandWales() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("", prefix);
     }
 
     @Test
-    void testGetCompanyNumberPrefixScotland() {
+    void testGetCompanyNumberPrefixScotland() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND,CompanyType.INDUSTRIAL_AND_PROVIDENT_SOCIETY);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("SP", prefix);
     }
 
     @Test
-    void testGetCompanyNumberPrefixNorthernIreland() {
+    void testGetCompanyNumberPrefixNorthernIreland() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.NI,CompanyType.LLP);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("NC", prefix);
     }
 
     @Test
-    void testGetCompanyNumberPrefixUnitedKingdom() {
+    void testGetCompanyNumberPrefixUnitedKingdom() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.UNITED_KINGDOM,CompanyType.OVERSEA_COMPANY);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("FC", prefix);
     }
 
     @Test
-    void testGetCompanyNumberPrefixSpecialTypes() {
+    void testGetCompanyNumberPrefixSpecialTypes() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.ROYAL_CHARTER);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("RC", prefix);
@@ -710,21 +710,21 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testGetCompanyNumberPrefixNoCompanyType() {
+    void testGetCompanyNumberPrefixNoCompanyType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,null);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("", prefix);
     }
 
     @Test
-    void testGetCompanyNumberPrefixNoJurisdiction() {
+    void testGetCompanyNumberPrefixNoJurisdiction() throws DataException {
         internalCompanyRequest.setCompanyType(CompanyType.UK_ESTABLISHMENT);
         String prefix = internalCompanyRequest.getJurisdiction().getCompanyNumberPrefix(internalCompanyRequest);
         assertEquals("BR", prefix);
     }
 
     @Test
-    void testCreateOverseasEntityWithOutType() {
+    void testCreateOverseasEntityWithOutType() throws DataException {
         Mockito.lenient().when(addressService.getAddress(overseasSpec.getJurisdiction()))
                 .thenReturn(new Address("", "", "", "", "", "", ""));
         Mockito.lenient().when(randomService.getEtag()).thenReturn(ETAG);
@@ -742,47 +742,47 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testCompanyExistsWhenCompanyExists() {
+    void testCompanyExistsWhenCompanyExists() throws DataException {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.of(savedProfile));
         assertTrue(companyProfileService.companyExists(COMPANY_NUMBER));
     }
 
     @Test
-    void testCompanyExistsWhenCompanyDoesNotExist() {
+    void testCompanyExistsWhenCompanyDoesNotExist() throws DataException {
         when(repository.findById(COMPANY_NUMBER)).thenReturn(Optional.empty());
         assertFalse(companyProfileService.companyExists(COMPANY_NUMBER));
     }
 
     @Test
-    void createCompanyWithNorthernIrelandType() {
+    void createCompanyWithNorthernIrelandType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.NI,CompanyType.NORTHERN_IRELAND);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertEquals("converted-closed", profile.getCompanyStatus());
     }
 
     @Test
-    void createCompanyWithNorthernIrelandOtherType() {
+    void createCompanyWithNorthernIrelandOtherType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.NI,CompanyType.NORTHERN_IRELAND_OTHER);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertEquals("converted-closed", profile.getCompanyStatus());
     }
 
     @Test
-    void createCompanyWithRegisteredOverseasEntityType() {
+    void createCompanyWithRegisteredOverseasEntityType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.UNITED_KINGDOM,CompanyType.REGISTERED_OVERSEAS_ENTITY);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertEquals(OVERSEAS_STATUS_REGISTERED, profile.getCompanyStatus());
     }
 
     @Test
-    void createCompanyWithOtherType() {
+    void createCompanyWithOtherType() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertEquals("active", profile.getCompanyStatus());
     }
 
     @Test
-    void createCompanyWithCompanyTypeHasNoFilingHistory() {
+    void createCompanyWithCompanyTypeHasNoFilingHistory() throws DataException {
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
         internalCompanyRequest.setCompanyType(CompanyType.ASSURANCE_COMPANY);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -790,7 +790,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithCompanyTypeHasFilingHistory() {
+    void createCompanyWithCompanyTypeHasFilingHistory() throws DataException {
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
         internalCompanyRequest.setCompanyType(CompanyType.PLC);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -798,7 +798,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setRegisteredOfficeAddressIsInDisputeTrue() {
+    void setRegisteredOfficeAddressIsInDisputeTrue() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setRegisteredOfficeIsInDispute(true);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -806,7 +806,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setRegisteredOfficeAddressIsInDisputeFalse() {
+    void setRegisteredOfficeAddressIsInDisputeFalse() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND,CompanyType.REGISTERED_OVERSEAS_ENTITY);
         internalCompanyRequest.setRegisteredOfficeIsInDispute(false);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -814,7 +814,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setRegisteredOfficeAddressIsInDisputeNull() {
+    void setRegisteredOfficeAddressIsInDisputeNull() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND,CompanyType.OVERSEA_COMPANY);
         internalCompanyRequest.setRegisteredOfficeIsInDispute(null);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -822,7 +822,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setUndeliverableRegisteredOfficeAddressTrue() {
+    void setUndeliverableRegisteredOfficeAddressTrue() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES,CompanyType.LTD);
         internalCompanyRequest.setUndeliverableRegisteredOfficeAddress(true);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -830,7 +830,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setUndeliverableRegisteredOfficeAddressFalse() {
+    void setUndeliverableRegisteredOfficeAddressFalse() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND,CompanyType.REGISTERED_OVERSEAS_ENTITY);
         internalCompanyRequest.setUndeliverableRegisteredOfficeAddress(false);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -838,20 +838,20 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void setUndeliverableRegisteredOfficeAddressNull() {
+    void setUndeliverableRegisteredOfficeAddressNull() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND,CompanyType.OVERSEA_COMPANY);
         internalCompanyRequest.setUndeliverableRegisteredOfficeAddress(null);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
         assertFalse(profile.getUndeliverableRegisteredOfficeAddress());
     }
 
-    private void setCompanyJurisdictionAndType(JurisdictionType jurisdiction, CompanyType companyType) {
+    private void setCompanyJurisdictionAndType(JurisdictionType jurisdiction, CompanyType companyType) throws DataException {
         internalCompanyRequest.setJurisdiction(jurisdiction);
         internalCompanyRequest.setCompanyType(companyType);
     }
 
     @Test
-    void createUkEstablishment() {
+    void createUkEstablishment() throws DataException {
         String parentCompanyNumber = "12345678";
         JurisdictionType jurisdiction = JurisdictionType.ENGLAND_WALES;
         LocalDate accountingReferenceDate = LocalDate.now();
@@ -885,7 +885,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createOverseaCompanyWithUkEstablishment() {
+    void createOverseaCompanyWithUkEstablishment() throws DataException {
         String parentCompanyNumber = "FC123456";
         String expectedUkEstablishmentNumber = "BR654321";
         JurisdictionType jurisdiction = JurisdictionType.UNITED_KINGDOM;
@@ -911,7 +911,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithProvidedCompanyName() {
+    void createCompanyWithProvidedCompanyName() throws DataException {
         String providedCompanyName = "Test & Company";
         internalCompanyRequest.setCompanyName(providedCompanyName);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -920,7 +920,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyWithProvidedCompanyNameIsNull() {
+    void createCompanyWithProvidedCompanyNameIsNull() throws DataException {
         internalCompanyRequest.setCompanyName(null);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
         CompanyProfile profile = createAndCapture(internalCompanyRequest);
@@ -928,7 +928,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createReturnsUnsavedProfileWhenCompanyWithDataStructureIsTrue() {
+    void createReturnsUnsavedProfileWhenCompanyWithDataStructureIsTrue() throws DataException {
         setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LTD);
         internalCompanyRequest.setCompanyWithPopulatedStructureOnly(true);
 
@@ -965,7 +965,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void updateCompanyProfileMissingNumber() {
+    void updateCompanyProfileMissingNumber() throws DataException {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber("");
 
@@ -977,7 +977,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void updateCompanyProfileNotFound() {
+    void updateCompanyProfileNotFound() throws DataException {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
 
@@ -990,7 +990,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void updateCompanyProfileWithUnknownFields() {
+    void updateCompanyProfileWithUnknownFields() throws DataException {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
 
@@ -1007,7 +1007,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void updateCompanyProfileSaveFailure() {
+    void updateCompanyProfileSaveFailure() throws DataException {
         UpdateCompanyRequest request = new UpdateCompanyRequest();
         request.setCompanyNumber(COMPANY_NUMBER);
 
@@ -1023,7 +1023,7 @@ class CompanyProfileServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("legalFormProvider")
-    void setsLegalFormBasedOnForeignCompanyLegalForm(String inputLegalForm, String expectedLegalForm) {
+    void setsLegalFormBasedOnForeignCompanyLegalForm(String inputLegalForm, String expectedLegalForm) throws DataException {
         overseasSpec.setForeignCompanyLegalForm(inputLegalForm);
         CompanyProfile profile = companyProfileService.create(overseasSpec);
         assertEquals(expectedLegalForm, ((OverseasEntity) profile).getForeignCompanyDetails().getLegalForm());
@@ -1040,7 +1040,7 @@ class CompanyProfileServiceImplTest {
     @ParameterizedTest
     @MethodSource("companyTypeAndExpectedNameEnding")
     void createSetsExpectedCompanyNameEndingFromCompanyType(CompanyType companyType,
-                                                            String expectedEnding) {
+                                                            String expectedEnding) throws DataException {
         internalCompanyRequest.setCompanyType(companyType);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
 
@@ -1061,7 +1061,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void createCompanyTypeWithPlcNameEnding() {
+    void createCompanyTypeWithPlcNameEnding() throws DataException {
         internalCompanyRequest.setCompanyType(PLC_TYPE);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
 
@@ -1080,7 +1080,7 @@ class CompanyProfileServiceImplTest {
     @ParameterizedTest
     @MethodSource("communityInterestCompanyTypeAndExpectedNameEnding")
     void createCommunityInterestCompanySetsExpectedCompanyNameEnding(CompanyType companyType,
-                                                                     String expectedEnding) {
+                                                                     String expectedEnding) throws DataException {
         internalCompanyRequest.setCompanyType(companyType);
         internalCompanyRequest.setSubType(CompanySubTypeValidator.COMMUNITY_INTEREST_COMPANY);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
@@ -1099,7 +1099,7 @@ class CompanyProfileServiceImplTest {
 
     @ParameterizedTest
     @MethodSource("companyTypesWithoutNameEndings")
-    void createCompanyTypeWithoutNameEnding(CompanyType companyType) {
+    void createCompanyTypeWithoutNameEnding(CompanyType companyType) throws DataException {
         internalCompanyRequest.setCompanyType(companyType);
         internalCompanyRequest.setCompanyNumber(COMPANY_NUMBER);
 
@@ -1305,7 +1305,7 @@ class CompanyProfileServiceImplTest {
         verify(repository, never()).save(any(CompanyProfile.class));
     }
     @Test
-    void testUkEstablishment_HasUkJurisdiction() {
+    void testUkEstablishment_HasUkJurisdiction() throws DataException {
         String parentCompanyNumber = "FC123456";
         JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
         LocalDate accountingReferenceDate = LocalDate.now();
@@ -1335,7 +1335,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testMultipleUkEstablishments_HaveUniqueNames() {
+    void testMultipleUkEstablishments_HaveUniqueNames() throws DataException {
         String parentCompanyNumber = "FC123456";
         JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
         LocalDate accountingReferenceDate = LocalDate.now();
@@ -1367,7 +1367,7 @@ class CompanyProfileServiceImplTest {
     }
 
     @Test
-    void testUkEstablishment_AddressIsUkBased() {
+    void testUkEstablishment_AddressIsUkBased() throws DataException {
         String parentCompanyNumber = "FC123456";
         JurisdictionType parentJurisdiction = JurisdictionType.UNITED_KINGDOM;
         LocalDate accountingReferenceDate = LocalDate.now();
@@ -1389,6 +1389,194 @@ class CompanyProfileServiceImplTest {
 
         assertNotNull(capturedProfile.getRegisteredOfficeAddress());
         assertEquals(ukAddress, capturedProfile.getRegisteredOfficeAddress());
+    }
+
+    // ============= TDG-189: Limited Partnership Subtype and Term Tests =============
+
+    @Test
+    void createLimitedPartnershipWithDefaultLpSubtypeForEnglandWales() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("lp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithDefaultSlpSubtypeForScotland() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("slp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithDefaultLpSubtypeForNorthernIreland() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.NI, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("lp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithExplicitLpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.LIMITED_PARTNERSHIP, profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithExplicitSlpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP, profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithPflpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP_SHORT);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP_SHORT, profile.getSubtype());
+        assertEquals("pflp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithSpflpSubtype() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_PRIVATE_FUND_LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals(CompanySubTypeValidator.SCOTTISH_PRIVATE_FUND_LIMITED_PARTNERSHIP, profile.getSubtype());
+        assertEquals("spflp", profile.getSubtype());
+    }
+
+    @Test
+    void createLimitedPartnershipWithTermUntilDissolution() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("until-dissolution");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("until-dissolution", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithTermByAgreement() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("by-agreement");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("by-agreement", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithTermNone() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("none");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithDefaultTermNoneWhenNotProvided() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipLpSubtypeRequiresTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("until-dissolution");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("lp", profile.getSubtype());
+        assertEquals("until-dissolution", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipSlpSubtypeRequiresTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("by-agreement");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("slp", profile.getSubtype());
+        assertEquals("by-agreement", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipPflpSubtypeDoesNotRequireTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.PRIVATE_FUND_LIMITED_PARTNERSHIP_SHORT);
+        internalCompanyRequest.setLimitedPartnershipTerm("until-dissolution");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("pflp", profile.getSubtype());
+        assertNull(profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipSpflpSubtypeDoesNotRequireTerm() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_PRIVATE_FUND_LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("by-agreement");
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("spflp", profile.getSubtype());
+        assertNull(profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipLpWithoutTermSetsDefaultNone() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("lp", profile.getSubtype());
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipSlpWithoutTermSetsDefaultNone() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.SCOTLAND, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setSubType(CompanySubTypeValidator.SCOTTISH_LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm(null);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertEquals("slp", profile.getSubtype());
+        assertEquals("none", profile.getTerm());
+    }
+
+    @Test
+    void createLimitedPartnershipWithInvalidTermThrowsException() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        internalCompanyRequest.setLimitedPartnershipTerm("invalid-term");
+        
+        assertThrows(DataException.class, () -> createAndCapture(internalCompanyRequest));
+    }
+
+    @Test
+    void createLimitedPartnershipSetsCommunityInterestCompanyFalse() throws DataException {
+        setCompanyJurisdictionAndType(JurisdictionType.ENGLAND_WALES, CompanyType.LIMITED_PARTNERSHIP);
+        CompanyProfile profile = createAndCapture(internalCompanyRequest);
+        
+        assertFalse(profile.getIsCommunityInterestCompany());
     }
 
 }
