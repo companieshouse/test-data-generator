@@ -70,6 +70,7 @@ class CreateCompanyWorkflowServiceImplTest {
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
+    private static final String SCOTTISH_LP_PREFIX = "SL";
     private static final String NI_COMPANY_PREFIX = "NI";
     private static final String AUTH_CODE = "123456";
     private static final String API_URL = "http://localhost:4001";
@@ -1342,11 +1343,13 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createPublicLimitedPartnershipWithDefaultTermFromJurisdiction() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, "LP" + COMPANY_NUMBER);
+        
         PublicCompanyRequest spec = new PublicCompanyRequest();
         spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
 
-        var response = creationService.createPublicCompany(spec);
+        creationService.createPublicCompany(spec);
 
         ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
         verify(companyProfileService).create(captor.capture());
@@ -1359,12 +1362,14 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createPublicLimitedPartnershipWithExplicitTerm() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, "LP" + COMPANY_NUMBER);
+        
         PublicCompanyRequest spec = new PublicCompanyRequest();
         spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
         spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
         spec.setLimitedPartnershipTerm("by-agreement");
 
-        var response = creationService.createPublicCompany(spec);
+        creationService.createPublicCompany(spec);
 
         ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
         verify(companyProfileService).create(captor.capture());
@@ -1377,12 +1382,14 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createPublicLimitedPartnershipScotlandWithDefaultSlpSubtype() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, SCOTTISH_LP_PREFIX + COMPANY_NUMBER);
+        
         PublicCompanyRequest spec = new PublicCompanyRequest();
         spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
         spec.setJurisdiction(JurisdictionType.SCOTLAND);
         spec.setLimitedPartnershipTerm("until-dissolution");
 
-        var response = creationService.createPublicCompany(spec);
+        creationService.createPublicCompany(spec);
 
         ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
         verify(companyProfileService).create(captor.capture());
@@ -1395,6 +1402,8 @@ class CreateCompanyWorkflowServiceImplTest {
 
     @Test
     void createPublicLimitedPartnershipMapsTermFieldFromPublicToInternalRequest() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, "LP" + COMPANY_NUMBER);
+        
         PublicCompanyRequest publicSpec = new PublicCompanyRequest();
         publicSpec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
         publicSpec.setJurisdiction(JurisdictionType.ENGLAND_WALES);

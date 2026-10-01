@@ -15,6 +15,8 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.entity.Address;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
@@ -211,8 +213,27 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
         request.setJurisdiction(companySpec.getJurisdiction());
         request.setCompanyType(companySpec.getCompanyType());
         request.setCompanyStatus(companySpec.getCompanyStatus());
-        request.setSubType(companySpec.getSubType());
-        request.setLimitedPartnershipTerm(companySpec.getLimitedPartnershipTerm());
+        
+        var subType = companySpec.getSubType();
+        // Apply jurisdiction-based defaults for LP companies
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(companySpec.getCompanyType()) && 
+            (subType == null || subType.trim().isEmpty())) {
+            if (JurisdictionType.SCOTLAND.equals(companySpec.getJurisdiction())) {
+                subType = "slp";
+            } else {
+                subType = "lp";
+            }
+        }
+        request.setSubType(subType);
+        
+        var term = companySpec.getLimitedPartnershipTerm();
+        // Apply term defaults for lp and slp subtypes
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(companySpec.getCompanyType()) && 
+            ("lp".equals(subType) || "slp".equals(subType)) && 
+            (term == null || term.trim().isEmpty())) {
+            term = "none";
+        }
+        request.setLimitedPartnershipTerm(term);
         request.setHasSuperSecurePscs(companySpec.getHasSuperSecurePscs());
         if (companySpec.getNumberOfAppointments() != null) {
             request.setNumberOfAppointments(companySpec.getNumberOfAppointments());
