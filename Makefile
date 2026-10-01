@@ -48,14 +48,6 @@ endif
 .PHONY: dist
 dist: clean build package
 
-.PHONY: sonar
-sonar:
-	mvn sonar:sonar
-
-.PHONY: sonar-pr-analysis
-sonar-pr-analysis:
-	mvn sonar:sonar -P sonar-pr-analysis
-
 .PHONY: docker-build
 docker-build:
 	docker build -t $(artifact_name):$(version) .

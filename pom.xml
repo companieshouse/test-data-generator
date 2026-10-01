@@ -55,6 +55,9 @@
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
         <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencyManagement>
