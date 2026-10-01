@@ -28,7 +28,6 @@
         <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 
         <spring-boot-dependencies.version>4.1.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
