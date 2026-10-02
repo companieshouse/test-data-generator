@@ -182,12 +182,13 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
     private void deleteCompanyData(String companyNumber, List<Exception> suppressedExceptions) {
         LOG.info("Deleting company data for company number: " + companyNumber);
 
-        // Resolved before the profile is deleted, as the name-keyed search indices need it.
-        String companyName = companyProfileService.getCompanyProfile(companyNumber)
-                .map(CompanyProfile::getCompanyName)
-                .orElse(null);
+        String companyName = null;
 
         try {
+            companyName = companyProfileService.getCompanyProfile(companyNumber)
+                    .map(CompanyProfile::getCompanyName)
+                    .orElse(null);
+
             companyProfileService.delete(companyNumber);
             LOG.info("Deleted company profile for company number: " + companyNumber);
         } catch (Exception ex) {
