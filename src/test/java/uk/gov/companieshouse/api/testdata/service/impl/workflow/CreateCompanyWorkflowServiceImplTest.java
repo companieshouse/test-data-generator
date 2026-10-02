@@ -70,6 +70,7 @@ class CreateCompanyWorkflowServiceImplTest {
     private static final String OFFICER_ID = "OFFICER_ID";
     private static final String APPOINTMENT_ID = "APPOINTMENT_ID";
     private static final String SCOTTISH_COMPANY_PREFIX = "SC";
+    private static final String SCOTTISH_LP_PREFIX = "SL";
     private static final String NI_COMPANY_PREFIX = "NI";
     private static final String AUTH_CODE = "123456";
     private static final String API_URL = "http://localhost:4001";
@@ -1336,5 +1337,84 @@ class CreateCompanyWorkflowServiceImplTest {
         verify(greenAlphabeticalCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
         verify(advancedCompanySearch, never()).addCompanyIntoElasticSearchIndex(result);
         verify(companySearchService, never()).addCompanyIntoElasticSearchIndex(result);
+    }
+
+    // Limited Partnership Term Tests for Public Company
+
+    @Test
+    void createPublicLimitedPartnershipWithDefaultTermFromJurisdiction() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, "LP" + COMPANY_NUMBER);
+        
+        PublicCompanyRequest spec = new PublicCompanyRequest();
+        spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+
+        creationService.createPublicCompany(spec);
+
+        ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
+        verify(companyProfileService).create(captor.capture());
+
+        InternalCompanyRequest captured = captor.getValue();
+        assertEquals(CompanyType.LIMITED_PARTNERSHIP, captured.getCompanyType());
+        assertEquals("lp", captured.getSubType());
+        assertEquals("none", captured.getLimitedPartnershipTerm());
+    }
+
+    @Test
+    void createPublicLimitedPartnershipWithExplicitTerm() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, "LP" + COMPANY_NUMBER);
+        
+        PublicCompanyRequest spec = new PublicCompanyRequest();
+        spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setLimitedPartnershipTerm("by-agreement");
+
+        creationService.createPublicCompany(spec);
+
+        ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
+        verify(companyProfileService).create(captor.capture());
+
+        InternalCompanyRequest captured = captor.getValue();
+        assertEquals(CompanyType.LIMITED_PARTNERSHIP, captured.getCompanyType());
+        assertEquals("lp", captured.getSubType());
+        assertEquals("by-agreement", captured.getLimitedPartnershipTerm());
+    }
+
+    @Test
+    void createPublicLimitedPartnershipScotlandWithDefaultSlpSubtype() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, SCOTTISH_LP_PREFIX + COMPANY_NUMBER);
+        
+        PublicCompanyRequest spec = new PublicCompanyRequest();
+        spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        spec.setJurisdiction(JurisdictionType.SCOTLAND);
+        spec.setLimitedPartnershipTerm("until-dissolution");
+
+        creationService.createPublicCompany(spec);
+
+        ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
+        verify(companyProfileService).create(captor.capture());
+
+        InternalCompanyRequest captured = captor.getValue();
+        assertEquals(CompanyType.LIMITED_PARTNERSHIP, captured.getCompanyType());
+        assertEquals("slp", captured.getSubType());
+        assertEquals("until-dissolution", captured.getLimitedPartnershipTerm());
+    }
+
+    @Test
+    void createPublicLimitedPartnershipMapsTermFieldFromPublicToInternalRequest() throws DataException {
+        setupCompanyCreationMocks(COMPANY_NUMBER, 6, "LP" + COMPANY_NUMBER);
+        
+        PublicCompanyRequest publicSpec = new PublicCompanyRequest();
+        publicSpec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        publicSpec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        publicSpec.setLimitedPartnershipTerm("by-agreement");
+
+        creationService.createPublicCompany(publicSpec);
+
+        ArgumentCaptor<InternalCompanyRequest> captor = ArgumentCaptor.forClass(InternalCompanyRequest.class);
+        verify(companyProfileService).create(captor.capture());
+
+        InternalCompanyRequest internalSpec = captor.getValue();
+        assertEquals("by-agreement", internalSpec.getLimitedPartnershipTerm());
     }
 }

@@ -13,7 +13,7 @@
     <parent>
         <groupId>uk.gov.companieshouse</groupId>
         <artifactId>companies-house-parent</artifactId>
-        <version>2.1.14</version>
+        <version>2.1.20</version>
         <relativePath/>
     </parent>
 
@@ -28,7 +28,6 @@
         <maven-surefire-plugin.version>3.3.1</maven-surefire-plugin.version>
         <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
 
         <spring-boot-dependencies.version>4.1.0</spring-boot-dependencies.version>
         <spring-boot-maven-plugin.version>4.1.0</spring-boot-maven-plugin.version>
@@ -37,27 +36,27 @@
         <mongodb-driver-version>5.11.1</mongodb-driver-version>
         <log4j2.version>2.26.1</log4j2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
-        <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <tomcat-embed-core.version>11.0.25</tomcat-embed-core.version>
         <tomcat-embed-websocket.version>11.0.25</tomcat-embed-websocket.version>
         <tomcat-embed-el.version>11.0.25</tomcat-embed-el.version>
         <jackson-bind.version>2.22.1</jackson-bind.version>
+        <datafaker.version>2.5.2</datafaker.version>
 
         <!-- internal dependencies -->
         <api-security-java.version>2.0.25</api-security-java.version>
         <private-api-sdk-java.version>7.2.19</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.19</api-sdk-manager-java-library.version>
-        <test-data-generator-library.version>1.0.43</test-data-generator-library.version>
+        <test-data-generator-library.version>1.0.47</test-data-generator-library.version>
 
         <!-- Sonar config -->
         <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
-        <sonar.login/>
-        <sonar.password/>
         <sonar.projectKey>uk.gov.companieshouse:test-data-generator</sonar.projectKey>
         <sonar.projectName>test-data-generator</sonar.projectName>
         <sonar.coverage.exclusions>**/Application.java,**/config/MongoConfig.java</sonar.coverage.exclusions>
-        <datafaker.version>2.5.2</datafaker.version>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            ${project.basedir}/target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencyManagement>
@@ -272,7 +271,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>${jacoco-maven-plugin.version}</version>
             </plugin>
         </plugins>
     </build>
