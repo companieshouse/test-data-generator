@@ -135,6 +135,16 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         LOG.info("Company with company number " + companyNumber + " deleted successfully without any errors.");
     }
 
+    @Override
+    public void deleteCompanyOptional(String companyNumber)
+            throws DataException, NoDataFoundException {
+        if (!companyProfileService.companyExists(companyNumber)) {
+            LOG.info("Company with number " + companyNumber + " does not exist. This is NOT an issue as this is only being called to ensure clean state before test runs in case a company with the same number already exists which is possible.");
+            return;
+        }
+        deleteCompany(companyNumber);
+    }
+
     private void deleteUkEstablishmentsIfOverseaCompany(
             String companyNumber, List<Exception> suppressedExceptions) {
         try {
@@ -179,11 +189,9 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         }
     }
 
-    private void deleteCompanyData(String companyNumber, List<Exception> suppressedExceptions) {
-        LOG.info("Deleting company data for company number: " + companyNumber);
-
+    private String deleteCompanyProfileAndReturnName(String companyNumber,
+            List<Exception> suppressedExceptions) {
         String companyName = null;
-
         try {
             companyName = companyProfileService.getCompanyProfile(companyNumber)
                     .map(CompanyProfile::getCompanyName)
@@ -194,6 +202,13 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         } catch (Exception ex) {
             suppressedExceptions.add(ex);
         }
+        return companyName;
+    }
+
+    private void deleteCompanyData(String companyNumber, List<Exception> suppressedExceptions) {
+        LOG.info("Deleting company data for company number: " + companyNumber);
+
+        String companyName = deleteCompanyProfileAndReturnName(companyNumber, suppressedExceptions);
         try {
             filingHistoryService.delete(companyNumber);
             LOG.info("Deleted filing history for company number: " + companyNumber);
