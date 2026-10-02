@@ -13,9 +13,10 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service("advancedCompanySearchService")
-public class AdvancedCompanySearchImpl implements CompanySearchService {
+public class AdvancedCompanySearchImpl extends CompanySearchBase implements CompanySearchService {
 
     private static final String ADVANCED_SEARCH_URI = "/advanced-search/companies/%s";
+    private static final String ADVANCED_SEARCH_QUERY_URI = "/advanced-search/companies";
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private static final String COMPANY_PROFILE_URI = "/company/%s";
 
@@ -39,8 +40,8 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
-        deleteCompanyFromAdvancedSearch(companyNumber);
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber, String companyName) {
+        deleteCompanyFromAdvancedSearch(companyNumber, companyName);
     }
 
     private void upsertCompanyProfileForAdvancedSearch(
@@ -57,10 +58,16 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
                 + companyNumber);
     }
 
-    private void deleteCompanyFromAdvancedSearch(String companyNumber) {
+    private void deleteCompanyFromAdvancedSearch(String companyNumber, String companyName) {
         String uri = formatUri(ADVANCED_SEARCH_URI, companyNumber);
         LOG.info("Deleting company profile from advanced search for company number: "
                 + companyNumber);
+        if (!companyExists(ADVANCED_SEARCH_QUERY_URI, "company_name_includes", companyName)) {
+            LOG.info("Company profile does not exist in Advanced ElasticSearch for company number: "
+                    + companyNumber);
+            return;
+        }
+
         try {
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()

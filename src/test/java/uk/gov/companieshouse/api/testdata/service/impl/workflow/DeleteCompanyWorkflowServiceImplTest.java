@@ -31,7 +31,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.when;
 class DeleteCompanyWorkflowServiceImplTest {
 
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String COMPANY_NAME = "COMPANY 12345678 LTD";
     private static final String OVERSEA_COMPANY = "FC123456";
     private static final String UK_ESTABLISHMENT_NUMBER = "BR123456";
     private static final String UK_ESTABLISHMENT_NUMBER_2 = "BR654321";
@@ -246,16 +249,47 @@ class DeleteCompanyWorkflowServiceImplTest {
 
     @Test
     void deleteCompanyWithElasticSearchDeployed() throws DataException, NoDataFoundException {
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setCompanyName(COMPANY_NAME);
+        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
+                .thenReturn(Optional.of(companyProfile));
+
         deletionService.setElasticSearchDeployed(true);
         deletionService.deleteCompany(COMPANY_NUMBER);
 
-        verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(companySearchService, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
         verify(alphabeticalCompanySearch, times(1))
-                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
         verify(greenAlphabeticalCompanySearch, times(1))
-                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
         verify(advancedCompanySearch, times(1))
-                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
+    }
+
+    @Test
+    void deleteCompanySuppressesSearchIndexFailures() throws Exception {
+        CompanyProfile companyProfile = new CompanyProfile();
+        companyProfile.setCompanyName(COMPANY_NAME);
+        when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
+                .thenReturn(Optional.of(companyProfile));
+
+        doThrow(new DataException("search failed")).when(companySearchService)
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
+        doThrow(new DataException("alphabetical failed")).when(alphabeticalCompanySearch)
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
+        doThrow(new DataException("green failed")).when(greenAlphabeticalCompanySearch)
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
+        doThrow(new DataException("advanced failed")).when(advancedCompanySearch)
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
+
+        deletionService.setElasticSearchDeployed(true);
+
+        // A failure in one index must not stop the others being attempted, nor fail the delete
+        assertDoesNotThrow(() -> deletionService.deleteCompany(COMPANY_NUMBER));
+
+        verify(advancedCompanySearch, times(1))
+                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
     }
 
     @Test
@@ -263,13 +297,14 @@ class DeleteCompanyWorkflowServiceImplTest {
         deletionService.setElasticSearchDeployed(false);
         deletionService.deleteCompany(COMPANY_NUMBER);
 
-        verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        verify(companySearchService, never())
+                .deleteCompanyFromElasticSearchIndex(anyString(), nullable(String.class));
         verify(alphabeticalCompanySearch, never())
-                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+                .deleteCompanyFromElasticSearchIndex(anyString(), nullable(String.class));
         verify(greenAlphabeticalCompanySearch, never())
-                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+                .deleteCompanyFromElasticSearchIndex(anyString(), nullable(String.class));
         verify(advancedCompanySearch, never())
-                .deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+                .deleteCompanyFromElasticSearchIndex(anyString(), nullable(String.class));
     }
 
     @Test
@@ -305,6 +340,25 @@ class DeleteCompanyWorkflowServiceImplTest {
                 () -> deletionService.deleteCompany(COMPANY_NUMBER));
 
         verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWhenCompanyExists() throws DataException, NoDataFoundException {
+        deletionService.deleteCompanyOptional(COMPANY_NUMBER);
+
+        // deleteCompanyOptional calls companyExists, then deleteCompany which calls it again
+        verify(companyProfileService, times(2)).companyExists(COMPANY_NUMBER);
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWhenCompanyDoesNotExist() throws DataException, NoDataFoundException {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
+
+        assertDoesNotThrow(() -> deletionService.deleteCompanyOptional(COMPANY_NUMBER));
+
+        verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
+        verify(companyProfileService, never()).delete(anyString());
     }
 }
 

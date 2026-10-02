@@ -111,6 +111,24 @@ public class InternalCompanyController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
+    @DeleteMapping({"/company/optional/{companyNumber}"})
+    public ResponseEntity<Void> deleteCompanyOptional(
+            @PathVariable String companyNumber,
+            @Valid @RequestBody(required = false) DeleteCompanyRequest request)
+            throws DataException, NoDataFoundException, InvalidAuthCodeException {
+
+        if (request != null && request.getAuthCode() != null
+                && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
+            throw new InvalidAuthCodeException(companyNumber);
+        }
+        deleteCompanyWorkflowService.deleteCompanyOptional(companyNumber);
+
+        Map<String, Object> data = new HashMap<>();
+        data.put(COMPANY_NUMBER_DATA, companyNumber);
+        LOG.info("Internal Company deleted", data);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @PostMapping("/get-populated-company-structure")
     public ResponseEntity<PopulatedCompanyDetailsResponse> buildCompanyDataStructure(
             @Valid @RequestBody(required = false) InternalCompanyRequest request) throws DataException {

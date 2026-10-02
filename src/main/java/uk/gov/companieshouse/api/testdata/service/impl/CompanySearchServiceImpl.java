@@ -17,9 +17,10 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service("companySearchService")
-public class CompanySearchServiceImpl implements CompanySearchService {
+public class CompanySearchServiceImpl extends CompanySearchBase implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
+    private static final String COMPANY_SEARCH_QUERY_URI = "/search/companies";
     private static final String COMPANY_PROFILE_URI = "/company/%s/links";
     private static final String OVERSEA_COMPANY_TYPE = "oversea-company";
 
@@ -56,16 +57,15 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber) throws DataException {
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber, String companyName) throws DataException {
         try {
             handleUkEstablishments(companyNumber, false);
 
             String formattedUri = formatUri(COMPANY_SEARCH_URI, companyNumber);
-            deleteCompanyProfile(formattedUri, companyNumber);
+            deleteCompanyProfileIfIndexed(formattedUri, companyNumber);
 
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile for company number: " + companyNumber, ex);
-            throw new DataException("Failed to delete company profile: " + ex.getMessage(), ex);
         }
     }
 
@@ -117,17 +117,34 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         LOG.info("Company profile upsert successful for company number: " + companyNumber);
     }
 
+    private void deleteCompanyProfileIfIndexed(String uri, String companyNumber)
+            throws ApiErrorResponseException, URIValidationException {
+        if (!companyExists(COMPANY_SEARCH_QUERY_URI, "q", companyNumber)) {
+            LOG.info("Company profile does not exist in ElasticSearch for company number: "
+                    + companyNumber);
+            return;
+        }
+        deleteCompanyProfile(uri, companyNumber);
+    }
+
     private void deleteCompanyProfile(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
         LOG.info("Deleting company profile from ElasticSearch for company number: "
                 + companyNumber);
-        internalApiClientSupplier.get()
-                .privateSearchResourceHandler()
-                .companySearch()
-                .deleteCompanyProfile(uri)
-                .execute();
+        try {
+            internalApiClientSupplier.get()
+                    .privateSearchResourceHandler()
+                    .companySearch()
+                    .deleteCompanyProfile(uri)
+                    .execute();
+        } catch (ApiErrorResponseException | URIValidationException ex) {
+            LOG.error("Failed to delete company profile for company number: "
+                    + companyNumber + " from company elasticsearch");
+            throw ex;
+        }
         LOG.info("Company profile deleted successfully for company number: " + companyNumber);
     }
+
 
     private Data fetchCompanyProfile(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
@@ -145,4 +162,5 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     private String formatUri(String template, String value) {
         return String.format(template, value);
     }
+
 }

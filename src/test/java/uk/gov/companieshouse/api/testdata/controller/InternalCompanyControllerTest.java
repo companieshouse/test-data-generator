@@ -220,6 +220,61 @@ class InternalCompanyControllerTest {
     }
 
     @Test
+    void deleteCompanyOptionalSuccess() throws Exception {
+        ResponseEntity<Void> response = internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, null);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWithValidAuthCode() throws Exception {
+        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        request.setAuthCode("654321");
+
+        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "654321")).thenReturn(true);
+
+        ResponseEntity<Void> response = internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, request);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWithInvalidAuthCode() throws Exception {
+        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        request.setAuthCode("wrongCode");
+
+        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "wrongCode")).thenReturn(false);
+
+        InvalidAuthCodeException thrown = assertThrows(InvalidAuthCodeException.class,
+                () -> internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, request));
+        assertEquals(COMPANY_NUMBER, thrown.getCompanyNumber());
+    }
+
+    @Test
+    void deleteCompanyOptionalDataException() throws Exception {
+        DataException ex = new DataException("error");
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, null));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void deleteCompanyOptionalNoDataFoundException() throws Exception {
+        NoDataFoundException ex = new NoDataFoundException("Company not found");
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class,
+                () -> internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, null));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
     void buildCompanyDataStructureSuccess() throws Exception {
         InternalCompanyRequest request = new InternalCompanyRequest();
         PopulatedCompanyDetailsResponse responseObj = new PopulatedCompanyDetailsResponse();

@@ -45,3 +45,4 @@ class AlphabeticalCompanySearchServiceConfigTest {
         assertNotNull(greenService);
     }
 }
+

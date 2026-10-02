@@ -11,16 +11,19 @@ import uk.gov.companieshouse.api.testdata.service.CompanySearchService;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-public class AlphabeticalCompanySearchImpl implements CompanySearchService {
+public class AlphabeticalCompanySearchImpl extends CompanySearchBase
+        implements CompanySearchService {
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private final String instance;
     private static final String ALPHABETICAL_SEARCH_URI = "%s/alphabetical-search/companies/%s";
+    private static final String ALPHABETICAL_SEARCH_QUERY_URI = "%s/alphabetical-search/companies";
     private static final String COMPANY_PROFILE_URI = "/company/%s";
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AlphabeticalCompanySearchImpl.class));
 
-    public AlphabeticalCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier, String instance) {
+    public AlphabeticalCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier,
+                                       String instance) {
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.instance = instance;
     }
@@ -31,7 +34,8 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
         String companyNumber = data.getCompanyNumber();
         var formattedAlphabeticalSearchUri = String.format(ALPHABETICAL_SEARCH_URI, instance,
                 companyNumber);
-        LOG.info("Adding company into " + instance + " alphabetical search index for company number: " + companyNumber);
+        LOG.info("Adding company into " + instance
+                + " alphabetical search index for company number: " + companyNumber);
         var companyProfileApi = getCompanyProfile(companyNumber);
         upsertCompanyProfileForAlphaSearch(
                 formattedAlphabeticalSearchUri, companyProfileApi, companyNumber);
@@ -39,17 +43,26 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber, String companyName) {
         var uri = String.format(ALPHABETICAL_SEARCH_URI, instance,
                 companyNumber);
-        LOG.info("Deleting company profile from " + instance + " alphabetical search for company number: " + companyNumber);
+        LOG.info("Deleting company profile from " + instance
+                + " alphabetical search for company number: " + companyNumber);
+        if (!companyExists(String.format(ALPHABETICAL_SEARCH_QUERY_URI, instance),
+                "q", companyName)) {
+            LOG.info("Company profile does not exist in " + instance
+                    + " alphabetical ElasticSearch for company number: " + companyNumber);
+            return;
+        }
+
         try {
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()
                     .alphabeticalCompanySearch()
                     .delete(uri)
                     .execute();
-            LOG.info("Company profile deleted successfully from " + instance + " alphabetical search for company number: "
+            LOG.info("Company profile deleted successfully from "
+                    + instance + " alphabetical search for company number: "
                     + companyNumber);
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile from " + instance + " alphabetical search "
@@ -67,7 +80,8 @@ public class AlphabeticalCompanySearchImpl implements CompanySearchService {
                 .alphabeticalCompanySearch()
                 .put(uri, profileData)
                 .execute();
-        LOG.info("Company profile upsert into " + instance + " alphabetical search is successful for company number:"
+        LOG.info("Company profile upsert into " + instance
+                + " alphabetical search is successful for company number:"
                 + companyNumber);
     }
 

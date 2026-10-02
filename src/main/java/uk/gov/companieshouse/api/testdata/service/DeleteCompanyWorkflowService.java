@@ -6,6 +6,8 @@ import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 public interface DeleteCompanyWorkflowService {
 
 	void deleteCompany(String companyNumber) throws DataException, NoDataFoundException;
+
+    void deleteCompanyOptional(String companyNumber) throws DataException, NoDataFoundException;
 }
 
 
