@@ -77,6 +77,9 @@ class AdvancedCompanySearchImplTest {
 
     @BeforeEach
     void setUp() {
+        // @InjectMocks uses constructor injection, which skips the inherited RestTemplate field
+        service.restTemplate = restTemplate;
+
         // Mock the InternalApiClient supplier
         Mockito.lenient().when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
 

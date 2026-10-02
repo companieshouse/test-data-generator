@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -24,9 +23,7 @@ public class AdvancedCompanySearchImpl extends CompanySearchBase implements Comp
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AdvancedCompanySearchImpl.class));
 
-    public AdvancedCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier,
-                                   RestTemplate restTemplate) {
-        super(restTemplate);
+    public AdvancedCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
         this.internalApiClientSupplier = internalApiClientSupplier;
     }
 
@@ -65,7 +62,7 @@ public class AdvancedCompanySearchImpl extends CompanySearchBase implements Comp
         String uri = formatUri(ADVANCED_SEARCH_URI, companyNumber);
         LOG.info("Deleting company profile from advanced search for company number: "
                 + companyNumber);
-        if (!isIndexed(companyNumber, companyName)) {
+        if (!companyExists(ADVANCED_SEARCH_QUERY_URI, "company_name_includes", companyName)) {
             LOG.info("Company profile does not exist in Advanced ElasticSearch for company number: "
                     + companyNumber);
             return;
@@ -84,16 +81,6 @@ public class AdvancedCompanySearchImpl extends CompanySearchBase implements Comp
             LOG.error("Failed to delete company profile from advanced search for company number: "
                     + companyNumber);
         }
-    }
-
-    private boolean isIndexed(String companyNumber, String companyName) {
-        if (companyName == null || companyName.isBlank()) {
-            // The advanced search index can only be queried by name, so without one we
-            // cannot confirm the company is absent and must attempt the delete.
-            return true;
-        }
-        return companyExists(buildSearchUri(ADVANCED_SEARCH_QUERY_URI,
-                "company_name_includes", companyName), companyNumber);
     }
 
     private String formatUri(String template, String value) {

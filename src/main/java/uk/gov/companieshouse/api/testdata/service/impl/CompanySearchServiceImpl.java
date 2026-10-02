@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -32,12 +31,9 @@ public class CompanySearchServiceImpl extends CompanySearchBase implements Compa
             LoggerFactory.getLogger(String.valueOf(CompanySearchServiceImpl.class));
 
     public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier,
-                                    CompanyProfileService companyProfileService,
-                                    RestTemplate restTemplate) {
-        super(restTemplate);
+                                    CompanyProfileService companyProfileService) {
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.companyProfileService = companyProfileService;
-        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -123,8 +119,7 @@ public class CompanySearchServiceImpl extends CompanySearchBase implements Compa
 
     private void deleteCompanyProfileIfIndexed(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
-        if (!companyExists(buildSearchUri(COMPANY_SEARCH_QUERY_URI, "q", companyNumber),
-                companyNumber)) {
+        if (!companyExists(COMPANY_SEARCH_QUERY_URI, "q", companyNumber)) {
             LOG.info("Company profile does not exist in ElasticSearch for company number: "
                     + companyNumber);
             return;

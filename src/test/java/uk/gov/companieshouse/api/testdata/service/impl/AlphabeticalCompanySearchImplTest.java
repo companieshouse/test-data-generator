@@ -77,7 +77,8 @@ class AlphabeticalCompanySearchImplTest {
 
     @BeforeEach
     void setUp() {
-        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, "", restTemplate);
+        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, "");
+        service.restTemplate = restTemplate;
         Mockito.lenient().when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         Mockito.lenient().when(internalApiClient.privateSearchResourceHandler())
                 .thenReturn(privateSearchResourceHandler);
@@ -170,7 +171,8 @@ class AlphabeticalCompanySearchImplTest {
 
     @Test
     void addCompanyIntoElasticSearchIndex_ShouldUpsertWithGreenPrefix() throws Exception {
-        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, GREEN_INSTANCE, restTemplate);
+        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, GREEN_INSTANCE);
+        service.restTemplate = restTemplate;
         when(internalApiClient.company()).thenReturn(companyResourceHandler);
         when(companyResourceHandler.get(anyString())).thenReturn(companyGet);
         when(companyGet.execute()).thenReturn(apiResponse);
@@ -216,7 +218,8 @@ class AlphabeticalCompanySearchImplTest {
 
     @Test
     void deleteCompanyFromElasticSearchIndex_ShouldDeleteWithGreenPrefix() throws Exception {
-        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, GREEN_INSTANCE, restTemplate);
+        service = new AlphabeticalCompanySearchImpl(internalApiClientSupplier, GREEN_INSTANCE);
+        service.restTemplate = restTemplate;
         stubCompanyFoundInSearch();
         when(privateAlphabeticalCompanySearchHandler.delete(anyString()))
                 .thenReturn(privateAlphabeticalCompanySearchDelete);

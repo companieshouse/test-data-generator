@@ -38,10 +38,6 @@ class CompanySearchBaseTest {
 
     /** Minimal concrete subclass so the abstract base can be exercised directly. */
     private static class TestCompanySearch extends CompanySearchBase {
-        TestCompanySearch(RestTemplate restTemplate) {
-            super(restTemplate);
-        }
-
         String searchUri(String path, String queryParam, String queryValue) {
             return buildSearchUri(path, queryParam, queryValue);
         }
@@ -54,7 +50,8 @@ class CompanySearchBaseTest {
 
     @BeforeEach
     void setUp() {
-        service = new TestCompanySearch(restTemplate);
+        service = new TestCompanySearch();
+        service.restTemplate = restTemplate;
         service.apiUrl = API_URL;
         service.apiKey = API_KEY;
     }
@@ -72,12 +69,12 @@ class CompanySearchBaseTest {
     }
 
     @Test
-    void companyExistsReturnsTrueWhenTopHitMatches() {
+    void companyExistsReturnsTrueWhenTopHitPresent() {
         var body = new LinkedHashMap<String, Object>();
         body.put("top_hit", company(COMPANY_NUMBER));
         stubResponse(body, HttpStatus.OK);
 
-        assertTrue(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertTrue(service.companyExists(SEARCH_URI));
     }
 
     @Test
@@ -87,53 +84,49 @@ class CompanySearchBaseTest {
         body.put("items", List.of(company("99999999"), company(COMPANY_NUMBER)));
         stubResponse(body, HttpStatus.OK);
 
-        assertTrue(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertTrue(service.companyExists(SEARCH_URI));
     }
 
     @Test
-    void companyExistsIsCaseInsensitiveAndIgnoresSurroundingWhitespace() {
-        var hit = new LinkedHashMap<String, Object>();
-        hit.put("company_number", "  sc123456  ");
+    void companyExistsReturnsFalseWhenTopHitIsEmpty() {
         var body = new LinkedHashMap<String, Object>();
-        body.put("top_hit", hit);
+        body.put("top_hit", new LinkedHashMap<String, Object>());
         stubResponse(body, HttpStatus.OK);
 
-        assertTrue(service.companyExists(SEARCH_URI, "SC123456"));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
-    void companyExistsReturnsFalseWhenADifferentCompanyMatches() {
+    void companyExistsReturnsFalseWhenItemsIsEmpty() {
         var body = new LinkedHashMap<String, Object>();
-        body.put("top_hit", company("99999999"));
-        body.put("items", List.of(company("88888888")));
+        body.put("items", List.of());
         stubResponse(body, HttpStatus.OK);
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
-    void companyExistsReturnsFalseWhenCompanyNumberFieldMissing() {
-        var hit = new LinkedHashMap<String, Object>();
-        hit.put("company_name", "COMPANY 12345678 LTD");
+    void companyExistsReturnsFalseWhenResultFieldsAreNotTheExpectedShape() {
         var body = new LinkedHashMap<String, Object>();
-        body.put("top_hit", hit);
+        body.put("top_hit", "not-a-map");
+        body.put("items", "not-a-list");
         stubResponse(body, HttpStatus.OK);
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
     void companyExistsReturnsFalseWhenResultsAreEmpty() {
         stubResponse(new LinkedHashMap<String, Object>(), HttpStatus.OK);
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
     void companyExistsReturnsFalseWhenBodyIsNull() {
         stubResponse(null, HttpStatus.OK);
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
@@ -142,21 +135,13 @@ class CompanySearchBaseTest {
         body.put("top_hit", company(COMPANY_NUMBER));
         stubResponse(body, HttpStatus.NO_CONTENT);
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
     void companyExistsReturnsFalseWhenSearchUriIsNullOrBlank() {
-        assertFalse(service.companyExists(null, COMPANY_NUMBER));
-        assertFalse(service.companyExists("   ", COMPANY_NUMBER));
-
-        verify(restTemplate, never()).exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class));
-    }
-
-    @Test
-    void companyExistsReturnsFalseWhenCompanyNumberIsNullOrBlank() {
-        assertFalse(service.companyExists(SEARCH_URI, null));
-        assertFalse(service.companyExists(SEARCH_URI, "   "));
+        assertFalse(service.companyExists(null));
+        assertFalse(service.companyExists("   "));
 
         verify(restTemplate, never()).exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class));
     }
@@ -167,7 +152,7 @@ class CompanySearchBaseTest {
                 .thenThrow(HttpClientErrorException.create(HttpStatus.NOT_FOUND,
                         "Not Found", null, null, null));
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
@@ -176,7 +161,7 @@ class CompanySearchBaseTest {
                 .thenThrow(HttpClientErrorException.create(HttpStatus.UNAUTHORIZED,
                         "Unauthorized", null, null, null));
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
@@ -184,14 +169,14 @@ class CompanySearchBaseTest {
         when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class)))
                 .thenThrow(new ResourceAccessException("connection refused"));
 
-        assertFalse(service.companyExists(SEARCH_URI, COMPANY_NUMBER));
+        assertFalse(service.companyExists(SEARCH_URI));
     }
 
     @Test
     void companyExistsCallsSearchApiWithApiKeyHeaderAndAbsoluteUrl() {
         stubResponse(new LinkedHashMap<String, Object>(), HttpStatus.OK);
 
-        service.companyExists(SEARCH_URI, COMPANY_NUMBER);
+        service.companyExists(SEARCH_URI);
 
         ArgumentCaptor<String> url = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<HttpEntity> entity = ArgumentCaptor.forClass(HttpEntity.class);
@@ -200,6 +185,33 @@ class CompanySearchBaseTest {
 
         assertEquals(API_URL + SEARCH_URI, url.getValue());
         assertEquals(API_KEY, entity.getValue().getHeaders().getFirst("Authorization"));
+    }
+
+    @Test
+    void companyExistsByQueryBuildsTheSearchUriAndReportsAHit() {
+        var body = new LinkedHashMap<String, Object>();
+        body.put("top_hit", company(COMPANY_NUMBER));
+        stubResponse(body, HttpStatus.OK);
+
+        assertTrue(service.companyExists("/advanced-search/companies",
+                "company_name_includes", "SMITH & CO LTD"));
+
+        ArgumentCaptor<String> url = ArgumentCaptor.forClass(String.class);
+        verify(restTemplate).exchange(url.capture(), eq(HttpMethod.GET), any(), eq(Map.class));
+        assertEquals(API_URL + "/advanced-search/companies"
+                + "?company_name_includes=SMITH+%26+CO+LTD", url.getValue());
+    }
+
+    @Test
+    void companyExistsByQueryAssumesIndexedWhenQueryValueIsNullOrBlank() {
+        // Without a value the index cannot be queried, so the caller must still attempt the delete
+        assertTrue(service.companyExists("/advanced-search/companies",
+                "company_name_includes", null));
+        assertTrue(service.companyExists("/advanced-search/companies",
+                "company_name_includes", "   "));
+
+        verify(restTemplate, never()).exchange(anyString(), eq(HttpMethod.GET), any(),
+                eq(Map.class));
     }
 
     @Test

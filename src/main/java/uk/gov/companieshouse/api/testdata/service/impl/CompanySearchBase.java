@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +19,6 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 public abstract class CompanySearchBase {
 
-    private static final String COMPANY_NUMBER_FIELD = "company_number";
     private static final String TOP_HIT_FIELD = "top_hit";
     private static final String ITEMS_FIELD = "items";
 
@@ -28,14 +28,11 @@ public abstract class CompanySearchBase {
     @Value("${api-key}")
     protected String apiKey;
 
+    @Autowired
     protected RestTemplate restTemplate;
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(CompanySearchBase.class));
-
-    protected CompanySearchBase(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     /**
      * Builds a search URI, URL encoding the query value so that company names containing
@@ -47,17 +44,25 @@ public abstract class CompanySearchBase {
     }
 
     /**
-     * Queries a search index and reports whether it holds a document for the given company
-     * number. The caller supplies the full search URI because each index is queried
-     * differently, while the company number is used to confirm the correct company matched.
+     * Queries a search index for the given value and reports whether it returned any results.
+     * When no value is available the index cannot be queried, so the company is reported as
+     * indexed: the existence check only exists to avoid spurious 404s, and skipping the delete
+     * would leave the entry orphaned in the index.
      */
-    public boolean companyExists(String searchUri, String companyNumber) {
+    public boolean companyExists(String path, String queryParam, String queryValue) {
+        if (queryValue == null || queryValue.isBlank()) {
+            return true;
+        }
+        return companyExists(buildSearchUri(path, queryParam, queryValue));
+    }
+
+    /**
+     * Queries a search index and reports whether it returned any results. The caller supplies
+     * the full search URI because each index is queried differently.
+     */
+    public boolean companyExists(String searchUri) {
         if (searchUri == null || searchUri.isBlank()) {
             LOG.error("Search uri cannot be null or empty");
-            return false;
-        }
-        if (companyNumber == null || companyNumber.isBlank()) {
-            LOG.error("Company number cannot be null or empty");
             return false;
         }
 
@@ -73,7 +78,7 @@ public abstract class CompanySearchBase {
             if (response.getStatusCode() != HttpStatus.OK || response.getBody() == null) {
                 return false;
             }
-            return containsCompanyNumber(response.getBody(), companyNumber);
+            return hasResults(response.getBody());
         } catch (HttpClientErrorException ex) {
             if (ex.getStatusCode() == HttpStatus.NOT_FOUND) {
                 LOG.info("Company not found for search uri: " + searchUri);
@@ -87,22 +92,11 @@ public abstract class CompanySearchBase {
         }
     }
 
-    private boolean containsCompanyNumber(Map<?, ?> body, String companyNumber) {
-        if (matchesCompanyNumber(body.get(TOP_HIT_FIELD), companyNumber)) {
+    private boolean hasResults(Map<?, ?> body) {
+        if (body.get(TOP_HIT_FIELD) instanceof Map<?, ?> topHit && !topHit.isEmpty()) {
             return true;
         }
-        if (body.get(ITEMS_FIELD) instanceof Collection<?> items) {
-            return items.stream().anyMatch(item -> matchesCompanyNumber(item, companyNumber));
-        }
-        return false;
-    }
-
-    private boolean matchesCompanyNumber(Object candidate, String companyNumber) {
-        if (candidate instanceof Map<?, ?> company) {
-            Object number = company.get(COMPANY_NUMBER_FIELD);
-            return number != null && companyNumber.equalsIgnoreCase(number.toString().trim());
-        }
-        return false;
+        return body.get(ITEMS_FIELD) instanceof Collection<?> items && !items.isEmpty();
     }
 
     protected HttpHeaders createHeaders(String apiKey) {

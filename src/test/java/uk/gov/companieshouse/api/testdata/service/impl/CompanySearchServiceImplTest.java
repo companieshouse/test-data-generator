@@ -87,6 +87,9 @@ class CompanySearchServiceImplTest {
 
     @BeforeEach
     void setUp() throws ApiErrorResponseException, URIValidationException {
+        // @InjectMocks uses constructor injection, which skips the inherited RestTemplate field
+        service.restTemplate = restTemplate;
+
         Mockito.lenient().when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
         Mockito.lenient().when(internalApiClient.privateCompanyLinksResourceHandler()).thenReturn(privateCompanyLinksResourceHandler);
         Mockito.lenient().when(internalApiClient.privateSearchResourceHandler()).thenReturn(privateSearchResourceHandler);
@@ -232,23 +235,6 @@ class CompanySearchServiceImplTest {
         service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
 
         verify(privateCompanySearchHandler).deleteCompanyProfile(URI);
-    }
-
-    @Test
-    void deleteCompanyFromElasticSearchIndex_ShouldSkipDelete_WhenDifferentCompanyMatched()
-            throws Exception {
-        var item = new LinkedHashMap<String, Object>();
-        item.put("company_number", "99999999");
-        var body = new LinkedHashMap<String, Object>();
-        body.put("items", List.of(item));
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class)))
-                .thenReturn(new ResponseEntity<>(body, HttpStatus.OK));
-        when(companyProfileService.findUkEstablishmentsByParent(COMPANY_NUMBER))
-                .thenReturn(Collections.emptyList());
-
-        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
-
-        verify(privateCompanySearchHandler, never()).deleteCompanyProfile(anyString());
     }
 
     @Test

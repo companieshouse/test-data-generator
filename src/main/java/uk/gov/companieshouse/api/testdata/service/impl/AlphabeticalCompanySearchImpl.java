@@ -2,7 +2,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 
 import java.util.function.Supplier;
 
-import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -24,9 +23,7 @@ public class AlphabeticalCompanySearchImpl extends CompanySearchBase
             LoggerFactory.getLogger(String.valueOf(AlphabeticalCompanySearchImpl.class));
 
     public AlphabeticalCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier,
-                                       String instance,
-                                       RestTemplate restTemplate) {
-        super(restTemplate);
+                                       String instance) {
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.instance = instance;
     }
@@ -51,7 +48,8 @@ public class AlphabeticalCompanySearchImpl extends CompanySearchBase
                 companyNumber);
         LOG.info("Deleting company profile from " + instance
                 + " alphabetical search for company number: " + companyNumber);
-        if (!isIndexed(companyNumber, companyName)) {
+        if (!companyExists(String.format(ALPHABETICAL_SEARCH_QUERY_URI, instance),
+                "q", companyName)) {
             LOG.info("Company profile does not exist in " + instance
                     + " alphabetical ElasticSearch for company number: " + companyNumber);
             return;
@@ -70,17 +68,6 @@ public class AlphabeticalCompanySearchImpl extends CompanySearchBase
             LOG.error("Failed to delete company profile from " + instance + " alphabetical search "
                     + "for company number: " + companyNumber);
         }
-    }
-
-    private boolean isIndexed(String companyNumber, String companyName) {
-        if (companyName == null || companyName.isBlank()) {
-            // The alphabetical index is ordered by name and can only be queried by name, so
-            // without one we cannot confirm the company is absent and must attempt the delete.
-            return true;
-        }
-        String uri = String.format(ALPHABETICAL_SEARCH_QUERY_URI, instance);
-        return companyExists(buildSearchUri(uri, "q", companyName),
-                companyNumber);
     }
 
     private void upsertCompanyProfileForAlphaSearch(
