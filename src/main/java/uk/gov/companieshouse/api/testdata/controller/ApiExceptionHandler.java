@@ -67,7 +67,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(value = {NoDataFoundException.class})
     @ResponseStatus(value = HttpStatus.NOT_FOUND)
     protected void handleNoDataFoundException(NoDataFoundException ex) {
-        logException(ex);
+        LOG.info(ex.getMessage());
     }
 
     @ExceptionHandler(value = {InvalidAuthCodeException.class})

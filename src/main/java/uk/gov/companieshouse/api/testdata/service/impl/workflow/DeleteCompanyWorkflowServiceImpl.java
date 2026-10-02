@@ -182,6 +182,11 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
     private void deleteCompanyData(String companyNumber, List<Exception> suppressedExceptions) {
         LOG.info("Deleting company data for company number: " + companyNumber);
 
+        // Resolved before the profile is deleted, as the name-keyed search indices need it.
+        String companyName = companyProfileService.getCompanyProfile(companyNumber)
+                .map(CompanyProfile::getCompanyName)
+                .orElse(null);
+
         try {
             companyProfileService.delete(companyNumber);
             LOG.info("Deleted company profile for company number: " + companyNumber);
@@ -247,7 +252,7 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
             try {
                 LOG.info("Attempting to delete company from ElasticSearch indices for company number: "
                         + companyNumber);
-                deleteCompanyFromSearchIndex(companyNumber);
+                deleteCompanyFromSearchIndex(companyNumber, companyName);
                 LOG.info("Deleted company from ElasticSearch indices for company number: "
                         + companyNumber);
             } catch (Exception ex) {
@@ -257,11 +262,12 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         }
     }
 
-    private void deleteCompanyFromSearchIndex(String companyNumber) {
+    private void deleteCompanyFromSearchIndex(String companyNumber, String companyName) {
         try {
             LOG.info("Attempting to delete company from ElasticSearch index for company number: "
                     + companyNumber);
-            companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber);
+            companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber,
+                    companyName);
             LOG.info("Deleted company from ElasticSearch index for company number: "
                     + companyNumber);
         } catch (Exception ex) {
@@ -271,7 +277,8 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         try {
             LOG.info("Attempting to delete company from AlphabeticalSearch index for company number: "
                     + companyNumber);
-            alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+            alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber,
+                    companyName);
         } catch (Exception ex) {
             LOG.error("Failed to delete company from AlphabeticalSearch index for company number: "
                     + companyNumber, ex);
@@ -279,7 +286,8 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         try {
             LOG.info("Attempting to delete company from GreenAlphabeticalSearch index for company number: "
                     + companyNumber);
-            greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+            greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber,
+                    companyName);
         } catch (Exception ex) {
             LOG.error("Failed to delete company from GreenAlphabeticalSearch index for company number: "
                     + companyNumber, ex);
@@ -287,7 +295,8 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         try {
             LOG.info("Attempting to delete company from AdvancedSearch index for company number: "
                     + companyNumber);
-            advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+            advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber,
+                    companyName);
         } catch (Exception ex) {
             LOG.error("Failed to delete company from AdvancedSearch index for company number: "
                     + companyNumber, ex);

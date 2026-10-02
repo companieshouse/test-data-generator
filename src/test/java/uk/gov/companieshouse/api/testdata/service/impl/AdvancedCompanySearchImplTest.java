@@ -1,13 +1,17 @@
 package uk.gov.companieshouse.api.testdata.service.impl;
 
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.api.client.http.HttpHeaders;
 import com.google.api.client.http.HttpResponseException;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -15,7 +19,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -35,6 +44,7 @@ class AdvancedCompanySearchImplTest {
 
     private static final ApiResponse<Void> SUCCESS_RESPONSE = new ApiResponse<>(200, null);
     private static final String COMPANY_NUMBER = "12345678";
+    private static final String COMPANY_NAME = "COMPANY 12345678 LTD";
     private static final String URI = "/advanced-search/companies/%s".formatted(COMPANY_NUMBER);
 
     @Mock
@@ -59,19 +69,32 @@ class AdvancedCompanySearchImplTest {
     @Mock
     private CompanyGet companyGet;
 
+    @Mock
+    private RestTemplate restTemplate;
+
     @InjectMocks
     private AdvancedCompanySearchImpl service;
 
     @BeforeEach
     void setUp() {
         // Mock the InternalApiClient supplier
-        when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
+        Mockito.lenient().when(internalApiClientSupplier.get()).thenReturn(internalApiClient);
 
         // Mock the private search resource handler
-        when(internalApiClient.privateSearchResourceHandler())
+        Mockito.lenient().when(internalApiClient.privateSearchResourceHandler())
                 .thenReturn(privateSearchResourceHandler);
-        when(privateSearchResourceHandler.advancedCompanySearch())
+        Mockito.lenient().when(privateSearchResourceHandler.advancedCompanySearch())
                 .thenReturn(privateAdvancedCompanySearchHandler);
+    }
+
+    private void stubCompanyFoundInSearch() {
+        var topHit = new LinkedHashMap<String, Object>();
+        topHit.put("company_name", COMPANY_NAME);
+        topHit.put("company_number", COMPANY_NUMBER);
+        var body = new LinkedHashMap<String, Object>();
+        body.put("top_hit", topHit);
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class)))
+                .thenReturn(new ResponseEntity<>(body, HttpStatus.OK));
     }
 
     @Test
@@ -94,17 +117,29 @@ class AdvancedCompanySearchImplTest {
 
     @Test
     void deleteCompanyFromElasticSearchIndex_ShouldDeleteCompanyProfile() throws Exception {
+        stubCompanyFoundInSearch();
         when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
                 .thenReturn(privateAdvancedCompanySearchDelete);
         when(privateAdvancedCompanySearchDelete.execute()).thenReturn(SUCCESS_RESPONSE);
-        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
 
         verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
     }
 
     @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldSkipDelete_WhenCompanyNotInSearchIndex() {
+        when(restTemplate.exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class)))
+                .thenReturn(new ResponseEntity<>(new LinkedHashMap<String, Object>(), HttpStatus.OK));
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
+
+        verify(privateAdvancedCompanySearchHandler, never()).deleteCompanyProfile(anyString());
+    }
+
+    @Test
     void deleteCompanyFromElasticSearchIndex_ShouldLogError_WhenApiErrorResponseExceptionThrown()
             throws Exception {
+        stubCompanyFoundInSearch();
         // Mock the deleteCompanyProfile to throw ApiErrorResponseException
         when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
                 .thenReturn(privateAdvancedCompanySearchDelete);
@@ -112,7 +147,7 @@ class AdvancedCompanySearchImplTest {
                 .thenThrow(new ApiErrorResponseException(new HttpResponseException.Builder(500,
                         "API error", new HttpHeaders())));
 
-        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
 
         verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
         // Verify that the error is logged
@@ -122,16 +157,46 @@ class AdvancedCompanySearchImplTest {
     @Test
     void deleteCompanyFromElasticSearchIndex_ShouldLogError_WhenUriValidationExceptionThrown()
             throws Exception {
+        stubCompanyFoundInSearch();
         // Mock the deleteCompanyProfile to throw URIValidationException
         when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
                 .thenReturn(privateAdvancedCompanySearchDelete);
         when(privateAdvancedCompanySearchDelete.execute())
                 .thenThrow(new URIValidationException("URI validation error"));
 
-        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, COMPANY_NAME);
 
         verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
         // Verify that the error is logged
         verify(privateAdvancedCompanySearchDelete).execute();
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldAttemptDelete_WhenCompanyNameUnknown()
+            throws Exception {
+        // Without a name the advanced index cannot be queried, so the delete must still be tried
+        when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
+                .thenReturn(privateAdvancedCompanySearchDelete);
+        when(privateAdvancedCompanySearchDelete.execute()).thenReturn(SUCCESS_RESPONSE);
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, null);
+
+        verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
+        verify(restTemplate, never())
+                .exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class));
+    }
+
+    @Test
+    void deleteCompanyFromElasticSearchIndex_ShouldAttemptDelete_WhenCompanyNameBlank()
+            throws Exception {
+        when(privateAdvancedCompanySearchHandler.deleteCompanyProfile(anyString()))
+                .thenReturn(privateAdvancedCompanySearchDelete);
+        when(privateAdvancedCompanySearchDelete.execute()).thenReturn(SUCCESS_RESPONSE);
+
+        service.deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER, "   ");
+
+        verify(privateAdvancedCompanySearchHandler).deleteCompanyProfile(URI);
+        verify(restTemplate, never())
+                .exchange(anyString(), eq(HttpMethod.GET), any(), eq(Map.class));
     }
 }

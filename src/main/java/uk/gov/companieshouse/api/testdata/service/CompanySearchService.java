@@ -9,5 +9,5 @@ public interface CompanySearchService {
 
     void addCompanyIntoElasticSearchIndex(CompanyProfileResponse data) throws DataException, ApiErrorResponseException, URIValidationException;
 
-    void deleteCompanyFromElasticSearchIndex(String companyNumber) throws DataException, ApiErrorResponseException, URIValidationException;
+    void deleteCompanyFromElasticSearchIndex(String companyNumber, String companyName) throws DataException, ApiErrorResponseException, URIValidationException;
 }

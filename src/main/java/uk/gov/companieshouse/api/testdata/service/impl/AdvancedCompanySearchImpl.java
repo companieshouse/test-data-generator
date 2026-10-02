@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
 import uk.gov.companieshouse.api.handler.exception.URIValidationException;
@@ -13,16 +14,19 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service("advancedCompanySearchService")
-public class AdvancedCompanySearchImpl implements CompanySearchService {
+public class AdvancedCompanySearchImpl extends CompanySearchBase implements CompanySearchService {
 
     private static final String ADVANCED_SEARCH_URI = "/advanced-search/companies/%s";
+    private static final String ADVANCED_SEARCH_QUERY_URI = "/advanced-search/companies";
     private final Supplier<InternalApiClient> internalApiClientSupplier;
     private static final String COMPANY_PROFILE_URI = "/company/%s";
 
     private static final Logger LOG =
             LoggerFactory.getLogger(String.valueOf(AdvancedCompanySearchImpl.class));
 
-    public AdvancedCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier) {
+    public AdvancedCompanySearchImpl(Supplier<InternalApiClient> internalApiClientSupplier,
+                                   RestTemplate restTemplate) {
+        super(restTemplate);
         this.internalApiClientSupplier = internalApiClientSupplier;
     }
 
@@ -39,8 +43,8 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber) {
-        deleteCompanyFromAdvancedSearch(companyNumber);
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber, String companyName) {
+        deleteCompanyFromAdvancedSearch(companyNumber, companyName);
     }
 
     private void upsertCompanyProfileForAdvancedSearch(
@@ -57,10 +61,16 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
                 + companyNumber);
     }
 
-    private void deleteCompanyFromAdvancedSearch(String companyNumber) {
+    private void deleteCompanyFromAdvancedSearch(String companyNumber, String companyName) {
         String uri = formatUri(ADVANCED_SEARCH_URI, companyNumber);
         LOG.info("Deleting company profile from advanced search for company number: "
                 + companyNumber);
+        if (!isIndexed(companyNumber, companyName)) {
+            LOG.info("Company profile does not exist in Advanced ElasticSearch for company number: "
+                    + companyNumber);
+            return;
+        }
+
         try {
             internalApiClientSupplier.get()
                     .privateSearchResourceHandler()
@@ -74,6 +84,16 @@ public class AdvancedCompanySearchImpl implements CompanySearchService {
             LOG.error("Failed to delete company profile from advanced search for company number: "
                     + companyNumber);
         }
+    }
+
+    private boolean isIndexed(String companyNumber, String companyName) {
+        if (companyName == null || companyName.isBlank()) {
+            // The advanced search index can only be queried by name, so without one we
+            // cannot confirm the company is absent and must attempt the delete.
+            return true;
+        }
+        return companyExists(buildSearchUri(ADVANCED_SEARCH_QUERY_URI,
+                "company_name_includes", companyName), companyNumber);
     }
 
     private String formatUri(String template, String value) {

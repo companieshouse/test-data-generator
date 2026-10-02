@@ -30,6 +30,7 @@ import tools.jackson.core.JacksonException.Reference;
 
 import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.DataException;
+import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationError;
 import uk.gov.companieshouse.api.testdata.model.rest.validation.ValidationErrors;
@@ -230,6 +231,19 @@ class ApiExceptionHandlerTest {
         ValidationError expectedError = new ValidationError(
                 "invalid request", null, null, "ch:validation");
         assertTrue(errors.containsError(expectedError));
+    }
+
+    @Test
+    void handleNoDataFoundExceptionReturnsNotFoundWithoutStackTrace() throws Exception {
+        Method method = ApiExceptionHandler.class
+                .getDeclaredMethod("handleNoDataFoundException", NoDataFoundException.class);
+        method.setAccessible(true);
+
+        method.invoke(handler, new NoDataFoundException("company not found"));
+
+        ResponseStatus responseStatus = method.getAnnotation(ResponseStatus.class);
+        assertNotNull(responseStatus);
+        assertEquals(HttpStatus.NOT_FOUND, responseStatus.value());
     }
 
     @Test

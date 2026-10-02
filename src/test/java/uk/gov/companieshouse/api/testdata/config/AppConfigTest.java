@@ -37,6 +37,11 @@ class AppConfigTest {
     }
 
     @Test
+    void restTemplate_ShouldReturnNonNullRestTemplate() {
+        assertNotNull(appConfig.restTemplate());
+    }
+
+    @Test
     void internalApiClientSupplier_ShouldReturnInternalApiClient() {
         // Mock DataMapHolder behaviour
         DataMapHolder.initialise("test-request-id");

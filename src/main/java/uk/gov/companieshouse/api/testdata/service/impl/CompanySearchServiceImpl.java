@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import uk.gov.companieshouse.api.InternalApiClient;
 import uk.gov.companieshouse.api.company.Data;
 import uk.gov.companieshouse.api.error.ApiErrorResponseException;
@@ -17,9 +18,10 @@ import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
 @Service("companySearchService")
-public class CompanySearchServiceImpl implements CompanySearchService {
+public class CompanySearchServiceImpl extends CompanySearchBase implements CompanySearchService {
 
     private static final String COMPANY_SEARCH_URI = "/company-search/companies/%s";
+    private static final String COMPANY_SEARCH_QUERY_URI = "/search/companies";
     private static final String COMPANY_PROFILE_URI = "/company/%s/links";
     private static final String OVERSEA_COMPANY_TYPE = "oversea-company";
 
@@ -30,9 +32,12 @@ public class CompanySearchServiceImpl implements CompanySearchService {
             LoggerFactory.getLogger(String.valueOf(CompanySearchServiceImpl.class));
 
     public CompanySearchServiceImpl(Supplier<InternalApiClient> internalApiClientSupplier,
-                                    CompanyProfileService companyProfileService) {
+                                    CompanyProfileService companyProfileService,
+                                    RestTemplate restTemplate) {
+        super(restTemplate);
         this.internalApiClientSupplier = internalApiClientSupplier;
         this.companyProfileService = companyProfileService;
+        this.restTemplate = restTemplate;
     }
 
     @Override
@@ -56,12 +61,12 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     }
 
     @Override
-    public void deleteCompanyFromElasticSearchIndex(String companyNumber) throws DataException {
+    public void deleteCompanyFromElasticSearchIndex(String companyNumber, String companyName) throws DataException {
         try {
             handleUkEstablishments(companyNumber, false);
 
             String formattedUri = formatUri(COMPANY_SEARCH_URI, companyNumber);
-            deleteCompanyProfile(formattedUri, companyNumber);
+            deleteCompanyProfileIfIndexed(formattedUri, companyNumber);
 
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile for company number: " + companyNumber, ex);
@@ -116,6 +121,17 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         LOG.info("Company profile upsert successful for company number: " + companyNumber);
     }
 
+    private void deleteCompanyProfileIfIndexed(String uri, String companyNumber)
+            throws ApiErrorResponseException, URIValidationException {
+        if (!companyExists(buildSearchUri(COMPANY_SEARCH_QUERY_URI, "q", companyNumber),
+                companyNumber)) {
+            LOG.info("Company profile does not exist in ElasticSearch for company number: "
+                    + companyNumber);
+            return;
+        }
+        deleteCompanyProfile(uri, companyNumber);
+    }
+
     private void deleteCompanyProfile(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
         LOG.info("Deleting company profile from ElasticSearch for company number: "
@@ -129,9 +145,11 @@ public class CompanySearchServiceImpl implements CompanySearchService {
         } catch (ApiErrorResponseException | URIValidationException ex) {
             LOG.error("Failed to delete company profile for company number: "
                     + companyNumber + " from company elasticsearch");
+            throw ex;
         }
         LOG.info("Company profile deleted successfully for company number: " + companyNumber);
     }
+
 
     private Data fetchCompanyProfile(String uri, String companyNumber)
             throws ApiErrorResponseException, URIValidationException {
@@ -149,4 +167,5 @@ public class CompanySearchServiceImpl implements CompanySearchService {
     private String formatUri(String template, String value) {
         return String.format(template, value);
     }
+
 }
