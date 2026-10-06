@@ -1,5 +1,20 @@
 package uk.gov.companieshouse.api.testdata.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -19,6 +34,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.OfficerType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteInternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
@@ -30,18 +46,6 @@ import uk.gov.companieshouse.api.testdata.service.CompanyAuthCodeService;
 import uk.gov.companieshouse.api.testdata.service.CompanyProfileService;
 import uk.gov.companieshouse.api.testdata.service.CreateCompanyWorkflowService;
 import uk.gov.companieshouse.api.testdata.service.DeleteCompanyWorkflowService;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class InternalCompanyControllerTest {
@@ -170,12 +174,12 @@ class InternalCompanyControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
+        verify(deleteCompanyWorkflowService).deleteCompany(nullable(DeleteInternalCompanyRequest.class), eq(COMPANY_NUMBER));
     }
 
     @Test
     void deleteCompanyInternalWithValidAuthCode() throws Exception {
-        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        DeleteInternalCompanyRequest request = new DeleteInternalCompanyRequest();
         request.setAuthCode("654321");
 
         when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "654321")).thenReturn(true);
@@ -184,12 +188,25 @@ class InternalCompanyControllerTest {
 
         assertNull(response.getBody());
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-        verify(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
+        verify(deleteCompanyWorkflowService).deleteCompany(any(DeleteInternalCompanyRequest.class), eq(COMPANY_NUMBER));
+    }
+
+    @Test
+    void deleteCompanyInternalWithNullAuthCode() throws Exception {
+        DeleteInternalCompanyRequest request = new DeleteInternalCompanyRequest();
+        request.setAuthCode(null);
+
+        ResponseEntity<Void> response = internalCompanyController.deleteCompany(COMPANY_NUMBER, request);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteCompanyWorkflowService).deleteCompany(any(DeleteInternalCompanyRequest.class), eq(COMPANY_NUMBER));
+        verify(companyAuthCodeService, never()).verifyAuthCode(COMPANY_NUMBER, null);
     }
 
     @Test
     void deleteCompanyInternalWithInvalidAuthCode() throws Exception {
-        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        DeleteInternalCompanyRequest request = new DeleteInternalCompanyRequest();
         request.setAuthCode("wrongCode");
 
         when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "wrongCode")).thenReturn(false);
@@ -202,7 +219,7 @@ class InternalCompanyControllerTest {
     @Test
     void deleteCompanyInternalDataException() throws Exception {
         DataException ex = new DataException("error");
-        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
+        lenient().doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(nullable(DeleteInternalCompanyRequest.class), eq(COMPANY_NUMBER));
 
         DataException thrown = assertThrows(DataException.class,
                 () -> internalCompanyController.deleteCompany(COMPANY_NUMBER, null));
@@ -212,7 +229,7 @@ class InternalCompanyControllerTest {
     @Test
     void deleteCompanyInternalNoDataFoundException() throws Exception {
         NoDataFoundException ex = new NoDataFoundException("Company not found");
-        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(COMPANY_NUMBER);
+        lenient().doThrow(ex).when(deleteCompanyWorkflowService).deleteCompany(nullable(DeleteInternalCompanyRequest.class), eq(COMPANY_NUMBER));
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class,
                 () -> internalCompanyController.deleteCompany(COMPANY_NUMBER, null));
@@ -404,6 +421,61 @@ class InternalCompanyControllerTest {
 
         NoDataFoundException thrown = assertThrows(NoDataFoundException.class, () ->
                 internalCompanyController.findOrCreateCompanyAuthCode(COMPANY_NUMBER));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void deleteCompanyOptionalSuccess() throws Exception {
+        ResponseEntity<Void> response = internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, null);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWithValidAuthCode() throws Exception {
+        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        request.setAuthCode("654321");
+
+        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "654321")).thenReturn(true);
+
+        ResponseEntity<Void> response = internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, request);
+
+        assertNull(response.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        verify(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWithInvalidAuthCode() throws Exception {
+        DeleteCompanyRequest request = new DeleteCompanyRequest();
+        request.setAuthCode("wrongCode");
+
+        when(companyAuthCodeService.verifyAuthCode(COMPANY_NUMBER, "wrongCode")).thenReturn(false);
+
+        InvalidAuthCodeException thrown = assertThrows(InvalidAuthCodeException.class,
+                () -> internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, request));
+        assertEquals(COMPANY_NUMBER, thrown.getCompanyNumber());
+    }
+
+    @Test
+    void deleteCompanyOptionalDataException() throws Exception {
+        DataException ex = new DataException("error");
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+
+        DataException thrown = assertThrows(DataException.class,
+                () -> internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, null));
+        assertEquals(ex, thrown);
+    }
+
+    @Test
+    void deleteCompanyOptionalNoDataFoundException() throws Exception {
+        NoDataFoundException ex = new NoDataFoundException("Company not found");
+        doThrow(ex).when(deleteCompanyWorkflowService).deleteCompanyOptional(COMPANY_NUMBER);
+
+        NoDataFoundException thrown = assertThrows(NoDataFoundException.class,
+                () -> internalCompanyController.deleteCompanyOptional(COMPANY_NUMBER, null));
         assertEquals(ex, thrown);
     }
 }

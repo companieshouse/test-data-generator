@@ -13,6 +13,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteInternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -101,7 +102,7 @@ class DeleteCompanyWorkflowServiceImplTest {
      */
     private void assertDeleteCompanyException(RuntimeException... expectedExceptions) {
         DataException thrown = assertThrows(DataException.class,
-                () -> deletionService.deleteCompany(COMPANY_NUMBER));
+                () -> deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER));
         assertEquals(expectedExceptions.length, thrown.getSuppressed().length,
                 "Unexpected number of suppressed exceptions");
         for (int i = 0; i < expectedExceptions.length; i++) {
@@ -121,7 +122,7 @@ class DeleteCompanyWorkflowServiceImplTest {
 
     @Test
     void deleteCompany() throws Exception {
-        deletionService.deleteCompany(COMPANY_NUMBER);
+        deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER);
         verifyDeleteCompany();
     }
 
@@ -217,7 +218,7 @@ class DeleteCompanyWorkflowServiceImplTest {
         when(companyProfileService.getCompanyProfile(COMPANY_NUMBER))
                 .thenReturn(Optional.of(companyProfile));
 
-        deletionService.deleteCompany(COMPANY_NUMBER);
+        deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER);
 
         verify(companyProfileService).delete(COMPANY_NUMBER);
         verify(companyProfileService, never()).findUkEstablishmentsByParent(anyString());
@@ -247,7 +248,12 @@ class DeleteCompanyWorkflowServiceImplTest {
     @Test
     void deleteCompanyWithElasticSearchDeployed() throws DataException, NoDataFoundException {
         deletionService.setElasticSearchDeployed(true);
-        deletionService.deleteCompany(COMPANY_NUMBER);
+        DeleteInternalCompanyRequest request = new DeleteInternalCompanyRequest();
+        request.setAddToCompanyElasticSearchIndex(true);
+        request.setAlphabeticalSearch(true);
+        request.setGreenAlphabeticalSearch(true);
+        request.setAdvancedSearch(true);
+        deletionService.deleteCompany(request, COMPANY_NUMBER);
 
         verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
         verify(alphabeticalCompanySearch, times(1))
@@ -261,7 +267,7 @@ class DeleteCompanyWorkflowServiceImplTest {
     @Test
     void deleteCompanyWithElasticSearchNotDeployed() throws DataException, NoDataFoundException {
         deletionService.setElasticSearchDeployed(false);
-        deletionService.deleteCompany(COMPANY_NUMBER);
+        deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER);
 
         verify(companySearchService, never()).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
         verify(alphabeticalCompanySearch, never())
@@ -276,7 +282,7 @@ class DeleteCompanyWorkflowServiceImplTest {
     void deleteInternalCompanySuccess() throws DataException, NoDataFoundException {
         when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
 
-        deletionService.deleteCompany(COMPANY_NUMBER);
+        deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER);
 
         verifyDeleteCompany();
     }
@@ -287,7 +293,7 @@ class DeleteCompanyWorkflowServiceImplTest {
 
         NoDataFoundException exception = assertThrows(
                 NoDataFoundException.class,
-                () -> deletionService.deleteCompany(COMPANY_NUMBER));
+                () -> deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER));
 
         assertEquals("Company with number " + COMPANY_NUMBER + " not found",
                 exception.getMessage());
@@ -302,9 +308,29 @@ class DeleteCompanyWorkflowServiceImplTest {
         doThrow(cause).when(companyProfileService).delete(COMPANY_NUMBER);
 
         assertThrows(DataException.class,
-                () -> deletionService.deleteCompany(COMPANY_NUMBER));
+                () -> deletionService.deleteCompany(new DeleteInternalCompanyRequest(), COMPANY_NUMBER));
 
         verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWhenCompanyExists() throws DataException, NoDataFoundException {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
+
+        deletionService.deleteCompanyOptional(COMPANY_NUMBER);
+
+        verify(companyProfileService, times(2)).companyExists(COMPANY_NUMBER);
+        verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
+    }
+
+    @Test
+    void deleteCompanyOptionalWhenCompanyDoesNotExist() throws DataException, NoDataFoundException {
+        when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
+
+        deletionService.deleteCompanyOptional(COMPANY_NUMBER);
+
+        verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
+        verify(companyProfileService, never()).delete(anyString());
     }
 }
 

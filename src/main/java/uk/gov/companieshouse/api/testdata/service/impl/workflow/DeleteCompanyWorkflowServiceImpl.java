@@ -12,6 +12,7 @@ import uk.gov.companieshouse.api.testdata.model.entity.CompanyRegisters;
 import uk.gov.companieshouse.api.testdata.model.entity.Disqualifications;
 import uk.gov.companieshouse.api.testdata.model.entity.FilingHistory;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteInternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.service.AppointmentService;
 import uk.gov.companieshouse.api.testdata.service.CompanyAuthAllowListService;
@@ -135,6 +136,22 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         LOG.info("Company with company number " + companyNumber + " deleted successfully without any errors.");
     }
 
+    @Override
+    public void deleteCompany(DeleteInternalCompanyRequest deleteInternalCompanyRequest, String companyNumber) throws DataException, NoDataFoundException {
+        deleteCompany(companyNumber);
+        deleteCompanyFromSearchIndex(deleteInternalCompanyRequest, companyNumber);
+    }
+
+    @Override
+    public void deleteCompanyOptional(String companyNumber)
+            throws DataException, NoDataFoundException {
+        if (!companyProfileService.companyExists(companyNumber)) {
+            LOG.info("Company with number " + companyNumber + " does not exist. This is NOT an issue as this is only being called to ensure clean state before test runs in case a company with the same number already exists which is possible.");
+            return;
+        }
+        deleteCompany(companyNumber);
+    }
+
     private void deleteUkEstablishmentsIfOverseaCompany(
             String companyNumber, List<Exception> suppressedExceptions) {
         try {
@@ -242,55 +259,52 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
         } catch (Exception ex) {
             suppressedExceptions.add(ex);
         }
-
-        if (isElasticSearchDeployed) {
-            try {
-                LOG.info("Attempting to delete company from ElasticSearch indices for company number: "
-                        + companyNumber);
-                deleteCompanyFromSearchIndex(companyNumber);
-                LOG.info("Deleted company from ElasticSearch indices for company number: "
-                        + companyNumber);
-            } catch (Exception ex) {
-                LOG.error("Failed to delete company from ElasticSearch indices for company number: "
-                        + companyNumber, ex);
-            }
-        }
     }
 
-    private void deleteCompanyFromSearchIndex(String companyNumber) {
-        try {
-            LOG.info("Attempting to delete company from ElasticSearch index for company number: "
-                    + companyNumber);
-            companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber);
-            LOG.info("Deleted company from ElasticSearch index for company number: "
-                    + companyNumber);
-        } catch (Exception ex) {
-            LOG.error("Failed to delete company from ElasticSearch index for company number: "
-                    + companyNumber, ex);
-        }
-        try {
-            LOG.info("Attempting to delete company from AlphabeticalSearch index for company number: "
-                    + companyNumber);
-            alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
-        } catch (Exception ex) {
-            LOG.error("Failed to delete company from AlphabeticalSearch index for company number: "
-                    + companyNumber, ex);
-        }
-        try {
-            LOG.info("Attempting to delete company from GreenAlphabeticalSearch index for company number: "
-                    + companyNumber);
-            greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
-        } catch (Exception ex) {
-            LOG.error("Failed to delete company from GreenAlphabeticalSearch index for company number: "
-                    + companyNumber, ex);
-        }
-        try {
-            LOG.info("Attempting to delete company from AdvancedSearch index for company number: "
-                    + companyNumber);
-            advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
-        } catch (Exception ex) {
-            LOG.error("Failed to delete company from AdvancedSearch index for company number: "
-                    + companyNumber, ex);
+    private void deleteCompanyFromSearchIndex(DeleteInternalCompanyRequest deleteInternalCompanyRequest, String companyNumber) {
+        if (isElasticSearchDeployed) {
+            try {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getAddToCompanyElasticSearchIndex() != null) {
+                    LOG.info("Attempting to delete company from ElasticSearch index for company number: "
+                            + companyNumber);
+                    companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber);
+                }
+
+            } catch (Exception ex) {
+                LOG.error("Failed to delete company from ElasticSearch index for company number: "
+                        + companyNumber, ex);
+            }
+            try {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getAlphabeticalSearch() != null) {
+                    LOG.info("Attempting to delete company from AlphabeticalSearch index for company number: "
+                            + companyNumber);
+                    alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+
+                }
+            } catch (Exception ex) {
+                LOG.error("Failed to delete company from AlphabeticalSearch index for company number: "
+                        + companyNumber, ex);
+            }
+            try {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getGreenAlphabeticalSearch() != null) {
+                    LOG.info("Attempting to delete company from GreenAlphabeticalSearch index for company number: "
+                            + companyNumber);
+                    greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+                }
+            } catch (Exception ex) {
+                LOG.error("Failed to delete company from GreenAlphabeticalSearch index for company number: "
+                        + companyNumber, ex);
+            }
+            try {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getAdvancedSearch() != null) {
+                    LOG.info("Attempting to delete company from AdvancedSearch index for company number: "
+                            + companyNumber);
+                    advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
+                }
+            } catch (Exception ex) {
+                LOG.error("Failed to delete company from AdvancedSearch index for company number: "
+                        + companyNumber, ex);
+            }
         }
     }
 }
