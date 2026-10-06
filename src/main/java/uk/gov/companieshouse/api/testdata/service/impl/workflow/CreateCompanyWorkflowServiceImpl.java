@@ -19,6 +19,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteInternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.response.CompanyProfileResponse;
 import uk.gov.companieshouse.api.testdata.model.rest.response.PopulatedCompanyDetailsResponse;
@@ -384,7 +385,8 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
 
     private void handleRollbackFailure(String companyNumber) {
         try {
-            deleteCompanyWorkflowService.deleteCompany(companyNumber);
+            DeleteInternalCompanyRequest deleteRequest = new DeleteInternalCompanyRequest();
+            deleteCompanyWorkflowService.deleteCompany(deleteRequest, companyNumber);
         } catch (Exception rollbackException) {
             LOG.error("Rollback delete failed for company number " + companyNumber, rollbackException);
         }

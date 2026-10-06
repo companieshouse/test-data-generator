@@ -22,6 +22,7 @@ import uk.gov.companieshouse.api.testdata.model.rest.enums.CompanyType;
 import uk.gov.companieshouse.api.testdata.model.rest.enums.JurisdictionType;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
+import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteInternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DisqualificationsRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.PublicCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.RegistersRequest;
@@ -54,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -193,7 +195,7 @@ class CreateCompanyWorkflowServiceImplTest {
 
         assertEquals("invalid request", thrown.getMessage());
         verify(companyProfileService, never()).create(any());
-        verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
+        verify(deleteCompanyWorkflowService, never()).deleteCompany(any(DeleteInternalCompanyRequest.class), anyString());
     }
 
     @Test
@@ -395,7 +397,7 @@ class CreateCompanyWorkflowServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointment(eq(capturedSpec), any());
         verify(metricsService).create(capturedSpec);
-        verify(deleteCompanyWorkflowService).deleteCompany(fullCompanyNumber);
+        verify(deleteCompanyWorkflowService).deleteCompany(any(DeleteInternalCompanyRequest.class), eq(fullCompanyNumber));
     }
 
     @Test
@@ -403,7 +405,7 @@ class CreateCompanyWorkflowServiceImplTest {
         assertThrows(IllegalArgumentException.class,
                 () -> creationService.createInternalCompany(null));
         verify(companyProfileService, never()).create(any());
-        verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
+        verify(deleteCompanyWorkflowService, never()).deleteCompany(any(DeleteInternalCompanyRequest.class), anyString());
     }
 
     @Test
@@ -1032,7 +1034,7 @@ class CreateCompanyWorkflowServiceImplTest {
         verify(companyAuthCodeService).create(capturedSpec);
         verify(appointmentService).createAppointment(eq(capturedSpec), any());
         verify(metricsService).create(capturedSpec);
-        verify(deleteCompanyWorkflowService).deleteCompany(fullCompanyNumber);
+        verify(deleteCompanyWorkflowService).deleteCompany(any(DeleteInternalCompanyRequest.class), eq(fullCompanyNumber));
     }
 
     @Test
@@ -1065,7 +1067,7 @@ class CreateCompanyWorkflowServiceImplTest {
     @Test
     void createCompanyDataNullSpec() throws Exception {
         assertThrows(IllegalArgumentException.class, () -> creationService.buildAndPersistCompanyDataStructure(null));
-        verify(deleteCompanyWorkflowService, never()).deleteCompany(any());
+        verify(deleteCompanyWorkflowService, never()).deleteCompany(any(DeleteInternalCompanyRequest.class), anyString());
         verify(companyProfileService, never()).create(any());
     }
 
