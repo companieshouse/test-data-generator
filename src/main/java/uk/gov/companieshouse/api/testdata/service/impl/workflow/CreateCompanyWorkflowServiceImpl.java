@@ -135,6 +135,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             InternalCompanyRequest spec) throws DataException {
         assignCompanyNumber(spec);
         CompanySubTypeValidator.validate(spec.getSubType(), spec.getCompanyType());
+        applyLimitedPartnershipServiceAddressDefault(spec);
 
         try {
             var response = new PopulatedCompanyDetailsResponse();
@@ -278,6 +279,7 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
     protected CompanyProfileResponse buildAndPersistCompanyDataStructure(InternalCompanyRequest companySpec) throws DataException {
         assignCompanyNumber(companySpec);
         CompanySubTypeValidator.validate(companySpec.getSubType(), companySpec.getCompanyType());
+        applyLimitedPartnershipServiceAddressDefault(companySpec);
         companySpec.setCompanyWithPopulatedStructureOnly(false);
 
         try {
@@ -363,6 +365,12 @@ public class CreateCompanyWorkflowServiceImpl implements CreateCompanyWorkflowSe
             return companyProfile.getRegisteredOfficeAddress();
         }
         return null;
+    }
+
+    private void applyLimitedPartnershipServiceAddressDefault(InternalCompanyRequest companySpec) {
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(companySpec.getCompanyType())) {
+            companySpec.setServiceAddressIsSameAsRegisteredOfficeAddress(true);
+        }
     }
 
     private DataException handleCreateFailure(String companyNumber, Exception ex) {

@@ -697,6 +697,25 @@ class CreateCompanyWorkflowServiceImplTest {
     }
 
     @Test
+    void createLimitedPartnershipAlwaysUsesRegisteredOfficeForServiceAddress() throws DataException {
+        PublicCompanyRequest spec = new PublicCompanyRequest();
+        spec.setCompanyType(CompanyType.LIMITED_PARTNERSHIP);
+        spec.setJurisdiction(JurisdictionType.ENGLAND_WALES);
+        spec.setServiceAddressIsSameAsRegisteredOfficeAddress(false);
+
+        when(randomService.getNumber(anyInt())).thenReturn(123456L);
+        when(companyProfileService.companyExists(any())).thenReturn(false);
+        CompanyAuthCode mockAuthCode = new CompanyAuthCode();
+        mockAuthCode.setAuthCode(AUTH_CODE);
+        when(companyAuthCodeService.create(any())).thenReturn(mockAuthCode);
+
+        creationService.createPublicCompany(spec);
+        InternalCompanyRequest capturedSpec = captureCompanySpec();
+
+        assertEquals(Boolean.TRUE, capturedSpec.getServiceAddressIsSameAsRegisteredOfficeAddress());
+    }
+
+    @Test
     void createPublicCompanyMapsServiceAddressFlagNull() throws DataException {
         PublicCompanyRequest spec = new PublicCompanyRequest();
         spec.setServiceAddressIsSameAsRegisteredOfficeAddress(null);
