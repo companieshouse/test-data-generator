@@ -9,7 +9,7 @@ public interface DeleteCompanyWorkflowService {
 
     void deleteCompany(DeleteInternalCompanyRequest deleteInternalCompanyRequest, String companyNumber)
             throws DataException, NoDataFoundException;
-    void deleteCompanyOptional(String companyNumber) throws DataException, NoDataFoundException;
+    void deleteCompanyIfExists(String companyNumber) throws DataException, NoDataFoundException;
 }
 
 

@@ -317,7 +317,7 @@ class DeleteCompanyWorkflowServiceImplTest {
     void deleteCompanyOptionalWhenCompanyExists() throws DataException, NoDataFoundException {
         when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(true);
 
-        deletionService.deleteCompanyOptional(COMPANY_NUMBER);
+        deletionService.deleteCompanyIfExists(COMPANY_NUMBER);
 
         verify(companyProfileService, times(2)).companyExists(COMPANY_NUMBER);
         verify(companyProfileService, times(1)).delete(COMPANY_NUMBER);
@@ -327,7 +327,7 @@ class DeleteCompanyWorkflowServiceImplTest {
     void deleteCompanyOptionalWhenCompanyDoesNotExist() throws DataException, NoDataFoundException {
         when(companyProfileService.companyExists(COMPANY_NUMBER)).thenReturn(false);
 
-        deletionService.deleteCompanyOptional(COMPANY_NUMBER);
+        deletionService.deleteCompanyIfExists(COMPANY_NUMBER);
 
         verify(companyProfileService, times(1)).companyExists(COMPANY_NUMBER);
         verify(companyProfileService, never()).delete(anyString());

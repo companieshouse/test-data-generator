@@ -143,7 +143,7 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
     }
 
     @Override
-    public void deleteCompanyOptional(String companyNumber)
+    public void deleteCompanyIfExists(String companyNumber)
             throws DataException, NoDataFoundException {
         if (!companyProfileService.companyExists(companyNumber)) {
             LOG.info("Company with number " + companyNumber + " does not exist. This is NOT an issue as this is only being called to ensure clean state before test runs in case a company with the same number already exists which is possible.");

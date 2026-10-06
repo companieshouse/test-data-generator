@@ -19,7 +19,6 @@ import uk.gov.companieshouse.api.testdata.exception.InvalidAuthCodeException;
 import uk.gov.companieshouse.api.testdata.exception.NoDataFoundException;
 import uk.gov.companieshouse.api.testdata.model.entity.CompanyProfile;
 import uk.gov.companieshouse.api.testdata.model.rest.request.CompanyWithPopulatedStructureRequest;
-import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.DeleteInternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.InternalCompanyRequest;
 import uk.gov.companieshouse.api.testdata.model.rest.request.UpdateCompanyRequest;
@@ -94,9 +93,10 @@ public class InternalCompanyController {
         return new ResponseEntity<>(createdCompany, HttpStatus.CREATED);
     }
 
-    @DeleteMapping({"/company/{companyNumber}"})
+    @DeleteMapping("/company/{companyNumber}")
     public ResponseEntity<Void> deleteCompany(
             @PathVariable String companyNumber,
+            @RequestParam(defaultValue = "false") boolean ignoreMissing,
             @Valid @RequestBody(required = false) DeleteInternalCompanyRequest request)
             throws DataException, NoDataFoundException, InvalidAuthCodeException {
 
@@ -106,25 +106,17 @@ public class InternalCompanyController {
             }
         }
 
-        deleteCompanyWorkflowService.deleteCompany(request, companyNumber);
-
-        Map<String, Object> data = new HashMap<>();
-        data.put(COMPANY_NUMBER_DATA, companyNumber);
-        LOG.info("Internal Company deleted", data);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @DeleteMapping({"/company/optional/{companyNumber}"})
-    public ResponseEntity<Void> deleteCompanyOptional(
-            @PathVariable String companyNumber,
-            @Valid @RequestBody(required = false) DeleteCompanyRequest request)
-            throws DataException, NoDataFoundException, InvalidAuthCodeException {
-
-        if (request != null && request.getAuthCode() != null
-                && !companyAuthCodeService.verifyAuthCode(companyNumber, request.getAuthCode())) {
-            throw new InvalidAuthCodeException(companyNumber);
+        try {
+            if (ignoreMissing) {
+                deleteCompanyWorkflowService.deleteCompanyIfExists(companyNumber);
+            } else {
+                deleteCompanyWorkflowService.deleteCompany(request, companyNumber);
+            }
+        } catch (NoDataFoundException e) {
+            if (!ignoreMissing) {
+                throw e;
+            }
         }
-        deleteCompanyWorkflowService.deleteCompanyOptional(companyNumber);
 
         Map<String, Object> data = new HashMap<>();
         data.put(COMPANY_NUMBER_DATA, companyNumber);
