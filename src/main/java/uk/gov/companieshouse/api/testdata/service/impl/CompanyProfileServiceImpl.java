@@ -217,6 +217,7 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
                         companyStatus, "")));
         profile.setEtag(this.randomService.getEtag());
         setJurisdictionAndAddress(profile, jurisdiction, nonJurisdictionType);
+        setServiceAddress(profile, companyType);
         profile.setHasCharges(false);
         profile.setCanFile(true);
         setPartialDataOptions(profile, jurisdiction, companyType);
@@ -649,6 +650,12 @@ public class CompanyProfileServiceImpl implements CompanyProfileService {
         if (jurisdiction != null && !nonJurisdictionType.isEmpty()) {
             profile.setJurisdiction(jurisdiction.toString());
             profile.setRegisteredOfficeAddress(addressService.getAddress(jurisdiction));
+        }
+    }
+
+    private void setServiceAddress(CompanyProfile profile, CompanyType companyType) {
+        if (CompanyType.LIMITED_PARTNERSHIP.equals(companyType)) {
+            profile.setServiceAddress(profile.getRegisteredOfficeAddress());
         }
     }
 
