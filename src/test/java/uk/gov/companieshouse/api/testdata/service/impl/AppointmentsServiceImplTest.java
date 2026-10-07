@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -17,14 +18,18 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalLong;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -62,6 +67,8 @@ class AppointmentsServiceImplTest {
     private static final String INTERNAL_ID_PREFIX = "8";
     private static final String OFFICER_ID = "ODI5NjY4Nzg2NExOSVRNSEYx";
     private static final String COUNTRY = "England";
+    private static final int MINIMUM_AGE = 16;
+    private static final int MAXIMUM_AGE = 100;
 
     @Mock
     private AddressService addressService;
@@ -83,6 +90,7 @@ class AppointmentsServiceImplTest {
     @BeforeEach
     void setUp() {
         mockServiceAddress = new Address("", "", "", "", "", "", "");
+        when(randomService.getNumberInRange(anyInt(), anyInt())).thenReturn(OptionalLong.of(40));
     }
 
     @Test
@@ -539,6 +547,98 @@ class AppointmentsServiceImplTest {
         Appointment appointment = invokeCreateBaseAppointment(request);
 
         assertFalse(appointment.isSecureOfficer());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {MINIMUM_AGE, MAXIMUM_AGE})
+    void createBaseAppointment_shouldGenerateDateOfBirthWithinConfiguredAgeBounds(int age) {
+        when(randomService.getNumberInRange(anyInt(), anyInt()))
+                .thenReturn(OptionalLong.of(age), OptionalLong.of(0));
+
+        Appointment appointment = invokeCreateBaseAppointment(
+                buildAppointmentCreationRequest(new InternalCompanyRequest()));
+
+        Instant expectedDateOfBirth = LocalDate.now().minusYears(age + 1).plusDays(1)
+                .atStartOfDay(ZoneId.of("UTC"))
+                .toInstant();
+        assertEquals(expectedDateOfBirth, appointment.getDateOfBirth());
+    }
+
+    @Test
+    void createAppointment_shouldGenerateRandomOfficerDateOfBirth() {
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setCompanyWithPopulatedStructureOnly(true);
+        request.setCompanyNumber(COMPANY_NUMBER);
+        request.setOfficerRoles(List.of(OfficerType.DIRECTOR));
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(mockServiceAddress);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
+        when(randomService.getNumberInRange(anyInt(), anyInt()))
+                .thenReturn(
+                        OptionalLong.of(MAXIMUM_AGE), OptionalLong.of(0),
+                        OptionalLong.of(MAXIMUM_AGE), OptionalLong.of(0),
+                        OptionalLong.of(MAXIMUM_AGE), OptionalLong.of(0));
+
+        var result = appointmentsService.createAppointment(request, mockServiceAddress);
+        OfficerAppointment officerAppointment = result.getOfficerAppointment().getFirst();
+
+        LocalDate expectedDateOfBirth = LocalDate.now().minusYears(MAXIMUM_AGE + 1).plusDays(1);
+        assertEquals(expectedDateOfBirth.getYear(), officerAppointment.getDateOfBirthYear());
+        assertEquals(expectedDateOfBirth.getMonthValue(), officerAppointment.getDateOfBirthMonth());
+        assertEquals(expectedDateOfBirth.atStartOfDay(ZoneId.of("UTC")).toInstant(),
+                result.getAppointment().getFirst().getDateOfBirth());
+    }
+
+    @Test
+    void createBaseAppointment_shouldRandomiseDateOfBirthMonth() {
+        when(randomService.getNumberInRange(anyInt(), anyInt()))
+                .thenReturn(
+                        OptionalLong.of(40), OptionalLong.of(0),
+                        OptionalLong.of(40), OptionalLong.of(200));
+
+        Appointment firstAppointment = invokeCreateBaseAppointment(
+                buildAppointmentCreationRequest(new InternalCompanyRequest()));
+        Appointment secondAppointment = invokeCreateBaseAppointment(
+                buildAppointmentCreationRequest(new InternalCompanyRequest()));
+
+        LocalDate firstDateOfBirth = firstAppointment.getDateOfBirth()
+                .atZone(ZoneId.of("UTC")).toLocalDate();
+        LocalDate secondDateOfBirth = secondAppointment.getDateOfBirth()
+                .atZone(ZoneId.of("UTC")).toLocalDate();
+
+        assertNotEquals(firstDateOfBirth.getMonth(), secondDateOfBirth.getMonth());
+    }
+
+    @ParameterizedTest
+    @EnumSource(OfficerType.class)
+    void createAppointment_shouldAssignDateOfBirthToEveryOfficerType(OfficerType officerType) {
+        InternalCompanyRequest request = new InternalCompanyRequest();
+        request.setCompanyWithPopulatedStructureOnly(true);
+        request.setCompanyNumber(COMPANY_NUMBER);
+
+        AppointmentCreationRequest appointmentRequest = AppointmentCreationRequest.builder()
+                .companyNumber(COMPANY_NUMBER)
+                .officerRoles(List.of(officerType.getValue()))
+                .spec(request)
+                .build();
+
+        when(randomService.getNumber(anyInt())).thenReturn(123L);
+        when(randomService.getEncodedIdWithSalt(anyInt(), anyInt())).thenReturn(ENCODED_VALUE);
+        when(randomService.addSaltAndEncode(anyString(), anyInt())).thenReturn("ENCODED_ID");
+        when(randomService.getEtag()).thenReturn(ETAG);
+        when(addressService.getAddress(any())).thenReturn(mockServiceAddress);
+        when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
+        when(appointmentsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        var result = appointmentsService.createAppointment(appointmentRequest);
+
+        assertNotNull(result.getAppointment().getFirst().getDateOfBirth());
+        assertNotNull(result.getOfficerAppointment().getFirst().getDateOfBirthYear());
+        assertNotNull(result.getOfficerAppointment().getFirst().getDateOfBirthMonth());
     }
 
     @Test

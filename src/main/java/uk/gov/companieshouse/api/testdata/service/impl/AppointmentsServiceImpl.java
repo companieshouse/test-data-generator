@@ -3,6 +3,7 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -50,9 +51,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final String OFFICERS_LINK = "/officers/";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
     private static final String APPOINTMENT_MSG = " appointments for company number: ";
-    private static final LocalDate DATE_OF_BIRTH = LocalDate.of(1951, 3, 4);
-    private static final Instant DOB_INSTANT
-            = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final int MINIMUM_AGE = 16;
+    private static final int MAXIMUM_AGE = 100;
     private static final String DEFAULT_COUNTRY = "United Kingdom";
     private static final int DEFAULT_LLP_APPOINTMENTS = 2;
     private static final Faker NAME_FAKER = new Faker(Locale.UK);
@@ -222,7 +222,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
             appointment.setTitle("Mr");
 
-            appointment.setDateOfBirth( LocalDate.now().minusYears(40).atStartOfDay(ZoneId.of("UTC")).toInstant());
+            appointment.setDateOfBirth(toDateOfBirthInstant());
 
             FormerName formerName = new FormerName();
             formerName.setForenames(NAME_FAKER.name().firstName());
@@ -541,7 +541,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
 
         appointment.setDataCompanyNumber(request.getCompanyNumber());
-        appointment.setDateOfBirth(DOB_INSTANT);
+        appointment.setDateOfBirth(toDateOfBirthInstant());
         appointment.setCompanyName("Company " + request.getCompanyNumber());
         appointment.setCompanyStatus(COMPANY_STATUS);
         appointment.setOfficerId(request.getOfficerId());
@@ -599,8 +599,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setLinks(links);
 
         officerAppointment.setEtag(randomService.getEtag());
-        officerAppointment.setDateOfBirthYear(DATE_OF_BIRTH.getYear());
-        officerAppointment.setDateOfBirthMonth(DATE_OF_BIRTH.getMonthValue());
+        LocalDate dateOfBirth = generateDateOfBirth();
+        officerAppointment.setDateOfBirthYear(dateOfBirth.getYear());
+        officerAppointment.setDateOfBirthMonth(dateOfBirth.getMonthValue());
 
         var dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         officerAppointment.setOfficerAppointmentItems(
@@ -609,8 +610,24 @@ public class AppointmentsServiceImpl implements AppointmentService {
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return officerAppointment;
         }
+
         officerRepository.save(officerAppointment);
         return officerAppointment;
+    }
+
+    private LocalDate generateDateOfBirth() {
+        int age = (int) randomService.getNumberInRange(MINIMUM_AGE, MAXIMUM_AGE + 1)
+                .orElseThrow(() -> new IllegalStateException("Unable to generate a random age"));
+        LocalDate latestDateOfBirth = LocalDate.now().minusYears(age);
+        LocalDate earliestDateOfBirth = LocalDate.now().minusYears(age + 1).plusDays(1);
+        int daysInRange = (int) ChronoUnit.DAYS.between(earliestDateOfBirth, latestDateOfBirth) + 1;
+        int randomDay = (int) randomService.getNumberInRange(0, daysInRange)
+                .orElseThrow(() -> new IllegalStateException("Unable to generate a random date of birth"));
+        return earliestDateOfBirth.plusDays(randomDay);
+    }
+
+    private Instant toDateOfBirthInstant() {
+        return generateDateOfBirth().atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(
