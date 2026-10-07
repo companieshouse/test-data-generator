@@ -591,6 +591,7 @@ class AppointmentsServiceImplTest {
         assertEquals(expectedDateOfBirth.getMonthValue(), officerAppointment.getDateOfBirthMonth());
         assertEquals(expectedDateOfBirth.atStartOfDay(ZoneId.of("UTC")).toInstant(),
                 result.getAppointment().getFirst().getDateOfBirth());
+        verify(randomService, times(2)).getNumberInRange(anyInt(), anyInt());
     }
 
     @Test

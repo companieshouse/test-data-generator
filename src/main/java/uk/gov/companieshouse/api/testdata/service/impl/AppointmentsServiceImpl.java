@@ -201,7 +201,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .appointmentId(appointmentId)
                 .build();
 
-        Appointment appointment = createBaseAppointment(request);
+        LocalDate dateOfBirth = generateDateOfBirth();
+        Appointment appointment = createBaseAppointment(request, dateOfBirth);
         String roleName = setRoleName(ctx.role);
 
         appointment.setForename(FORENAME);
@@ -221,8 +222,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setNationality(NATIONALITY);
 
             appointment.setTitle("Mr");
-
-            appointment.setDateOfBirth(toDateOfBirthInstant());
 
             FormerName formerName = new FormerName();
             formerName.setForenames(NAME_FAKER.name().firstName());
@@ -261,7 +260,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         accumulator.appointments.add(saved);
 
         OfficerAppointment officerAppointment =
-                createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role);
+                createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role, dateOfBirth);
         accumulator.officerAppointments.add(officerAppointment);
     }
 
@@ -436,12 +435,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .appointmentId(appointmentId)
                 .build();
 
+        LocalDate dateOfBirth = generateDateOfBirth();
         Appointment appointment = buildCompanyAppointment(
-                creationRequest, roleName, currentRole, index, registeredOfficeAddress);
+                creationRequest, roleName, currentRole, index, registeredOfficeAddress, dateOfBirth);
 
         LOG.debug("Creating officer appointment for officer ID: " + officerId);
         OfficerAppointment officerAppointment =
-                createOfficerAppointment(request, officerId, appointmentId, currentRole);
+                createOfficerAppointment(request, officerId, appointmentId, currentRole, dateOfBirth);
         if (shouldPersistAppointmentData(request)) {
             Appointment savedAppointment = appointmentsRepository.save(appointment);
             LOG.info("Appointment saved with ID: " + savedAppointment.getId());
@@ -455,8 +455,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
             String roleName,
             String currentRole,
             int index,
-            Address registeredOfficeAddress) {
-        Appointment appointment = createBaseAppointment(creationRequest, registeredOfficeAddress);
+            Address registeredOfficeAddress,
+            LocalDate dateOfBirth) {
+        Appointment appointment = createBaseAppointment(creationRequest, registeredOfficeAddress, dateOfBirth);
         appointment.setForename(NAME_FAKER.name().firstName());
         appointment.setOtherForeNames(NAME_FAKER.name().firstName());
         appointment.setSurname(NAME_FAKER.name().lastName());
@@ -511,7 +512,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsDeleted;
     }
 
-    private Appointment createBaseAppointment(AppointmentCreationRequest request, Address registeredOfficeAddress) {
+    private Appointment createBaseAppointment(
+            AppointmentCreationRequest request,
+            Address registeredOfficeAddress,
+            LocalDate dateOfBirth) {
         var appointment = new Appointment();
 
         appointment.setId(request.getAppointmentId());
@@ -541,7 +545,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
 
         appointment.setDataCompanyNumber(request.getCompanyNumber());
-        appointment.setDateOfBirth(toDateOfBirthInstant());
+        appointment.setDateOfBirth(toDateOfBirthInstant(dateOfBirth));
         appointment.setCompanyName("Company " + request.getCompanyNumber());
         appointment.setCompanyStatus(COMPANY_STATUS);
         appointment.setOfficerId(request.getOfficerId());
@@ -557,7 +561,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private Appointment createBaseAppointment(AppointmentCreationRequest request) {
         JurisdictionType jurisdiction = request.getSpec() != null ? request.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
         Address registeredOfficeAddress = addressService.getAddress(jurisdiction);
-        return createBaseAppointment(request, registeredOfficeAddress);
+        return createBaseAppointment(request, registeredOfficeAddress, generateDateOfBirth());
+    }
+
+    private Appointment createBaseAppointment(AppointmentCreationRequest request, LocalDate dateOfBirth) {
+        JurisdictionType jurisdiction = request.getSpec() != null ? request.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
+        Address registeredOfficeAddress = addressService.getAddress(jurisdiction);
+        return createBaseAppointment(request, registeredOfficeAddress, dateOfBirth);
     }
 
     private Links createAppointmentLinks(
@@ -579,7 +589,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private OfficerAppointment createOfficerAppointment(
-            InternalCompanyRequest spec, String officerId, String appointmentId, String role) {
+            InternalCompanyRequest spec,
+            String officerId,
+            String appointmentId,
+            String role,
+            LocalDate dateOfBirth) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
@@ -599,7 +613,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setLinks(links);
 
         officerAppointment.setEtag(randomService.getEtag());
-        LocalDate dateOfBirth = generateDateOfBirth();
         officerAppointment.setDateOfBirthYear(dateOfBirth.getYear());
         officerAppointment.setDateOfBirthMonth(dateOfBirth.getMonthValue());
 
@@ -626,8 +639,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return earliestDateOfBirth.plusDays(randomDay);
     }
 
-    private Instant toDateOfBirthInstant() {
-        return generateDateOfBirth().atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private Instant toDateOfBirthInstant(LocalDate dateOfBirth) {
+        return dateOfBirth.atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(
