@@ -565,7 +565,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         var links = new Links();
         links.setSelf(COMPANY_LINK + companyNumber + APPOINTMENT_LINK_STEM + "/" + appointmentId);
         links.setOfficerSelf(OFFICERS_LINK + officerId);
-        links.setOfficerAppointments(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
+        links.setOfficerAppointmentsLink(OFFICERS_LINK + officerId + APPOINTMENT_LINK_STEM);
         return links;
     }
 
