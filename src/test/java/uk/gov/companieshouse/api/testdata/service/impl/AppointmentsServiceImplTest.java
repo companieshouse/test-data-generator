@@ -131,7 +131,7 @@ class AppointmentsServiceImplTest {
         Links links = appointment.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_VALUE, links.getSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
-        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
+        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointmentsLink());
 
         assertNotNull(appointment.getSurname());
         assertTrue(!appointment.getSurname().isBlank());
@@ -190,7 +190,7 @@ class AppointmentsServiceImplTest {
         Links links = appointment.getLinks();
         assertEquals("/company/" + COMPANY_NUMBER + "/appointments/" + ENCODED_VALUE, links.getSelf());
         assertEquals("/officers/" + ENCODED_INTERNAL_ID, links.getOfficerSelf());
-        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointments());
+        assertEquals("/officers/" + ENCODED_INTERNAL_ID + "/appointments", links.getOfficerAppointmentsLink());
 
         assertNotNull(appointment.getSurname());
         assertTrue(!appointment.getSurname().isBlank());
