@@ -50,9 +50,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final String OFFICERS_LINK = "/officers/";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
     private static final String APPOINTMENT_MSG = " appointments for company number: ";
-    private static final LocalDate DATE_OF_BIRTH = LocalDate.of(1951, 3, 4);
-    private static final Instant DOB_INSTANT
-            = DATE_OF_BIRTH.atStartOfDay(ZoneId.of("UTC")).toInstant();
+    private static final String CORPORATE_ROLE = "corporate";
+    private static final String INVALID_NULL_OFFICER_ROLE = "Invalid officer role: null";
     private static final String DEFAULT_COUNTRY = "United Kingdom";
     private static final int DEFAULT_LLP_APPOINTMENTS = 2;
     private static final Faker NAME_FAKER = new Faker(Locale.UK);
@@ -97,9 +96,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     internalCompanyRequest,
                     companyNumber,
                     countryOfResidence,
-                    rolePlan.officerRoles(),
+                    rolePlan.officerRoles().get(i),
                     appointmentIds.get(i),
-                    i,
                     accumulator,
                     registeredOfficeAddress
             );
@@ -131,7 +129,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         for (String role : officerRoles) {
             validateOfficerRole(role);
 
-            boolean isCorporate = role.contains("corporate");
+            boolean isCorporate = role.contains(CORPORATE_ROLE);
 
             if (isCorporate && identificationTypes != null && !identificationTypes.isEmpty()) {
                 for (String identificationType : identificationTypes) {
@@ -188,7 +186,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     .toInstant();
         }
 
-        boolean isCorporate = ctx.role.contains("corporate");
+        boolean isCorporate = ctx.role.contains(CORPORATE_ROLE);
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
                 .spec(safeSpec)
@@ -201,7 +199,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .appointmentId(appointmentId)
                 .build();
 
-        Appointment appointment = createBaseAppointment(request);
+        LocalDate dateOfBirth = randomService.generateDateOfBirth();
+        Appointment appointment = createBaseAppointment(request, dateOfBirth);
         String roleName = setRoleName(ctx.role);
 
         appointment.setForename(FORENAME);
@@ -221,8 +220,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
             appointment.setNationality(NATIONALITY);
 
             appointment.setTitle("Mr");
-
-            appointment.setDateOfBirth( LocalDate.now().minusYears(40).atStartOfDay(ZoneId.of("UTC")).toInstant());
 
             FormerName formerName = new FormerName();
             formerName.setForenames(NAME_FAKER.name().firstName());
@@ -261,7 +258,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         accumulator.appointments.add(saved);
 
         OfficerAppointment officerAppointment =
-                createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role);
+                createOfficerAppointment(safeSpec, officerId, appointmentId, ctx.role, dateOfBirth);
         accumulator.officerAppointments.add(officerAppointment);
     }
 
@@ -402,19 +399,16 @@ public class AppointmentsServiceImpl implements AppointmentService {
             InternalCompanyRequest request,
             String companyNumber,
             String countryOfResidence,
-            List<OfficerType> officerRoleList,
+            OfficerType currentRoleEnum,
             String appointmentId,
-            int index,
             AppointmentAccumulator accumulator,
             Address registeredOfficeAddress) {
-        OfficerType currentRoleEnum = officerRoleList.get(index);
         if (currentRoleEnum == null) {
-            LOG.error("Invalid officer role: null at index " + index);
-            throw new IllegalArgumentException("Invalid officer role: null");
+            throw new IllegalArgumentException(INVALID_NULL_OFFICER_ROLE);
         }
         String currentRole = currentRoleEnum.getValue();
         validateOfficerRole(currentRole);
-        LOG.debug("Processing appointment {} with role: " + (index + 1) + currentRole);
+        LOG.debug("Processing appointment with role: " + currentRole);
 
         String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
         String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
@@ -424,7 +418,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         Instant dateTimeNow = Instant.now();
         Instant appointedOn = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-        String roleName = setRoleName(currentRole);
         AppointmentCreationRequest creationRequest = AppointmentCreationRequest.builder()
                 .spec(request)
                 .companyNumber(companyNumber)
@@ -436,12 +429,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .appointmentId(appointmentId)
                 .build();
 
+        LocalDate dateOfBirth = randomService.generateDateOfBirth();
         Appointment appointment = buildCompanyAppointment(
-                creationRequest, roleName, currentRole, index, registeredOfficeAddress);
+                creationRequest, currentRole, registeredOfficeAddress, dateOfBirth);
 
         LOG.debug("Creating officer appointment for officer ID: " + officerId);
         OfficerAppointment officerAppointment =
-                createOfficerAppointment(request, officerId, appointmentId, currentRole);
+                createOfficerAppointment(request, officerId, appointmentId, currentRole, dateOfBirth);
         if (shouldPersistAppointmentData(request)) {
             Appointment savedAppointment = appointmentsRepository.save(appointment);
             LOG.info("Appointment saved with ID: " + savedAppointment.getId());
@@ -452,11 +446,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private Appointment buildCompanyAppointment(
             AppointmentCreationRequest creationRequest,
-            String roleName,
             String currentRole,
-            int index,
-            Address registeredOfficeAddress) {
-        Appointment appointment = createBaseAppointment(creationRequest, registeredOfficeAddress);
+            Address registeredOfficeAddress,
+            LocalDate dateOfBirth) {
+        Appointment appointment = createBaseAppointment(creationRequest, registeredOfficeAddress, dateOfBirth);
         appointment.setForename(NAME_FAKER.name().firstName());
         appointment.setOtherForeNames(NAME_FAKER.name().firstName());
         appointment.setSurname(NAME_FAKER.name().lastName());
@@ -511,7 +504,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointmentsDeleted;
     }
 
-    private Appointment createBaseAppointment(AppointmentCreationRequest request, Address registeredOfficeAddress) {
+    private Appointment createBaseAppointment(
+            AppointmentCreationRequest request,
+            Address registeredOfficeAddress,
+            LocalDate dateOfBirth) {
         var appointment = new Appointment();
 
         appointment.setId(request.getAppointmentId());
@@ -541,7 +537,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         }
 
         appointment.setDataCompanyNumber(request.getCompanyNumber());
-        appointment.setDateOfBirth(DOB_INSTANT);
+        appointment.setDateOfBirth(toDateOfBirthInstant(dateOfBirth));
         appointment.setCompanyName("Company " + request.getCompanyNumber());
         appointment.setCompanyStatus(COMPANY_STATUS);
         appointment.setOfficerId(request.getOfficerId());
@@ -554,10 +550,10 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointment;
     }
 
-    private Appointment createBaseAppointment(AppointmentCreationRequest request) {
+    private Appointment createBaseAppointment(AppointmentCreationRequest request, LocalDate dateOfBirth) {
         JurisdictionType jurisdiction = request.getSpec() != null ? request.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
         Address registeredOfficeAddress = addressService.getAddress(jurisdiction);
-        return createBaseAppointment(request, registeredOfficeAddress);
+        return createBaseAppointment(request, registeredOfficeAddress, dateOfBirth);
     }
 
     private Links createAppointmentLinks(
@@ -579,7 +575,11 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private OfficerAppointment createOfficerAppointment(
-            InternalCompanyRequest spec, String officerId, String appointmentId, String role) {
+            InternalCompanyRequest spec,
+            String officerId,
+            String appointmentId,
+            String role,
+            LocalDate dateOfBirth) {
         OfficerAppointment officerAppointment = new OfficerAppointment();
 
         Instant dayTimeNow = Instant.now();
@@ -599,8 +599,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
         officerAppointment.setLinks(links);
 
         officerAppointment.setEtag(randomService.getEtag());
-        officerAppointment.setDateOfBirthYear(DATE_OF_BIRTH.getYear());
-        officerAppointment.setDateOfBirthMonth(DATE_OF_BIRTH.getMonthValue());
+        officerAppointment.setDateOfBirthYear(dateOfBirth.getYear());
+        officerAppointment.setDateOfBirthMonth(dateOfBirth.getMonthValue());
 
         var dayNow = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
         officerAppointment.setOfficerAppointmentItems(
@@ -609,8 +609,13 @@ public class AppointmentsServiceImpl implements AppointmentService {
         if (Boolean.TRUE.equals(spec.getCompanyWithPopulatedStructureOnly())) {
             return officerAppointment;
         }
+
         officerRepository.save(officerAppointment);
         return officerAppointment;
+    }
+
+    private Instant toDateOfBirthInstant(LocalDate dateOfBirth) {
+        return dateOfBirth.atStartOfDay(ZoneId.of("UTC")).toInstant();
     }
 
     private List<OfficerAppointmentItem> createOfficerAppointmentItems(
@@ -703,7 +708,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private boolean isCorporateOfficerRole(String officerRole) {
-        return officerRole != null && officerRole.toLowerCase().contains("corporate");
+        return officerRole != null && officerRole.toLowerCase().contains(CORPORATE_ROLE);
     }
 
     private String setRoleName(String role) {
@@ -717,7 +722,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private void validateOfficerRoleForCompanyType(OfficerType officerRole, CompanyType companyType) {
         if (officerRole == null) {
-            throw new IllegalArgumentException("Invalid officer role: null");
+            throw new IllegalArgumentException(INVALID_NULL_OFFICER_ROLE);
         }
         boolean llpCompanyType = companyType == CompanyType.LLP;
         boolean llpOfficerType = isLlpOfficerType(officerRole);

@@ -72,6 +72,15 @@ class RandomServiceImplTest {
     }
 
     @Test
+    void generateDateOfBirth_returnsDateWithinDefaultAgeRange() {
+        LocalDate today = LocalDate.now();
+        LocalDate dateOfBirth = randomService.generateDateOfBirth();
+
+        assertTrue(dateOfBirth.isAfter(today.minusYears(101)));
+        assertTrue(!dateOfBirth.isAfter(today.minusYears(16)));
+    }
+
+    @Test
     void generateAccountsDueDateByStatus_overdue() {
         LocalDate now = LocalDate.now();
         LocalDate overdueDate = randomService.generateAccountsDueDateByStatus("overdue");
