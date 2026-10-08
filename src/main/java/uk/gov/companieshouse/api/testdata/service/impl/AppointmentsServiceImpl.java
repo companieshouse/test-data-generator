@@ -404,7 +404,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
             AppointmentAccumulator accumulator,
             Address registeredOfficeAddress) {
         if (currentRoleEnum == null) {
-            LOG.error(INVALID_NULL_OFFICER_ROLE);
             throw new IllegalArgumentException(INVALID_NULL_OFFICER_ROLE);
         }
         String currentRole = currentRoleEnum.getValue();
