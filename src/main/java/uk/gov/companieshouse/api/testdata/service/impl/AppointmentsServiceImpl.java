@@ -3,7 +3,6 @@ package uk.gov.companieshouse.api.testdata.service.impl;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -51,8 +50,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
     private static final String OFFICERS_LINK = "/officers/";
     private static final String APPOINTMENT_LINK_STEM = "/appointments";
     private static final String APPOINTMENT_MSG = " appointments for company number: ";
-    private static final int MINIMUM_AGE = 16;
-    private static final int MAXIMUM_AGE = 100;
+    private static final String CORPORATE_ROLE = "corporate";
+    private static final String INVALID_NULL_OFFICER_ROLE = "Invalid officer role: null";
     private static final String DEFAULT_COUNTRY = "United Kingdom";
     private static final int DEFAULT_LLP_APPOINTMENTS = 2;
     private static final Faker NAME_FAKER = new Faker(Locale.UK);
@@ -97,9 +96,8 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     internalCompanyRequest,
                     companyNumber,
                     countryOfResidence,
-                    rolePlan.officerRoles(),
+                    rolePlan.officerRoles().get(i),
                     appointmentIds.get(i),
-                    i,
                     accumulator,
                     registeredOfficeAddress
             );
@@ -131,7 +129,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
         for (String role : officerRoles) {
             validateOfficerRole(role);
 
-            boolean isCorporate = role.contains("corporate");
+            boolean isCorporate = role.contains(CORPORATE_ROLE);
 
             if (isCorporate && identificationTypes != null && !identificationTypes.isEmpty()) {
                 for (String identificationType : identificationTypes) {
@@ -188,7 +186,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                     .toInstant();
         }
 
-        boolean isCorporate = ctx.role.contains("corporate");
+        boolean isCorporate = ctx.role.contains(CORPORATE_ROLE);
 
         AppointmentCreationRequest request = AppointmentCreationRequest.builder()
                 .spec(safeSpec)
@@ -201,7 +199,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .appointmentId(appointmentId)
                 .build();
 
-        LocalDate dateOfBirth = generateDateOfBirth();
+        LocalDate dateOfBirth = randomService.generateDateOfBirth();
         Appointment appointment = createBaseAppointment(request, dateOfBirth);
         String roleName = setRoleName(ctx.role);
 
@@ -401,19 +399,17 @@ public class AppointmentsServiceImpl implements AppointmentService {
             InternalCompanyRequest request,
             String companyNumber,
             String countryOfResidence,
-            List<OfficerType> officerRoleList,
+            OfficerType currentRoleEnum,
             String appointmentId,
-            int index,
             AppointmentAccumulator accumulator,
             Address registeredOfficeAddress) {
-        OfficerType currentRoleEnum = officerRoleList.get(index);
         if (currentRoleEnum == null) {
-            LOG.error("Invalid officer role: null at index " + index);
-            throw new IllegalArgumentException("Invalid officer role: null");
+            LOG.error(INVALID_NULL_OFFICER_ROLE);
+            throw new IllegalArgumentException(INVALID_NULL_OFFICER_ROLE);
         }
         String currentRole = currentRoleEnum.getValue();
         validateOfficerRole(currentRole);
-        LOG.debug("Processing appointment {} with role: " + (index + 1) + currentRole);
+        LOG.debug("Processing appointment with role: " + currentRole);
 
         String internalId = INTERNAL_ID_PREFIX + randomService.getNumber(INTERNAL_ID_LENGTH);
         String officerId = randomService.addSaltAndEncode(internalId, SALT_LENGTH);
@@ -423,7 +419,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         Instant dateTimeNow = Instant.now();
         Instant appointedOn = LocalDate.now().atStartOfDay(ZoneId.of("UTC")).toInstant();
-        String roleName = setRoleName(currentRole);
         AppointmentCreationRequest creationRequest = AppointmentCreationRequest.builder()
                 .spec(request)
                 .companyNumber(companyNumber)
@@ -435,9 +430,9 @@ public class AppointmentsServiceImpl implements AppointmentService {
                 .appointmentId(appointmentId)
                 .build();
 
-        LocalDate dateOfBirth = generateDateOfBirth();
+        LocalDate dateOfBirth = randomService.generateDateOfBirth();
         Appointment appointment = buildCompanyAppointment(
-                creationRequest, roleName, currentRole, index, registeredOfficeAddress, dateOfBirth);
+                creationRequest, currentRole, registeredOfficeAddress, dateOfBirth);
 
         LOG.debug("Creating officer appointment for officer ID: " + officerId);
         OfficerAppointment officerAppointment =
@@ -452,9 +447,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private Appointment buildCompanyAppointment(
             AppointmentCreationRequest creationRequest,
-            String roleName,
             String currentRole,
-            int index,
             Address registeredOfficeAddress,
             LocalDate dateOfBirth) {
         Appointment appointment = createBaseAppointment(creationRequest, registeredOfficeAddress, dateOfBirth);
@@ -558,12 +551,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
         return appointment;
     }
 
-    private Appointment createBaseAppointment(AppointmentCreationRequest request) {
-        JurisdictionType jurisdiction = request.getSpec() != null ? request.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
-        Address registeredOfficeAddress = addressService.getAddress(jurisdiction);
-        return createBaseAppointment(request, registeredOfficeAddress, generateDateOfBirth());
-    }
-
     private Appointment createBaseAppointment(AppointmentCreationRequest request, LocalDate dateOfBirth) {
         JurisdictionType jurisdiction = request.getSpec() != null ? request.getSpec().getJurisdiction() : JurisdictionType.ENGLAND_WALES;
         Address registeredOfficeAddress = addressService.getAddress(jurisdiction);
@@ -626,17 +613,6 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
         officerRepository.save(officerAppointment);
         return officerAppointment;
-    }
-
-    private LocalDate generateDateOfBirth() {
-        int age = (int) randomService.getNumberInRange(MINIMUM_AGE, MAXIMUM_AGE + 1)
-                .orElseThrow(() -> new IllegalStateException("Unable to generate a random age"));
-        LocalDate latestDateOfBirth = LocalDate.now().minusYears(age);
-        LocalDate earliestDateOfBirth = LocalDate.now().minusYears(age + 1).plusDays(1);
-        int daysInRange = (int) ChronoUnit.DAYS.between(earliestDateOfBirth, latestDateOfBirth) + 1;
-        int randomDay = (int) randomService.getNumberInRange(0, daysInRange)
-                .orElseThrow(() -> new IllegalStateException("Unable to generate a random date of birth"));
-        return earliestDateOfBirth.plusDays(randomDay);
     }
 
     private Instant toDateOfBirthInstant(LocalDate dateOfBirth) {
@@ -733,7 +709,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
     }
 
     private boolean isCorporateOfficerRole(String officerRole) {
-        return officerRole != null && officerRole.toLowerCase().contains("corporate");
+        return officerRole != null && officerRole.toLowerCase().contains(CORPORATE_ROLE);
     }
 
     private String setRoleName(String role) {
@@ -747,7 +723,7 @@ public class AppointmentsServiceImpl implements AppointmentService {
 
     private void validateOfficerRoleForCompanyType(OfficerType officerRole, CompanyType companyType) {
         if (officerRole == null) {
-            throw new IllegalArgumentException("Invalid officer role: null");
+            throw new IllegalArgumentException(INVALID_NULL_OFFICER_ROLE);
         }
         boolean llpCompanyType = companyType == CompanyType.LLP;
         boolean llpOfficerType = isLlpOfficerType(officerRole);

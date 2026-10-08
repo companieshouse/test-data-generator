@@ -23,7 +23,6 @@ import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -90,7 +89,7 @@ class AppointmentsServiceImplTest {
     @BeforeEach
     void setUp() {
         mockServiceAddress = new Address("", "", "", "", "", "", "");
-        when(randomService.getNumberInRange(anyInt(), anyInt())).thenReturn(OptionalLong.of(40));
+        when(randomService.generateDateOfBirth()).thenReturn(LocalDate.now().minusYears(40));
     }
 
     @Test
@@ -552,13 +551,13 @@ class AppointmentsServiceImplTest {
     @ParameterizedTest
     @ValueSource(ints = {MINIMUM_AGE, MAXIMUM_AGE})
     void createBaseAppointment_shouldGenerateDateOfBirthWithinConfiguredAgeBounds(int age) {
-        when(randomService.getNumberInRange(anyInt(), anyInt()))
-                .thenReturn(OptionalLong.of(age), OptionalLong.of(0));
+        LocalDate expectedLocalDate = LocalDate.now().minusYears(age);
+        when(randomService.generateDateOfBirth()).thenReturn(expectedLocalDate);
 
         Appointment appointment = invokeCreateBaseAppointment(
                 buildAppointmentCreationRequest(new InternalCompanyRequest()));
 
-        Instant expectedDateOfBirth = LocalDate.now().minusYears(age + 1).plusDays(1)
+        Instant expectedDateOfBirth = expectedLocalDate
                 .atStartOfDay(ZoneId.of("UTC"))
                 .toInstant();
         assertEquals(expectedDateOfBirth, appointment.getDateOfBirth());
@@ -577,29 +576,25 @@ class AppointmentsServiceImplTest {
         when(randomService.getEtag()).thenReturn(ETAG);
         when(addressService.getAddress(any())).thenReturn(mockServiceAddress);
         when(addressService.getCountryFromSelectedProfile(any())).thenReturn(COUNTRY);
-        when(randomService.getNumberInRange(anyInt(), anyInt()))
-                .thenReturn(
-                        OptionalLong.of(MAXIMUM_AGE), OptionalLong.of(0),
-                        OptionalLong.of(MAXIMUM_AGE), OptionalLong.of(0),
-                        OptionalLong.of(MAXIMUM_AGE), OptionalLong.of(0));
+        LocalDate expectedDateOfBirth = LocalDate.now().minusYears(MAXIMUM_AGE);
+        when(randomService.generateDateOfBirth()).thenReturn(expectedDateOfBirth);
 
         var result = appointmentsService.createAppointment(request, mockServiceAddress);
         OfficerAppointment officerAppointment = result.getOfficerAppointment().getFirst();
 
-        LocalDate expectedDateOfBirth = LocalDate.now().minusYears(MAXIMUM_AGE + 1).plusDays(1);
         assertEquals(expectedDateOfBirth.getYear(), officerAppointment.getDateOfBirthYear());
         assertEquals(expectedDateOfBirth.getMonthValue(), officerAppointment.getDateOfBirthMonth());
         assertEquals(expectedDateOfBirth.atStartOfDay(ZoneId.of("UTC")).toInstant(),
                 result.getAppointment().getFirst().getDateOfBirth());
-        verify(randomService, times(2)).getNumberInRange(anyInt(), anyInt());
+        verify(randomService).generateDateOfBirth();
     }
 
     @Test
     void createBaseAppointment_shouldRandomiseDateOfBirthMonth() {
-        when(randomService.getNumberInRange(anyInt(), anyInt()))
-                .thenReturn(
-                        OptionalLong.of(40), OptionalLong.of(0),
-                        OptionalLong.of(40), OptionalLong.of(200));
+        LocalDate firstExpectedDateOfBirth = LocalDate.of(1980, 1, 1);
+        LocalDate secondExpectedDateOfBirth = LocalDate.of(1980, 7, 1);
+        when(randomService.generateDateOfBirth())
+                .thenReturn(firstExpectedDateOfBirth, secondExpectedDateOfBirth);
 
         Appointment firstAppointment = invokeCreateBaseAppointment(
                 buildAppointmentCreationRequest(new InternalCompanyRequest()));
@@ -1504,9 +1499,11 @@ class AppointmentsServiceImplTest {
 
     private Appointment invokeCreateBaseAppointment(AppointmentCreationRequest request) {
         try {
-            var method = AppointmentsServiceImpl.class.getDeclaredMethod("createBaseAppointment", AppointmentCreationRequest.class);
+            var method = AppointmentsServiceImpl.class.getDeclaredMethod(
+                    "createBaseAppointment", AppointmentCreationRequest.class, LocalDate.class);
             method.setAccessible(true);
-            return (Appointment) method.invoke(appointmentsService, request);
+            return (Appointment) method.invoke(
+                    appointmentsService, request, randomService.generateDateOfBirth());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

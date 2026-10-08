@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Base64;
 import java.util.OptionalLong;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,6 +22,8 @@ import uk.gov.companieshouse.api.testdata.service.RandomService;
 public class RandomServiceImpl implements RandomService {
 
     private static final String SALT_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+    private static final int MINIMUM_AGE = 16;
+    private static final int MAXIMUM_AGE = 100;
     private static final SecureRandom RND = new SecureRandom();
 
     @Override
@@ -82,6 +85,19 @@ public class RandomServiceImpl implements RandomService {
             }
         }
         return result;
+    }
+
+    @Override
+    public LocalDate generateDateOfBirth() {
+        int age = (int) getNumberInRange(MINIMUM_AGE, MAXIMUM_AGE + 1)
+                .orElseThrow(() -> new IllegalStateException("Unable to generate a random age"));
+        LocalDate today = LocalDate.now();
+        LocalDate latestDateOfBirth = today.minusYears(age);
+        LocalDate earliestDateOfBirth = today.minusYears(age + 1).plusDays(1);
+        int daysInRange = (int) ChronoUnit.DAYS.between(earliestDateOfBirth, latestDateOfBirth) + 1;
+        int randomDay = (int) getNumberInRange(0, daysInRange)
+                .orElseThrow(() -> new IllegalStateException("Unable to generate a random date of birth"));
+        return earliestDateOfBirth.plusDays(randomDay);
     }
 
     @Override

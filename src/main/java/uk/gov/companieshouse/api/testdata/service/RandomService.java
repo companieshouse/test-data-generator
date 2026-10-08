@@ -65,6 +65,13 @@ public interface RandomService {
     LocalDate generateAccountsDueDateByStatus(String accountsDueStatus);
 
     /**
+     * Generate a random date of birth for an age between 16 and 100 years.
+     *
+     * @return a random date of birth
+     */
+    LocalDate generateDateOfBirth();
+
+    /**
      * Generate a random ObjectId.
      * @return A random ObjectId.
      */
