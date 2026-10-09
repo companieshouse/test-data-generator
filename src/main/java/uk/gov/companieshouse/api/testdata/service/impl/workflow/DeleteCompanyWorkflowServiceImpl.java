@@ -264,7 +264,7 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
     private void deleteCompanyFromSearchIndex(DeleteInternalCompanyRequest deleteInternalCompanyRequest, String companyNumber) {
         if (isElasticSearchDeployed) {
             try {
-                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getAddToCompanyElasticSearchIndex() != null) {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getRemoveCompanySearch()!= null) {
                     LOG.info("Attempting to delete company from ElasticSearch index for company number: "
                             + companyNumber);
                     companySearchService.deleteCompanyFromElasticSearchIndex(companyNumber);
@@ -275,7 +275,7 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
                         + companyNumber, ex);
             }
             try {
-                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getAlphabeticalSearch() != null) {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getRemoveAlphabeticalSearch() != null) {
                     LOG.info("Attempting to delete company from AlphabeticalSearch index for company number: "
                             + companyNumber);
                     alphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
@@ -286,7 +286,7 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
                         + companyNumber, ex);
             }
             try {
-                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getGreenAlphabeticalSearch() != null) {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getRemoveGreenAlphabeticalSearch() != null) {
                     LOG.info("Attempting to delete company from GreenAlphabeticalSearch index for company number: "
                             + companyNumber);
                     greenAlphabeticalCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
@@ -296,7 +296,7 @@ public class DeleteCompanyWorkflowServiceImpl implements DeleteCompanyWorkflowSe
                         + companyNumber, ex);
             }
             try {
-                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getAdvancedSearch() != null) {
+                if (deleteInternalCompanyRequest != null && deleteInternalCompanyRequest.getRemoveAdvancedSearch() != null) {
                     LOG.info("Attempting to delete company from AdvancedSearch index for company number: "
                             + companyNumber);
                     advancedCompanySearch.deleteCompanyFromElasticSearchIndex(companyNumber);
