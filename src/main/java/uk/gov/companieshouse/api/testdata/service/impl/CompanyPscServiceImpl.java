@@ -483,7 +483,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         beneficialOwner.setCountryOfResidence(addressService
                 .getCountryFromSelectedProfile(jurisdiction));
         beneficialOwner.setNationality(NATIONALITY);
-        beneficialOwner.setDateOfBirth(new DateOfBirth(20, 9, 1975));
+        beneficialOwner.setDateOfBirth(generateRandomDateOfBirth());
 
         beneficialOwner.setNameTitle(NAME_FAKER.name().prefix());
         beneficialOwner.setNameForename(NAME_FAKER.name().firstName());
@@ -561,7 +561,7 @@ public class CompanyPscServiceImpl implements CompanyPscService {
         companyPsc.setResidentialAddressSameAsServiceAddress(
                 isResidentialAddressSameAsServiceAddress);
         companyPsc.setNationality(NATIONALITY);
-        companyPsc.setDateOfBirth(new DateOfBirth(20, 9, 1975));
+        companyPsc.setDateOfBirth(generateRandomDateOfBirth());
 
         NameElements nameElements = new NameElements();
         nameElements.setTitle(NAME_FAKER.name().prefix());
@@ -640,5 +640,11 @@ public class CompanyPscServiceImpl implements CompanyPscService {
             LOG.info("No PSCs found for company number: " + companyNumber);
             return false;
         }
+    }
+
+    private DateOfBirth generateRandomDateOfBirth() {
+        LocalDate dateOfBirth = randomService.generateDateOfBirth();
+        return new DateOfBirth(dateOfBirth.getDayOfMonth(), dateOfBirth.getMonthValue(),
+                dateOfBirth.getYear());
     }
 }
