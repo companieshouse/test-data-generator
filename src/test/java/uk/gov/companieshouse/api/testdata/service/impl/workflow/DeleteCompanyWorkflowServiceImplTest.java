@@ -249,10 +249,10 @@ class DeleteCompanyWorkflowServiceImplTest {
     void deleteCompanyWithElasticSearchDeployed() throws DataException, NoDataFoundException {
         deletionService.setElasticSearchDeployed(true);
         DeleteInternalCompanyRequest request = new DeleteInternalCompanyRequest();
-        request.setAddToCompanyElasticSearchIndex(true);
-        request.setAlphabeticalSearch(true);
-        request.setGreenAlphabeticalSearch(true);
-        request.setAdvancedSearch(true);
+        request.setRemoveCompanySearch(true);
+        request.setRemoveAlphabeticalSearch(true);
+        request.setRemoveGreenAlphabeticalSearch(true);
+        request.setRemoveAdvancedSearch(true);
         deletionService.deleteCompany(request, COMPANY_NUMBER);
 
         verify(companySearchService, times(1)).deleteCompanyFromElasticSearchIndex(COMPANY_NUMBER);
