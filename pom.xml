@@ -39,7 +39,7 @@
         <tomcat-embed-core.version>11.0.25</tomcat-embed-core.version>
         <tomcat-embed-websocket.version>11.0.25</tomcat-embed-websocket.version>
         <tomcat-embed-el.version>11.0.25</tomcat-embed-el.version>
-        <jackson-bind.version>2.22.1</jackson-bind.version>
+        <jackson-bind.version>2.22.3</jackson-bind.version>
         <datafaker.version>2.5.2</datafaker.version>
 
         <!-- internal dependencies -->
